@@ -240,8 +240,10 @@ public final class DevTourB {
             c.sendCommand("item replace entity @s weapon.mainhand with diamond_sword");
             face(mc, 0f, 0f);
             mc.options.setCameraType(CameraType.FIRST_PERSON);
+            mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE);
             return true;
         }).after(40));
+        l.add(act("clear chat", () -> clearChat(mc)).after(5));
         l.add(check("in world (first person)", 100, () -> shot("world_first_person")).after(5));
 
         // --- cosmetics
@@ -260,6 +262,7 @@ public final class DevTourB {
             if (!missing.isEmpty()) throw new IllegalStateException("missing: " + missing);
             mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT);
             face(mc, 0f, 0f);
+            hud(mc, false);
             return true;
         }).after(40));
         l.add(check("cosmetics front", 100, () -> shot("cosmetics_front")).after(5));
@@ -271,6 +274,8 @@ public final class DevTourB {
         }).after(20));
         l.add(check("cosmetics back from above", 100, () -> shot("cosmetics_back_above")).after(5));
         l.add(act("first person shield", () -> {
+            hud(mc, true);
+            clearChat(mc);
             mc.options.setCameraType(CameraType.FIRST_PERSON);
             face(mc, 0f, 0f);
         }).after(20));
@@ -282,7 +287,11 @@ public final class DevTourB {
         emote(l, mc, "seal_summon", 30);
 
         // --- screens in the world
-        l.add(act("first person for the screens", () -> mc.options.setCameraType(CameraType.FIRST_PERSON)).after(5));
+        l.add(act("first person for the screens", () -> {
+            mc.options.setCameraType(CameraType.FIRST_PERSON);
+            hud(mc, true);
+            clearChat(mc);
+        }).after(5));
         l.add(act("open wardrobe", () -> WardrobeUi.openWardrobe(null)).after(40));
         l.add(check("wardrobe", 100, () -> expectName("WardrobeScreen") && shot("wardrobe")).after(5));
         l.add(act("close wardrobe", () -> ClientCompat.openScreen(null)).after(10));
@@ -317,6 +326,7 @@ public final class DevTourB {
             if (AvatarItems.get(id) == null) throw new IllegalStateException("no emote " + id);
             mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT);
             face(mc, 0f, 0f);
+            hud(mc, false);
             w.playEmote(id);
         }).after(midTicks));
         l.add(check("emote " + name + " playing", 100, () -> {
@@ -389,6 +399,21 @@ public final class DevTourB {
         p.setYHeadRot(yaw);
         p.yBodyRot = yaw;
         p.yBodyRotO = yaw;
+    }
+
+    /** F1 on/off. */
+    private static void hud(Minecraft mc, boolean visible) {
+        //? if >=26.2 {
+        /*if (mc.gui.hud.isHidden() == visible) mc.gui.hud.toggle();
+        *///?} else
+        mc.options.hideGui = !visible;
+    }
+
+    private static void clearChat(Minecraft mc) {
+        //? if >=26.2 {
+        /*mc.gui.hud.getChat().clearMessages(false);
+        *///?} else
+        mc.gui.getChat().clearMessages(false);
     }
 
     private static boolean loading(Minecraft mc) {
@@ -475,6 +500,10 @@ public final class DevTourB {
         }
         Wardrobe w = Services.get(Wardrobe.class).orElse(null);
         if (w != null) for (Slot s : Slot.all()) w.unequip(s);
+        try {
+            hud(Minecraft.getInstance(), true);
+        } catch (RuntimeException ignored) {
+        }
         dev.henny.vibeyclient.api.Tasks.later(1500, () -> dev.henny.vibeyclient.api.Tasks.onMain(() -> Minecraft.getInstance().stop()));
     }
 
