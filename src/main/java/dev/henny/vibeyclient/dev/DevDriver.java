@@ -1,10 +1,11 @@
-package dev.henny.vibeyclient.client;
+package dev.henny.vibeyclient.dev;
 
 import dev.henny.vibeyclient.Vibey;
 import dev.henny.vibeyclient.api.GlobalSettings;
 import dev.henny.vibeyclient.api.ModuleManager;
 import dev.henny.vibeyclient.api.Services;
 import dev.henny.vibeyclient.api.Tasks;
+import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.api.net.VibeyNet;
 import dev.henny.vibeyclient.api.service.HostingService;
 import dev.henny.vibeyclient.api.service.VibeBackend;
@@ -104,7 +105,7 @@ public final class DevDriver {
         switch (cmd) {
             case "status": {
                 VibeBackend b = Services.get(VibeBackend.class).orElse(null);
-                return "ok screen=" + (mc.screen == null ? "none" : mc.screen.getClass().getSimpleName())
+                return "ok screen=" + (ClientCompat.screen() == null ? "none" : ClientCompat.screen().getClass().getSimpleName())
                         + " world=" + (mc.level != null) + " name=" + ClientCompat.playerName()
                         + " backend=" + (b == null ? "none" : b.isReady() ? "ready" : "connecting")
                         + " online=" + GlobalSettings.online() + " serverChannel=" + VibeyNet.available()
@@ -150,7 +151,7 @@ public final class DevDriver {
                 wd.stopEmote();
                 return "ok";
             case "wardrobe":
-                dev.henny.vibeyclient.module.cosmetics.ui.WardrobeUi.openWardrobe(mc.screen);
+                dev.henny.vibeyclient.module.cosmetics.ui.WardrobeUi.openWardrobe(ClientCompat.screen());
                 return "ok";
             case "close":
                 ClientCompat.openScreen(null);
@@ -196,7 +197,7 @@ public final class DevDriver {
                 return "ok";
             }
             case "camera":
-                mc.options.setCameraType(switch (arg) {
+                dev.henny.vibeyclient.avatar.EngineCompat.setCamera(switch (arg) {
                     case "back" -> net.minecraft.client.CameraType.THIRD_PERSON_BACK;
                     case "front" -> net.minecraft.client.CameraType.THIRD_PERSON_FRONT;
                     default -> net.minecraft.client.CameraType.FIRST_PERSON;
