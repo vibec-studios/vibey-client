@@ -55,9 +55,10 @@ public final class ToastStack {
             this.key = key;
         }
 
-        int height() {
+        int height(boolean hud) {
             int h = 24 + (lines == null ? 0 : lines.length * 10) + Math.max(0, titleLines.length - 1) * 10;
             if (!buttons.isEmpty()) h += 18;
+            else if (hud && toast.action() != null) h += 9; // "Open with G" row
             return Math.max(30, h);
         }
     }
@@ -160,7 +161,7 @@ public final class ToastStack {
         for (int i = 0; i < visible.size(); i++) {
             Entry e = visible.get(i);
             layout(g, e, w);
-            int h = e.height();
+            int h = e.height(mouseX < 0);
             boolean hovered = mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + h;
             // timer (paused while hovered)
             long dt = now - e.lastFrame;

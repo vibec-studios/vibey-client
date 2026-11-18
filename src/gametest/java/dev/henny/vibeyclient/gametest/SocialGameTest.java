@@ -132,6 +132,19 @@ public final class SocialGameTest implements FabricClientGameTest {
             ctx.waitTicks(40);
             ctx.takeScreenshot("social_15_account");
 
+            // friend comes online → toast in game
+            ctx.setScreen(() -> null);
+            ctx.runOnClient(mc -> m.service().updateMe(dev.henny.vibeyclient.backend.J.of("statusText", "nova please")));
+            ctx.waitFor(mc -> friend(m, "Nova") != null && friend(m, "Nova").presence().online(), 20 * SEC);
+            ctx.waitTicks(10);
+            ctx.takeScreenshot("social_09b_friend_online_toast");
+            ctx.runOnClient(mc -> m.service().updateMe(dev.henny.vibeyclient.backend.J.of("statusText", "testing Vibey Client")));
+
+            dev.henny.vibeyclient.ui.screen.ModulesPanel.preselect("social");
+            ctx.setScreen(() -> new VibeyScreen(null));
+            ctx.waitTicks(30);
+            ctx.takeScreenshot("social_15b_module_settings");
+
             hostingPhase(ctx, m, junoId);
 
             ctx.runOnClient(mc -> GlobalSettings.language.set(GlobalSettings.Language.GERMAN));

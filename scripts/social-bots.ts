@@ -147,6 +147,17 @@ async function main() {
       log("Juno invited the game", inv.map((i) => i.id));
     }
   });
+  // The game sets its status text to "nova please" → Nova comes online (friend-online toast), offline again later.
+  mira.gw!.on("user.updated", (u) => {
+    if (u.id !== gameId || u.statusText !== "nova please" || nova.gw) return;
+    log("Nova goes online");
+    nova.gw = new VibeGateway(nova.api, { presence: { status: "online", activity: { type: "launcher", instanceName: "Seal Pack", joinable: false } } });
+    nova.gw.connect();
+    setTimeout(() => {
+      nova.gw?.disconnect();
+      nova.gw = undefined;
+    }, 30_000);
+  });
   juno.gw!.on("presence.update", (p) => {
     if (p.userId === gameId) log("Juno sees game presence", p.status, JSON.stringify(p.activity));
   });
