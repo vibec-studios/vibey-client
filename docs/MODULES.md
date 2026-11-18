@@ -156,7 +156,33 @@ Services.register(HostSessionService.class, impl);        // provider (onLoad/on
 Services.get(HostSessionService.class).ifPresent(...);    // consumer, look up lazily
 ```
 
+`HostingService` (api/service) is provided by the multiplayer module while it is enabled (it posts
+`HostingService.HostingChanged` with the host-only address; the port comes from `port()`).
 Put shared service interfaces in the providing module's package (e.g. `module.multiplayer.HostSessionService`).
+
+## Vibe backend and toasts
+
+The social module owns the backend connection (`backend/BackendClient`: Mojang-verified login, rotating tokens,
+REST with retries, the realtime gateway) and registers it as `VibeBackend` while social and online features are on.
+
+```java
+Services.get(VibeBackend.class).ifPresent(b -> {
+    if (!b.isReady()) return;                                         // logged in + gateway ready
+    b.request("GET", "/api/v1/cosmetics/me", null)                   // token refresh is handled for you
+            .thenAcceptAsync(json -> apply(json), Tasks::onMain)       // never join() on the render thread
+            .exceptionally(t -> { /* VibeBackend.ApiException: status, code, retryAfter */ return null; });
+    b.sendOp("cosmetics.subscribe", obj);                             // re-sent automatically after reconnect/resume
+});
+on(VibeBackend.Ready.class, e -> ...);                                // every fresh `ready` (not on resume)
+AutoCloseable h = backend.onEvent("loadout.updated", d -> ...);       // client thread; close() to stop
+```
+
+`presence` and `cosmetics.subscribe` ops are remembered and sent again after a reconnect. Tokens live in
+`<gameDir>/vibeyclient/auth.json` (per backend URL and Minecraft account), never in `config/`.
+
+Toasts from any module: `Notify.info/success/warn/error(title, body)` or `Notify.show(new Notify.Toast(...))`
+(icon key = a player UUID for a head). The sink is `ui/toast/ToastStack` (top right, max 4, over every screen and
+on the HUD; `ToastStack.show(toast, buttons, durationMs, key)` for toasts with buttons).
 
 ## Background work
 
@@ -175,6 +201,9 @@ only for keybind names/categories and mod menu text.
 
 ## UI
 
+Design rules, title screen / pause menu entries (`MenuEntries`), the player preview service (`MenuPreview`),
+icons and the widget cheat sheet: **[docs/UI.md](UI.md)**.
+
 - `Gfx` wraps GuiGraphics / GuiGraphicsExtractor (26.x): `rect`, `outline`, `text`, `bold`, `textScaled`,
   `image`, `scissor`, `push/translate/scale/pop`, `widget`. Use it for HUD and screens – never the vanilla drawing
   API directly (it differs per version).
@@ -185,6 +214,9 @@ only for keybind names/categories and mod menu text.
   animations setting. `ui.anim(key, slot, initial)` keeps one per widget.
 - `Ui` + `Widgets` (immediate mode): `button`, `toggle`, `slider`, `cycler`, `textField`, `swatches`, `chip`,
   `caption`, `monogram`; `ScrollArea` for lists. Pattern: `if (Widgets.button(ui, key, x, y, w, h, label, Style.PRIMARY)) ...`
+- `CardScreen`: one centered card in the Vibe look, immediate mode with hit areas (header, scrollable body, footer;
+  `row`, `toggle`, `button`, `segmented`, `cycler`, `stepper`, `swatches`, `inputBox`, ...). Used by the host screens
+  (multiplayer) and the lyrics screens; texts passed to `row` are keys relative to the module's i18n prefix.
 - `VibeyScreen` is the menu (Right Shift, pause menu button). Add a top-level tab from `onLoad`:
   `VibeyTabs.register(new VibeyTabs.Tab("friends", "social.tab.friends", 10, FriendsPanel::new, this::isEnabled))`.
   A `Panel` draws into the content area with the `Ui` context. A module can replace its generated settings page with

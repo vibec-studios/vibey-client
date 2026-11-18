@@ -36,6 +36,9 @@ public final class Ui {
     private int rectCount;
     private int[] lastRects = new int[256];
     private int lastRectCount;
+    // which rects take keyboard focus
+    private boolean[] focusable = new boolean[64];
+    private boolean[] lastFocusable = new boolean[64];
 
     private final Map<Object, Anim[]> anims = new IdentityHashMap<>();
     private final Map<Object, Input> inputs = new IdentityHashMap<>();
@@ -51,28 +54,48 @@ public final class Ui {
         }
     }
 
-    Ui(Consumer<EditBox> addWidget) {
+    // Keyboard focus (Tab / Shift+Tab, Enter/Space activates): index into the clickable rects of the frame.
+    private int focus = -1;
+    private boolean activate;
+    private boolean focusOwned;
+
+    // Tooltip requested this frame (drawn on top in end()), shown after a short hover delay.
+    private Object tipKey;
+    private String tipText;
+    private Object shownTipKey;
+    private long tipSince;
+
+    public Ui(Consumer<EditBox> addWidget) {
         this.addWidget = addWidget;
     }
 
     // ============================================================================================ frame
 
-    void begin(Gfx g, int mouseX, int mouseY, float delta) {
+    public void begin(Gfx g, int mouseX, int mouseY, float delta) {
         this.g = g;
         this.mouseX = mouseX;
         this.mouseY = mouseY;
         this.delta = delta;
         rectCount = 0;
+        tipKey = null;
+        tipText = null;
+        focusOwned = false;
         resetClip();
         for (Input in : inputs.values()) in.seen = false;
     }
 
-    void end() {
+    public void end() {
+        drawFocus();
+        drawTooltip();
         pendingClick = false;
+        activate = false;
         pendingScroll = 0;
         int[] t = lastRects;
         lastRects = rects;
         rects = t;
+        boolean[] f = lastFocusable;
+        lastFocusable = focusable;
+        focusable = f;
         lastRectCount = rectCount;
         for (Input in : inputs.values()) {
             if (!in.seen) {
@@ -83,13 +106,14 @@ public final class Ui {
     }
 
     /** Re-adds the text fields after the screen was re-initialised (resize). */
-    void reattach() {
+    public void reattach() {
         for (Input in : inputs.values()) addWidget.accept(in.box);
     }
 
     // ============================================================================================ input from the screen
 
-    boolean queueClick(double x, double y, int button) {
+    public boolean queueClick(double x, double y, int button) {
+        focus = -1;
         for (Input in : inputs.values()) {
             EditBox b = in.box;
             if (b.visible && x >= b.getX() - 4 && x < b.getX() + b.getWidth() + 4 && y >= b.getY() - 4 && y < b.getY() + b.getHeight() + 4) {
@@ -114,12 +138,12 @@ public final class Ui {
         return hit;
     }
 
-    void release() {
+    public void release() {
         mouseDown = false;
         dragging = null;
     }
 
-    void queueScroll(double amount) {
+    public void queueScroll(double amount) {
         pendingScroll += amount;
     }
 
@@ -136,15 +160,31 @@ public final class Ui {
     }
 
     public boolean clicked(int x, int y, int w, int h, int button) {
+        return register(x, y, w, h, button, true);
+    }
+
+    /** Like {@link #clicked(int, int, int, int)} but never gets the keyboard focus (decoration, e.g. the seal). */
+    public boolean clickedNoFocus(int x, int y, int w, int h) {
+        return register(x, y, w, h, 0, false);
+    }
+
+    private boolean register(int x, int y, int w, int h, int button, boolean canFocus) {
         int x1 = Math.max(x, clipX1), y1 = Math.max(y, clipY1);
         int x2 = Math.min(x + w, clipX2), y2 = Math.min(y + h, clipY2);
         if (x2 <= x1 || y2 <= y1) return false;
         if (rectCount * 4 + 4 > rects.length) rects = java.util.Arrays.copyOf(rects, rects.length * 2);
+        if (rectCount + 1 > focusable.length) focusable = java.util.Arrays.copyOf(focusable, focusable.length * 2);
+        focusable[rectCount] = canFocus;
         int o = rectCount++ * 4;
         rects[o] = x1;
         rects[o + 1] = y1;
         rects[o + 2] = x2 - x1;
         rects[o + 3] = y2 - y1;
+        if (activate && button == 0 && rectCount - 1 == focus) {
+            activate = false;
+            capturing = null;
+            return true;
+        }
         if (!pendingClick || clickButton != button) return false;
         if (clickX >= x1 && clickX < x2 && clickY >= y1 && clickY < y2) {
             pendingClick = false;
@@ -156,7 +196,7 @@ public final class Ui {
 
     /** Starts/continues a drag of {@code key} when the area is pressed; true while dragging it. */
     public boolean dragging(Object key, int x, int y, int w, int h) {
-        if (clicked(x, y, w, h)) dragging = key;
+        if (register(x, y, w, h, 0, false)) dragging = key;
         return dragging == key && mouseDown;
     }
 
@@ -181,8 +221,130 @@ public final class Ui {
         return capturing;
     }
 
-    void stopCapture() {
+    public void stopCapture() {
         capturing = null;
+    }
+
+    // ============================================================================================ keyboard focus
+
+    /**
+     * Keyboard navigation over everything clickable: Tab / Shift+Tab (or the arrow keys when {@code arrows}) move
+     * the focus ring, Enter/Space click the focused control. Returns true if the key was used. The screen calls this
+     * before panels see the key.
+     */
+    public boolean key(int keyCode, boolean shift, boolean arrows) {
+        int n = lastRectCount;
+        if (n == 0) return false;
+        int dir = 0;
+        if (keyCode == dev.henny.vibeyclient.client.Keys.TAB) dir = shift ? -1 : 1;
+        else if (arrows && keyCode == dev.henny.vibeyclient.client.Keys.DOWN) dir = 1;
+        else if (arrows && keyCode == dev.henny.vibeyclient.client.Keys.UP) dir = -1;
+        if (dir != 0) {
+            for (Input in : inputs.values()) in.box.setFocused(false);
+            int f = focus < 0 ? (dir > 0 ? -1 : n) : focus;
+            for (int i = 0; i < n; i++) {
+                f = Math.floorMod(f + dir, n);
+                if (f < lastFocusable.length && lastFocusable[f]) {
+                    focus = f;
+                    return true;
+                }
+            }
+            return false;
+        }
+        if ((keyCode == dev.henny.vibeyclient.client.Keys.ENTER || keyCode == dev.henny.vibeyclient.client.Keys.SPACE
+                || keyCode == 335 /* keypad enter */) && focus >= 0 && focus < n) {
+            activate = true;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * True while the keyboard focus is on the clickable area registered last. A widget that asks draws its own
+     * focus state (like hover); otherwise the context draws a 1 px brand ring around the focused area.
+     */
+    public boolean focusedLast() {
+        boolean f = focus >= 0 && focus == rectCount - 1;
+        if (f) focusOwned = true;
+        return f;
+    }
+
+    public boolean keyboardMode() {
+        return focus >= 0;
+    }
+
+    public void clearFocus() {
+        focus = -1;
+    }
+
+    private void drawFocus() {
+        if (focus < 0 || focus >= rectCount || g == null || focusOwned) return;
+        int o = focus * 4;
+        g.outline(rects[o] - 1, rects[o + 1] - 1, rects[o + 2] + 2, rects[o + 3] + 2, Theme.BRAND);
+    }
+
+    // ============================================================================================ tooltips
+
+    /** Shows {@code text} as a tooltip if the mouse stays over x, y, w, h (call every frame, after drawing the control). */
+    public void tooltip(Object key, int x, int y, int w, int h, String text) {
+        if (text == null || text.isEmpty() || !hover(x, y, w, h)) return;
+        tipKey = key;
+        tipText = text;
+    }
+
+    private void drawTooltip() {
+        if (tipKey == null) {
+            shownTipKey = null;
+            return;
+        }
+        long now = System.currentTimeMillis();
+        if (tipKey != shownTipKey) {
+            shownTipKey = tipKey;
+            tipSince = now;
+        }
+        if (now - tipSince < 350) return;
+        drawTooltipBox(g, tipText, mouseX, mouseY);
+    }
+
+    /** The Vibe tooltip box (also usable by screens that do not use {@link Ui}). Wraps at 200 px. */
+    public static void drawTooltipBox(Gfx g, String text, int mx, int my) {
+        java.util.List<String> lines = wrap(g, text, 200);
+        int w = 0;
+        for (String l : lines) w = Math.max(w, g.width(l));
+        w += 10;
+        int h = lines.size() * 10 + 7;
+        int x = mx + 10, y = my + 12;
+        if (x + w > g.screenWidth() - 2) x = Math.max(2, mx - w - 6);
+        if (y + h > g.screenHeight() - 2) y = Math.max(2, my - h - 6);
+        g.layer();
+        g.rect(x, y, w, h, 0xF2101014);
+        g.outline(x, y, w, h, Theme.LINE2);
+        int ty = y + 4;
+        for (String l : lines) {
+            g.text(l, x + 5, ty, Theme.TEXT);
+            ty += 10;
+        }
+    }
+
+    /** Greedy word wrap with the Minecraft font. */
+    public static java.util.List<String> wrap(Gfx g, String text, int maxWidth) {
+        java.util.List<String> out = new java.util.ArrayList<>();
+        for (String para : text.split("\n")) {
+            StringBuilder line = new StringBuilder();
+            for (String word : para.split(" ")) {
+                String candidate = line.length() == 0 ? word : line + " " + word;
+                if (g.width(candidate) <= maxWidth || line.length() == 0) {
+                    line.setLength(0);
+                    line.append(candidate);
+                } else {
+                    out.add(line.toString());
+                    line.setLength(0);
+                    line.append(word);
+                }
+            }
+            out.add(line.toString());
+        }
+        return out;
     }
 
     // ============================================================================================ clipping
@@ -259,7 +421,12 @@ public final class Ui {
         return in.box;
     }
 
-    boolean anyInputFocused() {
+    /** Takes the keyboard focus away from every text field. */
+    public void blurInputs() {
+        for (Input in : inputs.values()) in.box.setFocused(false);
+    }
+
+    public boolean anyInputFocused() {
         for (Input in : inputs.values()) if (in.box.isFocused() && in.box.visible) return true;
         return false;
     }

@@ -41,11 +41,21 @@ public interface VibeBackend {
     final class ApiException extends RuntimeException {
         public final int status;
         public final String code;
+        /** Seconds to wait before retrying ({@code rate_limited}), or -1. */
+        public final int retryAfter;
+        /** The error's {@code details} (e.g. validation problems), or null. */
+        public final JsonElement details;
 
         public ApiException(int status, String code, String message) {
+            this(status, code, message, -1, null);
+        }
+
+        public ApiException(int status, String code, String message, int retryAfter, JsonElement details) {
             super(message);
             this.status = status;
             this.code = code;
+            this.retryAfter = retryAfter;
+            this.details = details;
         }
     }
 

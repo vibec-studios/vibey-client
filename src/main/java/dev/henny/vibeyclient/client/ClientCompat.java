@@ -38,6 +38,49 @@ public final class ClientCompat {
         return Minecraft.getInstance().options.hideGui;
     }
 
+    public static boolean shiftDown() {
+        //? if >=1.21.9 {
+        return Minecraft.getInstance().hasShiftDown();
+        //?} else
+        /*return Screen.hasShiftDown();*/
+    }
+
+    public static boolean controlDown() {
+        //? if >=1.21.9 {
+        return Minecraft.getInstance().hasControlDown();
+        //?} else
+        /*return Screen.hasControlDown();*/
+    }
+
+    /** The current GUI scale (screen pixels per GUI pixel). */
+    public static int guiScale() {
+        // double until 1.21.5, int since 1.21.6
+        return Math.max(1, (int) Math.round((double) Minecraft.getInstance().getWindow().getGuiScale()));
+    }
+
+    /** The vanilla options screen (26.1/26.2 take an extra "opened in game" flag). */
+    public static Screen optionsScreen(Screen parent) {
+        Minecraft mc = Minecraft.getInstance();
+        //? if >=26.1 && <26.3 {
+        /*return new net.minecraft.client.gui.screens.options.OptionsScreen(parent, mc.options, mc.level != null);
+        *///?} else
+        return new net.minecraft.client.gui.screens.options.OptionsScreen(parent, mc.options);
+    }
+
+    /** Asks "open this link?" (vanilla dialog) and opens it in the browser; returns to {@code parent}. */
+    public static void openLink(Screen parent, String url) {
+        net.minecraft.client.gui.screens.ConfirmLinkScreen.confirmLinkNow(parent, java.net.URI.create(url));
+    }
+
+    /** Name of the logged-in Minecraft account. */
+    public static String playerName() {
+        try {
+            return Minecraft.getInstance().getUser().getName();
+        } catch (RuntimeException e) {
+            return "Player";
+        }
+    }
+
     public static boolean inWorld() {
         Minecraft mc = Minecraft.getInstance();
         return mc.level != null && mc.player != null;
@@ -94,5 +137,20 @@ public final class ClientCompat {
 
     public static boolean isUnbound(KeyMapping mapping) {
         return mapping.isUnbound();
+    }
+
+    /** Other key mappings (vanilla, mods, Vibey) on the same key as {@code mapping}; empty if unbound. */
+    public static java.util.List<KeyMapping> conflicts(KeyMapping mapping) {
+        java.util.List<KeyMapping> out = new java.util.ArrayList<>(2);
+        if (mapping.isUnbound()) return out;
+        for (KeyMapping other : Minecraft.getInstance().options.keyMappings) {
+            if (other != mapping && !other.isUnbound() && other.same(mapping)) out.add(other);
+        }
+        return out;
+    }
+
+    /** Translated name of a key mapping ("Jump", "Open Vibey menu" …). */
+    public static String mappingName(KeyMapping mapping) {
+        return Component.translatable(mapping.getName()).getString();
     }
 }
