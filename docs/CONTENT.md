@@ -107,7 +107,8 @@ play `idle`/`walk`/`fly`/`sneak` (no belly slide while sprinting, no nap). The a
 (`auroraTexel` in `_polar.mjs`): sine-sum rays that loop seamlessly in time and run continuously across segments,
 alpha split over the two coplanar faces of each plane, `interpolate: true` strips. Both wings carry
 `cosmetic.offsetWhen` for the `back` slot. `b.texture(id, { interpolate: true })` writes `animation.interpolate`.
-The push script sends `thumbnails/<name>.png` with every item, so DEV items show their thumbnail in the wardrobe.
+The push script sends `thumbnails/<name>.png` with every item, so DEV items show their thumbnail in the wardrobe
+(`--no-thumbnails` leaves them out: such DEV items show a live 3D preview in their card).
 
 ## Build
 

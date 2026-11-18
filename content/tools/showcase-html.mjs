@@ -94,7 +94,7 @@ if (stateShots.length || wardrobeShots.length) {
       const cap = st ? `${st.name.split("_")[0]} · ${STATE_DE[st.state] ?? st.state}` : f.replace(/^sc_state_|\.png$/g, "").replace(/_/g, " ");
       return `<figure><img loading="lazy" src="${jpeg(join(shots, f))}" alt=""><figcaption>${esc(cap)}</figcaption></figure>`;
     })
-    .concat(wardrobeShots.map((f) => `<figure><img loading="lazy" src="${jpeg(join(shots, f))}" alt=""><figcaption>wardrobe · DEV items with their pushed thumbnails</figcaption></figure>`))
+    .concat(wardrobeShots.map((f) => `<figure><img loading="lazy" src="${jpeg(join(shots, f))}" alt=""><figcaption>${/fallback/.test(f) ? "wardrobe · DEV item pushed without a thumbnail: live 3D preview" : "wardrobe · DEV items with their pushed thumbnails"}</figcaption></figure>`))
     .join("")}</div></section>`;
 }
 

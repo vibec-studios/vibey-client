@@ -3,6 +3,7 @@
 // slot is equipped, everything else (other cosmetics, emotes) is only loaded – nothing is played.
 //
 //   node tools/push-to-game.mjs [folder] [--game-dir <dir>] [--instance <launcher instance id>] [--no-equip]
+//        [--no-thumbnails]
 //   npm run push:polar                         (= node tools/push-to-game.mjs dist/polar-pals)
 //   Each item's thumbnails/<name>.png (if any) is sent along as its wardrobe thumbnail.
 //
@@ -32,6 +33,7 @@ const flag = (k) => {
 const gameDirArg = opt("--game-dir");
 const instance = opt("--instance");
 const noEquip = flag("--no-equip");
+const noThumbs = flag("--no-thumbnails");
 if (flag("--help") || flag("-h")) {
   console.log(readFileSync(fileURLToPath(import.meta.url), "utf8").split("\n").slice(0, 12).join("\n").replace(/^\/\/ ?/gm, ""));
   process.exit(0);
@@ -204,7 +206,7 @@ for (const f of files) {
   // wardrobe thumbnail (SPEC §8 push.thumbnail): <folder>/thumbnails/<name>.png, PNG ≤ 256×256 and ≤ 256 KiB
   const msg = { type: "push", bundle, action };
   const thumbFile = join(folder, "thumbnails", f.replace(/\.vibey$/, ".png"));
-  if (existsSync(thumbFile)) {
+  if (!noThumbs && existsSync(thumbFile)) {
     const png = readFileSync(thumbFile);
     const w = png.readUInt32BE(16), h = png.readUInt32BE(20);
     if (png.length <= 256 * 1024 && w <= 256 && h <= 256) msg.thumbnail = png.toString("base64");

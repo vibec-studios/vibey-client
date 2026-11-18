@@ -69,9 +69,13 @@ final class PreviewView implements AvatarPreview.View {
         st.happyTarget = st.emote != null && !st.emote.stopping() ? 1 : 0;
         st.happy += (st.happyTarget - st.happy) * Math.min(1f, dt * 5f);
         dev.henny.vibeyclient.avatar.AvatarTicker.states(st, now);
-        boolean pet = AvatarDraw.bundle(st, Slot.PET) != null;
+        dev.henny.vibeyclient.avatar.bundle.Bundle petBundle = AvatarDraw.bundle(st, Slot.PET);
+        boolean pet = petBundle != null;
         placePet(now);
-        float size = Math.min(h / 2.3f, w / (pet ? 3.1f : 1.6f));
+        // the view is centred on the player: fit the pet's side (big pets stand further out)
+        float span = pet ? (float) Math.max(3.1, 2 * (dev.henny.vibeyclient.avatar.AvatarTicker.petSide(petBundle)
+                + dev.henny.vibeyclient.avatar.AvatarTicker.petHalfWidth(petBundle)) + 0.3) : 1.6f;
+        float size = Math.min(h / 2.3f, w / span);
         try {
             render(g, x, y, w, h, size, now);
         } catch (RuntimeException e) {
