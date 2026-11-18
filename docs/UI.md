@@ -146,3 +146,15 @@ tooltip), module grid, a module page, the advanced area closed and open, General
 onboarding and the pause row, at GUI scales 2 / 3 and 1280 × 720 / 1920 × 1080, English and German. It also clicks
 through the real mouse input (title button → menu, tile → module page, Esc → grid).
 Screenshots: `versions/fabric-1.21.11/build/run/clientGameTest/screenshots/ui_*.png` – look at them.
+
+**Click self-test (every version, both loaders).** The client gametest only runs on 1.21.11, so clicks on the other
+versions are checked by `dev/ClickTest`: `./gradlew :fabric-26.3:runClient -Dvibeyclient.clicktest=<outdir>` (NeoForge:
+env `VIBEYCLIENT_CLICKTEST=<outdir>`). It feeds real mouse presses/releases into the game's `MouseHandler` (through
+`mixin/client/MouseHandlerAccessor`, so GUI scaling and the native button numbers are included) and checks an
+immediate-mode button, a right-click area and a `VibeyButton` on a test screen, then a tab of the real Vibey menu. It
+logs `[vibeyclient-clicktest] PASS|FAIL <check>` and a `SUMMARY`, writes `<outdir>/clicktest.txt` plus screenshots
+(`clicktest-screen.png`, `menu-before.png`, `menu-after.png`) and quits. Run it on 26.3 after touching input code.
+
+Mouse buttons: our code (`Ui`, `click(x, y, button)`, previews) uses GLFW numbers (`Keys.MOUSE_LEFT` = 0, right 1,
+middle 2). 26.3 (SDL) reports 1 left, 2 middle, 3 right; `BaseScreen` and `ToastHooks` convert with
+`Keys.mouseFromNative`, so never compare `MouseButtonEvent#button()` directly.

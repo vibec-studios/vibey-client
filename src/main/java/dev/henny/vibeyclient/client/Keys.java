@@ -53,4 +53,38 @@ public final class Keys {
         *///?} else
         return glfw;
     }
+
+    /** Mouse buttons as our UI code numbers them (GLFW): 0 left, 1 right, 2 middle, 3/4 side buttons. */
+    public static final int MOUSE_LEFT = 0, MOUSE_RIGHT = 1, MOUSE_MIDDLE = 2;
+
+    /**
+     * The GLFW number ({@link #MOUSE_LEFT} ...) of a mouse button the game reports (MouseButtonEvent#button, Fabric /
+     * NeoForge screen mouse events). Up to 26.2 they are GLFW numbers; 26.3 (SDL) reports SDL numbers: 1 left,
+     * 2 middle, 3 right, 4/5 side buttons. Without this, a left click on 26.3 arrives as "button 1" (right) and no
+     * Vibey widget reacts.
+     */
+    public static int mouseFromNative(int button) {
+        //? if >=26.3 {
+        /*return switch (button) {
+            case 1 -> MOUSE_LEFT;
+            case 2 -> MOUSE_MIDDLE;
+            case 3 -> MOUSE_RIGHT;
+            default -> button - 1;
+        };
+        *///?} else
+        return button;
+    }
+
+    /** Inverse of {@link #mouseFromNative}: the number the running game uses for a GLFW mouse button. */
+    public static int mouseToNative(int button) {
+        //? if >=26.3 {
+        /*return switch (button) {
+            case MOUSE_LEFT -> 1;
+            case MOUSE_MIDDLE -> 2;
+            case MOUSE_RIGHT -> 3;
+            default -> button + 1;
+        };
+        *///?} else
+        return button;
+    }
 }
