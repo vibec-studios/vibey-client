@@ -160,8 +160,8 @@ public final class AccountPanel implements Panel {
         g.bold(g.clip(name, textW), tx, y + 13, Theme.TEXT);
         String chip = module.tr("account.state." + state.name().toLowerCase(Locale.ROOT));
         g.rect(tx, y + 29, 5, 5, chipColor);
-        g.text(g.clip(chip + " · " + module.tr(state == BackendClient.State.READY ? "account.signedInWith" : "account.notSignedIn"), textW - 9),
-                tx + 9, y + 28, Theme.MUTED);
+        String sub = state == BackendClient.State.READY ? chip + " · " + module.tr("account.signedInWith") : chip;
+        g.text(g.clip(sub, textW - 9), tx + 9, y + 28, Theme.MUTED);
         y += h + 8;
         if (b != null && (state == BackendClient.State.ERROR || (state == BackendClient.State.LOGGED_OUT && b.errorCode() != null))) {
             y = notice(g, Errors.text(b.errorCode(), b.errorMessage(), -1), x, y, w, Theme.DANGER);
