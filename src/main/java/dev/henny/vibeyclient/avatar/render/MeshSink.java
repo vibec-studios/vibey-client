@@ -61,12 +61,27 @@ public abstract class MeshSink {
         @Override
         public void draw(PoseStack pose, RenderType type, BundleMesh.Part part, int light, int overlay, int argb) {
             emit(pose.last(), buffers.getBuffer(type), part.data, part.quads, light, overlay, argb);
+            //? if =1.21.5
+            /^flushEmissive(type);^/
         }
 
         @Override
         public void quads(PoseStack pose, RenderType type, float[] data, int quads, int light, int argb) {
             emit(pose.last(), buffers.getBuffer(type), data, quads, light, NO_OVERLAY, argb);
+            //? if =1.21.5
+            /^flushEmissive(type);^/
         }
+
+        //? if =1.21.5 {
+        /^// 1.21.5: vanilla's entity_translucent_emissive pipeline samples the lightmap (Sampler2) but its render type
+        // never binds it, so drawing the batch later (whenever the shared buffer flushes) throws "Missing sampler
+        // Sampler2" once another render type turned the light layer off. Draw it right away with the lightmap bound.
+        private void flushEmissive(RenderType type) {
+            if (!Tex.isEmissive(type) || !(buffers instanceof MultiBufferSource.BufferSource bs)) return;
+            net.minecraft.client.Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
+            bs.endBatch(type);
+        }
+        ^///?}
     }
     *///?}
 

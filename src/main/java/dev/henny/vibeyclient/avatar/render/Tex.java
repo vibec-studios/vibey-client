@@ -113,7 +113,18 @@ public final class Tex {
             emissive = RenderTypes.entityTranslucentEmissive(id);
             //?} else
             /*emissive = RenderType.entityTranslucentEmissive(id);*/
+            //? if =1.21.5
+            /*EMISSIVE.add(emissive);*/
         }
         return emissive;
     }
+
+    //? if =1.21.5 {
+    /*private static final java.util.Set<RenderType> EMISSIVE = java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
+
+    /^* 1.21.5 only: {@code type} is one of our emissive render types (see MeshSink.Buffers). ^/
+    static boolean isEmissive(RenderType type) {
+        return EMISSIVE.contains(type);
+    }
+    *///?}
 }
