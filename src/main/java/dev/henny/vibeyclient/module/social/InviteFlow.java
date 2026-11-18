@@ -80,7 +80,10 @@ public final class InviteFlow {
                     if (s.online() && (address == null || Objects.equals(s.address(), address))) sessionId = s.id();
                 }
             }
-            if (sessionId == null && attempt < 4 && (t == null || !"feature_disabled".equals(BackendClient.unwrap(t).code))) {
+            boolean lookupMayHelp = attempt < 4 && (t == null || !"feature_disabled".equals(BackendClient.unwrap(t).code));
+            // hosting just started: the relay has not handed out the address yet – keep waiting for it (~15 s)
+            boolean addressPending = address == null && attempt < 10;
+            if (sessionId == null && (lookupMayHelp || addressPending)) {
                 Tasks.later(1_500, () -> Tasks.onMain(() -> sendWhenSessionKnown(userIds, attempt + 1)));
                 return;
             }

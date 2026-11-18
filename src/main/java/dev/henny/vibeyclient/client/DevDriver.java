@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit;
  * the same services as the UI (Wardrobe, emotes, hosting, invites, toasts). Never active in release builds.
  * <pre>
  * status | players | avatar &lt;name|uuid&gt; | equip &lt;id&gt; | unequip &lt;slot&gt; | emote &lt;id&gt; | stopemote
- * wardrobe | close | connect &lt;host[:port]&gt; | disconnect | look &lt;name&gt; | camera &lt;first|back|front&gt; | cmd &lt;command&gt;
+ * wardrobe | close | connect &lt;host[:port]&gt; | disconnect | look &lt;name&gt; | approach &lt;name&gt; &lt;blocks&gt; | camera &lt;first|back|front&gt; | cmd &lt;command&gt;
  * online &lt;on|off&gt; | host | invite &lt;friend name&gt; | toastclick &lt;key prefix&gt; &lt;button&gt; | shot &lt;name&gt; | quit
  * </pre>
  */
@@ -182,6 +182,18 @@ public final class DevDriver {
                 mc.player.setXRot(pitch);
                 mc.player.setYHeadRot(yaw);
                 return "ok yaw=" + yaw + " pitch=" + pitch + " dist=" + Math.sqrt(dx * dx + dy * dy + dz * dz);
+            }
+            case "approach": { // approach <name> <blocks>: walk-teleport to that distance in front of a player
+                if (mc.player == null || mc.level == null) return "err no world";
+                String[] p = arg.split(" ");
+                UUID id = resolve(mc, p[0]);
+                Player other = id == null ? null : mc.level.getPlayerByUUID(id);
+                if (other == null) return "err not here " + p[0];
+                double want = p.length > 1 ? Double.parseDouble(p[1]) : 3;
+                double dx = mc.player.getX() - other.getX(), dz = mc.player.getZ() - other.getZ();
+                double len = Math.max(1e-3, Math.sqrt(dx * dx + dz * dz));
+                mc.player.setPos(other.getX() + dx / len * want, other.getY(), other.getZ() + dz / len * want);
+                return "ok";
             }
             case "camera":
                 mc.options.setCameraType(switch (arg) {
