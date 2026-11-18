@@ -236,9 +236,18 @@ export class Anim {
     return this;
   }
 
+  /** Events in the Blockbench plugin's canonical order: by time, then particle < sound < visibility (stable). */
   toJSON() {
     const out = { length: this.length, loop: this.loop, bones: this.bones };
-    if (this.events.length) out.events = [...this.events].sort((a, b) => a.t - b.t).map((e) => ({ ...e, t: +e.t.toFixed(4) }));
+    const TYPE = { particle: 0, sound: 1, visibility: 2 };
+    if (this.events.length)
+      out.events = this.events
+        .map((e) => ({ ...e, t: +e.t.toFixed(4) }))
+        .sort((a, b) => a.t - b.t || TYPE[a.type] - TYPE[b.type])
+        .map((e) => {
+          if (e.emissive === false) delete e.emissive; // default
+          return e;
+        });
     return out;
   }
 }
@@ -336,10 +345,18 @@ export class Bundle {
       out.textures.push(tj);
     }
 
-    if (this.bones.size || m.kind === "emote" || !["cape", "shield"].includes(m.cosmetic?.slot)) {
+    if (this.bones.size) {
       const model = {};
-      if (this.modelTexture && this.bones.size) model.texture = this.modelTexture;
-      model.bones = [...this.bones.values()].map((b) => {
+      if (this.modelTexture) model.texture = this.modelTexture;
+      // depth-first outliner order (roots, each followed by its children) – like the Blockbench plugin writes it
+      const ordered = [];
+      const add = (b) => {
+        ordered.push(b);
+        for (const c of this.bones.values()) if (c.parent === b.name) add(c);
+      };
+      for (const b of this.bones.values()) if (!b.parent) add(b);
+      if (ordered.length !== this.bones.size) throw new Error("bone with an unknown parent");
+      model.bones = ordered.map((b) => {
         const bj = { name: b.name, parent: b.parent };
         if (!b.parent) bj.attach = b.attach;
         bj.pivot = b.pivot;
@@ -362,8 +379,10 @@ export class Bundle {
       out.model = model;
     }
 
-    out.animations = {};
-    for (const a of this.anims.values()) out.animations[a.name] = a.toJSON();
+    if (this.anims.size) {
+      out.animations = {};
+      for (const a of this.anims.values()) out.animations[a.name] = a.toJSON();
+    }
     if (this.sprites.length)
       out.sprites = this.sprites.map((s) => {
         const r = s.region;

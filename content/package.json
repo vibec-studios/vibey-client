@@ -9,7 +9,8 @@
     "build": "node tools/build.mjs",
     "build:fast": "node tools/build.mjs --no-preview",
     "validate": "node tools/validate.mjs",
-    "synth": "node tools/synth.mjs"
+    "synth": "node tools/synth.mjs",
+    "check:blockbench": "node tools/check-blockbench.mjs"
   },
   "license": "MIT"
 }

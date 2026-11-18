@@ -80,20 +80,20 @@
         "translucent": false
       },
       {
-        "name": "pen_foot_left",
-        "parent": "penguin",
-        "pivot": [-1.5,1,-1],
-        "rotation": [0,0,0],
-        "cubes": [{"from":[-2.5,0,-3.5],"to":[-0.5,1,-0.5],"uv":{"box":[40,15]}}],
-        "emissive": false,
-        "translucent": false
-      },
-      {
         "name": "pen_flipper_right",
         "parent": "pen_body",
         "pivot": [3.5,9,0],
         "rotation": [0,0,0],
         "cubes": [{"from":[3.5,3,-1.5],"to":[4.5,9,1.5],"uv":{"box":[0,15]}}],
+        "emissive": false,
+        "translucent": false
+      },
+      {
+        "name": "pen_foot_left",
+        "parent": "penguin",
+        "pivot": [-1.5,1,-1],
+        "rotation": [0,0,0],
+        "cubes": [{"from":[-2.5,0,-3.5],"to":[-0.5,1,-0.5],"uv":{"box":[40,15]}}],
         "emissive": false,
         "translucent": false
       },

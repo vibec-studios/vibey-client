@@ -279,7 +279,6 @@
           "gravity": 0.002,
           "emissive": true
         },
-        {"t":0.58,"type":"visibility","bone":"seal","visible":true},
         {
           "t": 0.58,
           "type": "particle",
@@ -293,6 +292,7 @@
           "gravity": 0.002,
           "emissive": true
         },
+        {"t":0.58,"type":"visibility","bone":"seal","visible":true},
         {
           "t": 0.6,
           "type": "particle",

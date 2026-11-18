@@ -13,7 +13,6 @@
   "rarity": "common",
   "emote": {"animation":"main","loop":true,"thirdPerson":true,"stopOnMove":true,"hideHeldItems":true},
   "textures": [],
-  "model": {"bones":[]},
   "animations": {
     "main": {
       "length": 2,
