@@ -117,23 +117,33 @@ final class EmoteWheelScreen extends BaseScreen {
         drawCentre(g, wd, wheel.centreX(), wheel.centreY(), tile, o);
         g.pop();
 
-        // hints below the wheel: what a click/release does, how to fill empty slots, how to cancel
-        int hy = fy + fs + HINT_GAP;
+        // hints below the wheel: what a click/release does, how to fill empty slots, how to cancel; on a backing
+        // panel so they stay readable over bright worlds
+        String first;
+        int firstColor;
         if (wd == null) {
-            g.textCenter(Lang.tr("wardrobe.wheel.unavailable"), cx, hy, Theme.alpha(Theme.WARN, o));
+            first = Lang.tr("wardrobe.wheel.unavailable");
+            firstColor = Theme.WARN;
         } else {
-            String action;
-            if (hovered >= 0 && ids[hovered] != null) action = Lang.tr(sticky ? "wardrobe.wheel.click" : "wardrobe.wheel.release");
-            else if (hovered >= 0) action = Lang.tr("wardrobe.wheel.emptyClick");
-            else action = Lang.tr("wardrobe.wheel.pick");
-            g.textCenter(action, cx, hy, Theme.alpha(hovered >= 0 ? Theme.TEXT : Theme.MUTED, o));
+            if (hovered >= 0 && ids[hovered] != null) first = Lang.tr(sticky ? "wardrobe.wheel.click" : "wardrobe.wheel.release");
+            else if (hovered >= 0) first = Lang.tr("wardrobe.wheel.emptyClick");
+            else first = Lang.tr("wardrobe.wheel.pick");
+            firstColor = hovered >= 0 ? Theme.TEXT : Theme.MUTED;
         }
+        String assign = wd != null && anyEmpty ? Lang.tr("wardrobe.wheel.hintAssign") : null;
+        String cancel = Lang.tr("wardrobe.wheel.cancel");
+        int pw = Math.max(g.width(first), Math.max(assign == null ? 0 : g.width(assign), g.width(cancel))) + 16;
+        pw = Math.min(width - 8, Math.max(fs, pw));
+        int hy = fy + fs + HINT_GAP;
+        g.rect(cx - pw / 2, hy - 4, pw, hintLines * 12 + 5, Theme.alpha(Theme.PANEL, o * 0.85f));
+        g.outline(cx - pw / 2, hy - 4, pw, hintLines * 12 + 5, Theme.alpha(Theme.LINE, o));
+        g.textCenter(first, cx, hy, Theme.alpha(firstColor, o));
         hy += 12;
-        if (wd != null && anyEmpty) {
-            g.textCenter(Lang.tr("wardrobe.wheel.hintAssign"), cx, hy, Theme.alpha(Theme.MUTED, o));
+        if (assign != null) {
+            g.textCenter(assign, cx, hy, Theme.alpha(Theme.MUTED, o));
             hy += 12;
         }
-        g.textCenter(Lang.tr("wardrobe.wheel.cancel"), cx, hy, Theme.alpha(Theme.DIM, o));
+        g.textCenter(cancel, cx, hy, Theme.alpha(Theme.MUTED, o));
         ui.end();
     }
 

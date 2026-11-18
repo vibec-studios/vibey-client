@@ -38,6 +38,7 @@ public final class VibeyCore {
         BuiltinModules.registerAll(ModuleManager.get());
         ModuleManager.get().load();
         NetDispatch.setClientHandler(VibeyNet::handle);
+        DevDriver.startIfRequested();
         Vibey.LOG.info("Vibey Client core ready, {} modules", ModuleManager.get().all().size());
     }
 
