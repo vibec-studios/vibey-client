@@ -44,6 +44,7 @@ public final class ToastStack {
         long lastFrame;
         boolean leaving;
         String[] lines;
+        String[] titleLines = new String[0];
         int linesWidth = -1;
         int hitX, hitY, hitH;
 
@@ -55,7 +56,7 @@ public final class ToastStack {
         }
 
         int height() {
-            int h = 24 + (lines == null ? 0 : lines.length * 10);
+            int h = 24 + (lines == null ? 0 : lines.length * 10) + Math.max(0, titleLines.length - 1) * 10;
             if (!buttons.isEmpty()) h += 18;
             return Math.max(30, h);
         }
@@ -189,6 +190,7 @@ public final class ToastStack {
     private static void layout(Gfx g, Entry e, int w) {
         if (e.linesWidth == w) return;
         e.linesWidth = w;
+        e.titleLines = TextWrap.wrap(g, e.toast.title(), w - 50, 2).toArray(new String[0]);
         String body = e.toast.body();
         if (body == null || body.isBlank()) {
             e.lines = new String[0];
@@ -230,8 +232,12 @@ public final class ToastStack {
         }
         int tx = x + 34;
         int tw = w - 34 - 16;
-        g.text(g.clip(e.toast.title(), tw), tx, y + 7, Theme.TEXT);
-        int ly = y + 18;
+        int ly = y + 7;
+        for (String t : e.titleLines) {
+            g.text(t, tx, ly, Theme.TEXT);
+            ly += 10;
+        }
+        ly += 1;
         if (e.lines != null) {
             for (String line : e.lines) {
                 g.text(line, tx, ly, Theme.MUTED);

@@ -16,7 +16,12 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContex
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
 
+import java.util.List;
 import java.util.function.Function;
+import dev.henny.vibeyclient.api.Services;
+import dev.henny.vibeyclient.api.service.HostingService;
+import dev.henny.vibeyclient.client.Keys;
+import dev.henny.vibeyclient.module.social.ui.ConfirmScreen;
 
 /**
  * Social module against a LOCAL backend (AUTH_DEV_BYPASS) with scripted friend accounts (Mira, Juno, Kai, Nova,
@@ -123,6 +128,8 @@ public final class SocialGameTest implements FabricClientGameTest {
             ctx.waitTicks(40);
             ctx.takeScreenshot("social_15_account");
 
+            hostingPhase(ctx, m, junoId);
+
             ctx.runOnClient(mc -> GlobalSettings.language.set(GlobalSettings.Language.GERMAN));
             ctx.waitTicks(2);
             open(ctx, m, false, SidebarRoute.tab(SidebarRoute.Tab.FRIENDS));
@@ -144,6 +151,51 @@ public final class SocialGameTest implements FabricClientGameTest {
         log("reconnected after online features off/on");
         ctx.runOnClient(mc -> GlobalSettings.language.set(GlobalSettings.Language.AUTO));
         log("done");
+    }
+
+    /** Stand-in for the multiplayer module's relay hosting (that module lives in its own branch). */
+    static final class StubHosting implements HostingService {
+        volatile boolean hosting;
+
+        public boolean canHost() { return true; }
+        public boolean isHosting() { return hosting; }
+        public String address() { return hosting ? "vibeytester-test.vibey.localhost" : null; }
+        public int port() { return 25565; }
+        public void startHosting() {
+            hosting = true;
+            dev.henny.vibeyclient.api.Tasks.onMain(() -> dev.henny.vibeyclient.api.event.Events.post(new HostingChanged(true, address())));
+        }
+        public void stopHosting() { hosting = false; }
+        public void openHostScreen() {}
+    }
+
+    /** Invite → "host first?" dialog → hosting → invite sent (Juno accepts it); accepting Juno's invite asks before leaving. */
+    private static void hostingPhase(ClientGameTestContext ctx, SocialModule m, String junoId) {
+        StubHosting stub = new StubHosting();
+        ctx.runOnClient(mc -> Services.register(HostingService.class, stub));
+        open(ctx, m, false, SidebarRoute.invite(junoId));
+        ctx.waitTicks(20);
+        ctx.takeScreenshot("social_18_invite_pick_canhost");
+        ctx.runOnClient(mc -> m.invites().inviteToMyWorld(List.of(junoId)));
+        ctx.waitFor(mc -> mc.screen instanceof ConfirmScreen, 5 * SEC);
+        ctx.waitTicks(10);
+        ctx.takeScreenshot("social_19_confirm_host");
+        ctx.getInput().pressKey(Keys.ENTER);
+        ctx.waitFor(mc -> stub.hosting, 5 * SEC);
+        ctx.waitFor(mc -> find(m.service().state.invites.values(), i -> junoId.equals(i.toUserId())) != null, 30 * SEC);
+        log("invite to Juno sent while hosting " + stub.address());
+        ctx.waitTicks(40); // Juno accepts it (see the bot log), presence shows hosting
+        String inviteId = ctx.computeOnClient(mc -> m.service().state.openIncomingInvites().get(0).id());
+        ctx.runOnClient(mc -> m.service().acceptInvite(inviteId));
+        ctx.waitFor(mc -> mc.screen instanceof ConfirmScreen, 10 * SEC);
+        ctx.waitTicks(10);
+        ctx.takeScreenshot("social_20_confirm_join");
+        ctx.getInput().pressKey(Keys.ESCAPE);
+        ctx.waitTicks(5);
+        ctx.runOnClient(mc -> {
+            stub.stopHosting();
+            Services.unregister(HostingService.class, stub);
+        });
     }
 
     /** JSON → model mapping with the shapes of packages/shared (nullable fields, unknown fields, missing fields). */

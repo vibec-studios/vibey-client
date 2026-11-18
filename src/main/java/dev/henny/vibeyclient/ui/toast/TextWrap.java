@@ -41,8 +41,8 @@ public final class TextWrap {
         if (maxLines > 0 && out.size() > maxLines) {
             List<String> cut = new ArrayList<>(out.subList(0, maxLines));
             String last = cut.get(maxLines - 1);
-            cut.set(maxLines - 1, g.clip(last + " " + out.get(maxLines), width));
-            if (!cut.get(maxLines - 1).endsWith("…")) cut.set(maxLines - 1, g.clip(last + "……", width));
+            while (!last.isEmpty() && g.width(last + "…") > width) last = last.substring(0, last.length() - 1);
+            cut.set(maxLines - 1, last.stripTrailing() + "…");
             return cut;
         }
         return out;
