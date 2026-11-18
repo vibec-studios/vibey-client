@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.henny.vibeyclient.module.media.lyrics.mixin",
+  "plugin": "dev.henny.vibeyclient.mixin.VibeyMixinPlugin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [],
+  "client": ["CloudMixin", "FogMixin", "SkyMixin", "LevelRendererMixin"],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -63,8 +63,13 @@ public final class SettingsView {
         return out;
     }
 
-    /** Label of an action button. */
+    /** Label of an action as a header button: {@code <label>.action}, else the setting's label ("Open wardrobe"). */
     public static String actionLabel(ActionSetting a) {
+        return Lang.has(a.nameKey() + ".action") ? Lang.tr(a.nameKey() + ".action") : Lang.tr(a.nameKey());
+    }
+
+    /** Label of an action as a button in a row (next to its label): {@code <label>.button}, else the label. */
+    public static String buttonLabel(ActionSetting a) {
         return Lang.has(a.nameKey() + ".button") ? Lang.tr(a.nameKey() + ".button") : Lang.tr(a.nameKey());
     }
 
@@ -290,7 +295,7 @@ public final class SettingsView {
         if (s instanceof StringSetting) return Math.min(200, Math.max(120, rowW / 2 - 20));
         if (s instanceof ColorSetting c) return Widgets.swatchesWidth(c.presets().length);
         if (s instanceof KeybindSetting) return 96;
-        if (s instanceof ActionSetting a) return Math.max(60, g.width(actionLabel(a)) + 16);
+        if (s instanceof ActionSetting a) return Math.max(60, g.width(buttonLabel(a)) + 16);
         if (s instanceof EnumSetting<?> e) return enumWidth(g, e, rowW);
         return CONTROL_W;
     }
@@ -352,7 +357,7 @@ public final class SettingsView {
         } else if (s instanceof KeybindSetting k) {
             keybind(ui, k, right, cy);
         } else if (s instanceof ActionSetting a) {
-            String label = actionLabel(a);
+            String label = buttonLabel(a);
             int bw = Math.max(60, g.width(label) + 16);
             if (Widgets.button(ui, a, right - bw, cy - 8, bw, 16, label, Widgets.Style.SECONDARY)) a.run();
         }

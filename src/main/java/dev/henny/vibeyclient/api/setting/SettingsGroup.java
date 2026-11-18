@@ -28,6 +28,8 @@ public final class SettingsGroup {
     private final String id;
     private final List<Setting<?, ?>> settings = new ArrayList<>();
     private JsonObject data = new JsonObject();
+    /** The file as read: values of settings added after {@link #load()} and keys this version doesn't know. */
+    private JsonObject stored = new JsonObject();
     private boolean loaded;
 
     public SettingsGroup(String id) {
@@ -44,6 +46,11 @@ public final class SettingsGroup {
         }
         setting.group = this;
         settings.add(setting);
+        // Added after the file was read (e.g. a media feature registered late): still gets its stored value.
+        if (loaded && setting.persisted()) {
+            JsonElement v = stored.get(setting.key());
+            if (v != null && !v.isJsonNull()) setting.load(v);
+        }
         return setting;
     }
 
@@ -69,13 +76,14 @@ public final class SettingsGroup {
         return Vibey.platform().configDir().resolve(Vibey.MOD_ID);
     }
 
-    /** Reads the file once (startup, client thread). Settings added later keep their defaults until set. */
+    /** Reads the file once (startup, client thread). Settings added later get their stored value when added. */
     public void load() {
         loaded = true;
         Path f = file();
         if (!Files.isRegularFile(f)) return;
         try {
             JsonObject json = JsonParser.parseString(Files.readString(f, StandardCharsets.UTF_8)).getAsJsonObject();
+            stored = json;
             for (Setting<?, ?> s : settings) {
                 JsonElement v = json.get(s.key());
                 if (v != null && !v.isJsonNull() && s.persisted()) s.load(v);
@@ -84,6 +92,12 @@ public final class SettingsGroup {
         } catch (Exception e) {
             Vibey.LOG.warn("Could not read {} ({}), using defaults", f, e.toString());
         }
+    }
+
+    /** The file had a value for {@code key} when it was read (false for a setting new in this version). */
+    public boolean stored(String key) {
+        JsonElement v = stored.get(key);
+        return v != null && !v.isJsonNull();
     }
 
     public boolean isLoaded() {
@@ -100,6 +114,8 @@ public final class SettingsGroup {
         String text;
         synchronized (this) {
             JsonObject json = new JsonObject();
+            // Unknown keys survive (a setting that is not declared in this run, e.g. of a part that is off).
+            for (String k : stored.keySet()) if (!k.equals("_data")) json.add(k, stored.get(k));
             for (Setting<?, ?> s : settings) if (s.persisted()) json.add(s.key(), s.toJson());
             if (data.size() > 0) json.add("_data", data.deepCopy());
             text = GSON.toJson(json);

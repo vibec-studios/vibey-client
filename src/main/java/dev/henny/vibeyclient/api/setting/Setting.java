@@ -23,7 +23,9 @@ public abstract class Setting<T, S extends Setting<T, S>> {
     SettingsGroup group;
     private boolean advanced;
     private String section;
+    private String sectionLabel;
     private BooleanSupplier visible = () -> true;
+    private String nameKey;
     private final List<Consumer<T>> listeners = new CopyOnWriteArrayList<>();
 
     protected Setting(String key, T defaultValue) {
@@ -97,9 +99,17 @@ public abstract class Setting<T, S extends Setting<T, S>> {
         return section;
     }
 
+    /** Full i18n key of the section title instead of {@code <group>.section.<key>} (e.g. a media feature's name). */
+    public final S sectionLabel(String fullKey) {
+        sectionLabel = fullKey;
+        return self();
+    }
+
     /** i18n key of the section title, or null. */
     public final String sectionNameKey() {
-        return section == null ? null : (group == null ? "core" : group.id()) + ".section." + section;
+        if (section == null) return null;
+        if (sectionLabel != null) return sectionLabel;
+        return (group == null ? "core" : group.id()) + ".section." + section;
     }
 
     public final S visibleWhen(BooleanSupplier condition) {
@@ -125,7 +135,18 @@ public abstract class Setting<T, S extends Setting<T, S>> {
     }
 
     public String nameKey() {
+        if (nameKey != null) return nameKey;
         return (group == null ? "core" : group.id()) + ".setting." + key;
+    }
+
+    /**
+     * Uses another i18n key for the label (default {@code <group>.setting.<key>}); the description is
+     * {@code <labelKey>.desc}, enum values {@code <labelKey>.<value>}. Used by parts of a module that keep their own
+     * i18n file (e.g. media features: {@code media.video.setting.volume}).
+     */
+    public final S labelKey(String fullKey) {
+        nameKey = fullKey;
+        return self();
     }
 
     public String descriptionKey() {

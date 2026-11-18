@@ -37,6 +37,7 @@ public final class Keybinds {
             for (int i = 0; i < DECLARED.size(); i++) {
                 VibeyModule m = ModuleManager.get().get(OWNERS.get(i));
                 if (m != null && !m.status().loadable()) continue;
+                if (!DECLARED.get(i).shouldRegister()) continue;
                 REGISTERED.add(DECLARED.get(i));
                 list.add(DECLARED.get(i).mapping());
             }

@@ -113,6 +113,12 @@ public final class VibeyUiGameTest implements FabricClientGameTest {
         ctx.waitTicks(8);
         ctx.takeScreenshot("ui_menu_module_" + tag);
 
+        // Media: feature switches, HUD editor button, notices
+        ModulesPanel.preselect("media");
+        ctx.setScreen(() -> new VibeyScreen(null));
+        ctx.waitTicks(8);
+        ctx.takeScreenshot("ui_menu_media_" + tag);
+
         // module page with an advanced area: multiplayer, collapsed and open (scrolled to the bottom)
         ModulesPanel.preselect("multiplayer");
         ctx.runOnClient(mc -> SettingsView.setAdvancedOpen(ModuleManager.get().get("multiplayer").settings(), false));

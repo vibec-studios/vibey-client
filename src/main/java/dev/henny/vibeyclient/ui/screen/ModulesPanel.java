@@ -365,6 +365,19 @@ public final class ModulesPanel implements Panel {
             }
             y += rh + 10;
         }
+        // e.g. "Lyrics: provided by the installed Vibey Lyrics" (parts of a module that are off)
+        for (String notice : m.notices()) {
+            List<String> nl = Ui.wrap(g, notice, w - 16);
+            int nh = nl.size() * 10 + 10;
+            g.rect(x, y, w, nh, Theme.alpha(Theme.WARN, 0.10f));
+            g.vline(x, y, nh, Theme.WARN);
+            int ny = y + 6;
+            for (String l : nl) {
+                g.text(l, x + 8, ny, Theme.WARN);
+                ny += 10;
+            }
+            y += nh + 10;
+        }
         return y;
     }
 

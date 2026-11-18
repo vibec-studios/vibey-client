@@ -43,7 +43,7 @@ Related repositories (all under the GitHub org `vibec-studios`):
   `vibec-studios/.github` (`LICENSING.md`, `TRADEMARKS.md`, `ASSETS-POLICY.md`, `SERVICES.md`).
 - `environment: "*"` – the same jar can go on a server (it then only relays emote/loadout packets, see §6).
   Client-only classes must never be loaded on a dedicated server.
-- Lyrics module is **Fabric-only** (like the standalone mod). On NeoForge it is simply not registered.
+- Media module (was "lyrics" up to 0.2) is **Fabric-only** (like the standalone mod). On NeoForge it is simply not registered.
 - Release builds contain **no offline/cracked account support**. Dev-only code paths (e.g. backend dev login) are
   gated behind `isDevelopmentEnvironment()` **and** a system property.
 
@@ -51,10 +51,14 @@ Related repositories (all under the GitHub org `vibec-studios`):
 
 - Standalone *Vibey Multiplayer* has mod id `vibey` (package `dev.henny.vibey`, payload `vibey:modlist`).
 - Standalone *Vibey Lyrics* has mod id `vibeylyrics` (package `dev.henny.lyrics`, assets namespace `vibeylyrics`).
-- The client contains copies of their code under `dev.henny.vibeyclient.module.multiplayer` / `...module.lyrics`
+- The client contains copies of their code under `dev.henny.vibeyclient.module.multiplayer` / `...module.media.lyrics`
   with **their own** ids/namespaces/config files (no shared class names, payload ids, asset paths or config files).
-- If `vibey` / `vibeylyrics` is loaded, the matching module is auto-disabled ("provided by the installed standalone
-  mod"), its payloads are not registered, and its mixins do not apply (mixin config plugin checks the mod list).
+- If `vibey` is loaded, the multiplayer module is auto-disabled ("provided by the installed standalone mod"), its
+  payloads are not registered, and its mixins do not apply (mixin config plugin checks the mod list).
+- If `vibeylyrics` is loaded, only the **lyrics part** of the media module is off (`ModConflicts` key
+  `media.lyrics`): its keybinds are not registered, its mixins (`vibeyclient.media.lyrics.mixins.json`: sky, fog,
+  clouds) do not apply, Media's settings page says "Lyrics & skies: provided by the installed Vibey Lyrics". The rest
+  of Media (video screens, HUD editor) keeps working.
 - Both standalone mods must keep working unchanged on their own.
 
 ## 3. Module API (core)

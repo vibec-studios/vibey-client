@@ -79,6 +79,23 @@ tasks.register('checkI18n') {
                     if (!all.containsKey(label)) problems << "${rel}: section title ${label} is not in en_us"
                 }
             }
+            // Media features (module/media/**/<X>Feature.java, super(media, "<id>")): labels in media.<id>.json,
+            // keybind names key.vibeyclient.media.<id>.<key>.
+            def feature = (src =~ /extends MediaFeature[\s\S]*?super\(\s*\w+\s*,\s*"(\w+)"\s*\)/)
+            if (moduleId == 'media' && f.name.endsWith('Feature.java') && f.name != 'MediaFeature.java' && feature.find()) {
+                def fid = feature.group(1)
+                def s = setting.matcher(src)
+                while (s.find()) {
+                    def label = "media.${fid}.setting.${s.group(2)}".toString()
+                    if (!all.containsKey(label)) problems << "${rel}: setting label ${label} is not in en_us"
+                    if (s.group(1) == 'keybind') {
+                        def name = "key.vibeyclient.media.${fid}.${s.group(2)}".toString()
+                        if (!vEn.containsKey(name)) problems << "${rel}: keybind name ${name} is not in lang/en_us.json"
+                    }
+                }
+                if (!all.containsKey("media.${fid}.setting.enabled".toString())) problems << "${rel}: media.${fid}.setting.enabled is not in en_us"
+                if (!all.containsKey("media.${fid}.name".toString())) problems << "${rel}: media.${fid}.name is not in en_us"
+            }
             if (moduleId && f.name.endsWith('Module.java')) {
                 def s = setting.matcher(src)
                 while (s.find()) {
