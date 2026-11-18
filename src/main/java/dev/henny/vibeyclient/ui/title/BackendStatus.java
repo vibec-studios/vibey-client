@@ -9,6 +9,8 @@ import dev.henny.vibeyclient.api.Services;
 import dev.henny.vibeyclient.api.Tasks;
 import dev.henny.vibeyclient.api.service.SocialStatus;
 import dev.henny.vibeyclient.api.service.VibeBackend;
+import dev.henny.vibeyclient.backend.BackendClient;
+import dev.henny.vibeyclient.backend.MojangJoin;
 import dev.henny.vibeyclient.ui.Theme;
 
 import java.net.URI;
@@ -26,7 +28,13 @@ import java.time.Duration;
 public final class BackendStatus {
     private BackendStatus() {}
 
-    public enum State { OFF, CHECKING, REACHABLE, CONNECTING, ONLINE, OFFLINE }
+    /**
+     * {@code SIGNED_OUT}: the backend could log in but we are not (logged out by the player or the login was lost).
+     * {@code NO_ACCOUNT}: no Minecraft session that can prove the account (offline profile), so online features
+     * cannot work at all. {@code LOGIN_ERROR}: login refused (banned, registration closed …). {@code CONNECTING} only
+     * while a login or gateway connection is really in progress.
+     */
+    public enum State { OFF, CHECKING, REACHABLE, CONNECTING, ONLINE, OFFLINE, SIGNED_OUT, NO_ACCOUNT, LOGIN_ERROR }
 
     private static volatile Boolean reachable;
     private static volatile String motd;
@@ -69,11 +77,40 @@ public final class BackendStatus {
     public static State state() {
         if (!GlobalSettings.online()) return State.OFF;
         VibeBackend b = Services.get(VibeBackend.class).orElse(null);
-        if (b != null && b.isReady()) return State.ONLINE;
-        Boolean r = reachable;
-        if (r == null) return State.CHECKING;
-        if (!r) return State.OFFLINE;
-        return b != null ? State.CONNECTING : State.REACHABLE;
+        BackendClient.State client = b instanceof BackendClient c ? c.state() : null;
+        boolean canProve = BackendClient.devAuth() || MojangJoin.hasOnlineSession();
+        return compute(b != null && b.isReady(), b != null, client, canProve, reachable);
+    }
+
+    /**
+     * The decision behind {@link #state()}, without game state (unit-testable).
+     *
+     * @param ready     backend logged in and gateway ready
+     * @param present   the backend service exists (social module on)
+     * @param client    the backend client's own state, or null if unknown
+     * @param canProve  a Minecraft session that can do the Mojang join (or the dev login)
+     * @param reachable result of the last public meta check (null = not checked yet)
+     */
+    static State compute(boolean ready, boolean present, BackendClient.State client, boolean canProve, Boolean reachable) {
+        if (ready) return State.ONLINE;
+        if (present && client != null) {
+            switch (client) {
+                case LOGGED_OUT:
+                    return canProve ? (Boolean.FALSE.equals(reachable) ? State.OFFLINE : State.SIGNED_OUT) : State.NO_ACCOUNT;
+                case ERROR:
+                    return State.LOGIN_ERROR;
+                case OFF:
+                    present = false; // social module off: only the public check counts
+                    break;
+                default: // LOGGING_IN, CONNECTING, RECONNECTING, READY (not yet flagged ready)
+                    break;
+            }
+        } else if (present && !canProve) {
+            return State.NO_ACCOUNT;
+        }
+        if (reachable == null) return State.CHECKING;
+        if (!reachable) return State.OFFLINE;
+        return present ? State.CONNECTING : State.REACHABLE;
     }
 
     /** Message of the day from the backend (null/empty = none, or online features off). */
@@ -95,8 +132,8 @@ public final class BackendStatus {
         return switch (s) {
             case ONLINE, REACHABLE -> Theme.OK;
             case CHECKING, CONNECTING -> Theme.WARN;
-            case OFFLINE -> Theme.DANGER;
-            case OFF -> Theme.DIM;
+            case OFFLINE, LOGIN_ERROR -> Theme.DANGER;
+            case OFF, SIGNED_OUT, NO_ACCOUNT -> Theme.DIM;
         };
     }
 
