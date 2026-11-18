@@ -252,6 +252,8 @@ animations wrap; emotes fade in/out over 0.15 s when starting/stopping. Cosmetic
    `"float"`. `pet.scale` scales about the model origin; the client chooses the offset beside the player.
 7. Emotes: the `root` bone pivots at the feet `[0,0,0]`; the six player parts are its children, like vanilla.
 8. Emotes also carry `rarity` (the catalog requires it).
+9. *Catmull-Rom in looping animations* (≥ 3 keys): like Blockbench, the missing neighbour at either end is taken
+   from the other end of the loop.
 
 Validation rules (client + backend): `format == "vibey"`, `formatVersion == 1`, `id` matches
 `^[a-z0-9_.-]+:[a-z0-9_./-]+$`, kind/slot valid, all referenced textures/bones/sounds/sprites exist, textures are
