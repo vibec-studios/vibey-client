@@ -186,14 +186,45 @@ Max size 2 MiB (backend-configurable).
 ```
 
 **Coordinate convention (identical to Blockbench "Modded Entity" / the vanilla player in Blockbench):** units are
-pixels (16 = one block), origin at the player's feet, +Y up, the player faces **north (-Z)**, the player's right arm
-is at -X. Vanilla player part pivots in this space: head/body `[0, 24, 0]`, right arm `[-5, 22, 0]`, left arm
-`[5, 22, 0]`, right leg `[-1.9, 12, 0]`, left leg `[1.9, 12, 0]` (Blockbench shows the same reference player).
+pixels (16 = one block), origin at the player's feet, +Y up, the player faces **north (-Z)**, so the player's right
+arm is at **+X** (exactly like Blockbench's own player template). Vanilla player part pivots in this space:
+head/body `[0, 24, 0]`, right arm `[5, 22, 0]`, left arm `[-5, 22, 0]`, right leg `[1.9, 12, 0]`, left leg
+`[-1.9, 12, 0]`; cubes: head `[-4,24,-4]..[4,32,4]`, body `[-4,12,-2]..[4,24,2]`, right arm `[4,12,-2]..[8,24,2]`,
+left arm `[-8,12,-2]..[-4,24,2]`, right leg `[-0.1,0,-2]..[3.9,12,2]`, left leg `[-3.9,0,-2]..[0.1,12,2]`.
 A root bone with `attach: "right_arm"` moves with the right arm: the client converts its pivot into the arm's local
-space (MC model space is `x' = x`, `y' = 24 - y`, `z' = z`, rotations convert like Blockbench's Modded Entity
-exporter). Rule that must hold: **what the creator sees on the reference player in Blockbench is exactly what the
+space. **MC model space is `x' = -x`, `y' = 24 - y`, `z' = z`** (this is what Blockbench's Modded Entity exporter
+does; e.g. right arm `[5, 22, 0]` → vanilla `PartPose.offset(-5, 2, 0)`, its cube → `addBox(-3, -2, -2, 4, 12, 4)`).
+Rotations (bone rest rotations *and* rotation keyframes, degrees, Blockbench euler order ZYX = MC `rotationZYX`)
+convert to `(-x, -y, z)`; position keyframes (offsets) to `(-x, -y, z)`; scale keyframes are unchanged. (Mapping
+`x' = +x` would render a mirror image of what Blockbench shows – text reversed, east/west box-UV sides swapped.)
+Rule that must hold: **what the creator sees on the reference player in Blockbench is exactly what the
 game renders.** `attach: "root"` follows body yaw but not part animations; `attach: "world"` (pets, auras) is
 positioned relative to the player's feet with the body yaw, and the client may smooth it (pets follow with lag).
+
+**Format details (as written by the Blockbench plugin):**
+- `attach` is required on root bones (`parent: null`) and ignored on child bones. Bone names are unique.
+- Cubes: `from`/`to`/`pivot` are absolute model coordinates (like bone pivots). `uv.box: [u, v]` = Blockbench/Minecraft
+  box UV with the **unfloored** cube size (like `ModelPart`), `inflate` does not change UVs, `mirror` only applies to
+  box UV. Per-face UV: each face is `[u1, v1, u2, v2]` or `{ "uv": [u1, v1, u2, v2], "texture": "<id>" }`; omitted
+  faces are not drawn. Optional cube-level `"texture"` (texture of a box-UV cube / default for its faces). Texture
+  lookup: face `texture` → cube `texture` → `model.texture` → first texture. UVs are in the texture's `width`×`height`.
+- Textures: `width`/`height` are the UV size of **one frame**. The PNG may have a higher resolution with the same
+  aspect ratio (HD) and may be a vertical strip of N frames, N = `round(pngHeight * width / (pngWidth * height))`.
+  `animation.frames` defaults to `0..N-1`; optional `animation.interpolate: true` blends frames (like `.mcmeta`).
+- Locators: `position` is in absolute model coordinates (rest pose); `bone` is a model bone or, in emotes, a player
+  bone name. The locator follows the bone's animated transform.
+- Keyframes: `v` is the value at `t`; optional `pre` is the value arriving at `t` from the previous keyframe (a jump).
+  Between keyframes A→B: hold A if `A.i == "step"`; Catmull-Rom (neighbours as control points) if A or B is
+  `catmullrom`; otherwise linear (Blockbench's rules). Before the first / after the last keyframe the value is held;
+  looping does not interpolate across the loop end. `bezier` keyframes may carry a `bezier` handle object (optional).
+- Animations may set `"hold": true` (with `loop: false`): keep the last frame until stopped (emotes).
+- `model` is optional for capes, shields and emotes without props. Emote bones must not use the player bone names.
+  In emotes, cubes placed directly in a player bone are exported as a root bone `<part>_cubes` with `attach: <part>`,
+  pivot = the part pivot and `"generated": true` (editor hint). Cubes may carry an optional `name` (editor only).
+- Events: `particle` must be a namespaced particle id (`minecraft:heart`) unless `sprite` is set. `sound` is a
+  namespaced sound event id or the id of an embedded sound; sound events may have an optional `locator`.
+  `visibility` events target model bones (not player bones); the state at `t` holds until the next event.
+- `emote.loop` equals the `loop` of the emote's animation.
 
 **Emotes:** the `animations` of an emote may animate the six player bones by their vanilla names (`head`, `body`,
 `right_arm`, `left_arm`, `right_leg`, `left_leg`) plus `root` (moves/rotates the whole player). Values are
