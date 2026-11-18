@@ -1,5 +1,7 @@
 package dev.henny.vibeyclient.module.cosmetics.ui;
 
+import dev.henny.vibeyclient.ui.Ui;
+
 import dev.henny.vibeyclient.api.Lang;
 import dev.henny.vibeyclient.api.Services;
 import dev.henny.vibeyclient.avatar.AvatarItem;
@@ -23,10 +25,13 @@ import java.util.function.BooleanSupplier;
  */
 final class EmoteWheelScreen extends BaseScreen {
     static final long TAP_MS = 250;
+    /** Space kept free at the bottom for the hotbar, hearts/food and the XP bar (GUI pixels). */
+    static final int HUD_BOTTOM = 44;
+    private static final int TOP_MARGIN = 8, HINT_GAP = 8;
 
     private final Screen parent;
     private final BooleanSupplier keyHeld;
-    private final ScreenUi ui = new ScreenUi();
+    private final Ui ui = new Ui(box -> {});
     private final WheelLayout wheel = new WheelLayout();
     private final Anim open = new Anim(0f);
     private final Anim[] tiles = new Anim[WheelLayout.SLOTS];
@@ -73,11 +78,21 @@ final class EmoteWheelScreen extends BaseScreen {
         for (int i = 0; i < ids.length; i++) ids[i] = wd == null ? null : wd.wheel(i);
         float o = open.to(1f);
 
-        int min = Math.min(width, height);
-        int tile = Math.max(30, Math.min(62, (min - 80) / 3 - 4));
+        // The wheel and its hint lines must stay above the hotbar, hearts and XP bar (HUD_BOTTOM) on every GUI
+        // scale: size the tiles from the free height, then centre wheel + hints in that space.
+        boolean anyEmpty = false;
+        for (String id : ids) if (id == null) anyEmpty = true;
+        int hintLines = wd != null && anyEmpty ? 3 : 2;
+        int hintsH = HINT_GAP + hintLines * 12;
+        int freeH = height - HUD_BOTTOM - TOP_MARGIN;
+        int tileByH = (int) ((freeH - hintsH) / 3.5f);
+        int tileByW = (width - 40) / 3 - 4;
+        int tile = Math.max(24, Math.min(62, Math.min(tileByH, tileByW)));
         int gap = Math.max(3, tile / 12);
+        int frame = 3 * tile + 6 * gap;
+        int blockTop = TOP_MARGIN + Math.max(0, (freeH - frame - hintsH) / 2);
         int cx = width / 2;
-        int cy = height / 2 - 14;
+        int cy = blockTop + frame / 2;
         wheel.set(cx, cy, tile, gap);
         hovered = WheelLayout.direction(mx - (wheel.centreX() + tile / 2.0), my - (wheel.centreY() + tile / 2.0), tile * 0.45);
 
@@ -102,25 +117,33 @@ final class EmoteWheelScreen extends BaseScreen {
         drawCentre(g, wd, wheel.centreX(), wheel.centreY(), tile, o);
         g.pop();
 
-        // hints below the wheel: what a click/release does, how to fill empty slots, how to cancel
-        int hy = fy + fs + 8;
-        boolean anyEmpty = false;
-        for (String id : ids) if (id == null) anyEmpty = true;
+        // hints below the wheel: what a click/release does, how to fill empty slots, how to cancel; on a backing
+        // panel so they stay readable over bright worlds
+        String first;
+        int firstColor;
         if (wd == null) {
-            g.textCenter(Lang.tr("wardrobe.wheel.unavailable"), cx, hy, Theme.alpha(Theme.WARN, o));
+            first = Lang.tr("wardrobe.wheel.unavailable");
+            firstColor = Theme.WARN;
         } else {
-            String action;
-            if (hovered >= 0 && ids[hovered] != null) action = Lang.tr(sticky ? "wardrobe.wheel.click" : "wardrobe.wheel.release");
-            else if (hovered >= 0) action = Lang.tr("wardrobe.wheel.emptyClick");
-            else action = Lang.tr("wardrobe.wheel.pick");
-            g.textCenter(action, cx, hy, Theme.alpha(hovered >= 0 ? Theme.TEXT : Theme.MUTED, o));
+            if (hovered >= 0 && ids[hovered] != null) first = Lang.tr(sticky ? "wardrobe.wheel.click" : "wardrobe.wheel.release");
+            else if (hovered >= 0) first = Lang.tr("wardrobe.wheel.emptyClick");
+            else first = Lang.tr("wardrobe.wheel.pick");
+            firstColor = hovered >= 0 ? Theme.TEXT : Theme.MUTED;
         }
+        String assign = wd != null && anyEmpty ? Lang.tr("wardrobe.wheel.hintAssign") : null;
+        String cancel = Lang.tr("wardrobe.wheel.cancel");
+        int pw = Math.max(g.width(first), Math.max(assign == null ? 0 : g.width(assign), g.width(cancel))) + 16;
+        pw = Math.min(width - 8, Math.max(fs, pw));
+        int hy = fy + fs + HINT_GAP;
+        g.rect(cx - pw / 2, hy - 4, pw, hintLines * 12 + 5, Theme.alpha(Theme.PANEL, o * 0.85f));
+        g.outline(cx - pw / 2, hy - 4, pw, hintLines * 12 + 5, Theme.alpha(Theme.LINE, o));
+        g.textCenter(first, cx, hy, Theme.alpha(firstColor, o));
         hy += 12;
-        if (wd != null && anyEmpty) {
-            g.textCenter(Lang.tr("wardrobe.wheel.hintAssign"), cx, hy, Theme.alpha(Theme.MUTED, o));
+        if (assign != null) {
+            g.textCenter(assign, cx, hy, Theme.alpha(Theme.MUTED, o));
             hy += 12;
         }
-        g.textCenter(Lang.tr("wardrobe.wheel.cancel"), cx, hy, Theme.alpha(Theme.DIM, o));
+        g.textCenter(cancel, cx, hy, Theme.alpha(Theme.MUTED, o));
         ui.end();
     }
 

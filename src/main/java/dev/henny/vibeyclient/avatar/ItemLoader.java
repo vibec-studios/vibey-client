@@ -40,6 +40,8 @@ public final class ItemLoader {
     private static final AtomicBoolean CATALOG_RUNNING = new AtomicBoolean();
     private static volatile HttpClient http;
     private static volatile long lastCatalog;
+    /** True while catalog items are in the registry (fresh or from the disk cache); client thread. */
+    private static boolean catalogLoaded;
     /** Catalog item id → thumbnail URL (absolute). */
     private static final Map<String, String> THUMBS = new java.util.concurrent.ConcurrentHashMap<>();
 
@@ -133,7 +135,16 @@ public final class ItemLoader {
 
     /** Online features switched off: forget catalog items (they stay cached on disk). */
     public static void dropCatalog() {
+        catalogLoaded = false;
         AvatarItems.putAll(ItemSource.CATALOG, Map.of(), true);
+    }
+
+    /**
+     * Whether the catalog items are known (client thread). Until then an item that is only builtin cannot be told
+     * apart from an online one, so nothing that depends on "is this a catalog item" (loadout upload) may run.
+     */
+    public static boolean catalogLoaded() {
+        return catalogLoaded;
     }
 
     private static HttpClient http() {
@@ -246,6 +257,7 @@ public final class ItemLoader {
                 }
             }
             AvatarItems.putAll(ItemSource.CATALOG, items, true);
+            catalogLoaded = true;
         });
     }
 

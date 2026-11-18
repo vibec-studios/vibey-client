@@ -20,6 +20,12 @@ public final class TitleHook {
     private static boolean keepVanillaOnce;
 
     public static Screen replace(Screen screen) {
+        if (screen == null) {
+            // Outside a world vanilla turns setScreen(null) into a new TitleScreen after this hook ran (e.g. a menu
+            // opened from the title with a null parent is closed): hand back ours instead.
+            if (!enabled() || net.minecraft.client.Minecraft.getInstance().level != null) return null;
+            screen = new TitleScreen();
+        }
         if (!(screen instanceof TitleScreen title) || !enabled()) return screen;
         if (keepVanillaOnce) {
             keepVanillaOnce = false;

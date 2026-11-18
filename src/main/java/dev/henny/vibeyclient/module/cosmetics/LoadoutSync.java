@@ -14,6 +14,7 @@ import dev.henny.vibeyclient.avatar.AvatarItem;
 import dev.henny.vibeyclient.avatar.AvatarItems;
 import dev.henny.vibeyclient.avatar.AvatarState;
 import dev.henny.vibeyclient.avatar.AvatarStates;
+import dev.henny.vibeyclient.avatar.ItemLoader;
 import dev.henny.vibeyclient.avatar.ItemSource;
 import dev.henny.vibeyclient.avatar.Slot;
 import net.minecraft.client.Minecraft;
@@ -48,6 +49,10 @@ public final class LoadoutSync {
     private final List<AutoCloseable> listeners = new ArrayList<>();
     private Set<String> owned = Set.of();
     private boolean meLoaded;
+    /** {@code /cosmetics/me} answered: {@link #owned} is real. */
+    private boolean ownedKnown;
+    /** An upload is due but waits for the catalog and the owned list (see {@link #pushLoadout}). */
+    private boolean pushPending;
     private Set<UUID> subscribed = Set.of();
     private int tickCounter;
 
@@ -78,6 +83,7 @@ public final class LoadoutSync {
         VibeBackend b = GlobalSettings.online() ? Services.get(VibeBackend.class).orElse(null) : null;
         if (b != backend) attach(b);
         if (backend != null && backend.isReady() && !meLoaded) loadMe();
+        if (pushPending && canPush()) pushLoadout();
         if (++tickCounter % 40 == 0) updateSubscriptions();
         applyRemotes();
     }
@@ -92,6 +98,8 @@ public final class LoadoutSync {
         listeners.clear();
         backend = b;
         meLoaded = false;
+        ownedKnown = false;
+        pushPending = false;
         subscribed = Set.of();
         fromBackend.clear();
         if (b == null) return;
@@ -122,6 +130,7 @@ public final class LoadoutSync {
             Set<String> own = new HashSet<>();
             if (o.get("owned") instanceof JsonArray a) for (JsonElement e : a) own.add(e.getAsString());
             owned = own;
+            ownedKnown = true;
             if (module.localDirty()) {
                 pushLoadout();
             } else if (o.get("loadout") instanceof JsonObject l) {
@@ -138,8 +147,21 @@ public final class LoadoutSync {
         if (backendReady()) Tasks.debounce("vibeyclient:cosmetics:put", 1200, () -> Tasks.onMain(this::pushLoadout));
     }
 
+    private boolean canPush() {
+        return backendReady() && ownedKnown && ItemLoader.catalogLoaded();
+    }
+
+    /**
+     * Uploads our loadout. Slots are only sent for items the backend knows (catalog items we may use), so this must
+     * wait until the catalog and our owned list are loaded – otherwise every slot looks offline-only and the upload
+     * would clear the stored loadout (e.g. right after switching online features back on).
+     */
     private void pushLoadout() {
-        if (!backendReady()) return;
+        if (!canPush()) {
+            pushPending = backendReady();
+            return;
+        }
+        pushPending = false;
         Loadout l = module.loadout();
         JsonObject body = new JsonObject();
         JsonObject slots = new JsonObject();

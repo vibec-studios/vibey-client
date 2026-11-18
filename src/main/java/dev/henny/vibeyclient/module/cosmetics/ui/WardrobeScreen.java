@@ -1,5 +1,7 @@
 package dev.henny.vibeyclient.module.cosmetics.ui;
 
+import dev.henny.vibeyclient.ui.Ui;
+
 import dev.henny.vibeyclient.api.GlobalSettings;
 import dev.henny.vibeyclient.api.Lang;
 import dev.henny.vibeyclient.api.Services;
@@ -26,7 +28,7 @@ import java.util.List;
  * emote selects (and previews) it. Nothing here is purchasable: rarity is only a coloured label.
  */
 final class WardrobeScreen extends BaseScreen {
-    private static final int HEADER = ScreenUi.HEADER;
+    private static final int HEADER = WardrobeChrome.HEADER;
     private static final int GAP = 6;
     private static final int MIN_CARD = 70;
     private static final int MAX_CARD = 104;
@@ -43,7 +45,7 @@ final class WardrobeScreen extends BaseScreen {
     private static Category lastCategory = Category.CAPE;
 
     private final Screen parent;
-    private final ScreenUi ui = new ScreenUi();
+    private final Ui ui = new Ui(box -> {});
     private final ItemIndex index = new ItemIndex();
     private final PreviewHost preview = new PreviewHost();
     private final Scroller grid = new Scroller();
@@ -112,9 +114,9 @@ final class WardrobeScreen extends BaseScreen {
         float o = open.to(1f);
 
         g.rect(0, 0, width, height, Theme.BG);
-        int hx = ui.header(width, Lang.tr("wardrobe.title"), itemsText.tr("wardrobe.items", index.total()));
+        int hx = WardrobeChrome.header(ui, width, Lang.tr("wardrobe.title"), itemsText.tr("wardrobe.items", index.total()));
         int closeX = width - 24;
-        if (ui.closeButton(CLOSE, closeX, (HEADER - 18) / 2)) closeRequested = true;
+        if (WardrobeChrome.closeButton(ui, CLOSE, closeX, (HEADER - 18) / 2)) closeRequested = true;
         int sw = Math.min(clamp(width / 4, 80, 180), closeX - 8 - hx);
         drawSearch(g, closeX - 8 - sw, (HEADER - 16) / 2, sw);
 
@@ -198,7 +200,7 @@ final class WardrobeScreen extends BaseScreen {
             top += rowH;
         }
         int by = y + h - Theme.PAD - 18;
-        if (by > top + 4 && ui.button(WHEEL, x + 6, by, w - 12, 18, Lang.tr("wardrobe.wheel.title"), Widgets.Style.SECONDARY)) {
+        if (by > top + 4 && Widgets.button(ui, WHEEL, x + 6, by, w - 12, 18, Lang.tr("wardrobe.wheel.title"), Widgets.Style.SECONDARY)) {
             WardrobeUi.openWheelEditor(this);
         }
     }
@@ -228,7 +230,7 @@ final class WardrobeScreen extends BaseScreen {
             String edit = Lang.tr("wardrobe.wheel.edit");
             int bw = g.width(edit) + 16;
             if (lx + g.width(count) + 8 + bw <= toolbarRight) {
-                if (ui.button(EDIT_WHEEL, toolbarRight - bw, y + 6, bw, 16, edit, Widgets.Style.SECONDARY)) WardrobeUi.openWheelEditor(this);
+                if (Widgets.button(ui, EDIT_WHEEL, toolbarRight - bw, y + 6, bw, 16, edit, Widgets.Style.SECONDARY)) WardrobeUi.openWheelEditor(this);
                 toolbarRight -= bw + 8;
             }
         }
@@ -420,17 +422,17 @@ final class WardrobeScreen extends BaseScreen {
             String label = Lang.tr(playing != null ? "wardrobe.preview.stop" : "wardrobe.preview.emote");
             Widgets.Style style = playing != null ? Widgets.Style.SECONDARY : canPlay ? Widgets.Style.PRIMARY : Widgets.Style.DISABLED;
             int pw = stacked ? iw : (iw - GAP) / 2;
-            if (ui.button(PLAY, vx, by, pw, bh, label, style)) {
+            if (Widgets.button(ui, PLAY, vx, by, pw, bh, label, style)) {
                 if (playing != null) preview.stopEmote();
                 else preview.playEmote(selectedEmote);
             }
             int rx = stacked ? vx : vx + pw + GAP;
             int ry = stacked ? by + bh + GAP : by;
-            if (ui.button(RESET, rx, ry, stacked ? iw : iw - pw - GAP, bh, Lang.tr("wardrobe.preview.reset"),
+            if (Widgets.button(ui, RESET, rx, ry, stacked ? iw : iw - pw - GAP, bh, Lang.tr("wardrobe.preview.reset"),
                     preview.available() ? Widgets.Style.SECONDARY : Widgets.Style.DISABLED)) {
                 preview.reset();
             }
-        } else if (ui.button(RESET, vx, by, iw, bh, Lang.tr("wardrobe.preview.reset"),
+        } else if (Widgets.button(ui, RESET, vx, by, iw, bh, Lang.tr("wardrobe.preview.reset"),
                 preview.available() ? Widgets.Style.SECONDARY : Widgets.Style.DISABLED)) {
             preview.reset();
         }
