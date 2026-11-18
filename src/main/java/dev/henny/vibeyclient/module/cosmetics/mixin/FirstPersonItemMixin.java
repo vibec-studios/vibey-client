@@ -9,24 +9,28 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * First person: the shield cosmetic of the local player. 26.3 moved first-person hands into
- * FirstPersonHandsAndItemsRenderer (not ported yet; the mixin is empty there).
+ * First person: the shield cosmetic of the local player (owner for {@code ShieldDraw} while a hand is drawn).
+ * 26.2 renamed renderArmWithItem to submitArmWithItem; 26.3 moved first-person hands into
+ * FirstPersonHandsAndItemsRenderer (the item is still submitted inside submitArmWithItem).
  */
 //? if >=26.3 {
-/*@Mixin(net.minecraft.client.renderer.entity.layers.PlayerItemInHandLayer.class)
-public abstract class FirstPersonItemMixin {
-}
-*///?} else {
+/*@Mixin(net.minecraft.client.renderer.FirstPersonHandsAndItemsRenderer.class)
+*///?} else
 @Mixin(net.minecraft.client.renderer.ItemInHandRenderer.class)
 public abstract class FirstPersonItemMixin {
+    //? if >=26.2 {
+    /*@Inject(method = "submitArmWithItem", at = @At("HEAD"))
+    *///?} else
     @Inject(method = "renderArmWithItem", at = @At("HEAD"))
     private void vibey$owner(CallbackInfo ci) {
         ShieldDraw.owner = AvatarConfig.self == null ? null : AvatarStates.peek(AvatarConfig.self);
     }
 
+    //? if >=26.2 {
+    /*@Inject(method = "submitArmWithItem", at = @At("RETURN"))
+    *///?} else
     @Inject(method = "renderArmWithItem", at = @At("RETURN"))
     private void vibey$ownerEnd(CallbackInfo ci) {
         ShieldDraw.owner = null;
     }
 }
-//?}

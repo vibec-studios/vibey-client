@@ -64,6 +64,8 @@ processResources {
             mod_name           : project.mod_name,
             neo_range          : project.neo_range,
             minecraft_neo_range: project.minecraft_neo_range,
+            // NeoForge 26.3 warns on every start about the deprecated logoFile (square icons: iconFile)
+            neo_logo_key       : project.findProperty('neo_logo_key') ?: 'logoFile',
     ]
     inputs.properties(props)
     filesMatching('META-INF/neoforge.mods.toml') { expand props }

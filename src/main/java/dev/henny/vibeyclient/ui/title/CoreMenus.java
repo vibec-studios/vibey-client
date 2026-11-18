@@ -93,14 +93,17 @@ public final class CoreMenus {
     private static Class<?> modsScreenClass() {
         if (!modsChecked) {
             modsChecked = true;
-            String name = null;
-            if (Vibey.platform().isModLoaded("modmenu")) name = "com.terraformersmc.modmenu.gui.ModsScreen";
-            else if (!Vibey.platform().isFabric()) name = "net.neoforged.neoforge.client.gui.ModListScreen";
-            if (name != null) {
+            String[] names = {};
+            if (Vibey.platform().isModLoaded("modmenu")) names = new String[]{"com.terraformersmc.modmenu.gui.ModsScreen"};
+            // NeoForge 26.3 moved it into the modlist package (with a static create(Screen) factory)
+            else if (!Vibey.platform().isFabric()) names = new String[]{"net.neoforged.neoforge.client.gui.ModListScreen",
+                    "net.neoforged.neoforge.client.gui.modlist.ModListScreen"};
+            for (String name : names) {
                 try {
                     modsClass = Class.forName(name);
+                    break;
                 } catch (Throwable t) {
-                    Vibey.LOG.debug("No mod list screen: {}", t.toString());
+                    Vibey.LOG.debug("No mod list screen {}: {}", name, t.toString());
                 }
             }
         }
@@ -109,7 +112,13 @@ public final class CoreMenus {
 
     private static void openMods(Screen parent) {
         try {
-            Object s = modsScreenClass().getConstructor(Screen.class).newInstance(parent);
+            Class<?> c = modsScreenClass();
+            Object s;
+            try {
+                s = c.getConstructor(Screen.class).newInstance(parent);
+            } catch (NoSuchMethodException e) {
+                s = c.getMethod("create", Screen.class).invoke(null, parent);
+            }
             ClientCompat.openScreen((Screen) s);
         } catch (Throwable t) {
             Vibey.LOG.warn("Could not open the mod list: {}", t.toString());

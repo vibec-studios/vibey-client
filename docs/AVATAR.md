@@ -62,3 +62,10 @@ real-Blockbench screenshots in `content/dist/blockbench/`.
   world, every slot on the local player (third person front/back), wave/guitar/seal_summon mid-animation, wardrobe,
   emote wheel, social sidebar, lyrics sky (Fabric), host screen, pause menu; one screenshot per step into the outdir,
   log lines `[vibeyclient-tour] PASS|FAIL <step>` (plus errors other code logged during the step) and a `SUMMARY`.
+- Second tour, used for the 1.21.6+ / 26.x runtime pass (`dev/DevTourB`, dev workspace only, own switch so it never
+  runs together with `DevTour`): `VIBEYCLIENT_TOUR_B=<outdir> ./gradlew :neoforge-26.3:runClient` (or `-Dvibeyclient.tourB=<outdir>` via
+  `JAVA_TOOL_OPTIONS`; relative paths resolve against the game dir). Title/onboarding → Vibey menu → flat creative
+  world `saves/vibeytour` (created on the first run) → one item per slot front/back/first person → wave, guitar,
+  seal_summon → wardrobe, emote wheel, social sidebar, lyrics in the sky (Fabric), pause menu, host screen → quit.
+  Also the first-person shield and NeoForge's mod-loading warning screen. Logs `[vibeyclient-tourb] PASS|FAIL <step>` (a step that logged an ERROR fails), writes `NN_<step>.png` and
+  `tour.txt` to the out dir.
