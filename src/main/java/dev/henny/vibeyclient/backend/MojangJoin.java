@@ -20,6 +20,15 @@ public final class MojangJoin {
         return Minecraft.getInstance().getUser().getProfileId();
     }
 
+    /**
+     * The game runs with a real Microsoft session (its token is a JWT). Offline/dev sessions ("0", "FabricMC") can
+     * never pass Mojang's check, so they do not log in by themselves (no pointless challenges against the backend).
+     */
+    public static boolean hasOnlineSession() {
+        String t = Minecraft.getInstance().getUser().getAccessToken();
+        return t != null && t.length() > 40 && t.chars().filter(c -> c == '.').count() == 2;
+    }
+
     /** Blocking (network): call it on a worker thread. Returns null on success, else an error text. */
     public static String joinServer(String serverId) {
         Minecraft mc = Minecraft.getInstance();

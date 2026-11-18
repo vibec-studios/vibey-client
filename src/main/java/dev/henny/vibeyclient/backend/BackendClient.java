@@ -156,7 +156,7 @@ public final class BackendClient implements VibeBackend {
         if (tokens != null && tokens.valid()) {
             setState(State.CONNECTING, null, null);
             gateway.connect();
-        } else if (autoLogin && !store.loggedOut(accountKey)) {
+        } else if (autoLogin && !store.loggedOut(accountKey) && (devAuth() || MojangJoin.hasOnlineSession())) {
             loginAsync(gen);
         } else {
             setState(State.LOGGED_OUT, null, null);
@@ -239,12 +239,27 @@ public final class BackendClient implements VibeBackend {
                 loginBlocking();
                 if (generation.get() != gen) return;
                 LOG.info("Logged in as {}", accountName);
+                loginRetries.set(0);
                 setState(State.CONNECTING, null, null);
                 gateway.connect();
             } catch (ApiException e) {
                 if (generation.get() != gen) return;
                 LOG.warn("Login failed: {} {}", e.code, e.getMessage());
                 setState(State.ERROR, e.code, e.getMessage());
+                // Server unreachable / Mojang hiccup: try again later by itself (not for bans, closed registration …)
+                boolean transientError = "network".equals(e.code) || "mojang_failed".equals(e.code) || e.status >= 500 && !"feature_disabled".equals(e.code)
+                        || "rate_limited".equals(e.code);
+                if (transientError) {
+                    int attempt = loginRetries.getAndIncrement();
+                    long delay = Math.min(300_000L, 10_000L << Math.min(attempt, 5));
+                    if (e.retryAfter > 0) delay = Math.max(delay, e.retryAfter * 1000L);
+                    LOG.info("Retrying the login in {} s", delay / 1000);
+                    Tasks.later(delay, () -> {
+                        synchronized (this) {
+                            if (generation.get() == gen && running && tokens == null && state == State.ERROR) loginAsync(gen);
+                        }
+                    });
+                }
             } catch (RuntimeException e) {
                 if (generation.get() != gen) return;
                 LOG.warn("Login failed", e);
@@ -309,7 +324,8 @@ public final class BackendClient implements VibeBackend {
             }
             gateway.disconnect();
             if (!running) return;
-            boolean relogin = autoLogin && !revoked && !"banned".equals(code) && !store.loggedOut(accountKey);
+            boolean relogin = autoLogin && !revoked && !"banned".equals(code) && !store.loggedOut(accountKey)
+                    && (devAuth() || MojangJoin.hasOnlineSession());
             if (relogin) {
                 loginAsync(generation.get());
             } else if ("banned".equals(code) || revoked) {
@@ -375,6 +391,7 @@ public final class BackendClient implements VibeBackend {
     }
 
     private final AtomicInteger refreshCount = new AtomicInteger();
+    private final AtomicInteger loginRetries = new AtomicInteger();
 
     // ============================================================================================ REST
 
@@ -569,6 +586,7 @@ public final class BackendClient implements VibeBackend {
         } catch (IllegalArgumentException e) {
             selfId = null;
         }
+        LOG.info("Gateway ready as {} ({} friends)", J.str(user, "name"), J.arr(d, "friends") == null ? 0 : J.arr(d, "friends").size());
         setState(State.READY, null, null);
         dispatch(EV_READY, d);
         UUID self = selfId;

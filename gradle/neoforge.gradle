@@ -24,6 +24,13 @@ neoForge {
             client()
             gameDirectory = project.file('run')
             systemProperty 'vibeyclient.smoke', System.getProperty('vibeyclient.smoke', 'false')
+            // Social against a local backend (see SocialGameTest): -Dvibeyclient.devAuth=true -Dvibeyclient.api=...
+            ['vibeyclient.devAuth', 'vibeyclient.api'].each { k ->
+                def v = System.getProperty(k)
+                if (v != null) systemProperty k, v
+            }
+            def user = System.getProperty('vibeyclient.username')
+            if (user) programArguments.addAll('--username', user)
         }
         server {
             server()
