@@ -312,6 +312,7 @@ public final class DevTour {
 
         step("cosmetics_wings_back");
         run(mc -> {
+            requireWorld(mc);
             Wardrobe w = wardrobe();
             for (Slot s : Slot.all()) w.unequip(s);
             equip(w, "vibey:crystal_wings");
@@ -325,6 +326,7 @@ public final class DevTour {
 
         step("cosmetics_cape_backpack");
         run(mc -> {
+            requireWorld(mc);
             Wardrobe w = wardrobe();
             for (Slot s : Slot.all()) w.unequip(s);
             equip(w, "vibey:vibe_cape");
@@ -438,7 +440,10 @@ public final class DevTour {
         shot("40_host_screen");
 
         step("pause_menu");
-        run(mc -> ClientCompat.openScreen(new PauseScreen(true)));
+        run(mc -> {
+            requireWorld(mc);
+            ClientCompat.openScreen(new PauseScreen(true));
+        });
         waitTicks(20);
         shot("41_pause_menu");
         run(mc -> {
@@ -516,7 +521,9 @@ public final class DevTour {
     private static void openCreateWorld(Minecraft mc) throws ReflectiveOperationException {
         for (Method m : CreateWorldScreen.class.getMethods()) {
             Class<?>[] p = m.getParameterTypes();
-            if (m.getName().equals("openFresh") && p.length >= 1 && p[0] == Minecraft.class) {
+            // only the simple overload (Minecraft, Screen | Runnable); 1.21.2+ also has one with a CreateWorldCallback
+            if (m.getName().equals("openFresh") && p.length >= 1 && p[0] == Minecraft.class
+                    && java.util.Arrays.stream(p).skip(1).allMatch(c -> c == Screen.class || c == Runnable.class)) {
                 Object[] args = new Object[p.length];
                 args[0] = mc;
                 for (int i = 1; i < p.length; i++) {
