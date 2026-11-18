@@ -170,6 +170,13 @@ final class VideoDev {
                     return "ok";
                 }
                 return "err no setup screen";
+            case "settings": // Media's settings page
+                dev.henny.vibeyclient.ui.screen.ModulesPanel.preselect("media");
+                ClientCompat.openScreen(new dev.henny.vibeyclient.ui.VibeyScreen(null));
+                return "ok";
+            case "hud":
+                dev.henny.vibeyclient.ui.hud.HudLayout.openEditor(null);
+                return "ok";
             case "screen":
                 return "ok " + (mc.screen == null ? "none" : mc.screen.getClass().getSimpleName());
             default:
