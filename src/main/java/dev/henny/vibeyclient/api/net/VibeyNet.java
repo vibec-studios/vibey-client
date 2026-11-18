@@ -45,7 +45,17 @@ public final class VibeyNet {
 
     /** Sends our loadout ({@code slot → item id}, "" = empty) to everyone on the server who has the mod. */
     public static boolean sendLoadout(Map<String, String> slots) {
-        return available() && send(new LoadoutPayload(NetLimits.NOBODY, slots));
+        return sendLoadout(slots, "");
+    }
+
+    /**
+     * Same with our backend-signed loadout token (SPEC §6, "" = none). The token is only attached when the server
+     * reads protocol 2; older servers would drop us for the extra bytes.
+     */
+    public static boolean sendLoadout(Map<String, String> slots, String token) {
+        if (!available()) return false;
+        String t = token != null && serverProtocol >= NetLimits.PROTOCOL_TOKEN ? token : "";
+        return send(new LoadoutPayload(NetLimits.NOBODY, slots, t));
     }
 
     public static boolean sendEmote(String emoteId, boolean play) {
@@ -157,7 +167,7 @@ public final class VibeyNet {
         } else if (payload instanceof LoadoutPayload p) {
             // the relay only forwards players that said hello: they run Vibey Client (nametag icon)
             VibeyPlayers.server(p.player());
-            Events.post(new VibeyEvents.RemoteLoadout(p.player(), p.slots()));
+            Events.post(new VibeyEvents.RemoteLoadout(p.player(), p.slots(), p.token()));
         } else if (payload instanceof EmotePayload p) {
             VibeyPlayers.server(p.player());
             Events.post(new VibeyEvents.RemoteEmote(p.player(), p.emoteId(), p.play(), p.startTick()));

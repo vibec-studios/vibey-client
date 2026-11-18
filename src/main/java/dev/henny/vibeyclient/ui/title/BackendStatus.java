@@ -39,7 +39,8 @@ public final class BackendStatus {
         if (!GlobalSettings.online() || fetching) return;
         if (System.currentTimeMillis() - lastFetch < 5 * 60_000 && reachable != null) return;
         fetching = true;
-        String url = GlobalSettings.backend() + "/api/v1/meta";
+        String base = GlobalSettings.backend();
+        String url = base + "/api/v1/meta";
         Tasks.run(() -> {
             try {
                 if (http == null) http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(4)).executor(Tasks.executor()).build();
@@ -49,6 +50,9 @@ public final class BackendStatus {
                     JsonObject o = JsonParser.parseString(r.body()).getAsJsonObject();
                     JsonElement m = o.get("motd");
                     motd = m != null && m.isJsonPrimitive() ? m.getAsString().trim() : null;
+                    // loadout signing key (VIBE-API-2 §6), also without a login
+                    if (base.equals(dev.henny.vibeyclient.backend.BackendClient.configuredBaseUrl()))
+                        dev.henny.vibeyclient.backend.LoadoutKeys.fromMeta(base, o);
                     reachable = true;
                 } else {
                     reachable = false;

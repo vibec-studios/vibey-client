@@ -275,14 +275,48 @@ Two independent channels; the client uses whatever is available and merges by pl
 1. **Backend (works on any server, even vanilla):** see §7. The client subscribes to the UUIDs of players around it
    and gets their loadouts and emote plays via the gateway.
 2. **Server packets (only when the mod is also on the server, incl. hosted/LAN worlds):** custom payloads
-   `vibeyclient:hello` (C→S: protocol version; S→C: ack), `vibeyclient:loadout` (C→S: own `{slot: id}`;
-   S→C: `{uuid, slots}`), `vibeyclient:emote` (C→S: `{emoteId, action: play|stop}`; S→C: `{uuid, emoteId, action,
+   `vibeyclient:hello` (C→S: protocol version; S→C: ack), `vibeyclient:loadout` (C→S: own `{slot: id}` + signed
+   token; S→C: `{uuid, slots, token}`, see *Signed loadouts* below), `vibeyclient:emote` (C→S: `{emoteId, action: play|stop}`; S→C: `{uuid, emoteId, action,
    startTick}`), plus the generic module envelope `vibeyclient:msg` (C→S: `{target uuid or nil, channel, bytes ≤ 8 KiB}`;
    S→C: `{sender uuid, channel, bytes}`, used by `VibeyNet.channel(...)`). The server just validates sizes/rates and
    relays to every other player that sent `hello`. Since 0.2.0 it also announces peers: on `hello` the newcomer gets
    a (possibly empty) `loadout` of every peer and every peer an empty `loadout` of the newcomer, so clients know who
    runs Vibey Client (nametag icons, see §11). Asset
    bytes never go over the server channel – clients fetch bundles by id from the backend catalog or use built-ins.
+
+**Signed loadouts (protocol 2, after 0.2.0; backend contract: vibe-launcher `docs/VIBE-API-2.md` §6).** The server
+channel is not trusted: a modified client could claim any item. So:
+
+- The backend publishes its Ed25519 key in `GET /api/v1/meta` as `loadoutSigning: {alg: "Ed25519", keyId, publicKey}`
+  (`publicKey` = base64 of the 32 raw bytes, `keyId` = first 8 hex chars of SHA-256 over them) or `null`. The client
+  reads it on login and whenever the menus fetch meta (`backend/LoadoutKeys`), checks `keyId`, and caches it per
+  backend URL in `<game dir>/vibeyclient/cache/loadout-key.json`. `null` (or a backend without the field) removes it.
+  A token with an unknown `kid` triggers a meta refetch (at most every 5 min; key rotation).
+- Our token comes from `GET /api/v1/cosmetics/loadout/signed` → `{token, payload}` and from the `signed` field of the
+  `PUT /api/v1/cosmetics/loadout` answer; it is fetched after every loadout/ownership change and again 30 min before
+  `exp`. 404/501/413/`feature_disabled` = backend without signing → retry every 30 min, nothing breaks.
+  `token = base64url(payloadJson) + "." + base64url(ed25519(payloadJson))`,
+  `payload = {v: 1, kid, uuid, slots: {slot: id|null}, emotes: [id…], iat, exp}`.
+- Wire: `hello` carries the protocol (now **2**). `loadout` = `uuid, varint n, n × (slot, id)` as in protocol 1,
+  followed by `utf(token)` only when a token is attached (≤ 3072 chars on the wire; the backend keeps them ≤ 2 KiB). A
+  tokenless packet is byte-identical to protocol 1 and the decoder reads the token only if bytes are left. Clients
+  attach the token only when the server's hello said ≥ 2; the server strips it for peers whose hello said < 2. Older
+  clients and servers therefore never see the extra bytes (their decoders would reject them).
+- The server relay stores each peer's token with its loadout and forwards it unchanged (also to late joiners); it
+  only checks length and characters (`[A-Za-z0-9_-]*.[A-Za-z0-9_-]*`) plus the existing rate limits. It never
+  verifies signatures.
+- Receivers verify with the JDK's Ed25519 (`net/LoadoutToken`, raw key wrapped as X.509 with prefix
+  `302a300506032b6570032100`): signature over exactly the bytes of the first part, `v == 1`, `kid` = meta key,
+  `uuid` = the player the server says sent it, `exp > now − 5 min`.
+  - **Valid:** the slots of the token `payload` are shown (plus claimed slots whose item is available to everyone).
+    It then competes with the backend loadout of that player (newest wins), as before.
+  - **Missing/invalid/expired or no key:** only claimed items with availability `default` are shown (catalog
+    `default`, or built-in and not overridden by the catalog). The rest is ignored and the player is looked up via
+    `POST /api/v1/cosmetics/lookup` when the backend is available (at most once a minute per player); unverified
+    server data never overrides what the backend says.
+  - **Emotes over the server channel:** `default` emotes always; `granted` emotes only when they are listed under
+    `emotes` in the sender's last valid (not expired) token on this server. Stops always pass. Gateway emotes come
+    from the backend and are not filtered.
 
 Built-in starter bundles also ship inside the jar (`assets/vibeyclient/builtin/*.vibey`) so cosmetics work offline
 and when online features are off (then only visible to yourself and via server packets).

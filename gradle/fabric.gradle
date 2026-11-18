@@ -45,6 +45,21 @@ if (project.minecraft_version == '1.21.11') {
         java.srcDirs = [rootProject.file('src/gametest/java')]
         resources.srcDirs = [rootProject.file('src/gametest/resources')]
     }
+    // Plain JUnit tests (pure logic such as the signed-loadout check): ./gradlew :fabric-1.21.11:test (part of build)
+    sourceSets.named('test') {
+        java.srcDirs = [rootProject.file('src/test/java')]
+        resources.srcDirs = []
+    }
+    dependencies {
+        testImplementation platform('org.junit:junit-bom:5.11.4')
+        testImplementation 'org.junit.jupiter:junit-jupiter'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
+    tasks.named('test') {
+        useJUnitPlatform()
+        maxHeapSize = '512m'
+        testLogging { events 'failed'; exceptionFormat 'full' }
+    }
     loom.runs.named('clientGameTest') {
         vmArg '-Dfabric.client.gametest.disableNetworkSynchronizer=true'
         // Extra mod jars for the test, e.g. the standalone mods for the conflict test:

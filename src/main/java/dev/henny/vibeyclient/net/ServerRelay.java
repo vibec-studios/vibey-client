@@ -15,7 +15,9 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Server side of the {@code vibeyclient:*} channel (SPEC §6). Runs on dedicated servers and in the integrated server
  * (singleplayer/LAN/hosted worlds). It only validates sizes and rates and relays to every other player that sent
- * hello; it never knows what a cosmetic or emote is. All methods run on the server thread.
+ * hello; it never knows what a cosmetic or emote is. Signed loadout tokens (SPEC §6) are passed through unchanged –
+ * the server only checks their size and characters; the receiving clients verify them. All methods run on the server
+ * thread.
  */
 public final class ServerRelay {
     private ServerRelay() {}
@@ -24,14 +26,23 @@ public final class ServerRelay {
 
     private static final class Peer {
         final ServerPlayer player;
+        /** Protocol from the peer's hello: below {@link NetLimits#PROTOCOL_TOKEN} it cannot read tokens. */
+        final int protocol;
         Map<String, String> loadout = Map.of();
+        /** The peer's signed loadout token, "" = none. */
+        String token = "";
         final RateLimit loadoutRate = new RateLimit(2, 6);
         final RateLimit emoteRate = new RateLimit(2, 4);
         final RateLimit messageRate = new RateLimit(20, 40);
         int dropped;
 
-        Peer(ServerPlayer player) {
+        Peer(ServerPlayer player, int protocol) {
             this.player = player;
+            this.protocol = protocol;
+        }
+
+        boolean readsTokens() {
+            return protocol >= NetLimits.PROTOCOL_TOKEN;
         }
     }
 
@@ -63,7 +74,7 @@ public final class ServerRelay {
         Peer peer = PEERS.get(player.getUUID());
         if (peer == null || peer.player != player) return;
         PEERS.remove(player.getUUID());
-        if (!peer.loadout.isEmpty()) broadcast(peer, new LoadoutPayload(player.getUUID(), Map.of()));
+        if (!peer.loadout.isEmpty() || !peer.token.isEmpty()) broadcast(peer, new LoadoutPayload(player.getUUID(), Map.of()));
     }
 
     public static void onServerStopped() {
@@ -73,7 +84,7 @@ public final class ServerRelay {
     // ============================================================================================ handlers
 
     private static void onHello(ServerPlayer from, HelloPayload hello) {
-        Peer peer = new Peer(from);
+        Peer peer = new Peer(from, hello.protocol());
         PEERS.put(from.getUUID(), peer);
         send(from, new HelloPayload(NetLimits.PROTOCOL));
         // Current loadouts of everyone else (also empty ones: a loadout packet tells the client that this player runs
@@ -81,8 +92,8 @@ public final class ServerRelay {
         LoadoutPayload announce = new LoadoutPayload(from.getUUID(), Map.of());
         for (Peer other : PEERS.values()) {
             if (other == peer) continue;
-            send(from, new LoadoutPayload(other.player.getUUID(), other.loadout));
-            send(other.player, announce);
+            send(peer, new LoadoutPayload(other.player.getUUID(), other.loadout, other.token));
+            send(other, announce);
         }
     }
 
@@ -99,8 +110,14 @@ public final class ServerRelay {
             }
             clean.put(e.getKey(), e.getValue());
         }
+        String token = p.token();
+        if (token.length() > LoadoutToken.MAX_LENGTH || (!token.isEmpty() && !LoadoutToken.WIRE.matcher(token).matches())) {
+            drop(peer, "bad loadout token");
+            return;
+        }
         peer.loadout = Collections.unmodifiableMap(clean);
-        broadcast(peer, new LoadoutPayload(peer.player.getUUID(), peer.loadout));
+        peer.token = token;
+        broadcast(peer, new LoadoutPayload(peer.player.getUUID(), peer.loadout, peer.token));
     }
 
     private static void onEmote(Peer peer, EmotePayload p) {
@@ -130,7 +147,7 @@ public final class ServerRelay {
             broadcast(peer, out);
         } else {
             Peer target = PEERS.get(p.peer());
-            if (target != null && target != peer) send(target.player, out);
+            if (target != null && target != peer) send(target, out);
         }
     }
 
@@ -138,8 +155,14 @@ public final class ServerRelay {
 
     private static void broadcast(Peer from, CustomPacketPayload payload) {
         for (Peer other : PEERS.values()) {
-            if (other != from) send(other.player, payload);
+            if (other != from) send(other, payload);
         }
+    }
+
+    /** Sends to a peer in the format its protocol reads (no loadout token below protocol 2). */
+    private static void send(Peer to, CustomPacketPayload payload) {
+        if (payload instanceof LoadoutPayload l && !to.readsTokens()) payload = l.withoutToken();
+        send(to.player, payload);
     }
 
     private static void send(ServerPlayer to, CustomPacketPayload payload) {
