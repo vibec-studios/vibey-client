@@ -1222,11 +1222,12 @@ function savePrefs(p) {
 }
 const platform = () => (typeof SystemInfo !== 'undefined' && SystemInfo ? SystemInfo.platform : process.platform);
 const pathSep = () => (platform() === 'win32' ? '\\' : '/');
-function gameDir() {
-	if (LinkSettings.gameDir) return LinkSettings.gameDir;
+function defaultGameDir() {
 	const si = typeof SystemInfo !== 'undefined' && SystemInfo ? SystemInfo : {};
 	return Core.defaultGameDir(platform(), { APPDATA: si.appdata_directory }, si.home_directory || '');
 }
+/** The remembered game directory, default %APPDATA%.minecraft (or the platform equivalent). */
+const gameDir = () => LinkSettings.gameDir || defaultGameDir();
 function readTextFile(path) {
 	let out = null;
 	try {
@@ -1884,7 +1885,7 @@ function openLinkSettings() {
 			const r = dialog.getFormResult();
 			Object.assign(LinkSettings, {
 				autoFind: !!r.autoFind,
-				gameDir: r.gameDir && r.gameDir !== Core.defaultGameDir(platform(), { APPDATA: (SystemInfo || {}).appdata_directory }, (SystemInfo || {}).home_directory) ? r.gameDir : LinkSettings.gameDir && r.gameDir ? r.gameDir : '',
+				gameDir: r.gameDir && r.gameDir !== defaultGameDir() ? r.gameDir : '',
 				port: Number(r.port) || 47821,
 				token: String(r.token || '').trim(),
 				autoPush: !!r.autoPush,

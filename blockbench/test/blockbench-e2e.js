@@ -580,11 +580,20 @@ async function main() {
 				const ref = arm.mesh.children.find((c) => c.name === 'vibey_ref_right_arm');
 				Project.model_3d.updateMatrixWorld(true);
 				const box = new THREE.Box3().setFromObject(ref);
+				Timeline.setTime(1.95);
+				Animator.preview();
+				const flag = Group.all.find((g) => g.name === 'flag');
+				const hiddenAtEnd = flag.mesh.visible === false;
+				Timeline.setTime(0.5);
+				Animator.preview();
+				const visibleAgain = flag.mesh.visible === true;
 				const fxKf = anim.animators.effects.particle[0];
 				fxKf.select();
-				return { refParent: ref.parent === arm.mesh, armTopY: Math.round(box.max.y * 10) / 10 };
+				return { refParent: ref.parent === arm.mesh, armTopY: Math.round(box.max.y * 10) / 10, hiddenAtEnd, visibleAgain };
 			});
 			assert.equal(r.refParent, true);
+			assert.equal(r.hiddenAtEnd, true, 'visibility event at 1.9 s hides the flag in the preview');
+			assert.equal(r.visibleAgain, true);
 			assert.ok(r.armTopY > 30, 'raised arm reaches above the head, got ' + r.armTopY);
 			await cdp.eval(`Preview.selected.loadAnglePreset({position: [50, 40, -65], target: [2, 20, 0]}), true`);
 			await cdp.screenshot('blockbench-emote-animate.png');
@@ -625,7 +634,8 @@ async function main() {
 		});
 		await check('import emote .vibey round trip (player bones, generated cubes back in right_arm)', async () => {
 			const r = await cdp.run(async (json) => {
-				VibeyPlugin.importBundle(json, 'emote.vibey');
+				// the same path as File > Open / drag & drop: Blockbench picks the codec by its load_filter
+				loadModelFile({ path: 'emote.vibey', name: 'emote.vibey', content: json });
 				for (let i = 0; i < 100 && !Texture.all.every((t) => t.width); i++) await new Promise((res) => setTimeout(res, 50));
 				const arm = Group.all.find((g) => g.name === 'right_arm');
 				const c = VibeyPlugin.compileProjectJSON();
