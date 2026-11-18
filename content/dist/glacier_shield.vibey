@@ -1,0 +1,24 @@
+{
+  "format": "vibey",
+  "formatVersion": 1,
+  "kind": "cosmetic",
+  "id": "vibey:glacier_shield",
+  "name": {"en":"Glacier Shield","de":"Gletscherschild"},
+  "description": {
+    "en": "Cut from a glacier, polished by a very patient seal.",
+    "de": "Aus einem Gletscher geschnitten, poliert von einer sehr geduldigen Robbe."
+  },
+  "author": "Vibe Craft Studios",
+  "tags": ["ice","winter","snowflake","starter"],
+  "rarity": "rare",
+  "cosmetic": {"slot":"shield","shield":{"texture":"shield"}},
+  "textures": [
+    {
+      "id": "shield",
+      "width": 64,
+      "height": 64,
+      "png": "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"
+    }
+  ],
+  "animations": {}
+}

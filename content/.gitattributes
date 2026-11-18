@@ -1,0 +1,5 @@
+# .vibey bundles are identified by the SHA-256 of their bytes – never touch line endings.
+*.vibey -text
+*.json -text
+*.png binary
+*.ogg binary

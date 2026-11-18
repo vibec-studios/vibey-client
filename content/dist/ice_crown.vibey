@@ -1,0 +1,116 @@
+{
+  "format": "vibey",
+  "formatVersion": 1,
+  "kind": "cosmetic",
+  "id": "vibey:ice_crown",
+  "name": {"en":"Ice Crown","de":"Eiskrone"},
+  "description": {
+    "en": "A circlet of glacier ice with a glowing teal gem. Sparkles now and then.",
+    "de": "Ein Reif aus Gletschereis mit leuchtendem türkisen Edelstein. Funkelt ab und zu."
+  },
+  "author": "Vibe Craft Studios",
+  "tags": ["ice","crown","royal","starter"],
+  "rarity": "epic",
+  "cosmetic": {"slot":"hat","hideWithArmor":["head"]},
+  "textures": [
+    {
+      "id": "main",
+      "width": 32,
+      "height": 32,
+      "png": "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABAklEQVR42mNkIADufPhzB5+8igCLCgMtAT4HEHIcMYCJYYDBqANGHcBCaU6gFDB++/3/9YCGQNPW+78ZBgPY//3df3Sx////f5h24s1ZYsRBYjBxZDlc4iSlAUIAZAGMnWkurAymkcTQxRkZGQXgaQDmcwcOQYYDP94zQNkfSXHA1ttfH5Gi3keNRw/uAOQocOQUAvO33PpyiVwDqZoG6FYQzfr8+P/tP18ZhLLj/oMwUtx+BWFciQ8LnyT14CiQn9f1vzo0kmHp20cMD/YdhUs8SCz9huZYQtmVlRT1sIQIzgUgy7Eo4KZbPNAjqHGGBLJBtAzqUTAKRsEoGAWjABcAAAy13tSxr+I3AAAAAElFTkSuQmCC"
+    }
+  ],
+  "model": {
+    "texture": "main",
+    "bones": [
+      {
+        "name": "crown",
+        "parent": null,
+        "attach": "head",
+        "pivot": [0,32,0],
+        "rotation": [0,0,0],
+        "cubes": [
+          {"from":[-4,31,-4],"to":[4,33,4],"inflate":0.55,"uv":{"box":[0,0]}},
+          {"from":[-1,33.55,-4.55],"to":[1,35.55,-3.55],"uv":{"box":[17,10]}},
+          {"from":[-0.5,35.55,-4.55],"to":[0.5,36.55,-3.55],"uv":{"box":[6,15]}},
+          {"from":[-3,33.55,-4.55],"to":[-2,34.55,-3.55],"uv":{"box":[10,15]}},
+          {"from":[2,33.55,-4.55],"to":[3,34.55,-3.55],"uv":{"box":[14,15]}},
+          {"from":[-4.55,33.55,-1],"to":[-3.55,35.55,1],"uv":{"box":[5,10]}},
+          {"from":[-4.55,35.55,-0.5],"to":[-3.55,36.55,0.5],"uv":{"box":[18,15]}},
+          {"from":[-4.55,33.55,-3],"to":[-3.55,34.55,-2],"uv":{"box":[22,15]}},
+          {"from":[-4.55,33.55,2],"to":[-3.55,34.55,3],"uv":{"box":[26,15]}},
+          {"from":[-1,33.55,3.55],"to":[1,35.55,4.55],"uv":{"box":[23,10]}},
+          {"from":[-0.5,35.55,3.55],"to":[0.5,36.55,4.55],"uv":{"box":[0,18]}},
+          {"from":[-3,33.55,3.55],"to":[-2,34.55,4.55],"uv":{"box":[4,18]}},
+          {"from":[2,33.55,3.55],"to":[3,34.55,4.55],"uv":{"box":[8,18]}},
+          {"from":[3.55,33.55,-1],"to":[4.55,35.55,1],"uv":{"box":[11,10]}},
+          {"from":[3.55,35.55,-0.5],"to":[4.55,36.55,0.5],"uv":{"box":[12,18]}},
+          {"from":[3.55,33.55,-3],"to":[4.55,34.55,-2],"uv":{"box":[16,18]}},
+          {"from":[3.55,33.55,2],"to":[4.55,34.55,3],"uv":{"box":[20,18]}}
+        ],
+        "emissive": false,
+        "translucent": true
+      },
+      {
+        "name": "gem",
+        "parent": "crown",
+        "pivot": [0,32,-4.6],
+        "rotation": [0,0,0],
+        "cubes": [{"from":[-1,31.4,-5.4],"to":[1,33.4,-4.4],"uv":{"box":[0,15]}}],
+        "emissive": true,
+        "translucent": false
+      }
+    ],
+    "locators": {
+      "tip_front": {"bone":"crown","position":[0,36.5,-4.2]},
+      "tip_left": {"bone":"crown","position":[4.2,36.5,0]},
+      "tip_right": {"bone":"crown","position":[-4.2,36.5,0]}
+    }
+  },
+  "animations": {
+    "idle": {
+      "length": 3,
+      "loop": true,
+      "bones": {},
+      "events": [
+        {
+          "t": 0.3,
+          "type": "particle",
+          "sprite": "glint",
+          "count": 1,
+          "lifetime": 0.45,
+          "size": 0.14,
+          "spread": [0.02,0.02,0.02],
+          "velocity": [0,0.004,0],
+          "emissive": true,
+          "locator": "tip_front"
+        },
+        {
+          "t": 1.4,
+          "type": "particle",
+          "sprite": "glint",
+          "count": 1,
+          "lifetime": 0.45,
+          "size": 0.14,
+          "spread": [0.02,0.02,0.02],
+          "velocity": [0,0.004,0],
+          "emissive": true,
+          "locator": "tip_left"
+        },
+        {
+          "t": 2.3,
+          "type": "particle",
+          "sprite": "glint",
+          "count": 1,
+          "lifetime": 0.45,
+          "size": 0.14,
+          "spread": [0.02,0.02,0.02],
+          "velocity": [0,0.004,0],
+          "emissive": true,
+          "locator": "tip_right"
+        }
+      ]
+    }
+  },
+  "sprites": [{"id":"glint","texture":"main","uv":[0,10,5,15]}]
+}

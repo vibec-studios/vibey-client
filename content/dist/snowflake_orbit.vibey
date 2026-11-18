@@ -1,0 +1,370 @@
+{
+  "format": "vibey",
+  "formatVersion": 1,
+  "kind": "cosmetic",
+  "id": "vibey:snowflake_orbit",
+  "name": {"en":"Snowflake Orbit","de":"Schneeflocken-Orbit"},
+  "description": {
+    "en": "Five glowing snowflakes circle around you and drop tiny flakes.",
+    "de": "Fünf leuchtende Schneeflocken kreisen um dich und lassen kleine Flocken rieseln."
+  },
+  "author": "Vibe Craft Studios",
+  "tags": ["aura","snow","winter","glow","starter"],
+  "rarity": "epic",
+  "cosmetic": {"slot":"aura"},
+  "textures": [
+    {
+      "id": "main",
+      "width": 64,
+      "height": 64,
+      "png": "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAA6klEQVR42u3YsQ6CMBDG8ZaB2QEGfRF9C9/a+CQsLM4ukA4kxBQVaOHu+P8SY8ylJNdc+GydAwAAwevdtZZrMUVs0fi3hdo3PrbgVPp66mFaa5MTEBYNC+/NoxoeNP5orjEBc15+n99WaqTArxT4Z2xmjZQiRcr/DapjMMUmqIzBNY2bisGjTkCS5s3EoPVDVLZG1MdgjnjRwot8uWw5AbnihQnQeBUmLl603Ake9jC0dOOebdeYiMEltdD8tXJnKZuwy5VYaP5W+4vqGFwTn1Ka3/VS1EQMmotPcaczAAAAAAAAAAAAAEAaPbbABQHaw/RGAAAAAElFTkSuQmCC"
+    }
+  ],
+  "model": {
+    "texture": "main",
+    "bones": [
+      {
+        "name": "orbit",
+        "parent": null,
+        "attach": "world",
+        "pivot": [0,0,0],
+        "rotation": [0,0,0],
+        "cubes": [],
+        "emissive": true,
+        "translucent": true
+      },
+      {
+        "name": "flake_0",
+        "parent": "orbit",
+        "pivot": [13,7,0],
+        "rotation": [0,0,0],
+        "cubes": [
+          {"from":[9.5,3.5,0],"to":[16.5,10.5,0],"uv":{"box":[14,14]}},
+          {"from":[13,3.5,-3.5],"to":[13,10.5,3.5],"uv":{"box":[0,0]}}
+        ],
+        "emissive": true,
+        "translucent": true
+      },
+      {
+        "name": "flake_1",
+        "parent": "orbit",
+        "pivot": [3.71,23,11.41],
+        "rotation": [0,0,0],
+        "cubes": [
+          {"from":[0.21,19.5,11.41],"to":[7.21,26.5,11.41],"uv":{"box":[28,14]}},
+          {"from":[3.71,19.5,7.91],"to":[3.71,26.5,14.91],"uv":{"box":[14,0]}}
+        ],
+        "emissive": true,
+        "translucent": true
+      },
+      {
+        "name": "flake_2",
+        "parent": "orbit",
+        "pivot": [-11.33,13,8.23],
+        "rotation": [0,0,0],
+        "cubes": [
+          {"from":[-14.83,9.5,8.23],"to":[-7.83,16.5,8.23],"uv":{"box":[42,14]}},
+          {"from":[-11.33,9.5,4.73],"to":[-11.33,16.5,11.73],"uv":{"box":[28,0]}}
+        ],
+        "emissive": true,
+        "translucent": true
+      },
+      {
+        "name": "flake_3",
+        "parent": "orbit",
+        "pivot": [-9.71,28,-7.05],
+        "rotation": [0,0,0],
+        "cubes": [
+          {"from":[-13.21,24.5,-7.05],"to":[-6.21,31.5,-7.05],"uv":{"box":[0,28]}},
+          {"from":[-9.71,24.5,-10.55],"to":[-9.71,31.5,-3.55],"uv":{"box":[42,0]}}
+        ],
+        "emissive": true,
+        "translucent": true
+      },
+      {
+        "name": "flake_4",
+        "parent": "orbit",
+        "pivot": [4.33,18,-13.31],
+        "rotation": [0,0,0],
+        "cubes": [
+          {"from":[0.83,14.5,-13.31],"to":[7.83,21.5,-13.31],"uv":{"box":[14,28]}},
+          {"from":[4.33,14.5,-16.81],"to":[4.33,21.5,-9.81],"uv":{"box":[0,14]}}
+        ],
+        "emissive": true,
+        "translucent": true
+      }
+    ],
+    "locators": {
+      "flake_0": {"bone":"flake_0","position":[13,4,0]},
+      "flake_1": {"bone":"flake_1","position":[3.71,20,11.41]},
+      "flake_2": {"bone":"flake_2","position":[-11.33,10,8.23]},
+      "flake_3": {"bone":"flake_3","position":[-9.71,25,-7.05]},
+      "flake_4": {"bone":"flake_4","position":[4.33,15,-13.31]}
+    }
+  },
+  "animations": {
+    "idle": {
+      "length": 8,
+      "loop": true,
+      "bones": {
+        "orbit": {"rotation":[{"t":0,"v":[0,0,0]},{"t":8,"v":[0,-360,0]}]},
+        "flake_0": {
+          "rotation": [{"t":0,"v":[0,0,0]},{"t":8,"v":[0,720,0]}],
+          "position": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":2,"v":[0,1.5,0],"i":"catmullrom"},
+            {"t":6,"v":[0,-1.5,0],"i":"catmullrom"},
+            {"t":8,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "flake_1": {
+          "rotation": [{"t":0,"v":[0,0,0]},{"t":8,"v":[0,720,0]}],
+          "position": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":2.8,"v":[0,1.5,0],"i":"catmullrom"},
+            {"t":5.2,"v":[0,-1.5,0],"i":"catmullrom"},
+            {"t":8,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "flake_2": {
+          "rotation": [{"t":0,"v":[0,0,0]},{"t":8,"v":[0,720,0]}],
+          "position": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":3.6,"v":[0,1.5,0],"i":"catmullrom"},
+            {"t":4.4,"v":[0,-1.5,0],"i":"catmullrom"},
+            {"t":8,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "flake_3": {
+          "rotation": [{"t":0,"v":[0,0,0]},{"t":8,"v":[0,720,0]}],
+          "position": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":2.4,"v":[0,1.5,0],"i":"catmullrom"},
+            {"t":5.6,"v":[0,-1.5,0],"i":"catmullrom"},
+            {"t":8,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "flake_4": {
+          "rotation": [{"t":0,"v":[0,0,0]},{"t":8,"v":[0,720,0]}],
+          "position": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":3.2,"v":[0,1.5,0],"i":"catmullrom"},
+            {"t":4.8,"v":[0,-1.5,0],"i":"catmullrom"},
+            {"t":8,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        }
+      },
+      "events": [
+        {
+          "t": 0.1,
+          "type": "particle",
+          "sprite": "snow",
+          "locator": "flake_0",
+          "count": 1,
+          "lifetime": 1.6,
+          "size": 0.09,
+          "spread": [0.1,0.05,0.1],
+          "velocity": [0,-0.015,0],
+          "gravity": 0.0005,
+          "emissive": true
+        },
+        {
+          "t": 0.6,
+          "type": "particle",
+          "sprite": "snow",
+          "locator": "flake_1",
+          "count": 1,
+          "lifetime": 1.6,
+          "size": 0.09,
+          "spread": [0.1,0.05,0.1],
+          "velocity": [0,-0.015,0],
+          "gravity": 0.0005,
+          "emissive": true
+        },
+        {
+          "t": 1.1,
+          "type": "particle",
+          "sprite": "snow",
+          "locator": "flake_2",
+          "count": 1,
+          "lifetime": 1.6,
+          "size": 0.09,
+          "spread": [0.1,0.05,0.1],
+          "velocity": [0,-0.015,0],
+          "gravity": 0.0005,
+          "emissive": true
+        },
+        {
+          "t": 1.6,
+          "type": "particle",
+          "sprite": "snow",
+          "locator": "flake_3",
+          "count": 1,
+          "lifetime": 1.6,
+          "size": 0.09,
+          "spread": [0.1,0.05,0.1],
+          "velocity": [0,-0.015,0],
+          "gravity": 0.0005,
+          "emissive": true
+        },
+        {
+          "t": 2.1,
+          "type": "particle",
+          "sprite": "snow",
+          "locator": "flake_4",
+          "count": 1,
+          "lifetime": 1.6,
+          "size": 0.09,
+          "spread": [0.1,0.05,0.1],
+          "velocity": [0,-0.015,0],
+          "gravity": 0.0005,
+          "emissive": true
+        },
+        {
+          "t": 2.6,
+          "type": "particle",
+          "sprite": "snow",
+          "locator": "flake_0",
+          "count": 1,
+          "lifetime": 1.6,
+          "size": 0.09,
+          "spread": [0.1,0.05,0.1],
+          "velocity": [0,-0.015,0],
+          "gravity": 0.0005,
+          "emissive": true
+        },
+        {
+          "t": 3.1,
+          "type": "particle",
+          "sprite": "snow",
+          "locator": "flake_1",
+          "count": 1,
+          "lifetime": 1.6,
+          "size": 0.09,
+          "spread": [0.1,0.05,0.1],
+          "velocity": [0,-0.015,0],
+          "gravity": 0.0005,
+          "emissive": true
+        },
+        {
+          "t": 3.6,
+          "type": "particle",
+          "sprite": "snow",
+          "locator": "flake_2",
+          "count": 1,
+          "lifetime": 1.6,
+          "size": 0.09,
+          "spread": [0.1,0.05,0.1],
+          "velocity": [0,-0.015,0],
+          "gravity": 0.0005,
+          "emissive": true
+        },
+        {
+          "t": 4.1,
+          "type": "particle",
+          "sprite": "snow",
+          "locator": "flake_3",
+          "count": 1,
+          "lifetime": 1.6,
+          "size": 0.09,
+          "spread": [0.1,0.05,0.1],
+          "velocity": [0,-0.015,0],
+          "gravity": 0.0005,
+          "emissive": true
+        },
+        {
+          "t": 4.6,
+          "type": "particle",
+          "sprite": "snow",
+          "locator": "flake_4",
+          "count": 1,
+          "lifetime": 1.6,
+          "size": 0.09,
+          "spread": [0.1,0.05,0.1],
+          "velocity": [0,-0.015,0],
+          "gravity": 0.0005,
+          "emissive": true
+        },
+        {
+          "t": 5.1,
+          "type": "particle",
+          "sprite": "snow",
+          "locator": "flake_0",
+          "count": 1,
+          "lifetime": 1.6,
+          "size": 0.09,
+          "spread": [0.1,0.05,0.1],
+          "velocity": [0,-0.015,0],
+          "gravity": 0.0005,
+          "emissive": true
+        },
+        {
+          "t": 5.6,
+          "type": "particle",
+          "sprite": "snow",
+          "locator": "flake_1",
+          "count": 1,
+          "lifetime": 1.6,
+          "size": 0.09,
+          "spread": [0.1,0.05,0.1],
+          "velocity": [0,-0.015,0],
+          "gravity": 0.0005,
+          "emissive": true
+        },
+        {
+          "t": 6.1,
+          "type": "particle",
+          "sprite": "snow",
+          "locator": "flake_2",
+          "count": 1,
+          "lifetime": 1.6,
+          "size": 0.09,
+          "spread": [0.1,0.05,0.1],
+          "velocity": [0,-0.015,0],
+          "gravity": 0.0005,
+          "emissive": true
+        },
+        {
+          "t": 6.6,
+          "type": "particle",
+          "sprite": "snow",
+          "locator": "flake_3",
+          "count": 1,
+          "lifetime": 1.6,
+          "size": 0.09,
+          "spread": [0.1,0.05,0.1],
+          "velocity": [0,-0.015,0],
+          "gravity": 0.0005,
+          "emissive": true
+        },
+        {
+          "t": 7.1,
+          "type": "particle",
+          "sprite": "snow",
+          "locator": "flake_4",
+          "count": 1,
+          "lifetime": 1.6,
+          "size": 0.09,
+          "spread": [0.1,0.05,0.1],
+          "velocity": [0,-0.015,0],
+          "gravity": 0.0005,
+          "emissive": true
+        },
+        {
+          "t": 7.6,
+          "type": "particle",
+          "sprite": "snow",
+          "locator": "flake_0",
+          "count": 1,
+          "lifetime": 1.6,
+          "size": 0.09,
+          "spread": [0.1,0.05,0.1],
+          "velocity": [0,-0.015,0],
+          "gravity": 0.0005,
+          "emissive": true
+        }
+      ]
+    }
+  },
+  "sprites": [{"id":"snow","texture":"main","uv":[28,28,31,31]}]
+}
