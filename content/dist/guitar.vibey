@@ -39,7 +39,7 @@
         "translucent": false
       }
     ],
-    "locators": {"sound_hole":{"bone":"guitar","position":[0,18,-6.5]}}
+    "locators": {"sound_hole":{"bone":"guitar","position":[0,14,-7]}}
   },
   "animations": {
     "main": {

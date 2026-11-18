@@ -42,7 +42,7 @@ export default function () {
     north: (img) => img.noisy(C.brand, 0.03, 185).px(C.tealLight, [[0, 0], [2, 0], [0, 2], [2, 2]]),
     all: (img) => img.noisy(C.brandDeep, 0.03, 186),
   });
-  b.locator("sound_hole", "guitar", [0, P[1] + 3, zf - 2]);
+  b.locator("sound_hole", "guitar", [0, P[1] - 1, zf - 2.5]);
 
   // arms: left hand on the neck, right hand strumming over the sound hole
   const rad = (TILT * Math.PI) / 180;

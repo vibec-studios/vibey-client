@@ -68,8 +68,8 @@
       "name": {"en":"Crystal Ice Wings","de":"Kristalleisflügel"},
       "rarity": "legendary",
       "tags": ["ice","wings","crystal","starter"],
-      "size": 12986,
-      "sha256": "61a4ffa632ab27370dd2bcdf753010946476188e98c272dd1664d605acc51f56",
+      "size": 12984,
+      "sha256": "5714022e127c13fde5c119dcaeb625d31e6eaad6e4d4915f06ccf0d3afbbb7df",
       "sort": 50
     },
     {
@@ -82,8 +82,8 @@
       "name": {"en":"Neon Pixel Wings","de":"Neon-Pixelflügel"},
       "rarity": "epic",
       "tags": ["neon","wings","glow","vibe","starter"],
-      "size": 7420,
-      "sha256": "ba72fc6e3861a800e65166b23e46368184013acfb033b0a8ed0564c33bfa85a1",
+      "size": 7398,
+      "sha256": "557743d62b5bd37ecd82e6f0dc4219ba5c5e9f0cfc993c0a01d47cdb45503412",
       "sort": 60
     },
     {
@@ -265,7 +265,7 @@
       "rarity": "common",
       "tags": ["reaction","funny","starter"],
       "size": 2372,
-      "sha256": "8e3c257db8f1b25fe0b06aa7bc8246fa05594eaa82f3b8dc9e7ec85791a1abb1",
+      "sha256": "0976e46ad946183e3b92fc19f30d722c12d2a6999d234f872376b4c311632719",
       "sort": 190
     },
     {
@@ -278,8 +278,8 @@
       "name": {"en":"Guitar Jam","de":"Gitarrensolo"},
       "rarity": "rare",
       "tags": ["music","props","loop","sound","starter"],
-      "size": 6544,
-      "sha256": "0420f98673af7a819e5b4e78d6fdd0b35b5069506547644449ab2a5fa387a484",
+      "size": 6542,
+      "sha256": "a609c4c75fc0e71e53df84446fd0e271dfb6e2b1c816f9a5a67cad3027331122",
       "sort": 200
     },
     {

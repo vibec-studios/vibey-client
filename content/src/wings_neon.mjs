@@ -46,13 +46,13 @@ export default function () {
     },
     tags: ["neon", "wings", "glow", "vibe", "starter"],
     rarity: "epic",
-    cosmetic: { slot: "wings", hideWithArmor: ["chest"] },
+    cosmetic: { slot: "wings" },
   });
   b.texture("main", { frames: FRAMES, frameTime: 2 });
   for (const s of [1, -1]) {
     const side = s > 0 ? "left" : "right";
-    const root = b.bone(`wing_${side}`, { attach: "body", pivot: [s * 1.5, 21, 3], rotation: [0, s * -20, -s * 12], emissive: true, translucent: true });
-    root.box([s > 0 ? 1.5 : -1.5 - L, 27 - H, 2.5], [L, H, 1], {
+    const root = b.bone(`wing_${side}`, { attach: "body", pivot: [s * 1.5, 21, 3.6], rotation: [0, s * -20, -s * 12], emissive: true, translucent: true });
+    root.box([s > 0 ? 1.5 : -1.5 - L, 27 - H, 3.1], [L, H, 1], {
       north: (img, f) => { wingFace(img, f); if (s < 0) mirror(img); },
       south: (img, f) => { wingFace(img, f); if (s > 0) mirror(img); },
       up: (img) => img.fill([0, 0, 0, 0]),

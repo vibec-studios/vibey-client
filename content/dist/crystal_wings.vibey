@@ -11,7 +11,7 @@
   "author": "Vibe Craft Studios",
   "tags": ["ice","wings","crystal","starter"],
   "rarity": "legendary",
-  "cosmetic": {"slot":"wings","hideWithArmor":["chest"]},
+  "cosmetic": {"slot":"wings"},
   "textures": [
     {
       "id": "main",
@@ -28,7 +28,7 @@
         "name": "wing_left",
         "parent": null,
         "attach": "body",
-        "pivot": [1.5,20,3],
+        "pivot": [1.5,20,3.6],
         "rotation": [0,-24,0],
         "cubes": [],
         "emissive": false,
@@ -37,45 +37,45 @@
       {
         "name": "wing_left_0",
         "parent": "wing_left",
-        "pivot": [1.5,20,3],
+        "pivot": [1.5,20,3.6],
         "rotation": [0,0,-50],
-        "cubes": [{"from":[1.5,18,2.6],"to":[23.5,22,3.6],"uv":{"box":[0,0]}}],
+        "cubes": [{"from":[1.5,18,3.2],"to":[23.5,22,4.2],"uv":{"box":[0,0]}}],
         "emissive": false,
         "translucent": true
       },
       {
         "name": "wing_left_1",
         "parent": "wing_left",
-        "pivot": [1.5,20,3],
+        "pivot": [1.5,20,3.6],
         "rotation": [0,0,-32],
-        "cubes": [{"from":[1.5,18.5,2.62],"to":[20.5,21.5,3.62],"uv":{"box":[0,10]}}],
+        "cubes": [{"from":[1.5,18.5,3.22],"to":[20.5,21.5,4.22],"uv":{"box":[0,10]}}],
         "emissive": false,
         "translucent": true
       },
       {
         "name": "wing_left_2",
         "parent": "wing_left",
-        "pivot": [1.5,20,3],
+        "pivot": [1.5,20,3.6],
         "rotation": [0,0,-15],
-        "cubes": [{"from":[1.5,18.5,2.64],"to":[17.5,21.5,3.64],"uv":{"box":[0,18]}}],
+        "cubes": [{"from":[1.5,18.5,3.24],"to":[17.5,21.5,4.24],"uv":{"box":[0,18]}}],
         "emissive": false,
         "translucent": true
       },
       {
         "name": "wing_left_3",
         "parent": "wing_left",
-        "pivot": [1.5,20,3],
+        "pivot": [1.5,20,3.6],
         "rotation": [0,0,1],
-        "cubes": [{"from":[1.5,18.5,2.66],"to":[13.5,21.5,3.66],"uv":{"box":[34,22]}}],
+        "cubes": [{"from":[1.5,18.5,3.26],"to":[13.5,21.5,4.26],"uv":{"box":[34,22]}}],
         "emissive": false,
         "translucent": true
       },
       {
         "name": "wing_left_4",
         "parent": "wing_left",
-        "pivot": [1.5,20,3],
+        "pivot": [1.5,20,3.6],
         "rotation": [0,0,17],
-        "cubes": [{"from":[1.5,19,2.68],"to":[10.5,21,3.68],"uv":{"box":[26,26]}}],
+        "cubes": [{"from":[1.5,19,3.28],"to":[10.5,21,4.28],"uv":{"box":[26,26]}}],
         "emissive": false,
         "translucent": true
       },
@@ -83,7 +83,7 @@
         "name": "wing_right",
         "parent": null,
         "attach": "body",
-        "pivot": [-1.5,20,3],
+        "pivot": [-1.5,20,3.6],
         "rotation": [0,24,0],
         "cubes": [],
         "emissive": false,
@@ -92,45 +92,45 @@
       {
         "name": "wing_right_0",
         "parent": "wing_right",
-        "pivot": [-1.5,20,3],
+        "pivot": [-1.5,20,3.6],
         "rotation": [0,0,50],
-        "cubes": [{"from":[-23.5,18,2.6],"to":[-1.5,22,3.6],"uv":{"box":[0,5]}}],
+        "cubes": [{"from":[-23.5,18,3.2],"to":[-1.5,22,4.2],"uv":{"box":[0,5]}}],
         "emissive": false,
         "translucent": true
       },
       {
         "name": "wing_right_1",
         "parent": "wing_right",
-        "pivot": [-1.5,20,3],
+        "pivot": [-1.5,20,3.6],
         "rotation": [0,0,32],
-        "cubes": [{"from":[-20.5,18.5,2.62],"to":[-1.5,21.5,3.62],"uv":{"box":[0,14]}}],
+        "cubes": [{"from":[-20.5,18.5,3.22],"to":[-1.5,21.5,4.22],"uv":{"box":[0,14]}}],
         "emissive": false,
         "translucent": true
       },
       {
         "name": "wing_right_2",
         "parent": "wing_right",
-        "pivot": [-1.5,20,3],
+        "pivot": [-1.5,20,3.6],
         "rotation": [0,0,15],
-        "cubes": [{"from":[-17.5,18.5,2.64],"to":[-1.5,21.5,3.64],"uv":{"box":[0,22]}}],
+        "cubes": [{"from":[-17.5,18.5,3.24],"to":[-1.5,21.5,4.24],"uv":{"box":[0,22]}}],
         "emissive": false,
         "translucent": true
       },
       {
         "name": "wing_right_3",
         "parent": "wing_right",
-        "pivot": [-1.5,20,3],
+        "pivot": [-1.5,20,3.6],
         "rotation": [0,0,-1],
-        "cubes": [{"from":[-13.5,18.5,2.66],"to":[-1.5,21.5,3.66],"uv":{"box":[0,26]}}],
+        "cubes": [{"from":[-13.5,18.5,3.26],"to":[-1.5,21.5,4.26],"uv":{"box":[0,26]}}],
         "emissive": false,
         "translucent": true
       },
       {
         "name": "wing_right_4",
         "parent": "wing_right",
-        "pivot": [-1.5,20,3],
+        "pivot": [-1.5,20,3.6],
         "rotation": [0,0,-17],
-        "cubes": [{"from":[-10.5,19,2.68],"to":[-1.5,21,3.68],"uv":{"box":[0,30]}}],
+        "cubes": [{"from":[-10.5,19,3.28],"to":[-1.5,21,4.28],"uv":{"box":[0,30]}}],
         "emissive": false,
         "translucent": true
       }
