@@ -131,7 +131,7 @@ final class VideoDev {
                 return "ok";
             }
             case "others":
-                v.cfg.others.set(VideoSettings.Others.valueOf(a[1].toUpperCase(Locale.ROOT)));
+                v.cfg.others.set(VideoFeature.Others.valueOf(a[1].toUpperCase(Locale.ROOT)));
                 return "ok";
             case "setup":
                 ClientCompat.openScreen(new SetupScreen(null, SetupScreen.Need.valueOf(switch (a[1]) {

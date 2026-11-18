@@ -28,7 +28,7 @@
     "vibeyclient.cosmetics.mixins.json",
     "vibeyclient.emotes.mixins.json",
     "vibeyclient.multiplayer.mixins.json",
-    "vibeyclient.lyrics.mixins.json",
+    "vibeyclient.media.lyrics.mixins.json",
     "vibeyclient.devlink.mixins.json",
     "vibeyclient.nametags.mixins.json"
   ],

@@ -1,0 +1,14 @@
+{
+  "name": "Medien",
+  "description": "Musik, Songtexte, Himmel und Videos – und der HUD-Editor, um alles zu platzieren.",
+  "menu": "Medien",
+  "notice": {
+    "conflict": "{0}: kommt vom installierten {1}."
+  },
+  "setting": {
+    "editHud": "HUD-Layout",
+    "editHud.desc": "Songtext, Now-Playing-Leiste und andere Einblendungen verschieben und skalieren.",
+    "editHud.button": "Bearbeiten",
+    "hudEditor": "Taste: HUD-Editor"
+  }
+}

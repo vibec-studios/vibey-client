@@ -18,7 +18,7 @@ public final class ControlsScreen extends CardScreen {
     private final MediaScreen s;
 
     public ControlsScreen(Screen parent, MediaScreen screen) {
-        super(Component.literal(Video.tr("controls.title")), parent, "video.");
+        super(Component.literal(Video.tr("controls.title")), parent, "media.video.");
         this.s = screen;
     }
 

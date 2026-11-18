@@ -31,7 +31,7 @@ public final class SetupScreen extends CardScreen {
     private volatile String sizeText;
 
     public SetupScreen(Screen parent, Need need) {
-        super(Component.literal(Video.tr("setup.title")), parent, "video.");
+        super(Component.literal(Video.tr("setup.title")), parent, "media.video.");
         this.need = need;
         if (need == Need.FFMPEG && Ffmpeg.downloadable()) {
             sizeText = tr("setup.ffmpeg.size", "~80");

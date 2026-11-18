@@ -152,7 +152,7 @@ public final class VideoNet {
         if (!allow(sender)) return;
         switch (m.op()) {
             case UPSERT -> {
-                if (video.cfg.others.get() == VideoSettings.Others.NEVER) return;
+                if (video.cfg.others.get() == VideoFeature.Others.NEVER) return;
                 MediaScreen s = m.screen();
                 if (s == null || !UrlPolicy.acceptRemote(s.source)) return;
                 if (!video.screens.containsKey(s.id) && video.countRemote(sender) >= MAX_REMOTE_PER_PLAYER) return;

@@ -13,7 +13,7 @@ public final class AcceptScreen extends CardScreen {
     private final MediaScreen s;
 
     public AcceptScreen(Screen parent, MediaScreen screen) {
-        super(Component.literal(Video.tr("accept.title", screen.ownerName)), parent, "video.");
+        super(Component.literal(Video.tr("accept.title", screen.ownerName)), parent, "media.video.");
         this.s = screen;
     }
 

@@ -12,7 +12,6 @@ import dev.henny.vibeyclient.module.media.video.player.MediaPlayer;
 import dev.henny.vibeyclient.module.media.video.render.ScreenRenderer;
 import dev.henny.vibeyclient.module.media.video.ui.AcceptScreen;
 import dev.henny.vibeyclient.module.media.video.ui.ControlsScreen;
-import dev.henny.vibeyclient.module.media.video.ui.OverlayEditScreen;
 import dev.henny.vibeyclient.module.media.video.ui.SetupScreen;
 import dev.henny.vibeyclient.module.media.video.ui.SourceScreen;
 import dev.henny.vibeyclient.module.media.video.web.Web;
@@ -37,25 +36,24 @@ import java.util.UUID;
  * in this dimension, allowed), keeps the players on each screen's timeline, and wires rendering, the overlay,
  * placement and sync. One instance, see {@link #get()}.
  */
-public final class Video implements VideoFeature {
+public final class Video {
     /** At most this many screens decode at the same time (the nearest ones). */
     public static final int MAX_ACTIVE = 6;
     /** Closed after being far away / hidden this long (a paused player keeps processes or a browser alive). */
     private static final long CLOSE_AFTER_MS = 15_000;
     private static Video instance;
 
-    public final VideoSettings cfg;
+    public final VideoFeature cfg;
     public final Map<UUID, MediaScreen> screens = new LinkedHashMap<>();
     public final Placement placement = new Placement(this);
     public final VideoNet net = new VideoNet(this);
-    public final Overlay overlay = new Overlay(this);
     private boolean enabled;
     private boolean hooks;
     private String worldKey;
     public UUID overlayId;
     private long lastSave;
 
-    public Video(VideoSettings cfg) {
+    public Video(VideoFeature cfg) {
         this.cfg = cfg;
         instance = this;
     }
@@ -65,12 +63,11 @@ public final class Video implements VideoFeature {
     }
 
     public static String tr(String key, Object... args) {
-        return Lang.tr("video." + key, args);
+        return Lang.tr("media.video." + key, args);
     }
 
     // ============================================================================================ lifecycle
 
-    @Override
     public void onLoad() {
         net.register();
         VideoDev.register(this);
@@ -88,13 +85,11 @@ public final class Video implements VideoFeature {
         ClientLifecycleEvents.CLIENT_STOPPING.register(mc -> closeAllPlayers());
     }
 
-    @Override
     public void onEnable() {
         enabled = true;
         if (Minecraft.getInstance().level != null) onWorldJoin();
     }
 
-    @Override
     public void onDisable() {
         saveOwn();
         enabled = false;
@@ -105,7 +100,6 @@ public final class Video implements VideoFeature {
         worldKey = null;
     }
 
-    @Override
     public void onWorldJoin() {
         if (!enabled) return;
         worldKey = worldKey();
@@ -114,7 +108,6 @@ public final class Video implements VideoFeature {
         net.onJoin();
     }
 
-    @Override
     public void onWorldLeave() {
         saveOwn();
         placement.cancel();
@@ -124,18 +117,12 @@ public final class Video implements VideoFeature {
         worldKey = null;
     }
 
-    @Override
-    public List<HudElement> hudElements() {
-        return List.of(overlay);
-    }
-
     public boolean enabled() {
         return enabled;
     }
 
     // ============================================================================================ tick
 
-    @Override
     public void tick() {
         Minecraft mc = Minecraft.getInstance();
         if (!enabled || mc.level == null || mc.player == null) return;
@@ -290,13 +277,13 @@ public final class Video implements VideoFeature {
     }
 
     public boolean browserConsent() {
-        JsonObject d = cfg.group.data();
+        JsonObject d = cfg.data();
         return d.has("browserConsent") && d.get("browserConsent").getAsBoolean();
     }
 
     public void setBrowserConsent() {
-        cfg.group.data().addProperty("browserConsent", true);
-        cfg.group.markDirty();
+        cfg.data().addProperty("browserConsent", true);
+        cfg.markDirty();
     }
 
     /** Picture size for the decoder/browser: quality lines, the screen's aspect, even numbers. */
@@ -365,7 +352,7 @@ public final class Video implements VideoFeature {
             return s.player.audioOnly() ? "♪ " + s.source.label() : null;
         }
         if (s.remote && !allowed(s)) {
-            return cfg.others.get() == VideoSettings.Others.NEVER ? tr("status.hidden") : tr("status.ask", s.ownerName, s.source.label());
+            return cfg.others.get() == VideoFeature.Others.NEVER ? tr("status.hidden") : tr("status.ask", s.ownerName, s.source.label());
         }
         if (s.source.kind().web()) {
             Web.State st = Web.state(browserConsent());
@@ -429,7 +416,7 @@ public final class Video implements VideoFeature {
     }
 
     public void openControls(MediaScreen s) {
-        if (s.remote && !allowed(s) && cfg.others.get() == VideoSettings.Others.ASK) {
+        if (s.remote && !allowed(s) && cfg.others.get() == VideoFeature.Others.ASK) {
             ClientCompat.openScreen(new AcceptScreen(null, s));
             return;
         }
@@ -556,7 +543,7 @@ public final class Video implements VideoFeature {
     }
 
     public void editOverlay() {
-        ClientCompat.openScreen(new OverlayEditScreen(ClientCompat.screen(), overlay));
+        dev.henny.vibeyclient.ui.hud.HudLayout.openEditor(ClientCompat.screen());
     }
 
     // ============================================================================================ remote
@@ -629,7 +616,7 @@ public final class Video implements VideoFeature {
     }
 
     private void loadOwn() {
-        JsonObject all = cfg.group.data().getAsJsonObject("screens");
+        JsonObject all = cfg.data().getAsJsonObject("screens");
         if (all == null || worldKey == null || !all.has(worldKey)) return;
         UUID me = Minecraft.getInstance().player != null ? Minecraft.getInstance().player.getUUID() : null;
         for (JsonElement e : all.getAsJsonArray(worldKey)) {
@@ -647,7 +634,7 @@ public final class Video implements VideoFeature {
 
     public void saveOwn() {
         if (worldKey == null) return;
-        JsonObject data = cfg.group.data();
+        JsonObject data = cfg.data();
         JsonObject all = data.getAsJsonObject("screens");
         if (all == null) {
             all = new JsonObject();
@@ -657,16 +644,31 @@ public final class Video implements VideoFeature {
         for (MediaScreen s : screens.values()) if (!s.remote && s.placed()) arr.add(s.toJson());
         if (arr.isEmpty()) all.remove(worldKey);
         else all.add(worldKey, arr);
-        cfg.group.markDirty();
+        cfg.markDirty();
     }
 
     // ============================================================================================ HUD
 
-    @Override
     public void renderHud(Gfx g) {
         if (!enabled) return;
-        if (!(ClientCompat.screen() instanceof OverlayEditScreen)) overlay.renderAtLayout(g);
         placement.renderHud(g);
+    }
+
+    /** The overlay's picture into (0, 0)–(w, h) (HudLayout applies position and scale). Nothing is drawn on it. */
+    public void drawOverlay(Gfx g, int w, int h, boolean preview) {
+        MediaScreen s = overlayScreen();
+        if (s == null && !preview) return;
+        g.rect(-1, -1, w + 2, h + 2, 0xE0101014);
+        net.minecraft.resources.Identifier tex = s != null && s.player != null ? s.player.texture() : null;
+        if (tex != null && !s.player.audioOnly()) {
+            int tw = s.player.width();
+            int th = s.player.height();
+            g.image(tex, 0, 0, w, h, 0, 0, tw, th, tw, th);
+        } else {
+            String line = s == null ? tr("hud.overlay") : statusLine(s);
+            if (line == null) line = tr("status.loading");
+            g.textCenter(g.clip(line, w - 8), w / 2, h / 2 - 4, dev.henny.vibeyclient.ui.Theme.MUTED);
+        }
     }
 
     public MediaScreen overlayScreen() {

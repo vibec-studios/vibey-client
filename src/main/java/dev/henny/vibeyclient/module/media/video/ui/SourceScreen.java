@@ -23,7 +23,7 @@ public final class SourceScreen extends CardScreen {
     private boolean picking;
 
     public SourceScreen(Screen parent, MediaScreen existing) {
-        super(Component.literal(Video.tr(existing == null ? "source.new" : "source.change")), parent, "video.");
+        super(Component.literal(Video.tr(existing == null ? "source.new" : "source.change")), parent, "media.video.");
         this.existing = existing;
         if (existing != null) {
             float a = existing.aspect();
