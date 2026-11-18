@@ -86,7 +86,8 @@ public final class ToastHooks {
         OVERLAYS.add(overlay);
     }
 
-    private static void screenKey(Screen screen, int key) {
+    private static void screenKey(Screen screen, int nativeKey) {
+        int key = dev.henny.vibeyclient.client.Keys.fromNative(nativeKey);
         for (BiPredicate<Screen, Integer> l : KEY_LISTENERS) {
             try {
                 if (l.test(screen, key)) return;

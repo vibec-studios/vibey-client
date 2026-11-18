@@ -398,7 +398,7 @@ public final class SettingsView {
     static void applyKey(KeybindSetting k, int keyCode) {
         if (keyCode == Keys.ESCAPE) return;
         if (keyCode == Keys.BACKSPACE || keyCode == Keys.DELETE) keyCode = -1;
-        ClientCompat.rebind(k.mapping(), keyCode);
+        ClientCompat.rebind(k.mapping(), keyCode < 0 ? -1 : Keys.toNativeAny(keyCode));
     }
 
     private static final Map<KeybindSetting, VibeyScreen.KeyCapture> CAPTURES = new IdentityHashMap<>();

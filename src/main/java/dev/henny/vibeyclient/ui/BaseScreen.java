@@ -124,7 +124,8 @@ public abstract class BaseScreen extends Screen {
     //? if >=1.21.9 {
     @Override
     public boolean keyPressed(KeyEvent event) {
-        if (key(event.key())) return true;
+        // our screens compare GLFW codes; 26.3 reports SDL scancodes (Keys.fromNative is the identity before)
+        if (key(Keys.fromNative(event.key()))) return true;
         return super.keyPressed(event);
     }
     //?} else {

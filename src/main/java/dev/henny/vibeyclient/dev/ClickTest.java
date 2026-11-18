@@ -10,7 +10,6 @@ import dev.henny.vibeyclient.ui.VibeyScreen;
 import dev.henny.vibeyclient.ui.VibeyTabs;
 import dev.henny.vibeyclient.ui.screen.ModulesPanel;
 import dev.henny.vibeyclient.ui.title.OnboardingScreen;
-import dev.henny.vibeyclient.ui.title.VibeyTitleScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
@@ -101,7 +100,7 @@ public final class ClickTest {
         Screen s = ClientCompat.screen();
         if (s == null) return false;
         if (startTicks++ < 40) return false;
-        return s instanceof TitleScreen || s instanceof VibeyTitleScreen || s instanceof OnboardingScreen
+        return s instanceof TitleScreen || s instanceof OnboardingScreen
                 || s.getClass().getSimpleName().contains("Onboarding");
     }
 
@@ -172,6 +171,63 @@ public final class ClickTest {
             return 0;
         });
         STEPS.add(new TabScan());
+
+        // the corner button on the vanilla title screen opens the Vibey menu
+        step(mc -> {
+            ClientCompat.openScreen(new TitleScreen());
+            return 30;
+        });
+        clickAt(() -> titleButton()[0], () -> titleButton()[1], Keys.MOUSE_LEFT);
+        step(mc -> {
+            check("title_button", ClientCompat.screen() instanceof VibeyScreen, "screen=" + ClientCompat.screen());
+            shot(mc, "title-button-after");
+            return 0;
+        });
+
+        // a module tile opens its page
+        step(mc -> {
+            ModulesPanel.preselect(null);
+            ClientCompat.openScreen(new VibeyScreen(new TitleScreen(), VibeyTabs.MODULES));
+            return 30;
+        });
+        clickAt(() -> tile("emotes")[0], () -> tile("emotes")[1], Keys.MOUSE_LEFT);
+        step(mc -> {
+            check("module_tile", "emotes".equals(ModulesPanel.openPage()), "page=" + ModulesPanel.openPage());
+            shot(mc, "module-page");
+            return 0;
+        });
+
+        // screens get GLFW key codes on every version (26.3 reports SDL scancodes)
+        step(mc -> {
+            int[] keys = {Keys.ESCAPE, Keys.ENTER, Keys.TAB, Keys.BACKSPACE, Keys.UP, Keys.DOWN, Keys.LEFT, Keys.RIGHT, Keys.A, Keys.Z,
+                    Keys.F1, Keys.RIGHT_SHIFT, Keys.SPACE};
+            StringBuilder bad = new StringBuilder();
+            for (int k : keys) if (Keys.fromNative(Keys.toNative(k)) != k) bad.append(k).append(' ');
+            check("key_codes", bad.length() == 0, bad.length() == 0 ? "round trip ok" : "wrong: " + bad);
+            return 0;
+        });
+    }
+
+    /** Center (GUI px) of the "Vibey menu" corner button on the title screen, or the screen center. */
+    private static double[] titleButton() {
+        var s = ClientCompat.screen();
+        String label = dev.henny.vibeyclient.api.Lang.tr("core.title.vibey");
+        if (s != null) {
+            for (var l : s.children()) {
+                if (l instanceof dev.henny.vibeyclient.ui.VibeyButton b && b.getMessage().getString().equals(label)) {
+                    return new double[] {b.getX() + b.getWidth() / 2.0, b.getY() + b.getHeight() / 2.0};
+                }
+            }
+        }
+        if (s instanceof TitleScreen) log("no Vibey corner button on the title screen");
+        return new double[] {s == null ? 0 : s.width / 2.0, s == null ? 0 : s.height / 2.0};
+    }
+
+    /** A point inside the tile of module {@code id} (bottom left, away from the switch). */
+    private static double[] tile(String id) {
+        int[] b = ModulesPanel.tileBounds(id);
+        if (b == null) return new double[] {0, 0};
+        return new double[] {b[0] + 50, b[1] + b[3] - 8};
     }
 
     /** Clicks across the menu header (left of the close button) until {@link VibeyScreen#tab()} changes. */
