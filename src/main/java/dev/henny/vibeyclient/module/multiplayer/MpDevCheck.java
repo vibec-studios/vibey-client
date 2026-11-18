@@ -125,7 +125,7 @@ final class MpDevCheck {
             Object[] args = new Object[p.length];
             args[0] = mc.gameDirectory;
             args[1] = name + ".png";
-            args[2] = mc.getMainRenderTarget();
+            args[2] = renderTarget(mc, p[2]);
             for (int i = 3; i < p.length; i++) {
                 if (p[i] == int.class) args[i] = 1;
                 else args[i] = (java.util.function.Consumer<Object>) msg -> Vibey.LOG.info("[vibeyclient-mpcheck] screenshot {}", name);
@@ -134,6 +134,16 @@ final class MpDevCheck {
             return;
         }
         throw new NoSuchMethodException("Screenshot.grab");
+    }
+
+    /** The main render target (the getter's name differs between versions). */
+    private static Object renderTarget(Minecraft mc, Class<?> type) throws ReflectiveOperationException {
+        for (Method m : Minecraft.class.getMethods()) {
+            if (m.getParameterCount() == 0 && type.isAssignableFrom(m.getReturnType()) && !java.lang.reflect.Modifier.isStatic(m.getModifiers())) {
+                return m.invoke(mc);
+            }
+        }
+        throw new NoSuchMethodException("Minecraft -> " + type.getName());
     }
 
     private static void createWorld(Minecraft mc) throws ReflectiveOperationException {

@@ -156,6 +156,8 @@ Services.register(HostSessionService.class, impl);        // provider (onLoad/on
 Services.get(HostSessionService.class).ifPresent(...);    // consumer, look up lazily
 ```
 
+`HostingService` (api/service) is provided by the multiplayer module while it is enabled (it posts
+`HostingService.HostingChanged` with the host-only address; the port comes from `port()`).
 Put shared service interfaces in the providing module's package (e.g. `module.multiplayer.HostSessionService`).
 
 ## Background work
@@ -185,6 +187,9 @@ only for keybind names/categories and mod menu text.
   animations setting. `ui.anim(key, slot, initial)` keeps one per widget.
 - `Ui` + `Widgets` (immediate mode): `button`, `toggle`, `slider`, `cycler`, `textField`, `swatches`, `chip`,
   `caption`, `monogram`; `ScrollArea` for lists. Pattern: `if (Widgets.button(ui, key, x, y, w, h, label, Style.PRIMARY)) ...`
+- `CardScreen`: one centered card in the Vibe look, immediate mode with hit areas (header, scrollable body, footer;
+  `row`, `toggle`, `button`, `segmented`, `cycler`, `stepper`, `swatches`, `inputBox`, ...). Used by the host screens
+  (multiplayer) and the lyrics screens; texts passed to `row` are keys relative to the module's i18n prefix.
 - `VibeyScreen` is the menu (Right Shift, pause menu button). Add a top-level tab from `onLoad`:
   `VibeyTabs.register(new VibeyTabs.Tab("friends", "social.tab.friends", 10, FriendsPanel::new, this::isEnabled))`.
   A `Panel` draws into the content area with the `Ui` context. A module can replace its generated settings page with
