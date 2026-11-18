@@ -69,6 +69,12 @@ public final class HostSession {
         return server == openedFor;
     }
 
+    /** Players in the hosted world (host included), -1 when not hosting. */
+    public static int playerCount() {
+        IntegratedServer s = hosted;
+        return s == null || !isHosting() ? -1 : s.getPlayerCount();
+    }
+
     public static boolean canHost() {
         return Minecraft.getInstance().getSingleplayerServer() != null;
     }
@@ -137,6 +143,7 @@ public final class HostSession {
         address = "";
         onlineSince = 0;
         if (wasHosting) changed(false, null);
+        PlayLinks.onStopped();
         if (server != null) {
             server.execute(() -> {
                 Guests.kickAllGuests(server, "kick.stopped");
@@ -199,6 +206,9 @@ public final class HostSession {
                     error = "";
                     if (changed || !wasOnline) {
                         changed(true, addr);
+                        Minecraft.getInstance().execute(() -> {
+                            if (isHosting()) PlayLinks.onOnline(addr);
+                        });
                         if (changed) MultiplayerModule.toast(T.get("toast.online"), T.get("toast.online.body", addr), true);
                     }
                 }
@@ -228,6 +238,7 @@ public final class HostSession {
         status = Status.ERROR;
         error = text;
         changed(false, null);
+        PlayLinks.onStopped();
         MultiplayerModule.toast(T.get("toast.failed"), text, false);
     }
 

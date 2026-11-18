@@ -123,6 +123,12 @@ the pause menu, a *Manage* menu with players, whitelist and ban list (enforced b
 *Force mods*. Friends join with a normal Minecraft through *Multiplayer → Direct Connection*, or with one click from
 your invite.
 
+While you host, Vibey also makes an **invite link** (`https://vibe.henny.dev/j/<code>`, needs a Vibe login): *Copy
+invite link* in the host window and in the pause menu. Friends with the Vibe Launcher open it, the launcher installs
+your modpack/mods and joins your world. The host window also tells you when mods were added by hand (friends need
+those too). With the Vibe Launcher the client writes `.vibe/session.json` for the launcher's Discord status (world,
+server, invite link); switch it off under *General → Online* ("Show what I'm playing to the launcher").
+
 ### Media module (Fabric)
 
 Music, lyrics and skies (and in-world video), with the full [Vibey Lyrics](https://github.com/vibec-studios/vibey-lyrics)
@@ -335,6 +341,19 @@ VIBEY_TEST_RELAY=127.0.0.1:26400 ./gradlew :fabric-1.21.11:test --tests '*RelayH
 ./gradlew :fabric-1.21.11:runClientGameTest                          # hosts through 127.0.0.1:26400 (-Dvibeyclient.test.relay=off skips it)
 ./gradlew :fabric-1.21.11:runClientGameTest "-Dvibeyclient.test.addMods=<vibey.jar>;<vibeylyrics.jar>"   # conflict test
 ./gradlew :neoforge-1.21.11:runClient -Dvibeyclient.mpcheck=true -Dvibeyclient.mpcheck.relay=127.0.0.1:26400   # NeoForge screenshots → run/screenshots
+```
+
+**Play links** (contract: vibe-launcher `docs/PLAY-LINKS.md` §2/§3; code: `launcher/` for `instance.json` /
+`session.json`, `module/multiplayer/host/PlayLinks`). Until the backend has the routes, test against the local mock
+`scripts/mock-play-links.mjs`: it serves `POST/GET/DELETE /api/v1/play-links` and a `/j/<code>` stub with the backend's
+rules (code charset, one link per host, 10 per hour, 500 mods) and proxies everything else (login, gateway) to a local
+vibe-backend. `POST /__mock/config {"missing":true}` simulates a backend without the routes, `{"rate":0}` the rate
+limit. Never point the dev login or test links at production.
+
+```sh
+# local backend (vibe-backend/apps/api, AUTH_DEV_BYPASS=1 PORT=3460 …), relay on 26460, then:
+node scripts/mock-play-links.mjs --port 3461 --upstream http://127.0.0.1:3460 --log build/review/playlinks/mock-requests.jsonl
+./gradlew :fabric-1.21.11:runClientGameTest -Dvibeyclient.playLinkTest=$PWD/build/review/playlinks   -Dvibeyclient.api=http://127.0.0.1:3461 -Dvibeyclient.devAuth=true -Dvibeyclient.test.relay=127.0.0.1:26460 -Dvibeyclient.devOfflineHost=true
 ```
 
 ## Credits
