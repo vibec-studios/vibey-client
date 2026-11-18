@@ -33,6 +33,7 @@ public final class VibeyCore {
         platform = p;
         GlobalSettings.load();
         GlobalSettings.openMenu.onPress(VibeyCore::openMenu);
+        dev.henny.vibeyclient.ui.toast.ToastHooks.init();
         BuiltinModules.registerAll(ModuleManager.get());
         ModuleManager.get().load();
         NetDispatch.setClientHandler(VibeyNet::handle);
@@ -62,6 +63,7 @@ public final class VibeyCore {
     public static void onHud(Gfx g) {
         if (ClientCompat.hudHidden()) return;
         ModuleManager.get().renderHud(g);
+        dev.henny.vibeyclient.ui.toast.ToastHooks.renderHud(g);
     }
 
     public static void onWorldJoin() {
