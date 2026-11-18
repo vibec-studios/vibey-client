@@ -511,6 +511,10 @@ public final class DevTourB {
         Vibey.LOG.info("[vibeyclient-tour] {}", s);
     }
 
+    /** Vanilla noise of a dev (offline) account, not ours. */
+    private static final java.util.Set<String> IGNORED_LOGGERS = java.util.Set.of(
+            "net.minecraft.client.multiplayer.AccountProfileKeyPairManager", "net.minecraft.client.multiplayer.ProfileKeyPairManager");
+
     /** Collects WARN/ERROR lines (other than the tour's own) so a step that logged errors is reported. */
     private static void installAppender() {
         try {
@@ -520,7 +524,7 @@ public final class DevTourB {
                 public void append(LogEvent e) {
                     if (e.getLevel().isMoreSpecificThan(Level.WARN)) {
                         String msg = e.getMessage() == null ? "" : e.getMessage().getFormattedMessage();
-                        if (msg.contains("[vibeyclient-tour]")) return;
+                        if (msg.contains("[vibeyclient-tour]") || IGNORED_LOGGERS.contains(e.getLoggerName())) return;
                         Throwable t = e.getThrown();
                         String line = e.getLevel() + " " + e.getLoggerName() + ": " + msg + (t == null ? "" : " (" + t + ")");
                         if (line.length() > 400) line = line.substring(0, 400) + "…";

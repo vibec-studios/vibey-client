@@ -16,8 +16,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 //?} else
 /*@Mixin(net.minecraft.client.gui.screens.inventory.InventoryScreen.class)*/
 public abstract class GuiEntityMixin {
-    //? if >=26.1 {
+    //? if >=26.2 {
     /*private static final String TARGET = "renderToTexture(Lnet/minecraft/client/renderer/state/gui/pip/GuiEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;)V";
+    *///?} else if >=26.1 {
+    /*private static final String TARGET = "renderToTexture(Lnet/minecraft/client/renderer/state/gui/pip/GuiEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;)V";
     *///?} else if >=1.21.6 {
     private static final String TARGET = "renderToTexture(Lnet/minecraft/client/gui/render/state/pip/GuiEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;)V";
     //?} else
