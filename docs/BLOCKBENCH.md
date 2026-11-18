@@ -4,6 +4,9 @@ The Vibey Blockbench plugin (`blockbench/vibey.js`) turns Blockbench into the ed
 emotes. It writes `.vibey` bundles (see [SPEC §5](SPEC.md#5-the-vibey-asset-format-v1)) and can push them straight
 into the running game over the live link ([SPEC §8](SPEC.md#8-blockbench-live-link-devlink)).
 
+> See also: [FORMAT.md](FORMAT.md) (what the plugin writes, explained) · [CONTENT.md](CONTENT.md) (the starter set
+> to learn from) · [blockbench/README.md](../blockbench/README.md) (plugin development) · [docs index](README.md)
+
 ![Cosmetic project with reference player, Vibey panel and Attach setting](screenshots/blockbench-cosmetic-edit.png)
 
 ## Install

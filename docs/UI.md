@@ -3,6 +3,9 @@
 How the client looks and how a module plugs into it. Code: `dev.henny.vibeyclient.ui` (widgets, menu shell),
 `ui.title` (title screen, onboarding), `client/PauseMenu` (pause row). Tokens: `ui/Theme` (SPEC §4).
 
+> See also: [MODULES.md](MODULES.md) (module API) · [SPEC §4](SPEC.md#4-design-system-vibe) (design tokens) ·
+> [docs index](README.md)
+
 ## Design rules
 
 - **Same product as the Vibe launcher:** deep black (`BG`, `PANEL`, `SURFACE*`), square corners, 1 px lines
