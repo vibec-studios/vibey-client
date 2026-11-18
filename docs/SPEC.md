@@ -205,6 +205,29 @@ sleeves/pants) follows its part automatically.
 animations wrap; emotes fade in/out over 0.15 s when starting/stopping. Cosmetic animation names with meaning:
 `idle` (always), `walk` (blended by walk speed), `fly` (elytra/creative flying – wings), `sneak`.
 
+**Clarifications (binding, settled after the starter set was built – `content/` follows them):**
+
+1. *X axis:* the `.vibey` space is **vanilla-handed**: the player's right arm is at **-X** and `x' = x` into MC model
+   space. Blockbench's internal space is mirrored on X compared to that (its Modded Entity exporter writes
+   `setPos(-x, 24 - y, z)`), so the **Blockbench plugin negates X** on positions, pivots, cube from/to (swapping
+   them), locators and position keyframes when exporting (and back on import). Rotations: vanilla
+   `xRot = -rx, yRot = -ry, zRot = rz` (radians), applied in ZYX order like `ModelPart`.
+2. *Animated textures:* `width`/`height` are the size of **one frame**; the PNG is a vertical strip of N frames,
+   `frameTime` in ticks, `frames` optional (default 0..N-1).
+3. Per-face `texture` is optional; the starter set uses box UV with one texture per bundle.
+4. *Interpolation:* each segment uses the `i` of its **starting** keyframe; catmull-rom uses neighbouring keys,
+   clamped at the ends, no wrap-around for loops.
+5. *Visibility events:* a bone's visibility is the value of its last event at or before `t` (default visible);
+   hidden bones hide their children.
+6. *Particle units:* `spread` in blocks, `velocity` in blocks/tick, `gravity` in blocks/tick² (positive falls),
+   `size` in blocks, `lifetime` in seconds. The client adds a little randomness inside `spread`.
+7. Pivots, cube coordinates and locators are **absolute** model coordinates (not relative to the parent bone).
+8. `pet.follow`: `"ground"` (default; walks/hops beside the player) or `"shoulder_right"`/`"shoulder_left"`/
+   `"float"`. `pet.scale` scales about the model origin; the client chooses the offset beside the player.
+9. Emotes: the `root` bone pivots at the feet `[0,0,0]`; the six player parts are its children, like vanilla.
+10. Emotes also carry `rarity` (the catalog requires it). Emotes without props have `"model": {"bones": []}`.
+11. A root bone without `attach` defaults to `body` (validators warn).
+
 Validation rules (client + backend): `format == "vibey"`, `formatVersion == 1`, `id` matches
 `^[a-z0-9_.-]+:[a-z0-9_./-]+$`, kind/slot valid, all referenced textures/bones/sounds/sprites exist, textures are
 PNG ≤ 512×512 (animated strips ≤ 512×4096), ≤ 256 bones, ≤ 2048 cubes, sounds OGG ≤ 512 KiB each.
