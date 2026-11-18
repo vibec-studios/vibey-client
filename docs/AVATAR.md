@@ -53,3 +53,10 @@ real-Blockbench screenshots in `content/dist/blockbench/`.
   `VIBEYCLIENT_AVATAR_TEST=world ./gradlew :fabric-26.3:runClient --args="--quickPlaySingleplayer vibeytest"`
   (copy `versions/fabric-1.21.11/build/run/vibeytest-world` to `run/saves/vibeytest` first). Screenshots land in
   `versions/<target>/run/screenshots`, log lines start with `[vibeyclient-avatartest]`.
+- Whole-client runtime tour on any version/loader (`dev/DevTourB`, dev workspace only):
+  `VIBEYCLIENT_TOUR=<outdir> ./gradlew :neoforge-26.3:runClient` (or `-Dvibeyclient.tour=<outdir>` via
+  `JAVA_TOOL_OPTIONS`; relative paths resolve against the game dir). Title/onboarding → Vibey menu → flat creative
+  world `saves/vibeytour` (created on the first run) → one item per slot front/back/first person → wave, guitar,
+  seal_summon → wardrobe, emote wheel, social sidebar, lyrics in the sky (Fabric), pause menu, host screen → quit.
+  Logs `[vibeyclient-tour] PASS|FAIL <step>` (a step that logged an ERROR fails), writes `NN_<step>.png` and
+  `tour.txt` to the out dir.
