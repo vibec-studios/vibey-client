@@ -4,6 +4,7 @@ import dev.henny.vibeyclient.Vibey;
 import dev.henny.vibeyclient.api.event.Events;
 import dev.henny.vibeyclient.api.event.VibeyEvents;
 import dev.henny.vibeyclient.client.VibeyCore;
+import dev.henny.vibeyclient.client.VibeyPlayers;
 import dev.henny.vibeyclient.net.EmotePayload;
 import dev.henny.vibeyclient.net.HelloPayload;
 import dev.henny.vibeyclient.net.LoadoutPayload;
@@ -144,6 +145,7 @@ public final class VibeyNet {
 
     public static void onLeave() {
         serverProtocol = -1;
+        VibeyPlayers.clearServer();
     }
 
     /** Core: a payload from the server (client thread). */
@@ -153,10 +155,14 @@ public final class VibeyNet {
             Vibey.LOG.info("Server has Vibey Client (protocol {})", p.protocol());
             Events.post(new VibeyEvents.ServerHello(p.protocol()));
         } else if (payload instanceof LoadoutPayload p) {
+            // the relay only forwards players that said hello: they run Vibey Client (nametag icon)
+            VibeyPlayers.server(p.player());
             Events.post(new VibeyEvents.RemoteLoadout(p.player(), p.slots()));
         } else if (payload instanceof EmotePayload p) {
+            VibeyPlayers.server(p.player());
             Events.post(new VibeyEvents.RemoteEmote(p.player(), p.emoteId(), p.play(), p.startTick()));
         } else if (payload instanceof MessagePayload p) {
+            VibeyPlayers.server(p.peer());
             Channel<?> c = CHANNELS.get(p.channel());
             if (c != null) c.receive(p.peer(), p.data());
         }

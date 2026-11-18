@@ -17,6 +17,7 @@ import dev.henny.vibeyclient.avatar.AvatarStates;
 import dev.henny.vibeyclient.avatar.ItemLoader;
 import dev.henny.vibeyclient.avatar.ItemSource;
 import dev.henny.vibeyclient.avatar.Slot;
+import dev.henny.vibeyclient.client.VibeyPlayers;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 
@@ -54,6 +55,8 @@ public final class LoadoutSync {
     /** An upload is due but waits for the catalog and the owned list (see {@link #pushLoadout}). */
     private boolean pushPending;
     private Set<UUID> subscribed = Set.of();
+    /** Next full lookup (everybody around us + ourselves) for `client`/`badges`, epoch ms. */
+    private long nextFullLookup;
     private int tickCounter;
 
     /** Emote plays from the backend gateway or the server channel: (player, emoteId or null = stop). */
@@ -101,7 +104,9 @@ public final class LoadoutSync {
         ownedKnown = false;
         pushPending = false;
         subscribed = Set.of();
+        nextFullLookup = 0;
         fromBackend.clear();
+        VibeyPlayers.clearBackend();
         if (b == null) return;
         listeners.add(b.onEvent("loadout.updated", d -> {
             UUID id = uuid(d.get("userId"));
@@ -137,6 +142,7 @@ public final class LoadoutSync {
                 module.adoptRemoteLoadout(Loadout.fromJson(l));
             }
             subscribed = Set.of();
+            nextFullLookup = 0;
             updateSubscriptions();
         }));
     }
@@ -203,39 +209,65 @@ public final class LoadoutSync {
     private void updateSubscriptions() {
         if (!backendReady()) return;
         Minecraft mc = Minecraft.getInstance();
+        UUID self = module.selfId();
         Set<UUID> now = new LinkedHashSet<>();
         if (mc.level != null) {
-            UUID self = module.selfId();
             for (Player p : mc.level.players()) {
-                if (now.size() >= 200) break;
+                if (now.size() >= 199) break;
                 if (!p.getUUID().equals(self)) now.add(p.getUUID());
             }
         }
-        if (now.equals(subscribed)) return;
-        List<String> fresh = new ArrayList<>();
-        for (UUID u : now) if (!subscribed.contains(u)) fresh.add(u.toString());
-        subscribed = now;
-        JsonObject sub = new JsonObject();
-        JsonArray ids = new JsonArray();
-        for (UUID u : now) ids.add(u.toString());
-        sub.add("userIds", ids);
-        backend.sendOp("cosmetics.subscribe", sub);
-        if (fresh.isEmpty()) return;
+        // `client` ("vibey" while connected or seen in the last 2 minutes) and badges change without an event:
+        // look everybody up again every ~2 minutes (jittered so many clients do not hit the backend together).
+        long ms = System.currentTimeMillis();
+        boolean full = ms >= nextFullLookup;
+        if (now.equals(subscribed) && !full) return;
+        List<String> lookup = new ArrayList<>();
+        if (full) {
+            nextFullLookup = ms + 120_000 + java.util.concurrent.ThreadLocalRandom.current().nextInt(30_000);
+            if (self != null) lookup.add(self.toString()); // our own badges
+            for (UUID u : now) lookup.add(u.toString());
+        } else {
+            for (UUID u : now) if (!subscribed.contains(u)) lookup.add(u.toString());
+        }
+        if (!now.equals(subscribed)) {
+            subscribed = now;
+            JsonObject sub = new JsonObject();
+            JsonArray ids = new JsonArray();
+            for (UUID u : now) ids.add(u.toString());
+            sub.add("userIds", ids);
+            backend.sendOp("cosmetics.subscribe", sub);
+        }
+        if (lookup.isEmpty()) return;
         JsonObject body = new JsonObject();
         JsonArray list = new JsonArray();
-        for (String s : fresh) list.add(s);
+        for (String s : lookup) list.add(s);
         body.add("userIds", list);
         VibeBackend b = backend;
         b.request("POST", "/api/v1/cosmetics/lookup", body).whenComplete((res, err) -> Tasks.onMain(() -> {
             if (err != null || b != backend || !(res instanceof JsonObject o) || !(o.get("users") instanceof JsonObject users)) return;
             long t = System.currentTimeMillis();
+            UUID me = module.selfId();
+            for (String s : lookup) {
+                UUID id = uuid(new JsonPrimitive(s));
+                if (id != null && !users.has(s)) VibeyPlayers.backend(id, false, List.of()); // not a Vibe user (any more)
+            }
             for (Map.Entry<String, JsonElement> e : users.entrySet()) {
                 UUID id = uuid(new JsonPrimitive(e.getKey()));
                 if (id == null || !(e.getValue() instanceof JsonObject u)) continue;
+                VibeyPlayers.backend(id, u.get("client") instanceof JsonPrimitive c && "vibey".equals(c.getAsString()), badges(u.get("badges")));
+                if (id.equals(me)) continue; // our own loadout is local
                 Remote old = fromBackend.get(id);
                 if (old == null || old.time < t) fromBackend.put(id, new Remote(slots(u.get("slots")), t));
             }
         }));
+    }
+
+    private static List<String> badges(JsonElement e) {
+        if (!(e instanceof JsonArray a)) return List.of();
+        List<String> out = new ArrayList<>();
+        for (JsonElement x : a) if (x instanceof JsonPrimitive p && p.isString()) out.add(p.getAsString());
+        return out;
     }
 
     /** Server channel loadout (newest wins against the backend). */

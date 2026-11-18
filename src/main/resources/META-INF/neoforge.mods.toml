@@ -30,6 +30,9 @@ config = "vibeyclient.multiplayer.mixins.json"
 [[mixins]]
 config = "vibeyclient.devlink.mixins.json"
 
+[[mixins]]
+config = "vibeyclient.nametags.mixins.json"
+
 [[dependencies.${mod_id}]]
 modId = "neoforge"
 type = "required"

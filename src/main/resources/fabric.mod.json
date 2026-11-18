@@ -29,7 +29,8 @@
     "vibeyclient.emotes.mixins.json",
     "vibeyclient.multiplayer.mixins.json",
     "vibeyclient.lyrics.mixins.json",
-    "vibeyclient.devlink.mixins.json"
+    "vibeyclient.devlink.mixins.json",
+    "vibeyclient.nametags.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.16.5",

@@ -76,9 +76,13 @@ public final class ServerRelay {
         Peer peer = new Peer(from);
         PEERS.put(from.getUUID(), peer);
         send(from, new HelloPayload(NetLimits.PROTOCOL));
-        // Current loadouts of everyone else, so the new player sees them right away.
+        // Current loadouts of everyone else (also empty ones: a loadout packet tells the client that this player runs
+        // Vibey Client, for the nametag icon), and the newcomer to everyone else.
+        LoadoutPayload announce = new LoadoutPayload(from.getUUID(), Map.of());
         for (Peer other : PEERS.values()) {
-            if (other != peer && !other.loadout.isEmpty()) send(from, new LoadoutPayload(other.player.getUUID(), other.loadout));
+            if (other == peer) continue;
+            send(from, new LoadoutPayload(other.player.getUUID(), other.loadout));
+            send(other.player, announce);
         }
     }
 

@@ -18,6 +18,7 @@ public final class BuiltinModules {
         mm.register(new MultiplayerModule());
         //? if fabric
         mm.register(new dev.henny.vibeyclient.module.lyrics.LyricsModule());
+        mm.register(new dev.henny.vibeyclient.module.nametags.NametagsModule());
         mm.register(new DevLinkModule());
     }
 }
