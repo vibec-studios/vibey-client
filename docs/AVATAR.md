@@ -4,6 +4,10 @@ How the client turns `.vibey` bundles (SPEC §5) into things on players. Modules
 wardrobe), `emotes` (wheel, local plays), `devlink` (Blockbench live link). The engine itself lives in
 `dev.henny.vibeyclient.avatar` and has no module dependencies.
 
+> See also: [FORMAT.md](FORMAT.md) (the `.vibey` format for creators) · [SPEC §5–§8](SPEC.md#5-the-vibey-asset-format-v1)
+> (format, sync, backend, live link) · [BLOCKBENCH.md](BLOCKBENCH.md) · [CONTENT.md](CONTENT.md) (starter set) ·
+> [docs index](README.md)
+
 ## Packages
 
 | Package | What |
