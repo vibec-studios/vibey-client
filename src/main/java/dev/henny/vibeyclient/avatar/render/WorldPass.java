@@ -16,7 +16,8 @@ public final class WorldPass {
     //? if >=1.21.9 {
     private static final MeshSink.Submits SUBMITS = new MeshSink.Submits();
     //?}
-    private static final MeshSink.Buffers BUFFERS = new MeshSink.Buffers();
+    //? if <1.21.9
+    /*private static final MeshSink.Buffers BUFFERS = new MeshSink.Buffers();*/
     private static final Quaternionf CAM = new Quaternionf();
 
     //? if >=1.21.9 {
@@ -31,17 +32,18 @@ public final class WorldPass {
     }
     //?}
 
-    //? if >=1.21.2 {
-    public static void render(AvatarState st, net.minecraft.client.renderer.entity.state.LivingEntityRenderState state, PoseStack ps,
+    //? if >=1.21.2 <1.21.9 {
+    /*public static void render(AvatarState st, net.minecraft.client.renderer.entity.state.LivingEntityRenderState state, PoseStack ps,
                               net.minecraft.client.renderer.MultiBufferSource buffers, int light) {
         net.minecraft.client.Camera cam = net.minecraft.client.Minecraft.getInstance().gameRenderer.getMainCamera();
         //? if >=1.21.6 {
-        net.minecraft.world.phys.Vec3 cp = cam.position();
-        //?} else
-        /*net.minecraft.world.phys.Vec3 cp = cam.getPosition();*/
+        /^net.minecraft.world.phys.Vec3 cp = cam.position();
+        ^///?} else
+        /^net.minecraft.world.phys.Vec3 cp = cam.getPosition();^/
         draw(st, ps, BUFFERS.set(buffers), light, state.x, state.y, state.z, state.scale, cp.x, cp.y, cp.z, cam.rotation());
     }
-    //?} else {
+    *///?}
+    //? if <1.21.2 {
     /*public static void render121(net.minecraft.client.player.AbstractClientPlayer player, float partial, PoseStack ps,
                                  net.minecraft.client.renderer.MultiBufferSource buffers, int light) {
         AvatarState st = AvatarHooks.extract(player, partial);

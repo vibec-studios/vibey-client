@@ -7,6 +7,7 @@
   "mixins": [],
   "client": [
     "AbstractClientPlayerMixin",
+    "EntityRenderDispatcherAccessor",
     "LivingEntityRendererAccessor",
     "LivingEntityRendererMixin",
     "PlayerRendererMixin",

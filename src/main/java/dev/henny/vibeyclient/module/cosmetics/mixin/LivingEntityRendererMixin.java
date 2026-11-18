@@ -15,9 +15,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(LivingEntityRenderer.class)
 public abstract class LivingEntityRendererMixin {
     //? if >=1.21.9 {
+    //? if >=26.1 {
+    /*@Inject(method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V", at = @At("HEAD"))
+    private void vibey$world(net.minecraft.client.renderer.entity.state.LivingEntityRenderState state, PoseStack ps,
+                             net.minecraft.client.renderer.SubmitNodeCollector out, net.minecraft.client.renderer.state.level.CameraRenderState camera, CallbackInfo ci) {
+    *///?} else {
     @Inject(method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/CameraRenderState;)V", at = @At("HEAD"))
     private void vibey$world(net.minecraft.client.renderer.entity.state.LivingEntityRenderState state, PoseStack ps,
                              net.minecraft.client.renderer.SubmitNodeCollector out, net.minecraft.client.renderer.state.CameraRenderState camera, CallbackInfo ci) {
+    //?}
         if (state instanceof AvatarCarrier c && c.vibey$avatar() != null) WorldPass.submit(c.vibey$avatar(), state, ps, out, camera);
     }
     //?} else if >=1.21.2 {

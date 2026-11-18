@@ -121,9 +121,9 @@ final class PreviewView implements AvatarPreview.View {
     }
 
     private void render(Gfx g, int x, int y, int w, int h, float size, double now) {
-        //? if >=1.21.6 {
-        rs.skin = skin();
-        rs.entityType = net.minecraft.world.entity.EntityType.PLAYER;
+        //? if >=1.21.2 {
+        PlayerSkin skin = skin();
+        rs.skin = skin;
         rs.bodyRot = 180f + yaw;
         rs.yRot = 0f;
         rs.xRot = pitch;
@@ -133,9 +133,6 @@ final class PreviewView implements AvatarPreview.View {
         rs.scale = 1f;
         rs.boundingBoxWidth = 0.6f;
         rs.boundingBoxHeight = 1.8f;
-        rs.lightCoords = 0xF000F0;
-        rs.outlineColor = 0;
-        rs.shadowPieces.clear();
         rs.isInvisible = false;
         rs.showCape = true;
         rs.capeFlap = 0f;
@@ -143,12 +140,28 @@ final class PreviewView implements AvatarPreview.View {
         rs.capeLean2 = 0f;
         rs.nameTag = null;
         ((dev.henny.vibeyclient.avatar.render.AvatarCarrier) rs).vibey$setAvatar(st);
+        //?}
+        //? if >=1.21.9 {
+        rs.lightCoords = 0xF000F0;
+        rs.outlineColor = 0;
+        rs.shadowPieces.clear();
+        //?}
+        //? if >=1.21.6 {
+        //? if >=26.2 {
+        /*rs.entityType = net.minecraft.world.entity.EntityTypes.PLAYER;
+        *///?} else
+        rs.entityType = net.minecraft.world.entity.EntityType.PLAYER;
         Quaternionf rot = new Quaternionf().rotateZ((float) Math.PI);
         Quaternionf cam = new Quaternionf().rotateX(0f);
         rot.mul(cam);
         Vector3f translate = new Vector3f(0f, 1.8f / 2f + 0.06f, 0f);
+        //? if >=26.1 {
+        /*g.g.entity(rs, size, translate, rot, cam, x, y, x + w, y + h);
+        *///?} else
         g.g.submitEntityRenderState(rs, size, translate, rot, cam, x, y, x + w, y + h);
-        //?} else {
+        //?} else if >=1.21.2 {
+        /*PreviewLegacy.render(g, x, y, w, h, size, rs, skin);
+        *///?} else {
         /*PreviewLegacy.render(g, x, y, w, h, size, yaw, st, skin(), now);
         *///?}
     }

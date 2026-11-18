@@ -117,11 +117,11 @@ public final class AvatarDraw {
                 if (!st.petInit) x = y = z = 0;
                 ps.translate((float) x, (float) y, (float) z);
                 float yaw = lerpDeg(pt, st.petPrevYaw, st.petYaw);
-                ps.mulPose(Q.rotationY((float) Math.toRadians(180f - yaw)));
+                PoseCompat.rotate(ps, Q.rotationY((float) Math.toRadians(180f - yaw)));
                 float s = b.pet == null ? 1f : b.pet.scale();
                 ps.scale(s * playerScale, s * playerScale, s * playerScale);
             } else {
-                ps.mulPose(Q.rotationY((float) Math.toRadians(180f - st.bodyYaw)));
+                PoseCompat.rotate(ps, Q.rotationY((float) Math.toRadians(180f - st.bodyYaw)));
                 ps.scale(playerScale, playerScale, playerScale);
             }
             toModelSpace(ps);
@@ -133,7 +133,7 @@ public final class AvatarDraw {
             GpuBundle gb = GpuBundles.get(e.bundle);
             if (gb != null) {
                 ps.pushPose();
-                ps.mulPose(Q.rotationY((float) Math.toRadians(180f - st.bodyYaw)));
+                PoseCompat.rotate(ps, Q.rotationY((float) Math.toRadians(180f - st.bodyYaw)));
                 ps.scale(playerScale, playerScale, playerScale);
                 toModelSpace(ps);
                 MIX.clear().add(e.anim, e.localTime, 1f);

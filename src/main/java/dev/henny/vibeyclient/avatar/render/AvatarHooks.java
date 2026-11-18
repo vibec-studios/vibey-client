@@ -123,7 +123,7 @@ public final class AvatarHooks {
         }
         if ((ch & 1) != 0) {
             final float d = (float) (Math.PI / 180.0) * w;
-            ps.mulPose(Q.rotationZYX(p[o + 2] * d, p[o + 1] * d, p[o] * d));
+            PoseCompat.rotate(ps, Q.rotationZYX(p[o + 2] * d, p[o + 1] * d, p[o] * d));
         }
         if ((ch & 4) != 0) {
             ps.scale(lerp(1f, p[o + 6], w), lerp(1f, p[o + 7], w), lerp(1f, p[o + 8], w));

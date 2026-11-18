@@ -2,7 +2,8 @@ package dev.henny.vibeyclient.avatar.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.renderer.MultiBufferSource;
+//? if <1.21.9
+/*import net.minecraft.client.renderer.MultiBufferSource;*/
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -46,7 +47,8 @@ public abstract class MeshSink {
         }
     }
 
-    // ============================================================================================ buffer source
+    //? if <1.21.9 {
+    /*// ============================================================================================ buffer source
 
     public static final class Buffers extends MeshSink {
         private MultiBufferSource buffers;
@@ -66,6 +68,7 @@ public abstract class MeshSink {
             emit(pose.last(), buffers.getBuffer(type), data, quads, light, NO_OVERLAY, argb);
         }
     }
+    *///?}
 
     //? if >=1.21.9 {
     // ============================================================================================ submit collector

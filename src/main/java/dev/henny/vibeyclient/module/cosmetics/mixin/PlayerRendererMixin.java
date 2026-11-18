@@ -49,10 +49,15 @@ public abstract class PlayerRendererMixin {
         // an equipped Vibey cape is shown even if the vanilla "Cape" skin part is off
         if (st != null && AvatarHooks.capeTexture(st) != null) state.showCape = true;
         if (st != null && AvatarHooks.hideHeldItems(st)) {
+            //? if >=1.21.11 {
             state.rightHandItemState.clear();
             state.leftHandItemState.clear();
             state.rightHandItemStack = net.minecraft.world.item.ItemStack.EMPTY;
             state.leftHandItemStack = net.minecraft.world.item.ItemStack.EMPTY;
+            //?} else {
+            /*state.rightHandItem.clear();
+            state.leftHandItem.clear();
+            *///?}
             state.rightArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.EMPTY;
             state.leftArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.EMPTY;
         }
@@ -72,12 +77,14 @@ public abstract class PlayerRendererMixin {
             //? if >=1.21.4 {
             state.rightHandItem.clear();
             state.leftHandItem.clear();
+            state.rightArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.EMPTY;
+            state.leftArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.EMPTY;
             //?} else {
             /^state.rightHandItem = net.minecraft.world.item.ItemStack.EMPTY;
             state.leftHandItem = net.minecraft.world.item.ItemStack.EMPTY;
+            state.rightHandItemModel = null;
+            state.leftHandItemModel = null;
             ^///?}
-            state.rightArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.EMPTY;
-            state.leftArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.EMPTY;
         }
     }
 
