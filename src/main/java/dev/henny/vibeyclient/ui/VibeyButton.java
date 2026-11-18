@@ -111,7 +111,12 @@ public class VibeyButton extends AbstractWidget {
 
     @Override
     public boolean keyPressed(KeyEvent event) {
-        if (active && visible && isFocused() && (event.key() == 257 || event.key() == 32 || event.key() == 335)) {
+        // Enter / Space / keypad Enter; 26.3 reports SDL scancodes (40 / 44 / 88), so ask the event itself there
+        //? if >=26.3 {
+        /*boolean select = event.isSelection();
+        *///?} else
+        boolean select = event.key() == 257 || event.key() == 32 || event.key() == 335;
+        if (active && visible && isFocused() && select) {
             playDownSound(Minecraft.getInstance().getSoundManager());
             press();
             return true;

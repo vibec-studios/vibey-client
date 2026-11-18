@@ -49,7 +49,7 @@ public final class ToastHooks {
             *///?} else
             ScreenEvents.afterRender(screen).register((s, g, mx, my, d) -> afterScreen(s, new Gfx(g, mc.font), mx, my));
             //? if >=1.21.9 {
-            ScreenMouseEvents.allowMouseClick(screen).register((s, e) -> !ToastStack.click(e.x(), e.y(), e.button()));
+            ScreenMouseEvents.allowMouseClick(screen).register((s, e) -> !ToastStack.click(e.x(), e.y(), dev.henny.vibeyclient.client.Keys.mouseFromNative(e.button())));
             ScreenKeyboardEvents.afterKeyPress(screen).register((s, e) -> screenKey(s, e.key()));
             //?} else {
             /*ScreenMouseEvents.allowMouseClick(screen).register((s, x, y, b) -> !ToastStack.click(x, y, b));
@@ -60,7 +60,7 @@ public final class ToastHooks {
         /*NeoForge.EVENT_BUS.addListener((ScreenEvent.Render.Post e) ->
                 afterScreen(e.getScreen(), new Gfx(e.getGuiGraphics(), Minecraft.getInstance().font), e.getMouseX(), e.getMouseY()));
         NeoForge.EVENT_BUS.addListener((ScreenEvent.MouseButtonPressed.Pre e) -> {
-            if (ToastStack.click(e.getMouseX(), e.getMouseY(), e.getButton())) e.setCanceled(true);
+            if (ToastStack.click(e.getMouseX(), e.getMouseY(), dev.henny.vibeyclient.client.Keys.mouseFromNative(e.getButton()))) e.setCanceled(true);
         });
         NeoForge.EVENT_BUS.addListener((ScreenEvent.KeyPressed.Post e) -> screenKey(e.getScreen(), neoKey(e)));
         *///?}
