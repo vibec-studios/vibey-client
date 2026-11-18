@@ -267,6 +267,19 @@ public final class Settings {
             this.active = active;
         }
 
+        private boolean registered = true;
+
+        /** Not handed to the loader (not in the controls screen, never fires), e.g. a part of a module that is off
+         *  because a standalone mod provides it. Call before the game finishes starting. */
+        public KeybindSetting skipRegistration() {
+            registered = false;
+            return this;
+        }
+
+        public boolean shouldRegister() {
+            return registered;
+        }
+
         @Override
         public boolean persisted() {
             return false;

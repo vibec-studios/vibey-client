@@ -411,41 +411,41 @@ public final class DevTour {
         step("lyrics_sky");
         run(mc -> {
             requireWorld(mc);
-            if (!dev.henny.vibeyclient.module.lyrics.LyricsModule.running()) throw new IllegalStateException("lyrics module not running");
-            dev.henny.vibeyclient.module.lyrics.library.SongLibrary.rescan();
-            var demo = dev.henny.vibeyclient.module.lyrics.library.SongLibrary.find(
-                    dev.henny.vibeyclient.module.lyrics.library.SongLibrary.DEMO.toLowerCase(java.util.Locale.ROOT));
+            if (!dev.henny.vibeyclient.module.media.lyrics.LyricsFeature.running()) throw new IllegalStateException("lyrics module not running");
+            dev.henny.vibeyclient.module.media.lyrics.library.SongLibrary.rescan();
+            var demo = dev.henny.vibeyclient.module.media.lyrics.library.SongLibrary.find(
+                    dev.henny.vibeyclient.module.media.lyrics.library.SongLibrary.DEMO.toLowerCase(java.util.Locale.ROOT));
             if (demo == null) throw new IllegalStateException("demo song missing");
             hideHud(mc, true);
             mc.options.setCameraType(CameraType.FIRST_PERSON);
             look(mc, -45f, -14f);
-            var c = dev.henny.vibeyclient.module.lyrics.LyricsConfig.get();
-            c.position = dev.henny.vibeyclient.module.lyrics.LyricsConfig.Position.SKY;
-            c.applyPreset(dev.henny.vibeyclient.module.lyrics.LyricsConfig.Preset.NEON);
-            c.reveal = dev.henny.vibeyclient.module.lyrics.LyricsConfig.Reveal.LINE;
-            c.skyMode = dev.henny.vibeyclient.module.lyrics.LyricsConfig.SkyMode.FIXED;
+            var c = dev.henny.vibeyclient.module.media.lyrics.LyricsConfig.get();
+            c.position = dev.henny.vibeyclient.module.media.lyrics.LyricsConfig.Position.SKY;
+            c.applyPreset(dev.henny.vibeyclient.module.media.lyrics.LyricsConfig.Preset.NEON);
+            c.reveal = dev.henny.vibeyclient.module.media.lyrics.LyricsConfig.Reveal.LINE;
+            c.skyMode = dev.henny.vibeyclient.module.media.lyrics.LyricsConfig.SkyMode.FIXED;
             c.skyYaw = -45;
             c.sky = "vanilla";
-            dev.henny.vibeyclient.module.lyrics.Playback.play(demo);
+            dev.henny.vibeyclient.module.media.lyrics.Playback.play(demo);
         });
         waitTicks(20);
         run(mc -> {
-            dev.henny.vibeyclient.module.lyrics.Playback.seek(25_350);
-            dev.henny.vibeyclient.module.lyrics.Playback.pause();
+            dev.henny.vibeyclient.module.media.lyrics.Playback.seek(25_350);
+            dev.henny.vibeyclient.module.media.lyrics.Playback.pause();
         });
         waitTicks(15);
         shot("34_lyrics_sky");
         run(mc -> {
-            dev.henny.vibeyclient.module.lyrics.LyricsConfig.get().sky = "galaxy";
-            dev.henny.vibeyclient.module.lyrics.Playback.seek(16_700);
-            dev.henny.vibeyclient.module.lyrics.Playback.pause();
+            dev.henny.vibeyclient.module.media.lyrics.LyricsConfig.get().sky = "galaxy";
+            dev.henny.vibeyclient.module.media.lyrics.Playback.seek(16_700);
+            dev.henny.vibeyclient.module.media.lyrics.Playback.pause();
         });
         waitTicks(15);
         shot("35_lyrics_galaxy");
         run(mc -> {
-            long drawn = dev.henny.vibeyclient.module.lyrics.render.WorldLyrics.drawnFrames;
-            dev.henny.vibeyclient.module.lyrics.LyricsConfig.get().sky = "vanilla";
-            dev.henny.vibeyclient.module.lyrics.Playback.stop();
+            long drawn = dev.henny.vibeyclient.module.media.lyrics.render.WorldLyrics.drawnFrames;
+            dev.henny.vibeyclient.module.media.lyrics.LyricsConfig.get().sky = "vanilla";
+            dev.henny.vibeyclient.module.media.lyrics.Playback.stop();
             hideHud(mc, false);
             if (drawn <= 0) throw new IllegalStateException("world lyrics were never drawn");
         });

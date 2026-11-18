@@ -390,24 +390,24 @@ public final class DevTourB {
     private static void lyrics(List<Step> l, Minecraft mc) {
         //? if fabric {
         l.add(act("lyrics demo", () -> {
-            var m = dev.henny.vibeyclient.module.lyrics.LyricsModule.instance();
+            var m = dev.henny.vibeyclient.module.media.lyrics.LyricsFeature.instance();
             if (m == null || !m.isEnabled()) throw new IllegalStateException("lyrics module not running");
-            dev.henny.vibeyclient.module.lyrics.library.SongLibrary.ensureFolder();
-            var songs = dev.henny.vibeyclient.module.lyrics.library.SongLibrary.rescan();
-            var demo = songs.stream().filter(s -> s.id().equals(dev.henny.vibeyclient.module.lyrics.library.SongLibrary.DEMO.toLowerCase(java.util.Locale.ROOT)))
+            dev.henny.vibeyclient.module.media.lyrics.library.SongLibrary.ensureFolder();
+            var songs = dev.henny.vibeyclient.module.media.lyrics.library.SongLibrary.rescan();
+            var demo = songs.stream().filter(s -> s.id().equals(dev.henny.vibeyclient.module.media.lyrics.library.SongLibrary.DEMO.toLowerCase(java.util.Locale.ROOT)))
                     .findFirst().orElse(songs.isEmpty() ? null : songs.get(0));
             if (demo == null) throw new IllegalStateException("no demo song");
             mc.options.setCameraType(CameraType.FIRST_PERSON);
             face(mc, 0f, -35f);
-            dev.henny.vibeyclient.module.lyrics.Playback.play(demo);
+            dev.henny.vibeyclient.module.media.lyrics.Playback.play(demo);
         }).after(20 * 9));
         l.add(check("lyrics sky", 100, () -> {
-            if (!dev.henny.vibeyclient.module.lyrics.Playback.isPlaying()) throw new IllegalStateException("not playing: " + dev.henny.vibeyclient.module.lyrics.Playback.error());
+            if (!dev.henny.vibeyclient.module.media.lyrics.Playback.isPlaying()) throw new IllegalStateException("not playing: " + dev.henny.vibeyclient.module.media.lyrics.Playback.error());
             return shot("lyrics_sky");
         }).after(60));
         l.add(check("lyrics sky later", 100, () -> shot("lyrics_sky_2")).after(5));
         l.add(act("stop lyrics", () -> {
-            dev.henny.vibeyclient.module.lyrics.Playback.stop();
+            dev.henny.vibeyclient.module.media.lyrics.Playback.stop();
             face(mc, 0f, 0f);
         }).after(10));
         //?}

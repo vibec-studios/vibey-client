@@ -2,6 +2,26 @@
 
 All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.properties`.
 
+## Unreleased – Media module
+
+### Media (was "Lyrics", Fabric)
+
+- The lyrics module is now **Media** (`media`, de: *Medien*): music, lyrics and skies, with room for more media
+  parts (in-world video). Settings, on/off state and keybinds of the old `lyrics` module are carried over on the
+  first start. With the standalone *Vibey Lyrics* installed only the lyrics & skies part switches off (with a note on
+  the settings page); the rest of Media keeps working.
+- **Sky lyrics where you look** (new default): the words rest in the sky while you look around near them and, after a
+  short moment, glide calmly to where you look now – smooth, no overshoot, never below the horizon. The older modes
+  (follow softly, glued to your view, one direction) stay under *Advanced*.
+- **Skies that move with the music:** colors drift with the energy, the horizon glows with the bass, beats make
+  stars sparkle, aurora curtains brighten with the mids, drops bloom. Own songs are analysed in sync with what you
+  hear; music from the PC (Windows) through the sound the PC plays (WASAPI loopback, nothing recorded); otherwise
+  the lyrics timing. *Effect strength* slider; flashes are off by default, at most 3 pulses per second.
+- **HUD editor:** move and resize the HUD lyrics and the now playing bar (snapping to edges, centre and other
+  elements, guides, reset). Media settings → *HUD layout → Edit*, or the *HUD editor* key. Generic, for every module
+  (`ui/hud`).
+- *Media* entry in the title screen and pause menu (replaces the optional *♪ Lyrics* pause button).
+
 ## 0.2.1 – open source, signed loadouts, status fix
 
 ### Fixes
