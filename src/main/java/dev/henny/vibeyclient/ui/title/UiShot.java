@@ -69,7 +69,7 @@ public final class UiShot {
 
     private static void shot(Minecraft mc, String what) {
         Vibey.LOG.info("[vibeyclient-uishot] {} on {}", what, Vibey.platform().loader());
-        //? if >=26.3 {
+        //? if >=26.2 {
         /*Screenshot.grab(mc.gameDirectory, mc.gameRenderer.mainRenderTarget(), msg -> Vibey.LOG.info("[vibeyclient-uishot] {}", msg.getString()));
         *///?} else
         Screenshot.grab(mc.gameDirectory, mc.getMainRenderTarget(), msg -> Vibey.LOG.info("[vibeyclient-uishot] {}", msg.getString()));
