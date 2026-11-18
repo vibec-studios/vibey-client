@@ -286,6 +286,8 @@ public final class DevTour {
             command(mc, "gamerule advance_time false");
             command(mc, "gamemode creative");
             mc.options.hideGui = false;
+            // the "move with WASD" tutorial toast would cover every screenshot's corner
+            mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE);
         });
         waitTicks(100);
         shot("07_world_first_person");
