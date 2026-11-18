@@ -49,6 +49,9 @@ public final class MediaScreen {
     public transient long farSince;
     /** The current player has reached PLAYING once. */
     public transient boolean started;
+    /** Drift correction: a seek is on its way / how long seeks take to show a picture (ms). */
+    public transient boolean correcting;
+    public transient long lagMs;
     public transient boolean visible;
     public transient double distance = Double.MAX_VALUE;
 

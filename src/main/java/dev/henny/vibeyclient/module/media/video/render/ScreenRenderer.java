@@ -117,12 +117,37 @@ public final class ScreenRenderer {
                 (float) z.x, (float) z.y, (float) z.z, 0f,
                 0f, 0f, 0f, 1f);
         pose.mulPose(basis);
-        float maxW = s.width * 0.9f;
-        int pw = Math.max(1, font.width(line));
-        float scale = Math.min(s.height / 9f / 7f, maxW / pw);
+        // About 7 text lines per screen height; wrap to the width, shrink if it needs more than 3 lines.
+        float scale = s.height / 64f;
+        java.util.List<String> lines = wrap(font, line, s.width * 0.9f / scale);
+        for (int i = 0; i < 4 && lines.size() > 3; i++) {
+            scale *= 0.8f;
+            lines = wrap(font, line, s.width * 0.9f / scale);
+        }
         pose.scale(scale, scale, scale);
-        Component c = Component.literal(line);
-        out.submitText(pose, -pw / 2f, -4f, c.getVisualOrderText(), false, Font.DisplayMode.POLYGON_OFFSET, FULL_BRIGHT, 0xFFD8D8E0, 0, 0);
+        float top = -lines.size() * 10 / 2f + 1;
+        for (int i = 0; i < lines.size(); i++) {
+            String l = lines.get(i);
+            Component c = Component.literal(l);
+            out.submitText(pose, -font.width(l) / 2f, top + i * 10, c.getVisualOrderText(), false, Font.DisplayMode.POLYGON_OFFSET,
+                    FULL_BRIGHT, 0xFFD8D8E0, 0, 0);
+        }
         pose.popPose();
+    }
+
+    private static java.util.List<String> wrap(Font font, String text, float maxPx) {
+        java.util.List<String> out = new java.util.ArrayList<>();
+        StringBuilder cur = new StringBuilder();
+        for (String word : text.split(" ")) {
+            String next = cur.isEmpty() ? word : cur + " " + word;
+            if (font.width(next) > maxPx && !cur.isEmpty()) {
+                out.add(cur.toString());
+                cur = new StringBuilder(word);
+            } else {
+                cur = new StringBuilder(next);
+            }
+        }
+        if (!cur.isEmpty()) out.add(cur.toString());
+        return out;
     }
 }

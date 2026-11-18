@@ -35,7 +35,7 @@ public final class VideoNet {
     private final Video video;
     private VibeyNet.Channel<Msg> channel;
     private final Set<UUID> sent = new HashSet<>();
-    private final Map<UUID, float[]> buckets = new HashMap<>();
+    private final Map<UUID, Bucket> buckets = new HashMap<>();
     private long lastResync;
     private long lastOnlineCheck;
     private boolean requestPending;
@@ -129,13 +129,19 @@ public final class VideoNet {
 
     // ============================================================================================ receive
 
+    /** Token bucket per sender: burst 6, refills 3 per second. */
+    private static final class Bucket {
+        double tokens = 6;
+        long last = System.currentTimeMillis();
+    }
+
     private boolean allow(UUID sender) {
         long now = System.currentTimeMillis();
-        float[] b = buckets.computeIfAbsent(sender, k -> new float[] {6f, now});
-        b[0] = Math.min(6f, b[0] + (now - (long) b[1]) / 1000f * 3f);
-        b[1] = now;
-        if (b[0] < 1f) return false;
-        b[0] -= 1f;
+        Bucket b = buckets.computeIfAbsent(sender, k -> new Bucket());
+        b.tokens = Math.min(6, b.tokens + (now - b.last) / 1000.0 * 3);
+        b.last = now;
+        if (b.tokens < 1) return false;
+        b.tokens -= 1;
         return true;
     }
 

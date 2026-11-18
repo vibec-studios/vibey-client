@@ -39,7 +39,7 @@ import java.util.UUID;
  */
 public final class Video implements VideoFeature {
     /** At most this many screens decode at the same time (the nearest ones). */
-    public static final int MAX_ACTIVE = 4;
+    public static final int MAX_ACTIVE = 6;
     /** Closed after being far away / hidden this long (a paused player keeps processes or a browser alive). */
     private static final long CLOSE_AFTER_MS = 15_000;
     private static Video instance;
@@ -152,7 +152,8 @@ public final class Video implements VideoFeature {
             boolean want = s.source != null && allowed(s) && (s.id.equals(overlayId) || here && s.distance <= range);
             if (want) wanted.add(s);
         }
-        wanted.sort(Comparator.comparingDouble(s -> s.id.equals(overlayId) ? -1 : s.distance));
+        // Overlay first, then playing screens, then by distance (paused ones still show their picture).
+        wanted.sort(Comparator.comparingDouble(s -> s.id.equals(overlayId) ? -1 : s.distance + (s.playing ? 0 : 10_000)));
         for (int i = 0; i < wanted.size(); i++) {
             MediaScreen s = wanted.get(i);
             if (i >= MAX_ACTIVE) {
@@ -221,12 +222,28 @@ public final class Video implements VideoFeature {
                 appliedPlaying.put(s.id, false);
                 net.sendState(s);
             }
-        } else if ((st == MediaPlayer.Status.PLAYING || st == MediaPlayer.Status.PAUSED) && (p.seekable() || s.durationMs > 0)) {
-            long drift = Math.abs(p.positionMs() - s.expectedMs());
+        } else if (!s.remote && st == MediaPlayer.Status.PLAYING && s.playing && s.started && (p.seekable() || s.durationMs > 0)) {
+            // Own screen: what the owner actually sees is the truth (buffering, slow streams) – others follow it.
+            long behind = s.expectedMs() - p.positionMs();
             long last = lastCorrection.getOrDefault(s.id, 0L);
-            if (drift > (s.playing ? 2000 : 600) && now - last > 5000) {
+            if (Math.abs(behind) > 750 && now - last > 5000) {
                 lastCorrection.put(s.id, now);
-                p.seek(s.expectedMs());
+                s.setTimeline(true, p.positionMs());
+                net.sendState(s);
+            }
+        } else if (s.remote && (st == MediaPlayer.Status.PLAYING || st == MediaPlayer.Status.PAUSED) && (p.seekable() || s.durationMs > 0)) {
+            long behind = s.expectedMs() - p.positionMs();
+            if (s.correcting && st == MediaPlayer.Status.PLAYING) {
+                // How long the last seek took to show a picture: aim that much further next time.
+                s.correcting = false;
+                s.lagMs = Math.max(0, Math.min(5000, s.lagMs + behind));
+            }
+            long last = lastCorrection.getOrDefault(s.id, 0L);
+            long limit = s.playing ? (s.source.kind() == MediaSource.Kind.FILE ? 2000 : 3000) : 600;
+            if (Math.abs(behind) > limit && now - last > 5000) {
+                lastCorrection.put(s.id, now);
+                s.correcting = s.playing;
+                p.seek(s.expectedMs() + (s.playing ? s.lagMs : 0));
             }
         }
         float gain = cfg.volume.get() / 100f * s.volume * soundVolume();
