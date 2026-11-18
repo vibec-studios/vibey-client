@@ -256,13 +256,15 @@ public final class ToastStack {
         } else if (!e.buttons.isEmpty()) {
             int by = y + h - 18;
             int bx = tx;
-            for (Button b : e.buttons) {
-                int bw = Math.max(44, g.width(b.label()) + 14);
+            int[] widths = buttonWidths(g.font, e, w);
+            for (int bi = 0; bi < e.buttons.size(); bi++) {
+                Button b = e.buttons.get(bi);
+                int bw = widths[bi];
                 boolean bh = mx >= bx && mx < bx + bw && my >= by && my < by + 13;
                 int bg = b.primary() ? (bh ? Theme.BRAND_HOVER : Theme.BRAND) : (bh ? Theme.SURFACE3 : Theme.SURFACE2);
                 g.rect(bx, by, bw, 13, bg);
                 if (!b.primary()) g.outline(bx, by, bw, 13, Theme.LINE2);
-                g.textCenter(b.label(), bx + bw / 2, by + 3, b.primary() ? 0xFFFFFFFF : Theme.TEXT);
+                g.textCenter(g.clip(b.label(), bw - 4), bx + bw / 2, by + 3, b.primary() ? 0xFFFFFFFF : Theme.TEXT);
                 bx += bw + 4;
             }
         } else if (e.toast.action() != null && mx < 0) {
@@ -272,6 +274,20 @@ public final class ToastStack {
         // remaining time
         float left = 1f - Math.min(1f, e.elapsed / (float) e.durationMs);
         g.rect(x + 2, y + h - 1, Math.round((w - 2) * left), 1, Theme.alpha(accent, 0.5f));
+    }
+
+    /** Button widths that fit the toast ({@code w} = toast width; buttons start at +34, 6 px right margin). */
+    private static int[] buttonWidths(net.minecraft.client.gui.Font font, Entry e, int w) {
+        int n = e.buttons.size();
+        int[] out = new int[n];
+        int avail = w - 34 - 6 - (n - 1) * 4;
+        int total = 0;
+        for (int i = 0; i < n; i++) {
+            out[i] = Math.max(44, font.width(e.buttons.get(i).label()) + 14);
+            total += out[i];
+        }
+        if (total > avail) for (int i = 0; i < n; i++) out[i] = Math.max(20, avail / n);
+        return out;
     }
 
     /** Small pixel glyph: check (success), ! (warn/error/social), i (info). */
@@ -326,8 +342,10 @@ public final class ToastStack {
             if (!e.buttons.isEmpty()) {
                 int by = y + h - 18;
                 int bx = x + 34;
-                for (Button b : e.buttons) {
-                    int bw = Math.max(44, font.width(b.label()) + 14);
+                int[] widths = buttonWidths(font, e, w);
+                for (int bi = 0; bi < e.buttons.size(); bi++) {
+                    Button b = e.buttons.get(bi);
+                    int bw = widths[bi];
                     if (mx >= bx && mx < bx + bw && my >= by && my < by + 13) {
                         e.leaving = true;
                         run(b.action());

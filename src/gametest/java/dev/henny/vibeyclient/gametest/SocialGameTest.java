@@ -88,6 +88,8 @@ public final class SocialGameTest implements FabricClientGameTest {
             ctx.waitTicks(20);
             ctx.takeScreenshot("social_06_chat_reply");
 
+            editAndGroupChecks(ctx, m, dmId);
+
             // group from Juno
             ctx.waitFor(mc -> group(m, "Build crew") != null, 30 * SEC);
             String groupId = ctx.computeOnClient(mc -> group(m, "Build crew").id());
@@ -256,6 +258,38 @@ public final class SocialGameTest implements FabricClientGameTest {
         // still logged in afterwards (a reused refresh token would have ended the session)
         check(b.request("GET", "/api/v1/auth/sessions", null).join().isJsonArray(), "session alive");
         log("refresh serialisation ok (" + (b.refreshCount() - before) + " refresh for 8 parallel requests)");
+    }
+
+    /** Edit + delete our own message; our own group: create, rename, add a member, leave. */
+    private static void editAndGroupChecks(ClientGameTestContext ctx, SocialModule m, String dmId) {
+        var st = m.service().state;
+        String mine = ctx.computeOnClient(mc -> {
+            var h = st.history(dmId).messages;
+            for (int i = h.size() - 1; i >= 0; i--) if (st.selfId().equals(h.get(i).authorId()) && !h.get(i).isPending()) return h.get(i).id();
+            return null;
+        });
+        check(mine != null, "own message in history");
+        await(ctx, ctx.computeOnClient(mc -> m.service().editMessage(dmId, mine, "hello from the game client (edited)")));
+        ctx.waitFor(mc -> find(st.history(dmId).messages, x -> x.id().equals(mine) && x.editedAt() > 0) != null, 10 * SEC);
+        ctx.runOnClient(mc -> m.service().deleteMessage(dmId, mine));
+        ctx.waitFor(mc -> find(st.history(dmId).messages, x -> x.id().equals(mine) && x.deleted()) != null, 10 * SEC);
+        log("edit + delete ok");
+
+        String miraId = ctx.computeOnClient(mc -> friend(m, "Mira").user().id());
+        String junoId = ctx.computeOnClient(mc -> friend(m, "Juno").user().id());
+        var created = await(ctx, ctx.computeOnClient(mc -> m.service().createGroup("Seal squad", List.of(miraId))));
+        check(created != null && created.members().size() == 2, "group created with 2 members");
+        await(ctx, ctx.computeOnClient(mc -> m.service().renameGroup(created.id(), "Seal squad 2")));
+        await(ctx, ctx.computeOnClient(mc -> m.service().addMembers(created.id(), List.of(junoId))));
+        ctx.waitFor(mc -> st.chats.get(created.id()) != null && "Seal squad 2".equals(st.chats.get(created.id()).name())
+                && st.chats.get(created.id()).members().size() == 3, 10 * SEC);
+        open(ctx, m, false, SidebarRoute.chat(created.id()));
+        ctx.waitFor(mc -> st.history(created.id()).loaded, 10 * SEC);
+        ctx.waitTicks(20);
+        ctx.takeScreenshot("social_07b_own_group_system_messages");
+        await(ctx, ctx.computeOnClient(mc -> m.service().removeMember(created.id(), st.selfId())));
+        ctx.waitFor(mc -> !st.chats.containsKey(created.id()), 10 * SEC);
+        log("own group create/rename/add/leave ok");
     }
 
     /** Network drop → reconnect with resume; an event produced while offline (me.updated) is replayed. */
