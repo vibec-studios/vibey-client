@@ -30,7 +30,8 @@ final class MpPauseMenu {
         // "Open to LAN" before hosting, "Player Reporting" in the same slot once the world is published.
         Button lan = find(widgets, "menu.shareToLan");
         if (lan == null) lan = find(widgets, "menu.playerReporting");
-        if (lan != null) {
+        // 26.3 has no LAN button and "Player Reporting" is a 20 px icon there: too small for the label
+        if (lan != null && lan.getWidth() >= 60) {
             Button replacement = Button.builder(label(), b -> open(screen))
                     .bounds(lan.getX(), lan.getY(), lan.getWidth(), lan.getHeight()).build();
             remove.accept(lan);
