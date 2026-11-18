@@ -169,6 +169,7 @@ public final class DevTourB {
         List<Step> l = new ArrayList<>();
         Minecraft mc = Minecraft.getInstance();
         final boolean[] sawOnboarding = {false};
+        final String[] loadWarning = {null};
 
         // --- start: wait for the first real screen (vanilla accessibility onboarding, Vibey onboarding or title)
         l.add(check("game started", 20 * 180, () -> {
@@ -183,7 +184,17 @@ public final class DevTourB {
                 sawOnboarding[0] = true;
                 return true;
             }
-            if (s instanceof VibeyTitleScreen || s instanceof TitleScreen) return true;
+            if (s instanceof VibeyTitleScreen || s instanceof TitleScreen) {
+                if (loadWarning[0] != null) throw new IllegalStateException("mod loading warning screen: " + loadWarning[0]);
+                return true;
+            }
+            if (s.getClass().getSimpleName().equals("LoadingErrorScreen") && loadWarning[0] == null) {
+                // NeoForge's "Warning while loading mods" screen: note it, go on to the title screen
+                shot("loading_warning");
+                loadWarning[0] = s.getTitle().getString();
+                ClientCompat.openScreen(new TitleScreen());
+                return false;
+            }
             if (s.getClass().getSimpleName().contains("Onboarding") && stepTicks > 40) {
                 // a fresh game directory opens vanilla's accessibility onboarding first
                 mc.options.onboardAccessibility = false;
