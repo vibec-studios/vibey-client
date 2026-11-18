@@ -4,6 +4,7 @@
     "generic": "Dieser Server hat {0} Vibey-Funktion(en) ausgeschaltet, solange du hier spielst."
   },
   "badge": "Vom Server deaktiviert",
+  "badgeShort": "Server: aus",
   "badgeHint": "Dieser Server hat diese Funktion ausgeschaltet, solange du auf ihm spielst. Sie ist wieder da, sobald du ihn verlässt.",
   "notice": "Vom Server deaktiviert: {0}",
   "emotesOff": "Emotes sind auf diesem Server aus"

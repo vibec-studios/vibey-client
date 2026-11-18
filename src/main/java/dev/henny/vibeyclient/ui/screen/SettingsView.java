@@ -232,7 +232,12 @@ public final class SettingsView {
 
     /** Room for the "Disabled by this server" badge left of the control (0 when the server allows it). */
     private static int badgeSpace(Gfx g, Setting<?, ?> s) {
-        return s.serverDisabled() ? ServerBadge.width(g) + 6 : 0;
+        return s.serverDisabled() ? ServerBadge.width(g) + 6 + badgeGap(s) : 0;
+    }
+
+    /** Keybind rows may show a conflict icon left of the key button: keep the badge clear of it. */
+    private static int badgeGap(Setting<?, ?> s) {
+        return s instanceof KeybindSetting ? 16 : 0;
     }
 
     private static int rowHeight(Gfx g, Setting<?, ?> s, int w) {
@@ -251,7 +256,11 @@ public final class SettingsView {
         String name = Lang.tr(b.nameKey());
         boolean server = b.serverDisabled();
         int lw = tx - x - ROW_PAD - 6 - badgeSpace(g, b);
-        if (server) ServerBadge.drawRight(ui, b, tx - 6, y + (h - ServerBadge.H) / 2);
+        // a grid cell is narrow: the short badge when the full one would cut the label
+        boolean compact = server && g.width(name) > lw;
+        if (compact) lw = tx - x - ROW_PAD - 12 - ServerBadge.shortWidth(g);
+        if (compact) ServerBadge.drawShortRight(ui, b, tx - 6, y + (h - ServerBadge.H) / 2);
+        else if (server) ServerBadge.drawRight(ui, b, tx - 6, y + (h - ServerBadge.H) / 2);
         g.text(g.clip(name, lw), x + ROW_PAD, y + (h - 8) / 2, enabled && !server ? Theme.TEXT : Theme.MUTED);
         if (g.width(name) > lw) ui.tooltip(b.nameKey(), x, y, w, h, name);
         Widgets.drawToggle(ui, b, tx, y + (h - Widgets.TOGGLE_H) / 2, b.on(), true, hot);
@@ -273,7 +282,7 @@ public final class SettingsView {
         String name = Lang.tr(s.nameKey());
         int textColor = enabled && !s.serverDisabled() ? Theme.TEXT : Theme.MUTED;
         if (s.serverDisabled()) {
-            ServerBadge.drawRight(ui, s, x + w - ROW_PAD - controlWidth(g, s, w) - 6, y + (h - ServerBadge.H) / 2);
+            ServerBadge.drawRight(ui, s, x + w - ROW_PAD - controlWidth(g, s, w) - 6 - badgeGap(s), y + (h - ServerBadge.H) / 2);
         }
         if (desc.isEmpty()) {
             g.text(g.clip(name, labelW), tx, y + 9, textColor);

@@ -35,6 +35,15 @@ public final class ServerBadge {
         return g.width(label()) + 8;
     }
 
+    /** Short label for tight spots (switch grid cells): "Server: off". */
+    public static String shortLabel() {
+        return Lang.tr("serverrules.badgeShort");
+    }
+
+    public static int shortWidth(Gfx g) {
+        return g.width(shortLabel()) + 8;
+    }
+
     /** Tooltip: what it means, plus the server's own message. */
     public static String hint() {
         String m = ServerRules.message();
@@ -52,6 +61,15 @@ public final class ServerBadge {
         int w = Widgets.chip(ui.g, label(), x, y, Theme.WARN);
         ui.tooltip(KEYS.computeIfAbsent(owner, k -> new Object()), x, y, w, H, hint());
         return w;
+    }
+
+    /** The short badge ({@link #shortLabel()}), right-aligned so it ends at {@code right}. Returns its left x. */
+    public static int drawShortRight(Ui ui, Object owner, int right, int y) {
+        int w = shortWidth(ui.g);
+        int x = right - w;
+        Widgets.chip(ui.g, shortLabel(), x, y, Theme.WARN);
+        ui.tooltip(KEYS.computeIfAbsent(owner, k -> new Object()), x, y, w, H, label() + "\n" + hint());
+        return x;
     }
 
     /** Same, right-aligned so it ends at {@code right}. Returns its left x. */

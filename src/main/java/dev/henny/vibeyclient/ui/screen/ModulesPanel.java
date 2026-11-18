@@ -58,6 +58,14 @@ public final class ModulesPanel implements Panel {
         return lastPage == null ? null : lastPage.id();
     }
 
+    /** Scroll offset the open module page jumps to on its next frame (dev tests, DevDriver {@code scroll}); -1 = none. */
+    private static int testScroll = -1;
+
+    /** Dev tests: scrolls the open module page to {@code offset} px. */
+    public static void scrollPageTo(int offset) {
+        testScroll = offset;
+    }
+
     /** Which module page the next opened menu shows: a module id, or null for the grid. */
     public static void preselect(String moduleId) {
         lastPage = moduleId == null ? null : ModuleManager.get().get(moduleId);
@@ -314,6 +322,10 @@ public final class ModulesPanel implements Panel {
             return;
         }
         int cx = x + pad, cw = w - pad * 2;
+        if (testScroll >= 0) {
+            pageScroll.scrollTo(testScroll);
+            testScroll = -1;
+        }
         int cy = pageScroll.begin(ui, x, top, w, bodyH) + 12;
         cy = intro(ui, m, cx, cy, cw);
         cy = SettingsView.draw(ui, m.settings(), cx, cy, cw, runnable && m.isEnabled());
