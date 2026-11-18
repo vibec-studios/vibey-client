@@ -192,23 +192,48 @@ public final class AvatarDraw {
         return false;
     }
 
-    /** idle always, walk by walk speed (pets: by their own movement), fly, sneak. */
+    /** Cosmetic animation names with meaning (SPEC §5), in {@link #weights} order. Others are ignored. */
+    public static final String[] COSMETIC_ANIMS = {"idle", "walk", "fly", "sneak"};
+
+    /**
+     * Blend weights of idle / walk / fly / sneak for a cosmetic (missing animations weigh 0): walk by walk speed
+     * (pets: by their own movement), fly, sneak; idle gets the rest.
+     */
+    public static void weights(AvatarState st, Bundle b, Slot slot, float[] out) {
+        Animation walk = b.animation("walk"), fly = b.animation("fly"), sneak = b.animation("sneak");
+        out[1] = walk == null ? 0 : (slot == Slot.PET ? st.petMove : st.walk * (1f - st.fly));
+        out[2] = fly == null ? 0 : st.fly;
+        out[3] = sneak == null ? 0 : st.sneak * (1f - st.fly);
+        out[0] = b.animation("idle") == null ? 0 : Math.max(0f, 1f - out[1] - out[2] - out[3]);
+    }
+
+    private static final float[] W = new float[4];
+
+    /** idle always, walk / fly / sneak blended by {@link #weights}; visibility events follow the strongest animation that has some. */
     private static BoneRenderer.Mix cosmeticMix(AvatarState st, Bundle b, Slot slot, double now) {
-        Animation idle = b.animation("idle"), walk = b.animation("walk"), fly = b.animation("fly"), sneak = b.animation("sneak");
-        float wWalk = walk == null ? 0 : (slot == Slot.PET ? st.petMove : st.walk * (1f - st.fly));
-        float wFly = fly == null ? 0 : st.fly;
-        float wSneak = sneak == null ? 0 : st.sneak * (1f - st.fly);
-        float wIdle = idle == null ? 0 : Math.max(0f, 1f - wWalk - wFly - wSneak);
+        weights(st, b, slot, W);
         MIX.clear();
-        if (idle != null) {
-            float t = time(idle, now);
-            MIX.add(idle, t, wIdle);
-            MIX.visibility = idle;
-            MIX.visibilityTime = t;
+        float best = -1f;
+        for (int k = 0; k < COSMETIC_ANIMS.length; k++) {
+            Animation a = b.animation(COSMETIC_ANIMS[k]);
+            if (a == null) continue;
+            float t = time(a, now);
+            MIX.add(a, t, W[k]);
+            // idle keeps the visibility unless another animation with visibility events clearly dominates
+            float score = k == 0 ? Math.max(W[0], 0.5f) : W[k];
+            if (a.hasVisibility && score > best) {
+                best = score;
+                MIX.visibility = a;
+                MIX.visibilityTime = t;
+            }
         }
-        if (walk != null) MIX.add(walk, time(walk, now), wWalk);
-        if (fly != null) MIX.add(fly, time(fly, now), wFly);
-        if (sneak != null) MIX.add(sneak, time(sneak, now), wSneak);
+        if (MIX.visibility == null) {
+            Animation idle = b.animation("idle");
+            if (idle != null) {
+                MIX.visibility = idle;
+                MIX.visibilityTime = time(idle, now);
+            }
+        }
         return MIX;
     }
 

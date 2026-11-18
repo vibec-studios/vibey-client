@@ -1,0 +1,13 @@
+{
+  "_comment": "Exact Minecraft release ids (as in Mojang's version_manifest) each jar line supports, keyed by the target name after the loader (versions/<loader>-<key>). Used by the release manifest (tools/release-manifest.mjs) and checked against minecraft_range / minecraft_neo_range by ./gradlew checkMcVersions (part of buildAll). Add new patch releases here when a line gains one.",
+  "1.21.1": ["1.21", "1.21.1"],
+  "1.21.3": ["1.21.2", "1.21.3"],
+  "1.21.4": ["1.21.4"],
+  "1.21.5": ["1.21.5"],
+  "1.21.8": ["1.21.6", "1.21.7", "1.21.8"],
+  "1.21.10": ["1.21.9", "1.21.10"],
+  "1.21.11": ["1.21.11"],
+  "26.1": ["26.1", "26.1.1", "26.1.2"],
+  "26.2": ["26.2"],
+  "26.3": ["26.3"]
+}

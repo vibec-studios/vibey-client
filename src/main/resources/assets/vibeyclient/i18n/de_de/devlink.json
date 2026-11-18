@@ -44,5 +44,10 @@
     "warning": "1 Warnung – siehe Blockbench",
     "warnings": "{0} Warnungen – siehe Blockbench",
     "rejected": "{0} abgelehnt"
+  },
+  "submit": {
+    "signIn": "Melde dich zuerst bei Vibe an: Online-Funktionen an und das Spiel mit dem Vibe-Backend verbunden.",
+    "sent": "{0} an Vibe eingereicht",
+    "sentBody": "Das Vibe-Team prüft es; du bekommst einen Hinweis, wenn es freigegeben ist."
   }
 }

@@ -48,6 +48,7 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
     public final BoolSetting showShields = bool("show_shield", true);
     public final BoolSetting showHats = bool("show_hat", true);
     public final BoolSetting showBacks = bool("show_back", true);
+    public final BoolSetting notifyNew = bool("notifyNew", true);
     public final KeybindSetting wardrobeKey = keybind("wardrobe", Keys.UNBOUND).onPress(this::openWardrobe);
 
     private final LoadoutSync sync = new LoadoutSync(this);
@@ -86,10 +87,16 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
             else ItemLoader.dropCatalog();
         });
         on(VibeyEvents.BackendConnected.class, e -> ItemLoader.refreshCatalog(false));
+        // another backend has another catalog
+        GlobalSettings.backendUrl.onChange(v -> {
+            ItemLoader.dropCatalog();
+            ItemLoader.refreshCatalog(true);
+        });
         for (BoolSetting s : new BoolSetting[]{showOwn, showOthers, hideWithArmor, showCapes, showWings, showAuras, showPets, showShields, showHats, showBacks}) {
             s.onChange(v -> applyConfig());
         }
         AvatarItems.addListener(this::applySelf);
+        ItemLoader.onNewItems = this::newItems;
         dev.henny.vibeyclient.module.cosmetics.ui.WardrobeUi.register();
     }
 
@@ -123,6 +130,33 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
     public void onWorldJoin() {
         AvatarStates.clear();
         applySelf();
+        ItemLoader.requestCatalog(3_000);
+    }
+
+    // ============================================================================================ OTA: new items
+
+    private final java.util.Set<String> pendingNew = new java.util.LinkedHashSet<>();
+
+    /** New catalog items or new grants (client thread): one toast per batch, a few seconds after the last change. */
+    void newItems(java.util.Set<String> ids) {
+        for (String id : ids) {
+            AvatarItem i = AvatarItems.get(id);
+            if (i != null && canUse(i)) pendingNew.add(id);
+        }
+        if (pendingNew.isEmpty() || !notifyNew.get()) {
+            pendingNew.clear();
+            return;
+        }
+        dev.henny.vibeyclient.api.Tasks.debounce("vibeyclient:cosmetics:new", 3_000, () -> dev.henny.vibeyclient.api.Tasks.onMain(() -> {
+            int n = pendingNew.size();
+            if (n == 0) return;
+            AvatarItem first = AvatarItems.get(pendingNew.iterator().next());
+            pendingNew.clear();
+            if (!isEnabled()) return;
+            String body = n == 1 && first != null ? tr("new.one", first.name()) : tr("new.many", n);
+            dev.henny.vibeyclient.api.service.Notify.show(new dev.henny.vibeyclient.api.service.Notify.Toast(tr("new.title"), body,
+                    dev.henny.vibeyclient.api.service.Notify.Kind.SUCCESS, null, this::openWardrobe));
+        }));
     }
 
     private void applyConfig() {
@@ -237,6 +271,7 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
     @Override
     public String lockedReason(AvatarItem item) {
         if (canUse(item)) return null;
+        if (item.needsUpdate()) return tr("locked.update");
         return GlobalSettings.online() && sync.backendReady() ? tr("locked.notUnlocked") : tr("locked.signIn");
     }
 

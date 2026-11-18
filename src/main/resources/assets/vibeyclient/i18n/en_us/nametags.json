@@ -1,0 +1,12 @@
+{
+  "name": "Nametag icons",
+  "description": "A small seal before the names of players who use Vibey Client, plus staff, supporter and creator badges.",
+  "setting": {
+    "nametag": "Icons in nametags",
+    "nametag.desc": "Before the name above players in the world.",
+    "tabList": "Icons in the tab list",
+    "tabList.desc": "Before the names in the player list (Tab).",
+    "badges": "Badges",
+    "badges.desc": "Staff, supporter and creator icons next to the seal."
+  }
+}

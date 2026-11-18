@@ -69,5 +69,7 @@
     "description": "Capes, wings, auras, pets and emotes. Everything is free.",
     "open": "Open wardrobe",
     "loadout": "Loadout"
-  }
+  },
+  "by": "by {0}",
+  "deletedUser": "deleted user"
 }

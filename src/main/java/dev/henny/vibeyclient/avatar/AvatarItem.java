@@ -10,6 +10,9 @@ import java.util.List;
  * the same {@link #id()}; compare items by id, never by identity.
  */
 public final class AvatarItem {
+    /** {@link #creator()} of an item whose creator deleted their account (shown localised). */
+    public static final String DELETED_CREATOR = "\u0000deleted";
+
     private final String id;
     private final Bundle.Kind kind;
     private final Slot slot;
@@ -28,10 +31,23 @@ public final class AvatarItem {
     private final String availability;
     private final Bundle bundle;
     private final long revision;
+    /** Name of the community creator (catalog `creator.name`), null for official items. */
+    private final String creator;
+    /** Lowest Vibey Client version that can use the item (catalog/bundle `minClientVersion`), or null. */
+    private final String minClientVersion;
 
     public AvatarItem(String id, Bundle.Kind kind, Slot slot, Bundle.Text name, Bundle.Text description, String author,
                       List<String> tags, Rarity rarity, ItemSource source, int sort, String thumbnail, String hash,
                       String availability, Bundle bundle, long revision) {
+        this(id, kind, slot, name, description, author, tags, rarity, source, sort, thumbnail, hash, availability, bundle,
+                revision, null, null);
+    }
+
+    public AvatarItem(String id, Bundle.Kind kind, Slot slot, Bundle.Text name, Bundle.Text description, String author,
+                      List<String> tags, Rarity rarity, ItemSource source, int sort, String thumbnail, String hash,
+                      String availability, Bundle bundle, long revision, String creator, String minClientVersion) {
+        this.creator = creator == null || creator.isBlank() ? null : creator;
+        this.minClientVersion = minClientVersion == null || minClientVersion.isBlank() ? null : minClientVersion;
         this.id = id;
         this.kind = kind;
         this.slot = slot;
@@ -76,6 +92,11 @@ public final class AvatarItem {
     public Bundle bundle() { return bundle; }
     /** Increases whenever the item (or its bundle) is replaced; for caches. */
     public long revision() { return revision; }
+    /** Community creator name ("by …" in the wardrobe), or null. */
+    public String creator() { return creator; }
+    public String minClientVersion() { return minClientVersion; }
+    /** The item needs a newer Vibey Client: shown greyed out with "Update Vibey Client", never rendered. */
+    public boolean needsUpdate() { return minClientVersion != null && !ClientVersion.satisfies(minClientVersion); }
 
     @Override
     public String toString() {

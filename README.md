@@ -70,6 +70,9 @@ Friends on the Vibe backend, logged in with your Minecraft account (no extra reg
   friends, nobody), whether friends see the worlds you host, hide the server address, do not disturb.
 - **Account tab:** status text, logged-in devices (log any of them out), blocked players, log out.
 - Sidebar on **G**, or full screen with the maximize button.
+- **Nametag icons:** a small seal before the name of everyone who plays with Vibey Client (above their head and in
+  the tab list), plus staff, supporter and creator badges. Module *Nametag icons*, with separate switches for the
+  nametag, the tab list and the badges.
 
 | Invite toast in game | Group chat |
 |---|---|
@@ -92,6 +95,8 @@ Friends on the Vibe backend, logged in with your Minecraft account (no extra reg
 - **Hidden under armor** where it makes sense (e.g. hats under helmets). Show or hide your own and other players'
   cosmetics, per slot.
 - Works offline too: the starter set ships inside the jar.
+- **New cosmetics arrive over the air:** no client update needed – new and updated items download in the background
+  and show up in the wardrobe (with a short notice), equipped items stay equipped.
 
 | Crystal Ice Wings + Ice Crown | Snowflake Orbit + Pixel Penguin |
 |---|---|
@@ -270,6 +275,20 @@ a hosted world accept dev accounts without a Mojang session (for invite tests th
 
 Default backend (`https://vibe.henny.dev`) and relay are set in `gradle.properties` and baked into the generated
 `BuildInfo` class.
+
+### Releases
+
+1. Bump `mod_version` (`gradle.properties`), `version` in `blockbench/package.json` and `VERSION` in `blockbench/vibey.js`;
+   add a `## <version>` section to `CHANGELOG.md`. New Minecraft patch versions of a line go into
+   `gradle/mc-versions.json` (checked by `./gradlew checkMcVersions`).
+2. Check locally: `./gradlew buildAll`, then `node tools/release-manifest.mjs` prints the manifest for `build/dist`
+   (`node --test tools/release-manifest.test.mjs` for the script itself).
+3. Merge to `main` and publish a GitHub release with tag `v<version>` (`-beta.N` etc. = beta channel). The release
+   text becomes the changelog (empty = the CHANGELOG.md section). `.github/workflows/release.yml` builds all jars,
+   attaches them to the release and publishes to the Vibe backend (files staged in batches below the 100 MB proxy
+   limit, then the release by sha256; secret `CLIENT_PUBLISH_TOKEN`). Re-running is safe (409 = already published).
+   Test against a local backend instead of production: `CLIENT_PUBLISH_TOKEN=<local> node tools/release-manifest.mjs
+   --tag v<version> --publish http://127.0.0.1:<port>/internal/client/v1/releases`.
 
 Layout: common, server-safe code in `dev.henny.vibeyclient` (`Vibey`, `Platform`, `Compat`, `net/`), client core in
 `client/`, the module API in `api/`, UI in `ui/`, the cosmetics/emotes engine in `avatar/`, modules in

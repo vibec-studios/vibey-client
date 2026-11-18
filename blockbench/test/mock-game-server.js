@@ -5,6 +5,8 @@
  * - binds 127.0.0.1 only, rejects non-loopback peers and wrong tokens with close code 4001
  * - max message size 8 MiB
  * - hello -> welcome, push -> pushed | error (bundle validated against SPEC §5), remove, ping -> pong
+ * - submit -> submitted, submissions -> submissions, withdraw -> withdrawn (Submit to Vibe, answered with the
+ *   requestId like the game does after forwarding to the backend); options.signedIn === false answers with errors
  *
  * CLI:  node test/mock-game-server.js [--port 47821] [--token abc...] [--game-dir <dir>]
  *       writes <game-dir>/vibeyclient/devlink.json so "Find game automatically" works.
@@ -29,6 +31,7 @@ function createMockGame(options = {}) {
 		items: new Map(), // dev items by id
 		rejected: [], // { reason, code }
 		listeners: [],
+		submissions: [], // what the game would have forwarded to POST /api/v1/cosmetics/submissions
 	};
 	const remoteAddressOf = options.remoteAddressOf || ((req) => req.socket.remoteAddress);
 	const wss = new WebSocketServer({ host: '127.0.0.1', port: options.port || 0, maxPayload: 8 * 1024 * 1024 });
@@ -87,6 +90,27 @@ function createMockGame(options = {}) {
 					}
 					notify('push', entry);
 					return;
+				}
+				case 'submit': {
+					if (options.signedIn === false) return send({ type: 'error', id: null, requestId: msg.requestId, message: 'Sign in to Vibe first' });
+					const result = validate(msg.bundle);
+					if (result.errors.length) return send({ type: 'error', id: null, requestId: msg.requestId, message: 'Invalid bundle: ' + result.errors.join('; ') });
+					const submission = {
+						id: 'sub_' + (state.submissions.length + 1), name: msg.name || msg.bundle.name.en, description: msg.description || '',
+						kind: msg.bundle.kind, slot: (msg.bundle.cosmetic && msg.bundle.cosmetic.slot) || null, bundleId: msg.bundle.id,
+						status: 'pending', createdAt: new Date().toISOString(), thumbnail: !!msg.thumbnail,
+					};
+					state.submissions.push(submission);
+					notify('submit', { msg, submission });
+					return send({ type: 'submitted', requestId: msg.requestId, submission });
+				}
+				case 'submissions':
+					return send({ type: 'submissions', requestId: msg.requestId, submissions: state.submissions });
+				case 'withdraw': {
+					const sub = state.submissions.find((x) => x.id === msg.submissionId);
+					if (!sub || sub.status !== 'pending') return send({ type: 'error', id: null, requestId: msg.requestId, message: 'not found' });
+					sub.status = 'withdrawn';
+					return send({ type: 'withdrawn', requestId: msg.requestId, submission: sub });
 				}
 				case 'remove':
 					state.items.delete(msg.id);

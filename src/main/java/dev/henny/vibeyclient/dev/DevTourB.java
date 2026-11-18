@@ -312,6 +312,24 @@ public final class DevTourB {
         }).after(20));
         l.add(check("shield first person", 100, () -> shot("shield_first_person")).after(5));
 
+        // --- nametag icons on two fake players (one with Vibey + badges) and in the tab list
+        l.add(act("nametag players", () -> {
+            try {
+                NametagProbe.spawn(mc, 3.5);
+            } catch (Exception e) {
+                throw new IllegalStateException(e);
+            }
+            mc.options.setCameraType(CameraType.FIRST_PERSON);
+            face(mc, 0f, 0f);
+        }).after(5));
+        l.add(check("nametag icons", 100, () -> shot("nametag_icons")).after(20));
+        l.add(act("tab list down", () -> mc.options.keyPlayerList.setDown(true)).after(5));
+        l.add(check("tab list icons", 100, () -> shot("tablist_icons")).after(10));
+        l.add(act("nametag players gone", () -> {
+            mc.options.keyPlayerList.setDown(false);
+            NametagProbe.remove(mc);
+        }).after(5));
+
         // --- emotes
         emote(l, mc, "wave", 18);
         emote(l, mc, "guitar", 24);

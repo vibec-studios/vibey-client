@@ -28,6 +28,18 @@ public interface VibeBackend {
      */
     CompletableFuture<JsonElement> request(String method, String path, JsonElement body);
 
+    /** One part of a multipart request ({@code filename}/{@code contentType} null for plain fields). */
+    record Part(String name, String filename, String contentType, byte[] bytes) {
+        public static Part field(String name, String value) {
+            return new Part(name, null, null, value.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        }
+    }
+
+    /** Authenticated multipart POST (uploads, e.g. cosmetic submissions). Same errors as {@link #request}. */
+    default CompletableFuture<JsonElement> requestMultipart(String path, java.util.List<Part> parts) {
+        return CompletableFuture.failedFuture(new ApiException(0, "unsupported", "multipart not supported"));
+    }
+
     /** Sends a client op over the gateway ({@code {"op": op, "d": d}}); dropped when not connected. */
     void sendOp(String op, JsonObject d);
 

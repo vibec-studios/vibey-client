@@ -2,6 +2,53 @@
 
 All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.properties`.
 
+## 0.2.0 – nametag icons and over-the-air cosmetics
+
+### Nametag icons
+
+- A small seal before the name of everyone who plays with Vibey Client – above their head in the world and in the
+  tab list – plus badges for Vibe staff, supporters and creators.
+- New module *Nametag icons* with switches for the nametag, the tab list and the badges. The icons are a tiny font
+  of their own, so other mods that change nametags keep working.
+- Players are recognised through the Vibe backend and, without online features, through the server channel when the
+  server also runs Vibey Client (the server now tells everyone who has the mod).
+
+### Over-the-air cosmetics
+
+- New and updated cosmetics and emotes arrive without a client update: the client reloads the catalog when the
+  backend announces a change, after reconnecting, when you join a world and every ~10 minutes.
+- Downloads run in the background and in parallel; updated items swap in without a hitch and stay equipped.
+  Unchanged items are no longer re-read on every catalog check.
+- *New cosmetics available* notice when new items or newly unlocked items arrive (can be switched off under
+  *Cosmetics*).
+- Community items show *by <creator>* in the wardrobe.
+- Items made for a newer Vibey Client are listed greyed out with *Update Vibey Client* instead of failing.
+
+### Cosmetics engine
+
+- `walk`, `fly` and `sneak` animations of cosmetics can now fire particles and sounds too (only `idle` did), and
+  visibility toggles follow the animation that is playing.
+- More forgiving with files from newer tools: unknown attach points, interpolations, event types and fields are
+  skipped with a warning instead of rejecting the item; `minClientVersion` for items that need a newer client.
+
+### Creator tools
+
+- Blockbench plugin: **Submit to Vibe** sends your item to the Vibe team for review through the running game (its
+  Vibe login), with an optional thumbnail from the viewport; **My submissions** shows the status and lets you
+  withdraw open ones. Approved items reach every player over the air.
+- Blockbench plugin version 0.2.0 (now versioned together with the mod).
+
+### Distribution
+
+- Releases are built and published by CI (`.github/workflows/release.yml`) to the Vibe backend, where the Vibe
+  launcher installs the right jar for each Minecraft version (exact versions per jar in `gradle/mc-versions.json`).
+
+### Fixes
+
+- Minecraft 26.x: the dev tours can place client-side test players again.
+- Emote locators placed on player bones (e.g. `right_arm`) now follow the arm (particles and sounds came from the
+  player's position).
+
 ## 0.1.0 – first version
 
 The first version of Vibey Client: one modular client mod by Vibe Craft Studios for Fabric and NeoForge,

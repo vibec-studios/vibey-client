@@ -1,0 +1,99 @@
+{
+  "format": "vibey",
+  "formatVersion": 1,
+  "kind": "cosmetic",
+  "id": "vibeytest:sparkle_hat",
+  "name": {"en":"Audit Sparkle Hat","de":"Audit Sparkle Hat"},
+  "author": "Vibey audit",
+  "tags": ["audit"],
+  "rarity": "rare",
+  "future": {"hologram":true,"version":7},
+  "cosmetic": {"slot":"hat","hideWithArmor":["head","tail"],"hatPhysics":{"wobble":2}},
+  "textures": [
+    {
+      "id": "main",
+      "width": 16,
+      "height": 16,
+      "png": "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAq0lEQVR42u3bMQ2AMBAF0IMghJ2RAWFIYAUfCMAEAtADaRoQwb0b2vxuvVzf1mbs1zsSV1eWZZnjOuvBMNU9Q96PrTaghEwX//IR0Uby6t5uZHwCpUwAA0wAA0wAAxjAAAYwgAEMYAADGMAABjCAAQxgAAMYwAAGMIABDGAAAxjAAAYwgAEMYAADGMAABjCAAQxgAAMYwAAGMIABDGAAAxjAAAb8xYAm+/f5B51sEvdgfsaeAAAAAElFTkSuQmCC",
+      "mipmaps": "auto"
+    }
+  ],
+  "sprites": [{"id":"spark","texture":"main","uv":[0,0,4,4]}],
+  "sounds": [
+    {
+      "id": "pop",
+      "ogg": "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AEAqAIDBcSzL80RRNWXZsSTPE0XTVFXbdizL80TRNFXVti3PE0XTVFXX1XXL80TRVFXVdXXdE0XVVFXXlWXf90TRNFXVdWXZ903TdFXXlWXb9n3TNFXXdWVZtn1hdVXXlWXb1m1jWFXXdWXZtm1dOW7d1nXhF4ZhmNq67vu+LwzH8EwDAMATHACACmxYHeGkaCyw0JCVAEAGAABhDEIGIYUMQkghhZRCSCklAABgwAEAIMCEMlBoyEoAIBUAACDEWmuttdZaYqm11lprrbWGSmuttdZaa6211lprrbXWWmuttdZaa6211lprrbXWWmuttZRSSimllFJKKaWUUkoppZRSSimllFJKKaWUUkoppZRSSimllFJKKaWUUkoppZRSSimllFJKKRUA6FfhAOD/YMPqCCdFY4GFhqwEAMIBAABjlGIMOukkpNQw5RiEUlJJpZVGMecglJJSSq1VzklIpaXWWouxck5KSSm1FluMHYSUWmotxhhj7CCklFprMcYYYyilpRhjrDHWWkNJqbUYY4w111pSai3GWmutufeSUosxxlxr7rmX1mKsteacc849tRZjrTXn3HPwqbUYY8619957UK3FWGuuOQfhewEA3A0OABAJNs6wknRWOBpcaMhKACAkAIBAiDHGnHMOQgghREox5pxzEEIIIYRIKcaccw5CCCGEkDHmnHMQQgihlFIyxpxzDkIIJZRQSuaccxBCCKGUUkrJnHMOQgghlFJKKR10EEIIoZRSSimlcw5CCKGUUkoppYQQQiillFJKKaWUEEIIpZRSSimllBJCCKWUUkoppZRSQgihlFJKKaWkUkoIoZRSSimllFJKCSGUUkoppZRSSimhhFJKKaWUUkopJZRQSimllFJKKqUUAABw4AAAEGAEnWRUWYSNJlx4AAoNWQkAAAEAIM5abClGRjHnIIbIIMQghgopxZy1DCmDHKZMKYSUlc4xhoiTFlsLFQMAAEAQAEAgZAKBAigwkAEABwgJUgBAYYGhQ4QIEKPAwLi4tAEACEJkhkhELAaJCdVAUTEdACwuMOQDQIbGRtrFBXQZ4IIu7joQQhCCEMTiAApIwMEJNzzxhifc4ASdolIHAQAAAABwAAAPAADHBhAR0RxHh8cHSIjICElJAAAAAADgAMAHAMBhAkRENMfR4fEBEiIyQlISAAAAAAAAAAAABAQEAAAAAAACAAAABARPZ2dTAASQGwAAAAAAAAAAAAACAAAA9NB79QoeJEAvKyk4UJYwZI6f/h2H5/1nyH8yjgOAAAAAELeYP75dCws5GA4ALLZ/8pM4zhP/pHBzx12AAAQANLXfrmATmhsWhXd5T+RSbLIAGike9cv//03K34DnroBDJ7GxHS+vj+zINQAiAAAAAEA8/vVIU4nqq7u97V/W+dn2fd/3ff981Q0oq6vh7c0CAP4IXoY9pO4lUb/hfYADMo5x6/7sPybMcycAAAAAAAAAqIxjfH+IqdvUXDNiAQAA3vjdh98E2q8iveFEWUB4AQBAAAAAAADA2bDJCAATWeHYRc/OvSWXmgYACp64/WdYpGgTdcKOfwCkCQAAAgoAAAAA7K8FAIBQ8oG3z40EwN18JyAAHnj9HztJ8VIvsONvgDQBAAhISQEAAACwtxgAwAQTHj7nkgEw9RSmLhihLh1RSQbJoXNKSTJ0QAF+N/03LJK9q4/yh51pQJoAAGyVKcAAAIDzkwBASCEdTzt7kgAueE6pXZonZkE6S3nOzJjMUAefG3m9FykgE/J8bXcc4JhxvFs/oxiACQ9UAt62/BXO1x/iE9OOBEgLAFBJV8+qkgIAONwOMHlQGkX9e693tLNGHOOHyuvY8vU8115ue99NMzxAL9gaQt2FWE0Z5WxR9UtN3o7FU7gP1wST8xRXMNcGAqbVWwMbUiZEQiY3e0Wtp5BCOCdQrI1pM1enDf0Qqq1KvVpxvTu5xRK5AFOU10igSnOS0luutuAJsUJIU4FgAv6V3FyU/9uFAzewsX3EuK/LuTcGBQAAAACIa62cJidTM+968Iw+yMYVNKanO5fDAA=="
+    }
+  ],
+  "model": {
+    "texture": "main",
+    "bones": [
+      {
+        "name": "brim",
+        "parent": null,
+        "attach": "head",
+        "pivot": [0,32,0],
+        "rotation": [0,0,0],
+        "physics": {"spring":0.4},
+        "cubes": [{"from":[-5,32,-5],"to":[5,33,5],"uv":{"box":[0,0]},"bevel":1}]
+      },
+      {
+        "name": "orbit",
+        "parent": "brim",
+        "pivot": [0,33,0],
+        "rotation": [0,0,0],
+        "cubes": [{"from":[5,34,-1],"to":[7,36,1],"uv":{"box":[0,0]}}],
+        "emissive": true
+      }
+    ],
+    "locators": {"orbit_tip":{"bone":"orbit","position":[6,36,0]},"crown":{"bone":"brim","position":[0,34,0]}}
+  },
+  "animations": {
+    "idle": {
+      "length": 2,
+      "loop": true,
+      "bones": {
+        "orbit": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.5,"v":[0,90,0],"i":"catmullrom"},
+            {"t":1,"v":[0,180,0],"i":"catmullrom"},
+            {"t":1.5,"v":[0,270,0],"i":"catmullrom"},
+            {"t":2,"v":[0,360,0],"i":"catmullrom"}
+          ]
+        },
+        "brim": {"position":[{"t":0,"v":[0,0,0]},{"t":1,"v":[0,0.5,0],"i":"elastic"},{"t":2,"v":[0,0,0]}]}
+      },
+      "events": [
+        {"t":0,"type":"sound","sound":"minecraft:block.amethyst_block.chime","volume":0.3,"pitch":1.4},
+        {
+          "t": 0.25,
+          "type": "particle",
+          "particle": "minecraft:end_rod",
+          "locator": "orbit_tip",
+          "count": 2,
+          "spread": [0.02,0.02,0.02],
+          "velocity": [0,0.01,0]
+        },
+        {
+          "t": 0.75,
+          "type": "particle",
+          "sprite": "spark",
+          "locator": "orbit_tip",
+          "count": 3,
+          "lifetime": 0.6,
+          "size": 0.12,
+          "spread": [0.05,0.05,0.05],
+          "velocity": [0,0.02,0],
+          "gravity": -0.002,
+          "emissive": true
+        },
+        {"t":1.25,"type":"particle","particle":"heart","locator":"crown","count":1},
+        {"t":1.5,"type":"sound","sound":"pop","locator":"orbit_tip","volume":0.4,"pitch":1.2},
+        {"t":1.75,"type":"light","color":"#ffffff","radius":3},
+        {"t":1.9,"type":"particle","particle":"minecraft:dust","locator":"crown"}
+      ]
+    },
+    "celebrate": {"length":1,"loop":false,"bones":{"brim":{"scale":[{"t":0,"v":[1,1,1]},{"t":1,"v":[2,2,2]}]}}}
+  }
+}

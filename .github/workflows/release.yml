@@ -1,0 +1,122 @@
+name: Release
+
+# Builds every jar + the Blockbench plugin for a version tag, attaches them to the GitHub release and publishes the
+# release to the Vibe backend (vibe-launcher/docs/VIBE-API-2.md §2), where the launcher and website pick it up.
+#
+# Cut a release: bump mod_version (gradle.properties) and blockbench/package.json + VERSION in blockbench/vibey.js,
+# add a "## <version>" section to CHANGELOG.md, merge to main, then publish a GitHub release with tag v<version>
+# (the release text becomes the changelog; empty = the CHANGELOG.md section). A tag "v0.3.0-beta.1" (any "-pre"
+# suffix) goes to the beta channel. Pushing a v* tag without a release creates the release.
+# Re-running for a version the backend already has is fine (409 = already published).
+
+on:
+  release:
+    types: [published]
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release (e.g. v0.2.0)"
+        required: true
+      publish:
+        description: "Publish to the Vibe backend (off = build, attach and print the manifest only)"
+        type: boolean
+        default: true
+
+concurrency:
+  # one run per tag; a release event and its tag push must not publish twice at the same time
+  group: release-${{ github.event.release.tag_name || inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  TAG: ${{ github.event.release.tag_name || inputs.tag || github.ref_name }}
+  PUBLISH_URL: https://vibe.henny.dev/internal/client/v1/releases
+
+jobs:
+  release:
+    name: Build, attach and publish
+    runs-on: ubuntu-latest # free GitHub-hosted runner
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      # 1.21.x builds with Java 21, 26.x needs Java 25.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: |
+            21
+            25
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Check the version before building
+        run: |
+          node --test tools/release-manifest.test.mjs
+          v="${TAG#v}"
+          mod="$(sed -n 's/^mod_version=//p' gradle.properties | tr -d '\r')"
+          if [ "${v%%-*}" != "${mod%%-*}" ]; then echo "::error::tag $TAG does not match mod_version $mod"; exit 1; fi
+
+      - name: Build all jars
+        run: >
+          ./gradlew buildAll --stacktrace
+          -Porg.gradle.java.installations.auto-download=false
+          -Porg.gradle.java.installations.fromEnv=JAVA_HOME_21_X64,JAVA_HOME_25_X64
+
+      - name: Blockbench plugin tests
+        working-directory: blockbench
+        run: |
+          npm ci || npm install
+          npm test
+
+      - name: Release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_BODY: ${{ github.event.release.body }}
+        run: |
+          mkdir -p build/release
+          if [ -n "$EVENT_BODY" ]; then
+            printf '%s\n' "$EVENT_BODY" > build/release/notes.md
+          else
+            gh release view "$TAG" --json body --jq .body > build/release/notes.md 2>/dev/null || : > build/release/notes.md
+          fi
+
+      - name: Manifest
+        run: node tools/release-manifest.mjs --tag "$TAG" --changelog-file build/release/notes.md --out build/release/manifest.json
+
+      - name: Attach jars to the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          files=(build/dist/*.jar blockbench/vibey.js build/release/manifest.json)
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "${files[@]}" --clobber
+          else
+            # tag pushed without a release: create it with the changelog section
+            node -e "const m=require('./build/release/manifest.json');require('fs').writeFileSync('build/release/body.md',m.changelog)"
+            pre=""; case "$TAG" in *-*) pre="--prerelease";; esac
+            gh release create "$TAG" "${files[@]}" --title "Vibey Client ${TAG#v}" --notes-file build/release/body.md $pre
+          fi
+
+      - name: Publish to the Vibe backend
+        if: github.event_name != 'workflow_dispatch' || inputs.publish
+        env:
+          CLIENT_PUBLISH_TOKEN: ${{ secrets.CLIENT_PUBLISH_TOKEN }}
+        run: |
+          if [ -z "$CLIENT_PUBLISH_TOKEN" ]; then echo "::error::secret CLIENT_PUBLISH_TOKEN is not set"; exit 1; fi
+          set +e
+          node tools/release-manifest.mjs --tag "$TAG" --changelog-file build/release/notes.md --quiet --publish "$PUBLISH_URL"
+          code=$?
+          set -e
+          if [ "$code" = "3" ]; then echo "::notice::${TAG#v} is already published on the backend"; exit 0; fi
+          exit $code

@@ -255,6 +255,14 @@ animations wrap; emotes fade in/out over 0.15 s when starting/stopping. Cosmetic
 9. *Catmull-Rom in looping animations* (≥ 3 keys): like Blockbench, the missing neighbour at either end is taken
    from the other end of the loop.
 
+**Forward compatibility (client, binding since 0.2.0):** unknown fields are ignored everywhere; unknown event types
+and animation names are skipped, unknown interpolations play as `linear`, unknown `attach` values fall back to
+`body` (emotes `root`) – all with a warning. Optional top-level `minClientVersion` (also a catalog item field):
+clients older than that (and clients that see `formatVersion` > 1) list the item greyed out ("Update Vibey Client")
+and never render it. Unknown `kind`/`slot` values make the item invisible to that client (logged once).
+Cosmetic animation events: `idle` always, `walk`/`fly`/`sneak` while that animation has ≥ 50 % weight;
+visibility follows the strongest playing animation that has visibility events.
+
 Validation rules (client + backend): `format == "vibey"`, `formatVersion == 1`, `id` matches
 `^[a-z0-9_.-]+:[a-z0-9_./-]+$`, kind/slot valid, all referenced textures/bones/sounds/sprites exist, textures are
 PNG ≤ 512×512 (animated strips ≤ 512×4096), ≤ 256 bones, ≤ 2048 cubes, sounds OGG ≤ 512 KiB each.
@@ -271,7 +279,9 @@ Two independent channels; the client uses whatever is available and merges by pl
    S→C: `{uuid, slots}`), `vibeyclient:emote` (C→S: `{emoteId, action: play|stop}`; S→C: `{uuid, emoteId, action,
    startTick}`), plus the generic module envelope `vibeyclient:msg` (C→S: `{target uuid or nil, channel, bytes ≤ 8 KiB}`;
    S→C: `{sender uuid, channel, bytes}`, used by `VibeyNet.channel(...)`). The server just validates sizes/rates and
-   relays to every other player that sent `hello`. Asset
+   relays to every other player that sent `hello`. Since 0.2.0 it also announces peers: on `hello` the newcomer gets
+   a (possibly empty) `loadout` of every peer and every peer an empty `loadout` of the newcomer, so clients know who
+   runs Vibey Client (nametag icons, see §11). Asset
    bytes never go over the server channel – clients fetch bundles by id from the backend catalog or use built-ins.
 
 Built-in starter bundles also ship inside the jar (`assets/vibeyclient/builtin/*.vibey`) so cosmetics work offline
@@ -343,6 +353,13 @@ startup as `availability: default` (upsert by id when the hash changed; admin ed
     `{ "type": "pushed", "id": "…", "ok": true, "warnings": [] }` or `{ "type": "error", "id": "…", "message": "…" }`.
   - plugin → game `{ "type": "remove", "id": "…" }`, `{ "type": "ping" }` ↔ `{ "type": "pong" }`.
   - game → plugin `{ "type": "log", "level": "info"|"warn", "message": "…" }` (optional).
+  - Submit to Vibe (since 0.2.0; the game forwards with its own Vibe login, VIBE-API-2 §3), every request carries a
+    `requestId` that the answer repeats; failures are `{ "type": "error", "requestId", "message", "code"? }`:
+    plugin → game `{ "type": "submit", "requestId", "bundle": {…}, "name", "description", "thumbnail"?: "<base64 PNG ≤ 256×256>" }`
+    → `{ "type": "submitted", "requestId", "submission": {…} }` (multipart `POST /api/v1/cosmetics/submissions`);
+    `{ "type": "submissions", "requestId" }` → `{ "type": "submissions", "requestId", "submissions": […] }`;
+    `{ "type": "withdraw", "requestId", "submissionId" }` → `{ "type": "withdrawn", "requestId", "submission" }`.
+    game → plugin `{ "type": "submission", "submission": {…} }` when the gateway reports `submission.updated`.
 - Plugin side: auto-push on change (debounced ~300 ms, toggle), "Push now", "Play emote", connection status in the
   status bar.
 
@@ -365,3 +382,21 @@ particle/sound events via Blockbench effect keyframes (or a custom panel), embed
 - No per-frame stutter: no blocking I/O on the render thread, assets load async, textures upload on the main
   thread in small batches.
 - German and English for every user-facing string.
+
+## 11. Round 2 (0.2.0): nametag icons, OTA cosmetics, distribution
+
+Contract with the backend: `vibe-launcher/docs/VIBE-API-2.md`. Client side:
+
+- **Nametag icons** (module `nametags`): a seal glyph before the name of players who run Vibey Client (lookup
+  `client == "vibey"`, `loadout.updated`, any `vibeyclient:*` packet from them through the server, and ourselves) plus
+  badge glyphs (`staff`, `creator`, `supporter`; unknown badges ignored, max 2) in the world nametag and the tab list.
+  Glyphs U+E000–E003 of the own bitmap font `vibeyclient:icons`, prepended as a component (the vanilla name
+  component is kept). Settings: nametag, tab list, badges.
+- **OTA cosmetics:** catalog polled every 10 min (+0–3 min jitter), 3 s after world join, on `catalog.updated`
+  (0–5 s jitter) and when `ready.catalogVersion` differs; ETag/304; unchanged hashes keep their parsed bundle; new
+  assets download in parallel (4) on workers and swap in at once; owned list reloaded on `catalog.updated` (grants);
+  one "New cosmetics available" toast per batch (setting). Catalog `creator` → "by <name>" in the wardrobe (the
+  all-zero UUID = deleted user, localised).
+- **Release:** `.github/workflows/release.yml` + `tools/release-manifest.mjs` (exact Minecraft versions per jar in
+  `gradle/mc-versions.json`, checked by `./gradlew checkMcVersions`); files are staged in batches below the proxy
+  limit, then the release is created by sha256.

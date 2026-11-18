@@ -48,11 +48,14 @@ public final class AvatarState {
     public final Map<String, double[]> locators = new HashMap<>();
     /** Last processed animation-local time per (slot) for cosmetic idle events. */
     public final float[] idleEventTime = new float[Slot.all().length];
+    /** Event clocks of the walk / fly / sneak animations per slot ([slot * 3 + k]), -1 = not running. */
+    public final float[] moveEventTime = new float[Slot.all().length * 3];
 
     public AvatarState(UUID uuid, boolean preview) {
         this.uuid = uuid;
         this.preview = preview;
         java.util.Arrays.fill(idleEventTime, -1f);
+        java.util.Arrays.fill(moveEventTime, -1f);
     }
 
     /** Item id shown in {@code slot} (respecting preview overrides). */

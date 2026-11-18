@@ -1,0 +1,32 @@
+{
+  "format": "vibey",
+  "formatVersion": 1,
+  "kind": "cosmetic",
+  "id": "vibeytest:needs_update",
+  "name": {"en":"Audit Needs Update","de":"Audit Needs Update"},
+  "author": "Vibey audit",
+  "tags": ["audit"],
+  "rarity": "rare",
+  "minClientVersion": "9.0.0",
+  "cosmetic": {"slot":"hat"},
+  "textures": [
+    {
+      "id": "main",
+      "width": 16,
+      "height": 16,
+      "png": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAARklEQVR42mP88uXrfwYKAAuIKC9vYFi7dhVYIDg4DEwTw79z5xrEABCHFI3IfCYGCgEjKAwo8QLFLhgNg9EwoEoYMFKanQF37n9yb4eyvAAAAABJRU5ErkJggg=="
+    }
+  ],
+  "model": {
+    "texture": "main",
+    "bones": [
+      {
+        "name": "b",
+        "parent": null,
+        "attach": "head",
+        "pivot": [0,32,0],
+        "cubes": [{"from":[-1,32,-1],"to":[1,34,1],"uv":{"box":[0,0]}}]
+      }
+    ]
+  }
+}

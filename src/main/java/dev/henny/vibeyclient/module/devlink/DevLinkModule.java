@@ -51,6 +51,10 @@ public final class DevLinkModule extends VibeyModule {
 
     // Only touched on the control thread (except reads of the volatile status fields).
     private WebSocketServer server;
+    private volatile DevLinkProtocol protocol;
+    /** Backend we listen to for submission.updated (client thread). */
+    private dev.henny.vibeyclient.api.service.VibeBackend backend;
+    private AutoCloseable submissionListener;
     private Path writtenFile;
     private volatile State state = State.OFF;
     private volatile int listeningPort;
@@ -94,6 +98,29 @@ public final class DevLinkModule extends VibeyModule {
     }
 
     @Override
+    public void tick() {
+        // our submissions were reviewed: tell the Blockbench plugin (VIBE-API-2 §3, gateway submission.updated)
+        dev.henny.vibeyclient.api.service.VibeBackend b = Services.get(dev.henny.vibeyclient.api.service.VibeBackend.class).orElse(null);
+        if (b == backend) return;
+        if (submissionListener != null) {
+            try {
+                submissionListener.close();
+            } catch (Exception ignored) {
+            }
+            submissionListener = null;
+        }
+        backend = b;
+        if (b != null) submissionListener = b.onEvent("submission.updated", d -> {
+            DevLinkProtocol p = protocol;
+            if (p == null || !(d.get("submission") instanceof JsonObject sub)) return;
+            JsonObject o = new JsonObject();
+            o.addProperty("type", "submission");
+            o.add("submission", sub);
+            p.broadcast(o);
+        });
+    }
+
+    @Override
     public Panel createSettingsPanel() {
         return new DevLinkPanel(this);
     }
@@ -116,8 +143,9 @@ public final class DevLinkModule extends VibeyModule {
             return;
         }
         if (server != null) return;
+        DevLinkProtocol proto = new DevLinkProtocol(new GameSide(), Tasks::onMain);
         WebSocketServer s = new WebSocketServer(p, MAX_MESSAGE_BYTES, MAX_CONNECTIONS,
-                java.net.InetAddress::isLoopbackAddress, new DevLinkProtocol(new GameSide(), Tasks::onMain));
+                java.net.InetAddress::isLoopbackAddress, proto);
         try {
             s.start();
         } catch (BindException e) {
@@ -134,6 +162,7 @@ public final class DevLinkModule extends VibeyModule {
             return;
         }
         server = s;
+        protocol = proto;
         listeningPort = s.localPort();
         state = State.LISTENING;
         failure = "";
@@ -274,6 +303,51 @@ public final class DevLinkModule extends VibeyModule {
         public void rejected(String id, JsonObject bundle, String message) {
             if (!throttle("err:" + id + ":" + message, 3000)) return;
             Tasks.onMain(() -> Notify.error(tr("toast.rejected", displayName(bundle, id == null ? "?" : id)), message));
+        }
+
+        // ---------------------------------------------------------------- submit to Vibe (through our login)
+
+        private java.util.concurrent.CompletableFuture<dev.henny.vibeyclient.api.service.VibeBackend> ready() {
+            var b = Services.get(dev.henny.vibeyclient.api.service.VibeBackend.class).orElse(null);
+            if (b == null || !b.isReady())
+                return java.util.concurrent.CompletableFuture.failedFuture(new IllegalStateException(tr("submit.signIn")));
+            return java.util.concurrent.CompletableFuture.completedFuture(b);
+        }
+
+        private static JsonObject obj(JsonElement e) {
+            if (e instanceof JsonObject o) return o;
+            throw new IllegalStateException("unexpected answer from the backend");
+        }
+
+        @Override
+        public java.util.concurrent.CompletableFuture<JsonObject> submit(JsonObject bundle, String name, String description, byte[] thumbnail) {
+            byte[] bytes = bundle.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            try {
+                dev.henny.vibeyclient.avatar.bundle.BundleParser.parse(bytes); // same checks as the backend, faster feedback
+            } catch (RuntimeException e) {
+                return java.util.concurrent.CompletableFuture.failedFuture(new IllegalStateException("Invalid bundle: " + e.getMessage()));
+            }
+            String id = bundle.get("id") instanceof com.google.gson.JsonPrimitive p ? p.getAsString() : "bundle";
+            java.util.List<dev.henny.vibeyclient.api.service.VibeBackend.Part> parts = new java.util.ArrayList<>();
+            parts.add(new dev.henny.vibeyclient.api.service.VibeBackend.Part("bundle", id.replaceAll("[^a-z0-9_.-]", "_") + ".vibey", "application/json", bytes));
+            if (!name.isBlank()) parts.add(dev.henny.vibeyclient.api.service.VibeBackend.Part.field("name", name));
+            parts.add(dev.henny.vibeyclient.api.service.VibeBackend.Part.field("description", description));
+            if (thumbnail != null) parts.add(new dev.henny.vibeyclient.api.service.VibeBackend.Part("thumbnail", "thumbnail.png", "image/png", thumbnail));
+            return ready().thenCompose(b -> b.requestMultipart("/api/v1/cosmetics/submissions", parts)).thenApply(GameSide::obj)
+                    .whenComplete((r, e) -> {
+                        if (e == null) Tasks.onMain(() -> Notify.success(tr("submit.sent", displayName(bundle, id)), tr("submit.sentBody")));
+                    });
+        }
+
+        @Override
+        public java.util.concurrent.CompletableFuture<JsonObject> submissions() {
+            return ready().thenCompose(b -> b.request("GET", "/api/v1/cosmetics/submissions", null)).thenApply(GameSide::obj);
+        }
+
+        @Override
+        public java.util.concurrent.CompletableFuture<JsonObject> withdraw(String submissionId) {
+            String path = "/api/v1/cosmetics/submissions/" + java.net.URLEncoder.encode(submissionId, java.nio.charset.StandardCharsets.UTF_8);
+            return ready().thenCompose(b -> b.request("DELETE", path, null)).thenApply(GameSide::obj);
         }
 
         private void toast(Notify.Kind kind, String titleKey, Object[] titleArgs, String bodyKey, Object... bodyArgs) {

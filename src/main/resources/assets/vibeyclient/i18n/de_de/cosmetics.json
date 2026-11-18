@@ -14,11 +14,14 @@
     "show_hat": "Hüte",
     "show_back": "Rückenitems",
     "show_cape.desc": "Diesen Slot bei allen zeigen (nur auf deinem Bildschirm).",
-    "wardrobe": "Garderobe öffnen"
+    "wardrobe": "Garderobe öffnen",
+    "notifyNew": "Hinweis auf neue Cosmetics",
+    "notifyNew.desc": "Kurzer Hinweis, wenn neue Items in deiner Garderobe ankommen."
   },
   "locked": {
     "notUnlocked": "Nicht freigeschaltet",
-    "signIn": "Zum Benutzen anmelden"
+    "signIn": "Zum Benutzen anmelden",
+    "update": "Vibey Client aktualisieren"
   },
   "slot": {
     "cape": "Umhang",
@@ -28,5 +31,10 @@
     "shield": "Schild",
     "hat": "Hut",
     "back": "Rücken"
+  },
+  "new": {
+    "title": "Neue Cosmetics verfügbar",
+    "one": "{0} ist jetzt in deiner Garderobe.",
+    "many": "{0} neue Items in deiner Garderobe."
   }
 }

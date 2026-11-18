@@ -340,6 +340,25 @@ public final class DevTour {
         waitTicks(15);
         shot("14_cape_backpack_back");
 
+        step("nametag_icons");
+        run(mc -> {
+            requireWorld(mc);
+            hideHud(mc, false);
+            mc.options.setCameraType(CameraType.FIRST_PERSON);
+            look(mc, 0f, 0f);
+            NametagProbe.spawn(mc, 3.5);
+        });
+        waitTicks(20);
+        shot("15_nametag_icons");
+        run(mc -> mc.options.keyPlayerList.setDown(true));
+        waitTicks(10);
+        shot("16_tablist_icons");
+        run(mc -> {
+            mc.options.keyPlayerList.setDown(false);
+            NametagProbe.remove(mc);
+        });
+        waitTicks(5);
+
         step("emote_wave");
         emote("vibey:wave", 18, "20_emote_wave_front");
         step("emote_guitar");

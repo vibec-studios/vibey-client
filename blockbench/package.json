@@ -1,6 +1,6 @@
 {
   "name": "vibey-blockbench-plugin",
-  "version": "1.0.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Blockbench plugin for Vibey Client cosmetics and emotes (.vibey) with live link",
   "author": "Vibe Craft Studios",

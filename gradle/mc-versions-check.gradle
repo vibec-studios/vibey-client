@@ -1,0 +1,66 @@
+// ./gradlew checkMcVersions – gradle/mc-versions.json (exact Minecraft versions per jar, used by the release
+// manifest) must list every target, and every listed version must lie in the target's minecraft_range (Fabric,
+// ">=a <b") and minecraft_neo_range (NeoForge, "[a,b)"). Part of buildAll.
+import groovy.json.JsonSlurper
+
+tasks.register('checkMcVersions') {
+    group = 'verification'
+    description = 'Checks gradle/mc-versions.json against the version ranges of every target.'
+    def listFile = rootProject.file('gradle/mc-versions.json')
+    def versionsDir = rootProject.file('versions')
+    inputs.file(listFile)
+    inputs.files(fileTree(versionsDir) { include '*/gradle.properties' })
+    doLast {
+        def cmp = { String a, String b ->
+            def pa = a.tokenize('.').collect { it as int }, pb = b.tokenize('.').collect { it as int }
+            for (int i = 0; i < Math.max(pa.size(), pb.size()); i++) {
+                int x = i < pa.size() ? pa[i] : 0, y = i < pb.size() ? pb[i] : 0
+                if (x != y) return x <=> y
+            }
+            0
+        }
+        def inRange = { String v, String range ->
+            range = range.trim()
+            if (range.startsWith('[') || range.startsWith('(')) {
+                def m = range =~ /^([\[(])([^,]*),([^\])]*)([\])])$/
+                if (!m.matches()) throw new GradleException("cannot read range ${range}")
+                def lo = m.group(2).trim(), hi = m.group(3).trim()
+                if (lo && (m.group(1) == '[' ? cmp(v, lo) < 0 : cmp(v, lo) <= 0)) return false
+                if (hi && (m.group(4) == ']' ? cmp(v, hi) > 0 : cmp(v, hi) >= 0)) return false
+                return true
+            }
+            range.split(/\s+/).every { String c ->
+                def m = c =~ /^(>=|<=|>|<|=)?(.+)$/
+                m.matches()
+                def op = m.group(1) ?: '=', r = m.group(2)
+                int d = cmp(v, r)
+                switch (op) {
+                    case '>=': return d >= 0
+                    case '>': return d > 0
+                    case '<=': return d <= 0
+                    case '<': return d < 0
+                    default: return d == 0
+                }
+            }
+        }
+        def list = new JsonSlurper().parse(listFile, 'UTF-8') as Map
+        def problems = []
+        def keys = [] as Set
+        versionsDir.listFiles().findAll { it.isDirectory() && new File(it, 'gradle.properties').isFile() }.sort().each { dir ->
+            def props = new Properties()
+            new File(dir, 'gradle.properties').withInputStream { props.load(it) }
+            def key = dir.name.substring(dir.name.indexOf('-') + 1)
+            keys << key
+            def mcs = list[key]
+            if (!(mcs instanceof List) || mcs.isEmpty()) { problems << "${dir.name}: no entry \"${key}\" in gradle/mc-versions.json"; return }
+            def range = dir.name.startsWith('neoforge-') ? props.getProperty('minecraft_neo_range') : props.getProperty('minecraft_range')
+            if (!range) { problems << "${dir.name}: no minecraft range in gradle.properties"; return }
+            mcs.each { String v -> if (!inRange(v, range)) problems << "${dir.name}: ${v} is outside ${range}" }
+            if (!mcs.contains(props.getProperty('minecraft_version')) && !mcs.any { cmp(it, props.getProperty('minecraft_version')) == 0 })
+                problems << "${dir.name}: compiled-against version ${props.getProperty('minecraft_version')} is not listed"
+        }
+        list.keySet().findAll { !it.startsWith('_') && !keys.contains(it) }.each { problems << "gradle/mc-versions.json: \"${it}\" matches no target" }
+        if (!problems.isEmpty()) throw new GradleException("mc-versions check failed:\n  " + problems.join('\n  '))
+        println "mc-versions ok: ${keys.size()} lines"
+    }
+}

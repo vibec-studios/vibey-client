@@ -42,6 +42,9 @@ Contents: [File layout](#file-layout) · [Metadata](#metadata) · [Cosmetics and
 ```
 
 Unknown fields are ignored, so newer files still load in older clients (they just skip what they don't know).
+The same goes for unknown values where a fallback exists: an unknown event `type` or animation name is skipped, an
+unknown interpolation `i` plays as `linear`, an unknown `attach` point falls back to `body` (emotes: `root`) –
+each with a validator warning. If a file really needs a newer game client, say so with `minClientVersion`.
 
 ## Metadata
 
@@ -52,6 +55,7 @@ Unknown fields are ignored, so newer files still load in older clients (they jus
 | `description` | no | Same shape as `name`. |
 | `author`, `tags` | no | Shown in the wardrobe; tags help search. |
 | `rarity` | yes | `common`, `rare`, `epic` or `legendary`. Only a coloured label – everything is free. Fields like `price` or `cost` are **rejected**. |
+| `minClientVersion` | no | Lowest Vibey Client version that can show the item, e.g. `"0.3.0"`. Older clients list it greyed out with *Update Vibey Client* instead of loading it (same for a newer `formatVersion`). The catalog can also set it per item. |
 
 ## Cosmetics and slots
 
@@ -231,7 +235,9 @@ locator follows that bone's animation.
 ```
 
 **Names that mean something on cosmetics:** `idle` (always plays), `walk` (blended in by walking speed), `fly`
-(elytra / creative flying – for wings), `sneak`. Other names are not played automatically on cosmetics. Emotes play the animation
+(elytra / creative flying – for wings), `sneak`. Other names are not played automatically on cosmetics. Events of
+`idle` always run; events of `walk`, `fly` and `sneak` run while that animation is the main one (weight ≥ 50 %), and
+visibility events follow the strongest playing animation that has some (else `idle`). Emotes play the animation
 named in `emote.animation` (the plugin always uses `main`).
 
 **Keyframes:** `t` = time in seconds, `v` = value, `i` = interpolation of the segment that starts at this key:
@@ -311,7 +317,12 @@ my.vibey`).
 | No prices | `price`, `cost`, `prices` are rejected |
 
 Warnings (the bundle still loads): an unknown `hideWithArmor` value, a cube without faces, a texture that looks like
-a strip but has no `animation`, a root bone without `attach`.
+a strip but has no `animation`, a root bone without (or with an unknown) `attach`, an unknown interpolation or event
+type.
+
+Bundles for a newer client (`minClientVersion` above the running version, `formatVersion` > 1) are not errors: the
+game lists them greyed out with *Update Vibey Client*. Test files that combine unusual features live in
+`content/audit/` (built by `content/tools/build-audit.mjs`, checked by `AuditBundlesGameTest`).
 
 ## Examples
 
