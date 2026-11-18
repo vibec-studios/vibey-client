@@ -240,6 +240,7 @@ never switch the Stonecutter active version (it rewrites `src/`), build other ta
 ./gradlew :fabric-1.21.11:runClientGameTest     # client game test, screenshots in versions/fabric-1.21.11/build/run/clientGameTest/screenshots
 ./gradlew :neoforge-1.21.11:runClient -Dvibeyclient.smoke=true   # smoke: boot, log "[vibeyclient-smoke]", quit
 ./gradlew :fabric-1.21.11:runServer -Dvibeyclient.smoke=true     # same for a dedicated server (+ checks no client classes loaded)
+./gradlew :fabric-1.21.4:runClient "-Dvibeyclient.tour=$PWD/build/tour/fabric-1.21.4"   # dev tour: every screen + cosmetics/emotes in a flat world, screenshots, PASS/FAIL per step, quit
 ```
 
 The client game test covers the UI (`VibeyUiGameTest`, see [docs/UI.md](docs/UI.md#testing)) and cosmetics and

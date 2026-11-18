@@ -60,6 +60,7 @@ public final class VibeyCore {
         Keybinds.tick();
         mm.tick();
         dev.henny.vibeyclient.ui.title.UiShot.tick();
+        dev.henny.vibeyclient.dev.DevTour.tick();
     }
 
     public static void onHud(Gfx g) {
