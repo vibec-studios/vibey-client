@@ -139,7 +139,8 @@ export function textureCard(tex, scale, frame = 0, crop = null) {
     for (let x = 0; x < cw * scale; x++) {
       const chk = ((x >> 3) + (y >> 3)) & 1 ? "#1d1d24" : "#16161c";
       img.set(x, y, chk);
-      const c = tex.img.get(cx + Math.floor(x / scale), cy + Math.floor(y / scale) + frame * tex.height);
+      const k = tex.hd ?? 1;
+      const c = tex.img.get(Math.floor((cx + x / scale) * k), Math.floor((cy + y / scale) * k) + frame * Math.round(tex.height * k));
       if (c[3]) img.blend(x, y, c);
     }
   return img;

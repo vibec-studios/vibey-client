@@ -23,9 +23,11 @@ export function loadBundle(json) {
   for (const t of json.textures ?? []) {
     const d = decodePNG(Buffer.from(t.png, "base64"));
     const img = Img.fromRGBA(d.width, d.height, d.data);
-    const frames = t.animation ? Math.floor(d.height / t.height) : 1;
+    // HD textures: the PNG may be k× the UV size (same aspect ratio, SPEC §5); `hd` = PNG pixels per UV unit
+    const hd = d.width / t.width;
+    const frames = t.animation ? Math.floor(d.height / (t.height * hd)) : 1;
     tex.set(t.id, {
-      id: t.id, img, width: t.width, height: t.height, frames,
+      id: t.id, img, width: t.width, height: t.height, frames, hd,
       frameTime: t.animation?.frameTime ?? 1,
       order: t.animation?.frames ?? [...Array(frames).keys()],
     });
@@ -438,8 +440,9 @@ export function fitView(bounds, W, H, margin = 16, maxScale = 12) {
 
 // ------------------------------------------------------------------------------------------------ raster
 function texel(tex, u, v) {
-  const x = Math.min(tex.width - 1, Math.max(0, Math.floor(u)));
-  const y = Math.min(tex.height - 1, Math.max(0, Math.floor(v))) + tex.frame * tex.height;
+  const k = tex.hd ?? 1, fh = Math.round(tex.height * k);
+  const x = Math.min(Math.round(tex.width * k) - 1, Math.max(0, Math.floor(u * k)));
+  const y = Math.min(fh - 1, Math.max(0, Math.floor(v * k))) + tex.frame * fh;
   const d = tex.img.data, i = (y * tex.img.width + x) * 4;
   return [d[i], d[i + 1], d[i + 2], d[i + 3]];
 }

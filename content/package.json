@@ -10,7 +10,10 @@
     "build:fast": "node tools/build.mjs --no-preview",
     "validate": "node tools/validate.mjs",
     "synth": "node tools/synth.mjs",
-    "check:blockbench": "node tools/check-blockbench.mjs"
+    "check:blockbench": "node tools/check-blockbench.mjs",
+    "build:polar": "node tools/build.mjs --collection polar-pals",
+    "push:polar": "node tools/push-to-game.mjs dist/polar-pals",
+    "push": "node tools/push-to-game.mjs"
   },
   "license": "SEE LICENSE IN ../NOTICE"
 }
