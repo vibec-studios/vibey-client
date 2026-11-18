@@ -45,7 +45,17 @@ import java.util.concurrent.TimeUnit;
  * </pre>
  */
 public final class DevDriver {
+    /**
+     * Extra commands from code that only exists in some builds (e.g. {@code video ...} from the Fabric 1.21.11 video
+     * screens): {@code handler(argument)} runs on the client thread and returns the answer line.
+     */
+    public static final java.util.Map<String, java.util.function.Function<String, String>> EXTRA = new java.util.concurrent.ConcurrentHashMap<>();
+
     private DevDriver() {}
+
+    public static boolean active() {
+        return Integer.getInteger("vibeyclient.devDriver") != null && Vibey.platform().isDevelopment();
+    }
 
     public static void startIfRequested() {
         Integer port = Integer.getInteger("vibeyclient.devDriver");
@@ -243,8 +253,10 @@ public final class DevDriver {
             case "quit":
                 mc.stop();
                 return "ok";
-            default:
-                return "err unknown command " + cmd;
+            default: {
+                java.util.function.Function<String, String> extra = EXTRA.get(cmd);
+                return extra != null ? extra.apply(arg) : "err unknown command " + cmd;
+            }
         }
     }
 

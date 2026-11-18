@@ -8,6 +8,11 @@ apply from: rootProject.file('gradle/common.gradle')
 
 repositories {
     mavenCentral()
+    // MCEF Modern (optional browser for the video screens, compile only): https://modrinth.com/mod/mcef-modern
+    exclusiveContent {
+        forRepository { maven { name = 'Modrinth'; url = 'https://api.modrinth.com/maven' } }
+        filter { includeGroup 'maven.modrinth' }
+    }
 }
 
 dependencies {
@@ -18,6 +23,16 @@ dependencies {
     // Pure-Java MP3 decoder (MIT) for the lyrics module, shipped inside the jar (like Vibey Lyrics).
     implementation "fr.delthas:javamp3:${project.javamp3_version}"
     include "fr.delthas:javamp3:${project.javamp3_version}"
+    // Video screens (module/media/video, this version only): MCEF Modern is an OPTIONAL, separately installed mod
+    // (LGPL-2.1). We only compile against its API and never ship it; the game offers to download it when needed.
+    if (project.minecraft_version == '1.21.11') {
+        modCompileOnly "maven.modrinth:mcef-modern:${project.mcef_modern_version}"
+        compileOnly "me.friwi:jcef-api:${project.jcef_api_version}"
+        // -Dvibeyclient.mcef=true puts it into the dev run (otherwise the in-game download offer is used).
+        if (System.getProperty('vibeyclient.mcef') == 'true') {
+            modLocalRuntime "maven.modrinth:mcef-modern:${project.mcef_modern_version}"
+        }
+    }
 }
 
 loom {

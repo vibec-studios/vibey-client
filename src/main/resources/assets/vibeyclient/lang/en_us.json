@@ -13,5 +13,6 @@
   "key.vibeyclient.multiplayer.host": "Open host screen",
   "key.vibeyclient.social.open": "Open social sidebar",
   "modmenu.descriptionTranslation.vibeyclient": "The Vibe Craft Studios client: social, cosmetics, emotes, multiplayer hosting and lyrics in one modular mod.",
-  "key.vibeyclient.cosmetics.wardrobe": "Open wardrobe"
+  "key.vibeyclient.cosmetics.wardrobe": "Open wardrobe",
+  "key.vibeyclient.video.screens": "Video screens"
 }

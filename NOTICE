@@ -56,4 +56,14 @@ Fonts of the lyrics module (src/main/resources/assets/vibeyclient/font/lyrics/, 
   Apache License 2.0. License texts: licenses/lyrics/fonts/ (inside every Fabric jar under
   licenses/vibeyclient/lyrics/).
 
+Optional components of the video screens (Fabric 1.21.11) – NOT included in the jars. They are downloaded only
+after the user agrees in an in-game prompt that names size, source and licence (docs/VIDEO.md):
+  FFmpeg (LGPL-2.1-or-later "lgpl-shared" Windows build from https://github.com/BtbN/FFmpeg-Builds), run as a
+    separate program, unpacked to <game dir>/vibeyclient/ffmpeg/ together with its LICENSE.txt. An FFmpeg already
+    installed on the system is used as is.
+  MCEF Modern (https://github.com/DimasKama/mcef-modern, LGPL-2.1), installed unmodified into mods/ from Modrinth;
+    it downloads JCEF/CEF/Chromium (BSD-3-Clause and the Chromium third-party licences) from Maven Central
+    (me.friwi:jcef-natives-*). The client only compiles against its API.
+  YouTube videos are shown only through YouTube's official embedded player; the YouTube Terms of Service apply.
+
 Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.
