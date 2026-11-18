@@ -45,10 +45,15 @@ public abstract class ItemInHandLayerMixin {
         ShieldDraw.owner = null;
     }
     *///?} else {
-    /*@Inject(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/LivingEntity;FFFFFF)V", at = @At("HEAD"))
+    /*@Inject(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/LivingEntity;FFFFFF)V", at = @At("HEAD"), cancellable = true)
     private void vibey$owner(com.mojang.blaze3d.vertex.PoseStack ps, net.minecraft.client.renderer.MultiBufferSource out, int light,
                              net.minecraft.world.entity.LivingEntity entity, float a, float b, float c, float d, float e, float f, CallbackInfo ci) {
         ShieldDraw.owner = entity instanceof net.minecraft.world.entity.player.Player p ? dev.henny.vibeyclient.avatar.AvatarStates.peek(p.getUUID()) : null;
+        // 1.21.1 has no render state to clear: skip the held items while an emote hides them
+        if (ShieldDraw.owner != null && dev.henny.vibeyclient.avatar.render.AvatarHooks.hideHeldItems(ShieldDraw.owner)) {
+            ShieldDraw.owner = null;
+            ci.cancel();
+        }
     }
 
     @Inject(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/LivingEntity;FFFFFF)V", at = @At("RETURN"))
