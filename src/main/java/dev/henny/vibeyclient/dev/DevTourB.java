@@ -221,6 +221,17 @@ public final class DevTourB {
         l.add(act("about tab", () -> ((VibeyScreen) ClientCompat.screen()).showTab(VibeyTabs.ABOUT)).after(25));
         l.add(check("Vibey menu: about", 100, () -> expect(VibeyScreen.class) && VibeyTabs.ABOUT.equals(((VibeyScreen) ClientCompat.screen()).tab()) && shot("menu_about")).after(5));
 
+        if (!Vibey.platform().isFabric()) {
+            // NeoForge: the title's "Mods" entry opens NeoForge's mod list (moved in 26.3)
+            l.add(act("open mod list", () -> {
+                ClientCompat.openScreen(new VibeyTitleScreen(false));
+                var e = dev.henny.vibeyclient.ui.MenuEntries.visible(dev.henny.vibeyclient.ui.MenuEntries.Place.TITLE).stream()
+                        .filter(x -> x.id().equals("mods")).findFirst().orElseThrow(() -> new IllegalStateException("no Mods entry on the title screen"));
+                e.action().accept(ClientCompat.screen());
+            }).after(30));
+            l.add(check("mod list", 100, () -> expectName("ModListScreen") && shot("mod_list")).after(5));
+        }
+
         // --- world
         l.add(act("open world", () -> {
             ClientCompat.openScreen(new VibeyTitleScreen(false));
