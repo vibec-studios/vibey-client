@@ -6,13 +6,15 @@ shared with other Vibey Client players on the same server. Research and licences
 
 > See also: [MODULES.md](MODULES.md) · [SPEC.md](SPEC.md) §6 (server channel) · [UI.md](UI.md)
 
-Only in the **Fabric 1.21.11** jar for now: `gradle/common.gradle` excludes `module/media/video/**` and
-`i18n/*/video.json` from every other target, and `BuiltinModules` registers the module by reflection
-(`registerIfPresent`).
+Part of the **Media** module as the feature `video` (`VideoFeature extends MediaFeature`, see [MEDIA.md](MEDIA.md)):
+own on/off switch on Media's settings page, settings stored in `media.json` as `video.*`, strings in
+`i18n/*/media.video.json`, data under `_data.video`. Only in the **Fabric 1.21.11** jar for now:
+`gradle/common.gradle` excludes `module/media/video/**` and `i18n/*/media.video.json` from every other target, and
+`MediaFeatures` adds the feature by reflection (`addIfPresent`).
 
 ## Using it
 
-- **Screens key** (default **N**, "Video screens" in Controls): look at a screen → its controls; look anywhere else →
+- **Screens key** (default **N**, "Video screens" in Controls; or *Screens → Open* on Media's settings page): look at a screen → its controls; look anywhere else →
   *New screen*: paste a link / path or pick a file, choose the shape (16:9, 4:3, 1:1, 21:9, 9:16), then
   *Place in world* or *Overlay only*.
 - **Placing** (no item needed): the screen sticks to the block face under the crosshair (wall, floor, ceiling),
@@ -21,9 +23,11 @@ Only in the **Fabric 1.21.11** jar for now: `gradle/common.gradle` excludes `mod
 - **Controls**: play/pause, seek bar (or ±10 s for streams), per-screen volume, show as overlay, width, glowing
   (full bright) or lit by the world, repeat, share with others, change source, move, remove, *Use page* (mouse and
   keyboard to the web page, e.g. to press a page's own buttons).
-- **Settings** (module "Video screens"): screens key, *Other players' screens* (Ask first / Always load / Hide),
-  volume, overlay position; under Advanced: max resolution (360p–1080p, default 720p), max frame rate (default 30),
-  play distance (default 48 m), remove all my screens here.
+- **Settings** (Vibey menu → Media → *Video screens*): the switch, *Screens* (open), the screens key, *Other
+  players' screens* (Ask first / Always load / Hide), volume; under Advanced: max resolution (360p–1080p, default
+  720p), max frame rate (default 30), play distance (default 48 m), remove all my screens here.
+- **Overlay:** *Show as overlay* in a screen's controls; move and scale it in the HUD editor (Media → *HUD layout →
+  Edit*, element "Video overlay", id `media.video.overlay`, default top right).
 
 ## What plays where
 
@@ -47,7 +51,7 @@ downloaded, the size, the source and the licence, and does nothing until the use
 
 ## How it works
 
-- `Video` (the `VideoFeature`) owns all screens (`MediaScreen`: geometry, `MediaSource`, a **timeline** =
+- `Video` (driven by `VideoFeature`) owns all screens (`MediaScreen`: geometry, `MediaSource`, a **timeline** =
   playing + position at a wall-clock time). Each tick it gives ≤ 6 allowed screens in range a `MediaPlayer`
   (overlay first, then playing screens, then the nearest), and sets the volume
   (`volume × screen volume × MASTER × RECORDS × distance falloff`). Out of range → paused, closed after 15 s.
@@ -90,29 +94,23 @@ random 0.3–1 s delay). Owners resend `STATE` every 10 s while playing; receive
   (per session). *Always load* / *Hide* are the other choices. Rationale: loading a URL someone else picked reveals
   your IP to that host and can play sound – an explicit opt-in is the safe default; friends can switch to *Always*.
 
-## Wiring into the Media module (for the integrator)
+## Code map
 
-The feature is self-contained behind `VideoFeature` + `HudElement`; `VideoModule` is only a shim.
+| Class | Role |
+|---|---|
+| `VideoFeature` | the Media feature: settings, keybind, HUD element `overlay`, forwards the lifecycle to `Video` |
+| `Video` | screens, players, timeline following, volume, persistence (`_data.video.screens.<world>`), overlay drawing |
+| `MediaScreen`, `MediaSource`, `UrlPolicy` | model, link parsing (YouTube/web/stream/file), what we accept from others |
+| `Placement`, `render/ScreenRenderer` | item-free placing, world rendering |
+| `VideoNet` | `video:screen` channel (sharing) |
+| `player/FfmpegPlayer`, `player/Ffmpeg`, `player/FrameTexture` | FFmpeg playback, locating/downloading FFmpeg, GPU texture |
+| `web/Web` (facade), `web/McefBridge`, `web/WebPlayer`, `web/BrowserScreen`, `web/McefInstaller` | MCEF Modern (loaded only when installed) |
+| `ui/SourceScreen`, `ui/ControlsScreen`, `ui/SetupScreen`, `ui/AcceptScreen` | screens |
+| `VideoDev` | DevDriver `video …` commands (dev only) |
 
-1. **Settings:** construct `new VideoSettings(hostId, settings(), this::isEnabled)` in a field initialiser of the
-   Media module (keybinds can't be created later), then `new Video(cfg)`. Setting labels resolve as
-   `<hostId>.setting.<key>` – move the `setting.*` lines of `i18n/*/video.json` into `media.json` (or keep
-   them and prefix), and rename the keybind lang key `key.vibeyclient.video.screens` → `key.vibeyclient.<hostId>.screens`.
-   All other strings use `Video.tr` = `video.*` and can stay in `video.json`.
-2. **Lifecycle:** forward `onLoad/onEnable/onDisable/tick/renderHud/onWorldJoin/onWorldLeave` to the `VideoFeature`
-   (exactly what `VideoModule` does), e.g. as a `MediaFeature` adapter.
-3. **HUD editor:** take `VideoFeature.hudElements()` (one element, `video.overlay`): position = fractions of the
-   free screen space (`x()*(screenW - w*scale)`), `setLayout(x, y, scale)` persists. `OverlayEditScreen` is a
-   stand-in editor you can drop once the generic one exists; while a HUD editor is open the element should be drawn
-   by the editor (`render(..., editing=true)`), `Video.renderHud` skips it only for `OverlayEditScreen` – add the
-   generic editor screen class to that check.
-4. **Registration:** remove `registerIfPresent(...VideoModule)` from `BuiltinModules` and delete `VideoModule`; the
-   Media module can stay on all targets but must only touch the video classes on Fabric 1.21.11 (reflection or
-   `//? if` guard), because the package is excluded elsewhere.
-5. **Data:** own screens are stored per world (`sp:<level name>` / `mp:<server address>`) in the host's
-   `settings().data()` under `screens`, the overlay layout under `overlay`, consent under `browserConsent`. When the
-   host id changes from `video` to `media`, copy `config/vibeyclient/video.json` `_data` over once (or accept a
-   fresh start – it is new in this round).
+Porting to more versions: the version-specific parts are `render/ScreenRenderer` (submit API), `FrameTexture`
+(blaze3d `GpuTexture` upload), the Fabric world render events in `Video.onLoad`, `Placement` (hotbar slot API) and
+MCEF Modern's per-version API; then drop the exclusion in `gradle/common.gradle`.
 
 ## Dev testing
 
