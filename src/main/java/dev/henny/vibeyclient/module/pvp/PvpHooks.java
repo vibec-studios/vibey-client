@@ -13,7 +13,7 @@ public final class PvpHooks {
     private PvpHooks() {}
 
     /** Vanilla's quad is 1 unit tall at 0.5 in front of the eye; 100 % moves it this far down. */
-    private static final float FIRE_MAX = 0.5f, SHIELD_MAX = 0.4f;
+    private static final float FIRE_MAX = 0.32f, SHIELD_MAX = 0.25f;
 
     // ---------------------------------------------------------------------------------------- crosshair
 

@@ -42,10 +42,15 @@ public final class Crosshair {
         PvpModule m = PvpModule.get();
         if (m == null || !m.crosshairActive()) return false;
         Style s = m.crosshairStyle(HUD_STYLE);
-        int cx = gg.guiWidth() / 2, cy = gg.guiHeight() / 2;
+        int cx = centre(gg.guiWidth()), cy = centre(gg.guiHeight());
         int extra = m.chDynamic.on() ? Math.round(dynamicSpread(m)) : 0;
         draw(new Gfx(gg, Minecraft.getInstance().font), s, cx, cy, extra);
         return true;
+    }
+
+    /** The centre pixel of vanilla's 15 px crosshair sprite on a screen this wide/high. */
+    public static int centre(int size) {
+        return (size - 15) / 2 + 7;
     }
 
     /** Extra gap from moving / being in the air, eased per frame (purely visual). */

@@ -87,7 +87,7 @@ public final class PvpModule extends VibeyModule {
     public final BoolSetting outline = bool("outline", false).section("outline").serverRule(RULE_OUTLINE);
     public final ColorSetting outlineColor = color("outlineColor", 0xFF8B6CFF).presets(OUTLINE_COLORS).section("outline")
             .serverRule(RULE_OUTLINE).visibleWhen(this::outlineOn);
-    public final FloatSetting outlineWidth = floatRange("outlineWidth", 2.5f, 1f, 6f, 0.5f).decimals(1).section("outline")
+    public final FloatSetting outlineWidth = floatRange("outlineWidth", 3.5f, 1f, 6f, 0.5f).decimals(1).section("outline")
             .serverRule(RULE_OUTLINE).visibleWhen(this::outlineOn);
     public final IntSetting outlineOpacity = intRange("outlineOpacity", 100, 20, 100, 5).unit("%").section("outline")
             .serverRule(RULE_OUTLINE).visibleWhen(this::outlineOn);
@@ -105,7 +105,7 @@ public final class PvpModule extends VibeyModule {
 
     // ---------------------------------------------------------------------------------------- first person
     public final BoolSetting lowFire = bool("lowFire", false).section("view").serverRule(RULE_FIRE);
-    public final IntSetting fireHeight = intRange("fireHeight", 60, 10, 100, 5).unit("%").section("view")
+    public final IntSetting fireHeight = intRange("fireHeight", 70, 10, 100, 5).unit("%").section("view")
             .serverRule(RULE_FIRE).visibleWhen(lowFire::on);
     public final BoolSetting lowShield = bool("lowShield", false).section("view").serverRule(RULE_SHIELD);
     public final IntSetting shieldHeight = intRange("shieldHeight", 50, 10, 100, 5).unit("%").section("view")

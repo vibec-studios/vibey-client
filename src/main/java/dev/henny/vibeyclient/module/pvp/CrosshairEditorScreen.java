@@ -52,7 +52,7 @@ final class CrosshairEditorScreen extends BaseScreen {
         if (!inWorld) scene(g, px);
         else if (!m.isEnabled() || crosshairBlocked()) {
             // the HUD shows vanilla's crosshair then: show the edited one in the middle anyway
-            Crosshair.draw(g, m.crosshairStyle(style), width / 2, height / 2, 0);
+            Crosshair.draw(g, m.crosshairStyle(style), Crosshair.centre(width), Crosshair.centre(height), 0);
         }
         panel(g, px);
         ui.end();
@@ -65,7 +65,7 @@ final class CrosshairEditorScreen extends BaseScreen {
             int y = i * bandH;
             g.rect(0, y, right, i == SCENE.length - 1 ? height - y : bandH, SCENE[i]);
         }
-        Crosshair.draw(g, m.crosshairStyle(style), width / 2, height / 2, 0);
+        Crosshair.draw(g, m.crosshairStyle(style), Crosshair.centre(width), Crosshair.centre(height), 0);
     }
 
     private void panel(Gfx g, int x) {
@@ -136,7 +136,7 @@ final class CrosshairEditorScreen extends BaseScreen {
         g.outline(x - 1, y - 1, w + 2, h + 2, Theme.LINE2);
         g.scissor(x, y, x + w, y + h);
         g.push();
-        g.translate(x + w / 2, y + h / 2);
+        g.translate(x + w / 2 - MAG / 2, y + h / 2 - MAG / 2);
         g.scale(MAG, MAG);
         Crosshair.draw(g, m.crosshairStyle(style), 0, 0, 0);
         g.pop();
