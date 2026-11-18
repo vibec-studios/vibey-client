@@ -276,6 +276,20 @@ a hosted world accept dev accounts without a Mojang session (for invite tests th
 Default backend (`https://vibe.henny.dev`) and relay are set in `gradle.properties` and baked into the generated
 `BuildInfo` class.
 
+### Releases
+
+1. Bump `mod_version` (`gradle.properties`), `version` in `blockbench/package.json` and `VERSION` in `blockbench/vibey.js`;
+   add a `## <version>` section to `CHANGELOG.md`. New Minecraft patch versions of a line go into
+   `gradle/mc-versions.json` (checked by `./gradlew checkMcVersions`).
+2. Check locally: `./gradlew buildAll`, then `node tools/release-manifest.mjs` prints the manifest for `build/dist`
+   (`node --test tools/release-manifest.test.mjs` for the script itself).
+3. Merge to `main` and publish a GitHub release with tag `v<version>` (`-beta.N` etc. = beta channel). The release
+   text becomes the changelog (empty = the CHANGELOG.md section). `.github/workflows/release.yml` builds all jars,
+   attaches them to the release and publishes to the Vibe backend (files staged in batches below the 100 MB proxy
+   limit, then the release by sha256; secret `CLIENT_PUBLISH_TOKEN`). Re-running is safe (409 = already published).
+   Test against a local backend instead of production: `CLIENT_PUBLISH_TOKEN=<local> node tools/release-manifest.mjs
+   --tag v<version> --publish http://127.0.0.1:<port>/internal/client/v1/releases`.
+
 Layout: common, server-safe code in `dev.henny.vibeyclient` (`Vibey`, `Platform`, `Compat`, `net/`), client core in
 `client/`, the module API in `api/`, UI in `ui/`, the cosmetics/emotes engine in `avatar/`, modules in
 `module/<id>/`, loader entry points in `fabric/` and `neoforge/`. Starter content: `content/`
