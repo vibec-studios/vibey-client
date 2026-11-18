@@ -1,6 +1,5 @@
 package dev.henny.vibeyclient.avatar;
 
-import dev.henny.vibeyclient.api.Tasks;
 import dev.henny.vibeyclient.avatar.render.Tex;
 import dev.henny.vibeyclient.ui.Gfx;
 
@@ -17,14 +16,22 @@ final class ThumbnailCache {
     private static final Object FAILED = new Object();
     private static final Map<String, Object> STATE = new HashMap<>();
     private static final Map<String, byte[]> READY = new ConcurrentHashMap<>();
+    /** Own thread: catalog downloads must not starve the thumbnails. */
+    private static final java.util.concurrent.ExecutorService LOADER = java.util.concurrent.Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "VibeyClient-Thumbnails");
+        t.setDaemon(true);
+        return t;
+    });
 
     static boolean draw(Gfx g, AvatarItem item, int x, int y, int size) {
-        String src = item.thumbnail();
+        // the builtin thumbnail in the jar is instant; catalog URLs only for items the jar does not have
+        AvatarItem builtin = AvatarItems.get(item.id(), ItemSource.BUILTIN);
+        String src = builtin != null && builtin.thumbnail() != null ? builtin.thumbnail() : item.thumbnail();
         if (src == null) return false;
         Object s = STATE.get(src);
         if (s == null) {
             STATE.put(src, LOADING);
-            Tasks.run(() -> {
+            LOADER.execute(() -> {
                 byte[] png = null;
                 try {
                     if (src.startsWith("/")) {

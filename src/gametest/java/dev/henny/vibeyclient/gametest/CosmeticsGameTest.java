@@ -64,9 +64,22 @@ public final class CosmeticsGameTest implements FabricClientGameTest {
         context.waitTicks(16);
         context.takeScreenshot("p03_preview_title_override_wave");
         context.setScreen(() -> null);
+        // the real wardrobe on the title screen (real registry, thumbnails, preview)
+        context.runOnClient(mc -> dev.henny.vibeyclient.module.cosmetics.ui.WardrobeUi.openWardrobe(null, Slot.WINGS));
+        context.waitTicks(30);
+        context.takeScreenshot("w01_wardrobe_title_wings");
+        context.runOnClient(mc -> dev.henny.vibeyclient.module.cosmetics.ui.WardrobeUi.openWardrobe(null, Slot.PET));
+        context.waitTicks(20);
+        context.takeScreenshot("w02_wardrobe_title_pets");
+        context.runOnClient(mc -> dev.henny.vibeyclient.module.cosmetics.ui.WardrobeUi.openWardrobeEmotes(null));
+        context.waitTicks(20);
+        context.takeScreenshot("w03_wardrobe_title_emotes");
+        context.setScreen(() -> null);
         context.runOnClient(mc -> {
             Wardrobe w = Services.get(Wardrobe.class).orElseThrow();
             for (Slot s : Slot.all()) w.unequip(s);
+            String[] wheel = {"vibey:wave", "vibey:cheer", "vibey:guitar", "vibey:vibe_dance", "vibey:sit", "vibey:seal_summon", "vibey:clap", "vibey:shrug"};
+            for (int i = 0; i < wheel.length; i++) w.setWheel(i, wheel[i]);
         });
 
         try (TestSingleplayerContext world = context.worldBuilder().create()) {
@@ -161,6 +174,19 @@ public final class CosmeticsGameTest implements FabricClientGameTest {
             context.waitTicks(10);
             context.takeScreenshot("l01b_preview_in_world");
             context.setScreen(() -> null);
+            context.runOnClient(mc -> {
+                mc.options.hideGui = false;
+                dev.henny.vibeyclient.module.cosmetics.ui.WardrobeUi.openWardrobe(null, Slot.CAPE);
+            });
+            context.waitTicks(20);
+            context.takeScreenshot("w04_wardrobe_world_capes");
+            context.setScreen(() -> null);
+            boolean[] held = {true};
+            context.runOnClient(mc -> dev.henny.vibeyclient.module.cosmetics.ui.WardrobeUi.openWheel(() -> held[0]));
+            context.waitTicks(10);
+            context.takeScreenshot("w05_emote_wheel_world");
+            context.setScreen(() -> null);
+            context.runOnClient(mc -> mc.options.hideGui = true);
             context.runOnClient(mc -> {
                 mc.options.setCameraType(CameraType.FIRST_PERSON);
                 Services.get(Wardrobe.class).orElseThrow().playEmote("vibey:wave");
