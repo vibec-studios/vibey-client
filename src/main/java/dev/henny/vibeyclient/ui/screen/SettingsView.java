@@ -61,21 +61,30 @@ public final class SettingsView {
     private static int row(Ui ui, Setting<?, ?> s, int x, int y, int w, boolean enabled) {
         Gfx g = ui.g;
         String desc = Lang.has(s.descriptionKey()) ? Lang.tr(s.descriptionKey()) : null;
-        int h = desc == null ? 26 : 34;
+        int labelW = w - controlWidth(g, s) - 12;
+        java.util.List<String> descLines = desc == null ? java.util.List.of() : Ui.wrap(g, desc, labelW);
+        if (descLines.size() > 2) {
+            descLines = new java.util.ArrayList<>(descLines.subList(0, 2));
+            descLines.set(1, g.clip(descLines.get(1) + " …", labelW));
+        }
+        int h = desc == null ? 26 : 24 + descLines.size() * 10;
         if (!ui.visibleY(y, h)) return y + h;
         float hov = ui.anim(s, 0f).to(ui.hover(x, y, w, h) ? 1f : 0f);
         if (hov > 0f) g.rect(x - 4, y, w + 8, h, Theme.alpha(Theme.SURFACE2, hov));
-        int labelW = w - controlWidth(g, s) - 12;
         int textColor = enabled ? Theme.TEXT : Theme.MUTED;
         if (desc == null) {
             g.text(g.clip(Lang.tr(s.nameKey()), labelW), x, y + 9, textColor);
         } else {
             g.text(g.clip(Lang.tr(s.nameKey()), labelW), x, y + 6, textColor);
-            g.text(g.clip(desc, labelW), x, y + 18, Theme.DIM);
+            int dy = y + 18;
+            for (String l : descLines) {
+                g.text(g.clip(l, labelW), x, dy, Theme.DIM);
+                dy += 10;
+            }
         }
         g.hline(x, y + h - 1, w, Theme.LINE);
         String name = Lang.tr(s.nameKey());
-        if (g.width(name) > labelW || (desc != null && g.width(desc) > labelW)) {
+        if (g.width(name) > labelW || (desc != null && Ui.wrap(g, desc, labelW).size() > 2)) {
             ui.tooltip(s.nameKey(), x, y, labelW, h, desc == null ? name : name + "\n" + desc);
         }
         int right = x + w;

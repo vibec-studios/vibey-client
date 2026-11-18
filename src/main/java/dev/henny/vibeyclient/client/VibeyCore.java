@@ -58,6 +58,7 @@ public final class VibeyCore {
         Lang.tick();
         Keybinds.tick();
         mm.tick();
+        dev.henny.vibeyclient.ui.title.UiShot.tick();
     }
 
     public static void onHud(Gfx g) {

@@ -48,6 +48,7 @@ public class OnboardingScreen extends BaseScreen {
 
     @Override
     protected void init() {
+        dev.henny.vibeyclient.ui.UiScale.apply(this);
         ui.reattach();
     }
 
@@ -308,6 +309,7 @@ public class OnboardingScreen extends BaseScreen {
     @Override
     public void removed() {
         seal.close();
+        dev.henny.vibeyclient.ui.UiScale.restore();
     }
 
     @Override

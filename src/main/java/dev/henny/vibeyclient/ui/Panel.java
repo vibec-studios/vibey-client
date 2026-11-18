@@ -17,4 +17,9 @@ public interface Panel {
     default boolean key(int keyCode) {
         return false;
     }
+
+    /** A typed character while no text field has the focus (e.g. type-to-search); true if used. */
+    default boolean typed(int codepoint) {
+        return false;
+    }
 }

@@ -18,7 +18,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.multiplayer.SafetyScreen;
-import net.minecraft.client.gui.screens.options.OptionsScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 
 /**
@@ -46,7 +45,7 @@ public final class CoreMenus {
         MenuEntries.register(Place.TITLE, new Entry("vibey", "core.title.vibey", Icons.SEAL, 40,
                 () -> true, p -> ClientCompat.openScreen(new VibeyScreen(p))));
         MenuEntries.register(Place.TITLE, new Entry("options", "core.title.options", Icons.GEAR, 50,
-                () -> true, p -> ClientCompat.openScreen(new OptionsScreen(p, Minecraft.getInstance().options))));
+                () -> true, p -> ClientCompat.openScreen(ClientCompat.optionsScreen(p))));
         MenuEntries.register(Place.TITLE, new Entry("mods", "core.title.mods", Icons.PUZZLE, 60,
                 () -> modsScreenClass() != null, CoreMenus::openMods));
         MenuEntries.register(Place.TITLE, new Entry("quit", "core.title.quit", Icons.POWER, 1000,

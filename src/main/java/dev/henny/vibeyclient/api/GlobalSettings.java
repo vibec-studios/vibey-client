@@ -27,6 +27,20 @@ public final class GlobalSettings {
 
     public static final BoolSetting animations = GROUP.add(new BoolSetting("animations", true));
 
+    /** Size of the Vibey screens: the game's GUI scale or a fixed factor (whole numbers stay crisp). */
+    public enum UiScale {
+        GAME(0), X2(2), X3(3), X4(4);
+
+        public final int factor;
+
+        UiScale(int factor) {
+            this.factor = factor;
+        }
+    }
+
+    public static final EnumSetting<UiScale> uiScale = GROUP.add(new EnumSetting<>("uiScale", UiScale.GAME))
+            .onChange(v -> dev.henny.vibeyclient.ui.UiScale.refresh());
+
     /** Replace the vanilla title screen with the Vibey one (off: only a small Vibey button on the vanilla screen). */
     public static final BoolSetting vibeyMainMenu = GROUP.add(new BoolSetting("vibeyMainMenu", true));
 

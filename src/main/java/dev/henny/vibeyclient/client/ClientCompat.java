@@ -58,9 +58,18 @@ public final class ClientCompat {
         return Math.max(1, (int) Math.round((double) Minecraft.getInstance().getWindow().getGuiScale()));
     }
 
+    /** The vanilla options screen (26.1/26.2 take an extra "opened in game" flag). */
+    public static Screen optionsScreen(Screen parent) {
+        Minecraft mc = Minecraft.getInstance();
+        //? if >=26.1 && <26.3 {
+        /*return new net.minecraft.client.gui.screens.options.OptionsScreen(parent, mc.options, mc.level != null);
+        *///?} else
+        return new net.minecraft.client.gui.screens.options.OptionsScreen(parent, mc.options);
+    }
+
     /** Asks "open this link?" (vanilla dialog) and opens it in the browser; returns to {@code parent}. */
     public static void openLink(Screen parent, String url) {
-        net.minecraft.client.gui.screens.ConfirmLinkScreen.confirmLinkNow(parent, url);
+        net.minecraft.client.gui.screens.ConfirmLinkScreen.confirmLinkNow(parent, java.net.URI.create(url));
     }
 
     /** Name of the logged-in Minecraft account. */

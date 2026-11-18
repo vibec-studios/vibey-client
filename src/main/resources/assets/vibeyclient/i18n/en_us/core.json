@@ -63,7 +63,13 @@
     "resetBackend": "Reset backend URL",
     "resetBackend.button": "Reset",
     "vibeyMainMenu": "Vibey main menu",
-    "vibeyMainMenu.desc": "Replaces the title screen. Off: the vanilla one with a small Vibey button."
+    "vibeyMainMenu.desc": "Replaces the title screen. Off: the vanilla one with a small Vibey button.",
+    "uiScale": "UI scale",
+    "uiScale.desc": "Size of the Vibey menus.",
+    "uiScale.game": "Same as game",
+    "uiScale.x2": "2×",
+    "uiScale.x3": "3×",
+    "uiScale.x4": "4×"
   },
   "title": {
     "singleplayer": "Singleplayer",

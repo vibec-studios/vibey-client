@@ -3,6 +3,7 @@ package dev.henny.vibeyclient.gametest;
 import dev.henny.vibeyclient.api.GlobalSettings;
 import dev.henny.vibeyclient.client.Keys;
 import dev.henny.vibeyclient.ui.VibeyScreen;
+import dev.henny.vibeyclient.ui.VibeyTabs;
 import dev.henny.vibeyclient.ui.title.OnboardingScreen;
 import dev.henny.vibeyclient.ui.title.VibeyTitleScreen;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
@@ -37,6 +38,21 @@ public final class VibeyUiGameTest implements FabricClientGameTest {
             }
         }
 
+        // the Vibey UI scale override (2x on a 1920x1080 window with game scale auto = 4)
+        ctx.getInput().resizeWindow(1920, 1080);
+        setScale(ctx, 0);
+        ctx.runOnClient(mc -> GlobalSettings.uiScale.set(GlobalSettings.UiScale.X2));
+        ctx.setScreen(() -> new VibeyTitleScreen(false));
+        ctx.waitTicks(6);
+        ctx.takeScreenshot("ui_title_1920_uiscale2");
+        ctx.setScreen(() -> new VibeyScreen(null));
+        ctx.waitTicks(6);
+        ctx.takeScreenshot("ui_menu_1920_uiscale2");
+        ctx.setScreen(() -> null);
+        int restored = ctx.computeOnClient(mc -> (int) mc.getWindow().getGuiScale());
+        if (restored != 4) throw new AssertionError("GUI scale not restored after closing the Vibey menu: " + restored);
+        ctx.runOnClient(mc -> GlobalSettings.uiScale.set(GlobalSettings.UiScale.GAME));
+
         // in a world: pause menu with the Vibey row, at the small and the big scales
         ctx.getInput().resizeWindow(1280, 720);
         try (TestSingleplayerContext world = ctx.worldBuilder().create()) {
@@ -47,6 +63,13 @@ public final class VibeyUiGameTest implements FabricClientGameTest {
                 ctx.waitTicks(4);
                 ctx.takeScreenshot("ui_pause_1280_s" + scale);
             }
+            // tiny GUI (320 x 180): the row has to move out of the way
+            ctx.getInput().resizeWindow(960, 540);
+            setScale(ctx, 3);
+            ctx.setScreen(() -> new PauseScreen(true));
+            ctx.waitTicks(4);
+            ctx.takeScreenshot("ui_pause_960_s3");
+            ctx.getInput().resizeWindow(1280, 720);
             setScale(ctx, 3);
             lang(ctx, GlobalSettings.Language.GERMAN);
             ctx.setScreen(() -> new PauseScreen(true));
@@ -80,9 +103,21 @@ public final class VibeyUiGameTest implements FabricClientGameTest {
         ctx.waitTicks(6);
         ctx.takeScreenshot("ui_onboarding3_" + tag);
 
+        dev.henny.vibeyclient.ui.screen.ModulesPanel.preselect(null);
         ctx.setScreen(() -> new VibeyScreen(null));
         ctx.waitTicks(6);
-        ctx.takeScreenshot("ui_menu_" + tag);
+        ctx.takeScreenshot("ui_menu_global_" + tag);
+
+        dev.henny.vibeyclient.ui.screen.ModulesPanel.preselect("emotes");
+        ctx.setScreen(() -> new VibeyScreen(null));
+        ctx.waitTicks(4);
+        ctx.getInput().typeChars("mo");
+        ctx.waitTicks(6);
+        ctx.takeScreenshot("ui_menu_emotes_search_" + tag);
+
+        ctx.setScreen(() -> new VibeyScreen(null, VibeyTabs.ABOUT));
+        ctx.waitTicks(8);
+        ctx.takeScreenshot("ui_menu_about_" + tag);
     }
 
     private static void setScale(ClientGameTestContext ctx, int scale) {

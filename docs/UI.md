@@ -1,0 +1,104 @@
+# Vibey Client UI
+
+How the client looks and how a module plugs into it. Code: `dev.henny.vibeyclient.ui` (widgets, menu shell),
+`ui.title` (title screen, onboarding), `client/PauseMenu` (pause row). Tokens: `ui/Theme` (SPEC §4).
+
+## Design rules
+
+- **Same product as the Vibe launcher:** deep black (`BG`, `PANEL`, `SURFACE*`), square corners, 1 px lines
+  (`LINE`, `LINE2`), purple `BRAND` for "active/primary", teal `BRAND2` for small labels and "ok". No rounded
+  corners, no gradients – the only soft thing allowed is a faint brand glow (stacked translucent rects).
+- **Text:** Minecraft font for everything you read. `PixelFont` (blocky 5-row display font) only for the "VIBEY"
+  wordmark and short brand words. Small uppercase captions (`Widgets.caption`) for section titles, dim text for
+  secondary info. Every string in `i18n/en_us` **and** `i18n/de_de`; German is ~30 % longer – check it fits.
+- **Crisp at every GUI scale:** draw with `Gfx` fills; icons are 9 × 9 pixel maps (`Icons`), the seal is rendered
+  at screen-pixel density (`Seal`). Don't draw scaled-down PNGs.
+- **Motion:** 150 ms, `cubic-bezier(0.2, 0.8, 0.2, 1)` (`Anim`), fade/slide 6–8 px. Never block input while
+  something animates; no per-frame allocation in hot paths. `GlobalSettings.animations` off = no motion.
+- **States:** hover and keyboard focus look the same (`ui.focusedLast()` → draw it like hover); otherwise the `Ui`
+  context draws a 1 px brand focus ring. Active/selected = brand bar or underline. Disabled = `DIM`.
+- **Layering:** since 1.21.6 text is drawn after shapes inside one layer – call `g.layer()` before anything that
+  must cover text (overlays, popups, tooltips).
+- **Smallest screen:** 427 × 240 GUI px (1280 × 720 at GUI scale 3). Everything must fit there; long content
+  scrolls (`ScrollArea`), long labels clip with "…" and get a tooltip (`ui.tooltip`).
+
+## Screens
+
+| Screen | Class | Notes |
+|---|---|---|
+| Title | `ui/title/VibeyTitleScreen` | Replaces vanilla via `mixin/client/ScreenSwapMixin` → `TitleHook`. Setting *Vibey main menu* off (or the "Classic menu" button) keeps vanilla, which then gets a small Vibey button. Skipped under Fabric's client gametest runner. |
+| Onboarding | `ui/title/OnboardingScreen` | Once before the first title screen (`GlobalSettings.onboarded()`), reopen from About. |
+| Vibey menu | `ui/VibeyScreen` | Right Shift. Tabs from `VibeyTabs`; Tab/Shift+Tab focus, Enter clicks, Ctrl+Tab switches tabs, Esc: cancel key capture → leave text field → clear search → close. Typing anywhere searches the module list. |
+| Pause row | `client/PauseMenu` | One row under the vanilla buttons; above them or icon-only in the corner when the GUI is too small. |
+
+Global *UI scale* (`GlobalSettings.uiScale`: game / 2× / 3× / 4×) sets the window GUI scale while a Vibey screen is
+open (`UiScale.apply/restore`) – whole numbers only, so nothing gets blurry.
+
+## Extension points
+
+**Tabs in the Vibey menu** (in `onLoad`):
+
+```java
+VibeyTabs.register(new VibeyTabs.Tab("wardrobe", "cosmetics.tab.wardrobe", 10, WardrobePanel::new,
+        () -> isEnabled(), Icons.SHIRT));
+```
+
+Conventional ids: `wardrobe`, `friends`, `account`. Order: Modules 0, About 1000. The icon is used when the window
+is too narrow for all labels. A `Panel` draws into `(x, y, w, h)` every frame with the `Ui` context; it may
+override `key(int)`, `typed(int)`, `onShow()`, `onHide()`.
+
+**Title screen and pause menu entries** (`ui/MenuEntries`, same id replaces):
+
+```java
+MenuEntries.register(MenuEntries.Place.TITLE, new MenuEntries.Entry("wardrobe", "cosmetics.menu.wardrobe",
+        Icons.SHIRT, 20, MenuEntries.whenEnabled("cosmetics"), parent -> ClientCompat.openScreen(new WardrobeScreen(parent))));
+MenuEntries.register(MenuEntries.Place.PAUSE, new MenuEntries.Entry("friends", "social.menu.friends",
+        Icons.FRIENDS, 20, MenuEntries.whenOnline("social"), parent -> ..., () -> unreadCount()));   // badge
+```
+
+Core orders – title: singleplayer 0, multiplayer 10, wardrobe 20, friends 30, Vibey settings 40, options 50,
+mods 60 (Mod Menu on Fabric, NeoForge's mod list), quit 1000 (pinned to the bottom); groups split at 20 / 50.
+Pause: Vibey 0, wardrobe 10, friends 20, host 30. The core already registers `wardrobe` / `friends` (open the tab
+with that id, else the module's settings page) and `host` (`HostingService.openHostScreen()` while `canHost()`);
+replace them with your own screens if you have them. Entries of disabled modules are hidden via `visible`.
+
+**Player preview on the title screen** – register `api/service/MenuPreview`:
+
+```java
+Services.register(MenuPreview.class, new MenuPreview() {
+    public void render(Gfx g, int x, int y, int w, int h, int mouseX, int mouseY, float delta) { /* player in the box */ }
+    public boolean mouseClicked(double x, double y, int button) { return true; }          // start drag-rotate
+    public boolean mouseDragged(double x, double y, int b, double dx, double dy) { yaw += dx; return true; }
+});
+```
+
+Without one the title shows the seal on its ice floe.
+
+**Status numbers** – the social module registers `api/service/SocialStatus` (`onlineFriends()`, `badge()`); the
+title status bar shows "Online · 3 friends online". Backend reachability and the MOTD come from the public
+`GET /api/v1/meta` (`ui/title/BackendStatus`), only while online features are on.
+
+## Widgets cheat sheet
+
+Immediate mode (`Ui` + `Widgets`), call every frame, keys must be stable objects:
+
+```java
+if (Widgets.button(ui, this, x, y, 80, 16, label, Widgets.Style.PRIMARY)) save();
+if (Widgets.toggle(ui, setting, x, y, setting.on(), true)) setting.toggle();
+float v = Widgets.slider(ui, key, x, y, 100, value);
+int d = Widgets.cycler(ui, key, x, y, 120, valueLabel);          // -1 / +1
+Widgets.textField(ui, key, x, y, 160, text, 64, s -> text = s);
+ui.tooltip(key, x, y, w, h, "Shown after 350 ms");
+if (ui.clicked(x, y, w, h)) ...;  boolean hot = ui.focusedLast() || ui.hover(x, y, w, h);
+int top = scroll.begin(ui, x, y, w, h); ...; scroll.end(ui, bottom);
+Icons.draw(g, Icons.SHIRT, x, y, Theme.MUTED);   PixelFont.drawExtruded(g, "VIBEY", x, y, 3, Theme.TEXT, Theme.BRAND);
+```
+
+On vanilla screens use `VibeyButton` (a real widget: Tab/Enter, narration). The seal: `new Seal(withIce)`,
+`seal.draw(g, x, y, unit, hovered)`, `seal.close()` in `removed()`.
+
+## Testing
+
+`./gradlew :fabric-1.21.11:runClientGameTest` runs `VibeyUiGameTest`: title, onboarding, menu (global, module,
+search, About), pause row, at GUI scales 2 / 3 / auto and 1280 × 720 / 1920 × 1080, English and German.
+Screenshots: `versions/fabric-1.21.11/build/run/clientGameTest/screenshots/ui_*.png` – look at them.

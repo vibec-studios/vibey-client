@@ -46,6 +46,7 @@ public class VibeyScreen extends BaseScreen {
 
     @Override
     protected void init() {
+        UiScale.apply(this);
         ui.reattach();
     }
 
@@ -254,6 +255,12 @@ public class VibeyScreen extends BaseScreen {
         return false;
     }
 
+    @Override
+    protected boolean typed(int codepoint) {
+        if (ui.anyInputFocused() || ui.capturing() != null) return false;
+        return current != null && current.typed(codepoint);
+    }
+
     private void cycleTab(int dir) {
         List<VibeyTabs.Tab> tabs = VibeyTabs.visible();
         for (int i = 0; i < tabs.size(); i++) {
@@ -279,6 +286,7 @@ public class VibeyScreen extends BaseScreen {
     @Override
     public void removed() {
         seal.close();
+        UiScale.restore();
     }
 
     @Override

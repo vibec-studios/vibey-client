@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component;
 *///?} else
 import net.minecraft.client.gui.GuiGraphics;
 //? if >=1.21.9 {
+import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 //?}
@@ -39,6 +40,11 @@ public abstract class BaseScreen extends Screen {
     /** Drag with the movement since the last call (GUI pixels); defaults to {@link #drag(double, double, int)}. */
     protected boolean drag(double x, double y, int button, double dx, double dy) {
         return drag(x, y, button);
+    }
+
+    /** A typed character (only when no text field has the focus is it useful); true if used. */
+    protected boolean typed(int codepoint) {
+        return false;
     }
 
     /** Draws the vanilla title panorama (the rotating world background), full screen. */
@@ -123,6 +129,20 @@ public abstract class BaseScreen extends Screen {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (key(keyCode)) return true;
         return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+    *///?}
+
+    //? if >=1.21.9 {
+    @Override
+    public boolean charTyped(CharacterEvent event) {
+        if (typed(event.codepoint())) return true;
+        return super.charTyped(event);
+    }
+    //?} else {
+    /*@Override
+    public boolean charTyped(char c, int modifiers) {
+        if (typed(c)) return true;
+        return super.charTyped(c, modifiers);
     }
     *///?}
 

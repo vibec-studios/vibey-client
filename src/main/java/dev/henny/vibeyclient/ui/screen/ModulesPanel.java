@@ -41,6 +41,7 @@ public final class ModulesPanel implements Panel {
     private final Map<VibeyModule, Panel> customPanels = new HashMap<>();
     private Object selected = lastSelected;
     private String query = "";
+    private net.minecraft.client.gui.components.EditBox searchBox;
 
     @Override
     public void draw(Ui ui, int x, int y, int w, int h) {
@@ -61,6 +62,7 @@ public final class ModulesPanel implements Panel {
             query = q;
             listScroll.reset();
         });
+        searchBox = box;
         if (query.isEmpty() && !box.isFocused()) g.text(Lang.tr("core.menu.search"), x + 13, y + 11, Theme.DIM);
         dev.henny.vibeyclient.ui.Icons.draw(g, dev.henny.vibeyclient.ui.Icons.SEARCH, x + w - 8 - 13, y + 11, box.isFocused() ? Theme.BRAND : Theme.DIM);
         g.hline(x, y + SEARCH_H, w, Theme.LINE);
@@ -123,15 +125,16 @@ public final class ModulesPanel implements Panel {
         boolean runnable = m == null || m.status().loadable();
         int tx = x + w - Theme.PAD - Widgets.TOGGLE_W;
         int ty = y + (h - Widgets.TOGGLE_H) / 2;
-        // the switch first, so its click is not taken by the row
-        if (m != null && runnable && m.canToggle()) {
-            if (Widgets.toggle(ui, m, tx, ty, m.isEnabled(), true)) ModuleManager.get().toggle(m.id());
-        }
-        if (ui.clicked(x, y, w, h)) select(key);
+        // background first, then the switch (registered before the row, so its click is not taken by the row)
         float hov = ui.anim(key, 0f).to(sel ? 1f : ui.hover(x, y, w, h) ? 0.6f : 0f);
         float s = ui.anim(key, 5, sel ? 1f : 0f).to(sel ? 1f : 0f);
         if (hov > 0f) g.rect(x, y, w, h, Theme.alpha(Theme.SURFACE3, hov));
         if (s > 0f) g.rect(x, y + Math.round(h * (1f - s) / 2f), 2, Math.max(1, Math.round(h * s)), Theme.BRAND);
+        if (m != null && runnable && m.canToggle()) {
+            if (Widgets.toggle(ui, m, tx, ty, m.isEnabled(), true)) ModuleManager.get().toggle(m.id());
+        }
+        if (ui.clicked(x, y, w, h)) select(key);
+        if (ui.focusedLast() && !sel) g.rect(x, y, w, h, Theme.alpha(Theme.SURFACE3, 0.6f));
 
         int ix = x + Theme.PAD;
         int iy = y + (h - 14) / 2;
@@ -161,6 +164,17 @@ public final class ModulesPanel implements Panel {
         g.rect(x, y, 14, 14, Theme.alpha(color, 0.16f));
         g.outline(x, y, 14, 14, Theme.alpha(color, 0.55f));
         dev.henny.vibeyclient.ui.Icons.draw(g, icon, x + 3, y + 3, 1, color);
+    }
+
+    /** Type-to-search: the first printable key focuses the search field. */
+    @Override
+    public boolean typed(int codepoint) {
+        if (searchBox == null || codepoint <= 32 || Character.isISOControl(codepoint)) return false;
+        net.minecraft.client.gui.screens.Screen screen = dev.henny.vibeyclient.client.ClientCompat.screen();
+        if (screen != null) screen.setFocused(searchBox);
+        searchBox.setFocused(true);
+        searchBox.insertText(new String(Character.toChars(codepoint)));
+        return true;
     }
 
     @Override

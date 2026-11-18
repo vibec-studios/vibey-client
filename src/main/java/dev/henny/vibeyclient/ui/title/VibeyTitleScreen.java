@@ -51,6 +51,7 @@ public class VibeyTitleScreen extends BaseScreen {
 
     @Override
     protected void init() {
+        dev.henny.vibeyclient.ui.UiScale.apply(this);
         ui.reattach();
         BackendStatus.refresh();
         TitleHook.shownOnce = true;
@@ -234,7 +235,7 @@ public class VibeyTitleScreen extends BaseScreen {
         } else {
             // the seal on its ice floe, with a soft brand glow
             float unit = Math.max(1f, Math.min(pvW * 0.55f / 36.5f, pvH * 0.62f / 26f));
-            unit = Math.min(unit, 5f);
+            unit = Math.min(unit, 7f);
             int sw = heroSeal.width(unit), sh = heroSeal.height(unit);
             int sx = x + (w - sw) / 2;
             int sy = pvY + (pvH - sh) / 2 + 4;
@@ -417,6 +418,7 @@ public class VibeyTitleScreen extends BaseScreen {
     @Override
     public void removed() {
         brandSeal.close();
+        dev.henny.vibeyclient.ui.UiScale.restore();
         heroSeal.close();
         if (previewShown) {
             previewShown = false;
