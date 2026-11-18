@@ -74,10 +74,10 @@ offline showcase page `polar-pals.html` with in-game screenshots). They are **no
 
 | Id | Slot | Rarity | What it does |
 |---|---|---|---|
-| `vibey:polar_seal` | pet | legendary | Shoulder-high chibi seal pup (`pet.scale` 1.2), 13 s `idle` (blink, head tilt, sit-up clap with hearts + squeak, roll), galumph `walk`, belly-scoot `sprint`, superman `glide`/`fly`, shy `sneak`, hop-clap `happy`, nap with 3D Zs in `idle_long`. |
+| `vibey:polar_seal` | pet | legendary | Penguin-sized chibi seal pup (`pet.scale` 0.85: hip-high lying, shoulder-high sitting up), 13 s `idle` (blink, head tilt, sit-up clap with hearts + squeak, roll), galumph `walk`, belly-scoot `sprint`, superman `glide`/`fly`, shy `sneak`, hop-clap `happy`, nap with 3D Zs in `idle_long`. |
 | `vibey:polar_penguin` | pet | epic | Shoulder-high penguin chick (scale 0.95) in a knitted scarf: flaps, shows / tosses / gulps a fish, waddles, belly-slides in `sprint`, superman `glide`, flaps madly in `fly`, ducks in `sneak`, cheers in `happy`, dozes off in `idle_long`. |
-| `vibey:polar_owl_wings` | wings | legendary | Feathered wings: arm/forearm/hand bones, coverts + alula layers, 5 secondaries and 5 primaries as bones; folded `idle`, flap + glide `fly` (feather sprites), soaring `glide`, tucked `sneak`; `offsetWhen` back. |
-| `vibey:polar_aurora_wings` | wings | epic | Soft aurora veils: chains of 2 px emissive translucent segments with one continuous curtain texture (12-frame interpolated strip), flowing waves, `glide`, sparkle trail; `offsetWhen` back. |
+| `vibey:polar_owl_wings` | wings | legendary | Feathered wings: arm/forearm/hand bones, coverts + alula layers, 5 secondaries and 5 primaries as bones; folded `idle`, flap + glide `fly` (feather sprites), soaring `glide`, tucked `sneak`; roots at the outer shoulder blades, `offsetWhen` back `[0, 2.5, 6]` + pitch −10° so they hang beside the igloo backpack. |
+| `vibey:polar_aurora_wings` | wings | epic | Soft aurora veils: chains of 2 px emissive translucent segments with one continuous curtain texture (12-frame interpolated strip), flowing waves, `glide`, sparkle trail; knots at the outer shoulder blades, `offsetWhen` back `[0, 2, 4]` (beside the igloo top). |
 | `vibey:polar_pompom_beanie` | hat | rare | Calm knitted beanie (three colours): purple crown, ribbed cuff, one clean snow-white pompom (boing, bounce, streams back). |
 | `vibey:polar_igloo_backpack` | back | epic | Mini igloo on straps; a seal pup peeks out, blinks, waves and hides. |
 | `vibey:polar_aurora_ring` | aura | epic | Soft northern lights: three thin curved ribbons of segments with drifting rays and alpha falloff, phase-shifted waves (fold, lift, lean, stretch), slow turn, orbiting crystal snowflakes, rising sparkles. |
@@ -89,13 +89,15 @@ npm run build:polar                                  # = node tools/build.mjs --
 npm run check:blockbench -- --dir dist/polar-pals    # plugin validators + real Blockbench round trip
 npm run push:polar                                   # push all into the running game (Creator mode, DEV items)
 node tools/shot.mjs dist/polar-pals/polar_seal.vibey out.png "idle=5.2 + walk=1.2" --yaw 30,90   # quick pose check
+node tools/combo.mjs out.png dist/polar-pals/polar_igloo_backpack.vibey:idle=3.4 dist/polar-pals/polar_owl_wings.vibey:idle=0 --yaw 90,180,0
+                                                     # several items worn together, offsetWhen applied (fit check)
 ```
 
 New toolkit pieces (usable for any item): `b.texture(id, { hd: 4 })` HD textures (PNG k× the UV size, painters get
 k× larger views; renderer and validator understand HD), `build.mjs --collection <folder>`, `tools/shot.mjs` (render
-any pose/mix), `tools/push-to-game.mjs` (devlink push; finds `devlink.json` in `.minecraft`, the Vibe Launcher
+any pose/mix), `tools/combo.mjs` (several items on one player with their `offsetWhen` rules, e.g. wings + backpack), `tools/push-to-game.mjs` (devlink push; finds `devlink.json` in `.minecraft`, the Vibe Launcher
 instances `%APPDATA%\VibeLauncher\instances\<id>\minecraft` and `versions/*/run`; `--game-dir`, `--instance`),
-`tools/showcase-html.mjs` (offline page with embedded screenshots) and the opt-in `ShowcaseGameTest`
+`tools/showcase-html.mjs` (offline page with embedded screenshots; before/after sections from `--before` and the plan's `rounds`) and the opt-in `ShowcaseGameTest`
 (`VIBEYCLIENT_SHOWCASE=<folder>` + optional `VIBEYCLIENT_SHOWCASE_PLAN=content/src/polar-pals/showcase.json`, then
 `./gradlew :fabric-1.21.11:runClientGameTest`; screenshots `sc_*.png`).
 

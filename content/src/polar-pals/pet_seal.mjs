@@ -1,4 +1,4 @@
-// Polar Pals · Seal Pup – the centrepiece pet, about shoulder high next to you. A chibi seal with a big round head,
+// Polar Pals · Seal Pup – the centrepiece pet, penguin-sized: lying it reaches your hip, sitting up your shoulder. A chibi seal with a big round head,
 // glossy eyes, whiskers and soft fur. idle (13 s): breathe, blink, head tilt, sit up and clap (hearts + squeak), roll
 // over, shake. walk = galumph, sprint = fast belly scoot, glide = superman, fly = flapping superman, sneak = shy
 // blushing loaf, happy (while you play an emote) = hop-hop-clap with hearts, idle_long (you stood still ~10 s) =
@@ -33,12 +33,12 @@ export default function () {
   const b = cosmetic("polar_seal", {
     name: { en: "Polar Pals · Seal Pup", de: "Polar Pals · Robbenbaby" },
     description: {
-      en: "A big round seal pup with glossy eyes. Blinks, tilts its head, claps with hearts, rolls over, scoots after you on its belly, cheers when you emote and naps when you stand still.",
-      de: "Ein großes, kugelrundes Robbenbaby mit Glanzaugen. Blinzelt, legt den Kopf schief, klatscht mit Herzchen, rollt sich, rutscht dir auf dem Bauch hinterher, jubelt bei deinen Emotes und schläft ein, wenn du still stehst.",
+      en: "A round, penguin-sized seal pup with glossy eyes. Blinks, tilts its head, claps with hearts, rolls over, scoots after you on its belly, cheers when you emote and naps when you stand still.",
+      de: "Ein kugelrundes Robbenbaby in Pinguingröße mit Glanzaugen. Blinzelt, legt den Kopf schief, klatscht mit Herzchen, rollt sich, rutscht dir auf dem Bauch hinterher, jubelt bei deinen Emotes und schläft ein, wenn du still stehst.",
     },
     tags: ["polar-pals", "seal", "cute", "pet", "animated"],
     rarity: "legendary",
-    cosmetic: { slot: "pet", pet: { follow: "ground", scale: 1.2 } },
+    cosmetic: { slot: "pet", pet: { follow: "ground", scale: 0.85 } },
     preview: petPreview([
       { label: "idle · look", t: 2.9 },
       { label: "idle · clap", t: 5.2 },

@@ -26,8 +26,8 @@
       "name": {"en":"Polar Pals · Aurora Veil Wings","de":"Polar Pals · Polarlicht-Schleierflügel"},
       "rarity": "epic",
       "tags": ["polar-pals","wings","aurora","glow","animated"],
-      "size": 204159,
-      "sha256": "42e43f108e5442c49781d1b552b7b2a8c362afaee5699074e240691e2d47e214",
+      "size": 204183,
+      "sha256": "a088dde2fe8fcf499523a295c365c9cd63ed1f4af58769076b47e07ace0893c5",
       "sort": 20
     },
     {
@@ -40,8 +40,8 @@
       "name": {"en":"Polar Pals · Snowy Owl Wings","de":"Polar Pals · Schneeeulen-Flügel"},
       "rarity": "legendary",
       "tags": ["polar-pals","wings","owl","feathers","animated"],
-      "size": 106295,
-      "sha256": "bbd32ae83f94c5e479c893243017b915698d983e5b37bae744cebd5788fdbbd0",
+      "size": 106404,
+      "sha256": "4ff31098e8318def5bea2b099b1d1041167b4b5b5263d60abb63242270b86772",
       "sort": 30
     },
     {
@@ -82,8 +82,8 @@
       "name": {"en":"Polar Pals · Seal Pup","de":"Polar Pals · Robbenbaby"},
       "rarity": "legendary",
       "tags": ["polar-pals","seal","cute","pet","animated"],
-      "size": 146980,
-      "sha256": "8c966e9e67de44dc8d7c71af683dbab86cc21452988a9e8a66b6a52e7e1a8404",
+      "size": 147001,
+      "sha256": "7d44675c51862be2b810868fe6ace9a158a0c7c5349921ee6bb71412db16b64d",
       "sort": 60
     },
     {

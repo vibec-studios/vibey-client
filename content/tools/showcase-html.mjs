@@ -7,7 +7,9 @@
 //
 // Screenshots (sc_<item>_<nn>_<what>.png, sc_hero_<name>.png, sc_state_<name>.png, sc_wardrobe_*.png) are scaled to
 // --width and JPEG-encoded with ffmpeg (must be on PATH) to keep the page small. --before: a folder of earlier
-// JPEGs; every <name>.jpg that also exists in <dir>/ingame/ becomes a before/after pair.
+// JPEGs; every <name>.jpg that also exists in <dir>/ingame/ becomes a before/after pair. Later feedback rounds come
+// from the plan: "rounds": [{ "before": "ingame/before2", "title": "…", "note": "…" }] (folders relative to --dir,
+// newest first); each becomes its own before/after section (current image from ingame/ or ingame/states/).
 import { readFileSync, readdirSync, writeFileSync, mkdtempSync, rmSync, existsSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
@@ -71,15 +73,24 @@ html += `<section class="hero"><div class="grid hero-grid">${heroes
 
 // before / after (earlier in-game shots next to the current ones)
 const jpgData = (f) => "data:image/jpeg;base64," + readFileSync(f).toString("base64");
+const pairHtml = (beforeFile, afterFile, label) =>
+  `<div class="pair"><figure><img loading="lazy" src="${jpgData(beforeFile)}" alt=""><figcaption>before · ${esc(label)}</figcaption></figure><figure><img loading="lazy" src="${jpgData(afterFile)}" alt=""><figcaption>after · ${esc(label)}</figcaption></figure></div>`;
+for (const r of plan.rounds ?? []) {
+  const bdir = resolve(dir, r.before);
+  if (!existsSync(bdir)) continue;
+  const current = (f) => [join(dir, "ingame", f), join(dir, "ingame", "states", f)].find((x) => existsSync(x));
+  const files = readdirSync(bdir).filter((f) => f.endsWith(".jpg") && current(f)).sort();
+  if (!files.length) continue;
+  html += `<section class="round"><h2>${esc(r.title ?? "Before / after")}</h2>${r.note ? `<p class="note">${esc(r.note)}</p>` : ""}<div class="pairs">${files
+    .map((f) => pairHtml(join(bdir, f), current(f), f.replace(/\.jpg$/, "").replace(/^polar_/, "").replace(/_/g, " ")))
+    .join("")}</div></section>`;
+}
 const pairs = beforeDir && existsSync(beforeDir)
   ? readdirSync(beforeDir).filter((f) => f.endsWith(".jpg") && existsSync(join(dir, "ingame", f))).sort((a, b) => pos("vibey:" + a.replace(/\.jpg$/, "")) - pos("vibey:" + b.replace(/\.jpg$/, "")))
   : [];
 if (pairs.length) {
   html += `<section id="before-after"><h2>Before / after <small>Vorher / nachher</small></h2><div class="pairs">${pairs
-    .map((f) => {
-      const label = f.replace(/\.jpg$/, "").replace(/^polar_/, "").replace(/_/g, " ");
-      return `<div class="pair"><figure><img loading="lazy" src="${jpgData(join(beforeDir, f))}" alt=""><figcaption>before · ${esc(label)}</figcaption></figure><figure><img loading="lazy" src="${jpgData(join(dir, "ingame", f))}" alt=""><figcaption>after · ${esc(label)}</figcaption></figure></div>`;
-    })
+    .map((f) => pairHtml(join(beforeDir, f), join(dir, "ingame", f), f.replace(/\.jpg$/, "").replace(/^polar_/, "").replace(/_/g, " ")))
     .join("")}</div></section>`;
 }
 // optional states + wardrobe
@@ -147,7 +158,7 @@ section{padding:28px 0;border-bottom:1px solid var(--line)}
 .head{display:flex;gap:20px;align-items:flex-start;margin-bottom:16px}
 .thumb{width:128px;height:128px;image-rendering:pixelated;background:var(--s2);border:1px solid var(--line);flex:none}
 .meta{min-width:0}h2{margin:6px 0 6px;font-size:24px}h2 small{color:var(--muted);font-weight:400;font-size:16px;margin-left:6px}
-p{margin:4px 0;color:#d4d4d8}p.de{color:var(--muted)}p.story{color:var(--teal);font-size:14px}
+p{margin:4px 0;color:#d4d4d8}p.note{color:var(--muted);max-width:900px;margin:0 0 14px}p.de{color:var(--muted)}p.story{color:var(--teal);font-size:14px}
 .tags{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12px}
 .rarity{border:1px solid var(--c);color:var(--c);padding:1px 7px;text-transform:uppercase;letter-spacing:.08em}
 .slot{color:var(--muted);text-transform:uppercase;letter-spacing:.08em}code{color:var(--dim);font:12px ui-monospace,Consolas,monospace}
