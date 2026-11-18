@@ -45,9 +45,10 @@ if (project.minecraft_version == '1.21.11') {
         java.srcDirs = [rootProject.file('src/gametest/java')]
         resources.srcDirs = [rootProject.file('src/gametest/resources')]
     }
-    // Plain JUnit tests (pure logic such as the signed-loadout check): ./gradlew :fabric-1.21.11:test (part of build)
+    // Plain JUnit tests (pure logic such as the signed-loadout check): ./gradlew :fabric-1.21.11:test (part of build).
+    // They live in src/junit, not src/test: Stonecutter would hand src/test to every version, which has no JUnit.
     sourceSets.named('test') {
-        java.srcDirs = [rootProject.file('src/test/java')]
+        java.srcDirs = [rootProject.file('src/junit/java')]
         resources.srcDirs = []
     }
     dependencies {
