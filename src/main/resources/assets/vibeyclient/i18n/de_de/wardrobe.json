@@ -69,5 +69,7 @@
     "description": "Umhänge, Flügel, Auren, Begleiter und Emotes. Alles kostenlos.",
     "open": "Garderobe öffnen",
     "loadout": "Ausrüstung"
-  }
+  },
+  "by": "von {0}",
+  "deletedUser": "gelöschter Nutzer"
 }

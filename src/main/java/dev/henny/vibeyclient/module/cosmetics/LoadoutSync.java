@@ -70,7 +70,7 @@ public final class LoadoutSync {
 
     /** Online items need to be owned; builtin and dev items are always usable locally. */
     public boolean canUse(AvatarItem item) {
-        if (item == null) return false;
+        if (item == null || item.needsUpdate()) return false;
         if (item.source() != ItemSource.CATALOG) return true;
         if ("default".equals(item.availability())) return true;
         return owned.contains(item.id());
@@ -110,15 +110,53 @@ public final class LoadoutSync {
         if (b == null) return;
         listeners.add(b.onEvent("loadout.updated", d -> {
             UUID id = uuid(d.get("userId"));
-            if (id == null || id.equals(module.selfId())) return;
+            if (id == null) return;
+            // VIBE-API-2 §5: client/badges also come with loadout updates (absent on older backends)
+            if (d.has("client") || d.has("badges"))
+                VibeyPlayers.backend(id, d.get("client") instanceof JsonPrimitive c && "vibey".equals(c.getAsString()), badges(d.get("badges")));
+            if (id.equals(module.selfId())) return;
             fromBackend.put(id, new Remote(slots(d.get("slots")), System.currentTimeMillis()));
         }));
+        // OTA cosmetics (VIBE-API-2 §4): reload the catalog (spread over a few seconds) and what we own (grants)
+        listeners.add(b.onEvent("catalog.updated", d -> {
+            ItemLoader.requestCatalog(5_000);
+            Tasks.debounce("vibeyclient:cosmetics:owned", 2_000, () -> Tasks.onMain(this::reloadOwned));
+        }));
+        // after a reconnect the catalog may have changed while we were away (ready carries catalogVersion)
+        listeners.add(b.onEvent(dev.henny.vibeyclient.backend.BackendClient.EV_READY, d -> {
+            String v = d.get("catalogVersion") instanceof JsonPrimitive p ? p.getAsString() : null;
+            if (v == null || !v.equals(ItemLoader.catalogVersion())) ItemLoader.requestCatalog(10_000);
+        }));
+        // our submission was approved/rejected (the catalog itself follows with catalog.updated)
+        listeners.add(b.onEvent("submission.updated", d -> submissionUpdated.accept(d)));
         listeners.add(b.onEvent("emote.played", d -> {
             UUID id = uuid(d.get("userId"));
             if (id == null || id.equals(module.selfId())) return;
             String emote = d.has("emoteId") ? d.get("emoteId").getAsString() : null;
             boolean play = !d.has("action") || "play".equals(d.get("action").getAsString());
             remoteEmote.accept(id, play ? emote : null);
+        }));
+    }
+
+    /** Gateway {@code submission.updated} payloads (client thread); set by the devlink module. */
+    public static volatile java.util.function.Consumer<JsonObject> submissionUpdated = d -> {};
+
+    /** Owned items changed (grant/revoke, catalog.updated): refresh the list without touching the loadout. */
+    void reloadOwned() {
+        if (!backendReady() || !ownedKnown) return;
+        VibeBackend b = backend;
+        b.request("GET", "/api/v1/cosmetics/me", null).whenComplete((res, err) -> Tasks.onMain(() -> {
+            if (b != backend || err != null || !(res instanceof JsonObject o)) return;
+            Set<String> own = new HashSet<>();
+            if (o.get("owned") instanceof JsonArray a) for (JsonElement e : a) if (e.isJsonPrimitive()) own.add(e.getAsString());
+            Set<String> fresh = new HashSet<>(own);
+            fresh.removeAll(owned);
+            owned = own;
+            fresh.removeIf(id -> {
+                AvatarItem i = AvatarItems.get(id, ItemSource.CATALOG);
+                return i == null || "default".equals(i.availability()) || i.needsUpdate();
+            });
+            if (!fresh.isEmpty()) module.newItems(fresh);
         }));
     }
 

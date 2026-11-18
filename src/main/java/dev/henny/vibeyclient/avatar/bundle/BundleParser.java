@@ -61,7 +61,12 @@ public final class BundleParser {
     private static Bundle parse(JsonObject o, String sha, int size) {
         List<String> warnings = new ArrayList<>();
         if (!"vibey".equals(str(o, "format"))) throw new BundleException("format must be \"vibey\"");
-        if (num(o, "formatVersion", -1) != 1) throw new BundleException("formatVersion must be 1");
+        double fv = num(o, "formatVersion", -1);
+        String minClient = str(o, "minClientVersion");
+        if (minClient != null && !dev.henny.vibeyclient.avatar.ClientVersion.satisfies(minClient))
+            throw new NeedsUpdateException(minClient, "needs Vibey Client " + minClient + " or newer");
+        if (fv > 1) throw new NeedsUpdateException(null, "formatVersion " + (long) fv + " needs a newer Vibey Client");
+        if (fv != 1) throw new BundleException("formatVersion must be 1");
         String kindS = str(o, "kind");
         Kind kind = "cosmetic".equals(kindS) ? Kind.COSMETIC : "emote".equals(kindS) ? Kind.EMOTE : null;
         if (kind == null) throw new BundleException("kind must be cosmetic or emote");
@@ -274,9 +279,10 @@ public final class BundleParser {
                 String at = str(b, "attach");
                 attach = Attach.of(at);
                 if (attach == null) {
-                    if (at != null) throw new BundleException("bone \"" + n + "\": attach \"" + at + "\" is unknown");
+                    // unknown (future) attach points degrade to the default instead of rejecting the whole item
                     attach = kind == Kind.EMOTE ? Attach.ROOT : Attach.BODY;
-                    warnings.add("bone \"" + n + "\" has no attach, using " + attach.name().toLowerCase(Locale.ROOT));
+                    warnings.add("bone \"" + n + "\" " + (at == null ? "has no attach" : "has unknown attach \"" + at + "\"")
+                            + ", using " + attach.name().toLowerCase(Locale.ROOT));
                 }
             }
             float[] pivot = vec(b.get("pivot"), "bone " + n + " pivot", 0);
@@ -402,9 +408,9 @@ public final class BundleParser {
                 }
                 if (!(e.getValue() instanceof JsonObject ch)) continue;
                 String where = "animation " + name + " bone " + bn;
-                Channel r = channel(ch.get("rotation"), length, where + " rotation");
-                Channel p = channel(ch.get("position"), length, where + " position");
-                Channel s = channel(ch.get("scale"), length, where + " scale");
+                Channel r = channel(ch.get("rotation"), length, where + " rotation", warnings);
+                Channel p = channel(ch.get("position"), length, where + " position", warnings);
+                Channel s = channel(ch.get("scale"), length, where + " scale", warnings);
                 if (r == null && p == null && s == null) continue;
                 tracks.add(new Track(mb == null ? -1 : mb.index, pb, r, p, s));
             }
@@ -421,7 +427,7 @@ public final class BundleParser {
         return new Animation(name, length, loop, hold, tracks.toArray(new Track[0]), events.toArray(new Event[0]));
     }
 
-    private static Channel channel(JsonElement el, float length, String where) {
+    private static Channel channel(JsonElement el, float length, String where, List<String> warnings) {
         if (!(el instanceof JsonArray arr) || arr.isEmpty()) return null;
         int n = arr.size();
         float[] t = new float[n], v = new float[n * 3], pre = new float[n * 3];
@@ -441,10 +447,15 @@ public final class BundleParser {
             else Arrays.fill(pre, i * 3, i * 3 + 3, Float.NaN);
             String is = str(k, "i");
             in[i] = is == null ? Interp.LINEAR : switch (is) {
+                case "linear" -> Interp.LINEAR;
                 case "catmullrom" -> Interp.CATMULLROM;
                 case "step" -> Interp.STEP;
                 case "bezier" -> Interp.BEZIER;
-                default -> Interp.LINEAR;
+                default -> {
+                    String w = where + ": unknown interpolation \"" + is + "\", using linear";
+                    if (!warnings.contains(w)) warnings.add(w);
+                    yield Interp.LINEAR;
+                }
             };
         }
         return new Channel(t, v, pre, in);

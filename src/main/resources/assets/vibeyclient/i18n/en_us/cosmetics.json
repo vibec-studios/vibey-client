@@ -14,11 +14,14 @@
     "show_hat": "Hats",
     "show_back": "Back items",
     "show_cape.desc": "Show this slot on everyone (only on your screen).",
-    "wardrobe": "Open wardrobe"
+    "wardrobe": "Open wardrobe",
+    "notifyNew": "New cosmetics notice",
+    "notifyNew.desc": "A short notice when new items arrive in your wardrobe."
   },
   "locked": {
     "notUnlocked": "Not unlocked",
-    "signIn": "Sign in to use"
+    "signIn": "Sign in to use",
+    "update": "Update Vibey Client"
   },
   "slot": {
     "cape": "Cape",
@@ -28,5 +31,10 @@
     "shield": "Shield",
     "hat": "Hat",
     "back": "Back"
+  },
+  "new": {
+    "title": "New cosmetics available",
+    "one": "{0} is now in your wardrobe.",
+    "many": "{0} new items in your wardrobe."
   }
 }

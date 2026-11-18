@@ -392,6 +392,11 @@ final class WardrobeScreen extends BaseScreen {
                 stateColor = Theme.BRAND2;
             }
             if (state != null && rx < x + w - pad - 12) g.text(g.clip(state, x + w - pad - rx), rx, y + 20, stateColor);
+            String creator = info.creator();
+            if (creator != null) {
+                String who = AvatarItem.DELETED_CREATOR.equals(creator) ? Lang.tr("wardrobe.deletedUser") : creator;
+                g.text(g.clip(Lang.tr("wardrobe.by", who), iw), x + pad, y + 31, Theme.MUTED);
+            }
         } else {
             g.bold(g.clip(category.label(), iw), x + pad, y + 8, Theme.MUTED);
             g.text(g.clip(Lang.tr(category.emotes() ? "wardrobe.info.noEmote" : "wardrobe.info.none"), iw), x + pad, y + 20, Theme.DIM);
@@ -404,7 +409,7 @@ final class WardrobeScreen extends BaseScreen {
         int buttonsH = stacked ? bh * 2 + GAP : bh;
         int by = y + h - pad - buttonsH;
 
-        int vy = y + 34;
+        int vy = y + (info != null && info.creator() != null ? 44 : 34);
         int vh = by - pad - vy;
         int vx = x + pad;
         g.rect(vx, vy, iw, vh, Theme.BG);

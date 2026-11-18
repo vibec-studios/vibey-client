@@ -50,6 +50,7 @@ final class NametagProbe {
         p.yBodyRotO = yaw;
         p.yHeadRot = yaw;
         p.yHeadRotO = yaw;
+        p.setId(-4200 - SPAWNED.size()); // client-only entity; 26.x refuses entities without an id
         mc.level.addEntity(p);
         SPAWNED.add(p);
         PlayerInfo info = newInfo(profile);
