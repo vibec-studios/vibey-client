@@ -89,7 +89,7 @@ public final class PvpGameTest implements FabricClientGameTest {
             cmd(world, "setblock %d %d %d minecraft:black_concrete", x, y + 5, z - 16);
             cmd(world, "setblock %d %d %d minecraft:blue_concrete", x - 4, y + 9, z - 16);
             cmd(world, "setblock %d %d %d minecraft:lime_concrete", x + 4, y + 9, z - 16);
-            cmd(world, "tp @a %d.5 %d %d.5 180 0", x, y + 1, z);
+            cmd(world, "tp @a %.1f %d %.1f 180 0", x + 0.5, y + 1, z + 0.5);
             context.waitTicks(40);
             world.getClientWorld().waitForChunksRender();
             look(context, 180, -9);
@@ -263,9 +263,9 @@ public final class PvpGameTest implements FabricClientGameTest {
     private static void outline(ClientGameTestContext ctx, TestSingleplayerContext world, int x, int y, int z) {
         cmd(world, "setblock %d %d %d minecraft:stone", x, y + 1, z - 2);
         cmd(world, "setblock %d %d %d minecraft:oak_fence", x + 1, y + 1, z - 2);
-        cmd(world, "tp @a %d.5 %d %d.5 180 30", x, y + 1, z);
+        cmd(world, "tp @a %.1f %d %.1f 180 30", x + 0.5, y + 1, z + 0.5);
         ctx.waitTicks(5);
-        look(ctx, 180, 30);
+        lookAt(ctx, x + 0.5, y + 1.5, z - 1.5);
         ctx.waitTicks(3);
         shot(ctx, "pvp_40_outline_vanilla");
         outlineStyle(ctx, "pvp_41_outline_brand", m -> m.outline.set(true));
@@ -280,7 +280,7 @@ public final class PvpGameTest implements FabricClientGameTest {
             m.outlineFill.set(true);
             m.outlineFillOpacity.set(30);
         });
-        cmd(world, "tp @a %d.5 %d %d.5 180 25", x + 1, y + 1, z); // the fence: a non-cube shape
+        cmd(world, "tp @a %.1f %d %.1f 180 25", x + 1 + 0.5, y + 1, z + 0.5); // the fence: a non-cube shape
         ctx.waitTicks(5);
         lookAt(ctx, x + 1.5, y + 1.6, z - 1.5);
         outlineStyle(ctx, "pvp_44_outline_fence_red_fill", m -> {
@@ -290,7 +290,7 @@ public final class PvpGameTest implements FabricClientGameTest {
         });
         ctx.runOnClient(mc -> reset(m()));
         cmd(world, "fill %d %d %d %d %d %d minecraft:air", x, y + 1, z - 2, x + 1, y + 1, z - 2);
-        cmd(world, "tp @a %d.5 %d %d.5 180 0", x, y + 1, z);
+        cmd(world, "tp @a %.1f %d %.1f 180 0", x + 0.5, y + 1, z + 0.5);
         ctx.waitTicks(5);
     }
 
@@ -308,7 +308,7 @@ public final class PvpGameTest implements FabricClientGameTest {
     // ============================================================================================ hit colour
 
     private static void hitColor(ClientGameTestContext ctx, TestSingleplayerContext world, int x, int y, int z) {
-        cmd(world, "summon minecraft:iron_golem %d.5 %d %d.5 {NoAI:1b,Rotation:[0f,0f],Health:100f}", x, y + 1, z - 4);
+        cmd(world, "summon minecraft:iron_golem %.1f %d %.1f {NoAI:1b,Rotation:[0f,0f],Health:100f}", x + 0.5, y + 1, z - 4 + 0.5);
         ctx.waitTicks(10);
         look(ctx, 180, 4);
         ctx.waitTicks(3);
@@ -406,7 +406,7 @@ public final class PvpGameTest implements FabricClientGameTest {
     // ============================================================================================ toggle sprint
 
     private static void toggleSprint(ClientGameTestContext ctx, TestSingleplayerContext world, int x, int y, int z) {
-        cmd(world, "tp @a %d.5 %d %d.5 0 0", x, y + 1, z - 10); // face south, lots of room
+        cmd(world, "tp @a %.1f %d %.1f 0 0", x + 0.5, y + 1, z - 10 + 0.5); // face south, lots of room
         ctx.waitTicks(5);
         look(ctx, 0, 10);
         ctx.runOnClient(mc -> {
@@ -443,7 +443,7 @@ public final class PvpGameTest implements FabricClientGameTest {
             ToggleMovement.reset();
             reset(m());
         });
-        cmd(world, "tp @a %d.5 %d %d.5 180 0", x, y + 1, z);
+        cmd(world, "tp @a %.1f %d %.1f 180 0", x + 0.5, y + 1, z + 0.5);
         ctx.waitTicks(5);
     }
 
