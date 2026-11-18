@@ -50,6 +50,7 @@ final class ChatView {
     private record Block(Message m, boolean header, List<String> lines, int h) {}
 
     private final List<Block> blocks = new ArrayList<>();
+    private final java.util.Map<String, List<String>> wrapCache = new java.util.HashMap<>();
     private int layoutRev = -1;
     private int layoutW = -1;
     private String layoutChat;
@@ -153,6 +154,7 @@ final class ChatView {
     private void layout(Gfx g, Chat c, int w) {
         SocialState st = s.state();
         if (layoutRev == st.revision() && layoutW == w && c.id().equals(layoutChat)) return;
+        if (layoutW != w || wrapCache.size() > 2000) wrapCache.clear();
         layoutRev = st.revision();
         layoutW = w;
         layoutChat = c.id();
@@ -176,8 +178,13 @@ final class ChatView {
                 } else if ("invite".equals(m.kind()) && m.invite() != null) {
                     lines = List.of();
                 } else {
-                    String text = m.content() + (m.editedAt() > 0 ? " " + s.module.tr("chat.edited") : "");
-                    lines = TextWrap.wrap(g, text, textW, 0);
+                    String key = m.id() + "|" + m.editedAt() + "|" + m.content().length();
+                    lines = wrapCache.get(key);
+                    if (lines == null) {
+                        String text = m.content() + (m.editedAt() > 0 ? " " + s.module.tr("chat.edited") : "");
+                        lines = TextWrap.wrap(g, text, textW, 0);
+                        wrapCache.put(key, lines);
+                    }
                 }
                 h = (header ? 12 : 0) + lines.size() * 10 + ("invite".equals(m.kind()) && m.invite() != null && !m.deleted() ? 50 : 0) + 2;
                 if (header) h += 5;

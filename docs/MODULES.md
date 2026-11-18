@@ -158,6 +158,30 @@ Services.get(HostSessionService.class).ifPresent(...);    // consumer, look up l
 
 Put shared service interfaces in the providing module's package (e.g. `module.multiplayer.HostSessionService`).
 
+## Vibe backend and toasts
+
+The social module owns the backend connection (`backend/BackendClient`: Mojang-verified login, rotating tokens,
+REST with retries, the realtime gateway) and registers it as `VibeBackend` while social and online features are on.
+
+```java
+Services.get(VibeBackend.class).ifPresent(b -> {
+    if (!b.isReady()) return;                                         // logged in + gateway ready
+    b.request("GET", "/api/v1/cosmetics/me", null)                   // token refresh is handled for you
+            .thenAcceptAsync(json -> apply(json), Tasks::onMain)       // never join() on the render thread
+            .exceptionally(t -> { /* VibeBackend.ApiException: status, code, retryAfter */ return null; });
+    b.sendOp("cosmetics.subscribe", obj);                             // re-sent automatically after reconnect/resume
+});
+on(VibeBackend.Ready.class, e -> ...);                                // every fresh `ready` (not on resume)
+AutoCloseable h = backend.onEvent("loadout.updated", d -> ...);       // client thread; close() to stop
+```
+
+`presence` and `cosmetics.subscribe` ops are remembered and sent again after a reconnect. Tokens live in
+`<gameDir>/vibeyclient/auth.json` (per backend URL and Minecraft account), never in `config/`.
+
+Toasts from any module: `Notify.info/success/warn/error(title, body)` or `Notify.show(new Notify.Toast(...))`
+(icon key = a player UUID for a head). The sink is `ui/toast/ToastStack` (top right, max 4, over every screen and
+on the HUD; `ToastStack.show(toast, buttons, durationMs, key)` for toasts with buttons).
+
 ## Background work
 
 Never block the render thread. `Tasks.run(...)`, `Tasks.supply(...)` (worker pool), `Tasks.onMain(...)` (back to
