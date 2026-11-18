@@ -313,9 +313,14 @@ them is installed, the matching module switches itself off (no payloads, keybind
 live in `config/vibeyclient/multiplayer.json` / `lyrics.json`; on first start the standalone mods' `config/vibey.json`
 and `config/vibey-lyrics.json` are imported. Songs are shared with Vibey Lyrics in `.minecraft/vibey-lyrics/`.
 
+Always test against the **current** relay code: `git pull` in vibey-multiplayer first (an outdated local checkout
+once hid that relay 1.3.0 rejected the client's `"client": "vibey-client"`). `RelayHostTest` hosts with exactly the
+client's hello; CI runs it against the relay from vibey-multiplayer's `main` (job *Hosting against the real relay*).
+
 ```sh
 # local relay for hosting tests (never test against the production relay)
-cd ../vibey-multiplayer/relay && ALLOW_OFFLINE=1 PORT=26400 DATA_DIR=/tmp/relaydata node src/main.ts
+cd ../vibey-multiplayer && git pull && cd relay && ALLOW_OFFLINE=1 PORT=26400 DATA_DIR=/tmp/relaydata node src/main.ts
+VIBEY_TEST_RELAY=127.0.0.1:26400 ./gradlew :fabric-1.21.11:test --tests '*RelayHostTest*'   # the client's hello against it
 ./gradlew :fabric-1.21.11:runClientGameTest                          # hosts through 127.0.0.1:26400 (-Dvibeyclient.test.relay=off skips it)
 ./gradlew :fabric-1.21.11:runClientGameTest "-Dvibeyclient.test.addMods=<vibey.jar>;<vibeylyrics.jar>"   # conflict test
 ./gradlew :neoforge-1.21.11:runClient -Dvibeyclient.mpcheck=true -Dvibeyclient.mpcheck.relay=127.0.0.1:26400   # NeoForge screenshots → run/screenshots

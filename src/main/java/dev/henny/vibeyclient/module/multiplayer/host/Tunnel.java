@@ -40,8 +40,7 @@ public final class Tunnel {
         default void onBlocked(String name, String ip, String reason) {}
     }
 
-    private static final byte[] MAGIC = {0x00, 'V', 'B', 'Y'};
-    private static final int PROTOCOL = 1;
+    private static final byte[] MAGIC = RelayHello.MAGIC;
 
     private final String relayHost;
     private final int relayPort;
@@ -155,15 +154,7 @@ public final class Tunnel {
         control = s;
         controlOut = s.getOutputStream();
         try {
-            JsonObject hello = new JsonObject();
-            hello.addProperty("t", "hello");
-            hello.addProperty("v", PROTOCOL);
-            hello.addProperty("name", name);
-            hello.addProperty("uuid", uuid.toString());
-            hello.addProperty("mc", mcVersion);
-            hello.addProperty("mod", BuildInfo.VERSION);
-            // Ignored by the relay (it only reads the fields above); tells the operator which client hosts.
-            hello.addProperty("client", "vibey-client");
+            JsonObject hello = RelayHello.message(name, uuid, mcVersion, BuildInfo.VERSION);
             synchronized (this) {
                 controlOut.write(MAGIC);
             }

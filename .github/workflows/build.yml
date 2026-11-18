@@ -45,6 +45,47 @@ jobs:
           path: build/dist/*.jar
           if-no-files-found: error
 
+  relay:
+    name: Hosting against the real relay
+    # Hosts with exactly the client's hello against the relay from vibey-multiplayer's main branch (RelayHostTest).
+    # Catches relay changes that reject the Vibey Client (relay 1.3.0 answered "Invalid client.").
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: vibec-studios/vibey-multiplayer
+          ref: main
+          path: vibey-multiplayer
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: |
+            21
+            25
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Start the relay (offline mode, no backend)
+        run: |
+          mkdir -p "$RUNNER_TEMP/relay-data"
+          cd vibey-multiplayer/relay
+          ALLOW_OFFLINE=1 PORT=26400 DATA_DIR="$RUNNER_TEMP/relay-data" DOMAIN=vibey.test nohup node src/main.ts > "$RUNNER_TEMP/relay.log" 2>&1 &
+          for i in $(seq 1 50); do (echo > /dev/tcp/127.0.0.1/26400) 2>/dev/null && exit 0; sleep 0.2; done
+          cat "$RUNNER_TEMP/relay.log"; exit 1
+      - name: Host against it
+        env:
+          VIBEY_TEST_RELAY: 127.0.0.1:26400
+        run: >
+          ./gradlew :fabric-1.21.11:test --tests '*RelayHostTest*' --stacktrace
+          -Porg.gradle.java.installations.auto-download=false
+          -Porg.gradle.java.installations.fromEnv=JAVA_HOME_21_X64,JAVA_HOME_25_X64
+      - name: Relay log
+        if: always()
+        run: cat "$RUNNER_TEMP/relay.log" || true
+
   blockbench:
     name: Blockbench plugin
     runs-on: ubuntu-latest
