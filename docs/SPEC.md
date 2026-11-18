@@ -2,12 +2,12 @@
 
 This file is the single source of truth that every part of the project (client mod, backend extension, Blockbench
 plugin, starter content) builds against. If you need to change a contract here, change this file in the same commit
-and say so in your report.
+and say so in the pull request.
 
 ## 0. Product in one paragraph
 
 **Vibey Client** is a Minecraft client mod by Vibe Craft Studios (GitHub org `vibec-studios`, repo
-`vibec-studios/vibey-client`, private for now). It bundles a modular core, a complete client UI in the Vibe design,
+`vibec-studios/vibey-client`). It bundles a modular core, a complete client UI in the Vibe design,
 the existing *Vibey Multiplayer* and *Vibey Lyrics* mods as modules, social features (friends, requests, invites,
 chats, presence) on top of the live Vibe backend (`https://vibe.henny.dev`), a data-driven cosmetic system (capes,
 wings, auras, pets, shields, hats, back items), an emote system with props/particles/sounds, and Blockbench plugins
