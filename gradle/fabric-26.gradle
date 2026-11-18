@@ -27,3 +27,6 @@ loom {
 }
 
 apply from: rootProject.file('gradle/fabric-resources.gradle')
+
+// Dev tour (dev/DevTour.java): ./gradlew :<target>:runClient -Dvibeyclient.tour=<outdir>
+if (System.getProperty('vibeyclient.tour')) loom.runs.named('client') { vmArg "-Dvibeyclient.tour=${System.getProperty('vibeyclient.tour')}" }
