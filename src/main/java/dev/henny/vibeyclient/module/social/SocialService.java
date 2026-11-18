@@ -201,7 +201,7 @@ public final class SocialService {
             // friend requests and invites already have their own toasts
             boolean covered = n.type().startsWith("friend_") || n.type().equals("invite");
             if (!covered && !module.dnd() && module.toastSystem.on()) {
-                toast(n.title(), n.body(), "!", () -> module.openSidebar(SidebarRoute.tab(SidebarRoute.Tab.INBOX)), "notif:" + n.id());
+                toast(notificationTitle(n), n.body(), "!", () -> module.openSidebar(SidebarRoute.tab(SidebarRoute.Tab.INBOX)), "notif:" + n.id());
             }
         });
         on("settings.updated", d -> {
@@ -743,6 +743,30 @@ public final class SocialService {
                 yield a.mcVersion() != null ? module.tr("activity.minecraftVersion", a.mcVersion()) : module.tr("activity.minecraft");
             }
         };
+    }
+
+    /** Own (translated) title for the notification types we know, the backend's (German) title otherwise. */
+    public String notificationTitle(Notification n) {
+        String userId = J.str(n.data(), "userId");
+        String name = userId == null ? null : state.user(userId) == null ? null : state.user(userId).name();
+        switch (n.type()) {
+            case "friend_request" -> {
+                if (name != null) return module.tr("notif.friend_request", name);
+            }
+            case "friend_accepted" -> {
+                if (name != null) return module.tr("notif.friend_accepted", name);
+            }
+            case "invite_accepted" -> {
+                if (name != null) return module.tr("notif.invite_accepted", name);
+            }
+            case "invite" -> {
+                Invite i = state.invites.get(J.str(n.data(), "inviteId"));
+                if (i != null && i.from() != null) return module.tr("notif.invite", i.from().name(), i.targetName());
+            }
+            default -> {
+            }
+        }
+        return n.title();
     }
 
     public static String statusLabelKey(String status) {

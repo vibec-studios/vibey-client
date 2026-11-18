@@ -124,7 +124,8 @@ final class ProfileView {
             InviteFlow.Availability av = s.module.invites().availability();
             boolean canInvite = av == InviteFlow.Availability.OK || av == InviteFlow.Availability.START_HOSTING;
             String inviteLabel = av == InviteFlow.Availability.START_HOSTING ? s.module.tr("profile.hostAndInvite") : s.module.tr("profile.invite");
-            if (Widgets.button(ui, K_INVITE, cx, cy, cw, bh, canInvite ? inviteLabel : s.module.tr("profile.inviteNoWorld"),
+            String noInvite = av == InviteFlow.Availability.NO_MODULE ? s.module.tr("profile.inviteNoModule") : s.module.tr("profile.inviteNoWorld");
+            if (Widgets.button(ui, K_INVITE, cx, cy, cw, bh, canInvite ? inviteLabel : noInvite,
                     canInvite ? Widgets.Style.SECONDARY : Widgets.Style.DISABLED)) {
                 s.module.invites().inviteToMyWorld(List.of(id));
             }

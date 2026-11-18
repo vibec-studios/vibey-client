@@ -91,7 +91,7 @@ final class InboxView {
         int tx = x + 20;
         String when = SocialUi.ago(n.createdAt());
         g.textRight(when, hov ? right - 16 : right, y + 4, Theme.DIM);
-        g.text(g.clip(n.title(), right - tx - g.width(when) - 20), tx, y + 4, n.unread() ? Theme.TEXT : Theme.MUTED);
+        g.text(g.clip(s.service.notificationTitle(n), right - tx - g.width(when) - 20), tx, y + 4, n.unread() ? Theme.TEXT : Theme.MUTED);
         int ly = y + 15;
         if (n.body() != null) {
             for (String l : body) {

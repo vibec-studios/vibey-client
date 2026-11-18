@@ -32,8 +32,8 @@ import java.util.Locale;
 public final class SocialScreen extends BaseScreen {
     public static final int HEADER = 34;
     public static final int TABS = 22;
-    private static final int SIDEBAR_W = 270;
-    private static final int LIST_W = 250;
+    private static final int SIDEBAR_W = 284;
+    private static final int LIST_W = 270;
 
     private final Screen parent;
     final SocialModule module;
@@ -176,6 +176,7 @@ public final class SocialScreen extends BaseScreen {
         int smX = x + 30, smY = y + 26;
         if (statusMenu) handleStatusMenu(smX, smY);
 
+        if (!fullscreen) dev.henny.vibeyclient.ui.toast.ToastStack.reserveRight(width - x + 4);
         g.rect(x, y, w, h, Theme.SURFACE);
         g.vline(x - 1, y, h, Theme.LINE2);
         if (fullscreen) g.outline(x - 1, y - 1, w + 2, h + 2, Theme.LINE2);
@@ -185,8 +186,8 @@ public final class SocialScreen extends BaseScreen {
         BackendClient b = module.backend();
         if (b == null || !service.ready()) {
             drawConnection(g, x, cy, w, h - HEADER, b);
-        } else if (fullscreen) {
-            int lw = Math.min(LIST_W, w / 3);
+        } else if (fullscreen && w >= 520) {
+            int lw = Math.min(LIST_W, w * 2 / 5);
             drawTabs(g, x, cy, lw);
             drawTab(x, cy + TABS, lw, h - HEADER - TABS);
             g.vline(x + lw, cy, h - HEADER, Theme.LINE);
@@ -325,7 +326,7 @@ public final class SocialScreen extends BaseScreen {
             };
             String cs = count > 0 ? (count > 99 ? "99+" : Integer.toString(count)) : null;
             int bw = cs == null ? 0 : Math.max(10, g.width(cs) + 6) + 3;
-            String clipped = g.clip(label, ww - 8 - bw);
+            String clipped = g.clip(label, ww - 4 - bw);
             int lx = tx + (ww - g.width(clipped) - bw) / 2;
             g.text(clipped, lx, y + 7, Theme.mix(Theme.MUTED, Theme.TEXT, hov));
             if (cs != null) SocialUi.badge(g, count, lx + g.width(clipped) + bw, y + 6, t == SidebarRoute.Tab.REQUESTS ? Theme.BRAND : Theme.DANGER);

@@ -356,11 +356,25 @@ public final class BackendClient implements VibeBackend {
             if (!next.valid()) throw new ApiException(502, "bad_response", "No tokens");
             tokens = next;
             store.put(accountKey, next, null); // persisted before anyone can use it
+            refreshCount.incrementAndGet();
             return next;
         } finally {
             refreshLock.unlock();
         }
     }
+
+    /** Tests: marks the access token as expired (the next call must refresh first). Returns the refresh count so far. */
+    public int debugExpireAccessToken() {
+        Tokens t = tokens;
+        if (t != null) tokens = new Tokens(t.accessToken(), t.refreshToken(), 0, t.sessionId());
+        return refreshCount.get();
+    }
+
+    public int refreshCount() {
+        return refreshCount.get();
+    }
+
+    private final AtomicInteger refreshCount = new AtomicInteger();
 
     // ============================================================================================ REST
 
@@ -403,6 +417,8 @@ public final class BackendClient implements VibeBackend {
                     .timeout(Duration.ofMillis(TIMEOUT_MS))
                     .header("Accept", "application/json")
                     .header("User-Agent", "vibey-client/" + BuildInfo.VERSION);
+            // Cleartext (local dev): no h2c upgrade – Node rejects upgrade requests that carry a body.
+            if (baseUrl.startsWith("http://")) rb.version(HttpClient.Version.HTTP_1_1);
             if (used != null) rb.header("Authorization", "Bearer " + used.accessToken());
             if (body != null && !(body instanceof JsonNull)) {
                 rb.header("Content-Type", "application/json");

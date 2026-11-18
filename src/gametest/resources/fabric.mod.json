@@ -5,7 +5,7 @@
   "name": "Vibey Client Gametest",
   "environment": "client",
   "entrypoints": {
-    "fabric-client-gametest": ["dev.henny.vibeyclient.gametest.VibeyClientGameTest"]
+    "fabric-client-gametest": ["dev.henny.vibeyclient.gametest.VibeyClientGameTest", "dev.henny.vibeyclient.gametest.SocialGameTest"]
   },
   "depends": { "vibeyclient": "*" }
 }

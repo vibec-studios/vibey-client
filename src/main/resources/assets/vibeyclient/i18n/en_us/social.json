@@ -264,5 +264,10 @@
   "time.now": "just now",
   "time.minutes": "{0} min ago",
   "time.hours": "{0} h ago",
-  "time.days": "{0} d ago"
+  "time.days": "{0} d ago",
+  "profile.inviteNoModule": "Invite (needs the Multiplayer module)",
+  "notif.friend_request": "{0} wants to be friends",
+  "notif.friend_accepted": "{0} is now your friend",
+  "notif.invite_accepted": "{0} accepted your invite",
+  "notif.invite": "{0} invites you: {1}"
 }

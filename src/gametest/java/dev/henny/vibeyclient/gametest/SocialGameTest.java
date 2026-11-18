@@ -1,0 +1,226 @@
+package dev.henny.vibeyclient.gametest;
+
+import dev.henny.vibeyclient.api.GlobalSettings;
+import dev.henny.vibeyclient.api.ModuleManager;
+import dev.henny.vibeyclient.module.social.SidebarRoute;
+import dev.henny.vibeyclient.module.social.SocialModule;
+import dev.henny.vibeyclient.module.social.SocialState;
+import dev.henny.vibeyclient.module.social.model.Model.Chat;
+import dev.henny.vibeyclient.module.social.model.Model.Friend;
+import dev.henny.vibeyclient.module.social.model.Model.FriendRequest;
+import dev.henny.vibeyclient.module.social.ui.SocialScreen;
+import dev.henny.vibeyclient.ui.VibeyScreen;
+import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
+import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
+import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
+import net.minecraft.client.gui.screens.PauseScreen;
+import net.minecraft.client.gui.screens.TitleScreen;
+
+import java.util.function.Function;
+
+/**
+ * Social module against a LOCAL backend (AUTH_DEV_BYPASS) with scripted friend accounts (Mira, Juno, Kai, Nova,
+ * Lumen – see the bot driver). Only runs with {@code -Dvibeyclient.socialTest=true -Dvibeyclient.devAuth=true
+ * -Dvibeyclient.api=http://localhost:3100 -Dvibeyclient.username=VibeyTester}. Screenshots: social_*.png.
+ */
+public final class SocialGameTest implements FabricClientGameTest {
+    private static final int SEC = 20;
+
+    @Override
+    public void runTest(ClientGameTestContext ctx) {
+        mappingChecks();
+        if (!Boolean.getBoolean("vibeyclient.socialTest")) return;
+        ctx.getInput().resizeWindow(1280, 720);
+        ctx.runOnClient(mc -> GlobalSettings.language.set(GlobalSettings.Language.ENGLISH));
+        SocialModule m = ctx.computeOnClient(mc -> ModuleManager.get().get(SocialModule.class));
+        ctx.waitFor(mc -> m.service().ready(), 90 * SEC);
+        log("ready as " + ctx.computeOnClient(mc -> m.service().state.me.user().name()));
+        refreshCheck(m);
+
+        // incoming requests from the bots
+        ctx.waitFor(mc -> incoming(m, "Mira") != null && incoming(m, "Kai") != null && incoming(m, "Nova") != null, 60 * SEC);
+        ctx.runOnClient(mc -> {
+            m.service().sendFriendRequest("Juno", null);
+            m.service().sendFriendRequest("Lumen", null);
+        });
+        ctx.waitFor(mc -> outgoing(m, "Lumen") != null || friend(m, "Juno") != null, 20 * SEC);
+        open(ctx, m, true, SidebarRoute.tab(SidebarRoute.Tab.REQUESTS));
+        ctx.waitTicks(20);
+        ctx.takeScreenshot("social_01_requests_title");
+
+        ctx.runOnClient(mc -> {
+            m.service().acceptRequest(incoming(m, "Mira").id());
+            m.service().acceptRequest(incoming(m, "Nova").id());
+        });
+        ctx.waitFor(mc -> friend(m, "Mira") != null && friend(m, "Juno") != null && friend(m, "Nova") != null, 30 * SEC);
+        ctx.waitTicks(40);
+        open(ctx, m, true, SidebarRoute.tab(SidebarRoute.Tab.FRIENDS));
+        ctx.waitTicks(30);
+        ctx.takeScreenshot("social_02_friends_title");
+
+        try (TestSingleplayerContext world = ctx.worldBuilder().create()) {
+            world.getClientWorld().waitForChunksRender();
+            ctx.waitTicks(40);
+            open(ctx, m, false, SidebarRoute.tab(SidebarRoute.Tab.FRIENDS));
+            ctx.waitTicks(30);
+            ctx.takeScreenshot("social_03_friends_world");
+
+            // DM from Mira
+            ctx.waitFor(mc -> dm(m, "Mira") != null && dm(m, "Mira").lastMessage() != null, 30 * SEC);
+            String dmId = ctx.computeOnClient(mc -> dm(m, "Mira").id());
+            ctx.waitTicks(80); // all three messages
+            open(ctx, m, false, SidebarRoute.chat(dmId));
+            ctx.waitFor(mc -> m.service().state.history(dmId).messages.size() >= 3, 20 * SEC);
+            ctx.waitTicks(20);
+            ctx.takeScreenshot("social_04_chat");
+            ctx.runOnClient(mc -> m.service().sendMessage(dmId, "hello from the game client! see you on Seal Island"));
+            ctx.waitFor(mc -> !m.service().state.typingIn(dmId).isEmpty(), 20 * SEC);
+            ctx.waitTicks(4);
+            ctx.takeScreenshot("social_05_chat_typing");
+            ctx.waitFor(mc -> lastText(m, dmId).startsWith("got it"), 20 * SEC);
+            ctx.waitTicks(20);
+            ctx.takeScreenshot("social_06_chat_reply");
+
+            // group from Juno
+            ctx.waitFor(mc -> group(m, "Build crew") != null, 30 * SEC);
+            String groupId = ctx.computeOnClient(mc -> group(m, "Build crew").id());
+            ctx.waitTicks(40);
+            open(ctx, m, false, SidebarRoute.chat(groupId));
+            ctx.waitFor(mc -> m.service().state.history(groupId).messages.size() >= 2, 20 * SEC);
+            ctx.waitTicks(20);
+            ctx.takeScreenshot("social_07_group_chat");
+            open(ctx, m, false, SidebarRoute.groupSettings(groupId));
+            ctx.waitTicks(20);
+            ctx.takeScreenshot("social_08_group_settings");
+
+            // invite toast over the game, then over the pause menu
+            ctx.setScreen(() -> null);
+            ctx.waitFor(mc -> !m.service().state.openIncomingInvites().isEmpty(), 40 * SEC);
+            ctx.waitTicks(10);
+            ctx.takeScreenshot("social_09_invite_toast_game");
+            ctx.setScreen(() -> new PauseScreen(true));
+            ctx.waitTicks(10);
+            ctx.takeScreenshot("social_10_invite_toast_pause");
+
+            open(ctx, m, false, SidebarRoute.tab(SidebarRoute.Tab.INBOX));
+            ctx.waitTicks(20);
+            ctx.takeScreenshot("social_11_inbox");
+            String junoId = ctx.computeOnClient(mc -> friend(m, "Juno").user().id());
+            open(ctx, m, false, SidebarRoute.profile(junoId));
+            ctx.waitTicks(20);
+            ctx.takeScreenshot("social_12_profile");
+            open(ctx, m, false, SidebarRoute.invite(junoId));
+            ctx.waitTicks(20);
+            ctx.takeScreenshot("social_13_invite_pick");
+
+            ctx.runOnClient(mc -> SocialScreen.setFullscreen(true));
+            open(ctx, m, false, SidebarRoute.chat(dmId));
+            ctx.waitTicks(30);
+            ctx.takeScreenshot("social_14_fullscreen_chat");
+            ctx.runOnClient(mc -> SocialScreen.setFullscreen(false));
+
+            ctx.setScreen(() -> new VibeyScreen(null, "account"));
+            ctx.waitTicks(40);
+            ctx.takeScreenshot("social_15_account");
+
+            ctx.runOnClient(mc -> GlobalSettings.language.set(GlobalSettings.Language.GERMAN));
+            ctx.waitTicks(2);
+            open(ctx, m, false, SidebarRoute.tab(SidebarRoute.Tab.FRIENDS));
+            ctx.waitTicks(30);
+            ctx.takeScreenshot("social_16_friends_de");
+            open(ctx, m, false, SidebarRoute.chat(groupId));
+            ctx.waitTicks(20);
+            ctx.takeScreenshot("social_17_group_de");
+            ctx.runOnClient(mc -> GlobalSettings.language.set(GlobalSettings.Language.ENGLISH));
+
+            // presence reached the backend: our own activity is the singleplayer world
+            ctx.setScreen(() -> null);
+        }
+        // online features off → disconnect, on → reconnect with the stored login
+        ctx.runOnClient(mc -> GlobalSettings.onlineFeatures.set(false));
+        ctx.waitFor(mc -> !m.backend().running(), 5 * SEC);
+        ctx.runOnClient(mc -> GlobalSettings.onlineFeatures.set(true));
+        ctx.waitFor(mc -> m.service().ready(), 30 * SEC);
+        log("reconnected after online features off/on");
+        ctx.runOnClient(mc -> GlobalSettings.language.set(GlobalSettings.Language.AUTO));
+        log("done");
+    }
+
+    /** JSON → model mapping with the shapes of packages/shared (nullable fields, unknown fields, missing fields). */
+    private static void mappingChecks() {
+        var friend = Friend.from(com.google.gson.JsonParser.parseString("""
+                {"user":{"id":"bb6e170d-6947-3845-900a-d52624565dc4","name":"Mira","skin":{"url":null,"model":"slim","capeUrl":null},
+                 "statusText":null,"badge":"user","createdAt":"2026-11-18T02:00:00.000Z","futureField":1},
+                 "since":"2026-11-18T02:10:00.000Z",
+                 "presence":{"userId":"bb6e170d-6947-3845-900a-d52624565dc4","status":"busy","updatedAt":"2026-11-18T02:10:00.000Z",
+                 "activity":{"type":"hosting","world":"Seal Island","joinable":true,"join":{"type":"relay","address":"a.b","port":null,"hostSessionId":"h1"}}}}
+                """).getAsJsonObject());
+        check(friend.user().name().equals("Mira") && friend.user().slim() && friend.user().skinUrl() == null, "user mapping");
+        check(friend.presence().status().equals("busy") && friend.presence().online(), "presence mapping");
+        check(friend.presence().activity().join().port() == 25565 && "h1".equals(friend.presence().activity().join().hostSessionId()), "join mapping");
+        var msg = dev.henny.vibeyclient.module.social.model.Model.Message.from(com.google.gson.JsonParser.parseString("""
+                {"id":"42","chatId":"c1","authorId":null,"kind":"system","content":"","system":{"event":"renamed","actorId":"u1","name":"Crew"},
+                 "invite":null,"replyToId":null,"nonce":null,"createdAt":"2026-11-18T02:10:00.000Z","editedAt":null,"deleted":false}
+                """).getAsJsonObject());
+        check(msg.system().event().equals("renamed") && msg.editedAt() == 0 && msg.createdAt() > 0, "message mapping");
+        var err = dev.henny.vibeyclient.module.social.Errors.text("rate_limited", "Du schreibst zu schnell", 12);
+        check(err.contains("12"), "rate limit text: " + err);
+        log("mapping checks ok");
+    }
+
+    /** Eight requests at once with an expired access token: exactly one refresh, the session survives (rotation). */
+    private static void refreshCheck(SocialModule m) {
+        var b = m.backend();
+        int before = b.debugExpireAccessToken();
+        var futures = new java.util.ArrayList<java.util.concurrent.CompletableFuture<com.google.gson.JsonElement>>();
+        for (int i = 0; i < 8; i++) futures.add(b.request("GET", "/api/v1/me", null));
+        for (var f : futures) check(f.join().getAsJsonObject().has("id"), "request after refresh");
+        check(b.refreshCount() == before + 1, "expected exactly one refresh, got " + (b.refreshCount() - before));
+        // still logged in afterwards (a reused refresh token would have ended the session)
+        check(b.request("GET", "/api/v1/auth/sessions", null).join().isJsonArray(), "session alive");
+        log("refresh serialisation ok (" + (b.refreshCount() - before) + " refresh for 8 parallel requests)");
+    }
+
+    private static void check(boolean ok, String what) {
+        if (!ok) throw new AssertionError(what);
+    }
+
+    private static void open(ClientGameTestContext ctx, SocialModule m, boolean title, SidebarRoute route) {
+        ctx.setScreen(() -> new SocialScreen(title ? new TitleScreen() : null, m, route));
+    }
+
+    private static void log(String s) {
+        System.out.println("[vibeyclient-social-test] " + s);
+    }
+
+    private static <T> T find(Iterable<T> it, Function<T, Boolean> f) {
+        for (T t : it) if (f.apply(t)) return t;
+        return null;
+    }
+
+    private static FriendRequest incoming(SocialModule m, String name) {
+        return find(m.service().state.requests.values(), r -> r.incoming() && r.other() != null && r.other().name().equals(name));
+    }
+
+    private static FriendRequest outgoing(SocialModule m, String name) {
+        return find(m.service().state.requests.values(), r -> !r.incoming() && r.other() != null && r.other().name().equals(name));
+    }
+
+    private static Friend friend(SocialModule m, String name) {
+        return find(m.service().state.friends.values(), f -> f.user().name().equals(name));
+    }
+
+    private static Chat dm(SocialModule m, String name) {
+        Friend f = friend(m, name);
+        return f == null ? null : m.service().state.dmWith(f.user().id());
+    }
+
+    private static Chat group(SocialModule m, String name) {
+        return find(m.service().state.chats.values(), c -> !c.dm() && name.equals(c.name()));
+    }
+
+    private static String lastText(SocialModule m, String chatId) {
+        SocialState.History h = m.service().state.history(chatId);
+        return h.messages.isEmpty() ? "" : h.messages.get(h.messages.size() - 1).content();
+    }
+}

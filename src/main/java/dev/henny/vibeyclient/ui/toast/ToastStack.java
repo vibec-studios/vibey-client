@@ -69,6 +69,15 @@ public final class ToastStack {
     private static int lastX = Integer.MIN_VALUE;
     private static java.util.function.Supplier<String> hint = () -> Lang.tr("toast.openHint");
 
+    private static int reserveRight;
+    private static long reserveUntil;
+
+    /** Keeps the stack left of a panel on the right edge ({@code px} wide) for this frame (e.g. the social sidebar). */
+    public static void reserveRight(int px) {
+        reserveRight = px;
+        reserveUntil = System.currentTimeMillis() + 100;
+    }
+
     /** Text shown on clickable toasts in game, where the mouse is captured (e.g. "Open with G"). */
     public static void setHint(java.util.function.Supplier<String> h) {
         hint = h;
@@ -140,8 +149,11 @@ public final class ToastStack {
         if (visible.isEmpty()) return;
         long now = System.currentTimeMillis();
         int sw = g.screenWidth();
-        int w = Math.min(WIDTH, sw - MARGIN * 2);
-        int x = sw - MARGIN - w;
+        int reserve = now < reserveUntil ? reserveRight : 0;
+        // beside a panel on the right if there is room for a readable toast, else over it
+        if (sw - reserve - MARGIN * 2 < 120) reserve = 0;
+        int w = Math.min(WIDTH, sw - reserve - MARGIN * 2);
+        int x = sw - MARGIN - w - reserve;
         lastX = x;
         int y = MARGIN;
         for (int i = 0; i < visible.size(); i++) {
@@ -209,8 +221,12 @@ public final class ToastStack {
         if (icon != null && looksLikeUuid(icon)) {
             Heads.draw(g, icon, null, ix, iy, 18);
             g.outline(ix - 1, iy - 1, 20, 20, Theme.LINE2);
+        } else if (icon != null && !icon.isEmpty() && !icon.equals("!")) {
+            Widgets.monogram(g, icon, ix, iy, 18, accent);
         } else {
-            Widgets.monogram(g, icon != null && !icon.isEmpty() ? icon : e.toast.title(), ix, iy, 18, accent);
+            g.rect(ix, iy, 18, 18, Theme.alpha(accent, 0.18f));
+            g.outline(ix, iy, 18, 18, Theme.alpha(accent, 0.6f));
+            glyph(g, e.toast.kind(), ix, iy, accent);
         }
         int tx = x + 34;
         int tw = w - 34 - 16;
@@ -228,7 +244,10 @@ public final class ToastStack {
             Widgets.cross(g, x + w - 11, y + 5, 6, ch ? Theme.TEXT : Theme.DIM);
         }
         // buttons
-        if (!e.buttons.isEmpty()) {
+        if (!e.buttons.isEmpty() && mx < 0) {
+            // In game the mouse is captured: the buttons can't be clicked, say how to answer instead.
+            g.text(g.clip(hint.get(), tw), tx, y + h - 14, Theme.BRAND2);
+        } else if (!e.buttons.isEmpty()) {
             int by = y + h - 18;
             int bx = tx;
             for (Button b : e.buttons) {
@@ -247,6 +266,24 @@ public final class ToastStack {
         // remaining time
         float left = 1f - Math.min(1f, e.elapsed / (float) e.durationMs);
         g.rect(x + 2, y + h - 1, Math.round((w - 2) * left), 1, Theme.alpha(accent, 0.5f));
+    }
+
+    /** Small pixel glyph: check (success), ! (warn/error/social), i (info). */
+    private static void glyph(Gfx g, Notify.Kind kind, int x, int y, int c) {
+        switch (kind) {
+            case SUCCESS -> {
+                for (int i = 0; i < 3; i++) g.rect(x + 5 + i, y + 9 + i, 2, 2, c);
+                for (int i = 0; i < 6; i++) g.rect(x + 8 + i, y + 10 - i, 2, 2, c);
+            }
+            case INFO -> {
+                g.rect(x + 8, y + 5, 2, 2, c);
+                g.rect(x + 8, y + 8, 2, 6, c);
+            }
+            default -> {
+                g.rect(x + 8, y + 4, 2, 7, c);
+                g.rect(x + 8, y + 12, 2, 2, c);
+            }
+        }
     }
 
     private static boolean looksLikeUuid(String s) {

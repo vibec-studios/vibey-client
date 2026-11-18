@@ -264,5 +264,10 @@
   "time.now": "gerade eben",
   "time.minutes": "vor {0} Min.",
   "time.hours": "vor {0} Std.",
-  "time.days": "vor {0} T."
+  "time.days": "vor {0} T.",
+  "profile.inviteNoModule": "Einladen (braucht das Multiplayer-Modul)",
+  "notif.friend_request": "{0} möchte mit dir befreundet sein",
+  "notif.friend_accepted": "{0} ist jetzt dein Freund",
+  "notif.invite_accepted": "{0} hat deine Einladung angenommen",
+  "notif.invite": "{0} lädt dich ein: {1}"
 }
