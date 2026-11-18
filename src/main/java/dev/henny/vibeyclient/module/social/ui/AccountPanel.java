@@ -22,6 +22,7 @@ import dev.henny.vibeyclient.ui.ScrollArea;
 import dev.henny.vibeyclient.ui.Theme;
 import dev.henny.vibeyclient.ui.Ui;
 import dev.henny.vibeyclient.ui.Widgets;
+import dev.henny.vibeyclient.ui.screen.SettingsView;
 import dev.henny.vibeyclient.ui.toast.TextWrap;
 
 import java.util.ArrayList;
@@ -29,12 +30,14 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * "Account" tab of the Vibey menu: login state, presence status and status text, privacy, logged-in devices (log
- * out single ones) and blocked players.
+ * "Account" tab of the Vibey menu, in plain words: who you are signed in as (with sign in / out), your status, who
+ * may contact you, your signed-in devices and blocked players. Technical details (server, account id, device
+ * addresses) are in the collapsed advanced area at the bottom.
  */
 public final class AccountPanel implements Panel {
     private static final String[] LEVELS = {"everyone", "friends_of_friends", "friends", "nobody"};
     private static final String[] PRIVACY = {"friendRequests", "directMessages", "invites"};
+    private static final int ROW = 26;
 
     private final SocialModule module;
     private final ScrollArea scroll = new ScrollArea();
@@ -77,11 +80,12 @@ public final class AccountPanel implements Panel {
         g.bold(module.tr("account.title"), cx, cy, Theme.TEXT);
         cy += 13;
         g.text(g.clip(module.tr("account.description"), cw), cx, cy, Theme.MUTED);
-        cy += 20;
+        cy += 18;
 
         if (!GlobalSettings.online()) {
             cy = notice(g, module.tr("conn.offHint"), cx, cy, cw, Theme.WARN);
-            if (Widgets.button(ui, K_ONLINE, cx, cy, 160, 16, module.tr("conn.enableOnline"), Widgets.Style.PRIMARY)) {
+            if (Widgets.button(ui, K_ONLINE, cx, cy, Math.max(160, g.width(module.tr("conn.enableOnline")) + 20), 16,
+                    module.tr("conn.enableOnline"), Widgets.Style.PRIMARY)) {
                 GlobalSettings.onlineFeatures.set(true);
             }
             cy += 24;
@@ -90,20 +94,15 @@ public final class AccountPanel implements Panel {
         }
         SocialService svc = module.service();
         BackendClient b = module.backend();
-        cy = accountCard(ui, svc, b, cx, cy, cw);
-        if (svc == null || !svc.ready()) {
-            scroll.end(ui, cy + pad);
-            return;
+        cy = profile(ui, svc, b, cx, cy, cw);
+        if (svc != null && svc.ready()) {
+            SocialState st = svc.state;
+            cy = presence(ui, st, cx, cy + 12, cw);
+            cy = privacy(ui, st, cx, cy + 12, cw);
+            cy = devices(ui, svc, cx, cy + 12, cw);
+            cy = blocked(ui, svc, st, cx, cy + 12, cw);
         }
-        SocialState st = svc.state;
-        cy += 10;
-        cy = presence(ui, st, cx, cy, cw);
-        cy += 10;
-        cy = privacy(ui, st, cx, cy, cw);
-        cy += 10;
-        cy = devices(ui, svc, cx, cy, cw);
-        cy += 10;
-        cy = blocked(ui, svc, st, cx, cy, cw);
+        cy = SettingsView.drawAdvanced(ui, module.settings(), cx, cy, cw, true, (u, ax, ay, aw) -> technical(u, svc, b, ax, ay, aw));
         scroll.end(ui, cy + pad);
     }
 
@@ -120,23 +119,16 @@ public final class AccountPanel implements Panel {
         return y + h + 8;
     }
 
-    private int section(Gfx g, String title, int x, int y, int w) {
-        Widgets.caption(g, title, x, y);
-        g.hline(x, y + 11, w, Theme.LINE);
-        return y + 18;
-    }
+    // ============================================================================================ profile
 
-    private int accountCard(Ui ui, SocialService svc, BackendClient b, int x, int y, int w) {
+    private int profile(Ui ui, SocialService svc, BackendClient b, int x, int y, int w) {
         Gfx g = ui.g;
-        int h = 54;
-        g.rect(x, y, w, h, Theme.SURFACE2);
-        g.outline(x, y, w, h, Theme.LINE2);
+        int h = 52;
+        Widgets.card(g, x, y, w, h);
         User me = svc != null && svc.state.me != null ? svc.state.me.user() : null;
         String name = me != null ? me.name() : b != null && b.accountName() != null ? b.accountName() : "?";
-        SocialUi.head(g, me == null ? null : me.id(), me == null ? null : me.skinUrl(), x + 10, y + 11, 32, null);
-        g.outline(x + 9, y + 10, 34, 34, Theme.LINE2);
-        int tx = x + 52;
-        g.text(name, tx, y + 10, Theme.TEXT);
+        SocialUi.head(g, me == null ? null : me.id(), me == null ? null : me.skinUrl(), x + 10, y + 10, 32, null);
+        g.outline(x + 9, y + 9, 34, 34, Theme.LINE2);
         BackendClient.State state = b == null ? BackendClient.State.OFF : b.state();
         int chipColor = switch (state) {
             case READY -> Theme.OK;
@@ -144,25 +136,32 @@ public final class AccountPanel implements Panel {
             case LOGGED_OUT, OFF -> Theme.MUTED;
             default -> Theme.WARN;
         };
-        Widgets.chip(g, module.tr("account.state." + state.name().toLowerCase(Locale.ROOT)), tx + g.width(name) + 8, y + 8, chipColor);
-        String server = b == null ? BackendClient.configuredBaseUrl() : b.baseUrl();
-        g.text(g.clip(server + (BackendClient.devAuth() ? "  · DEV LOGIN" : ""), w - 60 - 120), tx, y + 22, Theme.DIM);
-        if (me != null) g.text(g.clip(me.id(), w - 60 - 120), tx, y + 33, Theme.DIM);
         // buttons on the right
-        int bw = 110;
-        int bx = x + w - bw - 10;
+        int right = x + w - 10;
+        int buttonsW = 0;
         if (state == BackendClient.State.READY) {
-            if (Widgets.button(ui, K_OPEN, bx, y + 10, bw, 16, module.tr("account.openFriends"), Widgets.Style.PRIMARY)) {
+            String open = module.tr("account.openFriends"), out = module.tr("account.logout");
+            int ow = g.width(open) + 20, lw = g.width(out) + 20;
+            buttonsW = ow + lw + 6;
+            if (Widgets.button(ui, K_LOGOUT, right - lw, y + 18, lw, 16, out, Widgets.Style.GHOST)) {
+                ConfirmScreen.ask(module.tr("account.logoutTitle"), module.tr("account.logoutText"), out, module::logout);
+            }
+            if (Widgets.button(ui, K_OPEN, right - lw - 6 - ow, y + 18, ow, 16, open, Widgets.Style.PRIMARY)) {
                 module.openSidebar(SidebarRoute.tab(SidebarRoute.Tab.FRIENDS));
             }
-            if (Widgets.button(ui, K_LOGOUT, bx, y + 30, bw, 16, module.tr("account.logout"), Widgets.Style.DANGER)) {
-                ConfirmScreen.ask(module.tr("account.logoutTitle"), module.tr("account.logoutText"), module.tr("account.logout"), module::logout);
-            }
-        } else if (state == BackendClient.State.LOGGED_OUT || state == BackendClient.State.ERROR) {
-            if (!"banned".equals(b.errorCode()) && Widgets.button(ui, K_LOGIN, bx, y + 10, bw, 16, module.tr("conn.login"), Widgets.Style.PRIMARY)) {
-                module.login();
-            }
+        } else if ((state == BackendClient.State.LOGGED_OUT || state == BackendClient.State.ERROR) && !"banned".equals(b.errorCode())) {
+            String in = module.tr("conn.login");
+            int iw = g.width(in) + 24;
+            buttonsW = iw;
+            if (Widgets.button(ui, K_LOGIN, right - iw, y + 18, iw, 16, in, Widgets.Style.PRIMARY)) module.login();
         }
+        int tx = x + 52;
+        int textW = Math.max(40, right - buttonsW - 10 - tx);
+        g.bold(g.clip(name, textW), tx, y + 13, Theme.TEXT);
+        String chip = module.tr("account.state." + state.name().toLowerCase(Locale.ROOT));
+        g.rect(tx, y + 29, 5, 5, chipColor);
+        g.text(g.clip(chip + " · " + module.tr(state == BackendClient.State.READY ? "account.signedInWith" : "account.notSignedIn"), textW - 9),
+                tx + 9, y + 28, Theme.MUTED);
         y += h + 8;
         if (b != null && (state == BackendClient.State.ERROR || (state == BackendClient.State.LOGGED_OUT && b.errorCode() != null))) {
             y = notice(g, Errors.text(b.errorCode(), b.errorMessage(), -1), x, y, w, Theme.DANGER);
@@ -172,52 +171,62 @@ public final class AccountPanel implements Panel {
         return y;
     }
 
+    // ============================================================================================ status
+
     private int presence(Ui ui, SocialState st, int x, int y, int w) {
         Gfx g = ui.g;
-        y = section(g, module.tr("account.presence"), x, y, w);
-        int cyw = 150;
-        g.text(module.tr("account.status"), x, y + 4, Theme.TEXT);
+        Widgets.caption(g, module.tr("account.presence"), x + 1, y);
+        y += 12;
+        Widgets.card(g, x, y, w, ROW * 2);
+        int cyw = Math.min(150, w / 2);
+        g.text(module.tr("account.status"), x + 10, y + 9, Theme.TEXT);
         String cur = module.status.get().name().toLowerCase(Locale.ROOT);
-        int d = Widgets.cycler(ui, K_STATUS, x + w - cyw, y, cyw, Lang.tr(SocialService.statusLabelKey(cur)));
+        int d = Widgets.cycler(ui, K_STATUS, x + w - 10 - cyw, y + 5, cyw, Lang.tr(SocialService.statusLabelKey(cur)));
         if (d != 0) {
             PresenceTracker.Status[] v = PresenceTracker.Status.values();
             module.setStatus(v[Math.floorMod(module.status.get().ordinal() + d, v.length)]);
         }
-        y += 22;
+        g.hline(x + 1, y + ROW, w - 2, Theme.LINE);
+        int ry = y + ROW;
         String current = st.me == null || st.me.user().statusText() == null ? "" : st.me.user().statusText();
         if (statusText == null || !current.equals(statusTextFor)) {
             statusText = current;
             statusTextFor = current;
         }
-        g.text(module.tr("account.statusText"), x, y + 4, Theme.TEXT);
-        int fw = Math.min(260, w - 140);
+        g.text(module.tr("account.statusText"), x + 10, ry + 9, Theme.TEXT);
+        int fw = Math.min(240, w - g.width(module.tr("account.statusText")) - 40);
         String save = module.tr("action.save");
         int sw = SocialUi.smallButtonWidth(g, save) + 6;
-        SocialUi.field(ui, K_TEXT, x + w - fw, y, fw - sw - 4, statusText, 120, module.tr("account.statusTextPlaceholder"), v -> statusText = v);
+        SocialUi.field(ui, K_TEXT, x + w - 10 - fw, ry + 5, fw - sw - 4, statusText, 120, module.tr("account.statusTextPlaceholder"), v -> statusText = v);
         boolean dirty = !statusText.equals(current);
-        if (Widgets.button(ui, K_SAVE, x + w - sw, y, sw, 16, save, dirty ? Widgets.Style.PRIMARY : Widgets.Style.DISABLED)) {
+        if (Widgets.button(ui, K_SAVE, x + w - 10 - sw, ry + 5, sw, 16, save, dirty ? Widgets.Style.PRIMARY : Widgets.Style.DISABLED)) {
             String t = statusText.trim();
             module.service().updateMe(J.of("statusText", t.isEmpty() ? JsonNull.INSTANCE : new com.google.gson.JsonPrimitive(t)));
         }
-        y += 22;
-        g.text(g.clip(module.tr("account.presenceHint"), w), x, y, Theme.DIM);
-        return y + 14;
+        y += ROW * 2 + 5;
+        g.text(g.clip(module.tr("account.presenceHint"), w), x + 1, y, Theme.DIM);
+        return y + 10;
     }
+
+    // ============================================================================================ privacy
 
     private int privacy(Ui ui, SocialState st, int x, int y, int w) {
         Gfx g = ui.g;
-        y = section(g, module.tr("account.privacy"), x, y, w);
+        Widgets.caption(g, module.tr("account.privacy"), x + 1, y);
+        y += 12;
         Privacy p = st.me == null ? null : st.me.privacy();
         if (p == null) return y;
-        int cyw = 150;
+        Widgets.card(g, x, y, w, ROW * 4);
+        int cyw = Math.min(150, w / 2 - 10);
+        int ry = y;
         for (String field : PRIVACY) {
             String value = switch (field) {
                 case "friendRequests" -> p.friendRequests();
                 case "directMessages" -> p.directMessages();
                 default -> p.invites();
             };
-            g.text(g.clip(module.tr("privacy." + field), w - cyw - 8), x, y + 4, Theme.TEXT);
-            int d = Widgets.cycler(ui, field, x + w - cyw, y, cyw, module.tr("privacy.level." + value));
+            g.text(g.clip(module.tr("privacy." + field), w - cyw - 30), x + 10, ry + 9, Theme.TEXT);
+            int d = Widgets.cycler(ui, field, x + w - 10 - cyw, ry + 5, cyw, module.tr("privacy.level." + value));
             if (d != 0) {
                 int idx = 0;
                 for (int i = 0; i < LEVELS.length; i++) if (LEVELS[i].equals(value)) idx = i;
@@ -226,35 +235,46 @@ public final class AccountPanel implements Panel {
                 priv.addProperty(field, next);
                 module.service().updateMe(J.of("privacy", priv));
             }
-            y += 20;
+            ry += ROW;
+            g.hline(x + 1, ry, w - 2, Theme.LINE);
         }
-        g.text(g.clip(module.tr("privacy.showHosting"), w - 40), x, y + 2, Theme.TEXT);
-        if (Widgets.toggle(ui, K_HOSTING, x + w - Widgets.TOGGLE_W, y + 1, p.showHosting(), true)) {
+        boolean clicked = ui.clicked(x + 1, ry, w - 2, ROW);
+        boolean hot = ui.focusedLast() || ui.hover(x + 1, ry, w - 2, ROW);
+        if (hot) g.rect(x + 1, ry + 1, w - 2, ROW - 2, Theme.alpha(Theme.SURFACE3, 1f));
+        g.text(g.clip(module.tr("privacy.showHosting"), w - 60), x + 10, ry + 9, Theme.TEXT);
+        Widgets.drawToggle(ui, K_HOSTING, x + w - 10 - Widgets.TOGGLE_W, ry + 7, p.showHosting(), true, hot);
+        if (clicked) {
             JsonObject priv = new JsonObject();
             priv.addProperty("showHosting", !p.showHosting());
             module.service().updateMe(J.of("privacy", priv));
         }
-        y += 18;
-        g.text(g.clip(module.tr("privacy.hint"), w), x, y, Theme.DIM);
-        return y + 14;
+        y += ROW * 4 + 5;
+        g.text(g.clip(module.tr("privacy.hint"), w), x + 1, y, Theme.DIM);
+        return y + 10;
     }
+
+    // ============================================================================================ devices
 
     private int devices(Ui ui, SocialService svc, int x, int y, int w) {
         Gfx g = ui.g;
-        y = section(g, module.tr("account.devices"), x, y, w);
-        SocialUi.smallButtonRight(ui, K_RELOAD, x + w, y - 19, module.tr("account.reload"), Widgets.Style.GHOST, this::loadDevices);
-        if (devicesLoading && devices.isEmpty()) {
-            g.text(module.tr("chat.loading"), x, y, Theme.DIM);
-            return y + 14;
+        Widgets.caption(g, module.tr("account.devices"), x + 1, y);
+        SocialUi.smallButtonRight(ui, K_RELOAD, x + w, y - 3, module.tr("account.reload"), Widgets.Style.GHOST, this::loadDevices);
+        y += 12;
+        if ((devicesLoading && devices.isEmpty()) || devicesError != null || devices.isEmpty()) {
+            Widgets.card(g, x, y, w, ROW);
+            String text = devicesError != null ? devicesError : devicesLoading ? module.tr("chat.loading") : module.tr("account.noDevices");
+            g.text(g.clip(text, w - 20), x + 10, y + 9, devicesError != null ? Theme.DANGER : Theme.DIM);
+            return y + ROW;
         }
-        if (devicesError != null) {
-            g.text(g.clip(devicesError, w), x, y, Theme.DANGER);
-            return y + 14;
-        }
+        int rh = 30;
+        Widgets.card(g, x, y, w, devices.size() * rh);
+        int ry = y;
+        boolean first = true;
         for (Device d : devices) {
-            int right = x + w;
+            if (!first) g.hline(x + 1, ry, w - 2, Theme.LINE);
+            first = false;
             String label = d.current() ? module.tr("account.logout") : module.tr("account.revoke");
-            right = SocialUi.smallButtonRight(ui, d.id(), right, y + 4, label, Widgets.Style.GHOST, () -> {
+            int right = SocialUi.smallButtonRight(ui, d.id(), x + w - 8, ry + 8, label, Widgets.Style.GHOST, () -> {
                 if (d.current()) {
                     ConfirmScreen.ask(module.tr("account.logoutTitle"), module.tr("account.logoutText"), module.tr("account.logout"), module::logout);
                 } else {
@@ -262,33 +282,66 @@ public final class AccountPanel implements Panel {
                 }
             });
             String title = d.clientName() + " " + d.clientVersion();
-            g.text(g.clip(title, right - x - 70), x, y + 2, Theme.TEXT);
-            if (d.current()) Widgets.chip(g, module.tr("account.thisDevice"), x + Math.min(g.width(title), right - x - 70) + 6, y, Theme.OK);
-            String sub = d.platform() + (d.ip() != null ? " · " + d.ip() : "") + " · " + SocialUi.ago(d.lastUsedAt());
-            g.text(g.clip(sub, right - x - 4), x, y + 12, Theme.DIM);
-            y += 26;
+            int tw = right - x - 20;
+            g.text(g.clip(title, tw - (d.current() ? 70 : 0)), x + 10, ry + 6, Theme.TEXT);
+            if (d.current()) Widgets.chip(g, module.tr("account.thisDevice"), x + 10 + Math.min(g.width(title), tw - 70) + 6, ry + 4, Theme.OK);
+            String sub = d.platform() + " · " + SocialUi.ago(d.lastUsedAt());
+            g.text(g.clip(sub, tw), x + 10, ry + 17, Theme.DIM);
+            ry += rh;
         }
-        if (devices.isEmpty()) {
-            g.text(module.tr("account.noDevices"), x, y, Theme.DIM);
-            y += 14;
-        }
-        return y;
+        return ry;
     }
+
+    // ============================================================================================ blocked
 
     private int blocked(Ui ui, SocialService svc, SocialState st, int x, int y, int w) {
         Gfx g = ui.g;
-        y = section(g, module.tr("account.blocked", st.blocked.size()), x, y, w);
+        Widgets.caption(g, module.tr("account.blocked", st.blocked.size()), x + 1, y);
+        y += 12;
         if (st.blocked.isEmpty()) {
-            g.text(module.tr("account.noBlocked"), x, y, Theme.DIM);
-            return y + 14;
+            Widgets.card(g, x, y, w, ROW);
+            g.text(g.clip(module.tr("account.noBlocked"), w - 20), x + 10, y + 9, Theme.DIM);
+            return y + ROW;
         }
-        for (User u : new ArrayList<>(st.blocked.values())) {
-            int right = SocialUi.smallButtonRight(ui, u.id(), x + w, y + 3, module.tr("action.unblock"), Widgets.Style.GHOST,
+        List<User> list = new ArrayList<>(st.blocked.values());
+        Widgets.card(g, x, y, w, list.size() * ROW);
+        int ry = y;
+        for (User u : list) {
+            if (ry > y) g.hline(x + 1, ry, w - 2, Theme.LINE);
+            int right = SocialUi.smallButtonRight(ui, u.id(), x + w - 8, ry + 6, module.tr("action.unblock"), Widgets.Style.GHOST,
                     () -> svc.unblock(u.id()));
-            SocialUi.head(g, u.id(), u.skinUrl(), x, y + 2, 16, null);
-            g.text(g.clip(u.name(), right - x - 26), x + 22, y + 6, Theme.TEXT);
-            y += 22;
+            SocialUi.head(g, u.id(), u.skinUrl(), x + 10, ry + 5, 16, null);
+            g.text(g.clip(u.name(), right - x - 40), x + 32, ry + 9, Theme.TEXT);
+            ry += ROW;
         }
-        return y;
+        return ry;
+    }
+
+    // ============================================================================================ advanced
+
+    /** Server address, account id, sign-in method, device addresses. */
+    private int technical(Ui ui, SocialService svc, BackendClient b, int x, int y, int w) {
+        Gfx g = ui.g;
+        List<String[]> rows = new ArrayList<>();
+        rows.add(new String[] {module.tr("account.tech.server"), b == null ? BackendClient.configuredBaseUrl() : b.baseUrl()});
+        User me = svc != null && svc.state.me != null ? svc.state.me.user() : null;
+        if (me != null) rows.add(new String[] {module.tr("account.tech.id"), me.id()});
+        rows.add(new String[] {module.tr("account.tech.login"), module.tr(BackendClient.devAuth() ? "account.tech.loginDev" : "account.tech.loginMojang")});
+        for (Device d : devices) {
+            if (d.ip() != null) rows.add(new String[] {d.clientName() + " · " + d.platform(), d.ip()});
+        }
+        int rh = 16;
+        int h = rows.size() * rh + 12;
+        Widgets.card(g, x, y, w, h);
+        int keyW = 0;
+        for (String[] r : rows) keyW = Math.max(keyW, g.width(r[0]));
+        keyW = Math.min(keyW + 12, w / 2);
+        int ry = y + 6;
+        for (String[] r : rows) {
+            g.text(g.clip(r[0], keyW - 6), x + 10, ry + 4, Theme.DIM);
+            g.text(g.clip(r[1], w - keyW - 20), x + 10 + keyW, ry + 4, Theme.TEXT);
+            ry += rh;
+        }
+        return y + h;
     }
 }

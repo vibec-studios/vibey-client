@@ -75,7 +75,8 @@ Required capabilities (the core author designs the concrete Java types; document
 - Events/services bus: lightweight typed events (e.g. `WorldJoin`, `ScreenOpen`, `BackendConnected`) and a
   service locator so modules can talk (e.g. social asks multiplayer for the current host session).
 - Global settings: language (auto/de/en), **online features on/off** (when off: no backend connection at all,
-  social module hidden, cosmetics only local/server-packet), backend URL (advanced), UI scale/animations.
+  social module hidden, cosmetics only local/server-packet), backend URL (advanced), UI scale/animations. Shown on
+  the *General* tab of the Vibey menu; technical settings only in the collapsed *Advanced · for creators* areas.
 - Own i18n: `assets/vibeyclient/i18n/<lang>/<module>.json` merged at runtime (de_de + en_us required for every
   string). Vanilla lang files only for keybind names/categories and mod menu text.
 

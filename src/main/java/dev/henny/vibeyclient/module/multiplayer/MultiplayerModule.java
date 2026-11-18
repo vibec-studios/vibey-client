@@ -38,13 +38,13 @@ public final class MultiplayerModule extends VibeyModule {
     public enum GameMode { SURVIVAL, CREATIVE, ADVENTURE, SPECTATOR }
 
     public final ActionSetting openHost = action("openHost", this::openHostScreen);
-    public final EnumSetting<GameMode> gameMode = choice("gameMode", GameMode.SURVIVAL);
-    public final BoolSetting cheats = bool("cheats", false);
-    public final BoolSetting pvp = bool("pvp", true);
-    public final IntSetting maxPlayers = intRange("maxPlayers", 8, 2, 8);
-    public final BoolSetting forceMods = bool("forceMods", false);
-    public final BoolSetting pauseButton = bool("pauseButton", true);
-    public final BoolSetting toasts = bool("toasts", true);
+    public final EnumSetting<GameMode> gameMode = choice("gameMode", GameMode.SURVIVAL).section("world");
+    public final BoolSetting cheats = bool("cheats", false).section("world");
+    public final BoolSetting pvp = bool("pvp", true).section("world");
+    public final IntSetting maxPlayers = intRange("maxPlayers", 8, 2, 8).section("world");
+    public final BoolSetting forceMods = bool("forceMods", false).section("world");
+    public final BoolSetting pauseButton = bool("pauseButton", true).section("buttons");
+    public final BoolSetting toasts = bool("toasts", true).section("buttons");
     public final KeybindSetting hostKey = keybind("host", Keys.UNBOUND).onPress(this::openHostScreen);
     public final BoolSetting exactModVersions = bool("exactModVersions", false).advanced();
     /** Default = BuildInfo.DEFAULT_RELAY: our relay, official builds only (forks: own default_relay, https://github.com/vibec-studios/.github/blob/main/SERVICES.md). */

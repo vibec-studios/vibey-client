@@ -3,9 +3,9 @@
   "description": "Umhänge, Flügel, Auren, Begleiter, Schilde, Hüte und Rückenitems.",
   "setting": {
     "showOwn": "Meine Cosmetics zeigen",
-    "showOthers": "Cosmetics anderer zeigen",
+    "showOthers": "Cosmetics anderer Spieler zeigen",
     "hideWithArmor": "Unter Rüstung verstecken",
-    "hideWithArmor.desc": "Manche Items verschwinden mit passender Rüstung.",
+    "hideWithArmor.desc": "Zum Beispiel Hüte unter einem Helm.",
     "show_cape": "Umhänge",
     "show_wings": "Flügel",
     "show_aura": "Auren",
@@ -13,10 +13,10 @@
     "show_shield": "Schilde",
     "show_hat": "Hüte",
     "show_back": "Rückenitems",
-    "show_cape.desc": "Diesen Slot bei allen zeigen (nur auf deinem Bildschirm).",
     "wardrobe": "Garderobe öffnen",
-    "notifyNew": "Hinweis auf neue Cosmetics",
-    "notifyNew.desc": "Kurzer Hinweis, wenn neue Items in deiner Garderobe ankommen."
+    "notifyNew": "Über neue Cosmetics informieren",
+    "notifyNew.desc": "Kurzer Hinweis, wenn neue Items in deiner Garderobe ankommen.",
+    "openWardrobe": "Garderobe öffnen"
   },
   "locked": {
     "notUnlocked": "Nicht freigeschaltet",
@@ -36,5 +36,9 @@
     "title": "Neue Cosmetics verfügbar",
     "one": "{0} ist jetzt in deiner Garderobe.",
     "many": "{0} neue Items in deiner Garderobe."
+  },
+  "section": {
+    "show": "Was du siehst",
+    "types": "Diese Arten bei allen zeigen"
   }
 }

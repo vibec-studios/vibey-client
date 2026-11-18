@@ -11,7 +11,7 @@ import dev.henny.vibeyclient.api.setting.Settings.StringSetting;
 import dev.henny.vibeyclient.api.setting.SettingsGroup;
 import dev.henny.vibeyclient.client.Keys;
 
-/** Settings that apply to the whole client ({@code config/vibeyclient/core.json}), shown as "Global settings". */
+/** Settings that apply to the whole client ({@code config/vibeyclient/core.json}), shown on the "General" tab. */
 public final class GlobalSettings {
     private GlobalSettings() {}
 
@@ -19,13 +19,7 @@ public final class GlobalSettings {
 
     public static final SettingsGroup GROUP = new SettingsGroup("core");
 
-    public static final EnumSetting<Language> language = GROUP.add(new EnumSetting<>("language", Language.AUTO));
-
-    /** Off: no backend connection at all, social hidden, cosmetics only local / via server packets. */
-    public static final BoolSetting onlineFeatures = GROUP.add(new BoolSetting("onlineFeatures", true))
-            .onChange(on -> Events.post(new VibeyEvents.OnlineFeaturesChanged(on)));
-
-    public static final BoolSetting animations = GROUP.add(new BoolSetting("animations", true));
+    public static final EnumSetting<Language> language = GROUP.add(new EnumSetting<>("language", Language.AUTO)).section("look");
 
     /** Size of the Vibey screens: the game's GUI scale or a fixed factor (whole numbers stay crisp). */
     public enum UiScale {
@@ -38,11 +32,14 @@ public final class GlobalSettings {
         }
     }
 
-    public static final EnumSetting<UiScale> uiScale = GROUP.add(new EnumSetting<>("uiScale", UiScale.GAME))
+    public static final EnumSetting<UiScale> uiScale = GROUP.add(new EnumSetting<>("uiScale", UiScale.GAME)).section("look")
             .onChange(v -> dev.henny.vibeyclient.ui.UiScale.refresh());
 
-    /** Replace the vanilla title screen with the Vibey one (off: only a small Vibey button on the vanilla screen). */
-    public static final BoolSetting vibeyMainMenu = GROUP.add(new BoolSetting("vibeyMainMenu", true));
+    public static final BoolSetting animations = GROUP.add(new BoolSetting("animations", true)).section("look");
+
+    /** Off: no backend connection at all, social hidden, cosmetics only local / via server packets. */
+    public static final BoolSetting onlineFeatures = GROUP.add(new BoolSetting("onlineFeatures", true)).section("online")
+            .onChange(on -> Events.post(new VibeyEvents.OnlineFeaturesChanged(on)));
 
     public static final KeybindSetting openMenu = GROUP.add(new KeybindSetting("core", "open_menu", Keys.RIGHT_SHIFT));
 

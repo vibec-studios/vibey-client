@@ -90,7 +90,7 @@ public final class VibeyCore {
                                     Consumer<AbstractWidget> add, Consumer<AbstractWidget> remove) {
         PauseMenu.decorate(screen, widgets, add);
         // A fresh game directory opens the accessibility onboarding first; both mean "started".
-        boolean start = screen instanceof net.minecraft.client.gui.screens.TitleScreen || screen instanceof dev.henny.vibeyclient.ui.title.VibeyTitleScreen
+        boolean start = screen instanceof net.minecraft.client.gui.screens.TitleScreen
                 || screen.getClass().getSimpleName().contains("Onboarding");
         if (start && dev.henny.vibeyclient.Smoke.enabled() && !smokeDone) {
             smokeDone = true;

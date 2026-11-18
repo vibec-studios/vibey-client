@@ -1,7 +1,8 @@
 # Vibey Client UI
 
 How the client looks and how a module plugs into it. Code: `dev.henny.vibeyclient.ui` (widgets, menu shell),
-`ui.title` (title screen, onboarding), `client/PauseMenu` (pause row). Tokens: `ui/Theme` (SPEC §4).
+`ui.screen` (module grid, module pages, General, About), `ui.title` (title screen buttons, onboarding),
+`client/PauseMenu` (pause row). Tokens: `ui/Theme` (SPEC §4).
 
 > See also: [MODULES.md](MODULES.md) (module API) · [SPEC §4](SPEC.md#4-design-system-vibe) (design tokens) ·
 > [docs index](README.md)
@@ -29,13 +30,36 @@ How the client looks and how a module plugs into it. Code: `dev.henny.vibeyclien
 
 | Screen | Class | Notes |
 |---|---|---|
-| Title | `ui/title/VibeyTitleScreen` | Replaces vanilla via `mixin/client/ScreenSwapMixin` → `TitleHook`. Setting *Vibey main menu* off (or the "Classic menu" button) keeps vanilla, which then gets a small Vibey button. Skipped under Fabric's client gametest runner. |
-| Onboarding | `ui/title/OnboardingScreen` | Once before the first title screen (`GlobalSettings.onboarded()`), reopen from About. |
-| Vibey menu | `ui/VibeyScreen` | Right Shift. Tabs from `VibeyTabs`; Tab/Shift+Tab focus, Enter clicks, Ctrl+Tab switches tabs, Esc: cancel key capture → leave text field → clear search → close. Typing anywhere searches the module list. |
+| Title | vanilla `TitleScreen` + `ui/title/TitleButtons` | The title screen stays vanilla. Vibey adds a row of small square icon buttons (entries of `MenuEntries.Place.TITLE`: wardrobe, friends with unread badge, media, Vibey menu) in a free corner: top right, else top left, else bottom left. Tooltips on hover, Tab/Enter work. |
+| Onboarding | `ui/title/OnboardingScreen` | Once before the first title screen (`TitleHook` via `mixin/client/ScreenSwapMixin`, `GlobalSettings.onboarded()`), reopen from About. Skipped under Fabric's client gametest runner and the smoke test. |
+| Vibey menu | `ui/VibeyScreen` | Right Shift. Tabs from `VibeyTabs`: *Modules* (grid → module pages), *General*, *Account* (social), *About*. Tab/Shift+Tab focus, Enter clicks, Ctrl+Tab switches tabs, Esc: cancel key capture → leave text field → module page back to the grid → clear search → close. Typing anywhere searches modules and settings. |
 | Pause row | `client/PauseMenu` | One row under the vanilla buttons; above them or icon-only in the corner when the GUI is too small. |
 
 Global *UI scale* (`GlobalSettings.uiScale`: game / 2× / 3× / 4×) sets the window GUI scale while a Vibey screen is
 open (`UiScale.apply/restore`) – whole numbers only, so nothing gets blurry.
+
+## Settings: module grid and pages
+
+Built like the mod screens of the big clients, in the Vibe look (`ui/screen/ModulesPanel`, `SettingsView`):
+
+- **Grid:** search bar (modules, descriptions and setting labels; a hit on a setting shows "› setting name" on the
+  tile, a hit on a global setting adds a *General* tile), then one tile per module: icon, name, one or two lines of
+  description, on/off switch, accent bar while on. Modules of category `CREATOR` (Blockbench link) sit in a
+  collapsed *For creators* area under the grid.
+- **Module page:** toolbar with *‹ Modules / name* and the on/off switch, then the intro (big icon, description,
+  the module's buttons = its non-advanced `ActionSetting`s, the first one primary), then the settings as cards:
+  untitled first, then one card per `.section(...)`, three or more plain switches in two columns, the keys
+  (key caps, conflicts in amber with a tooltip), and at the bottom the collapsed *Advanced · for creators* area with
+  every `.advanced()` setting. Enums with up to four short values are segmented controls, else ‹ value ›.
+- **General tab** (`GeneralPanel`): language, menu size, animations, online features (+ connection status with a
+  tooltip), the menu key; advanced: Vibe server address, and technical info (version, game, server, connection,
+  protocol, settings folder) with *Copy* for bug reports.
+- **Account tab** (social `AccountPanel`): profile card (head, name, signed in or not, *Open friends* / *Sign out* or
+  *Sign in*), status, privacy, devices, blocked players. Server address, account id, sign-in method and device
+  addresses only in the advanced area.
+
+Rule of thumb for texts: say what the player gets, no jargon; anything only a developer or creator needs is
+`.advanced()`.
 
 ## In the world
 
@@ -60,23 +84,25 @@ Conventional ids: `wardrobe`, `friends`, `account`. Order: Modules 0, About 1000
 is too narrow for all labels. A `Panel` draws into `(x, y, w, h)` every frame with the `Ui` context; it may
 override `key(int)`, `typed(int)`, `onShow()`, `onHide()`.
 
-**Title screen and pause menu entries** (`ui/MenuEntries`, same id replaces):
+**Title screen buttons and pause menu entries** (`ui/MenuEntries`, same id replaces):
 
 ```java
-MenuEntries.register(MenuEntries.Place.TITLE, new MenuEntries.Entry("wardrobe", "cosmetics.menu.wardrobe",
-        Icons.SHIRT, 20, MenuEntries.whenEnabled("cosmetics"), parent -> ClientCompat.openScreen(new WardrobeScreen(parent))));
+MenuEntries.register(MenuEntries.Place.TITLE, new MenuEntries.Entry("media", "media.menu.title",
+        Icons.NOTE, 30, MenuEntries.whenEnabled("media"), parent -> ClientCompat.openScreen(new MediaScreen(parent))));
 MenuEntries.register(MenuEntries.Place.PAUSE, new MenuEntries.Entry("friends", "social.menu.friends",
         Icons.FRIENDS, 20, MenuEntries.whenOnline("social"), parent -> ..., () -> unreadCount()));   // badge
 ```
 
-Core orders – title: singleplayer 0, multiplayer 10, wardrobe 20, friends 30, Vibey settings 40, options 50,
-mods 60 (Mod Menu on Fabric, NeoForge's mod list), quit 1000 (pinned to the bottom); groups split at 20 / 50.
-Pause: Vibey 0, wardrobe 10, friends 20. The core registers defaults for `wardrobe` / `friends` (open the tab
+On the title screen every entry is a 20 × 20 icon button (the label is its tooltip and narration), so give it a
+clear `Icons` icon. Core orders – title: wardrobe 10, friends 20, media 30 (free for the media module), Vibey menu
+100 (last). Pause: Vibey 0, wardrobe 10, friends 20. The core registers defaults for `wardrobe` / `friends` (open the tab
 with that id, else the module's settings page); the cosmetics module replaces `wardrobe` with its full-screen
 wardrobe and social replaces `friends` with the sidebar. There is no `host` pause entry: the multiplayer module puts
 *Host World* in place of vanilla's *Open to LAN*. Entries of disabled modules are hidden via `visible`.
 
-**Player preview on the title screen** – register `api/service/MenuPreview`:
+**Player preview** – `api/service/MenuPreview` (the cosmetics module registers `TitlePreview`, the player with all
+equipped cosmetics, drag to rotate). The vanilla title screen does not show it; any Vibey screen that wants the
+player model can look it up:
 
 ```java
 Services.register(MenuPreview.class, new MenuPreview() {
@@ -86,15 +112,17 @@ Services.register(MenuPreview.class, new MenuPreview() {
 });
 ```
 
-Without one the title shows the seal on its ice floe.
+Without one, show the seal (`Seal`) instead.
 
 **Status numbers** – the social module registers `api/service/SocialStatus` (`onlineFriends()`, `badge()`); the
-title status bar shows "Online · 3 friends online". Backend reachability and the MOTD come from the public
-`GET /api/v1/meta` (`ui/title/BackendStatus`), only while online features are on.
+title *Friends* button shows the badge, the General tab "Online · 3 friends online". Backend reachability comes from
+the public `GET /api/v1/meta` (`ui/title/BackendStatus`, refreshed when the title screen or the General tab opens),
+only while online features are on.
 
 ## Widgets cheat sheet
 
-Immediate mode (`Ui` + `Widgets`), call every frame, keys must be stable objects:
+Immediate mode (`Ui` + `Widgets`), call every frame, keys must be stable objects (newer helpers: `segmented`,
+`keycap`, `disclosure`, `card`, `iconTile`, `drawToggle` for rows that are clickable as a whole):
 
 ```java
 if (Widgets.button(ui, this, x, y, 80, 16, label, Widgets.Style.PRIMARY)) save();
@@ -113,6 +141,8 @@ On vanilla screens use `VibeyButton` (a real widget: Tab/Enter, narration). The 
 
 ## Testing
 
-`./gradlew :fabric-1.21.11:runClientGameTest` runs `VibeyUiGameTest`: title, onboarding, menu (global, module,
-search, About), pause row, at GUI scales 2 / 3 / auto and 1280 × 720 / 1920 × 1080, English and German.
+`./gradlew :fabric-1.21.11:runClientGameTest` runs `VibeyUiGameTest`: vanilla title with the corner buttons (+ hover
+tooltip), module grid, a module page, the advanced area closed and open, General, Account, search, About,
+onboarding and the pause row, at GUI scales 2 / 3 and 1280 × 720 / 1920 × 1080, English and German. It also clicks
+through the real mouse input (title button → menu, tile → module page, Esc → grid).
 Screenshots: `versions/fabric-1.21.11/build/run/clientGameTest/screenshots/ui_*.png` – look at them.

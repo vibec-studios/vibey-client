@@ -70,6 +70,15 @@ tasks.register('checkI18n') {
                         files.any { all.containsKey("${it}.${key}".toString()) }
                 if (!ok) problems << "${rel}: ${fn}(\"${key}\") is not in en_us"
             }
+            // .section("x") → <module or core>.section.x
+            def sec = (src =~ /\.section\(\s*"(\w+)"/)
+            def secOwner = moduleId ?: (f.name == 'GlobalSettings.java' ? 'core' : null)
+            if (secOwner) {
+                while (sec.find()) {
+                    def label = "${secOwner}.section.${sec.group(1)}".toString()
+                    if (!all.containsKey(label)) problems << "${rel}: section title ${label} is not in en_us"
+                }
+            }
             if (moduleId && f.name.endsWith('Module.java')) {
                 def s = setting.matcher(src)
                 while (s.find()) {

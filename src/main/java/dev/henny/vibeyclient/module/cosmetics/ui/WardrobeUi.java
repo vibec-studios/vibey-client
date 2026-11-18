@@ -34,7 +34,7 @@ public final class WardrobeUi {
         VibeyTabs.register(new VibeyTabs.Tab(TAB_ID, "wardrobe.tab", 20, WardrobePanel::new, visible));
         // "Wardrobe" on the title screen and in the pause row opens the full-screen wardrobe (replaces the core
         // default, which would open the Vibey menu tab)
-        MenuEntries.register(MenuEntries.Place.TITLE, new MenuEntries.Entry("wardrobe", "core.title.wardrobe", Icons.SHIRT, 20,
+        MenuEntries.register(MenuEntries.Place.TITLE, new MenuEntries.Entry("wardrobe", "core.title.wardrobe", Icons.SHIRT, 10,
                 visible, WardrobeUi::openWardrobe));
         MenuEntries.register(MenuEntries.Place.PAUSE, new MenuEntries.Entry("wardrobe", "core.title.wardrobe", Icons.SHIRT, 10,
                 visible, WardrobeUi::openWardrobe));

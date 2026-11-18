@@ -70,7 +70,7 @@ public class OnboardingScreen extends BaseScreen {
         // header: brand + step counter
         int pad = 14;
         PixelFont.drawExtruded(g, "VIBEY", cx + pad, cy + 11, 2, Theme.TEXT, Theme.BRAND);
-        VibeyTitleScreen.spaced(g, "CLIENT", cx + pad + PixelFont.width("VIBEY", 2) + 7, cy + 12, Theme.BRAND2, 1);
+        Widgets.spaced(g, "CLIENT", cx + pad + PixelFont.width("VIBEY", 2) + 7, cy + 12, Theme.BRAND2, 1);
         String counter = (step + 1) + " / " + STEPS;
         g.textRight(counter, cx + cw - pad, cy + 12, Theme.DIM);
         g.hline(cx, cy + 30, cw, Theme.LINE);

@@ -4,7 +4,7 @@
   "setting": {
     "creatorMode": "Creator-Modus",
     "creatorMode.desc": "Erlaubt dem Blockbench-Plugin, Modelle ins Spiel zu schicken.",
-    "port": "Port",
+    "port": "Port der Live-Verbindung",
     "port.desc": "Lokaler Port der Live-Verbindung (nur von diesem Computer erreichbar)."
   },
   "panel": {

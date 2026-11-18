@@ -1,7 +1,5 @@
 package dev.henny.vibeyclient.module.devlink;
 
-import dev.henny.vibeyclient.api.Lang;
-import dev.henny.vibeyclient.api.ModuleManager;
 import dev.henny.vibeyclient.ui.Gfx;
 import dev.henny.vibeyclient.ui.Panel;
 import dev.henny.vibeyclient.ui.ScrollArea;
@@ -16,7 +14,7 @@ import java.util.List;
 
 /** Settings page of the devlink module: server status, token (masked, copy, regenerate), how to connect, settings. */
 final class DevLinkPanel implements Panel {
-    private static final Object SHOW = new Object(), COPY = new Object(), REGEN = new Object(), TOGGLE = new Object();
+    private static final Object SHOW = new Object(), COPY = new Object(), REGEN = new Object();
 
     private final DevLinkModule module;
     private final ScrollArea scroll = new ScrollArea();
@@ -42,7 +40,7 @@ final class DevLinkPanel implements Panel {
         int cw = w - pad * 2;
         int cy = scroll.begin(ui, x, y, w, h) + pad;
 
-        cy = header(ui, cx, cy, cw);
+        cy = dev.henny.vibeyclient.ui.screen.ModulesPanel.intro(ui, module, cx, cy, cw);
         cy = status(ui, cx, cy, cw) + 10;
         cy = token(ui, cx, cy, cw) + 10;
 
@@ -59,26 +57,6 @@ final class DevLinkPanel implements Panel {
 
         cy = SettingsView.draw(ui, module.settings(), cx, cy, cw, module.isEnabled()) + pad;
         scroll.end(ui, cy);
-    }
-
-    private int header(Ui ui, int x, int y, int w) {
-        Gfx g = ui.g;
-        String name = module.displayName();
-        g.bold(name, x, y, Theme.TEXT);
-        int chipX = x + g.boldWidth(name) + 8;
-        Widgets.chip(g, Lang.tr(module.isEnabled() ? "core.module.status.enabled" : "core.module.status.disabled"), chipX, y - 2,
-                module.isEnabled() ? Theme.OK : Theme.MUTED);
-        if (module.canToggle()) {
-            String label = Lang.tr(module.isEnabled() ? "core.module.disable" : "core.module.enable");
-            int bw = Math.max(64, g.width(label) + 16);
-            if (Widgets.button(ui, TOGGLE, x + w - bw, y - 4, bw, 16, label,
-                    module.isEnabled() ? Widgets.Style.SECONDARY : Widgets.Style.PRIMARY)) {
-                ModuleManager.get().toggle(module.id());
-            }
-        }
-        y += 14;
-        g.text(g.clip(Lang.tr(module.descriptionKey()), w), x, y, Theme.MUTED);
-        return y + 20;
     }
 
     private int status(Ui ui, int x, int y, int w) {

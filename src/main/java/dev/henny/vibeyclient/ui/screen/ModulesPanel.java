@@ -1,201 +1,265 @@
 package dev.henny.vibeyclient.ui.screen;
 
 import dev.henny.vibeyclient.Compat;
-import dev.henny.vibeyclient.Vibey;
 import dev.henny.vibeyclient.api.GlobalSettings;
 import dev.henny.vibeyclient.api.Lang;
+import dev.henny.vibeyclient.api.ModuleCategory;
 import dev.henny.vibeyclient.api.ModuleManager;
 import dev.henny.vibeyclient.api.VibeyModule;
+import dev.henny.vibeyclient.api.setting.Settings.ActionSetting;
+import dev.henny.vibeyclient.client.ClientCompat;
+import dev.henny.vibeyclient.client.Keys;
 import dev.henny.vibeyclient.ui.Gfx;
+import dev.henny.vibeyclient.ui.Icons;
 import dev.henny.vibeyclient.ui.Panel;
 import dev.henny.vibeyclient.ui.ScrollArea;
 import dev.henny.vibeyclient.ui.Theme;
 import dev.henny.vibeyclient.ui.Ui;
+import dev.henny.vibeyclient.ui.VibeyScreen;
+import dev.henny.vibeyclient.ui.VibeyTabs;
 import dev.henny.vibeyclient.ui.Widgets;
+import net.minecraft.client.gui.components.EditBox;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
- * The "Modules" tab: left column = global settings entry + every visible module with its on/off switch,
- * right = the settings of the selected entry (auto-generated, or the module's own {@link Panel}).
+ * The "Modules" tab, like the mod screens of the big clients: a search bar and a grid of tiles (icon, name, one line
+ * of description, on/off switch). A click on a tile opens the module's page (toolbar with back + switch, a short
+ * intro, its buttons, then its settings via {@link SettingsView} or the module's own {@link Panel}). Creator modules
+ * (category {@link ModuleCategory#CREATOR}) sit in a collapsed "For creators" area under the grid.
  */
 public final class ModulesPanel implements Panel {
-    private static final int LIST_W = 168;
-    private static final Object GLOBAL = new Object();
-    private static final Object SEARCH = new Object();
-    private static final int SEARCH_H = 28;
+    private static final Object SEARCH = new Object(), BACK = new Object(), PAGE_TOGGLE = new Object(), CREATORS = new Object(),
+            GENERAL_TILE = new Object();
+    private static final int BAR_H = 30;
+    private static final int TILE_H = 54;
+    private static final int TILE_MIN_W = 150;
+    private static final int GAP = 8;
 
-    /** Remembered across openings of the menu. */
-    private static Object lastSelected = GLOBAL;
+    /** Module page the next opened menu shows (null = the grid); remembered across openings of the menu. */
+    private static VibeyModule lastPage;
+    private static boolean creatorsOpen;
 
-    /** Which entry the next opened menu shows: a module id, or null for the global settings. */
-    public static void preselect(String moduleId) {
-        VibeyModule m = moduleId == null ? null : ModuleManager.get().get(moduleId);
-        lastSelected = m == null ? GLOBAL : m;
+    /** Last drawn bounds (x, y, w, h in GUI pixels) of each module tile, for tests that click them. */
+    private static final Map<String, int[]> TILE_BOUNDS = new HashMap<>();
+
+    /** Bounds of the tile of module {@code id} in the last frame, or null (tests). */
+    public static int[] tileBounds(String id) {
+        return TILE_BOUNDS.get(id);
     }
 
-    private final ScrollArea listScroll = new ScrollArea();
-    private final ScrollArea detailScroll = new ScrollArea();
+    /** Id of the module page that is open (or opens next), null = the grid (tests). */
+    public static String openPage() {
+        return lastPage == null ? null : lastPage.id();
+    }
+
+    /** Which module page the next opened menu shows: a module id, or null for the grid. */
+    public static void preselect(String moduleId) {
+        lastPage = moduleId == null ? null : ModuleManager.get().get(moduleId);
+    }
+
+    private final ScrollArea gridScroll = new ScrollArea();
+    private final ScrollArea pageScroll = new ScrollArea();
     private final Map<VibeyModule, Panel> customPanels = new HashMap<>();
-    private Object selected = lastSelected;
+    private VibeyModule page = lastPage;
     private String query = "";
-    private net.minecraft.client.gui.components.EditBox searchBox;
+    private EditBox searchBox;
+    private Ui ui;
 
     @Override
     public void draw(Ui ui, int x, int y, int w, int h) {
-        Gfx g = ui.g;
-        int listW = Math.min(LIST_W, w / 3);
-        g.rect(x, y, listW, h, Theme.PANEL);
-        g.vline(x + listW, y, h, Theme.LINE);
-        drawList(ui, x, y, listW, h);
-        drawDetail(ui, x + listW + 1, y, w - listW - 1, h);
+        this.ui = ui;
+        if (page != null && !page.visible()) open(null);
+        if (page != null) drawPage(ui, page, x, y, w, h);
+        else drawGrid(ui, x, y, w, h);
     }
 
-    // ============================================================================================ left column
+    // ============================================================================================ grid
 
-    private void drawList(Ui ui, int x, int y, int w, int h) {
+    private void drawGrid(Ui ui, int x, int y, int w, int h) {
         Gfx g = ui.g;
-        // search (stays on top)
-        var box = Widgets.textField(ui, SEARCH, x + 8, y + 7, w - 16, query, 40, q -> {
+        int pad = Theme.PAD + 4;
+        // search bar (stays on top)
+        int sx = x + pad, sw = w - pad * 2;
+        EditBox box = Widgets.textField(ui, SEARCH, sx, y + 8, sw, query, 40, q -> {
             query = q;
-            listScroll.reset();
+            gridScroll.reset();
         });
         searchBox = box;
-        if (query.isEmpty() && !box.isFocused()) g.text(Lang.tr("core.menu.search"), x + 13, y + 11, Theme.DIM);
-        dev.henny.vibeyclient.ui.Icons.draw(g, dev.henny.vibeyclient.ui.Icons.SEARCH, x + w - 8 - 13, y + 11, box.isFocused() ? Theme.BRAND : Theme.DIM);
-        g.hline(x, y + SEARCH_H, w, Theme.LINE);
+        if (query.isEmpty() && !box.isFocused()) g.text(g.clip(Lang.tr("core.menu.search"), sw - 30), sx + 6, y + 12, Theme.DIM);
+        Icons.draw(g, Icons.SEARCH, sx + sw - 14, y + 12, box.isFocused() ? Theme.BRAND : Theme.DIM);
 
-        int cy = listScroll.begin(ui, x, y + SEARCH_H + 1, w, h - SEARCH_H - 1);
-        cy += 6;
-        String q = query.trim().toLowerCase(java.util.Locale.ROOT);
-        boolean any = false;
-        if (matches(q, Lang.tr("core.menu.global"), GlobalSettings.GROUP)) {
-            cy = entry(ui, GLOBAL, null, x, cy, w);
-            cy += 8;
-            any = true;
-        }
-        boolean caption = false;
-        List<VibeyModule> modules = ModuleManager.get().all();
-        for (VibeyModule m : modules) {
-            if (!m.visible() || !matches(q, m.displayName() + " " + Lang.tr(m.descriptionKey()), m.settings())) continue;
-            if (!caption) {
-                Widgets.caption(g, Lang.tr("core.menu.modules"), x + Theme.PAD, cy);
-                cy += 13;
-                caption = true;
+        int top = y + BAR_H;
+        int cy = gridScroll.begin(ui, x, top, w, h - BAR_H) + 4;
+        String q = query.trim().toLowerCase(Locale.ROOT);
+        int cols = Math.max(1, (sw + GAP) / (TILE_MIN_W + GAP));
+        int tileW = (sw - GAP * (cols - 1)) / cols;
+
+        List<VibeyModule> main = new ArrayList<>();
+        List<VibeyModule> creators = new ArrayList<>();
+        Map<VibeyModule, String> hits = new HashMap<>();
+        for (VibeyModule m : ModuleManager.get().all()) {
+            if (!m.visible()) continue;
+            if (!q.isEmpty()) {
+                String text = (m.displayName() + " " + Lang.tr(m.descriptionKey())).toLowerCase(Locale.ROOT);
+                String setting = text.contains(q) ? null : SettingsView.matchingSetting(m.settings(), q);
+                if (!text.contains(q) && setting == null) continue;
+                if (setting != null) hits.put(m, setting);
+                main.add(m);
+            } else if (m.category() == ModuleCategory.CREATOR) {
+                creators.add(m);
+            } else {
+                main.add(m);
             }
-            cy = entry(ui, m, m, x, cy, w);
-            any = true;
         }
-        if (!any) {
-            g.text(g.clip(Lang.tr("core.menu.noResults"), w - Theme.PAD * 2), x + Theme.PAD, cy + 4, Theme.DIM);
-            cy += 20;
-        }
-        cy += 6;
-        listScroll.end(ui, cy);
-    }
+        String generalHit = q.isEmpty() ? null : SettingsView.matchingSetting(GlobalSettings.GROUP, q);
+        if (generalHit == null && !q.isEmpty() && Lang.tr("core.tab.general").toLowerCase(Locale.ROOT).contains(q)) generalHit = "";
 
-    /** Search: name/description or any setting label contains the query. */
-    private static boolean matches(String q, String text, dev.henny.vibeyclient.api.setting.SettingsGroup settings) {
-        if (q.isEmpty() || text.toLowerCase(java.util.Locale.ROOT).contains(q)) return true;
-        for (dev.henny.vibeyclient.api.setting.Setting<?, ?> s : settings.all()) {
-            if (s.isVisible() && Lang.tr(s.nameKey()).toLowerCase(java.util.Locale.ROOT).contains(q)) return true;
+        int i = 0;
+        for (VibeyModule m : main) {
+            int tx = sx + (i % cols) * (tileW + GAP);
+            int ty = cy + (i / cols) * (TILE_H + GAP);
+            tile(ui, m, tx, ty, tileW, hits.get(m));
+            i++;
         }
-        return false;
+        if (generalHit != null) {
+            int tx = sx + (i % cols) * (tileW + GAP);
+            int ty = cy + (i / cols) * (TILE_H + GAP);
+            generalTile(ui, tx, ty, tileW, generalHit);
+            i++;
+        }
+        cy += ((i + cols - 1) / cols) * (TILE_H + GAP);
+        if (i == 0) {
+            Widgets.card(g, sx, cy, sw, 34);
+            g.textCenter(Lang.tr("core.menu.noResults"), sx + sw / 2, cy + 13, Theme.DIM);
+            cy += 34 + GAP;
+        }
+
+        if (!creators.isEmpty()) {
+            cy += 4;
+            String hint = Lang.tr("core.menu.creatorsHint");
+            if (Widgets.disclosure(ui, CREATORS, sx, cy, sw, 22, Lang.tr("core.menu.creators"), hint, creatorsOpen)) {
+                creatorsOpen = !creatorsOpen;
+            }
+            cy += 22 + GAP;
+            if (creatorsOpen) {
+                int j = 0;
+                for (VibeyModule m : creators) {
+                    tile(ui, m, sx + (j % cols) * (tileW + GAP), cy + (j / cols) * (TILE_H + GAP), tileW, null);
+                    j++;
+                }
+                cy += ((j + cols - 1) / cols) * (TILE_H + GAP);
+            }
+        }
+        gridScroll.end(ui, cy + 6);
     }
 
     /** Built-in icon for the bundled modules (a module's own {@code icon()} texture wins). */
-    private static String iconFor(VibeyModule m) {
+    public static String iconFor(VibeyModule m) {
         return switch (m.id()) {
-            case "social" -> dev.henny.vibeyclient.ui.Icons.FRIENDS;
-            case "cosmetics" -> dev.henny.vibeyclient.ui.Icons.SHIRT;
-            case "emotes" -> dev.henny.vibeyclient.ui.Icons.WAVE;
-            case "multiplayer" -> dev.henny.vibeyclient.ui.Icons.HOST;
-            case "lyrics" -> dev.henny.vibeyclient.ui.Icons.NOTE;
-            case "devlink" -> dev.henny.vibeyclient.ui.Icons.CUBE;
+            case "social" -> Icons.FRIENDS;
+            case "cosmetics" -> Icons.SHIRT;
+            case "emotes" -> Icons.WAVE;
+            case "multiplayer" -> Icons.HOST;
+            case "lyrics", "media" -> Icons.NOTE;
+            case "devlink" -> Icons.CUBE;
+            case "nametags" -> Icons.SEAL;
             default -> null;
         };
     }
 
-    private int entry(Ui ui, Object key, VibeyModule m, int x, int y, int w) {
-        Gfx g = ui.g;
-        int h = Theme.ROW;
-        boolean sel = selected == key;
-        boolean runnable = m == null || m.status().loadable();
-        int tx = x + w - Theme.PAD - Widgets.TOGGLE_W;
-        int ty = y + (h - Widgets.TOGGLE_H) / 2;
-        // background first, then the switch (registered before the row, so its click is not taken by the row)
-        float hov = ui.anim(key, 0f).to(sel ? 1f : ui.hover(x, y, w, h) ? 0.6f : 0f);
-        float s = ui.anim(key, 5, sel ? 1f : 0f).to(sel ? 1f : 0f);
-        if (hov > 0f) g.rect(x, y, w, h, Theme.alpha(Theme.SURFACE3, hov));
-        if (s > 0f) g.rect(x, y + Math.round(h * (1f - s) / 2f), 2, Math.max(1, Math.round(h * s)), Theme.BRAND);
-        if (m != null && runnable && m.canToggle()) {
-            if (Widgets.toggle(ui, m, tx, ty, m.isEnabled(), true)) ModuleManager.get().toggle(m.id());
-        }
-        if (ui.clicked(x, y, w, h)) select(key);
-        if (ui.focusedLast() && !sel) g.rect(x, y, w, h, Theme.alpha(Theme.SURFACE3, 0.6f));
-
-        int ix = x + Theme.PAD;
-        int iy = y + (h - 14) / 2;
-        String name;
-        if (m == null) {
-            iconTile(g, dev.henny.vibeyclient.ui.Icons.GEAR, ix, iy, Theme.MUTED);
-            name = Lang.tr("core.menu.global");
+    /** The module's icon in a square tile of {@code size} px. */
+    public static void moduleIcon(Gfx g, VibeyModule m, int x, int y, int size, boolean active) {
+        int color = active ? m.accentColor() : Theme.DIM;
+        String builtin = iconFor(m);
+        if (m.icon() != null) {
+            int c = m.icon().indexOf(':');
+            g.image(Compat.id(m.icon().substring(0, c), m.icon().substring(c + 1)), x, y, size, size, 16);
+        } else if (builtin != null) {
+            Widgets.iconTile(g, builtin, x, y, size, Math.max(1, (size - 6) / Icons.SIZE), color);
         } else {
-            String builtin = iconFor(m);
-            if (m.icon() != null) g.image(Compat.id(m.icon().substring(0, m.icon().indexOf(':')), m.icon().substring(m.icon().indexOf(':') + 1)), ix, iy, 14, 14, 16);
-            else if (builtin != null) iconTile(g, builtin, ix, iy, runnable ? m.accentColor() : Theme.DIM);
-            else Widgets.monogram(g, m.displayName(), ix, iy, 14, runnable ? m.accentColor() : Theme.DIM);
-            name = m.displayName();
-            ui.tooltip(m, x, y, Math.max(1, (m.canToggle() && runnable ? tx - 6 : x + w) - x), h, Lang.tr(m.descriptionKey()));
+            Widgets.monogram(g, m.displayName(), x, y, size, color);
         }
-        int textRight = m == null || !runnable ? x + w - Theme.PAD : tx - 6;
-        int color = runnable ? (sel ? Theme.TEXT : Theme.mix(Theme.MUTED, Theme.TEXT, hov)) : Theme.DIM;
-        g.text(g.clip(name, textRight - ix - 20), ix + 20, y + 8, color);
-        if (m != null && !runnable) {
-            String tag = m.status() == ModuleManager.Status.CONFLICT ? "MOD" : "—";
-            g.textRight(tag, x + w - Theme.PAD, y + 8, Theme.WARN);
+    }
+
+    private void tile(Ui ui, VibeyModule m, int x, int y, int w, String settingHit) {
+        Gfx g = ui.g;
+        if (!ui.visibleY(y, TILE_H)) return;
+        int[] b = TILE_BOUNDS.computeIfAbsent(m.id(), k -> new int[4]);
+        b[0] = x;
+        b[1] = y;
+        b[2] = w;
+        b[3] = TILE_H;
+        boolean runnable = m.status().loadable();
+        boolean on = m.isEnabled();
+        int tgx = x + w - 9 - Widgets.TOGGLE_W, tgy = y + 9;
+        boolean toggleable = runnable && m.canToggle();
+        // the switch first, so its click is not taken by the tile
+        boolean toggled = toggleable && ui.clicked(tgx - 3, tgy - 3, Widgets.TOGGLE_W + 6, Widgets.TOGGLE_H + 6);
+        boolean toggleHot = toggleable && (ui.focusedLast() || ui.hover(tgx - 3, tgy - 3, Widgets.TOGGLE_W + 6, Widgets.TOGGLE_H + 6));
+        boolean clicked = ui.clicked(x, y, w, TILE_H);
+        boolean hot = ui.focusedLast() || ui.hover(x, y, w, TILE_H);
+        float hov = ui.anim(m, 0f).to(hot ? 1f : 0f);
+        g.rect(x, y, w, TILE_H, Theme.mix(Theme.SURFACE2, Theme.SURFACE3, hov));
+        g.outline(x, y, w, TILE_H, Theme.mix(Theme.LINE, Theme.alpha(Theme.BRAND, 0.7f), hov));
+        if (on) g.rect(x, y, 2, TILE_H, m.accentColor());
+        if (toggleable) Widgets.drawToggle(ui, m, tgx, tgy, on, true, toggleHot);
+        moduleIcon(g, m, x + 10, y + 10, 24, runnable);
+        int tx = x + 42;
+        int right = toggleable ? tgx - 6 : x + w - 9;
+        g.bold(g.clip(m.displayName(), right - tx), tx, y + 11, runnable ? Theme.TEXT : Theme.MUTED);
+        int dw = x + w - 10 - tx;
+        if (!runnable) {
+            String tag = Lang.tr(m.status() == ModuleManager.Status.CONFLICT ? "core.module.providedShort" : "core.module.status.off");
+            g.text(g.clip(tag, dw), tx, y + 25, Theme.WARN);
+            ui.tooltip(m, x, y, w, TILE_H, m.statusReason());
+        } else if (settingHit != null) {
+            g.text(g.clip("› " + settingHit, dw), tx, y + 25, Theme.BRAND2);
+        } else {
+            List<String> lines = Ui.wrap(g, Lang.tr(m.descriptionKey()), dw);
+            int ly = y + 25;
+            for (int k = 0; k < Math.min(2, lines.size()); k++) {
+                String l = k == 1 && lines.size() > 2 ? g.clip(lines.get(1) + " …", dw) : lines.get(k);
+                g.text(g.clip(l, dw), tx, ly, Theme.mix(Theme.DIM, Theme.MUTED, hov));
+                ly += 10;
+            }
+            if (lines.size() > 2) ui.tooltip(m, x, y, w, TILE_H, Lang.tr(m.descriptionKey()));
         }
-        return y + h;
+        if (toggled) ModuleManager.get().toggle(m.id());
+        else if (clicked) open(m);
     }
 
-    private static void iconTile(Gfx g, String icon, int x, int y, int color) {
-        g.rect(x, y, 14, 14, Theme.alpha(color, 0.16f));
-        g.outline(x, y, 14, 14, Theme.alpha(color, 0.55f));
-        dev.henny.vibeyclient.ui.Icons.draw(g, icon, x + 3, y + 3, 1, color);
+    /** Search result that leads to the General tab. */
+    private void generalTile(Ui ui, int x, int y, int w, String hit) {
+        Gfx g = ui.g;
+        boolean clicked = ui.clicked(x, y, w, TILE_H);
+        boolean hot = ui.focusedLast() || ui.hover(x, y, w, TILE_H);
+        float hov = ui.anim(GENERAL_TILE, 0f).to(hot ? 1f : 0f);
+        g.rect(x, y, w, TILE_H, Theme.mix(Theme.SURFACE2, Theme.SURFACE3, hov));
+        g.outline(x, y, w, TILE_H, Theme.mix(Theme.LINE, Theme.alpha(Theme.BRAND, 0.7f), hov));
+        Widgets.iconTile(g, Icons.GEAR, x + 10, y + 10, 24, 2, Theme.MUTED);
+        int tx = x + 42;
+        g.bold(g.clip(Lang.tr("core.tab.general"), x + w - 10 - tx), tx, y + 11, Theme.TEXT);
+        String line = hit.isEmpty() ? Lang.tr("core.general.description") : "› " + hit;
+        g.text(g.clip(line, x + w - 10 - tx), tx, y + 25, hit.isEmpty() ? Theme.DIM : Theme.BRAND2);
+        if (clicked && ClientCompat.screen() instanceof VibeyScreen s) s.showTab(VibeyTabs.GENERAL);
     }
 
-    /** Type-to-search: the first printable key focuses the search field. */
-    @Override
-    public boolean typed(int codepoint) {
-        if (searchBox == null || codepoint <= 32 || Character.isISOControl(codepoint)) return false;
-        net.minecraft.client.gui.screens.Screen screen = dev.henny.vibeyclient.client.ClientCompat.screen();
-        if (screen != null) screen.setFocused(searchBox);
-        searchBox.setFocused(true);
-        searchBox.insertText(new String(Character.toChars(codepoint)));
-        return true;
-    }
+    // ============================================================================================ module page
 
-    @Override
-    public boolean key(int keyCode) {
-        // Esc in a non-empty search clears it first
-        if (keyCode == dev.henny.vibeyclient.client.Keys.ESCAPE && !query.isEmpty()) {
-            query = "";
-            listScroll.reset();
-            return true;
-        }
-        return false;
-    }
-
-    private void select(Object key) {
-        if (selected == key) return;
-        Panel old = selected instanceof VibeyModule m ? customPanels.get(m) : null;
+    private void open(VibeyModule m) {
+        if (page == m) return;
+        Panel old = page == null ? null : customPanels.get(page);
         if (old != null) old.onHide();
-        selected = key;
-        lastSelected = key;
-        detailScroll.reset();
-        if (key instanceof VibeyModule m) {
+        page = m;
+        lastPage = m;
+        pageScroll.reset();
+        if (ui != null) ui.clearFocus();
+        if (m != null) {
             Panel p = panelOf(m);
             if (p != null) p.onShow();
         }
@@ -206,73 +270,145 @@ public final class ModulesPanel implements Panel {
         return customPanels.get(m);
     }
 
-    // ============================================================================================ right side
-
-    private void drawDetail(Ui ui, int x, int y, int w, int h) {
+    private void drawPage(Ui ui, VibeyModule m, int x, int y, int w, int h) {
         Gfx g = ui.g;
-        if (selected instanceof VibeyModule m && !m.visible()) select(GLOBAL);
         int pad = Theme.PAD + 4;
-        int cx = x + pad;
-        int cw = w - pad * 2;
-        if (selected instanceof VibeyModule m) {
-            Panel custom = panelOf(m);
-            if (custom != null && m.status().loadable()) {
-                custom.draw(ui, x, y, w, h);
-                return;
-            }
-            int cy = detailScroll.begin(ui, x, y, w, h) + pad;
-            cy = header(ui, m, cx, cy, cw);
-            cy = SettingsView.draw(ui, m.settings(), cx, cy, cw, m.status().loadable()) + pad;
-            detailScroll.end(ui, cy);
-        } else {
-            int cy = detailScroll.begin(ui, x, y, w, h) + pad;
-            g.bold(Lang.tr("core.menu.global"), cx, cy, Theme.TEXT);
-            cy += 13;
-            g.text(g.clip(Lang.tr("core.menu.globalDescription"), cw), cx, cy, Theme.MUTED);
-            cy += 18;
-            cy = SettingsView.draw(ui, GlobalSettings.GROUP, cx, cy, cw, true);
-            cy += 12;
-            g.text(Vibey.NAME + " " + dev.henny.vibeyclient.BuildInfo.VERSION + " · " + Vibey.platform().loader() + " · Minecraft "
-                    + dev.henny.vibeyclient.BuildInfo.MINECRAFT_LABEL, cx, cy, Theme.DIM);
-            cy += 12 + pad;
-            detailScroll.end(ui, cy);
+        // toolbar: back, breadcrumb, switch
+        g.rect(x, y, w, BAR_H, Theme.PANEL);
+        g.hline(x, y + BAR_H - 1, w, Theme.LINE);
+        String back = Lang.tr("core.tab.modules");
+        int bw = g.width(back) + 24;
+        boolean bc = ui.clicked(x + pad - 4, y + 5, bw, 20);
+        boolean bh = ui.focusedLast() || ui.hover(x + pad - 4, y + 5, bw, 20);
+        if (bh) g.rect(x + pad - 4, y + 5, bw, 20, Theme.SURFACE3);
+        Widgets.arrow(g, x + pad + 2, y + 12, false, bh ? Theme.TEXT : Theme.MUTED);
+        g.text(back, x + pad + 10, y + 11, bh ? Theme.TEXT : Theme.MUTED);
+        int crumbX = x + pad - 4 + bw + 6;
+        g.text("/", crumbX, y + 11, Theme.DIM);
+        boolean runnable = m.status().loadable();
+        boolean toggle = runnable && m.canToggle();
+        String state = Lang.tr(m.isEnabled() ? "core.module.status.enabled" : "core.module.status.disabled");
+        int tgx = x + w - pad - Widgets.TOGGLE_W;
+        int stateW = toggle ? g.width(state) + 8 : 0;
+        g.bold(g.clip(m.displayName(), tgx - stateW - crumbX - 20), crumbX + 10, y + 11, Theme.TEXT);
+        if (toggle) {
+            g.textRight(state, tgx - 8, y + 11, m.isEnabled() ? Theme.OK : Theme.DIM);
+            if (Widgets.toggle(ui, PAGE_TOGGLE, tgx, y + 9, m.isEnabled(), true)) ModuleManager.get().toggle(m.id());
         }
+        if (bc) {
+            open(null);
+            return;
+        }
+
+        int top = y + BAR_H;
+        int bodyH = h - BAR_H;
+        Panel custom = panelOf(m);
+        if (custom != null && runnable) {
+            custom.draw(ui, x, top, w, bodyH);
+            return;
+        }
+        int cx = x + pad, cw = w - pad * 2;
+        int cy = pageScroll.begin(ui, x, top, w, bodyH) + 12;
+        cy = intro(ui, m, cx, cy, cw);
+        cy = SettingsView.draw(ui, m.settings(), cx, cy, cw, runnable && m.isEnabled());
+        pageScroll.end(ui, cy + pad);
     }
 
-    private int header(Ui ui, VibeyModule m, int x, int y, int w) {
+    /**
+     * The intro of a module page: big icon, description, the module's buttons and why it cannot run. Public for
+     * custom module pages that want the same look.
+     */
+    public static int intro(Ui ui, VibeyModule m, int x, int y, int w) {
         Gfx g = ui.g;
-        String name = m.displayName();
-        g.bold(name, x, y, Theme.TEXT);
-        int chipX = x + g.boldWidth(name) + 8;
-        switch (m.status()) {
-            case ENABLED -> Widgets.chip(g, Lang.tr("core.module.status.enabled"), chipX, y - 2, Theme.OK);
-            case DISABLED -> Widgets.chip(g, Lang.tr("core.module.status.disabled"), chipX, y - 2, Theme.MUTED);
-            default -> Widgets.chip(g, Lang.tr("core.module.status.off"), chipX, y - 2, Theme.WARN);
+        boolean runnable = m.status().loadable();
+        moduleIcon(g, m, x, y, 32, runnable);
+        int tx = x + 44;
+        List<String> lines = Ui.wrap(g, Lang.tr(m.descriptionKey()), w - 44);
+        int ly = y + (lines.size() == 1 ? 12 : lines.size() == 2 ? 6 : 1);
+        for (int k = 0; k < Math.min(3, lines.size()); k++) {
+            g.text(lines.get(k), tx, ly, Theme.MUTED);
+            ly += 10;
         }
-        if (m.status().loadable() && m.canToggle()) {
-            String label = Lang.tr(m.isEnabled() ? "core.module.disable" : "core.module.enable");
-            int bw = Math.max(64, g.width(label) + 16);
-            if (Widgets.button(ui, name, x + w - bw, y - 4, bw, 16, label,
-                    m.isEnabled() ? Widgets.Style.SECONDARY : Widgets.Style.PRIMARY)) {
-                ModuleManager.get().toggle(m.id());
+        y += Math.max(32, ly - y) + 10;
+        List<ActionSetting> actions = SettingsView.actions(m.settings());
+        if (!actions.isEmpty() && runnable) {
+            int bx = x;
+            boolean first = true;
+            for (ActionSetting a : actions) {
+                String label = SettingsView.actionLabel(a);
+                int bw = g.width(label) + 20;
+                if (bx + bw > x + w && bx > x) {
+                    bx = x;
+                    y += 20;
+                }
+                boolean usable = m.isEnabled();
+                Widgets.Style style = !usable ? Widgets.Style.DISABLED : first ? Widgets.Style.PRIMARY : Widgets.Style.SECONDARY;
+                if (Widgets.button(ui, a, bx, y, bw, 16, label, style)) a.run();
+                if (!usable) ui.tooltip(a, bx, y, bw, 16, Lang.tr("core.module.turnOnFirst"));
+                bx += bw + 6;
+                first = false;
             }
+            y += 16 + 12;
         }
-        y += 14;
-        g.text(g.clip(Lang.tr(m.descriptionKey()), w), x, y, Theme.MUTED);
-        y += 14;
         String reason = m.statusReason();
         if (reason != null) {
-            g.rect(x, y, w, 20, Theme.alpha(Theme.WARN, 0.10f));
-            g.vline(x, y, 20, Theme.WARN);
-            g.text(g.clip(reason, w - 12), x + 8, y + 6, Theme.WARN);
-            y += 26;
+            List<String> rl = Ui.wrap(g, reason, w - 16);
+            int rh = rl.size() * 10 + 10;
+            g.rect(x, y, w, rh, Theme.alpha(Theme.WARN, 0.10f));
+            g.vline(x, y, rh, Theme.WARN);
+            int ry = y + 6;
+            for (String l : rl) {
+                g.text(l, x + 8, ry, Theme.WARN);
+                ry += 10;
+            }
+            y += rh + 10;
         }
-        return y + 6;
+        return y;
+    }
+
+    // ============================================================================================ keys
+
+    /** Type-to-search: the first printable key focuses the search field (on a module page: back to the grid). */
+    @Override
+    public boolean typed(int codepoint) {
+        if (codepoint <= 32 || Character.isISOControl(codepoint)) return false;
+        if (page != null) open(null);
+        if (searchBox == null) return false;
+        net.minecraft.client.gui.screens.Screen screen = ClientCompat.screen();
+        if (screen != null) screen.setFocused(searchBox);
+        searchBox.setFocused(true);
+        searchBox.insertText(new String(Character.toChars(codepoint)));
+        return true;
+    }
+
+    @Override
+    public boolean key(int keyCode) {
+        if (keyCode != Keys.ESCAPE) return false;
+        // Esc: module page → grid, then clear the search, then the menu closes
+        if (page != null) {
+            open(null);
+            return true;
+        }
+        if (!query.isEmpty()) {
+            query = "";
+            if (searchBox != null) searchBox.setValue("");
+            gridScroll.reset();
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void onShow() {
+        if (page != null) {
+            Panel p = panelOf(page);
+            if (p != null) p.onShow();
+        }
     }
 
     @Override
     public void onHide() {
-        Panel p = selected instanceof VibeyModule m ? customPanels.get(m) : null;
+        Panel p = page == null ? null : customPanels.get(page);
         if (p != null) p.onHide();
     }
 }

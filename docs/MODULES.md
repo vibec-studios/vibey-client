@@ -67,7 +67,9 @@ logged (first 3 per module), they do not crash the game.
 
 Other knobs on `VibeyModule`: `nameKey()`/`descriptionKey()` (default `<id>.name`, `<id>.description`),
 `icon()` (texture id or null for a monogram tile), `accentColor()`, `visible()` (social hides itself while online
-features are off), `canToggle()`, `createSettingsPanel()` (custom page instead of the generated one).
+features are off), `canToggle()`, `createSettingsPanel()` (custom page body instead of the generated one). The
+category picks the place in the menu: `ModuleCategory.CREATOR` modules sit in the collapsed *For creators* area
+under the module grid.
 
 Look modules up with `ModuleManager.get().get(EmotesModule.class)` or `.get("emotes")`, check `isEnabled()`.
 
@@ -84,20 +86,35 @@ thread) and rendered automatically in the Vibey menu.
 | `choice(key, Enum.DEFAULT)` | `EnumSetting<E>` | ‹ value › cycler |
 | `string(key, def[, maxLength])` | `StringSetting` | text field |
 | `color(key, argb)` | `ColorSetting` (`.presets(...)`) | swatches |
-| `keybind(key, Keys.X or Keys.UNBOUND)` | `KeybindSetting` (`.onPress(...)`, `isDown()`) | rebind button |
-| `action(key, runnable)` | `ActionSetting` | button |
+| `keybind(key, Keys.X or Keys.UNBOUND)` | `KeybindSetting` (`.onPress(...)`, `isDown()`) | key cap in the "Keys" card |
+| `action(key, runnable)` | `ActionSetting` | button at the top of the module page (advanced: a row) |
 
 Every setting: `get()`, `set(v)` (clamped, listeners fire, save scheduled), `reset()`, `.onChange(v -> ...)`,
-`.advanced()` (shown under "Advanced"), `.visibleWhen(() -> ...)`.
+`.section("key")` (titled card), `.advanced()`, `.visibleWhen(() -> ...)`.
+
+**The module page** (click on the module's tile in the Vibey menu) is generated from the settings, so write them for
+normal players:
+
+- Settings without a section come first; `.section("show")` groups settings into a card titled `section.show`
+  (sections appear in the order of their first setting). Three or more switches in a row without a description are
+  laid out in two columns.
+- Keybinds go into a "Keys" card at the end; non-advanced `action(...)`s become buttons under the module's
+  description (the first one is the primary button, e.g. *Open wardrobe*, *Host my world…*).
+- `.advanced()` is for **technical** things only (addresses, ports, tokens, debug switches, protocol details): they
+  sit in the collapsed *Advanced · for creators* area at the bottom. A normal player should never need it.
+- Plain language: say what the player gets ("Show other players' cosmetics"), no jargon in labels or descriptions,
+  descriptions one short sentence. Every string in English and German.
 
 Labels come from your i18n file: `setting.<key>` (label), `setting.<key>.desc` (optional second line),
-`setting.<key>.<enum value lower case>` for enum values, `setting.<key>.button` for action buttons.
+`setting.<key>.<enum value lower case>` for enum values, `setting.<key>.button` for action buttons,
+`section.<key>` for section titles (`checkI18n` checks all of them).
 
 Free-form persistent data (caches, lists): `settings().data()` is a `JsonObject` stored under `"_data"`; call
 `settings().markDirty()` after changing it.
 
-Global settings (`GlobalSettings`): `language` (auto/de/en), `onlineFeatures` (default on; when off: **no backend
-connection at all**), `animations`, `openMenu` keybind (Right Shift), `backendUrl` (advanced; use
+Global settings (`GlobalSettings`, the *General* tab): `language` (auto/de/en), `uiScale`, `animations`,
+`onlineFeatures` (default on; when off: **no backend connection at all**), `openMenu` keybind (Right Shift),
+`backendUrl` (advanced; use
 `GlobalSettings.backend()`). Listen to `VibeyEvents.OnlineFeaturesChanged`.
 
 ## Keybinds
@@ -204,8 +221,8 @@ only for keybind names/categories and mod menu text.
 
 ## UI
 
-Design rules, title screen / pause menu entries (`MenuEntries`), the player preview service (`MenuPreview`),
-icons and the widget cheat sheet: **[docs/UI.md](UI.md)**.
+Design rules, title screen buttons / pause menu entries (`MenuEntries`), the module page, the player preview
+service (`MenuPreview`), icons and the widget cheat sheet: **[docs/UI.md](UI.md)**.
 
 - `Gfx` wraps GuiGraphics / GuiGraphicsExtractor (26.x): `rect`, `outline`, `text`, `bold`, `textScaled`,
   `image`, `scissor`, `push/translate/scale/pop`, `widget`. Use it for HUD and screens – never the vanilla drawing
@@ -222,8 +239,10 @@ icons and the widget cheat sheet: **[docs/UI.md](UI.md)**.
   (multiplayer) and the lyrics screens; texts passed to `row` are keys relative to the module's i18n prefix.
 - `VibeyScreen` is the menu (Right Shift, pause menu button). Add a top-level tab from `onLoad`:
   `VibeyTabs.register(new VibeyTabs.Tab("friends", "social.tab.friends", 10, FriendsPanel::new, this::isEnabled))`.
-  A `Panel` draws into the content area with the `Ui` context. A module can replace its generated settings page with
-  `createSettingsPanel()` (use `SettingsView.draw(ui, settings(), ...)` inside it to keep the generated rows).
+  A `Panel` draws into the content area with the `Ui` context. A module can replace the body of its generated
+  settings page with `createSettingsPanel()`: the menu still draws the toolbar (back, name, on/off switch) above it;
+  start with `ModulesPanel.intro(ui, module, x, y, w)` for the standard icon + description + buttons and use
+  `SettingsView.draw(ui, settings(), ...)` to keep the generated cards.
 
 ## Mixins
 

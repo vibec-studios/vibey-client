@@ -3,8 +3,8 @@
   "description": "Live link to Blockbench for creating cosmetics and emotes.",
   "setting": {
     "creatorMode": "Creator mode",
-    "creatorMode.desc": "Lets the Blockbench plugin push models into the game.",
-    "port": "Port",
+    "creatorMode.desc": "Lets the Blockbench plugin send models into the game.",
+    "port": "Live link port",
     "port.desc": "Local port of the live link (only reachable from this computer)."
   },
   "panel": {

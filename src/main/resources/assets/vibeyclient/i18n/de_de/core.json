@@ -6,15 +6,15 @@
   },
   "tab": {
     "modules": "Module",
-    "about": "Über"
+    "about": "Über",
+    "general": "Allgemein"
   },
   "menu": {
-    "modules": "Module",
-    "global": "Allgemein",
-    "globalDescription": "Einstellungen für den ganzen Client.",
-    "search": "Suchen",
+    "search": "Module und Einstellungen suchen",
     "noResults": "Nichts gefunden.",
-    "close": "Schließen (Esc)"
+    "close": "Schließen (Esc)",
+    "creators": "Für Creator",
+    "creatorsHint": "Werkzeuge zum Bauen von Cosmetics und Emotes"
   },
   "category": {
     "core": "Kern",
@@ -35,56 +35,46 @@
       "disabled": "Aus",
       "off": "Nicht verfügbar"
     },
-    "enable": "Aktivieren",
-    "disable": "Deaktivieren"
+    "providedShort": "Schon als eigene Mod installiert",
+    "turnOnFirst": "Schalte das Modul zuerst ein."
   },
   "settings": {
-    "advanced": "Erweitert",
-    "none": "Noch keine Einstellungen.",
-    "pressKey": "Taste drücken",
-    "run": "Ausführen",
+    "advanced": "Erweitert · für Creator",
+    "none": "Hier gibt es nichts einzustellen.",
+    "pressKey": "Taste drücken…",
     "unbound": "Nicht belegt",
     "conflict": "Auch belegt von: {0}",
-    "keyHelp": "Klicken, dann eine Taste drücken. Rücktaste entfernt, Esc bricht ab."
+    "keyHelp": "Klicken, dann eine Taste drücken. Rücktaste entfernt, Esc bricht ab.",
+    "advancedHint": "Technische Einstellungen",
+    "advancedHide": "Ausblenden",
+    "keys": "Tasten"
   },
   "setting": {
     "language": "Sprache",
-    "language.desc": "Sprache der Vibey-Menüs.",
+    "language.desc": "Für die Vibey-Menüs und Meldungen.",
     "language.auto": "Spielsprache",
     "language.german": "Deutsch",
     "language.english": "English",
     "onlineFeatures": "Online-Funktionen",
-    "onlineFeatures.desc": "Freunde, Chat und synchronisierte Cosmetics über das Vibe-Backend.",
+    "onlineFeatures.desc": "Freunde, Chat und Cosmetics, die andere sehen. Aus: Vibey verbindet sich mit nichts.",
     "animations": "Animationen",
-    "animations.desc": "Kurze Übergänge in den Menüs.",
+    "animations.desc": "Weiche Übergänge in den Vibey-Menüs.",
     "open_menu": "Vibey-Menü öffnen",
-    "backendUrl": "Backend-URL",
-    "backendUrl.desc": "Nur für die Entwicklung ändern.",
-    "resetBackend": "Backend-URL zurücksetzen",
+    "backendUrl": "Vibe-Serveradresse",
+    "backendUrl.desc": "Nur ändern, wenn du einen eigenen Vibe-Server betreibst.",
+    "resetBackend": "Standard-Serveradresse",
     "resetBackend.button": "Zurücksetzen",
-    "vibeyMainMenu": "Vibey-Hauptmenü",
-    "vibeyMainMenu.desc": "Ersetzt den Titelbildschirm. Aus: der normale mit einem kleinen Vibey-Knopf.",
-    "uiScale": "UI-Größe",
-    "uiScale.desc": "Größe der Vibey-Menüs.",
-    "uiScale.game": "Wie im Spiel",
+    "uiScale": "Menügröße",
+    "uiScale.desc": "Wie groß die Vibey-Menüs sind. Auto = wie im Spiel.",
+    "uiScale.game": "Auto",
     "uiScale.x2": "2×",
     "uiScale.x3": "3×",
     "uiScale.x4": "4×"
   },
   "title": {
-    "singleplayer": "Einzelspieler",
-    "multiplayer": "Mehrspieler",
     "wardrobe": "Garderobe",
     "friends": "Freunde",
-    "vibey": "Vibey-Einstellungen",
-    "options": "Optionen",
-    "mods": "Mods",
-    "quit": "Spiel beenden",
-    "accessibility": "Barrierefreiheit",
-    "language": "Sprache",
-    "classic": "Klassisches Menü (Vanilla-Titelbildschirm)",
-    "backToVibey": "Vibey-Menü",
-    "news": "Neuigkeiten"
+    "vibey": "Vibey-Menü"
   },
   "status": {
     "off": "Online-Funktionen aus",
@@ -132,9 +122,9 @@
     },
     "keys": {
       "title": "So findest du dich zurecht",
-      "menu": "Öffnet das Vibey-Menü: Module, Einstellungen, Garderobe.",
+      "menu": "Öffnet das Vibey-Menü: Module und Einstellungen.",
       "emote": "Öffnet das Emote-Rad.",
-      "pause": "Auch im Pausemenü gibt es eine Vibey-Leiste.",
+      "pause": "Im Pausemenü gibt es eine Vibey-Leiste, im Hauptmenü kleine Vibey-Knöpfe oben rechts.",
       "later": "Tasten änderst du im Vibey-Menü, diese Begrüßung findest du wieder unter Über."
     }
   },
@@ -151,5 +141,22 @@
     "privacyOff": "Aus: Vibey verbindet sich mit nichts.",
     "licenses": "Lizenzen",
     "mojang": "Kein offizielles Minecraft-Produkt. Nicht von Mojang oder Microsoft genehmigt oder mit ihnen verbunden."
+  },
+  "general": {
+    "description": "Sprache, Aussehen und Online-Funktionen für den ganzen Client.",
+    "offlineHint": "Online-Funktionen sind aus: Vibey verbindet sich mit nichts.",
+    "info": "Technische Infos",
+    "version": "Version",
+    "loader": "Spiel",
+    "server": "Vibe-Server",
+    "connection": "Verbindung",
+    "protocol": "Server-Kanal-Protokoll",
+    "config": "Einstellungsordner",
+    "copy": "Kopieren",
+    "copied": "Kopiert!"
+  },
+  "section": {
+    "look": "Sprache & Aussehen",
+    "online": "Online"
   }
 }

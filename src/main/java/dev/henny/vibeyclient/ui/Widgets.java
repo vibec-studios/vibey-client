@@ -63,17 +63,22 @@ public final class Widgets {
 
     /** On/off switch, top left at x, y. True when clicked (the caller flips the value). */
     public static boolean toggle(Ui ui, Object key, int x, int y, boolean on, boolean enabled) {
-        Gfx g = ui.g;
         boolean clicked = enabled && ui.clicked(x - 3, y - 3, TOGGLE_W + 6, TOGGLE_H + 6);
+        boolean hov = enabled && (ui.focusedLast() || ui.hover(x - 3, y - 3, TOGGLE_W + 6, TOGGLE_H + 6));
+        drawToggle(ui, key, x, y, on, enabled, hov);
+        return clicked;
+    }
+
+    /** Only draws the switch (for rows that are clickable as a whole); {@code hov} = the row is hovered/focused. */
+    public static void drawToggle(Ui ui, Object key, int x, int y, boolean on, boolean enabled, boolean hov) {
+        Gfx g = ui.g;
         float t = ui.anim(key, 2, on ? 1f : 0f).to(on ? 1f : 0f);
-        boolean hov = enabled && ui.hover(x - 3, y - 3, TOGGLE_W + 6, TOGGLE_H + 6);
         int track = enabled ? Theme.mix(hov ? Theme.SURFACE3 : Theme.SURFACE2, hov ? Theme.BRAND_HOVER : Theme.BRAND, t) : Theme.SURFACE2;
         g.rect(x, y, TOGGLE_W, TOGGLE_H, track);
         g.outline(x, y, TOGGLE_W, TOGGLE_H, enabled ? Theme.mix(Theme.LINE2, 0x00FFFFFF, t) : Theme.LINE);
         int knob = TOGGLE_H - 6;
         int kx = x + 3 + Math.round(t * (TOGGLE_W - knob - 6));
         g.rect(kx, y + 3, knob, knob, enabled ? Theme.mix(Theme.MUTED, 0xFFFFFFFF, t) : Theme.DIM);
-        return clicked;
     }
 
     // ============================================================================================ slider
@@ -184,6 +189,107 @@ public final class Widgets {
         g.outline(x, y, size, size, Theme.alpha(color, 0.6f));
         String l = name.isEmpty() ? "?" : name.substring(0, 1).toUpperCase(java.util.Locale.ROOT);
         g.textCenter(l, x + size / 2 + 1, y + (size - 8) / 2 + 1, color);
+    }
+
+    /** Square tile with an {@link Icons} icon drawn at {@code cell}× (size = 9 × cell + padding). */
+    public static void iconTile(Gfx g, String icon, int x, int y, int size, int cell, int color) {
+        g.rect(x, y, size, size, Theme.alpha(color, 0.16f));
+        g.outline(x, y, size, size, Theme.alpha(color, 0.55f));
+        int s = Icons.SIZE * cell;
+        Icons.draw(g, icon, x + (size - s) / 2, y + (size - s) / 2, cell, color);
+    }
+
+    /** A flat card: section background with a 1 px line. */
+    public static void card(Gfx g, int x, int y, int w, int h) {
+        g.rect(x, y, w, h, Theme.SURFACE2);
+        g.outline(x, y, w, h, Theme.LINE);
+    }
+
+    /**
+     * Collapsible section header ("› Advanced"): a full-width row with a chevron that points right (closed) or down
+     * (open). True when clicked (the caller flips its state).
+     */
+    public static boolean disclosure(Ui ui, Object key, int x, int y, int w, int h, String label, String hint, boolean open) {
+        Gfx g = ui.g;
+        boolean clicked = ui.clicked(x, y, w, h);
+        boolean hot = ui.focusedLast() || ui.hover(x, y, w, h);
+        float hov = ui.anim(key, 1, 0f).to(hot ? 1f : 0f);
+        g.rect(x, y, w, h, Theme.mix(Theme.SURFACE, Theme.SURFACE2, hov));
+        g.outline(x, y, w, h, Theme.mix(Theme.LINE, Theme.LINE2, hov));
+        int color = Theme.mix(Theme.MUTED, Theme.TEXT, hov);
+        int cy = y + (h - 8) / 2;
+        if (open) chevronDown(g, x + 9, cy + 2, color);
+        else arrow(g, x + 10, cy, true, color);
+        g.text(label, x + 22, cy, color);
+        if (hint != null && !hint.isEmpty()) {
+            int lw = g.width(label);
+            g.textRight(g.clip(hint, w - lw - 40), x + w - 9, cy, Theme.DIM);
+        }
+        return clicked;
+    }
+
+    /**
+     * Segmented control (one square segment per option). Returns the clicked index or -1.
+     */
+    public static int segmented(Ui ui, Object key, int x, int y, int w, String[] labels, int selected) {
+        Gfx g = ui.g;
+        int h = 16;
+        int n = labels.length;
+        int result = -1;
+        g.rect(x, y, w, h, Theme.SURFACE);
+        g.outline(x, y, w, h, Theme.LINE2);
+        int sx = x;
+        for (int i = 0; i < n; i++) {
+            int sw = i == n - 1 ? x + w - sx : w / n;
+            boolean sel = i == selected;
+            if (ui.clicked(sx, y, sw, h)) result = i;
+            boolean hot = ui.focusedLast() || ui.hover(sx, y, sw, h);
+            if (sel) g.rect(sx + 1, y + 1, sw - 2, h - 2, Theme.BRAND);
+            else if (hot) g.rect(sx + 1, y + 1, sw - 2, h - 2, Theme.SURFACE3);
+            if (i > 0 && !sel && i - 1 != selected) g.vline(sx, y + 3, h - 6, Theme.LINE);
+            g.textCenter(g.clip(labels[i], sw - 6), sx + sw / 2, y + 4, sel ? 0xFFFFFFFF : hot ? Theme.TEXT : Theme.MUTED);
+            sx += sw;
+        }
+        return result;
+    }
+
+    /** Minimum width a segmented control needs for {@code labels}. */
+    public static int segmentedWidth(Gfx g, String[] labels) {
+        int max = 0;
+        for (String l : labels) max = Math.max(max, g.width(l));
+        return (max + 14) * labels.length;
+    }
+
+    /**
+     * A key cap (keybind button): looks like a keyboard key, brand while waiting for a key. True when clicked.
+     */
+    public static boolean keycap(Ui ui, Object key, int x, int y, int w, String label, boolean waiting, boolean warn) {
+        Gfx g = ui.g;
+        int h = 16;
+        boolean clicked = ui.clicked(x, y, w, h);
+        boolean hot = ui.focusedLast() || ui.hover(x, y, w, h);
+        float hov = ui.anim(key, 1, 0f).to(hot || waiting ? 1f : 0f);
+        int face = waiting ? Theme.alpha(Theme.BRAND, 0.25f) : Theme.mix(Theme.SURFACE3, 0xFF22222B, hov);
+        int edge = waiting ? Theme.BRAND : warn ? Theme.WARN : Theme.mix(Theme.LINE2, 0x55FFFFFF, hov);
+        g.rect(x, y, w, h - 2, face);
+        g.rect(x, y + h - 2, w, 2, waiting ? Theme.BRAND : 0xFF050507);
+        g.outline(x, y, w, h, edge);
+        g.textCenter(g.clip(label, w - 8), x + w / 2, y + 3, waiting ? 0xFFFFFFFF : Theme.mix(Theme.TEXT, 0xFFFFFFFF, hov));
+        return clicked;
+    }
+
+    /** Text with extra spacing between letters (the launcher's mono labels). */
+    public static void spaced(Gfx g, String s, int x, int y, int color, int extra) {
+        for (int i = 0; i < s.length(); i++) {
+            String c = String.valueOf(s.charAt(i));
+            g.text(c, x, y, color);
+            x += g.width(c) + extra;
+        }
+    }
+
+    /** Small "v" chevron, 5 × 3. */
+    public static void chevronDown(Gfx g, int x, int y, int color) {
+        for (int i = 0; i < 3; i++) g.rect(x + i, y + i, 5 - i * 2, 1, color);
     }
 
     public static void cross(Gfx g, int x, int y, int size, int color) {
