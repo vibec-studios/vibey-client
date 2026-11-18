@@ -6,7 +6,10 @@ import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
-import { batches, buildManifest, changelogSection, channelOf, publish, sha256, targets } from './release-manifest.mjs';
+import { execFileSync } from 'node:child_process';
+import { readFileSync, statSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { batches, buildManifest, changelogSection, channelOf, publish, sha256, targets, withHashes } from './release-manifest.mjs';
 
 const dirs = [];
 after(() => dirs.forEach((d) => rmSync(d, { recursive: true, force: true })));
@@ -41,6 +44,7 @@ test('changelog section and channel', () => {
   assert.equal(changelogSection(md, '0.3.0'), '');
   assert.equal(channelOf('0.2.0'), 'release');
   assert.equal(channelOf('0.3.0-beta.1'), 'beta');
+  assert.equal(channelOf('0.3.0', true), 'beta'); // GitHub pre-release without a suffix
 });
 
 test('real repo: every target has exact Minecraft versions', () => {
@@ -79,6 +83,59 @@ test('release body wins over CHANGELOG.md; beta tags', () => {
   const { manifest } = buildManifest({ root: f.root, dist: f.dist, blockbench: f.blockbench, tag: 'refs/tags/v0.3.0-beta.1', changelogText: '  From the release  ' });
   assert.equal(manifest.channel, 'beta');
   assert.equal(manifest.changelog, 'From the release');
+});
+
+test('GitHub pre-release goes to beta', () => {
+  const f = fixture();
+  const { manifest } = buildManifest({ root: f.root, dist: f.dist, blockbench: f.blockbench, tag: 'v0.2.0', prerelease: true });
+  assert.equal(manifest.channel, 'beta');
+  assert.equal(manifest.version, '0.2.0');
+});
+
+test('vibey-manifest.json carries sha256 and size of every asset', () => {
+  const f = fixture();
+  const { manifest, uploads } = buildManifest({ root: f.root, dist: f.dist, blockbench: f.blockbench, tag: 'v0.2.0' });
+  const m = withHashes(manifest, uploads);
+  assert.deepEqual(Object.keys(m), ['version', 'channel', 'changelog', 'files', 'blockbench']);
+  assert.equal(m.files.length, 4);
+  for (const file of m.files) {
+    const path = join(f.dist, file.file);
+    assert.equal(file.sha256, sha256(path));
+    assert.match(file.sha256, /^[0-9a-f]{64}$/);
+    assert.equal(file.size, statSync(path).size);
+    assert.ok(file.loader && file.mcVersions.length && Array.isArray(file.requires));
+  }
+  assert.deepEqual(m.blockbench, { version: '0.2.0', file: 'vibey.js', sha256: sha256(f.blockbench), size: statSync(f.blockbench).size });
+  // `file` = GitHub asset name = the uploaded file's basename
+  assert.deepEqual([...m.files.map((x) => x.file), m.blockbench.file].sort(), uploads.map((u) => u.name).sort());
+  for (const u of uploads) assert.equal(u.name, u.path.split(/[\\/]/).pop());
+  // the plain manifest is unchanged (the manual --publish path adds the backend's staged hashes itself)
+  assert.ok(!('sha256' in manifest.files[0]) && !('size' in manifest.blockbench));
+});
+
+test('CLI writes vibey-manifest.json with --hashes and --prerelease', () => {
+  const f = fixture();
+  const tool = fileURLToPath(new URL('./release-manifest.mjs', import.meta.url));
+  const out = join(f.root, 'build/release/vibey-manifest.json');
+  execFileSync(process.execPath, [tool, '--root', f.root, '--tag', 'v0.2.0', '--hashes', '--prerelease', '--quiet', '--out', out], { stdio: 'pipe' });
+  const m = JSON.parse(readFileSync(out, 'utf8'));
+  assert.equal(m.version, '0.2.0');
+  assert.equal(m.channel, 'beta');
+  assert.equal(m.files.length, 4);
+  for (const x of m.files) assert.equal(x.sha256, sha256(join(f.dist, x.file)));
+  assert.equal(m.blockbench.sha256, sha256(f.blockbench));
+  assert.equal(m.blockbench.size, statSync(f.blockbench).size);
+});
+
+test('refuses a CRLF vibey.js (its hash would differ from the committed file)', () => {
+  const f = fixture();
+  writeFileSync(f.blockbench, "const VERSION = '0.2.0';\r\nmore();\r\n");
+  assert.throws(() => buildManifest({ root: f.root, dist: f.dist, blockbench: f.blockbench }), /CRLF/);
+});
+
+test('real repo: blockbench/vibey.js is checked out with LF', () => {
+  const real = fileURLToPath(new URL('../blockbench/vibey.js', import.meta.url));
+  assert.ok(!readFileSync(real, 'utf8').includes('\r'), 'blockbench/vibey.js has CRLF; .gitattributes wants eol=lf (re-checkout the file)');
 });
 
 test('refuses mismatches and missing files', () => {

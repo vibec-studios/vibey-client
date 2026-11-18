@@ -1,0 +1,10 @@
+# Files whose bytes are hashed or shipped as they are: keep LF on every OS so a local build (Windows, autocrlf)
+# produces the same sha256 as CI and the GitHub release (vibey-manifest.json).
+blockbench/vibey.js text eol=lf
+# .vibey bundles (JSON) and JSON resources go into the jars and the backend catalog by hash.
+*.vibey text eol=lf
+*.json text eol=lf
+# Shell scripts must stay LF to run.
+gradlew text eol=lf
+*.sh text eol=lf
+*.bat text eol=crlf

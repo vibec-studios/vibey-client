@@ -432,5 +432,8 @@ Contract with the backend: `vibe-launcher/docs/VIBE-API-2.md`. Client side:
   one "New cosmetics available" toast per batch (setting). Catalog `creator` → "by <name>" in the wardrobe (the
   all-zero UUID = deleted user, localised).
 - **Release:** `.github/workflows/release.yml` + `tools/release-manifest.mjs` (exact Minecraft versions per jar in
-  `gradle/mc-versions.json`, checked by `./gradlew checkMcVersions`); files are staged in batches below the proxy
-  limit, then the release is created by sha256.
+  `gradle/mc-versions.json`, checked by `./gradlew checkMcVersions`). CI attaches all jars, `vibey.js` and
+  `vibey-manifest.json` (the §2 manifest plus `sha256`/`size` per file, `file` = asset name, uploaded last) to the
+  GitHub release; the backend imports releases from GitHub (CI never calls vibe.henny.dev: Cloudflare's bot
+  protection blocks GitHub runners). Manual fallback: `release-manifest.mjs --publish` from a dev machine (files
+  staged in batches below the proxy limit, then the release by sha256).

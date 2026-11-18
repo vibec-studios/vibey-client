@@ -1,13 +1,15 @@
 name: Release
 
-# Builds every jar + the Blockbench plugin for a version tag, attaches them to the GitHub release and publishes the
-# release to the Vibe backend (vibe-launcher/docs/VIBE-API-2.md §2), where the launcher and website pick it up.
+# Builds every jar + the Blockbench plugin for a version tag and attaches them to the GitHub release together with
+# `vibey-manifest.json` (VIBE-API-2 §2 manifest plus sha256 and size of every file). The Vibe backend imports
+# releases from GitHub itself; this workflow never talks to vibe.henny.dev (Cloudflare blocks GitHub runners there).
+# Manual fallback without GitHub: `node tools/release-manifest.mjs --publish …` from your machine (README "Releases").
 #
 # Cut a release: bump mod_version (gradle.properties) and blockbench/package.json + VERSION in blockbench/vibey.js,
 # add a "## <version>" section to CHANGELOG.md, merge to main, then publish a GitHub release with tag v<version>
-# (the release text becomes the changelog; empty = the CHANGELOG.md section). A tag "v0.3.0-beta.1" (any "-pre"
-# suffix) goes to the beta channel. Pushing a v* tag without a release creates the release.
-# Re-running for a version the backend already has is fine (409 = already published).
+# (the release text becomes the changelog; empty = the CHANGELOG.md section). A GitHub pre-release or a tag with a
+# "-" suffix (v0.3.0-beta.1) goes to the beta channel. Pushing a v* tag without a release creates the release.
+# Re-running replaces the assets (--clobber); vibey-manifest.json is uploaded last, once every file it lists is there.
 
 on:
   release:
@@ -19,13 +21,9 @@ on:
       tag:
         description: "Tag to release (e.g. v0.2.0)"
         required: true
-      publish:
-        description: "Publish to the Vibe backend (off = build, attach and print the manifest only)"
-        type: boolean
-        default: true
 
 concurrency:
-  # one run per tag; a release event and its tag push must not publish twice at the same time
+  # one run per tag; a release event and its tag push must not upload at the same time
   group: release-${{ github.event.release.tag_name || inputs.tag || github.ref_name }}
   cancel-in-progress: false
 
@@ -34,11 +32,10 @@ permissions:
 
 env:
   TAG: ${{ github.event.release.tag_name || inputs.tag || github.ref_name }}
-  PUBLISH_URL: https://vibe.henny.dev/internal/client/v1/releases
 
 jobs:
   release:
-    name: Build, attach and publish
+    name: Build and attach to the GitHub release
     runs-on: ubuntu-latest # free GitHub-hosted runner
     timeout-minutes: 120
     steps:
@@ -79,10 +76,11 @@ jobs:
           npm ci || npm install
           npm test
 
-      - name: Release notes
+      - name: Release notes and channel
         env:
           GH_TOKEN: ${{ github.token }}
           EVENT_BODY: ${{ github.event.release.body }}
+          EVENT_PRERELEASE: ${{ github.event.release.prerelease }}
         run: |
           mkdir -p build/release
           if [ -n "$EVENT_BODY" ]; then
@@ -90,33 +88,33 @@ jobs:
           else
             gh release view "$TAG" --json body --jq .body > build/release/notes.md 2>/dev/null || : > build/release/notes.md
           fi
+          # beta = GitHub pre-release (event or existing release) or a tag with a "-" suffix
+          pre=false
+          [ "$EVENT_PRERELEASE" = "true" ] && pre=true
+          case "$TAG" in *-*) pre=true;; esac
+          [ "$(gh release view "$TAG" --json isPrerelease --jq .isPrerelease 2>/dev/null)" = "true" ] && pre=true
+          echo "PRERELEASE=$pre" >> "$GITHUB_ENV"
 
-      - name: Manifest
-        run: node tools/release-manifest.mjs --tag "$TAG" --changelog-file build/release/notes.md --out build/release/manifest.json
+      - name: Manifest (vibey-manifest.json)
+        run: |
+          # vibey.js must be the committed LF bytes (the manifest hashes it; the tool refuses CRLF)
+          flag=""; [ "$PRERELEASE" = "true" ] && flag="--prerelease"
+          node tools/release-manifest.mjs --tag "$TAG" --changelog-file build/release/notes.md --hashes $flag \
+            --out build/release/vibey-manifest.json
+          node -e "const m=require('./build/release/vibey-manifest.json');console.log(m.version,m.channel,m.files.length+' jars')"
 
-      - name: Attach jars to the GitHub release
+      - name: Attach to the GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          files=(build/dist/*.jar blockbench/vibey.js build/release/manifest.json)
+          files=(build/dist/*.jar blockbench/vibey.js)
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" "${files[@]}" --clobber
           else
             # tag pushed without a release: create it with the changelog section
-            node -e "const m=require('./build/release/manifest.json');require('fs').writeFileSync('build/release/body.md',m.changelog)"
-            pre=""; case "$TAG" in *-*) pre="--prerelease";; esac
-            gh release create "$TAG" "${files[@]}" --title "Vibey Client ${TAG#v}" --notes-file build/release/body.md $pre
+            node -e "const m=require('./build/release/vibey-manifest.json');require('fs').writeFileSync('build/release/body.md',m.changelog)"
+            prerelease_flag=""; [ "$PRERELEASE" = "true" ] && prerelease_flag="--prerelease"
+            gh release create "$TAG" "${files[@]}" --title "Vibey Client ${TAG#v}" --notes-file build/release/body.md $prerelease_flag
           fi
-
-      - name: Publish to the Vibe backend
-        if: github.event_name != 'workflow_dispatch' || inputs.publish
-        env:
-          CLIENT_PUBLISH_TOKEN: ${{ secrets.CLIENT_PUBLISH_TOKEN }}
-        run: |
-          if [ -z "$CLIENT_PUBLISH_TOKEN" ]; then echo "::error::secret CLIENT_PUBLISH_TOKEN is not set"; exit 1; fi
-          set +e
-          node tools/release-manifest.mjs --tag "$TAG" --changelog-file build/release/notes.md --quiet --publish "$PUBLISH_URL"
-          code=$?
-          set -e
-          if [ "$code" = "3" ]; then echo "::notice::${TAG#v} is already published on the backend"; exit 0; fi
-          exit $code
+          # last: the manifest marks the release as complete for the backend importer
+          gh release upload "$TAG" build/release/vibey-manifest.json --clobber
