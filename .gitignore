@@ -1,0 +1,15 @@
+.gradle/
+build/
+run/
+run-server/
+runs/
+out/
+.idea/
+*.iml
+.vscode/
+.kotlin/
+relay/data/
+node_modules/
+*.log
+blockbench/node_modules/
+tools/**/node_modules/
