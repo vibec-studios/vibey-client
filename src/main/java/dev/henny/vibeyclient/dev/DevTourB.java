@@ -221,7 +221,11 @@ public final class DevTourB {
         l.add(act("about tab", () -> ((VibeyScreen) ClientCompat.screen()).showTab(VibeyTabs.ABOUT)).after(25));
         l.add(check("Vibey menu: about", 100, () -> expect(VibeyScreen.class) && VibeyTabs.ABOUT.equals(((VibeyScreen) ClientCompat.screen()).tab()) && shot("menu_about")).after(5));
 
-        if (!Vibey.platform().isFabric()) {
+        String mcVersion = dev.henny.vibeyclient.BuildInfo.MINECRAFT;
+        // NeoForge 21.9.x beta's ModListScreen sorts an immutable list on its first tick and crashes (its own bug)
+        boolean brokenModList = mcVersion.startsWith("1.21.9") || mcVersion.startsWith("1.21.10");
+        if (!Vibey.platform().isFabric() && brokenModList) l.add(act("mod list skipped (NeoForge 21.9 ModListScreen crashes on its own)", () -> {}));
+        if (!Vibey.platform().isFabric() && !brokenModList) {
             // NeoForge: the title's "Mods" entry opens NeoForge's mod list (moved in 26.3)
             l.add(act("open mod list", () -> {
                 ClientCompat.openScreen(new VibeyTitleScreen(false));
