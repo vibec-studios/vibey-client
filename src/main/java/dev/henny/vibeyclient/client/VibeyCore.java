@@ -54,6 +54,7 @@ public final class VibeyCore {
 
     /** End of every client tick. */
     public static void onTick() {
+        dev.henny.vibeyclient.dev.DevTourB.tick();
         ModuleManager mm = ModuleManager.get();
         if (!mm.isStarted()) mm.start();
         Lang.tick();
