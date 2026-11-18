@@ -8,21 +8,20 @@
  *   npm run test:blockbench -- --devlink C:\path\to\devlink.json   # real game, explicit devlink.json
  *
  * Options: --blockbench <Blockbench.exe>  --keep-open  --no-screenshots  --lang en|de
+ *          --docs-screenshots   write the screenshots to docs/screenshots (default: test/out/screenshots)
  *
  * Blockbench runs with an isolated, temporary profile (--userData / --user-data-dir), so the user's own
  * Blockbench settings, plugins and recent projects are never touched. Only the process started here is closed.
  */
-const { spawn, execFileSync } = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const net = require('net');
 const assert = require('assert/strict');
-const WebSocket = require('ws');
 const Core = require('../vibey.js');
 const { validate: specValidate } = require('./spec-validator');
 const { createMockGame } = require('./mock-game-server');
 const { fakeOgg, pngB64 } = require('./fixtures');
+const { launchBlockbench, sleep } = require('./bb-harness');
 
 const args = process.argv.slice(2);
 const flag = (n) => args.includes('--' + n);
@@ -31,14 +30,13 @@ const ROOT = path.resolve(__dirname, '..');
 const REPO = path.resolve(ROOT, '..');
 const PLUGIN = path.join(ROOT, 'vibey.js');
 const OUT = path.join(__dirname, 'out');
-const SHOTS = path.join(REPO, 'docs', 'screenshots');
-const BB_EXE = opt('blockbench', path.join(process.env.LOCALAPPDATA || '', 'Programs', 'Blockbench', 'Blockbench.exe'));
+const SHOTS = flag('docs-screenshots') ? path.join(REPO, 'docs', 'screenshots') : path.join(OUT, 'screenshots');
 const LANG = opt('lang', 'en');
+const DE = LANG === 'de';
 let realGameDir = opt('game-dir');
 if (opt('devlink')) realGameDir = path.dirname(path.dirname(path.resolve(opt('devlink'))));
 const REAL = !!realGameDir;
 
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const results = [];
 function check(name, fn) {
 	return Promise.resolve()
@@ -51,76 +49,14 @@ function check(name, fn) {
 			}
 		);
 }
-const freePort = () =>
-	new Promise((res) => {
-		const s = net.createServer().listen(0, '127.0.0.1', () => {
-			const p = s.address().port;
-			s.close(() => res(p));
-		});
-	});
-
-// ------------------------------------------------------------------ CDP
-class CDP {
-	constructor(url) {
-		this.ws = new WebSocket(url, { maxPayload: 256 * 1024 * 1024 });
-		this.id = 0;
-		this.pending = new Map();
-		this.ws.on('message', (m) => {
-			const msg = JSON.parse(m);
-			if (msg.id && this.pending.has(msg.id)) {
-				this.pending.get(msg.id)(msg);
-				this.pending.delete(msg.id);
-			}
-		});
-	}
-	open() {
-		return new Promise((res, rej) => (this.ws.once('open', res), this.ws.once('error', rej)));
-	}
-	send(method, params = {}) {
-		return new Promise((resolve, reject) => {
-			const id = ++this.id;
-			this.pending.set(id, (msg) => (msg.error ? reject(new Error(method + ': ' + msg.error.message)) : resolve(msg.result)));
-			this.ws.send(JSON.stringify({ id, method, params }));
-		});
-	}
-	async eval(expression) {
-		const r = await this.send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true, userGesture: true });
-		if (r.exceptionDetails) throw new Error('page: ' + ((r.exceptionDetails.exception && r.exceptionDetails.exception.description) || r.exceptionDetails.text));
-		return r.result.value;
-	}
-	/** Runs fn(...args) inside Blockbench (fn must be self-contained). */
-	run(fn, ...a) {
-		return this.eval(`(async () => (${fn.toString()})(...${JSON.stringify(a)}))()`);
-	}
-	async waitFor(fn, timeout = 15000, ...a) {
-		const t0 = Date.now();
-		let last;
-		while (Date.now() - t0 < timeout) {
-			try {
-				last = await this.run(fn, ...a);
-				if (last) return last;
-			} catch (e) {
-				last = e.message;
-			}
-			await sleep(150);
-		}
-		throw new Error('timeout waiting for ' + fn.toString().slice(0, 120) + ' (last: ' + JSON.stringify(last) + ')');
-	}
-	async screenshot(name) {
-		if (flag('no-screenshots')) return null;
-		await sleep(400);
-		const r = await this.send('Page.captureScreenshot', { format: 'png' });
-		fs.mkdirSync(SHOTS, { recursive: true });
-		const file = path.join(SHOTS, name);
-		fs.writeFileSync(file, Buffer.from(r.data, 'base64'));
-		console.log('    screenshot ' + file);
-		return file;
-	}
-	close() {
-		try {
-			this.ws.close();
-		} catch (e) {}
-	}
+async function screenshot(cdp, name) {
+	if (flag('no-screenshots')) return null;
+	await sleep(400);
+	fs.mkdirSync(SHOTS, { recursive: true });
+	const file = path.join(SHOTS, name);
+	fs.writeFileSync(file, await cdp.capture());
+	console.log('    screenshot ' + file);
+	return file;
 }
 
 // ----------------------------------------------------- page-side helpers
@@ -156,12 +92,7 @@ const page = {
 
 async function main() {
 	fs.mkdirSync(OUT, { recursive: true });
-	assert.ok(fs.existsSync(BB_EXE), 'Blockbench not found at ' + BB_EXE + ' (use --blockbench <path>)');
-	const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'vibey-bb-e2e-'));
 	const gameDir = REAL ? realGameDir : fs.mkdtempSync(path.join(os.tmpdir(), 'vibey-game-'));
-	const cdpPort = await freePort();
-	console.log(`Blockbench: ${BB_EXE}\nIsolated profile: ${profile}\nGame dir: ${gameDir}${REAL ? ' (REAL GAME)' : ' (mock)'}`);
-
 	let game = null;
 	if (!REAL) {
 		game = await createMockGame({ player: 'E2EPlayer', game: '1.21.11' });
@@ -170,43 +101,18 @@ async function main() {
 	} else {
 		assert.ok(fs.existsSync(Core.devlinkPath(gameDir, path.sep)), 'devlink.json not found in ' + gameDir);
 	}
-
-	const proc = spawn(BB_EXE, ['--userData', profile, '--user-data-dir=' + profile, '--remote-debugging-port=' + cdpPort, '--lang=' + LANG], { stdio: 'ignore', detached: false });
-	console.log('Started Blockbench pid ' + proc.pid);
-	let cdp;
+	let bb = null;
+	let cdp = null;
 	const shutdown = async () => {
-		if (cdp) cdp.close();
-		if (!flag('keep-open')) {
-			try {
-				if (process.platform === 'win32') execFileSync('taskkill', ['/PID', String(proc.pid), '/T', '/F'], { stdio: 'ignore' });
-				else proc.kill();
-			} catch (e) {}
-			await sleep(800);
-			try {
-				fs.rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 300 });
-			} catch (e) {}
-			if (!REAL) fs.rmSync(gameDir, { recursive: true, force: true });
-		}
+		if (bb) await bb.close();
+		if (!flag('keep-open') && !REAL) fs.rmSync(gameDir, { recursive: true, force: true });
 		if (game) await game.close();
 	};
 
 	try {
-		let target;
-		for (let i = 0; i < 120 && !target; i++) {
-			try {
-				const list = await (await fetch(`http://127.0.0.1:${cdpPort}/json`)).json();
-				target = list.find((t) => t.type === 'page' && t.url.includes('index.html'));
-			} catch (e) {}
-			if (!target) await sleep(500);
-		}
-		assert.ok(target, 'Blockbench page did not appear on the DevTools port');
-		cdp = new CDP(target.webSocketDebuggerUrl);
-		await cdp.open();
-		await cdp.waitFor(page.ready, 60000);
-		// let Blockbench finish restoring installed plugins (it fetches the online plugin list first)
-		await cdp.waitFor(() => typeof Plugins !== 'undefined' && !Plugins.loading_promise, 60000);
-		await sleep(1500);
-
+		bb = await launchBlockbench({ lang: LANG, exe: opt('blockbench'), keepOpen: flag('keep-open') });
+		cdp = bb.cdp;
+		console.log(`Blockbench pid ${bb.proc.pid}, isolated profile ${bb.profile}\nGame dir: ${gameDir}${REAL ? ' (REAL GAME)' : ' (mock)'}`);
 		assert.equal(await cdp.eval('Language.code'), LANG, 'UI language (--lang) not applied');
 		const bbVersion = await cdp.eval('Blockbench.version');
 		console.log('Blockbench ' + bbVersion);
@@ -216,7 +122,13 @@ async function main() {
 			assert.ok(await cdp.run(page.loadPlugin, PLUGIN));
 			await cdp.waitFor(() => window.VibeyPlugin && Formats.vibey_cosmetic && Formats.vibey_emote && Codecs.vibey && MenuBar.menus.vibey);
 			const info = await cdp.eval(`({ v: VibeyPlugin.VERSION, author: Plugins.registered.vibey.author, variant: Plugins.registered.vibey.variant, exp: !!BarItems.vibey_export, imp: !!BarItems.vibey_import })`);
-			assert.deepEqual(info, { v: '0.2.0', author: 'Vibe Craft Studios', variant: 'desktop', exp: true, imp: true });
+			assert.deepEqual(info, { v: Core.VERSION, author: 'Vibe Craft Studios', variant: 'desktop', exp: true, imp: true });
+		});
+		await check('first start: the wizard opens by itself, once (remembered in local storage)', async () => {
+			await cdp.waitFor(() => Dialog.open && Dialog.open.id === 'vibey_wizard', 8000);
+			const r = await cdp.eval(`({ welcomed: VibeyPlugin.prefs().welcomed, welcome: !!document.querySelector('#vibey_wizard .vw_welcome'), cards: [...document.querySelectorAll('#vibey_wizard .vw_card')].map((c) => c.getAttribute('data-value')) })`);
+			assert.deepEqual(r, { welcomed: true, welcome: true, cards: ['cosmetic', 'emote'] });
+			await cdp.eval('Dialog.open.close(), true');
 		});
 		await check('loading the plugin file a second time keeps a single instance', async () => {
 			await cdp.run(async (file) => {
@@ -224,8 +136,8 @@ async function main() {
 				return true;
 			}, PLUGIN);
 			await sleep(500);
-			const r = await cdp.eval(`({ panels: document.querySelectorAll('.vibey_panel').length, status: document.querySelectorAll('#vibey_status').length, formats: !!Formats.vibey_cosmetic && !!Formats.vibey_emote, menus: Object.keys(MenuBar.menus).filter((k) => k === 'vibey').length })`);
-			assert.deepEqual(r, { panels: 1, status: 1, formats: true, menus: 1 });
+			const r = await cdp.eval(`({ panels: Object.keys(Panels).filter((k) => k === 'vibey_panel' || k === 'vibey_guide').length + (document.querySelectorAll('.vibey_panel').length > 1 ? 10 : 0), status: document.querySelectorAll('#vibey_status').length, formats: !!Formats.vibey_cosmetic && !!Formats.vibey_emote, menus: Object.keys(MenuBar.menus).filter((k) => k === 'vibey').length, wizard: Dialog.open ? Dialog.open.id : null })`);
+			assert.deepEqual(r, { panels: 2, status: 1, formats: true, menus: 1, wizard: null }, 'one panel + one guide, no second welcome wizard');
 		});
 		await cdp.run((dir) => {
 			Object.assign(VibeyPlugin.LinkSettings, { autoFind: true, gameDir: dir, autoPush: false, replayEmote: true });
@@ -235,14 +147,21 @@ async function main() {
 
 		// ================================================================ COSMETIC
 		console.log('\nVibey Cosmetic');
-		await check('new-project dialog asks for id, names, slot, rarity, tags', async () => {
+		await check('File > New > Vibey Cosmetic opens the wizard on the slot page', async () => {
 			await cdp.eval('Formats.vibey_cosmetic.new(), true');
+			await cdp.waitFor(() => Dialog.open && Dialog.open.id === 'vibey_wizard');
+			const cards = await cdp.eval(`[...document.querySelectorAll('#vibey_wizard .vw_card')].map((c) => c.getAttribute('data-value'))`);
+			assert.deepEqual(cards, Core.SLOTS);
+			await cdp.eval('Dialog.open.close(), true');
+		});
+		await check('properties dialog asks for id, names, slot, rarity, tags', async () => {
+			await cdp.eval('newProject(Formats.vibey_cosmetic), VibeyPlugin.openPropertiesDialog(true), true');
 			await cdp.waitFor(() => Dialog.open && Dialog.open.id === 'vibey_properties');
 			await cdp.run(() => {
 				Dialog.open.setFormValues({ id: 'e2e:seal_hat', name_en: 'Seal Hat', name_de: 'Robbenhut', desc_en: 'A cozy hat with a wobbly top.', tags: 'seal, hat, e2e', rarity: 'epic', slot: 'hat', hide_head: true });
 				return true;
 			});
-			await cdp.screenshot('blockbench-new-cosmetic-dialog.png');
+			await screenshot(cdp, 'blockbench-new-cosmetic-dialog.png');
 			await cdp.eval('Dialog.open.confirm(), true');
 			const meta = await cdp.eval('JSON.parse(JSON.stringify(VibeyPlugin.getMeta()))');
 			assert.equal(meta.id, 'e2e:seal_hat');
@@ -345,7 +264,7 @@ async function main() {
 			await cdp.eval(`Preview.selected.loadAnglePreset({position: [55, 42, -60], target: [0, 18, 0]}), true`);
 			// show the Element tab (Attach / Glowing / Translucent) for the screenshot
 			await cdp.eval(`(() => { try { const host = Panels.element.getHostPanel(); host.selectTab(Panels.element); } catch (e) {} return true; })()`);
-			await cdp.screenshot('blockbench-cosmetic-edit.png');
+			await screenshot(cdp, 'blockbench-cosmetic-edit.png');
 		});
 
 		let cosmeticJson, cosmeticBundle;
@@ -390,8 +309,14 @@ async function main() {
 			});
 			assert.ok(r.errors.some((e) => /Id "Not Valid" is invalid/.test(e)), r.errors.join('\n'));
 			assert.ok(r.errors.some((e) => /"loose" \(cube\) is not inside a group/.test(e)), r.errors.join('\n'));
-			await cdp.screenshot('blockbench-validation.png');
-			await cdp.eval('Dialog.open && Dialog.open.close(0), true');
+			const shown = await cdp.eval(`(() => { const d = document.querySelector('#vibey_problems'); return { items: [...d.querySelectorAll('.vibey_problems li')].map((li) => li.textContent), details: d.querySelector('details pre').textContent, buttons: [...d.querySelectorAll('.button_bar button')].map((b) => b.textContent) }; })()`);
+			const T = (k, ...a) => Core.STRINGS[k][DE ? 1 : 0].replace(/%(\d)/g, (m, i) => a[i]);
+			assert.ok(shown.items.includes(T('fp_id')), 'friendly id problem: ' + shown.items.join(' | '));
+			assert.ok(shown.items.includes(T('fp_loose', 'loose')), shown.items.join(' | '));
+			assert.match(shown.details, /Id "Not Valid" is invalid/, 'technical text under Details');
+			assert.deepEqual(shown.buttons, [T('fe_open_properties'), 'OK']);
+			await screenshot(cdp, 'blockbench-validation.png');
+			await cdp.eval('Dialog.open && Dialog.open.cancel(), true');
 			assert.deepEqual(await cdp.eval('VibeyPlugin.buildBundle().errors'), []);
 		});
 
@@ -417,7 +342,7 @@ async function main() {
 				assert.deepEqual(specValidate(p.bundle).errors, []);
 				assert.deepEqual(p.bundle, cosmeticBundle);
 				assert.equal(game.state.hellos[0].client, 'blockbench-vibey');
-				assert.equal(game.state.hellos[0].version, '0.2.0');
+				assert.equal(game.state.hellos[0].version, Core.VERSION);
 			}
 		});
 		await check('auto-push on change is debounced (~300 ms) and sends the edited model', async () => {
@@ -455,7 +380,7 @@ async function main() {
 				await game.close();
 				await cdp.waitFor(() => VibeyPlugin.Link.state === 'error' && /Retrying|Neuer Versuch/.test(VibeyPlugin.Link.message), 10000);
 				const msg = await cdp.eval('VibeyPlugin.Link.message');
-				assert.match(msg, /lost|not reachable/);
+				assert.match(msg, /lost|not reachable|verloren|nicht erreichbar/);
 				game = await createMockGame({ port, token, player: 'E2EPlayer' });
 				await cdp.waitFor(() => VibeyPlugin.Link.state === 'connected', 20000);
 			});
@@ -486,13 +411,13 @@ async function main() {
 					}
 				}, path.join(gameDir, 'does-not-exist'));
 				assert.match(msg, /devlink\.json/);
-				assert.match(msg, /Creator mode/);
+				assert.match(msg, /Creator mode|Creator-Modus/);
 				await cdp.waitFor(() => VibeyPlugin.Link.state === 'connected', 10000);
 			});
 		}
 		await cdp.run(() => (VibeyPlugin.openLinkSettings(), true));
 		await sleep(300);
-		await cdp.screenshot('blockbench-live-link-settings.png');
+		await screenshot(cdp, 'blockbench-live-link-settings.png');
 		await cdp.eval('Dialog.open && Dialog.open.close(2), true');
 
 		await check('import .vibey back into an editable project is lossless', async () => {
@@ -535,13 +460,13 @@ async function main() {
 		// ================================================================ EMOTE
 		console.log('\nVibey Emote');
 		await check('new emote project: dialog + player rig root > head/body/arms/legs with SPEC pivots', async () => {
-			await cdp.eval('Formats.vibey_emote.new(), true');
+			await cdp.eval('newProject(Formats.vibey_emote), VibeyPlugin.openPropertiesDialog(true), true');
 			await cdp.waitFor(() => Dialog.open && Dialog.open.id === 'vibey_properties');
 			await cdp.run(() => {
 				Dialog.open.setFormValues({ id: 'e2e:flag_wave', name_en: 'Flag Wave', name_de: 'Fahne schwenken', tags: 'wave, flag', third_person: true, stop_on_move: false, hide_held: true, loop: false });
 				return true;
 			});
-			await cdp.screenshot('blockbench-new-emote-dialog.png');
+			await screenshot(cdp, 'blockbench-new-emote-dialog.png');
 			await cdp.eval('Dialog.open.confirm(), true');
 			const rig = await cdp.eval(`Group.all.map(g => ({ name: g.name, parent: g.parent === 'root' ? null : g.parent.name, origin: g.origin.slice() }))`);
 			assert.deepEqual(rig, [
@@ -618,7 +543,7 @@ async function main() {
 			assert.equal(r.visibleAgain, true);
 			assert.ok(r.armTopY > 30, 'raised arm reaches above the head, got ' + r.armTopY);
 			await cdp.eval(`Preview.selected.loadAnglePreset({position: [50, 40, -65], target: [2, 20, 0]}), true`);
-			await cdp.screenshot('blockbench-emote-animate.png');
+			await screenshot(cdp, 'blockbench-emote-animate.png');
 		});
 		let emoteBundle, emoteJson;
 		await check('export emote: player channels + props + events validate against SPEC', async () => {
@@ -652,7 +577,7 @@ async function main() {
 				assert.ok(p.ok, p.errors.join('; '));
 				assert.deepEqual(p.bundle, emoteBundle);
 			}
-			await cdp.screenshot('blockbench-emote-pushed.png');
+			await screenshot(cdp, 'blockbench-emote-pushed.png');
 		});
 		await check('import emote .vibey round trip (player bones, generated cubes back in right_arm)', async () => {
 			const r = await cdp.run(async (json) => {
@@ -694,13 +619,293 @@ async function main() {
 			await cdp.eval('VibeyPlugin.Link.disconnect(), true');
 			assert.equal(await cdp.eval('VibeyPlugin.Link.state'), 'off');
 		});
+		// ================================================================ WIZARD + GUIDE
+		console.log('\nWizard, guide, menu, friendly errors');
+		const T = (k, ...a) => Core.STRINGS[k][DE ? 1 : 0].replace(/%(\d)/g, (m, i) => a[i]);
+		await check('Vibey menu: few clear entries + Advanced submenu, names follow the language', async () => {
+			const r = await cdp.run(() => {
+				const m = MenuBar.menus.vibey;
+				const top = m.structure.map((x) => (typeof x === 'string' ? x : x.id));
+				const adv = m.structure.find((x) => x.id === 'vibey_advanced');
+				const children = adv.children().map((x) => (typeof x === 'string' ? x : x.id));
+				m.open();
+				const shown = [...document.querySelectorAll('ul.contextMenu > li')].map((li) => li.textContent.trim()).filter(Boolean);
+				const names = ['vibey_wizard', 'vibey_tutorial', 'vibey_test_live', 'vibey_export_submit'].map((id) => BarItems[id].name);
+				return { top, children, shown, names, advName: adv.name };
+			});
+			assert.deepEqual(r.top, ['vibey_wizard', 'vibey_tutorial', '_', 'vibey_test_live', 'vibey_export_submit', '_', 'vibey_advanced']);
+			for (const id of ['vibey_properties', 'vibey_import_file', 'vibey_link_settings', 'vibey_add_sound', 'vibey_add_sprite', 'vibey_validate', 'vibey_submissions', 'vibey_about']) assert.ok(r.children.includes(id), id + ' in Advanced');
+			assert.deepEqual(r.names, [T('menu_new'), T('menu_tutorial'), T('menu_test_live'), T('menu_export_submit')]);
+			assert.equal(r.advName, T('menu_advanced'));
+			for (const n of r.names) assert.ok(r.shown.some((t) => t.includes(n)), 'menu shows ' + n + ': ' + r.shown.join(' | '));
+			await cdp.eval('open_menu && open_menu.hide(), true');
+		});
+		let wingsBundle;
+		await check('wizard through the real dialog (wings): structure, guide, export validates', async () => {
+			// the properties test above remembered the namespace "e2e"; a fresh creator gets "creator:"
+			assert.equal(await cdp.eval('VibeyPlugin.prefs().namespace'), 'e2e');
+			await cdp.eval("VibeyPlugin.savePrefs({ namespace: '' }), VibeyPlugin.openWizard(), true");
+			const click = (sel) => cdp.run((s) => (document.querySelector(s).click(), true), sel);
+			await click('#vibey_wizard .vw_card[data-value=cosmetic]');
+			await cdp.waitFor(() => !!document.querySelector('#vibey_wizard .vw_card[data-value=wings]'));
+			await click('#vibey_wizard .vw_card[data-value=wings]');
+			await cdp.waitFor(() => !!document.querySelector('#vibey_wizard input.vw_name_en'));
+			// "Next" is refused without a name
+			await click('#vibey_wizard .vw_next');
+			assert.equal(await cdp.eval(`document.querySelector('#vibey_wizard .vw_error').textContent.trim()`), T('wz_need_name'));
+			await cdp.run(() => {
+				const set = (sel, v) => {
+					const el = document.querySelector(sel);
+					el.value = v;
+					el.dispatchEvent(new Event('input', { bubbles: true }));
+				};
+				set('#vibey_wizard input.vw_name_en', 'Frost Wings');
+				set('#vibey_wizard input.vw_name_de', 'Frostflügel');
+				return true;
+			});
+			await sleep(100);
+			assert.equal(await cdp.eval(`document.querySelector('#vibey_wizard .vw_id').textContent`), 'creator:frost_wings');
+			await click('#vibey_wizard .vw_next');
+			await cdp.waitFor(() => !!document.querySelector('#vibey_wizard .vw_card[data-value=neon_wings]'));
+			await click('#vibey_wizard .vw_next'); // "Create" with "Start empty"
+			await cdp.waitFor(() => !Dialog.open && Format.id === 'vibey_cosmetic' && Texture.all.length && Texture.all[0].width, 8000);
+			await cdp.waitFor(() => VibeyPlugin.getMeta().wizard && VibeyPlugin.getMeta().wizard.textureHash, 5000);
+			const r = await cdp.run(() => {
+				const groups = Group.all.map((g) => ({ name: g.name, parent: g.parent === 'root' ? null : g.parent.name, attach: g.vibey_attach, origin: g.origin.slice() }));
+				const c = VibeyPlugin.compileProjectJSON();
+				return {
+					groups, anims: Animator.animations.map((a) => a.name + ':' + a.loop), tex: Texture.all.map((t) => [t.name, t.width, t.height]),
+					meta: { id: VibeyPlugin.getMeta().id, name: VibeyPlugin.getMeta().name, slot: VibeyPlugin.getMeta().slot },
+					ref: VibeyPlugin.getMeta().showReference, guide: !!document.querySelector('.vibey_guide .vg_step'), errors: c.errors, json: c.json,
+				};
+			});
+			assert.deepEqual(r.groups, [
+				{ name: 'wings', parent: null, attach: 'body', origin: [0, 21, 2] },
+				{ name: 'wing_right', parent: 'wings', attach: '', origin: [1.5, 21, 2.5] },
+				{ name: 'wing_left', parent: 'wings', attach: '', origin: [-1.5, 21, 2.5] },
+			]);
+			assert.deepEqual(r.anims, ['idle:loop', 'walk:loop', 'fly:loop', 'sneak:loop']);
+			assert.deepEqual(r.tex, [['main', 64, 64]]);
+			assert.deepEqual(r.meta, { id: 'creator:frost_wings', name: { en: 'Frost Wings', de: 'Frostflügel' }, slot: 'wings' });
+			assert.equal(r.ref, true);
+			assert.equal(r.guide, true, 'the guide panel is shown');
+			assert.deepEqual(r.errors, []);
+			wingsBundle = JSON.parse(r.json);
+			assert.deepEqual(Core.validateBundle(wingsBundle).errors, []);
+			assert.deepEqual(specValidate(wingsBundle).errors, []);
+			fs.writeFileSync(path.join(OUT, 'wizard-wings.vibey'), r.json);
+		});
+		await check('guide: checks fire (model, texture, animate, effects, live, export) and steps can be ticked', async () => {
+			const state = () => cdp.run(() => (VibeyPlugin.refreshUI(), new Promise((res) => setTimeout(() => res(VibeyPlugin.UI.guide.steps.map((s) => s.id + ':' + s.state + ':' + s.check)), 80))));
+			let s = await state();
+			assert.deepEqual(s.map((x) => x.split(':').slice(0, 2).join(':')), ['model:todo', 'texture:todo', 'animate:todo', 'effects:optional', 'live:todo', 'export:todo']);
+			assert.ok(s[0].endsWith(T('chk_model_empty', 'wings')), s[0]);
+			assert.ok(s[1].endsWith(T('chk_tex_template')), s[1]);
+			assert.ok(s[2].endsWith(T('chk_anim_empty', 'idle')), s[2]);
+			assert.ok(s[4].endsWith(T('chk_live_off')) || s[4].endsWith(T('chk_live_connecting')), s[4]);
+			assert.equal(await cdp.eval(`document.querySelector('.vibey_guide .vg_current .vg_check span').textContent.trim()`), T('chk_model_empty', 'wings'));
+			await cdp.run(() => {
+				const r = Group.all.find((g) => g.name === 'wing_right');
+				new Cube({ name: 'feather', from: [1.5, 12, 2.5], to: [11.5, 24, 3.5], box_uv: true, uv_offset: [0, 0] }).addTo(r).init();
+				const tex = Texture.all[0];
+				const ctx = tex.canvas.getContext('2d');
+				ctx.fillStyle = '#3fe0c5';
+				ctx.fillRect(0, 0, 16, 16);
+				const anim = Animator.animations.find((a) => a.name === 'idle');
+				anim.getBoneAnimator(r).addKeyframe({ channel: 'rotation', time: 0, data_points: [{ x: 0, y: 0, z: 0 }] });
+				anim.getBoneAnimator(r).addKeyframe({ channel: 'rotation', time: 1, data_points: [{ x: 0, y: -20, z: 0 }] });
+				const fx = (anim.animators.effects = new EffectAnimator(anim));
+				fx.addKeyframe({ channel: 'particle', time: 0.5, data_points: [{ effect: 'minecraft:snowflake' }] });
+				return true;
+			});
+			s = await state();
+			assert.deepEqual(s.map((x) => x.split(':').slice(0, 2).join(':')), ['model:ok', 'texture:ok', 'animate:ok', 'effects:ok', 'live:todo', 'export:todo']);
+			// tick + next
+			const g = await cdp.run(() => {
+				VibeyPlugin.Guide.next(0);
+				VibeyPlugin.Guide.tick(1, true);
+				VibeyPlugin.refreshUI();
+				return new Promise((res) => setTimeout(() => res({ current: VibeyPlugin.UI.guide.current, done: VibeyPlugin.getMeta().tutorial.done }), 80));
+			});
+			assert.deepEqual(g, { current: 1, done: { model: true, texture: true } });
+		});
+		await check('"Test live in game": friendly help when the game cannot be found, then it connects and pushes by itself', async () => {
+			const missing = path.join(gameDir, 'no-game-here');
+			await cdp.run((dir) => {
+				VibeyPlugin.Link.disconnect();
+				VibeyPlugin.LinkSettings.gameDir = dir;
+				return true;
+			}, missing);
+			await cdp.eval('VibeyPlugin.testLive(), true');
+			await cdp.waitFor(() => Dialog.open && Dialog.open.id === 'vibey_friendly', 8000);
+			const d = await cdp.eval(`(() => { const d = document.querySelector('#vibey_friendly'); return { key: Dialog.open.vibey_key, title: d.querySelector('.vf_title').textContent, fixes: [...d.querySelectorAll('.vf_fix li')].map((l) => l.textContent), details: d.querySelector('details pre').textContent, buttons: [...d.querySelectorAll('.button_bar button')].map((b) => b.textContent) }; })()`);
+			assert.equal(d.key, 'devlink_missing');
+			assert.equal(d.title, T('fe_devlink_missing_title'));
+			assert.deepEqual(d.fixes, T('fe_devlink_missing_fix').split('\n'));
+			assert.ok(d.fixes.some((f) => /Creator/.test(f)), 'explains Creator mode');
+			assert.match(d.details, /devlink\.json/);
+			assert.deepEqual(d.buttons, [T('fe_try_again'), T('fe_open_settings'), T('fe_close')]);
+			const guideHelp = await cdp.run(() => (VibeyPlugin.getMeta().tutorial.step = 4, VibeyPlugin.refreshUI(), new Promise((res) => setTimeout(() => res(!!document.querySelector('.vibey_guide .vg_howto')), 100))));
+			assert.equal(guideHelp, true, 'the guide shows the how-to while not connected');
+			await screenshot(cdp, 'blockbench-friendly-error.png');
+			await cdp.eval('Dialog.open.cancel(), true');
+			// the game appears: the plugin keeps looking and sends the queued item
+			const waitPush = game && game.waitFor('push', (p) => p.bundle.id === 'creator:frost_wings');
+			await cdp.run((dir) => (VibeyPlugin.LinkSettings.gameDir = dir, true), gameDir);
+			await cdp.waitFor(() => VibeyPlugin.Link.state === 'connected', 20000);
+			if (game) {
+				const p = await waitPush;
+				assert.equal(p.action, 'equip');
+				assert.ok(p.ok, p.errors.join('; '));
+			}
+			await cdp.waitFor(() => VibeyPlugin.sessionOf().pushed, 8000);
+			const live = await cdp.run(() => (VibeyPlugin.refreshUI(), new Promise((res) => setTimeout(() => res(VibeyPlugin.UI.guide.steps.find((s) => s.id === 'live').state), 80))));
+			assert.equal(live, 'ok');
+			// and the button again while connected pushes right away
+			const res = await cdp.eval('VibeyPlugin.testLive()');
+			assert.equal(res.type, 'pushed', JSON.stringify(res));
+		});
+		await check('Export / Submit dialog; a game rejection is explained in plain words', async () => {
+			await cdp.eval('VibeyPlugin.exportSubmitDialog(), true');
+			await cdp.waitFor(() => Dialog.open && Dialog.open.id === 'vibey_export_submit');
+			const cards = await cdp.eval(`[...document.querySelectorAll('#vibey_export_submit [data-value]')].map((e) => e.getAttribute('data-value'))`);
+			assert.deepEqual(cards, ['save', 'submit', 'submissions']);
+			await cdp.eval('Dialog.open.cancel(), true');
+			// submit through the game (mock): the guide marks the export step done
+			if (game) {
+				const sub = await cdp.run(async () => {
+					VibeyPlugin.exportSubmitDialog();
+					await new Promise((r) => setTimeout(r, 50));
+					document.querySelector('#vibey_export_submit [data-value=submit]').click();
+					await new Promise((r) => setTimeout(r, 200));
+					Dialog.open.setFormValues({ thumbnail: false });
+					Dialog.open.confirm();
+					for (let i = 0; i < 100 && !VibeyPlugin.sessionOf().submitted; i++) await new Promise((r) => setTimeout(r, 50));
+					const ok = Dialog.open && Dialog.open.id;
+					if (Dialog.open) Dialog.open.cancel();
+					return { submitted: VibeyPlugin.sessionOf().submitted, dialog: ok };
+				});
+				assert.equal(sub.submitted, true, JSON.stringify(sub));
+				assert.equal(game.state.submissions.slice(-1)[0].bundleId, 'creator:frost_wings');
+			}
+			// the game refuses a push -> friendly dialog with the reason under Details
+			const r = await cdp.run(async () => {
+				const orig = VibeyPlugin.Link.ws.send.bind(VibeyPlugin.Link.ws);
+				VibeyPlugin.Link.ws.send = () => setTimeout(() => VibeyPlugin.Link.onMessage(JSON.stringify({ type: 'error', id: 'creator:frost_wings', message: 'Invalid bundle: something the game did not like' })), 20);
+				const res = await VibeyPlugin.Link.push('equip');
+				VibeyPlugin.Link.ws.send = orig;
+				const d = document.querySelector('#vibey_friendly');
+				const out = { type: res.type, key: Dialog.open && Dialog.open.vibey_key, details: d && d.querySelector('details pre').textContent };
+				if (Dialog.open) Dialog.open.cancel();
+				return out;
+			});
+			assert.equal(r.type, 'error');
+			assert.equal(r.key, 'game_rejected');
+			assert.match(r.details, /something the game did not like/);
+		});
+		await check('wizard for every slot + an emote creates a valid, exportable structure', async () => {
+			const out = await cdp.run(async () => {
+				const res = {};
+				for (const slot of ['cape', 'wings', 'aura', 'pet', 'shield', 'hat', 'back', 'emote']) {
+					const kind = slot === 'emote' ? 'emote' : 'cosmetic';
+					VibeyPlugin.createItem({ kind, slot: kind === 'emote' ? undefined : slot, name: { en: 'E2E ' + slot }, loop: true, length: 1.5 });
+					for (let i = 0; i < 60 && Texture.all.some((t) => !t.width); i++) await new Promise((r) => setTimeout(r, 50));
+					const c = VibeyPlugin.compileProjectJSON();
+					res[slot] = {
+						format: Format.id, errors: c.errors, json: c.json,
+						groups: Group.all.map((g) => g.name + (g.vibey_preview ? '*' : '')),
+						locked: Cube.all.filter((x) => x.vibey_preview).every((x) => x.locked && x.export === false),
+						anims: Animator.animations.map((a) => a.name),
+					};
+					await Project.close(true);
+				}
+				return res;
+			});
+			for (const slot of Object.keys(out)) {
+				const r = out[slot];
+				assert.deepEqual(r.errors, [], slot);
+				const b = JSON.parse(r.json);
+				assert.deepEqual(Core.validateBundle(b).errors, [], slot);
+				assert.deepEqual(specValidate(b).errors, [], slot);
+				assert.equal(b.id, 'creator:e2e_' + slot);
+				if (slot === 'emote') {
+					assert.equal(r.format, 'vibey_emote');
+					assert.deepEqual(r.groups, Core.PLAYER_BONES);
+					assert.deepEqual(b.emote.loop, true);
+					assert.equal(b.animations.main.length, 1.5);
+					continue;
+				}
+				const p = Core.SLOT_PRESETS[slot];
+				assert.equal(b.cosmetic.slot, slot);
+				assert.deepEqual([b.textures[0].width, b.textures[0].height], p.texture);
+				if (p.textureOnly) {
+					assert.deepEqual(r.groups, [slot + '_preview*'], slot + ': only the never-exported preview');
+					assert.equal(r.locked, true);
+					assert.equal(b.model, undefined);
+					assert.equal(b.cosmetic[slot].texture, slot);
+				} else {
+					assert.equal(r.groups[0], p.root);
+					assert.equal(b.model.bones[0].attach, p.attach);
+					assert.deepEqual(r.anims, p.tracks);
+				}
+			}
+		});
+		await check('templates: a starter item becomes an editable copy with the creator\'s id', async () => {
+			const out = await cdp.run(async () => {
+				const res = [];
+				for (const [kind, slot, template] of [['cosmetic', 'hat', 'seal_beanie'], ['cosmetic', 'cape', 'vibe_cape'], ['emote', undefined, 'wave']]) {
+					VibeyPlugin.createItem({ kind, slot, template, name: { en: 'My ' + template } });
+					for (let i = 0; i < 60 && Texture.all.some((t) => !t.width); i++) await new Promise((r) => setTimeout(r, 50));
+					const c = VibeyPlugin.compileProjectJSON();
+					res.push({ template, errors: c.errors, json: c.json });
+					await Project.close(true);
+				}
+				return res;
+			});
+			const starter = (name) => JSON.parse(fs.readFileSync(path.join(REPO, 'content', 'dist', name + '.vibey'), 'utf8'));
+			for (const r of out) {
+				assert.deepEqual(r.errors, [], r.template);
+				const b = JSON.parse(r.json);
+				assert.equal(b.id, 'creator:my_' + r.template);
+				assert.deepEqual(specValidate(b).errors, []);
+				const s = starter(r.template);
+				assert.deepEqual(b.animations, s.animations, r.template + ' animations');
+				assert.deepEqual(b.model, s.model, r.template + ' model');
+				assert.deepEqual(b.textures.map((t) => t.png), s.textures.map((t) => t.png), r.template + ' textures byte-exact');
+			}
+		});
+		await check('guide can be hidden and reopened (Vibey > Tutorial); the choice is remembered', async () => {
+			const r = await cdp.run(async () => {
+				VibeyPlugin.createItem({ kind: 'cosmetic', slot: 'hat', name: { en: 'Guide Hat' } });
+				await new Promise((res) => setTimeout(res, 200));
+				const visible = () => {
+					const el = document.querySelector('#panel_vibey_guide');
+					return !!el && !el.closest('.panel_container.hidden') && el.offsetParent !== null;
+				};
+				const before = visible();
+				VibeyPlugin.Guide.hide();
+				await new Promise((res) => setTimeout(res, 200));
+				const hidden = !visible() && VibeyPlugin.prefs().guide === false;
+				BarItems.vibey_tutorial.click();
+				await new Promise((res) => setTimeout(res, 200));
+				const again = visible() && VibeyPlugin.prefs().guide === true;
+				await Project.close(true);
+				return { before, hidden, again };
+			});
+			assert.deepEqual(r, { before: true, hidden: true, again: true });
+		});
+		await check('remove dev items + disconnect', async () => {
+			await cdp.eval('VibeyPlugin.Link.remove("creator:frost_wings"), VibeyPlugin.Link.disconnect(), true');
+			assert.equal(await cdp.eval('VibeyPlugin.Link.state'), 'off');
+		});
 		await check('plugin unloads cleanly', async () => {
-			const r = await cdp.eval(`(() => { Plugins.registered.vibey.unload(); return { formats: !!Formats.vibey_cosmetic, menu: !!MenuBar.menus.vibey, api: !!window.VibeyPlugin, status: !!document.getElementById('vibey_status') }; })()`);
-			assert.deepEqual(r, { formats: false, menu: false, api: false, status: false });
+			const r = await cdp.eval(`(() => { Plugins.registered.vibey.unload(); return { formats: !!Formats.vibey_cosmetic, menu: !!MenuBar.menus.vibey, api: !!window.VibeyPlugin, status: !!document.getElementById('vibey_status'), guide: !!Panels.vibey_guide, wizard: !!document.querySelector('#vibey_wizard') && !!Dialog.open }; })()`);
+			assert.deepEqual(r, { formats: false, menu: false, api: false, status: false, guide: false, wizard: false });
 		});
 	} catch (e) {
 		results.push({ name: 'harness', ok: false, error: String(e.stack || e) });
 		console.error(e);
+		if (cdp && cdp.logs.length) console.error('Page log:\n  ' + cdp.logs.slice(-15).join('\n  '));
 	} finally {
 		await shutdown();
 	}
