@@ -38,6 +38,14 @@ public final class Compat {
         return new CustomPacketPayload.Type<>(id(path));
     }
 
+    /** Dimension id of the player's level, e.g. {@code minecraft:the_nether}. */
+    public static String dimensionId(ServerPlayer player) {
+        //? if >=1.21.11 {
+        return player.level().dimension().identifier().toString();
+        //?} else
+        /*return player.level().dimension().location().toString();*/
+    }
+
     public static MinecraftServer server(ServerPlayer player) {
         return ((ServerLevel) player.level()).getServer();
     }

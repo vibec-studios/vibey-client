@@ -9,6 +9,7 @@ import dev.henny.vibeyclient.net.HelloPayload;
 import dev.henny.vibeyclient.net.LoadoutPayload;
 import dev.henny.vibeyclient.net.MessagePayload;
 import dev.henny.vibeyclient.net.NetDispatch;
+import dev.henny.vibeyclient.net.RulesPayloads;
 import dev.henny.vibeyclient.ui.Gfx;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -47,6 +48,7 @@ public final class VibeyFabricClient implements ClientModInitializer, ClientPlat
         ClientPlayNetworking.registerGlobalReceiver(LoadoutPayload.TYPE, (p, ctx) -> NetDispatch.toClient(p));
         ClientPlayNetworking.registerGlobalReceiver(EmotePayload.TYPE, (p, ctx) -> NetDispatch.toClient(p));
         ClientPlayNetworking.registerGlobalReceiver(MessagePayload.TYPE, (p, ctx) -> NetDispatch.toClient(p));
+        if (RulesPayloads.active()) ClientPlayNetworking.registerGlobalReceiver(RulesPayloads.Rules.TYPE, (p, ctx) -> NetDispatch.toClient(p));
 
         ClientTickEvents.END_CLIENT_TICK.register(mc -> VibeyCore.onTick());
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> VibeyCore.onWorldJoin());

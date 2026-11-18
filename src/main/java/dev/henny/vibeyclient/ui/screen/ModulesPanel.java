@@ -13,6 +13,7 @@ import dev.henny.vibeyclient.ui.Gfx;
 import dev.henny.vibeyclient.ui.Icons;
 import dev.henny.vibeyclient.ui.Panel;
 import dev.henny.vibeyclient.ui.ScrollArea;
+import dev.henny.vibeyclient.ui.ServerBadge;
 import dev.henny.vibeyclient.ui.Theme;
 import dev.henny.vibeyclient.ui.Ui;
 import dev.henny.vibeyclient.ui.VibeyScreen;
@@ -219,6 +220,9 @@ public final class ModulesPanel implements Panel {
             ui.tooltip(m, x, y, w, TILE_H, m.statusReason());
         } else if (settingHit != null) {
             g.text(g.clip("› " + settingHit, dw), tx, y + 25, Theme.BRAND2);
+        } else if (!ServerBadge.disabledKeys(m).isEmpty()) {
+            g.text(g.clip(ServerBadge.label(), dw), tx, y + 25, Theme.WARN);
+            ui.tooltip(m, x, y, w, TILE_H, ServerBadge.hint());
         } else {
             String summaryKey = m.id() + ".summary";
             String summary = Lang.has(summaryKey) ? Lang.tr(summaryKey) : Lang.tr(m.descriptionKey());
@@ -365,6 +369,7 @@ public final class ModulesPanel implements Panel {
             }
             y += rh + 10;
         }
+        y = ServerBadge.notice(ui, m, x, y, w);
         // e.g. "Lyrics: provided by the installed Vibey Lyrics" (parts of a module that are off)
         for (String notice : m.notices()) {
             List<String> nl = Ui.wrap(g, notice, w - 16);

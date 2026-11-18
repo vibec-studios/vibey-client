@@ -15,6 +15,7 @@ import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.client.Keys;
 import dev.henny.vibeyclient.ui.Gfx;
 import dev.henny.vibeyclient.ui.Icons;
+import dev.henny.vibeyclient.ui.ServerBadge;
 import dev.henny.vibeyclient.ui.Theme;
 import dev.henny.vibeyclient.ui.Ui;
 import dev.henny.vibeyclient.ui.VibeyScreen;
@@ -226,7 +227,12 @@ public final class SettingsView {
     }
 
     private static int labelWidth(Gfx g, Setting<?, ?> s, int w) {
-        return w - ROW_PAD * 2 - controlWidth(g, s, w) - 12;
+        return w - ROW_PAD * 2 - controlWidth(g, s, w) - 12 - badgeSpace(g, s);
+    }
+
+    /** Room for the "Disabled by this server" badge left of the control (0 when the server allows it). */
+    private static int badgeSpace(Gfx g, Setting<?, ?> s) {
+        return s.serverDisabled() ? ServerBadge.width(g) + 6 : 0;
     }
 
     private static int rowHeight(Gfx g, Setting<?, ?> s, int w) {
@@ -243,8 +249,10 @@ public final class SettingsView {
         if (hov > 0f) g.rect(x + 1, y + 1, w - 2, h - 1, Theme.alpha(Theme.SURFACE3, hov));
         int tx = x + w - ROW_PAD - Widgets.TOGGLE_W;
         String name = Lang.tr(b.nameKey());
-        int lw = tx - x - ROW_PAD - 6;
-        g.text(g.clip(name, lw), x + ROW_PAD, y + (h - 8) / 2, enabled ? Theme.TEXT : Theme.MUTED);
+        boolean server = b.serverDisabled();
+        int lw = tx - x - ROW_PAD - 6 - badgeSpace(g, b);
+        if (server) ServerBadge.drawRight(ui, b, tx - 6, y + (h - ServerBadge.H) / 2);
+        g.text(g.clip(name, lw), x + ROW_PAD, y + (h - 8) / 2, enabled && !server ? Theme.TEXT : Theme.MUTED);
         if (g.width(name) > lw) ui.tooltip(b.nameKey(), x, y, w, h, name);
         Widgets.drawToggle(ui, b, tx, y + (h - Widgets.TOGGLE_H) / 2, b.on(), true, hot);
         if (clicked) b.toggle();
@@ -263,7 +271,10 @@ public final class SettingsView {
         if (hov > 0f) g.rect(x + 1, y + 1, w - 2, h - 1, Theme.alpha(Theme.SURFACE3, hov * (whole ? 1f : 0.6f)));
         int tx = x + ROW_PAD;
         String name = Lang.tr(s.nameKey());
-        int textColor = enabled ? Theme.TEXT : Theme.MUTED;
+        int textColor = enabled && !s.serverDisabled() ? Theme.TEXT : Theme.MUTED;
+        if (s.serverDisabled()) {
+            ServerBadge.drawRight(ui, s, x + w - ROW_PAD - controlWidth(g, s, w) - 6, y + (h - ServerBadge.H) / 2);
+        }
         if (desc.isEmpty()) {
             g.text(g.clip(name, labelW), tx, y + 9, textColor);
         } else {

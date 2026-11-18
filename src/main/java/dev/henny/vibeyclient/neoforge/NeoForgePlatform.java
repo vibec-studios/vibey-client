@@ -74,6 +74,11 @@ public final class NeoForgePlatform implements Platform {
     }
 
     @Override
+    public boolean canSendToPlayer(ServerPlayer player, CustomPacketPayload.Type<?> type) {
+        return player.connection != null && player.connection.hasChannel(type);
+    }
+
+    @Override
     public void sendToPlayer(ServerPlayer player, CustomPacketPayload payload) {
         if (player.connection != null && player.connection.hasChannel(payload.type())) PacketDistributor.sendToPlayer(player, payload);
     }

@@ -26,6 +26,7 @@ public abstract class Setting<T, S extends Setting<T, S>> {
     private String sectionLabel;
     private BooleanSupplier visible = () -> true;
     private String nameKey;
+    private String serverRule;
     private final List<Consumer<T>> listeners = new CopyOnWriteArrayList<>();
 
     protected Setting(String key, T defaultValue) {
@@ -110,6 +111,26 @@ public abstract class Setting<T, S extends Setting<T, S>> {
         if (section == null) return null;
         if (sectionLabel != null) return sectionLabel;
         return (group == null ? "core" : group.id()) + ".section." + section;
+    }
+
+    /**
+     * The server-rule key this setting belongs to (PLAY-LINKS.md §5, e.g. {@code "zoom"} or {@code "hud.cps"}): while
+     * the current server disables it, the settings page shows "Disabled by this server" in the row. Only the badge –
+     * the feature itself must still check {@link dev.henny.vibeyclient.api.ServerRules#isDisabled}.
+     */
+    public final S serverRule(String key) {
+        serverRule = key;
+        return self();
+    }
+
+    /** The server-rule key, or null. */
+    public final String serverRule() {
+        return serverRule;
+    }
+
+    /** True while the current server disables this setting's {@link #serverRule(String) feature}. */
+    public final boolean serverDisabled() {
+        return serverRule != null && dev.henny.vibeyclient.api.ServerRules.isDisabled(serverRule);
     }
 
     public final S visibleWhen(BooleanSupplier condition) {

@@ -37,6 +37,7 @@ public final class VibeyCore {
         dev.henny.vibeyclient.ui.title.CoreMenus.register();
         BuiltinModules.registerAll(ModuleManager.get());
         ModuleManager.get().load();
+        ServerRulesClient.init();
         NetDispatch.setClientHandler(VibeyNet::handle);
         dev.henny.vibeyclient.dev.DevDriver.startIfRequested();
         Vibey.LOG.info("Vibey Client core ready, {} modules", ModuleManager.get().all().size());
@@ -60,6 +61,7 @@ public final class VibeyCore {
         if (!mm.isStarted()) mm.start();
         Lang.tick();
         Keybinds.tick();
+        ServerRulesClient.tick();
         mm.tick();
         dev.henny.vibeyclient.ui.title.UiShot.tick();
         dev.henny.vibeyclient.dev.DevTour.tick();
@@ -74,6 +76,7 @@ public final class VibeyCore {
 
     public static void onWorldJoin() {
         inWorld = true;
+        ServerRulesClient.onJoin();
         VibeyNet.onJoin();
         ModuleManager.get().forEachEnabled(m -> m.onWorldJoin());
         Events.post(new VibeyEvents.WorldJoin());
@@ -82,6 +85,7 @@ public final class VibeyCore {
     public static void onWorldLeave() {
         if (!inWorld) return;
         inWorld = false;
+        ServerRulesClient.onLeave();
         VibeyNet.onLeave();
         ModuleManager.get().forEachEnabled(m -> m.onWorldLeave());
         Events.post(new VibeyEvents.WorldLeave());
