@@ -1,5 +1,5 @@
 /**
- * Vibey Client – Blockbench plugin (v0.2.0) by Vibe Craft Studios.
+ * Vibey Client – Blockbench plugin (v0.2.1) by Vibe Craft Studios.
  *
  * Model formats "Vibey Cosmetic" and "Vibey Emote", import/export of `.vibey` bundles (docs/SPEC.md §5),
  * a reference player, validation and the live link into the running game (docs/SPEC.md §8).
@@ -14,7 +14,7 @@
  */
 (function () {
 'use strict';
-const VERSION = '0.2.0';
+const VERSION = '0.2.1';
 
 /* ===========================================================================
  * Vibey core – pure helpers, no Blockbench dependency.

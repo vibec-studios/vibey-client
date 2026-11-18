@@ -101,8 +101,14 @@
       "reachable": "Das Vibe-Backend ist erreichbar.",
       "connecting": "Anmeldung bei Vibe mit deinem Minecraft-Konto…",
       "online": "Bei Vibe angemeldet: Freunde, Chat und synchronisierte Cosmetics sind aktiv.",
-      "offline": "Das Vibe-Backend ist gerade nicht erreichbar. Alles andere funktioniert."
-    }
+      "offline": "Das Vibe-Backend ist gerade nicht erreichbar. Alles andere funktioniert.",
+      "signed_out": "Bei Vibe abgemeldet. Wieder anmelden unter Vibey-Einstellungen → Konto; alles andere funktioniert.",
+      "no_account": "Dieses Minecraft-Profil hat keine Microsoft-Anmeldung (Offline-Profil), Online-Funktionen sind damit nicht möglich. Alles andere funktioniert.",
+      "login_error": "Vibe hat die Anmeldung abgelehnt. Details unter Vibey-Einstellungen → Konto."
+    },
+    "signed_out": "Nicht angemeldet",
+    "no_account": "Kein Vibe-Login",
+    "login_error": "Anmeldung fehlgeschlagen"
   },
   "onboarding": {
     "next": "Weiter",

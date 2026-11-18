@@ -2,7 +2,13 @@
 
 All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.properties`.
 
-## Unreleased
+## 0.2.1 – open source, signed loadouts, status fix
+
+### Fixes
+
+- Title screen status: with an offline Minecraft profile (no Microsoft login) the status said *Signing in…* forever
+  although nothing signs in. It now says *No Vibe login*; after logging out it says *Not signed in*, a refused login
+  shows *Sign-in failed*, and *Signing in…* only appears while a login really runs.
 
 ### License
 

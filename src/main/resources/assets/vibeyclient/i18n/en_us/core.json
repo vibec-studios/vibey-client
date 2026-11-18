@@ -101,8 +101,14 @@
       "reachable": "The Vibe backend is reachable.",
       "connecting": "Signing in to Vibe with your Minecraft account…",
       "online": "Signed in to Vibe: friends, chat and synced cosmetics are active.",
-      "offline": "The Vibe backend is not reachable right now. Everything else works."
-    }
+      "offline": "The Vibe backend is not reachable right now. Everything else works.",
+      "signed_out": "Signed out of Vibe. Sign in again under Vibey settings → Account; everything else works.",
+      "no_account": "This Minecraft profile has no Microsoft login (offline profile), so online features cannot work. Everything else works.",
+      "login_error": "Vibe refused the sign-in. Details under Vibey settings → Account."
+    },
+    "signed_out": "Not signed in",
+    "no_account": "No Vibe login",
+    "login_error": "Sign-in failed"
   },
   "onboarding": {
     "next": "Next",
