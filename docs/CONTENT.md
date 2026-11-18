@@ -224,5 +224,5 @@ should show.
 ## License
 
 The starter set (`content/src`, `content/dist`, `content/sounds`, `content/audit`) is artwork by Vibe Craft Studios,
-all rights reserved (`ASSETS-LICENSE.md`); only the tools in `content/tools/` are Apache-2.0 code. Forks must make
+all rights reserved (`NOTICE`, [ASSETS-POLICY.md](https://github.com/vibec-studios/.github/blob/main/ASSETS-POLICY.md)); only the tools in `content/tools/` are Apache-2.0 code. Forks must make
 their own content.

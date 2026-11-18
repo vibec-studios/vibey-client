@@ -46,7 +46,7 @@ public final class GlobalSettings {
 
     public static final KeybindSetting openMenu = GROUP.add(new KeybindSetting("core", "open_menu", Keys.RIGHT_SHIFT));
 
-    /** Default = BuildInfo.DEFAULT_BACKEND: our backend, official builds only (forks: own default_backend, SERVICES.md). */
+    /** Default = BuildInfo.DEFAULT_BACKEND: our backend, official builds only (forks: own default_backend, https://github.com/vibec-studios/.github/blob/main/SERVICES.md). */
     public static final StringSetting backendUrl = GROUP.add(new StringSetting("backendUrl", BuildInfo.DEFAULT_BACKEND, 256)).advanced();
 
     public static final ActionSetting resetBackend = GROUP.add(new ActionSetting("resetBackend",

@@ -1,31 +1,47 @@
 Vibey Client
 Copyright 2026 Vibe Craft Studios
 
-The source code in this repository is licensed under the Apache License, Version 2.0 (see LICENSE). This includes
-the Minecraft mod, the Blockbench plugin code (blockbench/), the content build tools (content/tools/) and the
-scripts in tools/ and scripts/.
+The source code is licensed under the Apache License, Version 2.0 (see LICENSE). This includes the Minecraft mod, the
+Blockbench plugin code (blockbench/), the content build tools (content/tools/) and the scripts in tools/ and scripts/.
 
-The Apache License does not cover:
-  - the names "Vibe", "Vibey", "Vibey Client", "Vibe Craft Studios" and the seal mascot/logo (see TRADEMARKS.md),
-  - the artwork and other assets listed in ASSETS-LICENSE.md (all rights reserved), among them the starter
-    cosmetics and emotes, icons, textures, sounds and screenshots,
-  - access to the Vibe online services such as vibe.henny.dev and the Vibey relay (see SERVICES.md).
+Not covered by that license – see https://github.com/vibec-studios/.github/blob/main/LICENSING.md :
+  - our names and logos ("Vibe", "Vibey", "Vibey Client", "Vibey Multiplayer", "Vibey Lyrics", "Vibe Craft Studios",
+    the seal) – TRADEMARKS.md,
+  - artwork, models, textures, animations and sounds – ASSETS-POLICY.md, in this repository in particular:
+      assets/icon.png, assets/icon.svg (the seal logo; in the jars as assets/vibeyclient/icon.png),
+      the seal character drawn by src/main/java/dev/henny/vibeyclient/ui/SealModel.java and ui/Seal.java,
+      content/src/** (the designs of the starter cosmetics and emotes, written as code),
+      content/dist/** (.vibey bundles, index.json, thumbnails/, previews/, blockbench/; in the jars as
+        assets/vibeyclient/builtin/**),
+      content/sounds/**, content/audit/**,
+      src/main/resources/assets/vibeyclient/textures/font/icons.png (nametag seal and badge glyphs),
+      src/main/resources/assets/vibeyclient/textures/lyrics/sky/** (incl. thumb/), except the MIT files below,
+      src/main/resources/assets/vibeyclient/lyrics/demo/pixel_skies.png,
+      the 9x9 pixel icon designs in src/main/java/dev/henny/vibeyclient/ui/Icons.java,
+      the reference player of the Blockbench plugin (mannequin model, REF_COLORS and the skin painted by
+        paintReferenceSkin() in blockbench/vibey.js),
+      docs/screenshots/**,
+      cosmetics loaded from the Vibe services
+  - access to the Vibe online services (vibe.henny.dev, vibey.henny.dev) – SERVICES.md. The addresses in this
+    repository are for the official builds only: default_backend / default_relay in gradle.properties (baked into
+    the generated BuildInfo class by gradle/common.gradle) and the website link in ui/screen/AboutPanel.java.
 
 Forks must use their own name, their own artwork and their own backend services.
 
 -------------------------------------------------------------------------------------------------------------------
-Code taken over from earlier Vibe Craft Studios projects (MIT)
+Code and files from earlier Vibe Craft Studios projects (MIT)
 -------------------------------------------------------------------------------------------------------------------
 
 The multiplayer module (src/main/java/dev/henny/vibeyclient/module/multiplayer/) is based on Vibey Multiplayer
 (github.com/vibec-studios/vibey-multiplayer) and the lyrics module (src/main/java/dev/henny/vibeyclient/module/lyrics/)
-on Vibey Lyrics (github.com/vibec-studios/vibey-lyrics), both Copyright (c) 2026 Vibe Craft Studios and published
-under the MIT License. The original license texts are kept in:
-  - licenses/vibey-multiplayer-MIT.txt
-  - licenses/vibey-lyrics-MIT.txt
-The parts of these modules that came from those projects remain available under the MIT License as published there;
-the changes made in this repository are licensed under the Apache License 2.0. Lyrics-module assets that were
-published in Vibey Lyrics under MIT (see ASSETS-LICENSE.md, "Exceptions") stay under MIT.
+on Vibey Lyrics (github.com/vibec-studios/vibey-lyrics), both Copyright (c) 2026 Vibe Craft Studios. What was
+published there before 2026-11-18 stays available under the MIT License; the license texts are in
+licenses/vibey-multiplayer-MIT.txt and licenses/vibey-lyrics-MIT.txt (inside the jars under licenses/vibeyclient/).
+
+These lyrics files were published in Vibey Lyrics under MIT and remain available under it:
+  src/main/resources/assets/vibeyclient/textures/lyrics/sky/{aurora,candy,crimson,dreamy,galaxy,golden,moonlight,
+    nebula,saturn,streak,sunset,synthwave}.png (+ .png.mcmeta),
+  src/main/resources/assets/vibeyclient/lyrics/demo/pixel_skies.ogg and pixel_skies.lrc.
 
 -------------------------------------------------------------------------------------------------------------------
 Third-party components
@@ -40,5 +56,4 @@ Fonts of the lyrics module (src/main/resources/assets/vibeyclient/font/lyrics/, 
   Apache License 2.0. License texts: licenses/lyrics/fonts/ (inside every Fabric jar under
   licenses/vibeyclient/lyrics/).
 
-Minecraft, Fabric and NeoForge are not part of this repository; the mod is compiled against them.
 Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.

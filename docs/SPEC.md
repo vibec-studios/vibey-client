@@ -39,7 +39,8 @@ Related repositories (all under the GitHub org `vibec-studios`):
 - Mod id `vibeyclient`, name `Vibey Client`, Java package `dev.henny.vibeyclient`, maven group `dev.henny`,
   archives `vibey-client-<loader>-<mc label>`. Asset namespace `vibeyclient`. License: code Apache-2.0 (`LICENSE`, `NOTICE`; the
   multiplayer/lyrics code from the MIT standalone mods keeps its notice in `licenses/`), artwork all rights reserved
-  (`ASSETS-LICENSE.md`), names and the seal in `TRADEMARKS.md`, online services in `SERVICES.md`.
+  (paths in `NOTICE`); names, the seal and the online services follow the central policies in
+  `vibec-studios/.github` (`LICENSING.md`, `TRADEMARKS.md`, `ASSETS-POLICY.md`, `SERVICES.md`).
 - `environment: "*"` – the same jar can go on a server (it then only relays emote/loadout packets, see §6).
   Client-only classes must never be loaded on a dedicated server.
 - Lyrics module is **Fabric-only** (like the standalone mod). On NeoForge it is simply not registered.

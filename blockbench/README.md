@@ -80,4 +80,5 @@ plugin), used by the mock game server and the tests.
 ## License
 
 The plugin code is Apache-2.0 (see `LICENSE` and `NOTICE` in the repository root). The reference player it draws, the
-seal icon and the names "Vibey"/"Vibe" are not covered: see `ASSETS-LICENSE.md` and `TRADEMARKS.md`.
+seal icon and the names "Vibey"/"Vibe" are not covered: see `NOTICE` and
+https://github.com/vibec-studios/.github/blob/main/LICENSING.md.

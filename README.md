@@ -275,7 +275,7 @@ a hosted world accept dev accounts without a Mojang session (for invite tests th
 
 Default backend (`https://vibe.henny.dev`) and relay are set in `gradle.properties` and baked into the generated
 `BuildInfo` class. They are our services, for official builds only: forks must set their own (see
-[SERVICES.md](SERVICES.md)), and local development uses a local backend/relay.
+[SERVICES.md](https://github.com/vibec-studios/.github/blob/main/SERVICES.md)), and local development uses a local backend/relay.
 
 ### Releases
 
@@ -343,20 +343,25 @@ Not an official Minecraft product. Not approved by or associated with Mojang or 
 
 ## Lizenz / License
 
-**Code:** [Apache License 2.0](LICENSE) (© Vibe Craft Studios, [NOTICE](NOTICE)). Forken, ändern und weitergeben ist
-erlaubt.
+**Code:** [Apache License 2.0](LICENSE). Forken, ändern und weitergeben ist erlaubt.
 
-**Nicht** von der Code-Lizenz erfasst:
+**Nicht** von der Code-Lizenz erfasst (gilt für alle Repos von Vibe Craft Studios,
+[LICENSING.md](https://github.com/vibec-studios/.github/blob/main/LICENSING.md)):
 
 - **Namen und Logos** („Vibe“, „Vibey“, „Vibey Client“, „Vibe Craft Studios“, die Robbe): Forks brauchen einen
-  eigenen Namen, eine eigene Mod-ID und eigene Logos und dürfen nicht unter unseren Namen vermarktet werden –
-  [TRADEMARKS.md](TRADEMARKS.md).
+  eigenen Namen, eine eigene Mod-ID und eigene Logos –
+  [TRADEMARKS.md](https://github.com/vibec-studios/.github/blob/main/TRADEMARKS.md).
 - **Grafiken und Modelle** (Logo, Icons, Robbe, Starter-Cosmetics und -Emotes, Texturen, Sounds, Screenshots, der
-  Referenzspieler des Blockbench-Plugins): alle Rechte vorbehalten – [ASSETS-LICENSE.md](ASSETS-LICENSE.md).
+  Referenzspieler des Blockbench-Plugins): alle Rechte vorbehalten –
+  [ASSETS-POLICY.md](https://github.com/vibec-studios/.github/blob/main/ASSETS-POLICY.md); Pfade in [NOTICE](NOTICE).
 - **Vibe-Dienste** (Backend `vibe.henny.dev` mit Cosmetics-Katalog, Loadouts und Downloads, Relay
-  `vibey.henny.dev`): nur für offizielle Builds; Forks müssen eigene Dienste nutzen – [SERVICES.md](SERVICES.md),
-  Nutzungsbedingungen: <https://vibe.henny.dev/terms>.
+  `vibey.henny.dev`): nur für offizielle Builds –
+  [SERVICES.md](https://github.com/vibec-studios/.github/blob/main/SERVICES.md).
+
+Code aus *Vibey Multiplayer* und *Vibey Lyrics*, der dort vor dem 18.11.2026 unter MIT veröffentlicht wurde, bleibt
+unter MIT ([`licenses/`](licenses/), Details in [NOTICE](NOTICE)).
 
 *English:* the code is Apache-2.0. Our names and logos, the seal, artwork and models, and the Vibe online services are
-not included: forks must use their own name, artwork and backend. See TRADEMARKS.md, ASSETS-LICENSE.md and
-SERVICES.md. Code taken over from Vibey Multiplayer and Vibey Lyrics keeps its MIT notice (`licenses/`).
+not included: forks must use their own name, artwork and backend. See the linked policies and [NOTICE](NOTICE) for
+the asset paths in this repository. Code from Vibey Multiplayer and Vibey Lyrics that was published under MIT before
+2026-11-18 stays available under MIT (`licenses/`).

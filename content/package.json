@@ -12,5 +12,5 @@
     "synth": "node tools/synth.mjs",
     "check:blockbench": "node tools/check-blockbench.mjs"
   },
-  "license": "SEE LICENSE IN ../ASSETS-LICENSE.md"
+  "license": "SEE LICENSE IN ../NOTICE"
 }
