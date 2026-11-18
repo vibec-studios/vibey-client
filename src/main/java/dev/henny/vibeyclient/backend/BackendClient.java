@@ -150,12 +150,21 @@ public final class BackendClient implements VibeBackend {
         this.baseUrl = configuredBaseUrl();
         UUID profile = MojangJoin.profileId();
         this.accountName = MojangJoin.name();
-        this.accountKey = AuthStore.key(baseUrl, profile == null ? accountName : profile.toString());
-        this.tokens = store.get(accountKey);
+        String key = AuthStore.key(baseUrl, profile == null ? accountName : profile.toString());
+        // Same account: keep the in-memory pair (a refresh may just have rotated it); read the file only for a new
+        // account. No refreshLock here: this runs on the client thread and refresh() may hold it during a request.
+        if (!key.equals(accountKey)) {
+            authEpoch.incrementAndGet(); // late results for the old account are dropped (key/epoch check)
+            accountKey = key;
+            tokens = store.get(key);
+        } else if (tokens == null) {
+            Tokens stored = store.get(key);
+            if (tokens == null) tokens = stored;
+        }
         LOG.info("Backend {} for {} ({})", baseUrl, accountName, tokens != null ? "stored login" : "no login yet");
         if (tokens != null && tokens.valid()) {
             setState(State.CONNECTING, null, null);
-            gateway.connect();
+            gateway.connect(gen);
         } else if (autoLogin && !store.loggedOut(accountKey) && (devAuth() || MojangJoin.hasOnlineSession())) {
             loginAsync(gen);
         } else {
@@ -213,7 +222,7 @@ public final class BackendClient implements VibeBackend {
         return accountName;
     }
 
-    void setState(State s, String code, String message) {
+    synchronized void setState(State s, String code, String message) {
         boolean changed = state != s || !java.util.Objects.equals(code, errorCode);
         state = s;
         errorCode = code;
@@ -241,7 +250,7 @@ public final class BackendClient implements VibeBackend {
                 LOG.info("Logged in as {}", accountName);
                 loginRetries.set(0);
                 setState(State.CONNECTING, null, null);
-                gateway.connect();
+                gateway.connect(gen);
             } catch (ApiException e) {
                 if (generation.get() != gen) return;
                 LOG.warn("Login failed: {} {}", e.code, e.getMessage());
@@ -269,6 +278,8 @@ public final class BackendClient implements VibeBackend {
     }
 
     private Tokens loginBlocking() {
+        int epoch = authEpoch.get();
+        String key = accountKey;
         JsonObject challenge = J.obj(call("POST", "/api/v1/auth/challenge", new JsonObject(), false));
         String serverId = J.str(challenge, "serverId");
         if (serverId == null) throw new ApiException(502, "bad_response", "No serverId");
@@ -285,8 +296,15 @@ public final class BackendClient implements VibeBackend {
         JsonObject res = J.obj(call("POST", "/api/v1/auth/verify", body, false));
         Tokens t = Tokens.fromPair(res);
         if (!t.valid()) throw new ApiException(502, "bad_response", "No tokens");
-        tokens = t;
-        store.put(accountKey, t, accountName);
+        refreshLock.lock();
+        try {
+            // logged out / account switched while we were waiting: drop this login
+            if (authEpoch.get() != epoch || !key.equals(accountKey)) throw new ApiException(0, "cancelled", "Login cancelled");
+            tokens = t;
+            store.put(key, t, accountName);
+        } finally {
+            refreshLock.unlock();
+        }
         me = J.obj(res, "user");
         return t;
     }
@@ -299,7 +317,8 @@ public final class BackendClient implements VibeBackend {
         gateway.disconnect();
         CompletableFuture<Void> f = t == null ? CompletableFuture.completedFuture(null)
                 : request("POST", "/api/v1/auth/logout", new JsonObject()).handle((r, e) -> null);
-        return f.thenRun(() -> {
+        return f.thenRunAsync(() -> {
+            authEpoch.incrementAndGet(); // a refresh/login still in flight must not bring the tokens back
             synchronized (this) {
                 gateway.disconnect();
                 tokens = null;
@@ -311,13 +330,20 @@ public final class BackendClient implements VibeBackend {
                 }
                 if (running) setState(State.LOGGED_OUT, null, null);
             }
-        });
+        }, exec);
     }
 
     /** The login is gone for good (refresh rejected, banned, session revoked). */
     void authLost(String code, String message, boolean revoked) {
-        LOG.warn("Backend login lost: {} {}", code, message);
+        authLost(-1, code, message, revoked);
+    }
+
+    /** {@code gen}: the run the gateway reported it for (-1 = current); stale reports are ignored. */
+    void authLost(int gen, String code, String message, boolean revoked) {
         synchronized (this) {
+            if (gen != -1 && gen != generation.get()) return;
+            LOG.warn("Backend login lost: {} {}", code, message);
+            authEpoch.incrementAndGet();
             tokens = null;
             selfId = null;
             if (accountKey != null) {
@@ -357,6 +383,8 @@ public final class BackendClient implements VibeBackend {
         try {
             Tokens current = tokens;
             if (current == null) throw new ApiException(401, "unauthorized", "Not logged in");
+            int epoch = authEpoch.get();
+            String key = accountKey;
             if (failed != null && !current.accessToken().equals(failed.accessToken())
                     && current.expiresAt() - System.currentTimeMillis() > 30_000) {
                 return current;
@@ -365,15 +393,17 @@ public final class BackendClient implements VibeBackend {
             try {
                 pair = J.obj(call("POST", "/api/v1/auth/refresh", J.of("refreshToken", current.refreshToken()), false));
             } catch (ApiException e) {
-                if (e.status == 401 || e.status == 403) {
+                if ((e.status == 401 || e.status == 403) && authEpoch.get() == epoch) {
                     authLost(e.code, e.getMessage(), false);
                 }
                 throw e;
             }
             Tokens next = Tokens.fromPair(pair);
             if (!next.valid()) throw new ApiException(502, "bad_response", "No tokens");
+            // logged out / account switched meanwhile: the new pair belongs to nobody any more
+            if (authEpoch.get() != epoch || !key.equals(accountKey)) throw new ApiException(401, "unauthorized", "Logged out");
             tokens = next;
-            store.put(accountKey, next, null); // persisted before anyone can use it
+            store.put(key, next, null); // persisted before anyone can use it
             refreshCount.incrementAndGet();
             return next;
         } finally {
@@ -383,9 +413,14 @@ public final class BackendClient implements VibeBackend {
 
     /** Tests: marks the access token as expired (the next call must refresh first). Returns the refresh count so far. */
     public int debugExpireAccessToken() {
-        Tokens t = tokens;
-        if (t != null) tokens = new Tokens(t.accessToken(), t.refreshToken(), 0, t.sessionId());
-        return refreshCount.get();
+        refreshLock.lock();
+        try {
+            Tokens t = tokens;
+            if (t != null) tokens = new Tokens(t.accessToken(), t.refreshToken(), 0, t.sessionId());
+            return refreshCount.get();
+        } finally {
+            refreshLock.unlock();
+        }
     }
 
     public int refreshCount() {
@@ -394,6 +429,8 @@ public final class BackendClient implements VibeBackend {
 
     private final AtomicInteger refreshCount = new AtomicInteger();
     private final AtomicInteger loginRetries = new AtomicInteger();
+    /** Bumped when a login is abandoned (logout, login lost, other account): late refresh/login results are dropped. */
+    private final AtomicInteger authEpoch = new AtomicInteger();
 
     // ============================================================================================ REST
 
@@ -578,7 +615,16 @@ public final class BackendClient implements VibeBackend {
         return b + "/ws";
     }
 
-    void onGatewayReady(JsonObject d) {
+    /** A callback of an old run (restart/stop happened meanwhile)? */
+    private boolean stale(int gen) {
+        return gen != generation.get() || !running;
+    }
+
+    void onGatewayReady(int gen, JsonObject d) {
+        synchronized (this) {
+            if (stale(gen)) return;
+            setState(State.READY, null, null);
+        }
         readyPayload = d;
         JsonObject user = J.obj(d, "user");
         if (user != null) me = user;
@@ -589,7 +635,6 @@ public final class BackendClient implements VibeBackend {
             selfId = null;
         }
         LOG.info("Gateway ready as {} ({} friends)", J.str(user, "name"), J.arr(d, "friends") == null ? 0 : J.arr(d, "friends").size());
-        setState(State.READY, null, null);
         dispatch(EV_READY, d);
         UUID self = selfId;
         Tasks.onMain(() -> {
@@ -615,23 +660,29 @@ public final class BackendClient implements VibeBackend {
     private final AtomicInteger resumes = new AtomicInteger();
     private volatile int lastReplayed;
 
-    void onGatewayResumed(JsonObject d) {
+    void onGatewayResumed(int gen, JsonObject d) {
+        synchronized (this) {
+            if (stale(gen)) return;
+            setState(State.READY, null, null);
+        }
         lastReplayed = J.num(d, "replayed", 0);
         resumes.incrementAndGet();
         LOG.info("Gateway resumed, {} events replayed", lastReplayed);
-        setState(State.READY, null, null);
         dispatch(EV_RESUMED, d);
     }
 
-    void onGatewayDown(int code, String reason, boolean willReconnect) {
-        if (!running) return;
+    synchronized void onGatewayDown(int gen, int code, String reason, boolean willReconnect) {
+        if (stale(gen)) return;
         if (state == State.READY) {
             Tasks.onMain(() -> Events.post(new VibeyEvents.BackendDisconnected(reason == null ? "" : reason)));
         }
-        if (willReconnect && tokens != null) setState(State.RECONNECTING, null, null);
+        // authLost clears the tokens and sets LOGGED_OUT/ERROR under the same lock: never overwrite that
+        boolean loginGone = tokens == null || state == State.LOGGED_OUT || state == State.ERROR || state == State.LOGGING_IN;
+        if (willReconnect && !loginGone) setState(State.RECONNECTING, null, null);
     }
 
-    void onGatewayEvent(String t, JsonObject d) {
+    void onGatewayEvent(int gen, String t, JsonObject d) {
+        if (gen != generation.get()) return;
         if ("me.updated".equals(t)) me = d;
         dispatch(t, d);
     }

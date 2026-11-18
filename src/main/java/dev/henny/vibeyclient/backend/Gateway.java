@@ -52,6 +52,10 @@ final class Gateway {
     private JsonObject cosmeticsSubscription;
     private CompletableFuture<WebSocket> sendChain = CompletableFuture.completedFuture(null);
     private int connectionId;
+    private int gen;
+    /** Access token of the open connection (a 4001 close refreshes only if nobody else rotated it meanwhile). */
+    private String currentToken;
+    private String failedToken;
 
     Gateway(BackendClient client) {
         this.client = client;
@@ -59,9 +63,11 @@ final class Gateway {
 
     // ============================================================================================ public (any thread)
 
-    void connect() {
+    /** {@code gen}: the BackendClient run this connection belongs to (passed back with every callback). */
+    void connect(int gen) {
         loop.execute(() -> {
             wanted = true;
+            this.gen = gen;
             if (ws != null || opening || reconnect != null) return;
             open();
         });
@@ -71,6 +77,7 @@ final class Gateway {
         loop.execute(() -> {
             wanted = false;
             ready = false;
+            opening = false;
             cancelTimers();
             sessionId = null;
             seq = 0;
@@ -119,7 +126,9 @@ final class Gateway {
         opening = true;
         int id = ++connectionId;
         boolean refresh = refreshBeforeConnect;
+        String failed = failedToken;
         refreshBeforeConnect = false;
+        failedToken = null;
         if (sessionId != null && disconnectedAt > 0 && System.currentTimeMillis() - disconnectedAt > RESUME_WINDOW_MS) {
             sessionId = null; // too late to resume, start fresh
             seq = 0;
@@ -127,13 +136,10 @@ final class Gateway {
         // Token (may refresh = network) on a backend worker, then back on the loop.
         CompletableFuture.supplyAsync(() -> {
             Tokens t = client.validTokens();
-            if (refresh) t = client.refresh(t);
+            if (refresh && failed != null && failed.equals(t.accessToken())) t = client.refresh(t);
             return t;
         }, client.executor()).whenCompleteAsync((tokens, err) -> {
-            if (id != connectionId || !wanted) {
-                opening = false;
-                return;
-            }
+            if (id != connectionId || !wanted) return; // stale: a newer open/disconnect owns `opening`
             if (err != null) {
                 opening = false;
                 ApiException e = BackendClient.unwrap(err);
@@ -145,15 +151,16 @@ final class Gateway {
                 return;
             }
             String token = tokens.accessToken();
+            currentToken = token;
             client.http.newWebSocketBuilder()
                     .connectTimeout(Duration.ofSeconds(10))
                     .buildAsync(URI.create(client.gatewayUrl()), new Listener(id, token))
                     .whenCompleteAsync((w, e2) -> {
-                        opening = false;
                         if (id != connectionId || !wanted) {
                             if (w != null) w.abort();
                             return;
                         }
+                        opening = false;
                         if (e2 != null) {
                             BackendClient.LOG.debug("Gateway connect failed: {}", e2.toString());
                             scheduleReconnect();
@@ -235,7 +242,7 @@ final class Gateway {
                 if (d != null) heartbeatMs = Math.max(5_000, J.num(d, "heartbeatInterval", heartbeatMs));
                 startHeartbeat(id);
                 if (cosmeticsSubscription != null) sendNow(J.of("op", "cosmetics.subscribe", "d", cosmeticsSubscription));
-                client.onGatewayReady(d == null ? new JsonObject() : d);
+                client.onGatewayReady(gen, d == null ? new JsonObject() : d);
             }
             case "resumed" -> {
                 attempts = 0;
@@ -245,7 +252,7 @@ final class Gateway {
                 if (presence != null) sendNow(J.of("op", "presence", "d", presence));
                 // Subscriptions belong to the connection: send them again.
                 if (cosmeticsSubscription != null) sendNow(J.of("op", "cosmetics.subscribe", "d", cosmeticsSubscription));
-                client.onGatewayResumed(d == null ? new JsonObject() : d);
+                client.onGatewayResumed(gen, d == null ? new JsonObject() : d);
             }
             case "invalid_session" -> {
                 // a fresh `ready` follows right away
@@ -263,7 +270,7 @@ final class Gateway {
                     revokedReason = J.str(d, "reason");
                 }
                 JsonElement raw = msg.get("d");
-                client.onGatewayEvent(t, raw != null && raw.isJsonObject() ? raw.getAsJsonObject() : new JsonObject());
+                client.onGatewayEvent(gen, t, raw != null && raw.isJsonObject() ? raw.getAsJsonObject() : new JsonObject());
             }
             default -> {
             }
@@ -284,17 +291,20 @@ final class Gateway {
         if (wasReady) disconnectedAt = System.currentTimeMillis();
         boolean fatal = code == 4010 || !wanted;
         BackendClient.LOG.info("Gateway closed {} {}{}", code, reason, fatal ? " (no reconnect)" : "");
-        client.onGatewayDown(code, reason, !fatal);
+        client.onGatewayDown(gen, code, reason, !fatal);
         if (code == 4010) {
             wanted = false;
             sessionId = null;
             String why = revokedReason != null ? revokedReason : reason;
             revokedReason = null;
-            client.authLost("session_revoked", why, true);
+            client.authLost(gen, "session_revoked", why, true);
             return;
         }
         if (fatal) return;
-        if (code == 4001) refreshBeforeConnect = true;
+        if (code == 4001) {
+            refreshBeforeConnect = true;
+            failedToken = currentToken;
+        }
         if (code == 4012) attempts = 0; // server restart: come back quickly
         if (code == 4029) attempts = Math.max(attempts, 3);
         scheduleReconnect();
@@ -305,7 +315,7 @@ final class Gateway {
         int base = Math.min(MAX_BACKOFF_MS, 1000 * (1 << Math.min(attempts, 5)));
         long delay = Math.round(base / 2.0 + Math.random() * (base / 2.0));
         attempts++;
-        client.onGatewayDown(0, "reconnecting", true);
+        client.onGatewayDown(gen, 0, "reconnecting", true);
         reconnect = loop.schedule(() -> {
             reconnect = null;
             if (wanted && ws == null && !opening) open();

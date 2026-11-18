@@ -1,7 +1,6 @@
 package dev.henny.vibeyclient.module.social;
 
 import dev.henny.vibeyclient.api.GlobalSettings;
-import dev.henny.vibeyclient.api.Lang;
 import dev.henny.vibeyclient.api.ModuleCategory;
 import dev.henny.vibeyclient.api.Services;
 import dev.henny.vibeyclient.api.VibeyModule;
@@ -18,11 +17,13 @@ import dev.henny.vibeyclient.client.Keys;
 import dev.henny.vibeyclient.module.social.ui.AccountPanel;
 import dev.henny.vibeyclient.module.social.ui.ConfirmScreen;
 import dev.henny.vibeyclient.module.social.ui.SocialScreen;
+import dev.henny.vibeyclient.api.service.SocialStatus;
+import dev.henny.vibeyclient.ui.Icons;
+import dev.henny.vibeyclient.ui.MenuEntries;
 import dev.henny.vibeyclient.ui.VibeyScreen;
 import dev.henny.vibeyclient.ui.VibeyTabs;
 import dev.henny.vibeyclient.ui.toast.ToastHooks;
 import dev.henny.vibeyclient.ui.toast.ToastStack;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.PauseScreen;
@@ -30,7 +31,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
-import net.minecraft.network.chat.contents.TranslatableContents;
 import org.slf4j.Logger;
 
 /**
@@ -93,7 +93,12 @@ public final class SocialModule extends VibeyModule {
                 () -> isEnabled() && GlobalSettings.online()));
 
         on(VibeyEvents.OnlineFeaturesChanged.class, e -> apply());
-        on(VibeyEvents.ScreenInit.class, e -> decorate(e));
+        // "Friends" on the Vibey title screen and in the pause menu row opens the sidebar over that screen
+        java.util.function.BooleanSupplier shown = () -> isEnabled() && GlobalSettings.online();
+        MenuEntries.register(MenuEntries.Place.TITLE, new MenuEntries.Entry("friends", "core.title.friends", Icons.FRIENDS, 30,
+                shown, p -> ClientCompat.openScreen(new SocialScreen(p, this, null)), this::badge));
+        MenuEntries.register(MenuEntries.Place.PAUSE, new MenuEntries.Entry("friends", "core.title.friends", Icons.FRIENDS, 20,
+                shown, p -> ClientCompat.openScreen(new SocialScreen(p, this, null)), this::badge));
         GlobalSettings.backendUrl.onChange(v -> dev.henny.vibeyclient.api.Tasks.debounce("vibeyclient-social-backend", 1500,
                 () -> dev.henny.vibeyclient.api.Tasks.onMain(this::restart)));
         ToastHooks.addScreenKeyListener(this::screenKey);
@@ -122,10 +127,32 @@ public final class SocialModule extends VibeyModule {
         if (want) {
             if (!backend.running()) backend.start(true);
             Services.register(VibeBackend.class, backend);
+            Services.register(SocialStatus.class, socialStatus);
         } else {
             Services.unregister(VibeBackend.class, backend);
+            Services.unregister(SocialStatus.class, socialStatus);
             if (backend.running()) backend.stop();
         }
+    }
+
+    /** Numbers for the title screen status line and the menu badges (render thread, cheap). */
+    private final SocialStatus socialStatus = new SocialStatus() {
+        @Override
+        public int onlineFriends() {
+            return service.ready() ? service.state.onlineCount() : -1;
+        }
+
+        @Override
+        public int badge() {
+            return SocialModule.this.badge();
+        }
+    };
+
+    /** Unread chats + incoming requests + open invites. */
+    public int badge() {
+        if (!service.ready()) return 0;
+        SocialState st = service.state;
+        return st.unreadChats() + st.incomingRequests() + st.openIncomingInviteCount();
     }
 
     private void restart() {
@@ -202,26 +229,12 @@ public final class SocialModule extends VibeyModule {
         if (!isEnabled() || !GlobalSettings.online()) return false;
         if (!ClientCompat.matches(openKey.mapping(), key)) return false;
         boolean safe = screen instanceof TitleScreen || screen instanceof PauseScreen || screen instanceof JoinMultiplayerScreen
-                || screen instanceof SelectWorldScreen || screen instanceof VibeyScreen;
+                || screen instanceof SelectWorldScreen || screen instanceof VibeyScreen
+                || screen instanceof dev.henny.vibeyclient.ui.title.VibeyTitleScreen;
         if (!safe) return false;
         GuiEventListener f = screen.getFocused();
         if (f instanceof EditBox eb && eb.isFocused()) return false;
         openSidebar(null);
         return true;
-    }
-
-    private void decorate(VibeyEvents.ScreenInit e) {
-        if (!(e.screen() instanceof PauseScreen) || !GlobalSettings.online()) return;
-        boolean full = false;
-        for (GuiEventListener l : e.widgets()) {
-            if (l instanceof Button b && b.getMessage().getContents() instanceof TranslatableContents tc && tc.getKey().equals("menu.returnToGame")) {
-                full = true;
-            }
-        }
-        if (!full) return;
-        int unread = service.state.unreadChats() + service.state.incomingRequests() + service.state.openIncomingInvites().size();
-        String label = tr("pause.button") + (unread > 0 ? " (" + unread + ")" : "");
-        e.addWidget().accept(Button.builder(Lang.text("social.pause.button").copy().append(unread > 0 ? " (" + unread + ")" : ""),
-                b -> openSidebar(null)).bounds(74, 6, Math.max(64, net.minecraft.client.Minecraft.getInstance().font.width(label) + 12), 20).build());
     }
 }

@@ -212,6 +212,7 @@ public final class SocialGameTest implements FabricClientGameTest {
     /** Invite → "host first?" dialog → hosting → invite sent (Juno accepts it); accepting Juno's invite asks before leaving. */
     private static void hostingPhase(ClientGameTestContext ctx, SocialModule m, String junoId) {
         StubHosting stub = new StubHosting();
+        HostingService real = ctx.computeOnClient(mc -> Services.get(HostingService.class).orElse(null));
         ctx.runOnClient(mc -> Services.register(HostingService.class, stub));
         open(ctx, m, false, SidebarRoute.invite(junoId));
         ctx.waitTicks(20);
@@ -235,6 +236,7 @@ public final class SocialGameTest implements FabricClientGameTest {
         ctx.runOnClient(mc -> {
             stub.stopHosting();
             Services.unregister(HostingService.class, stub);
+            if (real != null) Services.register(HostingService.class, real);
         });
     }
 

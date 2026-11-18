@@ -158,6 +158,14 @@ public final class SocialState {
         return out;
     }
 
+    /** Open invites from others (no allocation: called per frame for badges). */
+    public int openIncomingInviteCount() {
+        String self = selfId();
+        int n = 0;
+        for (Invite i : invites.values()) if (i.open() && i.from() != null && !i.from().id().equals(self)) n++;
+        return n;
+    }
+
     /** The DM chat with {@code userId}, or null. */
     public Chat dmWith(String userId) {
         for (Chat c : chats.values()) {
