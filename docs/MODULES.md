@@ -22,7 +22,7 @@ src/main/resources/
 
 Existing stubs: `social`, `cosmetics`, `emotes`, `multiplayer` (conflicts with mod id `vibey`), `lyrics`
 (conflicts with `vibeylyrics`, Fabric only: the package is excluded from the NeoForge build and not registered
-there), `devlink`.
+there), `devlink`, `nametags` (seal + badge glyphs before player names; data in `client/VibeyPlayers`).
 
 ## Client only
 

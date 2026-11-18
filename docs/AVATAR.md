@@ -29,6 +29,23 @@ wardrobe), `emotes` (wheel, local plays), `devlink` (Blockbench live link). The 
 
 `AvatarItems.version()` changes on every registry change (poll it in UIs). `Thumbnails.draw(g, item, x, y, size)`.
 
+## Over-the-air updates (ItemLoader)
+
+The catalog (`GET /api/v1/cosmetics/catalog`, ETag) is fetched on start, every 10 min + 0–3 min jitter, 3 s after a
+world join, 0–5 s after the gateway event `catalog.updated` and after a reconnect whose `ready.catalogVersion`
+differs (all through `ItemLoader.requestCatalog`, never more than every 15 s). A 304 does nothing. On a change:
+entries whose asset hash is unchanged keep their parsed `Bundle` (no re-parse, no texture re-upload); new/changed
+assets come from the disk cache or are downloaded on workers (4 in parallel, sha256-checked, cached by hash), parsed
+and their meshes compiled, then everything is swapped in with one `AvatarItems.putAll` on the client thread
+(replaced bundles release their GPU textures and sounds; the new textures upload lazily, 3 per frame). Until the
+swap the old version keeps rendering; a failed download keeps it until the next poll. Loadouts store ids, so equipped
+items stay equipped. `ItemLoader.onNewItems` (first load excluded) and `LoadoutSync.reloadOwned` (grants after
+`catalog.updated`) feed one "New cosmetics available" toast per batch.
+
+Items that need a newer client (`minClientVersion` on the catalog item or in the bundle, `formatVersion` > 1) become
+metadata-only items (`bundle() == null`, `needsUpdate()`): listed greyed out with "Update Vibey Client", never
+rendered or equipped. Unknown kinds/slots are skipped and logged once; parse failures are logged once per hash.
+
 ## Render path per version
 
 | Versions | Player data | Cosmetics | World things (pets, auras, particles) | GUI preview |
@@ -53,6 +70,12 @@ real-Blockbench screenshots in `content/dist/blockbench/`.
 
 - `./gradlew :fabric-1.21.11:runClientGameTest` – `CosmeticsGameTest`: mannequin player with every slot (front/side/back),
   12 emotes mid-animation, shields, local player emote with camera switch, previews on the title screen and in a world.
+- `AuditBundlesGameTest` (same run): the bundles in `content/audit/` (built by `content/tools/build-audit.mjs`) combine
+  features in unusual ways – a hat with a catmull-rom orbit, a locator particle loop and an embedded sound, a pet with
+  props and visibility toggles in `idle` *and* `walk`, per-face textures (animated interpolated strip + HD), wings with a
+  future attach point, an emote with three props on different bones and locators on props and player bones, and
+  bundles for a newer client / with an unknown slot. Then OTA against a local mock catalog: hot swap of an equipped
+  item, new community items with creators, needs-update stubs, unknown kinds, 304 reuse, one "new items" batch.
 - Other versions: `VIBEYCLIENT_AVATAR_TEST=true ./gradlew :fabric-1.21.4:runClient` (title-screen previews) or
   `VIBEYCLIENT_AVATAR_TEST=world ./gradlew :fabric-26.3:runClient --args="--quickPlaySingleplayer vibeytest"`
   (copy `versions/fabric-1.21.11/build/run/vibeytest-world` to `run/saves/vibeytest` first). Screenshots land in

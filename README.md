@@ -70,6 +70,9 @@ Friends on the Vibe backend, logged in with your Minecraft account (no extra reg
   friends, nobody), whether friends see the worlds you host, hide the server address, do not disturb.
 - **Account tab:** status text, logged-in devices (log any of them out), blocked players, log out.
 - Sidebar on **G**, or full screen with the maximize button.
+- **Nametag icons:** a small seal before the name of everyone who plays with Vibey Client (above their head and in
+  the tab list), plus staff, supporter and creator badges. Module *Nametag icons*, with separate switches for the
+  nametag, the tab list and the badges.
 
 | Invite toast in game | Group chat |
 |---|---|
@@ -92,6 +95,8 @@ Friends on the Vibe backend, logged in with your Minecraft account (no extra reg
 - **Hidden under armor** where it makes sense (e.g. hats under helmets). Show or hide your own and other players'
   cosmetics, per slot.
 - Works offline too: the starter set ships inside the jar.
+- **New cosmetics arrive over the air:** no client update needed – new and updated items download in the background
+  and show up in the wardrobe (with a short notice), equipped items stay equipped.
 
 | Crystal Ice Wings + Ice Crown | Snowflake Orbit + Pixel Penguin |
 |---|---|

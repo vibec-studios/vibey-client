@@ -171,6 +171,25 @@ public final class BoneRenderer {
             }
             ps.popPose();
         }
+        // locators on player bones (emotes may place them on head/right_arm/…/root, SPEC §5): follow the posed part
+        if (pass == Pass.ATTACHED && parts != null && locators != null) {
+            for (Bundle.Locator l : b.model.locators.values()) {
+                if (l.bone() >= 0 || l.playerBone() == null) continue;
+                PlayerBone pb = l.playerBone();
+                ps.pushPose();
+                parts.apply(pb, ps);
+                locators.locator(l, ps.last().pose(), PART_PIVOT_M[pb.ordinal()]);
+                ps.popPose();
+            }
+        }
+    }
+
+    /** Model-space origin of each player part after {@link PlayerParts#apply} (root: the model origin). */
+    private static final float[][] PART_PIVOT_M = new float[PlayerBone.VALUES.length][];
+
+    static {
+        for (PlayerBone pb : PlayerBone.VALUES)
+            PART_PIVOT_M[pb.ordinal()] = pb == PlayerBone.ROOT ? new float[]{0f, 0f, 0f} : new float[]{-pb.px, 24f - pb.py, pb.pz};
     }
 
     /** mats[i] *= T((local + pos) / 16) · R(rest + rot) · S(scale), blending the mix. */

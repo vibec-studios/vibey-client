@@ -122,8 +122,20 @@ public final class ItemLoader {
 
     private static final long POLL_MS = 10 * 60_000, POLL_JITTER_MS = 3 * 60_000, MIN_GAP_MS = 15_000;
     private static final int PARALLEL_DOWNLOADS = 4;
+    /**
+     * Own small pool for catalog loads and asset downloads: a load waits for its downloads, so they must not share the
+     * general worker pool (which the HTTP client also needs to complete responses).
+     */
+    private static final java.util.concurrent.ExecutorService CATALOG_IO = java.util.concurrent.Executors.newFixedThreadPool(PARALLEL_DOWNLOADS + 1, r -> {
+        Thread t = new Thread(r, "VibeyClient-Catalog");
+        t.setDaemon(true);
+        t.setPriority(Thread.NORM_PRIORITY - 1);
+        return t;
+    });
     /** Next time the catalog is fetched (epoch ms); 0 = as soon as possible. */
     private static volatile long nextCatalog;
+    /** Bumped when the catalog is dropped (online off, other backend): loads started before are discarded. */
+    private static final java.util.concurrent.atomic.AtomicInteger GENERATION = new java.util.concurrent.atomic.AtomicInteger();
     /** Hashes (or "id@hash") that failed to load: logged once, not retried until the catalog changes them. */
     private static final java.util.Set<String> FAILED = java.util.concurrent.ConcurrentHashMap.newKeySet();
     /** Catalog ids after the last apply, null before the first one (for "new cosmetics" toasts). */
@@ -149,12 +161,13 @@ public final class ItemLoader {
         if (!CATALOG_RUNNING.compareAndSet(false, true)) return;
         lastCatalog = now;
         nextCatalog = now + POLL_MS + java.util.concurrent.ThreadLocalRandom.current().nextLong(POLL_JITTER_MS);
-        Tasks.run(() -> {
+        int gen = GENERATION.get();
+        CATALOG_IO.execute(() -> {
             try {
-                loadCatalog();
+                loadCatalog(gen);
             } catch (Exception e) {
                 Vibey.LOG.info("Cosmetics catalog not available: {}", e.toString());
-                if (!catalogLoaded) loadCachedCatalog();
+                if (!catalogLoaded) loadCachedCatalog(gen);
                 // try again sooner than the normal interval
                 nextCatalog = Math.min(nextCatalog, System.currentTimeMillis() + 60_000
                         + java.util.concurrent.ThreadLocalRandom.current().nextLong(30_000));
@@ -175,6 +188,8 @@ public final class ItemLoader {
 
     /** Online features switched off: forget catalog items (they stay cached on disk). */
     public static void dropCatalog() {
+        GENERATION.incrementAndGet();
+        nextCatalog = 0;
         catalogLoaded = false;
         lastIds = null;
         AvatarItems.putAll(ItemSource.CATALOG, Map.of(), true);
@@ -207,7 +222,7 @@ public final class ItemLoader {
         return base() + (url.startsWith("/") ? url : "/" + url);
     }
 
-    private static void loadCatalog() throws Exception {
+    private static void loadCatalog(int gen) throws Exception {
         Path dir = cacheDir();
         Files.createDirectories(dir.resolve("assets"));
         Path cached = dir.resolve("catalog.json"), etagFile = dir.resolve("catalog.etag");
@@ -228,14 +243,14 @@ public final class ItemLoader {
         } else {
             throw new IllegalStateException("HTTP " + res.statusCode());
         }
-        apply(JsonParser.parseString(new String(body, StandardCharsets.UTF_8)).getAsJsonObject(), true);
+        apply(JsonParser.parseString(new String(body, StandardCharsets.UTF_8)).getAsJsonObject(), true, gen);
     }
 
-    private static void loadCachedCatalog() {
+    private static void loadCachedCatalog(int gen) {
         try {
             Path cached = cacheDir().resolve("catalog.json");
             if (!Files.isRegularFile(cached)) return;
-            apply(JsonParser.parseString(Files.readString(cached)).getAsJsonObject(), false);
+            apply(JsonParser.parseString(Files.readString(cached)).getAsJsonObject(), false, gen);
         } catch (Exception e) {
             Vibey.LOG.debug("Cached catalog unreadable: {}", e.toString());
         }
@@ -245,7 +260,7 @@ public final class ItemLoader {
     private record Entry(String id, String hash, String url, JsonObject json, String minClient) {}
 
     /** Worker thread: turns the catalog JSON into registry items and hands them to the client thread. */
-    static void apply(JsonObject catalog, boolean download) {
+    static void apply(JsonObject catalog, boolean download, int gen) {
         JsonArray list = catalog.get("items") instanceof JsonArray a ? a : new JsonArray();
         String version = catalog.get("version") instanceof com.google.gson.JsonPrimitive v ? v.getAsString() : null;
         List<Entry> entries = new java.util.ArrayList<>();
@@ -317,7 +332,7 @@ public final class ItemLoader {
                     synchronized (items) {
                         if (!items.containsKey(e.id) && old != null && old.bundle() != null) items.put(e.id, old);
                     }
-                }, Tasks.executor()));
+                }, CATALOG_IO));
             }
             java.util.concurrent.CompletableFuture.allOf(jobs.toArray(new java.util.concurrent.CompletableFuture[0])).join();
             Vibey.LOG.info("Cosmetics catalog: downloaded {} new/changed asset(s)", missing.size());
@@ -326,7 +341,7 @@ public final class ItemLoader {
 
         // 3. swap in on the client thread
         Tasks.onMain(() -> {
-            if (!GlobalSettings.online()) return;
+            if (!GlobalSettings.online() || gen != GENERATION.get()) return; // dropped meanwhile (other backend / offline)
             for (AvatarItem old : AvatarItems.all()) {
                 if (old.source() != ItemSource.CATALOG || old.bundle() == null) continue;
                 AvatarItem n = items.get(old.id());

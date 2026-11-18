@@ -87,6 +87,11 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
             else ItemLoader.dropCatalog();
         });
         on(VibeyEvents.BackendConnected.class, e -> ItemLoader.refreshCatalog(false));
+        // another backend has another catalog
+        GlobalSettings.backendUrl.onChange(v -> {
+            ItemLoader.dropCatalog();
+            ItemLoader.refreshCatalog(true);
+        });
         for (BoolSetting s : new BoolSetting[]{showOwn, showOthers, hideWithArmor, showCapes, showWings, showAuras, showPets, showShields, showHats, showBacks}) {
             s.onChange(v -> applyConfig());
         }
