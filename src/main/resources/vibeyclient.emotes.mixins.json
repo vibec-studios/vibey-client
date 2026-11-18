@@ -5,7 +5,9 @@
   "plugin": "dev.henny.vibeyclient.mixin.VibeyMixinPlugin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [],
-  "client": [],
+  "client": [
+    "PlayerModelMixin"
+  ],
   "server": [],
   "injectors": {
     "defaultRequire": 1
