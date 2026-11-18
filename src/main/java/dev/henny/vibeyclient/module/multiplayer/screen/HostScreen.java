@@ -12,6 +12,11 @@ import dev.henny.vibeyclient.module.multiplayer.T;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.GameType;
 
+import dev.henny.vibeyclient.module.multiplayer.host.PlayLinks;
+
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,10 +25,13 @@ import java.util.List;
  * else (players, whitelist, bans, world settings) lives in {@link AdminScreen}.
  */
 public final class HostScreen extends MpCardScreen {
+    private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm");
     private long copiedAt;
+    private long linkCopiedAt;
 
     public HostScreen(Screen parent) {
         super(T.text("title"), parent);
+        PlayLinks.refreshInstance();
     }
 
     @Override
@@ -56,9 +64,22 @@ public final class HostScreen extends MpCardScreen {
     @Override
     protected int drawBody(Gfx g, int x, int y, int w) {
         y = drawAddress(g, x, y, w);
+        if (PlayLinks.visible() && HostSession.status() != HostSession.Status.ERROR) {
+            y += 6;
+            y = drawInvite(g, x, y, w);
+        }
         y += 8;
         g.text(g.clip(summary(), w), x, y, DIM);
-        return y + 12;
+        y += 12;
+        int manual = PlayLinks.manualMods();
+        if (manual > 0) {
+            y += 2;
+            for (String l : wrap(g, T.get(manual == 1 ? "link.manual.one" : "link.manual", manual), w)) {
+                g.text(l, x, y, AMBER);
+                y += 10;
+            }
+        }
+        return y;
     }
 
     private int drawAddress(Gfx g, int x, int y, int w) {
@@ -117,6 +138,85 @@ public final class HostScreen extends MpCardScreen {
         String notice = HostSession.notice();
         if (live && !notice.isEmpty()) g.text(g.clip(notice, textW), x + 10, y + 32, AMBER);
         else g.text(g.clip(sub, textW), x + 10, y + 32, DIM);
+        return y + h;
+    }
+
+    /** The invite link ("play with me"): link + copy button, or what is missing for one. */
+    private int drawInvite(Gfx g, int x, int y, int w) {
+        int h = 44;
+        g.rect(x, y, w, h, SURFACE);
+        g.text(T.get("link.title"), x + 10, y + 8, MUTED);
+        PlayLinks.State st = PlayLinks.state();
+        boolean hosting = HostSession.isHosting();
+        PlayLinks.Link link = PlayLinks.link();
+
+        int btnW = 0;
+        if (hosting && link != null) {
+            boolean copied = System.currentTimeMillis() - linkCopiedAt < 1500;
+            String bl = T.get(copied ? "copied" : "link.copy");
+            btnW = g.width(bl) + 16;
+            int bx = x + w - 8 - btnW;
+            int by = y + 13;
+            boolean hov = hover(bx, by, btnW, 18);
+            g.rect(bx, by, btnW, 18, copied ? 0xFF1F3A28 : (hov ? ACCENT_HOVER : ACCENT));
+            g.textCenter(bl, bx + btnW / 2, by + 5, copied ? GREEN : 0xFFFFFFFF);
+            hit(bx, by, btnW, 18, () -> {
+                if (PlayLinks.copy()) linkCopiedAt = System.currentTimeMillis();
+            });
+        } else if (hosting && (st == PlayLinks.State.ERROR)) {
+            String bl = T.get("button.retry");
+            btnW = g.width(bl) + 16;
+            int bx = x + w - 8 - btnW;
+            int by = y + 13;
+            boolean hov = hover(bx, by, btnW, 18);
+            g.rect(bx, by, btnW, 18, hov ? SURFACE_HOVER : SURFACE_2);
+            g.outline(bx, by, btnW, 18, CARD_LINE);
+            g.textCenter(bl, bx + btnW / 2, by + 5, TEXT);
+            hit(bx, by, btnW, 18, PlayLinks::retry);
+        }
+        int textW = w - 20 - (btnW > 0 ? btnW + 8 : 0);
+        String main;
+        String sub;
+        int mainColor = TEXT;
+        int subColor = DIM;
+        if (!hosting) {
+            main = T.get("link.none");
+            sub = T.get("link.none.hint");
+            mainColor = DIM;
+        } else if (link != null) {
+            main = link.url();
+            sub = link.expiresAt() > 0 ? T.get("link.expires", TIME.format(Instant.ofEpochMilli(link.expiresAt()).atZone(ZoneId.systemDefault())))
+                    : T.get("link.hint");
+        } else {
+            switch (st) {
+                case SIGNED_OUT -> {
+                    main = T.get("link.signin");
+                    sub = T.get("link.signin.hint");
+                    mainColor = AMBER;
+                }
+                case RATE_LIMITED -> {
+                    long min = Math.max(1, (PlayLinks.retryAt() - System.currentTimeMillis() + 59_999) / 60_000);
+                    main = T.get("link.ratelimited");
+                    sub = T.get("link.ratelimited.hint", min);
+                    mainColor = AMBER;
+                }
+                case ERROR -> {
+                    main = T.get("link.error");
+                    sub = PlayLinks.error();
+                    mainColor = RED;
+                }
+                default -> {
+                    main = T.get("link.creating") + dots();
+                    sub = T.get("link.hint");
+                }
+            }
+        }
+        if (link != null && hosting) {
+            g.text(Component.literal(g.clip(main, textW - main.length())).withStyle(ChatFormatting.BOLD), x + 10, y + 21, TEXT);
+        } else {
+            g.text(g.clip(main, textW), x + 10, y + 21, mainColor);
+        }
+        g.text(g.clip(sub, textW), x + 10, y + 32, subColor);
         return y + h;
     }
 
