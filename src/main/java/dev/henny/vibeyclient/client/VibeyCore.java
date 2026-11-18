@@ -86,6 +86,7 @@ public final class VibeyCore {
         boolean start = screen instanceof net.minecraft.client.gui.screens.TitleScreen || screen.getClass().getSimpleName().contains("Onboarding");
         if (start && dev.henny.vibeyclient.Smoke.enabled() && !smokeDone) {
             smokeDone = true;
+            ModuleManager.get().start();
             StringBuilder sb = new StringBuilder();
             for (dev.henny.vibeyclient.api.VibeyModule m : ModuleManager.get().all()) sb.append(m.id()).append('=').append(m.status()).append(' ');
             Vibey.LOG.info("[vibeyclient-smoke] client reached the title screen on {}, modules: {}", Vibey.platform().loader(), sb.toString().trim());
