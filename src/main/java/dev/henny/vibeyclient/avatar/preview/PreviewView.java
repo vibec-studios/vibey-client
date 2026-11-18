@@ -66,7 +66,7 @@ final class PreviewView implements AvatarPreview.View {
         st.walk = st.fly = st.sneak = 0;
         boolean pet = AvatarDraw.bundle(st, Slot.PET) != null;
         placePet(now);
-        float size = Math.min(h / (pet ? 2.35f : 2.25f), w / (pet ? 2.2f : 1.25f));
+        float size = Math.min(h / 2.3f, w / (pet ? 3.1f : 1.6f));
         try {
             render(g, x, y, w, h, size, now);
         } catch (RuntimeException e) {

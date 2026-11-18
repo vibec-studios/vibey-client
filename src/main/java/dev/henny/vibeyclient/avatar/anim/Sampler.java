@@ -12,15 +12,18 @@ import dev.henny.vibeyclient.avatar.bundle.Bundle.Interp;
 public final class Sampler {
     private Sampler() {}
 
-    /** Writes the channel value at {@code t} (seconds) into {@code out[off..off+2]}. */
-    public static void sample(Channel c, float t, float[] out, int off) {
-        float[] ts = c.t, v = c.v;
+    /**
+     * Writes the channel value at {@code t} (seconds) into {@code out[off..off+2]}. Ported from the starter
+     * content's reference renderer (Blockbench 5.2's BoneAnimator.interpolate / Keyframe.getCatmullromLerp): before
+     * the first key its {@code pre ?? v} is held, after the last key its {@code v}; Catmull-Rom duplicates the end
+     * point when there is no neighbour (or A/B is a split key) and, in loops with 3+ keys, wraps the missing
+     * neighbours (keys[n-2] before the first segment, keys[1] after the last).
+     */
+    public static void sample(Channel c, float t, boolean loop, float[] out, int off) {
+        float[] ts = c.t, v = c.v, pre = c.pre;
         int n = ts.length;
-        if (n == 1 || t <= ts[0]) {
-            // before the first key: its "pre" value if it has one? Blockbench holds the first key's value.
-            out[off] = v[0];
-            out[off + 1] = v[1];
-            out[off + 2] = v[2];
+        if (t < ts[0]) {
+            for (int k = 0; k < 3; k++) out[off + k] = Float.isNaN(pre[k]) ? v[k] : pre[k];
             return;
         }
         if (t >= ts[n - 1]) {
@@ -30,31 +33,38 @@ public final class Sampler {
             out[off + 2] = v[k + 2];
             return;
         }
-        int b = 1;
-        while (b < n - 1 && ts[b] <= t) b++;
-        int a = b - 1;
+        int a = 0;
+        while (a < n - 1 && ts[a + 1] <= t) a++;
+        int b = a + 1;
         float span = ts[b] - ts[a];
-        float alpha = span <= 1e-6f ? 1f : (t - ts[a]) / span;
+        float f = (t - ts[a]) / (span == 0 ? 1f : span);
         Interp ia = c.interp[a], ib = c.interp[b];
         if (ia == Interp.STEP) {
-            int k = a * 3;
-            out[off] = v[k];
-            out[off + 1] = v[k + 1];
-            out[off + 2] = v[k + 2];
+            out[off] = v[a * 3];
+            out[off + 1] = v[a * 3 + 1];
+            out[off + 2] = v[a * 3 + 2];
             return;
         }
-        boolean catmull = ia == Interp.CATMULLROM || ib == Interp.CATMULLROM;
-        float[] pre = c.pre;
-        for (int axis = 0; axis < 3; axis++) {
-            float p1 = v[a * 3 + axis];
-            float p2 = Float.isNaN(pre[b * 3 + axis]) ? v[b * 3 + axis] : pre[b * 3 + axis];
-            if (catmull) {
-                float p0 = a > 0 ? v[(a - 1) * 3 + axis] : p1;
-                float p3 = b < n - 1 ? v[(b + 1) * 3 + axis] : p2;
-                out[off + axis] = catmullRom(alpha, p0, p1, p2, p3);
-            } else {
-                out[off + axis] = p1 + (p2 - p1) * alpha;
+        boolean aSplit = !Float.isNaN(pre[a * 3]), bSplit = !Float.isNaN(pre[b * 3]);
+        if (ia == Interp.CATMULLROM || ib == Interp.CATMULLROM) {
+            boolean wrap = loop && n >= 3;
+            int before = a - 1 >= 0 ? a - 1 : (wrap ? n - 2 : -1);
+            int after = b + 1 < n ? b + 1 : (wrap ? 1 : -1);
+            for (int k = 0; k < 3; k++) {
+                float p1 = v[a * 3 + k];
+                float end = bSplit ? pre[b * 3 + k] : v[b * 3 + k];
+                float p0 = before >= 0 && !aSplit ? v[before * 3 + k] : p1;
+                float p3;
+                if (after >= 0 && !bSplit) p3 = Float.isNaN(pre[after * 3 + k]) ? v[after * 3 + k] : pre[after * 3 + k];
+                else p3 = end;
+                out[off + k] = catmullRom(f, p0, p1, end, p3);
             }
+            return;
+        }
+        for (int k = 0; k < 3; k++) {
+            float p1 = v[a * 3 + k];
+            float end = bSplit ? pre[b * 3 + k] : v[b * 3 + k];
+            out[off + k] = p1 + (end - p1) * f;
         }
     }
 

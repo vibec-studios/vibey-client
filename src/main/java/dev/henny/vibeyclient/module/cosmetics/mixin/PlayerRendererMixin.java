@@ -46,6 +46,8 @@ public abstract class PlayerRendererMixin {
     private void vibey$extract(Avatar avatar, AvatarRenderState state, float partial, CallbackInfo ci) {
         AvatarState st = avatar instanceof Player p ? AvatarHooks.extract(p, partial) : null;
         ((AvatarCarrier) state).vibey$setAvatar(st);
+        // an equipped Vibey cape is shown even if the vanilla "Cape" skin part is off
+        if (st != null && AvatarHooks.capeTexture(st) != null) state.showCape = true;
         if (st != null && AvatarHooks.hideHeldItems(st)) {
             state.rightHandItemState.clear();
             state.leftHandItemState.clear();
@@ -65,6 +67,7 @@ public abstract class PlayerRendererMixin {
     private void vibey$extract(AbstractClientPlayer player, PlayerRenderState state, float partial, CallbackInfo ci) {
         AvatarState st = AvatarHooks.extract(player, partial);
         ((AvatarCarrier) state).vibey$setAvatar(st);
+        if (st != null && AvatarHooks.capeTexture(st) != null) state.showCape = true;
         if (st != null && AvatarHooks.hideHeldItems(st)) {
             //? if >=1.21.4 {
             state.rightHandItem.clear();

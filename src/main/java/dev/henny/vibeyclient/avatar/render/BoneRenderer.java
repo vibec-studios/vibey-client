@@ -182,20 +182,21 @@ public final class BoneRenderer {
             Track t = tracks == null ? null : tracks[i];
             if (t == null) continue;
             float w = mix.weights[k], time = mix.times[k];
+            boolean loop = mix.anims[k].loop;
             if (t.rotation() != null) {
-                Sampler.sample(t.rotation(), time, ROT, 0);
+                Sampler.sample(t.rotation(), time, loop, ROT, 0);
                 rx += ROT[0] * w;
                 ry += ROT[1] * w;
                 rz += ROT[2] * w;
             }
             if (t.position() != null) {
-                Sampler.sample(t.position(), time, POS, 0);
+                Sampler.sample(t.position(), time, loop, POS, 0);
                 px += POS[0] * w;
                 py += POS[1] * w;
                 pz += POS[2] * w;
             }
             if (t.scale() != null) {
-                Sampler.sample(t.scale(), time, SCL, 0);
+                Sampler.sample(t.scale(), time, loop, SCL, 0);
                 sx += (SCL[0] - 1f) * w;
                 sy += (SCL[1] - 1f) * w;
                 sz += (SCL[2] - 1f) * w;

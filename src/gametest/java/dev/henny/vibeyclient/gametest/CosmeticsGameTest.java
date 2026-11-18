@@ -37,6 +37,38 @@ public final class CosmeticsGameTest implements FabricClientGameTest {
         context.waitFor(mc -> AvatarItems.all().size() >= 20, 600);
         context.runOnClient(mc -> System.out.println("[vibeyclient-test] items: " + AvatarItems.all().size()));
 
+        // ---------------------------------------------------------------- preview on the title screen
+        context.runOnClient(mc -> {
+            Wardrobe w = Services.get(Wardrobe.class).orElseThrow();
+            w.equip(AvatarItems.get("vibey:vibe_cape"));
+            w.equip(AvatarItems.get("vibey:crystal_wings"));
+            w.equip(AvatarItems.get("vibey:seal_beanie"));
+            w.equip(AvatarItems.get("vibey:seal_buddy"));
+        });
+        PreviewTestScreen[] screen = new PreviewTestScreen[1];
+        context.setScreen(() -> screen[0] = new PreviewTestScreen());
+        context.waitTicks(20);
+        context.takeScreenshot("p01_preview_title");
+        context.runOnClient(mc -> {
+            for (var v : screen[0].views) v.playEmote("vibey:guitar");
+        });
+        context.waitTicks(14);
+        context.takeScreenshot("p02_preview_title_guitar");
+        context.runOnClient(mc -> {
+            for (var v : screen[0].views) {
+                v.override(Slot.WINGS, "vibey:neon_wings");
+                v.override(Slot.PET, "vibey:pixel_penguin");
+                v.playEmote("vibey:wave");
+            }
+        });
+        context.waitTicks(16);
+        context.takeScreenshot("p03_preview_title_override_wave");
+        context.setScreen(() -> null);
+        context.runOnClient(mc -> {
+            Wardrobe w = Services.get(Wardrobe.class).orElseThrow();
+            for (Slot s : Slot.all()) w.unequip(s);
+        });
+
         try (TestSingleplayerContext world = context.worldBuilder().create()) {
             world.getClientWorld().waitForChunksRender();
             world.getServer().runCommand("time set noon");
@@ -102,6 +134,7 @@ public final class CosmeticsGameTest implements FabricClientGameTest {
 
             // ---------------------------------------------------------------- local player
             context.runOnClient(mc -> {
+                mannequin.setPos(mannequin.getX() + 40, mannequin.getY(), mannequin.getZ());
                 Wardrobe w = Services.get(Wardrobe.class).orElseThrow();
                 w.equip(AvatarItems.get("vibey:vibe_cape"));
                 w.equip(AvatarItems.get("vibey:seal_buddy"));
@@ -109,6 +142,10 @@ public final class CosmeticsGameTest implements FabricClientGameTest {
             });
             context.waitTicks(30);
             context.takeScreenshot("l01_self_front_cape_pet");
+            context.setScreen(PreviewTestScreen::new);
+            context.waitTicks(10);
+            context.takeScreenshot("l01b_preview_in_world");
+            context.setScreen(() -> null);
             context.runOnClient(mc -> {
                 mc.options.setCameraType(CameraType.FIRST_PERSON);
                 Services.get(Wardrobe.class).orElseThrow().playEmote("vibey:wave");

@@ -76,11 +76,11 @@ public final class EmotePlay {
                 pose[o + 6] = pose[o + 7] = pose[o + 8] = 1f;
                 continue;
             }
-            if (t.rotation() != null) Sampler.sample(t.rotation(), localTime, pose, o);
+            if (t.rotation() != null) Sampler.sample(t.rotation(), localTime, anim.loop, pose, o);
             else pose[o] = pose[o + 1] = pose[o + 2] = 0f;
-            if (t.position() != null) Sampler.sample(t.position(), localTime, pose, o + 3);
+            if (t.position() != null) Sampler.sample(t.position(), localTime, anim.loop, pose, o + 3);
             else pose[o + 3] = pose[o + 4] = pose[o + 5] = 0f;
-            if (t.scale() != null) Sampler.sample(t.scale(), localTime, pose, o + 6);
+            if (t.scale() != null) Sampler.sample(t.scale(), localTime, anim.loop, pose, o + 6);
             else pose[o + 6] = pose[o + 7] = pose[o + 8] = 1f;
         }
     }
