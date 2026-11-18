@@ -9,6 +9,7 @@
       "dev.henny.vibeyclient.gametest.VibeyClientGameTest",
       "dev.henny.vibeyclient.gametest.BackendStatusGameTest",
       "dev.henny.vibeyclient.gametest.MultiplayerLyricsGameTest",
+      "dev.henny.vibeyclient.gametest.MediaGameTest",
       "dev.henny.vibeyclient.gametest.VibeyUiGameTest",
       "dev.henny.vibeyclient.gametest.SocialGameTest",
       "dev.henny.vibeyclient.gametest.WardrobeUiGameTest",

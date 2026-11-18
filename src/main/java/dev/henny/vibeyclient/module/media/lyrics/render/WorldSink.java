@@ -53,6 +53,23 @@ public final class WorldSink {
     }
 
     /**
+     * Untextured quads (position + color) blended additively ({@code src * alpha + dst}), without the alpha cut-off
+     * of the text shader, so soft fades stay soft: glows, flashes, sparkles, aurora. Lower {@code order} draws first.
+     */
+    public void additive(PoseStack pose, Mesh mesh, int order) {
+        //? if >=1.21.11 {
+        RenderType type = RenderTypes.lightning();
+        //?} else
+        /*RenderType type = RenderType.lightning();*/
+        //? if >=1.21.9 {
+        out.order(order).submitCustomGeometry(pose, type, (p, vc) -> mesh.build(p.pose(), vc));
+        //?} else {
+        /*mesh.build(pose.last().pose(), out.getBuffer(type));
+        if (out instanceof MultiBufferSource.BufferSource source) source.endBatch(type);
+        *///?}
+    }
+
+    /**
      * Textured quads drawn before everything else this sink gets (the sky has to be behind the lyrics' see-through
      * glow). Uses the text render type, which every version has: depth tested, alpha blended, full bright.
      */

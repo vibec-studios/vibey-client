@@ -2,7 +2,6 @@ package dev.henny.vibeyclient.module.media.lyrics.fx;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import dev.henny.vibeyclient.module.media.lyrics.LyricsCompat;
 import dev.henny.vibeyclient.module.media.lyrics.LyricsConfig;
 import dev.henny.vibeyclient.module.media.lyrics.render.LyricLayout;
 import dev.henny.vibeyclient.module.media.lyrics.render.WorldSink;
@@ -15,25 +14,17 @@ import org.joml.Matrix4f;
  * motes on day skies), aurora curtains brighten with the mids and highs, a drop blooms the horizon (and, only with
  * the setting on, gives one soft flash). Tasteful and epilepsy-safe by default: every effect eases in and out, beats
  * light up at most 3 times per second, a flash at most every 2.5 s and never brighter than a third, and *Effect
- * strength* scales everything. Render thread only; the meshes are static (no capturing lambdas, no allocation).
+ * strength* scales everything. Drawn additively without textures (see WorldSink.additive). Render thread only;
+ * the meshes are static (no capturing lambdas, no allocation).
  */
 public final class SkyFx {
     private static final int STARS = 160;
     private static final int GROUPS = 6;
     private static final int GLOW_LON = 48;
-    private static final int AURORA_SEG = 72;
+    private static final int AURORA_SEG = 120;
     private static final long PULSE_MIN_NANOS = 333_000_000L;
     private static final long FLASH_MIN_NANOS = 2_500_000_000L;
 
-    //? if >=1.21.11 {
-    private static final net.minecraft.resources.Identifier WHITE = LyricsCompat.id("vibeyclient", "textures/lyrics/sky/fx_white.png");
-    private static final net.minecraft.resources.Identifier STAR = LyricsCompat.id("vibeyclient", "textures/lyrics/sky/fx_star.png");
-    private static final net.minecraft.resources.Identifier AURORA = LyricsCompat.id("vibeyclient", "textures/lyrics/sky/fx_aurora.png");
-    //?} else {
-    /*private static final net.minecraft.resources.ResourceLocation WHITE = LyricsCompat.id("vibeyclient", "textures/lyrics/sky/fx_white.png");
-    private static final net.minecraft.resources.ResourceLocation STAR = LyricsCompat.id("vibeyclient", "textures/lyrics/sky/fx_star.png");
-    private static final net.minecraft.resources.ResourceLocation AURORA = LyricsCompat.id("vibeyclient", "textures/lyrics/sky/fx_aurora.png");
-    *///?}
 
     // star field (fixed, generated once)
     private static final float[] SX = new float[STARS];
@@ -203,9 +194,9 @@ public final class SkyFx {
                 auroraAlpha = 0f;
             }
             starBase = night ? s * (0.18f + 0.35f * energyS) : 0f;
-            if (!vanilla && (glowAlpha > 0.004f || flashAlpha > 0.004f)) sink.textured(pose, WHITE, GLOW, -999);
-            if (auroraAlpha > 0.01f) sink.textured(pose, AURORA, AURORA_MESH, -998);
-            if (starBase > 0.01f || burst > 0.02f) sink.textured(pose, STAR, STARS_MESH, -997);
+            if (!vanilla && (glowAlpha > 0.003f || flashAlpha > 0.003f)) sink.additive(pose, GLOW, -999);
+            if (auroraAlpha > 0.01f) sink.additive(pose, AURORA_MESH, -998);
+            if (starBase > 0.01f || burst > 0.02f) sink.additive(pose, STARS_MESH, -997);
         }
         long took = System.nanoTime() - t0 + frameNanos;
         if (MX != null) allocatedBytes += Math.max(0, MX.getCurrentThreadAllocatedBytes() - alloc0);
@@ -222,60 +213,60 @@ public final class SkyFx {
     }
 
     // ============================================================================================ meshes
+    // Additive, untextured quads (WorldSink.additive): soft fades stay soft and the drawing order does not matter.
+    // Every quad is emitted in both windings so culling never hides it.
 
     /** Horizon glow (and the soft flash) on the inside of the dome. */
     private static void glow(Matrix4f m, VertexConsumer vc) {
         long t0 = System.nanoTime();
         float r = radius * 0.985f;
-        float a = Math.min(0.75f, glowAlpha);
-        // rings: -6° (0) → 0° (a) → 10° (a) → 40° (0)
-        float[] elev = RINGS;
-        for (int j = 0; j < elev.length - 1; j++) {
-            float e0 = elev[j];
-            float e1 = elev[j + 1];
-            int c0 = withAlpha(glowColor, a * RING_A[j]);
-            int c1 = withAlpha(glowColor, a * RING_A[j + 1]);
-            band(vc, m, r, e0, e1, c0, c1);
+        float a = Math.min(0.6f, glowAlpha);
+        if (a > 0.003f) {
+            for (int j = 0; j < RINGS.length - 1; j++) {
+                band(vc, m, r, RINGS[j], RINGS[j + 1], withAlpha(glowColor, a * RING_A[j]), withAlpha(glowColor, a * RING_A[j + 1]));
+            }
         }
-        if (flashAlpha > 0.004f) {
+        if (flashAlpha > 0.003f) {
             int fc = LyricLayout.mix(glowColor, 0xFFFFFFFF, 0.5f);
-            band(vc, m, r * 0.99f, -6f, 60f, withAlpha(fc, flashAlpha * 0.6f), withAlpha(fc, flashAlpha));
-            band(vc, m, r * 0.99f, 60f, 89.5f, withAlpha(fc, flashAlpha), withAlpha(fc, flashAlpha));
+            band(vc, m, r * 0.99f, -6f, 8f, withAlpha(fc, 0f), withAlpha(fc, flashAlpha));
+            band(vc, m, r * 0.99f, 8f, 60f, withAlpha(fc, flashAlpha), withAlpha(fc, flashAlpha * 0.7f));
+            band(vc, m, r * 0.99f, 60f, 89.5f, withAlpha(fc, flashAlpha * 0.7f), withAlpha(fc, flashAlpha * 0.5f));
         }
         frameNanos += System.nanoTime() - t0;
     }
 
-    private static final float[] RINGS = {-6f, 0f, 10f, 22f, 40f};
-    private static final float[] RING_A = {0f, 1f, 0.85f, 0.35f, 0f};
+    // -6 degrees nothing, full at the horizon, then fading out up to 45 degrees
+    private static final float[] RINGS = {-6f, 0f, 8f, 18f, 30f, 45f};
+    private static final float[] RING_A = {0f, 1f, 0.8f, 0.4f, 0.12f, 0f};
 
     private static void band(VertexConsumer vc, Matrix4f m, float r, float e0, float e1, int c0, int c1) {
         for (int i = 0; i < GLOW_LON; i++) {
             float l0 = 360f * i / GLOW_LON;
             float l1 = 360f * (i + 1) / GLOW_LON;
-            sphere(vc, m, r, l1, e1, c1, 0.5f, 0.5f);
-            sphere(vc, m, r, l1, e0, c0, 0.5f, 0.5f);
-            sphere(vc, m, r, l0, e0, c0, 0.5f, 0.5f);
-            sphere(vc, m, r, l0, e1, c1, 0.5f, 0.5f);
+            quadSphere(vc, m, r, l0, l1, e0, e0, e1, e1, c0, c0, c1, c1);
         }
     }
 
-    /** Stars that twinkle softly with the energy; on each beat one group of them lights up (motes on day skies). */
+    /**
+     * Stars that twinkle softly with the energy; on each beat one group of them lights up (warm motes on day skies).
+     * Each is a small four-pointed sparkle: four tapered rays that are bright at the centre and fade to nothing.
+     */
     private static void stars(Matrix4f m, VertexConsumer vc) {
         long t0 = System.nanoTime();
         float r = radius * 0.97f;
         for (int i = 0; i < STARS; i++) {
             boolean inBurst = i % GROUPS == burstGroup;
-            float tw = 0.5f + 0.5f * (float) Math.sin(time * SRATE[i] + SPHASE[i]);
-            float a = starBase * (0.35f + 0.65f * tw);
-            if (inBurst) a += strength * 0.95f * burst;
             if (!night && !inBurst) continue;
+            float tw = 0.5f + 0.5f * (float) Math.sin(time * SRATE[i] + SPHASE[i]);
+            float a = night ? starBase * (0.35f + 0.65f * tw) : 0f;
+            if (inBurst) a += strength * 0.9f * burst;
             if (a < 0.02f) continue;
             a = Math.min(1f, a);
-            float size = SSIZE[i] * (1f + (inBurst ? 0.9f * burst : 0f)) * r;
+            float size = SSIZE[i] * 1.6f * (1f + (inBurst ? 0.8f * burst : 0f)) * r;
             float x = SX[i];
             float y = SY[i];
             float z = SZ[i];
-            // a tangent basis at the star: east = up × dir, north = dir × east
+            // a tangent basis at the star: east = up x dir, north = dir x east
             float ex = z;
             float ez = -x;
             float el = (float) Math.sqrt(ex * ex + ez * ez);
@@ -290,17 +281,29 @@ public final class SkyFx {
             float ny = z * ex - x * ez;
             float nz = -y * ex;
             int c = withAlpha(starColor, a);
+            int c0 = starColor & 0xFFFFFF;
             float cx = x * r;
             float cy = y * r;
             float cz = z * r;
-            put(vc, m, cx - ex * size - nx * size, cy - ny * size, cz - ez * size - nz * size, c, 0f, 1f);
-            put(vc, m, cx + ex * size - nx * size, cy - ny * size, cz + ez * size - nz * size, c, 1f, 1f);
-            put(vc, m, cx + ex * size + nx * size, cy + ny * size, cz + ez * size + nz * size, c, 1f, 0f);
-            put(vc, m, cx - ex * size + nx * size, cy + ny * size, cz - ez * size + nz * size, c, 0f, 0f);
-            put(vc, m, cx - ex * size + nx * size, cy + ny * size, cz - ez * size + nz * size, c, 0f, 0f);
-            put(vc, m, cx + ex * size + nx * size, cy + ny * size, cz + ez * size + nz * size, c, 1f, 0f);
-            put(vc, m, cx + ex * size - nx * size, cy - ny * size, cz + ez * size - nz * size, c, 1f, 1f);
-            put(vc, m, cx - ex * size - nx * size, cy - ny * size, cz - ez * size - nz * size, c, 0f, 1f);
+            float w = size * 0.18f;
+            // four rays: +east, -east, +north, -north
+            for (int k = 0; k < 4; k++) {
+                float dx = k < 2 ? ex : nx;
+                float dy = k < 2 ? 0f : ny;
+                float dz = k < 2 ? ez : nz;
+                float qx = k < 2 ? nx : ex;
+                float qy = k < 2 ? ny : 0f;
+                float qz = k < 2 ? nz : ez;
+                float sign = (k & 1) == 0 ? 1f : -1f;
+                float tx = cx + dx * size * sign;
+                float ty = cy + dy * size * sign;
+                float tz = cz + dz * size * sign;
+                quad(vc, m,
+                        cx + qx * w, cy + qy * w, cz + qz * w, c,
+                        cx - qx * w, cy - qy * w, cz - qz * w, c,
+                        tx - qx * w * 0.1f, ty - qy * w * 0.1f, tz - qz * w * 0.1f, c0,
+                        tx + qx * w * 0.1f, ty + qy * w * 0.1f, tz + qz * w * 0.1f, c0);
+            }
         }
         frameNanos += System.nanoTime() - t0;
     }
@@ -315,7 +318,7 @@ public final class SkyFx {
     }
 
     private static void curtain(VertexConsumer vc, Matrix4f m, float r, float from, float span, float seed) {
-        float a = Math.min(0.85f, auroraAlpha);
+        float a = Math.min(0.55f, auroraAlpha);
         float lift = 0.6f + 0.4f * midS;
         for (int i = 0; i < AURORA_SEG; i++) {
             float f0 = i / (float) AURORA_SEG;
@@ -326,37 +329,69 @@ public final class SkyFx {
             float b1 = 15f + 6f * (float) Math.sin(Math.toRadians(l1 * 2) + time * 0.10f + seed);
             float h0 = (16f + 9f * (float) Math.sin(Math.toRadians(l0 * 3) - time * 0.15f + seed)) * lift;
             float h1 = (16f + 9f * (float) Math.sin(Math.toRadians(l1 * 3) - time * 0.15f + seed)) * lift;
-            // fades in and out along the curtain, ripples move along it
-            float w0 = (float) Math.sin(Math.PI * f0) * (0.65f + 0.35f * (float) Math.sin(l0 * 0.09f + time * 0.6f + seed));
-            float w1 = (float) Math.sin(Math.PI * f1) * (0.65f + 0.35f * (float) Math.sin(l1 * 0.09f + time * 0.6f + seed));
-            int lo0 = withAlpha(auroraLow, a * w0);
-            int lo1 = withAlpha(auroraLow, a * w1);
-            int hi0 = withAlpha(auroraHigh, a * w0 * 0.8f);
-            int hi1 = withAlpha(auroraHigh, a * w1 * 0.8f);
-            float u0 = l0 / 60f;
-            float u1 = l1 / 60f;
-            sphere(vc, m, r, l1, b1 + h1, hi1, u1, 0f);
-            sphere(vc, m, r, l1, b1, lo1, u1, 1f);
-            sphere(vc, m, r, l0, b0, lo0, u0, 1f);
-            sphere(vc, m, r, l0, b0 + h0, hi0, u0, 0f);
-            sphere(vc, m, r, l0, b0 + h0, hi0, u0, 0f);
-            sphere(vc, m, r, l0, b0, lo0, u0, 1f);
-            sphere(vc, m, r, l1, b1, lo1, u1, 1f);
-            sphere(vc, m, r, l1, b1 + h1, hi1, u1, 0f);
+            // fades in and out along the curtain, ripples move along it, fine vertical streaks
+            float w0 = (float) Math.sin(Math.PI * f0) * (0.65f + 0.35f * (float) Math.sin(l0 * 0.09f + time * 0.6f + seed)) * streak(i, seed);
+            float w1 = (float) Math.sin(Math.PI * f1) * (0.65f + 0.35f * (float) Math.sin(l1 * 0.09f + time * 0.6f + seed)) * streak(i + 1, seed);
+            // soft base -> bright band just above it -> fades out at the top
+            float k0 = b0 + h0 * 0.18f;
+            float k1 = b1 + h1 * 0.18f;
+            float m0 = b0 + h0 * 0.55f;
+            float m1 = b1 + h1 * 0.55f;
+            int base = auroraLow & 0xFFFFFF;
+            int top = auroraHigh & 0xFFFFFF;
+            int band0 = withAlpha(auroraLow, a * w0);
+            int band1 = withAlpha(auroraLow, a * w1);
+            int mid0 = withAlpha(auroraHigh, a * w0 * 0.45f);
+            int mid1 = withAlpha(auroraHigh, a * w1 * 0.45f);
+            quadSphere(vc, m, r, l0, l1, b0, b1, k0, k1, base, base, band0, band1);
+            quadSphere(vc, m, r, l0, l1, k0, k1, m0, m1, band0, band1, mid0, mid1);
+            quadSphere(vc, m, r, l0, l1, m0, m1, b0 + h0, b1 + h1, mid0, mid1, top, top);
         }
+    }
+
+    private static float streak(int i, float seed) {
+        return 0.55f + 0.45f * hash(i, (long) (seed * 10) + 11);
     }
 
     // ============================================================================================ helpers
 
-    private static void sphere(VertexConsumer vc, Matrix4f m, float r, float lonDeg, float elevDeg, int color, float u, float v) {
-        double lon = Math.toRadians(lonDeg);
-        double elev = Math.toRadians(elevDeg);
-        float ce = (float) Math.cos(elev);
-        put(vc, m, (float) (ce * Math.sin(lon)) * r, (float) Math.sin(elev) * r, (float) (ce * Math.cos(lon)) * r, color, u, v);
+    /** A quad on the sphere between longitudes l0/l1, bottom edge at e00/e01, top edge at e10/e11. */
+    private static void quadSphere(VertexConsumer vc, Matrix4f m, float r, float l0, float l1, float e00, float e01, float e10, float e11,
+                                   int c00, int c01, int c10, int c11) {
+        quad(vc, m,
+                sx(l0, e00, r), sy(e00, r), sz(l0, e00, r), c00,
+                sx(l1, e01, r), sy(e01, r), sz(l1, e01, r), c01,
+                sx(l1, e11, r), sy(e11, r), sz(l1, e11, r), c11,
+                sx(l0, e10, r), sy(e10, r), sz(l0, e10, r), c10);
     }
 
-    private static void put(VertexConsumer vc, Matrix4f m, float x, float y, float z, int color, float u, float v) {
-        vc.addVertex(m, x, y, z).setColor(color).setUv(u, v).setLight(LyricsCompat.FULL_BRIGHT);
+    private static float sx(float lonDeg, float elevDeg, float r) {
+        return (float) (Math.cos(Math.toRadians(elevDeg)) * Math.sin(Math.toRadians(lonDeg))) * r;
+    }
+
+    private static float sy(float elevDeg, float r) {
+        return (float) Math.sin(Math.toRadians(elevDeg)) * r;
+    }
+
+    private static float sz(float lonDeg, float elevDeg, float r) {
+        return (float) (Math.cos(Math.toRadians(elevDeg)) * Math.cos(Math.toRadians(lonDeg))) * r;
+    }
+
+    /** One quad in both windings. */
+    private static void quad(VertexConsumer vc, Matrix4f m, float ax, float ay, float az, int ac, float bx, float by, float bz, int bc,
+                             float cx, float cy, float cz, int cc, float dx, float dy, float dz, int dc) {
+        put(vc, m, ax, ay, az, ac);
+        put(vc, m, bx, by, bz, bc);
+        put(vc, m, cx, cy, cz, cc);
+        put(vc, m, dx, dy, dz, dc);
+        put(vc, m, dx, dy, dz, dc);
+        put(vc, m, cx, cy, cz, cc);
+        put(vc, m, bx, by, bz, bc);
+        put(vc, m, ax, ay, az, ac);
+    }
+
+    private static void put(VertexConsumer vc, Matrix4f m, float x, float y, float z, int color) {
+        vc.addVertex(m, x, y, z).setColor(color);
     }
 
     private static int withAlpha(int rgb, float a) {

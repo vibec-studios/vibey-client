@@ -36,9 +36,11 @@ public final class Analysis {
     private int onsetCount;
     private final float[] tempoVotes = new float[71];
     private double lastTime = -1;
-    private float shortLevel;
-    private float longLevel;
-    private float quietMemory = 1f;
+    private double firstTime = -1;
+    /** Bass level in dB, short-term and long-term average (drops are a jump of the first over the second). */
+    private float shortDb = -75f;
+    private float longDb = -75f;
+    private float bassDb = -75f;
     private double lastDrop = -100;
 
     public float bass;
@@ -61,12 +63,12 @@ public final class Analysis {
         for (int b = 0; b < BANDS; b++) {
             lo[b] = Math.max(1, Math.round(EDGES[edges[b][0]] / binHz));
             hi[b] = Math.max(lo[b] + 1, Math.min(n / 2 - 1, Math.round(EDGES[edges[b][1]] / binHz)));
-            peakDb[b] = -60f;
+            peakDb[b] = -45f;
         }
         for (int k = 0; k < n / 2; k++) {
             float hz = k * binHz;
             // kicks and bass hits drive the beat; hats and noise count a little
-            weight[k] = hz < 35 ? 0f : hz < 180 ? 3f : hz < 2000 ? 1f : hz < 6000 ? 0.4f : 0f;
+            weight[k] = hz < 35 ? 0f : hz < 180 ? 3f : hz < 2000 ? 0.25f : hz < 6000 ? 0.1f : 0f;
         }
     }
 
@@ -98,9 +100,10 @@ public final class Analysis {
             double e = 0;
             for (int k = lo[b]; k < hi[b]; k++) e += fft.power(k) * norm;
             float db = (float) (10 * Math.log10(e + 1e-12));
-            // the loudest part of the last seconds is "full"; the peak sinks by 1.5 dB per second
-            peakDb[b] = Math.max(db, Math.max(-60f, peakDb[b] - 1.5f * dt));
-            float l = db < -75f ? 0f : clamp01(1f + (db - peakDb[b]) / 24f);
+            if (b == 0) bassDb = Math.max(-75f, db);
+            // the loudest part of the last seconds is "full"; the peak sinks by 0.8 dB per second
+            peakDb[b] = Math.max(db, Math.max(-45f, peakDb[b] - 0.8f * dt));
+            float l = db < -66f ? 0f : clamp01(1f + (db - peakDb[b]) / 24f);
             // fast attack, softer release
             float k = l > level[b] ? 1f - (float) Math.exp(-dt / 0.03f) : 1f - (float) Math.exp(-dt / 0.18f);
             level[b] += (l - level[b]) * k;
@@ -117,6 +120,7 @@ public final class Analysis {
         float k = 1f - (float) Math.exp(-dt / 0.25f);
         for (int b = 0; b < BANDS; b++) level[b] -= level[b] * k;
         java.util.Arrays.fill(prevLog, 0f);
+        bassDb = -75f;
         publish();
         onset = false;
         drop = false;
@@ -175,12 +179,11 @@ public final class Analysis {
         onsetCount++;
         // tempo: every interval between recent onsets (and its halves/doubles) votes for 60–200 bpm (2 bpm bins)
         for (int i = 0; i < tempoVotes.length; i++) tempoVotes[i] *= 0.97f;
-        int n = Math.min(onsetCount, ONSET_HISTORY);
-        for (int i = 1; i < n; i++) {
-            double prev = onsetTimes[(onsetCount - 1 - i) % ONSET_HISTORY];
-            double iv = t - prev;
-            if (iv > 2.0) break;
-            for (double m : MULTS) vote(60.0 / (iv / m), m == 1 ? 1f : 0.4f);
+        // the gap to the previous onset votes for its tempo, its double and half count a little (a mild prior
+        // around 120 bpm decides between them)
+        if (onsetCount > 1) {
+            double iv = t - onsetTimes[(onsetCount - 2) % ONSET_HISTORY];
+            if (iv < 2.0) for (double m : MULTS) vote(60.0 / (iv / m), m == 1 ? 1f : 0.35f);
         }
         int best = -1;
         float bestV = 0f;
@@ -195,6 +198,7 @@ public final class Analysis {
 
     private void vote(double bpmValue, float w) {
         if (bpmValue < 60 || bpmValue > 200) return;
+        w *= (float) Math.exp(-Math.pow(Math.log(bpmValue / 120.0), 2) / (2 * 0.5 * 0.5));
         double pos = (bpmValue - 60) / 2.0;
         int i = (int) Math.floor(pos);
         float f = (float) (pos - i);
@@ -203,13 +207,15 @@ public final class Analysis {
     }
 
     private void dropDetect(float dt, double t) {
-        float now = bass * 0.6f + energy * 0.4f;
-        shortLevel += (now - shortLevel) * (1f - (float) Math.exp(-dt / 0.2f));
-        longLevel += (now - longLevel) * (1f - (float) Math.exp(-dt / 4f));
-        // how quiet it was in the last seconds (a drop follows a calmer part)
-        quietMemory = Math.min(longLevel, quietMemory + dt * 0.08f);
-        drop = shortLevel > 0.6f && shortLevel - longLevel > 0.28f && quietMemory < 0.55f && t - lastDrop > 6.0;
-        if (drop) lastDrop = t;
+        if (firstTime < 0) firstTime = t;
+        // the bass comes back much louder than it was over the last seconds (after a build-up or a break)
+        shortDb += (bassDb - shortDb) * (1f - (float) Math.exp(-dt / 0.25f));
+        longDb += (bassDb - longDb) * (1f - (float) Math.exp(-dt / 4f));
+        drop = shortDb > -40f && shortDb - longDb > 9f && t - lastDrop > 6.0 && t - firstTime > 4.0;
+        if (drop) {
+            lastDrop = t;
+            longDb = shortDb;
+        }
     }
 
     private static float clamp01(float v) {

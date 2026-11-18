@@ -17,7 +17,7 @@ import net.minecraft.network.chat.Component;
  */
 public final class HudLyrics {
     public static final int BOX_W = 320;
-    public static final int BOX_H = 84;
+    public static final int BOX_H = 110;
     /** Focal length of the fake perspective for 3D animations, in font pixels. */
     private static final float ROOM = 220f;
     /** Font pixels per GUI pixel at element scale 100 % and size 100 %. */
@@ -48,7 +48,8 @@ public final class HudLyrics {
                 : HudLayout.alignX(dev.henny.vibeyclient.module.media.lyrics.LyricsFeature.instance().hudText);
         float cx = align < 0 ? Math.min(w / 2f, frame.width() * scale / 2f + 2) : align > 0 ? Math.max(w / 2f, w - frame.width() * scale / 2f - 2) : w / 2f;
         g.push();
-        g.translate(cx, h / 2f);
+        // the sung line a bit above the middle, so the next line below still fits into the box
+        g.translate(cx, h * 0.4f);
         g.scale(scale, scale);
         new Painter(g.font) {
             @Override

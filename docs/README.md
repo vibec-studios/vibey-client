@@ -30,7 +30,7 @@ How they fit together:
                               └──► Vibe backend catalog ──────┘ (SPEC §7)
 
  game: core + module API (MODULES.md) + Vibe UI (UI.md)
-       modules: social · cosmetics · emotes · multiplayer · lyrics (Fabric) · devlink
+       modules: social · cosmetics · emotes · multiplayer · media (Fabric: lyrics & skies, video) · devlink
 ```
 
 ## Screenshots

@@ -23,7 +23,7 @@ modules. Every part is a module you can switch off. **Everything is free.** Ther
 | ![Friends list with joinable worlds and an invite toast](docs/screenshots/social-03-friends-world.png) | ![Direct chat in the sidebar](docs/screenshots/social-06-chat-reply.png) |
 | **Guitar Jam emote (prop + note particles)** | **Seal Summon emote** |
 | ![Guitar emote with a guitar prop](docs/screenshots/emote-guitar.png) | ![Seal Summon emote: a seal pops into the arms](docs/screenshots/emote-seal-summon.png) |
-| **Host your world (multiplayer module)** | **Lyrics in the sky (lyrics module)** |
+| **Host your world (multiplayer module)** | **Lyrics in the sky (media module)** |
 | ![Host World window with your address](docs/screenshots/multiplayer-host.png) | ![3D flight lyrics under the Galaxy sky](docs/screenshots/lyrics-flight.png) |
 | **Vibey menu (Right Shift)** | **Blockbench plugin** |
 | ![Vibey menu with global settings and the module list](docs/screenshots/vibey-menu.png) | ![Blockbench with a Vibey cosmetic project](docs/screenshots/blockbench-cosmetic-edit.png) |
@@ -124,12 +124,15 @@ the pause menu, a *Manage* menu with players, whitelist and ban list (enforced b
 *Force mods*. Friends join with a normal Minecraft through *Multiplayer → Direct Connection*, or with one click from
 your invite.
 
-### Lyrics module (Fabric)
+### Media module (Fabric)
 
-The full [Vibey Lyrics](https://github.com/vibec-studios/vibey-lyrics) mod, built in: synced lyrics for your own
-songs or for the music playing on your PC (Spotify, a browser, any player), as 3D words flying through the sky,
-under eleven custom skies, in front of you, pinned in the world or on the HUD. Open it with **K**. Fabric only, just
-like the standalone mod.
+Music, lyrics and skies (and in-world video), with the full [Vibey Lyrics](https://github.com/vibec-studios/vibey-lyrics)
+mod built in: synced lyrics for your own songs or for the music playing on your PC (Spotify, a browser, any
+player), as 3D words in the sky **where you look** (they follow your view calmly), under custom skies **that move
+with the music** (colors, gentle pulses, twinkling stars and aurora on the beat, a bloom on the drop), in front of
+you, pinned in the world or on the HUD. Open the player with **K** or *Media* in the pause menu; place the HUD lyrics
+and the now playing bar with the **HUD editor**. Fabric only, just like the standalone mod. Details:
+[docs/MEDIA.md](docs/MEDIA.md).
 
 | Lyrics on the HUD with the now-playing bar |
 |---|
@@ -154,10 +157,11 @@ like the standalone mod.
 | **Right Shift** | Open the Vibey menu | core |
 | **G** | Open the social sidebar (friends, chats, requests, inbox) | Social |
 | **B** | Emote wheel (hold, point, release) | Emotes |
-| **K** | Open the lyrics menu | Lyrics (Fabric) |
+| **K** | Open the music & lyrics player | Media (Fabric) |
 | *unbound* | Open the wardrobe | Cosmetics |
 | *unbound* | Open the host screen | Multiplayer |
-| *unbound* | Play / pause song, next / previous song, hide / show lyrics, lyrics 0.1 s earlier / later | Lyrics (Fabric) |
+| *unbound* | Play / pause song, next / previous song, hide / show lyrics, lyrics 0.1 s earlier / later | Media (Fabric) |
+| *unbound* | HUD editor (move and resize HUD elements) | Media (Fabric) |
 
 Change them under *Options → Controls → Vibey Client* or in the module settings in the Vibey menu. The keys only
 work while their module is switched on.
@@ -184,7 +188,7 @@ work while their module is switched on.
 3. Start the game. The welcome screen asks for your language and whether online features should be on.
 
 - **Fabric** needs [Fabric API](https://modrinth.com/mod/fabric-api).
-- **NeoForge:** everything except the lyrics module (it is Fabric only, like the standalone *Vibey Lyrics*).
+- **NeoForge:** everything except the media module (it is Fabric only, like the standalone *Vibey Lyrics*).
 - **On a server (optional):** the same jar can also go on a dedicated server. It then only relays cosmetics,
   emotes and module messages between players who have Vibey Client, so they see each other without the backend.
   Players without the mod can still join. LAN and hosted worlds do this automatically.
@@ -192,8 +196,8 @@ work while their module is switched on.
 ### Works alongside the standalone mods
 
 Already using **Vibey Multiplayer** (`vibey`) or **Vibey Lyrics** (`vibeylyrics`)? Keep them. If one of them is
-installed, the matching module switches itself off and shows *Provided by the installed standalone mod*, so nothing
-runs twice. On first start the module imports the standalone mod's settings (`config/vibey.json`,
+installed, the matching part switches itself off and says so, so nothing runs twice: Vibey Multiplayer replaces the
+multiplayer module, Vibey Lyrics only the lyrics & skies part of Media (the rest of Media keeps working). On first start the module imports the standalone mod's settings (`config/vibey.json`,
 `config/vibey-lyrics.json`), and songs are shared with Vibey Lyrics in `.minecraft/vibey-lyrics/`.
 
 ## Privacy
@@ -306,12 +310,16 @@ Layout: common, server-safe code in `dev.henny.vibeyclient` (`Vibey`, `Platform`
 `module/<id>/`, loader entry points in `fabric/` and `neoforge/`. Starter content: `content/`
 ([docs/CONTENT.md](docs/CONTENT.md)); Blockbench plugin: `blockbench/` ([blockbench/README.md](blockbench/README.md)).
 
-### Multiplayer and lyrics modules
+### Multiplayer and media modules
 
-Ports of the standalone mods *Vibey Multiplayer* (`vibey`) and *Vibey Lyrics* (`vibeylyrics`, Fabric only). If one of
-them is installed, the matching module switches itself off (no payloads, keybinds, pause buttons or mixins). Settings
-live in `config/vibeyclient/multiplayer.json` / `lyrics.json`; on first start the standalone mods' `config/vibey.json`
-and `config/vibey-lyrics.json` are imported. Songs are shared with Vibey Lyrics in `.minecraft/vibey-lyrics/`.
+Ports of the standalone mods *Vibey Multiplayer* (`vibey`) and *Vibey Lyrics* (`vibeylyrics`, Fabric only; it lives
+on as the `lyrics` part of the media module, see [docs/MEDIA.md](docs/MEDIA.md)). If one of them is installed, the
+matching module (multiplayer) or part (Media's lyrics) switches itself off (no payloads, keybinds, pause buttons or
+mixins). Settings live in `config/vibeyclient/multiplayer.json` / `media.json` (the 0.2 `lyrics.json` is moved over
+on the first start); on first start the standalone mods' `config/vibey.json` and `config/vibey-lyrics.json` are
+imported. Songs are shared with Vibey Lyrics in `.minecraft/vibey-lyrics/`. `MediaGameTest` covers sky lyrics
+following the view, the sky reacting to a synthetic test song and the HUD editor; `AnalysisTest` (JUnit) the
+music analysis.
 
 Always test against the **current** relay code: `git pull` in vibey-multiplayer first (an outdated local checkout
 once hid that relay 1.3.0 rejected the client's `"client": "vibey-client"`). `RelayHostTest` hosts with exactly the

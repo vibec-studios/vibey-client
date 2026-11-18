@@ -181,7 +181,8 @@ public final class HudEditorScreen extends BaseScreen {
         String label = Lang.tr(e.labelKey());
         if (sel || hov) label += "  " + Math.round(p.scale * 100) + "%";
         int tw = g.width(label) + 8;
-        int ty = y - 12 >= 0 ? y - 12 : y + 1;
+        // above the element, else below it, else inside its top edge
+        int ty = y - 12 >= 0 ? y - 12 : y + h + 1 + 11 <= height ? y + h + 1 : y + 1;
         int tx = Math.max(0, Math.min(width - tw, x));
         g.rect(tx, ty, tw, 11, sel ? Theme.BRAND : 0xCC0B0B0E);
         g.text(label, tx + 4, ty + 2, sel ? 0xFFFFFFFF : Theme.MUTED);

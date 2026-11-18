@@ -170,6 +170,36 @@ public final class AdvancedScreen extends CardScreen {
         toggle(g, "stars", r, y + h / 2, c.shootingStars, () -> c.shootingStars = !c.shootingStars);
         y += h + 10;
 
+        y = section(g, T.get("adv.fx"), x, y);
+        h = row(g, x, y, w, "adv.fx.on");
+        toggle(g, "fx", r, y + h / 2, c.skyFx, () -> c.skyFx = !c.skyFx);
+        y += h + 2;
+        if (c.skyFx) {
+            h = row(g, x, y, w, "adv.fx.strength");
+            stepperLabel(g, r, y + h / 2, c.fxStrength + " %", () -> c.fxStrength = Math.max(0, c.fxStrength - 10), () -> c.fxStrength = Math.min(100, c.fxStrength + 10));
+            y += h + 2;
+            h = row(g, x, y, w, "adv.fx.flashes");
+            toggle(g, "fxflash", r, y + h / 2, c.fxFlashes, () -> c.fxFlashes = !c.fxFlashes);
+            y += h + 2;
+            if (dev.henny.vibeyclient.module.media.lyrics.fx.MusicAnalyzer.systemAudioSupported()) {
+                h = row(g, x, y, w, "adv.fx.pcaudio");
+                toggle(g, "fxpc", r, y + h / 2, c.fxPcAudio, () -> {
+                    c.fxPcAudio = !c.fxPcAudio;
+                    dev.henny.vibeyclient.module.media.lyrics.fx.LoopbackCapture.retry();
+                });
+                y += h + 2;
+            }
+            String src = switch (dev.henny.vibeyclient.module.media.lyrics.fx.MusicAnalyzer.source) {
+                case SONG -> "fx.source.song";
+                case PC -> "fx.source.pc";
+                case LYRICS -> "fx.source.lyrics";
+                default -> "fx.source.none";
+            };
+            g.text(g.clip(T.get(src), w), x, y + 2, DIM);
+            y += 12;
+        }
+        y += 8;
+
         y = section(g, T.get("adv.placement"), x, y);
         h = row(g, x, y, w, "adv.skymode");
         LyricsConfig.SkyMode[] modes = LyricsConfig.SkyMode.values();
@@ -237,6 +267,10 @@ public final class AdvancedScreen extends CardScreen {
             c.clock = d.clock;
             c.hideClouds = d.hideClouds;
             c.shootingStars = d.shootingStars;
+            c.skyFx = d.skyFx;
+            c.fxStrength = d.fxStrength;
+            c.fxFlashes = d.fxFlashes;
+            c.fxPcAudio = d.fxPcAudio;
             c.sparkles = d.sparkles;
             c.skyMode = d.skyMode;
             c.skyOnTop = d.skyOnTop;

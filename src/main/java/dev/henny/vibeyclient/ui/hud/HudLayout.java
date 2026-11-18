@@ -205,7 +205,8 @@ public final class HudLayout {
         placement(e).reset(e);
     }
 
-    static void resetAll() {
+    /** Every element back to its default placement (call {@link #save()} to keep it). */
+    public static void resetAll() {
         for (HudElement e : elements()) reset(e);
     }
 
@@ -271,7 +272,7 @@ public final class HudLayout {
     }
 
     /** Writes every customised placement (debounced, on a worker thread). */
-    static void save() {
+    public static void save() {
         ensureLoaded();
         JsonObject data = FILE.data();
         synchronized (FILE) {

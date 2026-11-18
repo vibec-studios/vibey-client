@@ -31,18 +31,23 @@ final class MediaMigration {
     private static final String OLD_KEY = "key_key.vibeyclient.lyrics.";
     private static final String NEW_KEY = "key_key.vibeyclient.media.lyrics.";
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger("VibeyClient/media");
+
     private MediaMigration() {}
 
     static void run() {
-        Path dir;
         try {
-            dir = SettingsGroup.configDir();
+            migrate(SettingsGroup.configDir(), Vibey.platform().gameDir().resolve("options.txt"));
         } catch (RuntimeException e) {
-            return;
+            LOG.warn("Media migration failed: {}", e.toString());
         }
+    }
+
+    /** {@code dir} = config/vibeyclient, {@code options} = options.txt. Returns true if something was moved. */
+    static boolean migrate(Path dir, Path options) {
         Path oldFile = dir.resolve("lyrics.json");
         Path newFile = dir.resolve(MediaModule.ID + ".json");
-        if (!Files.isRegularFile(oldFile) || Files.exists(newFile)) return;
+        if (!Files.isRegularFile(oldFile) || Files.exists(newFile)) return false;
         try {
             JsonObject old = JsonParser.parseString(Files.readString(oldFile, StandardCharsets.UTF_8)).getAsJsonObject();
             JsonObject out = new JsonObject();
@@ -58,12 +63,13 @@ final class MediaMigration {
             Files.createDirectories(dir);
             Files.writeString(newFile, GSON.toJson(out), StandardCharsets.UTF_8);
             Files.move(oldFile, dir.resolve("lyrics.json.migrated"), StandardCopyOption.REPLACE_EXISTING);
-            Vibey.LOG.info("Moved the lyrics module settings to {}", newFile);
+            LOG.info("Moved the lyrics module settings to {}", newFile);
         } catch (Exception e) {
-            Vibey.LOG.warn("Could not move {} to {}: {}", oldFile, newFile, e.toString());
+            LOG.warn("Could not move {} to {}: {}", oldFile, newFile, e.toString());
         }
         moduleState(dir.resolve("modules.json"));
-        keybinds(Vibey.platform().gameDir().resolve("options.txt"));
+        keybinds(options);
+        return true;
     }
 
     private static void moduleState(Path f) {
@@ -74,7 +80,7 @@ final class MediaMigration {
             json.add(MediaModule.ID, json.remove("lyrics"));
             Files.writeString(f, GSON.toJson(json), StandardCharsets.UTF_8);
         } catch (Exception e) {
-            Vibey.LOG.warn("Could not update {}: {}", f, e.toString());
+            LOG.warn("Could not update {}: {}", f, e.toString());
         }
     }
 
@@ -85,7 +91,7 @@ final class MediaMigration {
             if (!text.contains(OLD_KEY) || text.contains(NEW_KEY)) return;
             Files.writeString(f, text.replace(OLD_KEY, NEW_KEY), StandardCharsets.UTF_8);
         } catch (Exception e) {
-            Vibey.LOG.warn("Could not update the lyrics keybinds in {}: {}", f, e.toString());
+            LOG.warn("Could not update the lyrics keybinds in {}: {}", f, e.toString());
         }
     }
 }
