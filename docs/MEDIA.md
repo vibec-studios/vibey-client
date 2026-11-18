@@ -7,7 +7,7 @@ and standalone-mod conflict. Built-in features:
 | Feature | Package | What |
 |---|---|---|
 | `lyrics` | `module.media.lyrics` | Synced lyrics (LRCLIB, own `.lrc`, Spotify/browser via the system media controls), own songs (OGG/MP3/WAV), custom skies that react to the music, sky/front/world/HUD lyrics, 3D flight, now playing bar. Ported from Vibey Lyrics. Off on its own when the standalone `vibeylyrics` is installed. |
-| `video` | `module.media.video` | In-world video screens (separate work). |
+| `video` | `module.media.video` | Video screens in the world and a HUD overlay: YouTube (official embed), web pages, files, streams; sharing with other players. Fabric 1.21.11 only for now. See [VIDEO.md](VIDEO.md). |
 
 > See also: [MODULES.md](MODULES.md) (module API) · [UI.md](UI.md#hud-editor) (HUD editor) · [SPEC §2](SPEC.md) ·
 > [docs index](README.md)
