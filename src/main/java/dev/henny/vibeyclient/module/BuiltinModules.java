@@ -17,7 +17,7 @@ public final class BuiltinModules {
         mm.register(new EmotesModule());
         mm.register(new MultiplayerModule());
         //? if fabric
-        mm.register(new dev.henny.vibeyclient.module.lyrics.LyricsModule());
+        mm.register(new dev.henny.vibeyclient.module.media.MediaModule());
         mm.register(new dev.henny.vibeyclient.module.nametags.NametagsModule());
         mm.register(new DevLinkModule());
     }

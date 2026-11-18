@@ -1,0 +1,14 @@
+{
+  "name": "Media",
+  "description": "Music, lyrics, skies and video – and the HUD editor to place them.",
+  "menu": "Media",
+  "notice": {
+    "conflict": "{0}: provided by the installed {1}. The rest of Media keeps working."
+  },
+  "setting": {
+    "editHud": "HUD layout",
+    "editHud.desc": "Move and resize the lyrics, the now playing bar and other overlays.",
+    "editHud.button": "Edit",
+    "hudEditor": "Key: HUD editor"
+  }
+}

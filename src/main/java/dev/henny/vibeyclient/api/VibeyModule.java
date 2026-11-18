@@ -110,6 +110,14 @@ public abstract class VibeyModule {
         return true;
     }
 
+    /**
+     * Extra lines shown on the module's settings page under its description (translated), e.g. "Lyrics are provided
+     * by the installed Vibey Lyrics" when only a part of the module is off. Checked every frame, keep it cheap.
+     */
+    public List<String> notices() {
+        return List.of();
+    }
+
     /** Can the player switch it off? */
     public boolean canToggle() {
         return true;

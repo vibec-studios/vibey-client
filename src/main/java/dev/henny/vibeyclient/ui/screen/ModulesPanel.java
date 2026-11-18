@@ -112,7 +112,7 @@ public final class ModulesPanel implements Panel {
             case "cosmetics" -> dev.henny.vibeyclient.ui.Icons.SHIRT;
             case "emotes" -> dev.henny.vibeyclient.ui.Icons.WAVE;
             case "multiplayer" -> dev.henny.vibeyclient.ui.Icons.HOST;
-            case "lyrics" -> dev.henny.vibeyclient.ui.Icons.NOTE;
+            case "media" -> dev.henny.vibeyclient.ui.Icons.NOTE;
             case "devlink" -> dev.henny.vibeyclient.ui.Icons.CUBE;
             default -> null;
         };
@@ -265,6 +265,12 @@ public final class ModulesPanel implements Panel {
             g.rect(x, y, w, 20, Theme.alpha(Theme.WARN, 0.10f));
             g.vline(x, y, 20, Theme.WARN);
             g.text(g.clip(reason, w - 12), x + 8, y + 6, Theme.WARN);
+            y += 26;
+        }
+        for (String notice : m.notices()) {
+            g.rect(x, y, w, 20, Theme.alpha(Theme.WARN, 0.10f));
+            g.vline(x, y, 20, Theme.WARN);
+            g.text(g.clip(notice, w - 12), x + 8, y + 6, Theme.WARN);
             y += 26;
         }
         return y + 6;
