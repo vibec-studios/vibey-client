@@ -41,6 +41,8 @@ public final class SocialGameTest implements FabricClientGameTest {
         ctx.waitFor(mc -> m.service().ready(), 90 * SEC);
         log("ready as " + ctx.computeOnClient(mc -> m.service().state.me.user().name()));
         refreshCheck(m);
+        resumeCheck(ctx, m);
+        devicesCheck(ctx, m);
 
         // incoming requests from the bots
         ctx.waitFor(mc -> incoming(m, "Mira") != null && incoming(m, "Kai") != null && incoming(m, "Nova") != null, 60 * SEC);
@@ -149,6 +151,29 @@ public final class SocialGameTest implements FabricClientGameTest {
         ctx.runOnClient(mc -> GlobalSettings.onlineFeatures.set(true));
         ctx.waitFor(mc -> m.service().ready(), 30 * SEC);
         log("reconnected after online features off/on");
+
+        // revoke this very session (as if done from another device): 4010 → logged out, no automatic reconnect
+        var b = m.backend();
+        var devs = await(ctx, m.service().devices());
+        String current = devs.stream().filter(d -> d.current()).findFirst().orElseThrow().id();
+        ctx.runOnClient(mc -> m.service().revokeDevice(current));
+        ctx.waitFor(mc -> b.state() == dev.henny.vibeyclient.backend.BackendClient.State.ERROR
+                || b.state() == dev.henny.vibeyclient.backend.BackendClient.State.LOGGED_OUT, 15 * SEC);
+        ctx.waitTicks(60);
+        check(!b.isReady() && !b.hasLogin(), "revoked session must stay logged out, state " + b.state());
+        log("revoked: state " + b.state() + " " + b.errorCode());
+        open(ctx, m, true, SidebarRoute.tab(SidebarRoute.Tab.FRIENDS));
+        ctx.waitTicks(20);
+        ctx.takeScreenshot("social_21_revoked");
+        ctx.runOnClient(mc -> m.login());
+        ctx.waitFor(mc -> m.service().ready(), 30 * SEC);
+        // logout → logged out; login again
+        ctx.runOnClient(mc -> m.logout());
+        ctx.waitFor(mc -> b.state() == dev.henny.vibeyclient.backend.BackendClient.State.LOGGED_OUT, 15 * SEC);
+        ctx.runOnClient(mc -> m.login());
+        ctx.waitFor(mc -> m.service().ready(), 30 * SEC);
+        log("revoke / logout / login ok");
+        ctx.setScreen(() -> null);
         ctx.runOnClient(mc -> GlobalSettings.language.set(GlobalSettings.Language.AUTO));
         log("done");
     }
@@ -231,6 +256,43 @@ public final class SocialGameTest implements FabricClientGameTest {
         // still logged in afterwards (a reused refresh token would have ended the session)
         check(b.request("GET", "/api/v1/auth/sessions", null).join().isJsonArray(), "session alive");
         log("refresh serialisation ok (" + (b.refreshCount() - before) + " refresh for 8 parallel requests)");
+    }
+
+    /** Network drop → reconnect with resume; an event produced while offline (me.updated) is replayed. */
+    private static void resumeCheck(ClientGameTestContext ctx, SocialModule m) {
+        var b = m.backend();
+        int before = b.resumes();
+        ctx.runOnClient(mc -> b.debugDropGateway());
+        ctx.waitFor(mc -> !b.isReady(), 5 * SEC);
+        String text = "resume test " + System.currentTimeMillis() % 1000;
+        b.request("PATCH", "/api/v1/me", dev.henny.vibeyclient.backend.J.of("statusText", text)).join();
+        ctx.waitFor(mc -> b.resumes() > before, 30 * SEC);
+        check(b.lastReplayed() >= 1, "expected replayed events, got " + b.lastReplayed());
+        ctx.waitFor(mc -> text.equals(m.service().state.me.user().statusText()), 5 * SEC);
+        b.request("PATCH", "/api/v1/me", dev.henny.vibeyclient.backend.J.of("statusText", "testing Vibey Client")).join();
+        log("resume ok (" + b.lastReplayed() + " events replayed)");
+    }
+
+    /** Device list + revoking the sessions of earlier test runs. */
+    private static void devicesCheck(ClientGameTestContext ctx, SocialModule m) {
+        var list = await(ctx, m.service().devices());
+        check(list.stream().anyMatch(d -> d.current() && d.clientName().equals("vibey-client")), "current device listed");
+        int revoked = 0;
+        for (var d : list) {
+            if (!d.current()) {
+                await(ctx, m.service().revokeDevice(d.id()));
+                revoked++;
+            }
+        }
+        var after = await(ctx, m.service().devices());
+        check(after.size() == 1, "only this device left, got " + after.size());
+        log("devices ok (" + list.size() + " listed, " + revoked + " old ones revoked)");
+    }
+
+    /** Futures that complete on the client thread: let the client tick while waiting (never join on the test thread). */
+    private static <T> T await(ClientGameTestContext ctx, java.util.concurrent.CompletableFuture<T> f) {
+        ctx.waitFor(mc -> f.isDone(), 20 * SEC);
+        return f.join();
     }
 
     private static void check(boolean ok, String what) {

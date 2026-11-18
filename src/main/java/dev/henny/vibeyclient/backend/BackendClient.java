@@ -295,6 +295,8 @@ public final class BackendClient implements VibeBackend {
     public CompletableFuture<Void> logout() {
         Tokens t = tokens;
         String key = accountKey;
+        // Close the gateway first: the server answers the logout with close 4010, which must not read as "revoked".
+        gateway.disconnect();
         CompletableFuture<Void> f = t == null ? CompletableFuture.completedFuture(null)
                 : request("POST", "/api/v1/auth/logout", new JsonObject()).handle((r, e) -> null);
         return f.thenRun(() -> {
@@ -596,7 +598,27 @@ public final class BackendClient implements VibeBackend {
         });
     }
 
+    /** Tests: simulates a network drop of the gateway. */
+    public void debugDropGateway() {
+        gateway.debugDrop();
+    }
+
+    /** Number of successful resumes and the events replayed by the last one. */
+    public int resumes() {
+        return resumes.get();
+    }
+
+    public int lastReplayed() {
+        return lastReplayed;
+    }
+
+    private final AtomicInteger resumes = new AtomicInteger();
+    private volatile int lastReplayed;
+
     void onGatewayResumed(JsonObject d) {
+        lastReplayed = J.num(d, "replayed", 0);
+        resumes.incrementAndGet();
+        LOG.info("Gateway resumed, {} events replayed", lastReplayed);
         setState(State.READY, null, null);
         dispatch(EV_RESUMED, d);
     }

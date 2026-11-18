@@ -102,6 +102,17 @@ final class Gateway {
         });
     }
 
+    /** Tests: drops the socket like a network failure (the gateway reconnects and resumes). */
+    void debugDrop() {
+        loop.execute(() -> {
+            WebSocket w = ws;
+            if (w == null) return;
+            int id = connectionId;
+            w.abort();
+            closed(id, 1006, "debug drop");
+        });
+    }
+
     // ============================================================================================ connection
 
     private void open() {
