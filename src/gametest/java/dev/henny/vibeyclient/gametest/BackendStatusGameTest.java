@@ -6,7 +6,6 @@ import dev.henny.vibeyclient.api.Services;
 import dev.henny.vibeyclient.api.service.VibeBackend;
 import dev.henny.vibeyclient.backend.BackendClient;
 import dev.henny.vibeyclient.ui.title.BackendStatus;
-import dev.henny.vibeyclient.ui.title.VibeyTitleScreen;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 
@@ -33,7 +32,7 @@ public final class BackendStatusGameTest implements FabricClientGameTest {
         }
         if (st != BackendClient.State.LOGGED_OUT) throw new AssertionError("backend client not LOGGED_OUT with an offline profile: " + st);
 
-        ctx.setScreen(() -> new VibeyTitleScreen(false));
+        ctx.setScreen(net.minecraft.client.gui.screens.TitleScreen::new);
         ctx.waitTicks(10);
         BackendStatus.State shown = ctx.computeOnClient(mc -> BackendStatus.state());
         if (shown != BackendStatus.State.NO_ACCOUNT) throw new AssertionError("title status for an offline profile: " + shown + " (expected NO_ACCOUNT)");

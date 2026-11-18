@@ -22,6 +22,8 @@ public abstract class Setting<T, S extends Setting<T, S>> {
     protected T value;
     SettingsGroup group;
     private boolean advanced;
+    private String section;
+    private String sectionLabel;
     private BooleanSupplier visible = () -> true;
     private String nameKey;
     private final List<Consumer<T>> listeners = new CopyOnWriteArrayList<>();
@@ -73,10 +75,41 @@ public abstract class Setting<T, S extends Setting<T, S>> {
         return self();
     }
 
-    /** Shown under "Advanced" in the settings UI. */
+    /**
+     * Technical setting (addresses, ports, debug switches): shown only in the collapsed "Advanced · for creators"
+     * area of the settings page, so normal players never have to read it.
+     */
     public final S advanced() {
         advanced = true;
         return self();
+    }
+
+    /**
+     * Puts the setting into a titled group on the settings page ({@code <group>.section.<key>}, e.g.
+     * {@code cosmetics.section.types}). Settings without a section come first, without a title; sections appear in
+     * the order of their first setting.
+     */
+    public final S section(String sectionKey) {
+        section = sectionKey;
+        return self();
+    }
+
+    /** The section key, or null. */
+    public final String section() {
+        return section;
+    }
+
+    /** Full i18n key of the section title instead of {@code <group>.section.<key>} (e.g. a media feature's name). */
+    public final S sectionLabel(String fullKey) {
+        sectionLabel = fullKey;
+        return self();
+    }
+
+    /** i18n key of the section title, or null. */
+    public final String sectionNameKey() {
+        if (section == null) return null;
+        if (sectionLabel != null) return sectionLabel;
+        return (group == null ? "core" : group.id()) + ".section." + section;
     }
 
     public final S visibleWhen(BooleanSupplier condition) {

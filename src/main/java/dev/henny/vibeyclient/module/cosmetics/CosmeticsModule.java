@@ -7,6 +7,7 @@ import dev.henny.vibeyclient.api.ModuleManager;
 import dev.henny.vibeyclient.api.Services;
 import dev.henny.vibeyclient.api.VibeyModule;
 import dev.henny.vibeyclient.api.event.VibeyEvents;
+import dev.henny.vibeyclient.api.setting.Settings.ActionSetting;
 import dev.henny.vibeyclient.api.setting.Settings.BoolSetting;
 import dev.henny.vibeyclient.api.setting.Settings.KeybindSetting;
 import dev.henny.vibeyclient.avatar.AvatarConfig;
@@ -38,17 +39,18 @@ import java.util.UUID;
  */
 public final class CosmeticsModule extends VibeyModule implements Wardrobe {
 
-    public final BoolSetting showOwn = bool("showOwn", true);
-    public final BoolSetting showOthers = bool("showOthers", true);
-    public final BoolSetting hideWithArmor = bool("hideWithArmor", true);
-    public final BoolSetting showCapes = bool("show_cape", true);
-    public final BoolSetting showWings = bool("show_wings", true);
-    public final BoolSetting showAuras = bool("show_aura", true);
-    public final BoolSetting showPets = bool("show_pet", true);
-    public final BoolSetting showShields = bool("show_shield", true);
-    public final BoolSetting showHats = bool("show_hat", true);
-    public final BoolSetting showBacks = bool("show_back", true);
-    public final BoolSetting notifyNew = bool("notifyNew", true);
+    public final ActionSetting openWardrobeAction = action("openWardrobe", this::openWardrobe);
+    public final BoolSetting showOwn = bool("showOwn", true).section("show");
+    public final BoolSetting showOthers = bool("showOthers", true).section("show");
+    public final BoolSetting hideWithArmor = bool("hideWithArmor", true).section("show");
+    public final BoolSetting notifyNew = bool("notifyNew", true).section("show");
+    public final BoolSetting showCapes = bool("show_cape", true).section("types");
+    public final BoolSetting showWings = bool("show_wings", true).section("types");
+    public final BoolSetting showAuras = bool("show_aura", true).section("types");
+    public final BoolSetting showPets = bool("show_pet", true).section("types");
+    public final BoolSetting showShields = bool("show_shield", true).section("types");
+    public final BoolSetting showHats = bool("show_hat", true).section("types");
+    public final BoolSetting showBacks = bool("show_back", true).section("types");
     public final KeybindSetting wardrobeKey = keybind("wardrobe", Keys.UNBOUND).onPress(this::openWardrobe);
 
     private final LoadoutSync sync = new LoadoutSync(this);

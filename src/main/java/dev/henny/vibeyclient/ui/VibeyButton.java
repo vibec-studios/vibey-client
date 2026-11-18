@@ -24,7 +24,8 @@ public class VibeyButton extends AbstractWidget {
     private final Anim hover = new Anim(0f);
     private boolean iconOnly;
     private boolean accent;
-    private int badge;
+    private boolean subtle;
+    private java.util.function.IntSupplier badge = () -> 0;
 
     public VibeyButton(int x, int y, int w, int h, Component label, String icon, Runnable action) {
         super(x, y, w, h, label);
@@ -35,6 +36,8 @@ public class VibeyButton extends AbstractWidget {
     /** Draws only the icon (label still used for narration and the tooltip). */
     public VibeyButton iconOnly(boolean v) {
         this.iconOnly = v;
+        // vanilla's deferred tooltip: drawn after everything else on the screen (the title logo, other widgets)
+        setTooltip(v ? net.minecraft.client.gui.components.Tooltip.create(getMessage()) : null);
         return this;
     }
 
@@ -45,7 +48,19 @@ public class VibeyButton extends AbstractWidget {
     }
 
     public VibeyButton badge(int n) {
+        this.badge = () -> n;
+        return this;
+    }
+
+    /** Badge read every frame (e.g. unread messages). */
+    public VibeyButton badge(java.util.function.IntSupplier n) {
         this.badge = n;
+        return this;
+    }
+
+    /** Lighter look for icon buttons on top of the vanilla title panorama. */
+    public VibeyButton subtle(boolean v) {
+        this.subtle = v;
         return this;
     }
 
@@ -58,10 +73,15 @@ public class VibeyButton extends AbstractWidget {
         int x = getX(), y = getY(), w = getWidth(), h = getHeight();
         boolean hot = isHoveredOrFocused() && active;
         float t = hover.to(hot ? 1f : 0f);
-        g.rect(x, y, w, h, Theme.mix(0xE60B0B0E, 0xF018181F, t));
-        g.outline(x, y, w, h, Theme.mix(Theme.LINE2, accent ? Theme.BRAND : 0x50FFFFFF, t));
-        if (accent) g.rect(x, y, 2, h, Theme.BRAND);
-        int fg = !active ? Theme.DIM : Theme.mix(Theme.MUTED, Theme.TEXT, Math.max(t, accent ? 0.6f : 0f));
+        if (subtle) {
+            g.rect(x, y, w, h, Theme.mix(0x8C000000, 0xE618181F, t));
+            g.outline(x, y, w, h, Theme.mix(0x3DFFFFFF, Theme.BRAND, t));
+        } else {
+            g.rect(x, y, w, h, Theme.mix(0xE60B0B0E, 0xF018181F, t));
+            g.outline(x, y, w, h, Theme.mix(Theme.LINE2, accent ? Theme.BRAND : 0x50FFFFFF, t));
+            if (accent) g.rect(x, y, 2, h, Theme.BRAND);
+        }
+        int fg = !active ? Theme.DIM : Theme.mix(subtle ? 0xFFD4D4D8 : Theme.MUTED, Theme.TEXT, Math.max(t, accent ? 0.6f : 0f));
         int iy = y + (h - Icons.SIZE) / 2;
         String label = getMessage().getString();
         if (iconOnly || label.isEmpty()) {
@@ -76,13 +96,19 @@ public class VibeyButton extends AbstractWidget {
             }
             g.text(g.clip(label, x + w - 4 - cx), cx, y + (h - 8) / 2, fg);
         }
-        if (badge > 0) {
-            String b = badge > 9 ? "9+" : String.valueOf(badge);
+        int n;
+        try {
+            n = badge.getAsInt();
+        } catch (RuntimeException e) {
+            n = 0;
+        }
+        if (n > 0) {
+            String b = n > 9 ? "9+" : String.valueOf(n);
             int bw = Math.max(9, g.width(b) + 4);
             g.rect(x + w - bw - 2, y + 2, bw, 9, Theme.BRAND);
             g.text(b, x + w - bw - 2 + (bw - g.width(b)) / 2 + 1, y + 3, 0xFFFFFFFF);
         }
-        if (isHovered() && (iconOnly || label.isEmpty() || g.width(label) > w - 28) && !label.isEmpty()) {
+        if (isHovered() && !iconOnly && g.width(label) > w - 28 && !label.isEmpty()) {
             Ui.drawTooltipBox(g, label, mouseX, mouseY);
         }
     }
@@ -111,7 +137,12 @@ public class VibeyButton extends AbstractWidget {
 
     @Override
     public boolean keyPressed(KeyEvent event) {
-        if (active && visible && isFocused() && (event.key() == 257 || event.key() == 32 || event.key() == 335)) {
+        // Enter / Space / keypad Enter; 26.3 reports SDL scancodes (40 / 44 / 88), so ask the event itself there
+        //? if >=26.3 {
+        /*boolean select = event.isSelection();
+        *///?} else
+        boolean select = event.key() == 257 || event.key() == 32 || event.key() == 335;
+        if (active && visible && isFocused() && select) {
             playDownSound(Minecraft.getInstance().getSoundManager());
             press();
             return true;

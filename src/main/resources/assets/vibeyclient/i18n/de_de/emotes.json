@@ -1,11 +1,13 @@
 {
   "name": "Emotes",
   "description": "Emote-Rad mit Requisiten, Partikeln und Sounds.",
+  "summary": "Emote-Rad mit Requisiten und Sounds.",
   "setting": {
-    "wheel": "Emote-Rad",
+    "wheel": "Emote-Rad (gedrückt halten)",
     "thirdPerson": "Dritte Person beim Emoten",
-    "volume": "Emote-Lautstärke",
-    "showOthers": "Emotes anderer zeigen"
+    "volume": "Emote-Sounds",
+    "showOthers": "Emotes anderer Spieler zeigen",
+    "thirdPerson.desc": "Die Kamera wechselt, damit du dich selbst siehst."
   },
   "notLoaded": "Emote lädt noch"
 }

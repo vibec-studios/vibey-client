@@ -10,7 +10,7 @@ import net.minecraft.client.gui.screens.Screen;
 
 /**
  * Dev-only visual check for versions without the Fabric client gametest ({@code -Dvibeyclient.uishot=true}, e.g. via
- * {@code JAVA_TOOL_OPTIONS} for {@code runClient}): waits for the onboarding / Vibey title screen, takes vanilla
+ * {@code JAVA_TOOL_OPTIONS} for {@code runClient}): waits for the onboarding / title screen, takes vanilla
  * screenshots (run/screenshots) of the onboarding, the title screen and the Vibey menu, then quits. Does nothing
  * without the system property.
  */
@@ -28,7 +28,7 @@ public final class UiShot {
         ticks++;
         switch (stage) {
             case 0 -> { // wait for the first Vibey screen
-                if (s instanceof OnboardingScreen || s instanceof VibeyTitleScreen) {
+                if (s instanceof OnboardingScreen || s instanceof net.minecraft.client.gui.screens.TitleScreen) {
                     stage = s instanceof OnboardingScreen ? 1 : 2;
                     ticks = 0;
                 } else if (ticks > 200 && s != null) {
@@ -42,7 +42,7 @@ public final class UiShot {
                 if (ticks == 40) shot(mc, "onboarding");
                 if (ticks == 45) {
                     GlobalSettings.setOnboarded(true);
-                    ClientCompat.openScreen(new VibeyTitleScreen(false));
+                    ClientCompat.openScreen(new net.minecraft.client.gui.screens.TitleScreen());
                     stage = 2;
                     ticks = 0;
                 }

@@ -1,6 +1,7 @@
 package dev.henny.vibeyclient.ui;
 
 import dev.henny.vibeyclient.ui.screen.AboutPanel;
+import dev.henny.vibeyclient.ui.screen.GeneralPanel;
 import dev.henny.vibeyclient.ui.screen.ModulesPanel;
 
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import java.util.function.Supplier;
  * Top-level tabs of the Vibey menu. Modules add theirs in {@code onLoad}, e.g.
  * {@code VibeyTabs.register(new VibeyTabs.Tab("friends", "social.tab", 10, FriendsPanel::new, () -> isEnabled(), Icons.FRIENDS))}.
  * Label key is a Vibey i18n key; the optional icon is an {@link Icons} name (used when the window is too narrow for
- * all labels). {@code order}: modules = 0, about = 1000, lower first. Conventional ids: "wardrobe", "friends",
+ * all labels). {@code order}: modules = 0, general = 5, account = 10, about = 1000, lower first. Conventional ids: "wardrobe", "friends",
  * "account" (the title screen and pause entries open these when they exist).
  */
 public final class VibeyTabs {
@@ -30,12 +31,14 @@ public final class VibeyTabs {
     }
 
     public static final String MODULES = "modules";
+    public static final String GENERAL = "general";
     public static final String ABOUT = "about";
 
     private static final List<Tab> TABS = new ArrayList<>();
 
     static {
         register(new Tab(MODULES, "core.tab.modules", 0, ModulesPanel::new, () -> true, Icons.MODULES));
+        register(new Tab(GENERAL, "core.tab.general", 5, GeneralPanel::new, () -> true, Icons.GEAR));
         register(new Tab(ABOUT, "core.tab.about", 1000, AboutPanel::new, () -> true, Icons.INFO));
     }
 

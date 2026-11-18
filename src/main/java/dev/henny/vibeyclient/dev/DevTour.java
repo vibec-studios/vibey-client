@@ -18,7 +18,6 @@ import dev.henny.vibeyclient.ui.VibeyScreen;
 import dev.henny.vibeyclient.ui.VibeyTabs;
 import dev.henny.vibeyclient.ui.screen.ModulesPanel;
 import dev.henny.vibeyclient.ui.title.OnboardingScreen;
-import dev.henny.vibeyclient.ui.title.VibeyTitleScreen;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -136,7 +135,7 @@ public final class DevTour {
         Screen s = ClientCompat.screen();
         if (s == null) return false;
         if (startTicks++ < 40) return false;
-        return s instanceof TitleScreen || s instanceof VibeyTitleScreen || s instanceof OnboardingScreen
+        return s instanceof TitleScreen || s instanceof OnboardingScreen
                 || s.getClass().getSimpleName().contains("Onboarding");
     }
 
@@ -242,7 +241,7 @@ public final class DevTour {
             GlobalSettings.setOnboarded(true);
             ClientCompat.openScreen(new TitleScreen());
         });
-        until(() -> ClientCompat.screen() instanceof VibeyTitleScreen, 100);
+        until(() -> ClientCompat.screen() instanceof TitleScreen, 100);
         waitTicks(50);
         shot("01_title");
 
@@ -637,7 +636,13 @@ public final class DevTour {
 
     /** Saves the last frame to {@code <out>/<name>.png}. */
     private static void shot(Minecraft mc, String name) throws Exception {
-        Path dir = Path.of(OUT).toAbsolutePath();
+        screenshot(mc, Path.of(OUT), name);
+        shots++;
+    }
+
+    /** Saves the last frame to {@code <dir>/<name>.png} (also used by {@link ClickTest}). */
+    static void screenshot(Minecraft mc, Path out, String name) throws Exception {
+        Path dir = out.toAbsolutePath();
         Files.createDirectories(dir);
         Path file = dir.resolve(name + ".png");
         Method take = null;
@@ -655,7 +660,6 @@ public final class DevTour {
         }
         Object r = take.invoke(null, args);
         if (r != null) writeImage(r, file);
-        shots++;
         log("screenshot " + file);
     }
 

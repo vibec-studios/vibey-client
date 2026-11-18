@@ -1,13 +1,10 @@
 package dev.henny.vibeyclient.client;
 
-import dev.henny.vibeyclient.api.GlobalSettings;
 import dev.henny.vibeyclient.api.Lang;
 import dev.henny.vibeyclient.ui.Icons;
 import dev.henny.vibeyclient.ui.MenuEntries;
 import dev.henny.vibeyclient.ui.VibeyButton;
-import dev.henny.vibeyclient.ui.VibeyScreen;
-import dev.henny.vibeyclient.ui.title.TitleHook;
-import dev.henny.vibeyclient.ui.title.VibeyTitleScreen;
+import dev.henny.vibeyclient.ui.title.TitleButtons;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -24,8 +21,8 @@ import java.util.function.Consumer;
 
 /**
  * Decorates vanilla screens: one Vibey row in the pause menu (entries from {@link MenuEntries.Place#PAUSE}, placed
- * under the vanilla buttons – or above them, or icon-only in the corner when the GUI is too small) and a small Vibey
- * button on the vanilla title screen while the Vibey main menu is off.
+ * under the vanilla buttons – or above them, or icon-only in the corner when the GUI is too small) and the small
+ * icon buttons on the vanilla title screen ({@link TitleButtons}).
  */
 public final class PauseMenu {
     private PauseMenu() {}
@@ -35,7 +32,7 @@ public final class PauseMenu {
 
     public static void decorate(Screen screen, List<? extends GuiEventListener> widgets, Consumer<AbstractWidget> add) {
         if (screen instanceof TitleScreen) {
-            decorateTitle(screen, add);
+            TitleButtons.decorate(screen, widgets, add);
             return;
         }
         if (!(screen instanceof PauseScreen)) return;
@@ -85,20 +82,10 @@ public final class PauseMenu {
             int w = iconOnly ? H : VibeyButton.widthFor(label);
             String icon = Icons.has(e.icon()) ? e.icon() : null;
             VibeyButton b = new VibeyButton(x, y, w, H, Component.literal(label), icon, () -> e.action().accept(screen))
-                    .iconOnly(iconOnly).accent("vibey".equals(e.id())).badge(MenuEntries.badge(e));
+                    .iconOnly(iconOnly).accent("vibey".equals(e.id())).badge(() -> MenuEntries.badge(e));
             add.accept(b);
             x += w + GAP;
         }
-    }
-
-    /** Vanilla title screen (Vibey main menu off, or "classic menu" chosen): a small way back into Vibey. */
-    private static void decorateTitle(Screen screen, Consumer<AbstractWidget> add) {
-        boolean vibeyMenu = GlobalSettings.vibeyMainMenu.on() && TitleHook.enabled();
-        String label = Lang.tr(vibeyMenu ? "core.title.backToVibey" : "core.pause.button");
-        add.accept(new VibeyButton(6, 6, VibeyButton.widthFor(label), H, Component.literal(label), Icons.SEAL, () -> {
-            if (vibeyMenu) ClientCompat.openScreen(new VibeyTitleScreen(false));
-            else ClientCompat.openScreen(new VibeyScreen(screen));
-        }).accent(true));
     }
 
     private static boolean hasButton(List<? extends GuiEventListener> widgets, String key) {

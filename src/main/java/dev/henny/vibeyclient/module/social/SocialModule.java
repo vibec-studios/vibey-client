@@ -6,6 +6,7 @@ import dev.henny.vibeyclient.api.Services;
 import dev.henny.vibeyclient.api.VibeyModule;
 import dev.henny.vibeyclient.api.event.VibeyEvents;
 import dev.henny.vibeyclient.api.service.VibeBackend;
+import dev.henny.vibeyclient.api.setting.Settings.ActionSetting;
 import dev.henny.vibeyclient.api.setting.Settings.BoolSetting;
 import dev.henny.vibeyclient.api.setting.Settings.EnumSetting;
 import dev.henny.vibeyclient.api.setting.Settings.IntSetting;
@@ -39,18 +40,19 @@ import org.slf4j.Logger;
  */
 public final class SocialModule extends VibeyModule {
 
+    public final ActionSetting openFriends = action("openFriends", () -> openSidebar(null));
     public final KeybindSetting openKey = keybind("open", Keys.G).onPress(() -> openSidebar(null));
-    public final EnumSetting<PresenceTracker.Status> status = choice("status", PresenceTracker.Status.ONLINE);
-    public final BoolSetting autoAway = bool("autoAway", true);
-    public final IntSetting autoAwayMinutes = intRange("autoAwayMinutes", 5, 1, 30).unit(" min");
-    public final BoolSetting showPresence = bool("showPresence", true);
-    public final BoolSetting hideServerAddress = bool("hideServerAddress", false);
-    public final BoolSetting doNotDisturb = bool("doNotDisturb", false);
-    public final BoolSetting toastFriendOnline = bool("toastFriendOnline", true);
-    public final BoolSetting toastRequests = bool("toastRequests", true);
-    public final BoolSetting toastMessages = bool("toastMessages", true);
-    public final BoolSetting toastInvites = bool("toastInvites", true);
-    public final BoolSetting toastSystem = bool("toastSystem", true);
+    public final EnumSetting<PresenceTracker.Status> status = choice("status", PresenceTracker.Status.ONLINE).section("status");
+    public final BoolSetting autoAway = bool("autoAway", true).section("status");
+    public final IntSetting autoAwayMinutes = intRange("autoAwayMinutes", 5, 1, 30).unit(" min").section("status");
+    public final BoolSetting showPresence = bool("showPresence", true).section("privacy");
+    public final BoolSetting hideServerAddress = bool("hideServerAddress", false).section("privacy");
+    public final BoolSetting doNotDisturb = bool("doNotDisturb", false).section("notifications");
+    public final BoolSetting toastFriendOnline = bool("toastFriendOnline", true).section("notifications");
+    public final BoolSetting toastRequests = bool("toastRequests", true).section("notifications");
+    public final BoolSetting toastMessages = bool("toastMessages", true).section("notifications");
+    public final BoolSetting toastInvites = bool("toastInvites", true).section("notifications");
+    public final BoolSetting toastSystem = bool("toastSystem", true).section("notifications");
 
     private BackendClient backend;
     private SocialService service;
@@ -90,12 +92,12 @@ public final class SocialModule extends VibeyModule {
         hideServerAddress.onChange(v -> presence.changed());
 
         VibeyTabs.register(new VibeyTabs.Tab("account", "social.tab.account", 10, () -> new AccountPanel(this),
-                () -> isEnabled() && GlobalSettings.online()));
+                () -> isEnabled() && GlobalSettings.online(), Icons.USER));
 
         on(VibeyEvents.OnlineFeaturesChanged.class, e -> apply());
         // "Friends" on the Vibey title screen and in the pause menu row opens the sidebar over that screen
         java.util.function.BooleanSupplier shown = () -> isEnabled() && GlobalSettings.online();
-        MenuEntries.register(MenuEntries.Place.TITLE, new MenuEntries.Entry("friends", "core.title.friends", Icons.FRIENDS, 30,
+        MenuEntries.register(MenuEntries.Place.TITLE, new MenuEntries.Entry("friends", "core.title.friends", Icons.FRIENDS, 20,
                 shown, p -> ClientCompat.openScreen(new SocialScreen(p, this, null)), this::badge));
         MenuEntries.register(MenuEntries.Place.PAUSE, new MenuEntries.Entry("friends", "core.title.friends", Icons.FRIENDS, 20,
                 shown, p -> ClientCompat.openScreen(new SocialScreen(p, this, null)), this::badge));
@@ -229,8 +231,7 @@ public final class SocialModule extends VibeyModule {
         if (!isEnabled() || !GlobalSettings.online()) return false;
         if (!ClientCompat.matches(openKey.mapping(), key)) return false;
         boolean safe = screen instanceof TitleScreen || screen instanceof PauseScreen || screen instanceof JoinMultiplayerScreen
-                || screen instanceof SelectWorldScreen || screen instanceof VibeyScreen
-                || screen instanceof dev.henny.vibeyclient.ui.title.VibeyTitleScreen;
+                || screen instanceof SelectWorldScreen || screen instanceof VibeyScreen;
         if (!safe) return false;
         GuiEventListener f = screen.getFocused();
         if (f instanceof EditBox eb && eb.isFocused()) return false;

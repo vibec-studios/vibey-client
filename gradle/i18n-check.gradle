@@ -70,6 +70,15 @@ tasks.register('checkI18n') {
                         files.any { all.containsKey("${it}.${key}".toString()) }
                 if (!ok) problems << "${rel}: ${fn}(\"${key}\") is not in en_us"
             }
+            // .section("x") → <module or core>.section.x
+            def sec = (src =~ /\.section\(\s*"(\w+)"/)
+            def secOwner = moduleId ?: (f.name == 'GlobalSettings.java' ? 'core' : null)
+            if (secOwner) {
+                while (sec.find()) {
+                    def label = "${secOwner}.section.${sec.group(1)}".toString()
+                    if (!all.containsKey(label)) problems << "${rel}: section title ${label} is not in en_us"
+                }
+            }
             // Media features (module/media/**/<X>Feature.java, super(media, "<id>")): labels in media.<id>.json,
             // keybind names key.vibeyclient.media.<id>.<key>.
             def feature = (src =~ /extends MediaFeature[\s\S]*?super\(\s*\w+\s*,\s*"(\w+)"\s*\)/)

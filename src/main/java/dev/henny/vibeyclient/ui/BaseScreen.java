@@ -1,5 +1,6 @@
 package dev.henny.vibeyclient.ui;
 
+import dev.henny.vibeyclient.client.Keys;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 //? if >=26.1 {
@@ -80,22 +81,24 @@ public abstract class BaseScreen extends Screen {
     }
     //?}
 
+    // Buttons reach click/release/drag as GLFW numbers (0 left, 1 right, 2 middle) on every version: 26.3 (SDL)
+    // reports 1 left, 2 middle, 3 right, see Keys.mouseFromNative. The vanilla super calls keep the native event.
     //? if >=1.21.9 {
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (click(event.x(), event.y(), event.button())) return true;
+        if (click(event.x(), event.y(), Keys.mouseFromNative(event.button()))) return true;
         return super.mouseClicked(event, doubleClick);
     }
 
     @Override
     public boolean mouseReleased(MouseButtonEvent event) {
-        if (release(event.x(), event.y(), event.button())) return true;
+        if (release(event.x(), event.y(), Keys.mouseFromNative(event.button()))) return true;
         return super.mouseReleased(event);
     }
 
     @Override
     public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
-        if (drag(event.x(), event.y(), event.button(), dx, dy)) return true;
+        if (drag(event.x(), event.y(), Keys.mouseFromNative(event.button()), dx, dy)) return true;
         return super.mouseDragged(event, dx, dy);
     }
     //?} else {
@@ -121,7 +124,8 @@ public abstract class BaseScreen extends Screen {
     //? if >=1.21.9 {
     @Override
     public boolean keyPressed(KeyEvent event) {
-        if (key(event.key())) return true;
+        // our screens compare GLFW codes; 26.3 reports SDL scancodes (Keys.fromNative is the identity before)
+        if (key(Keys.fromNative(event.key()))) return true;
         return super.keyPressed(event);
     }
     //?} else {

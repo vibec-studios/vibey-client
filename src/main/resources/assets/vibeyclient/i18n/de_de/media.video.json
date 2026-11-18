@@ -6,6 +6,7 @@
   "setting.open": "Leinwände",
   "setting.open.desc": "Neue Leinwand oder die Steuerung der, auf die du schaust (in einer Welt).",
   "setting.open.button": "Öffnen",
+  "setting.open.action": "Video-Leinwände…",
   "hud.overlay": "Video-Overlay",
   "setting.screens": "Leinwand-Taste",
   "setting.screens.desc": "Auf eine Leinwand schauen, um sie zu steuern, sonst eine neue anlegen.",

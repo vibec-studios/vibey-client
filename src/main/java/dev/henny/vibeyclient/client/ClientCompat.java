@@ -123,8 +123,9 @@ public final class ClientCompat {
         Minecraft.getInstance().options.save();
     }
 
-    /** Whether {@code keyCode} (GLFW) is the key of {@code mapping}. */
+    /** Whether {@code keyCode} (GLFW, or a {@code Keys.NATIVE_ONLY} code from a screen) is the key of {@code mapping}. */
     public static boolean matches(KeyMapping mapping, int keyCode) {
+        keyCode = Keys.toNativeAny(keyCode);
         //? if >=1.21.9 {
         return mapping.matches(new net.minecraft.client.input.KeyEvent(keyCode, 0, 0));
         //?} else

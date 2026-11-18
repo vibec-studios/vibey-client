@@ -53,4 +53,86 @@ public final class Keys {
         *///?} else
         return glfw;
     }
+
+    /**
+     * Keys that have no GLFW constant here come out of {@link #fromNative} as {@code NATIVE_ONLY + native code}, so
+     * they never equal a GLFW constant but can still be bound ({@link #toNativeAny}).
+     */
+    public static final int NATIVE_ONLY = 1 << 20;
+
+    /**
+     * The GLFW code of a key code the running game reports (screen key events): the same up to 26.2; on 26.3 (SDL
+     * scancodes) the keys of {@link #toNative} map back, any other key becomes {@code NATIVE_ONLY + code}.
+     */
+    public static int fromNative(int nativeCode) {
+        //? if >=26.3 {
+        /*if (nativeCode < 0) return -1;
+        if (nativeCode >= 4 && nativeCode <= 29) return A + (nativeCode - 4);
+        if (nativeCode >= 30 && nativeCode <= 38) return 49 + (nativeCode - 30); // 1..9
+        if (nativeCode == 39) return 48;                                          // 0
+        if (nativeCode >= 58 && nativeCode <= 69) return F1 + (nativeCode - 58);
+        return switch (nativeCode) {
+            case 40 -> ENTER;
+            case 41 -> ESCAPE;
+            case 42 -> BACKSPACE;
+            case 43 -> TAB;
+            case 44 -> SPACE;
+            case 73 -> INSERT;
+            case 76 -> DELETE;
+            case 79 -> RIGHT;
+            case 80 -> LEFT;
+            case 81 -> DOWN;
+            case 82 -> UP;
+            case 88 -> 335; // keypad enter
+            case 224 -> LEFT_CONTROL;
+            case 225 -> LEFT_SHIFT;
+            case 226 -> LEFT_ALT;
+            case 228 -> RIGHT_CONTROL;
+            case 229 -> RIGHT_SHIFT;
+            case 230 -> RIGHT_ALT;
+            default -> NATIVE_ONLY + nativeCode;
+        };
+        *///?} else
+        return nativeCode;
+    }
+
+    /** Inverse of {@link #fromNative}: the game's key code for a GLFW code or a {@code NATIVE_ONLY} code. */
+    public static int toNativeAny(int code) {
+        if (code >= NATIVE_ONLY) return code - NATIVE_ONLY;
+        return toNative(code);
+    }
+
+    /** Mouse buttons as our UI code numbers them (GLFW): 0 left, 1 right, 2 middle, 3/4 side buttons. */
+    public static final int MOUSE_LEFT = 0, MOUSE_RIGHT = 1, MOUSE_MIDDLE = 2;
+
+    /**
+     * The GLFW number ({@link #MOUSE_LEFT} ...) of a mouse button the game reports (MouseButtonEvent#button, Fabric /
+     * NeoForge screen mouse events). Up to 26.2 they are GLFW numbers; 26.3 (SDL) reports SDL numbers: 1 left,
+     * 2 middle, 3 right, 4/5 side buttons. Without this, a left click on 26.3 arrives as "button 1" (right) and no
+     * Vibey widget reacts.
+     */
+    public static int mouseFromNative(int button) {
+        //? if >=26.3 {
+        /*return switch (button) {
+            case 1 -> MOUSE_LEFT;
+            case 2 -> MOUSE_MIDDLE;
+            case 3 -> MOUSE_RIGHT;
+            default -> button - 1;
+        };
+        *///?} else
+        return button;
+    }
+
+    /** Inverse of {@link #mouseFromNative}: the number the running game uses for a GLFW mouse button. */
+    public static int mouseToNative(int button) {
+        //? if >=26.3 {
+        /*return switch (button) {
+            case MOUSE_LEFT -> 1;
+            case MOUSE_MIDDLE -> 2;
+            case MOUSE_RIGHT -> 3;
+            default -> button + 1;
+        };
+        *///?} else
+        return button;
+    }
 }

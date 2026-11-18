@@ -262,5 +262,6 @@
   "fx.source.song": "Effekte: aus dem Song",
   "fx.source.pc": "Effekte: aus dem PC-Sound",
   "fx.source.lyrics": "Effekte: aus dem Songtext-Timing",
-  "fx.source.none": "Effekte: warten auf Musik"
+  "fx.source.none": "Effekte: warten auf Musik",
+  "setting.openMenu.action": "Lyrics-Menü öffnen"
 }

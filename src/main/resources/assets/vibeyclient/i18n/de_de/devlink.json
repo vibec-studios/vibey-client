@@ -1,10 +1,11 @@
 {
   "name": "Blockbench-Link",
   "description": "Live-Verbindung zu Blockbench zum Erstellen von Cosmetics und Emotes.",
+  "summary": "Modelle live aus Blockbench schicken.",
   "setting": {
     "creatorMode": "Creator-Modus",
     "creatorMode.desc": "Erlaubt dem Blockbench-Plugin, Modelle ins Spiel zu schicken.",
-    "port": "Port",
+    "port": "Port der Live-Verbindung",
     "port.desc": "Lokaler Port der Live-Verbindung (nur von diesem Computer erreichbar)."
   },
   "panel": {

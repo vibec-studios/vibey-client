@@ -4,8 +4,8 @@
 
 **One modular client mod for friends, cosmetics, emotes, world hosting and lyrics, in the Vibe look.**
 
-Vibey Client is a Minecraft client mod for Fabric and NeoForge by Vibe Craft Studios. It replaces the title screen
-and adds a menu in the black-and-purple Vibe design (with the grey seal mascot). You get friends, chats and world
+Vibey Client is a Minecraft client mod for Fabric and NeoForge by Vibe Craft Studios. It keeps the vanilla title
+screen and adds a menu in the black-and-purple Vibe design (with the grey seal mascot). You get friends, chats and world
 invites on the Vibe backend, capes, wings, auras, pets, shields, hats and back items that other players can see, an
 emote wheel with props, particles and sounds, and the *Vibey Multiplayer* and *Vibey Lyrics* mods built in as
 modules. Every part is a module you can switch off. **Everything is free.** There is no shop and nothing to buy.
@@ -16,7 +16,7 @@ modules. Every part is a module you can switch off. **Everything is free.** Ther
 
 | Title screen | Wardrobe |
 |---|---|
-| ![Vibey title screen with the player preview and cosmetics](docs/screenshots/title-preview.png) | ![Wardrobe with wings selected and a 3D preview](docs/screenshots/wardrobe.png) |
+| ![Vanilla title screen with the small Vibey buttons in the corner](docs/screenshots/title-preview.png) | ![Wardrobe with wings selected and a 3D preview](docs/screenshots/wardrobe.png) |
 | **Cosmetics in game** | **Emote wheel (B)** |
 | ![Seal beanie, neon wings, ember aura and seal pet](docs/screenshots/cosmetics-all.png) | ![Emote wheel in a world](docs/screenshots/emote-wheel.png) |
 | **Friends sidebar (G) with an invite** | **Chat** |
@@ -26,7 +26,7 @@ modules. Every part is a module you can switch off. **Everything is free.** Ther
 | **Host your world (multiplayer module)** | **Lyrics in the sky (media module)** |
 | ![Host World window with your address](docs/screenshots/multiplayer-host.png) | ![3D flight lyrics under the Galaxy sky](docs/screenshots/lyrics-flight.png) |
 | **Vibey menu (Right Shift)** | **Blockbench plugin** |
-| ![Vibey menu with global settings and the module list](docs/screenshots/vibey-menu.png) | ![Blockbench with a Vibey cosmetic project](docs/screenshots/blockbench-cosmetic-edit.png) |
+| ![Vibey menu with the module tiles](docs/screenshots/vibey-menu.png) | ![Blockbench with a Vibey cosmetic project](docs/screenshots/blockbench-cosmetic-edit.png) |
 
 *Screenshots from the automated client tests (Fabric 1.21.11) and the real Blockbench. Social screenshots were taken
 against a local test backend with bot accounts.*
@@ -35,16 +35,15 @@ against a local test backend with bot accounts.*
 
 ### UI & menus
 
-- **Vibey title screen:** singleplayer, multiplayer, wardrobe, friends and settings on the left, your own player
-  with all equipped cosmetics on the right (drag to rotate; now and then it plays one of your emotes), the seal in
-  the corner and on its ice floe when cosmetics are off, a status line with the client version and whether
-  Vibe is online. *Vibey main menu* off (or *Classic menu*) gives you the vanilla title screen back, with a small
-  Vibey button.
+- **Vanilla title screen, untouched**, plus a few small icon buttons in the top right corner: *Wardrobe*,
+  *Friends* (with a badge for unread messages), *Media* and the *Vibey menu*. Hover for a tooltip.
 - **Welcome in three steps** on first start: language, online features on or off, the most important keys. You
   can open it again under *About*.
-- **Vibey menu** (Right Shift, or *Vibey* in the pause menu): every module with an on/off switch and its settings,
-  global settings, search (just start typing), Account and About tabs. Full keyboard use (Tab, Enter, Ctrl+Tab,
-  Esc).
+- **Vibey menu** (Right Shift, or *Vibey* in the pause menu / title buttons): every module as a tile with an icon,
+  a one-line description and an on/off switch; click a tile for a clean page with a few understandable options.
+  Search finds modules and settings (just start typing). *General* (language, menu size, animations, online
+  features), *Account* and *About* tabs. Technical things (server addresses, ports, tokens) sit in collapsed
+  *Advanced · for creators* areas. Full keyboard use (Tab, Enter, Ctrl+Tab, Esc).
 - **Pause menu row:** *Vibey*, *Wardrobe*, *Friends* under the vanilla buttons, and *Host World* in place of *Open to
   LAN*.
 - **Toasts** for friend requests, messages, invites and friends coming online, top right, over every screen.
@@ -202,7 +201,7 @@ multiplayer module, Vibey Lyrics only the lyrics & skies part of Media (the rest
 
 ## Privacy
 
-- **Online features are optional.** You choose on first start and can change it any time under *Global settings →
+- **Online features are optional.** You choose on first start and can change it any time under *Vibey menu → General →
   Online features*. When they are off, Vibey Client does not connect to anything: no social module, cosmetics only
   for you and through the server channel.
 - **Login with Mojang's own check.** When online features are on, the client logs in to the Vibe backend
@@ -256,6 +255,10 @@ never switch the Stonecutter active version (it rewrites `src/`), build other ta
 ./gradlew :fabric-1.21.11:runServer -Dvibeyclient.smoke=true     # same for a dedicated server (+ checks no client classes loaded)
 ./gradlew :fabric-1.21.4:runClient "-Dvibeyclient.tour=$PWD/build/tour/fabric-1.21.4"   # dev tour: every screen + cosmetics/emotes in a flat world, screenshots, PASS/FAIL per step, quit
 ```
+
+`powershell -ExecutionPolicy Bypass -File scripts/dev-install.ps1` (add `-SkipBuild` to reuse the last build) builds
+the Fabric 1.21.11 jar and installs it into a "Vibey Dev" instance of your Vibe Launcher (created if missing, with
+Fabric API, Vibey auto-update off).
 
 The client game test covers the UI (`VibeyUiGameTest`, see [docs/UI.md](docs/UI.md#testing)) and cosmetics and
 emotes (`CosmeticsGameTest`, see [docs/AVATAR.md](docs/AVATAR.md#testing)).

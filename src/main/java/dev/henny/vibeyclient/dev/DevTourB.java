@@ -15,7 +15,6 @@ import dev.henny.vibeyclient.module.social.SocialModule;
 import dev.henny.vibeyclient.ui.VibeyScreen;
 import dev.henny.vibeyclient.ui.VibeyTabs;
 import dev.henny.vibeyclient.ui.title.OnboardingScreen;
-import dev.henny.vibeyclient.ui.title.VibeyTitleScreen;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -185,7 +184,7 @@ public final class DevTourB {
                 sawOnboarding[0] = true;
                 return true;
             }
-            if (s instanceof VibeyTitleScreen || s instanceof TitleScreen) {
+            if (s instanceof TitleScreen) {
                 if (loadWarning[0] != null) throw new IllegalStateException("mod loading warning screen: " + loadWarning[0]);
                 return true;
             }
@@ -212,33 +211,18 @@ public final class DevTourB {
         }).after(5));
         l.add(check("onboarding skipped", 100, () -> {
             GlobalSettings.setOnboarded(true);
-            if (!(ClientCompat.screen() instanceof VibeyTitleScreen)) ClientCompat.openScreen(new VibeyTitleScreen(false));
+            if (!(ClientCompat.screen() instanceof TitleScreen)) ClientCompat.openScreen(new TitleScreen());
             return true;
         }).after(60));
-        l.add(check("title screen", 100, () -> expect(VibeyTitleScreen.class) && shot("title")).after(5));
+        l.add(check("title screen", 100, () -> expect(TitleScreen.class) && shot("title")).after(5));
         l.add(act("open Vibey menu", () -> ClientCompat.openScreen(new VibeyScreen(ClientCompat.screen(), VibeyTabs.MODULES))).after(30));
         l.add(check("Vibey menu: modules", 100, () -> expect(VibeyScreen.class) && "modules".equals(((VibeyScreen) ClientCompat.screen()).tab()) && shot("menu_modules")).after(5));
         l.add(act("about tab", () -> ((VibeyScreen) ClientCompat.screen()).showTab(VibeyTabs.ABOUT)).after(25));
         l.add(check("Vibey menu: about", 100, () -> expect(VibeyScreen.class) && VibeyTabs.ABOUT.equals(((VibeyScreen) ClientCompat.screen()).tab()) && shot("menu_about")).after(5));
 
-        String mcVersion = dev.henny.vibeyclient.BuildInfo.MINECRAFT;
-        // NeoForge 21.9.x beta's ModListScreen sorts an immutable list on its first tick and crashes (its own bug)
-        boolean brokenModList = mcVersion.startsWith("1.21.9") || mcVersion.startsWith("1.21.10");
-        if (!Vibey.platform().isFabric() && brokenModList) l.add(act("mod list skipped (NeoForge 21.9 ModListScreen crashes on its own)", () -> {}));
-        if (!Vibey.platform().isFabric() && !brokenModList) {
-            // NeoForge: the title's "Mods" entry opens NeoForge's mod list (moved in 26.3)
-            l.add(act("open mod list", () -> {
-                ClientCompat.openScreen(new VibeyTitleScreen(false));
-                var e = dev.henny.vibeyclient.ui.MenuEntries.visible(dev.henny.vibeyclient.ui.MenuEntries.Place.TITLE).stream()
-                        .filter(x -> x.id().equals("mods")).findFirst().orElseThrow(() -> new IllegalStateException("no Mods entry on the title screen"));
-                e.action().accept(ClientCompat.screen());
-            }).after(30));
-            l.add(check("mod list", 100, () -> expectName("ModListScreen") && shot("mod_list")).after(5));
-        }
-
         // --- world
         l.add(act("open world", () -> {
-            ClientCompat.openScreen(new VibeyTitleScreen(false));
+            ClientCompat.openScreen(new TitleScreen());
             if (Files.isDirectory(mc.gameDirectory.toPath().resolve("saves").resolve(WORLD))) {
                 log("loading existing world " + WORLD);
                 mc.createWorldOpenFlows().openWorld(WORLD, () -> ClientCompat.openScreen(new TitleScreen()));

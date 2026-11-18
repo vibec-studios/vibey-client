@@ -72,7 +72,7 @@ public abstract class MediaFeature {
         this.log = LoggerFactory.getLogger("VibeyClient/media/" + id);
         for (String mod : conflictingMods()) if (Vibey.platform().isModLoaded(mod)) conflict = mod;
         this.enabledSetting = media.settings().add(new BoolSetting(id + ".enabled", defaultEnabled()))
-                .labelKey(prefix() + "setting.enabled").visibleWhen(this::usable);
+                .labelKey(prefix() + "setting.enabled").visibleWhen(this::usable).section(id).sectionLabel(prefix() + "name");
     }
 
     // ============================================================================================ identity
@@ -177,6 +177,8 @@ public abstract class MediaFeature {
     private <S extends Setting<?, ?>> S add(S s) {
         media.settings().add(s);
         s.labelKey(prefix() + "setting." + s.key().substring(id.length() + 1));
+        // one card per feature on the Media page, titled with the feature's name
+        if (s.section() == null) s.section(id).sectionLabel(prefix() + "name");
         return s;
     }
 

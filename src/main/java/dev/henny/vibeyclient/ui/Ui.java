@@ -406,6 +406,8 @@ public final class Ui {
             box.setMaxLength(maxLength);
             box.setTextColor(Theme.TEXT);
             box.setValue(value);
+            box.setCursorPosition(0);
+            box.setHighlightPos(0);
             in = new Input(box);
             Input fin = in;
             box.setResponder(s -> {
@@ -415,6 +417,8 @@ public final class Ui {
             addWidget.accept(box);
         } else if (!in.box.isFocused() && !in.box.getValue().equals(value)) {
             in.box.setValue(value);
+            in.box.setCursorPosition(0);
+            in.box.setHighlightPos(0);
         }
         in.onChange = onChange;
         in.seen = true;

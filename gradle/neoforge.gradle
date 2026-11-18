@@ -73,3 +73,5 @@ processResources {
 
 // Dev tour (dev/DevTour.java): ./gradlew :<target>:runClient -Dvibeyclient.tour=<outdir>
 if (System.getProperty('vibeyclient.tour')) neoForge.runs.named('client') { systemProperty 'vibeyclient.tour', System.getProperty('vibeyclient.tour') }
+// Click self-test (dev/ClickTest.java): -Dvibeyclient.clicktest=<outdir>, or env VIBEYCLIENT_CLICKTEST=<outdir>
+if (System.getProperty('vibeyclient.clicktest')) neoForge.runs.named('client') { systemProperty 'vibeyclient.clicktest', System.getProperty('vibeyclient.clicktest') }
