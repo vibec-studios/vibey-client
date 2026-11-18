@@ -1,6 +1,8 @@
 // Builds every item in content/src (one script per item) into content/dist:
 //   dist/<name>.vibey, dist/previews/<name>.png, dist/thumbnails/<name>.png, dist/index.json
-// Usage: node tools/build.mjs [name-filter …] [--no-preview]
+// Usage: node tools/build.mjs [name-filter …] [--no-preview] [--collection <name>]
+//   --collection polar-pals builds content/src/polar-pals/*.mjs into content/dist/polar-pals/ (own index.json there;
+//   collections are never part of the builtin set or content/dist/index.json).
 import { readdirSync, writeFileSync, mkdirSync, readFileSync, existsSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { dirname, join } from "node:path";
@@ -11,9 +13,12 @@ import { loadBundle, sheet, thumbnail } from "./render/preview.mjs";
 import { previewPlan } from "./plans.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const SRC = join(ROOT, "src");
-const DIST = join(ROOT, "dist");
 const args = process.argv.slice(2);
+const ci = args.indexOf("--collection");
+const collection = ci >= 0 ? args.splice(ci, 2)[1] : null;
+if (ci >= 0 && !/^[a-z0-9_-]+$/.test(collection ?? "")) throw new Error("--collection needs a folder name");
+const SRC = collection ? join(ROOT, "src", collection) : join(ROOT, "src");
+const DIST = collection ? join(ROOT, "dist", collection) : join(ROOT, "dist");
 const noPreview = args.includes("--no-preview");
 const filters = args.filter((a) => !a.startsWith("--"));
 

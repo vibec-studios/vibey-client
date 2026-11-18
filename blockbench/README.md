@@ -3,13 +3,17 @@
 `vibey.js` adds everything needed to make **Vibey Client** cosmetics and emotes in [Blockbench](https://blockbench.net)
 (desktop app, 5.x) and to push them live into the running game.
 
+- **New item wizard** (type → slot → name → start empty or from a starter item) and the **Vibey guide**, a checklist
+  with automatic checks that walks you from the first cube to *Test live in game* and *Export / Submit*
 - Model formats **Vibey Cosmetic** and **Vibey Emote** (box UV + per-face UV, bone rig, locators, animation mode)
 - Grey reference player (original texture, vanilla proportions and pivots) – toggleable, never exported
 - Import / export of `.vibey` bundles (`docs/SPEC.md` §5) with embedded PNG textures (incl. animated strips),
   OGG sounds and particle sprites
 - Particle, sound and visibility events as Blockbench effect keyframes, edited in the Keyframe panel
-- Validation with readable messages (Vibey > Validate, live in Blockbench's validator)
+- Validation and errors in plain words with a fix (technical details folded away), also in Blockbench's validator
 - Live link (`docs/SPEC.md` §8): find the game automatically, push, play emote, auto-push on change, reconnect
+- Submit to Vibe and My submissions through the running game
+- English and German, following Blockbench's language setting
 
 Full guide with screenshots: [`docs/BLOCKBENCH.md`](../docs/BLOCKBENCH.md).
 
@@ -22,30 +26,46 @@ Full guide with screenshots: [`docs/BLOCKBENCH.md`](../docs/BLOCKBENCH.md).
 
 The plugin is desktop only (`variant: "desktop"`); it needs Blockbench 5.0 or newer.
 
-## Quick start
+## Getting started
 
-- **File > New > Vibey Cosmetic** or **Vibey Emote** → fill in the properties dialog (id, names, slot/emote options…).
-- Model on the reference player. In a cosmetic, each *root group* picks what it is attached to
-  (Element panel > **Attach to**). In an emote, animate the player bones `root`, `head`, `body`, `right_arm`,
-  `left_arm`, `right_leg`, `left_leg`; groups inside them are props.
-- **File > Export > Vibey Bundle (.vibey)**, or **Vibey > Push to game** while Minecraft runs with Creator mode on.
+1. After installing, the **New Vibey item** wizard opens by itself (once). Later: **Vibey > New item…**
+   (German: *Vibey > Neues Item…*) or *File > New > Vibey Cosmetic / Vibey Emote*.
+2. Pick *Cosmetic* or *Emote*, the slot (cape, wings, aura, pet, shield, hat, back) or the emote options, a name, and
+   *Start empty* or a starter item as template. The plugin creates the right groups and attach points, empty
+   animations (`idle`/`walk`/`fly`/`sneak` per slot, `main` for emotes) and a texture (vanilla cape/shield layout with a
+   colour guide for texture-only slots).
+3. The **Vibey guide** in the left sidebar takes over: model → texture → animate → particles & sounds (optional) →
+   **Test live in game** → export / submit. Each step checks your project ("No keyframes in idle yet", "Not connected to
+   the game") and can be ticked off. Reopen it with **Vibey > Tutorial** (*Anleitung*).
+4. **Vibey > Test live in game** (*Live im Spiel testen*) finds the running game by itself. If it can't: start
+   Minecraft with Vibey Client, open the Vibey menu (Right Shift) → **Creator → Blockbench link** → turn on
+   **Creator mode**, and click again.
+5. **Vibey > Export / Submit…** (*Exportieren / Einreichen…*) saves a `.vibey` file or submits the item to Vibe.
+   Everything else is under **Vibey > Advanced ▸** (*Erweitert*).
+
+Full guide: [`docs/BLOCKBENCH.md`](../docs/BLOCKBENCH.md).
 
 ## Development
 
 ```sh
 cd blockbench
 npm install
-npm test                 # unit tests + mock game server tests (Node ≥ 22, node:test)
+npm test                 # unit tests (core, wizard, guide, strings) + mock game server tests (Node ≥ 22, node:test)
 npm run test:blockbench  # drives the installed Blockbench over CDP (isolated profile), see below
+npm run shots            # review screenshots of wizard, guide, menu and errors (EN + DE) -> review/wizard.html
+npm run embed-assets     # re-embeds the wizard thumbnails + starter templates from content/dist into vibey.js
 ```
 
 `npm run test:blockbench` starts the installed Blockbench (`%LOCALAPPDATA%\Programs\Blockbench\Blockbench.exe`,
 override with `--blockbench <exe>`) with a **temporary, isolated profile** (`--userData` / `--user-data-dir`) and
-`--remote-debugging-port`, loads the plugin, builds a cosmetic and an emote project through the real APIs and
-dialogs, exports and validates both bundles, connects the live link to the mock game server
-(`test/mock-game-server.js`), checks push / auto-push / reconnect / token errors, re-imports the files and compares
-them byte for byte, and writes screenshots to `docs/screenshots/blockbench-*.png`. Only the Blockbench process it
-started is closed afterwards.
+`--remote-debugging-port`, loads the plugin, checks that the wizard opens on the first start, builds a cosmetic and an
+emote project through the real APIs and dialogs, exports and validates both bundles, connects the live link to the mock
+game server (`test/mock-game-server.js`), checks push / auto-push / reconnect / token errors, re-imports the files and
+compares them byte for byte. It then runs the wizard through the real dialog, creates every slot and an emote (and
+items from templates) and validates their exports, checks the menu, the guide's automatic checks, *Test live in game*
+with and without a game, the friendly error dialogs and *Submit to Vibe*. Screenshots go to `test/out/screenshots/`
+(`--docs-screenshots` writes them to `docs/screenshots/`). Only the Blockbench process it started is closed
+afterwards; `test/bb-harness.js` holds the shared launcher.
 
 Against the **real game** (Creator mode on):
 
@@ -54,7 +74,12 @@ npm run test:blockbench -- --game-dir "%APPDATA%\.minecraft"      # uses <dir>/v
 npm run test:blockbench -- --devlink C:\path\to\devlink.json
 ```
 
-Other options: `--keep-open`, `--no-screenshots`, `--lang de`.
+Other options: `--keep-open`, `--no-screenshots`, `--lang de` (run both languages before a release).
+
+`npm run shots` uses the same harness and the mock game to photograph every wizard step, the guide at several steps
+(including failing checks and *Test live in game* connected / not connected), the menu, *Export / Submit* and the
+friendly errors, in English and German, and writes one self-contained page `review/wizard.html` (git-ignored, the
+images are embedded).
 
 The mock game server can also run standalone for manual testing:
 
@@ -71,8 +96,11 @@ Then set *Vibey > Live link settings… > Game directory* to `C:\temp\fakegame`.
 - **Core** (top): pure functions without Blockbench – snapshot → bundle compiler, bundle → snapshot decompiler,
   SPEC validator, keyframe conversion, box UV, devlink helpers. Exported as `module.exports` under Node and as
   `window.VibeyCore` in Blockbench.
-- **Blockbench integration** (bottom): formats, codec, panel, dialogs, reference player, live link. Exposed for tests
-  as `window.VibeyPlugin` while the plugin is loaded.
+- The **wizard / guide core** is pure too: `starterSnapshot` (what the wizard creates per slot), `templateSnapshot`,
+  `tutorialChecks`, `friendlyProblem`, the EN/DE `STRINGS` and the embedded `ASSETS` (64×64 thumbnails and a few
+  starter bundles, generated by `tools/embed-assets.js` between the `vibey-assets` markers – do not edit by hand).
+- **Blockbench integration** (bottom): formats, codec, wizard, guide panel, Vibey panel, dialogs, friendly errors,
+  reference player, live link. Exposed for tests as `window.VibeyPlugin` while the plugin is loaded.
 
 `test/spec-validator.js` is an independent validator written straight from SPEC §5 (it does not share code with the
 plugin), used by the mock game server and the tests.
@@ -80,5 +108,6 @@ plugin), used by the mock game server and the tests.
 ## License
 
 The plugin code is Apache-2.0 (see `LICENSE` and `NOTICE` in the repository root). The reference player it draws, the
-seal icon and the names "Vibey"/"Vibe" are not covered: see `NOTICE` and
+seal icon, the embedded starter thumbnails and template bundles (copied from `content/dist`) and the names
+"Vibey"/"Vibe" are not covered: see `NOTICE` and
 https://github.com/vibec-studios/.github/blob/main/LICENSING.md.

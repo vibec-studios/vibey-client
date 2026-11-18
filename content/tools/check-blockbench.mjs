@@ -5,6 +5,7 @@
 //   npm run check:blockbench -- --static     # only the Node checks (no Blockbench)
 //   npm run check:blockbench -- --shots all  # screenshot every item (default: SHOTS below)
 //   options: --blockbench <Blockbench.exe>  --keep-open  --no-screenshots  --only <name,name>
+//            --dir <folder>  check another folder of bundles, e.g. --dir dist/polar-pals (screenshots → <folder>/blockbench)
 //
 // Static (Node): every bundle passes the plugin's validator (Core.validateBundle) and the plugin's independent
 // SPEC validator (blockbench/test/spec-validator.js), and survives the plugin's decompile → compile round trip.
@@ -25,7 +26,9 @@ import { decodePNG } from "./png.mjs";
 const require = createRequire(import.meta.url);
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const REPO = resolve(ROOT, "..");
-const DIST = join(ROOT, "dist");
+const argv0 = process.argv.slice(2);
+const dirArg = argv0.indexOf("--dir") >= 0 ? argv0[argv0.indexOf("--dir") + 1] : null;
+const DIST = dirArg ? resolve(dirArg) : join(ROOT, "dist");
 const OUT = join(DIST, "blockbench");
 const PLUGIN = join(REPO, "blockbench", "vibey.js");
 const Core = require(PLUGIN);

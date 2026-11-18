@@ -1,13 +1,15 @@
 {
   "name": "vibey-blockbench-plugin",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": true,
   "description": "Blockbench plugin for Vibey Client cosmetics and emotes (.vibey) with live link",
   "author": "Vibe Craft Studios",
   "license": "Apache-2.0",
   "scripts": {
-    "test": "node --test test/unit.test.js test/server.test.js",
-    "test:blockbench": "node test/blockbench-e2e.js"
+    "test": "node --test test/unit.test.js test/wizard.test.js test/server.test.js",
+    "test:blockbench": "node test/blockbench-e2e.js",
+    "shots": "node test/wizard-shots.js",
+    "embed-assets": "node tools/embed-assets.js"
   },
   "devDependencies": {
     "ws": "^8.18.0"

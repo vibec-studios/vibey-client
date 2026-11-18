@@ -20,6 +20,8 @@ Not covered by that license – see https://github.com/vibec-studios/.github/blo
       the 9x9 pixel icon designs in src/main/java/dev/henny/vibeyclient/ui/Icons.java,
       the reference player of the Blockbench plugin (mannequin model, REF_COLORS and the skin painted by
         paintReferenceSkin() in blockbench/vibey.js),
+      the starter thumbnails and template bundles embedded in blockbench/vibey.js (ASSETS block, copied from
+        content/dist),
       docs/screenshots/**,
       cosmetics loaded from the Vibe services
   - access to the Vibe online services (vibe.henny.dev, vibey.henny.dev) – SERVICES.md. The addresses in this

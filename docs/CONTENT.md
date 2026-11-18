@@ -64,6 +64,47 @@ Click a thumbnail for the full preview sheet.
 All emotes: `thirdPerson: true`, `stopOnMove: true`, `hideHeldItems: true`, animation `main`, start and end at
 (or within a few degrees of) the rest pose so the 0.15 s fade is seamless. Loops have identical first/last keys.
 
+## Polar Pals (premium collection, local only)
+
+Eight new 3D, animated cosmetics in one arctic style, built like the starter set but in their own collection:
+sources in `content/src/polar-pals/` (shared painting helpers in `_polar.mjs`), output in `content/dist/polar-pals/`
+(`.vibey`, `previews/`, `thumbnails/`, `blockbench/`, its own `index.json`, a German test guide `README.md` and the
+offline showcase page `polar-pals.html` with in-game screenshots). They are **not** part of the builtin set,
+`content/dist/index.json` or the backend seed.
+
+| Id | Slot | Rarity | What it does |
+|---|---|---|---|
+| `vibey:polar_seal` | pet | legendary | Chibi seal pup, 20 s `idle` (blink, head tilt, sit-up clap with hearts + squeak, roll, nap with 3D Zs, stretch), galumph + belly-slide `walk`, superman `fly`, shy `sneak`. |
+| `vibey:polar_penguin` | pet | epic | Penguin chick in a knitted scarf: flaps, shows / tosses / gulps a fish, waddles with a belly slide, flaps madly in `fly`, ducks in `sneak`. |
+| `vibey:polar_owl_wings` | wings | legendary | Feathered wings: arm/forearm/hand bones, coverts + alula layers, 5 secondaries and 5 primaries as bones; folded `idle`, flap + glide `fly` (feather sprites), tucked `sneak`. |
+| `vibey:polar_aurora_wings` | wings | epic | Emissive translucent aurora veils (3-segment chains), 8-frame shimmer, sparkle trail. |
+| `vibey:polar_pompom_beanie` | hat | rare | Knitted beanie with Nordic band, braided ear flaps, springy pompom (boing, bounce, streams back). |
+| `vibey:polar_igloo_backpack` | back | epic | Mini igloo on straps; a seal pup peeks out, blinks, waves and hides. |
+| `vibey:polar_aurora_ring` | aura | epic | Ring of aurora curtains with a travelling wave, orbiting crystal snowflakes, rising sparkles. |
+| `vibey:polar_snowfall_cape` | cape | rare | HD (4×) 8-frame cape: the pals on an ice floe under a rippling aurora in falling snow. |
+
+```sh
+cd content
+npm run build:polar                                  # = node tools/build.mjs --collection polar-pals
+npm run check:blockbench -- --dir dist/polar-pals    # plugin validators + real Blockbench round trip
+npm run push:polar                                   # push all into the running game (Creator mode, DEV items)
+node tools/shot.mjs dist/polar-pals/polar_seal.vibey out.png "idle=5.2 + walk=1.2" --yaw 30,90   # quick pose check
+```
+
+New toolkit pieces (usable for any item): `b.texture(id, { hd: 4 })` HD textures (PNG k× the UV size, painters get
+k× larger views; renderer and validator understand HD), `build.mjs --collection <folder>`, `tools/shot.mjs` (render
+any pose/mix), `tools/push-to-game.mjs` (devlink push; finds `devlink.json` in `.minecraft`, the Vibe Launcher
+instances `%APPDATA%\VibeLauncher\instances\<id>\minecraft` and `versions/*/run`; `--game-dir`, `--instance`),
+`tools/showcase-html.mjs` (offline page with embedded screenshots) and the opt-in `ShowcaseGameTest`
+(`VIBEYCLIENT_SHOWCASE=<folder>` + optional `VIBEYCLIENT_SHOWCASE_PLAN=content/src/polar-pals/showcase.json`, then
+`./gradlew :fabric-1.21.11:runClientGameTest`; screenshots `sc_*.png`).
+
+Design tricks that keep everything data-driven on the 0.2.1 engine (only `idle`/`walk`/`fly`/`sneak` exist and the
+clock is global): long `idle` loops tell a little story; eyelids, the fish, the peeking pup and the nap Zs rest
+*inside* the model and are moved out by `idle` position offsets, so they vanish by themselves when `walk`/`fly`
+take over; belly slides are a phase of the `walk` loop because sprinting is not a separate state; pet `walk` and
+`fly` are designed to look right when both play at full weight (moving pet + flying player).
+
 ## Build
 
 ```sh
