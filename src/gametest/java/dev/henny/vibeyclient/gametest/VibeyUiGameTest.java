@@ -38,6 +38,13 @@ public final class VibeyUiGameTest implements FabricClientGameTest {
             }
         }
 
+        // classic (vanilla) title screen: gets a small Vibey button
+        ctx.getInput().resizeWindow(1280, 720);
+        setScale(ctx, 2);
+        ctx.setScreen(net.minecraft.client.gui.screens.TitleScreen::new);
+        ctx.waitTicks(6);
+        ctx.takeScreenshot("ui_vanilla_title_1280_s2");
+
         // the Vibey UI scale override (2x on a 1920x1080 window with game scale auto = 4)
         ctx.getInput().resizeWindow(1920, 1080);
         setScale(ctx, 0);

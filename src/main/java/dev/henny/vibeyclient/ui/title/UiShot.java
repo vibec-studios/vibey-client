@@ -31,6 +31,11 @@ public final class UiShot {
                 if (s instanceof OnboardingScreen || s instanceof VibeyTitleScreen) {
                     stage = s instanceof OnboardingScreen ? 1 : 2;
                     ticks = 0;
+                } else if (ticks > 200 && s != null) {
+                    // a fresh game directory starts with vanilla's accessibility onboarding: go on to the title
+                    mc.options.onboardAccessibility = false;
+                    ClientCompat.openScreen(new net.minecraft.client.gui.screens.TitleScreen());
+                    ticks = 0;
                 }
             }
             case 1 -> {
@@ -64,6 +69,9 @@ public final class UiShot {
 
     private static void shot(Minecraft mc, String what) {
         Vibey.LOG.info("[vibeyclient-uishot] {} on {}", what, Vibey.platform().loader());
+        //? if >=26.3 {
+        /*Screenshot.grab(mc.gameDirectory, mc.gameRenderer.mainRenderTarget(), msg -> Vibey.LOG.info("[vibeyclient-uishot] {}", msg.getString()));
+        *///?} else
         Screenshot.grab(mc.gameDirectory, mc.getMainRenderTarget(), msg -> Vibey.LOG.info("[vibeyclient-uishot] {}", msg.getString()));
     }
 }

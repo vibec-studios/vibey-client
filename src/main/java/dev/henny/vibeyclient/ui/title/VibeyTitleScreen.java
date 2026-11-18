@@ -76,7 +76,7 @@ public class VibeyTitleScreen extends BaseScreen {
         int slide = Math.round((1f - o) * -6);
 
         // layers: dim the panorama, darker sidebar, status bar
-        g.rect(0, 0, W, H, 0x8C000000);
+        g.rect(0, 0, W, H, 0xA8000000);
         g.rect(0, 0, navW, H - BAR, 0xD908080B);
         g.vline(navW, 0, H - BAR, Theme.LINE2);
 
