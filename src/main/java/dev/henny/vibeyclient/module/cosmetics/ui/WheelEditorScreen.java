@@ -1,5 +1,7 @@
 package dev.henny.vibeyclient.module.cosmetics.ui;
 
+import dev.henny.vibeyclient.ui.Ui;
+
 import dev.henny.vibeyclient.api.Lang;
 import dev.henny.vibeyclient.api.Services;
 import dev.henny.vibeyclient.avatar.AvatarItem;
@@ -21,7 +23,7 @@ import java.util.List;
  * on the right (click one to put it on the selected slot; an emote already on another slot swaps places).
  */
 final class WheelEditorScreen extends BaseScreen {
-    private static final int HEADER = ScreenUi.HEADER;
+    private static final int HEADER = WardrobeChrome.HEADER;
     private static final int GAP = 6;
     private static final String[] SLOT_NUMBERS = {"1", "2", "3", "4", "5", "6", "7", "8"};
     private static final Object CLOSE = new Object();
@@ -29,7 +31,7 @@ final class WheelEditorScreen extends BaseScreen {
     private static final Object DONE = new Object();
 
     private final Screen parent;
-    private final ScreenUi ui = new ScreenUi();
+    private final Ui ui = new Ui(box -> {});
     private final ItemIndex index = new ItemIndex();
     private final WheelLayout wheel = new WheelLayout();
     private final Scroller list = new Scroller();
@@ -71,8 +73,8 @@ final class WheelEditorScreen extends BaseScreen {
         float o = open.to(1f);
 
         g.rect(0, 0, width, height, Theme.BG);
-        ui.header(width, Lang.tr("wardrobe.wheel.title"), wd == null ? null : assignedText.tr("wardrobe.wheel.assigned", assigned));
-        if (ui.closeButton(CLOSE, width - 24, (HEADER - 18) / 2)) closeRequested = true;
+        WardrobeChrome.header(ui, width, Lang.tr("wardrobe.wheel.title"), wd == null ? null : assignedText.tr("wardrobe.wheel.assigned", assigned));
+        if (WardrobeChrome.closeButton(ui, CLOSE, width - 24, (HEADER - 18) / 2)) closeRequested = true;
 
         int y0 = HEADER + 1;
         int bodyH = height - y0;
@@ -152,11 +154,11 @@ final class WheelEditorScreen extends BaseScreen {
         }
         int by = y + h - pad - 18;
         int bw = (w - pad * 2 - GAP) / 2;
-        if (ui.button(CLEAR, x + pad, by, bw, 18, Lang.tr("wardrobe.wheel.clear"), wd == null ? Widgets.Style.DISABLED : Widgets.Style.DANGER)) {
+        if (Widgets.button(ui, CLEAR, x + pad, by, bw, 18, Lang.tr("wardrobe.wheel.clear"), wd == null ? Widgets.Style.DISABLED : Widgets.Style.DANGER)) {
             for (int i = 0; i < ids.length; i++) wd.setWheel(i, null);
             selected = 0;
         }
-        if (ui.button(DONE, x + pad + bw + GAP, by, w - pad * 2 - bw - GAP, 18, Lang.tr("wardrobe.wheel.done"), Widgets.Style.PRIMARY)) {
+        if (Widgets.button(ui, DONE, x + pad + bw + GAP, by, w - pad * 2 - bw - GAP, 18, Lang.tr("wardrobe.wheel.done"), Widgets.Style.PRIMARY)) {
             closeRequested = true;
         }
     }

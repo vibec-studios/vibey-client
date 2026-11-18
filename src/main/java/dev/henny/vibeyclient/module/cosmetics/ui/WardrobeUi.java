@@ -4,6 +4,8 @@ import dev.henny.vibeyclient.api.Lang;
 import dev.henny.vibeyclient.api.ModuleManager;
 import dev.henny.vibeyclient.avatar.Slot;
 import dev.henny.vibeyclient.client.ClientCompat;
+import dev.henny.vibeyclient.ui.Icons;
+import dev.henny.vibeyclient.ui.MenuEntries;
 import dev.henny.vibeyclient.ui.VibeyTabs;
 import net.minecraft.client.gui.screens.Screen;
 
@@ -30,6 +32,12 @@ public final class WardrobeUi {
     public static void register(BooleanSupplier visible) {
         Lang.addFile("wardrobe");
         VibeyTabs.register(new VibeyTabs.Tab(TAB_ID, "wardrobe.tab", 20, WardrobePanel::new, visible));
+        // "Wardrobe" on the title screen and in the pause row opens the full-screen wardrobe (replaces the core
+        // default, which would open the Vibey menu tab)
+        MenuEntries.register(MenuEntries.Place.TITLE, new MenuEntries.Entry("wardrobe", "core.title.wardrobe", Icons.SHIRT, 20,
+                visible, WardrobeUi::openWardrobe));
+        MenuEntries.register(MenuEntries.Place.PAUSE, new MenuEntries.Entry("wardrobe", "core.title.wardrobe", Icons.SHIRT, 10,
+                visible, WardrobeUi::openWardrobe));
     }
 
     /** Opens the full-screen wardrobe on the last used category; Escape returns to {@code parent} (null = game). */
