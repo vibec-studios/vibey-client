@@ -1,0 +1,81 @@
+name: Build
+
+on:
+  push:
+    branches: ["main"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  mod:
+    name: Mod (all Minecraft versions)
+    # Free GitHub-hosted runner, no paid services.
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      # 1.21.x builds with Java 21, 26.x needs Java 25. The last one listed becomes JAVA_HOME.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: |
+            21
+            25
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Build all jars
+        run: >
+          ./gradlew buildAll --stacktrace
+          -Porg.gradle.java.installations.auto-download=false
+          -Porg.gradle.java.installations.fromEnv=JAVA_HOME_21_X64,JAVA_HOME_25_X64
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vibey-client-jars
+          path: build/dist/*.jar
+          if-no-files-found: error
+
+  blockbench:
+    name: Blockbench plugin
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Unit tests
+        working-directory: blockbench
+        run: |
+          npm ci || npm install
+          npm test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vibey-blockbench-plugin
+          path: blockbench/vibey.js
+
+  content:
+    name: Starter content
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Rebuild and check that dist is up to date
+        working-directory: content
+        run: |
+          npm ci || npm install
+          npm run build
+          git diff --stat --exit-code -- dist/*.vibey dist/index.json
