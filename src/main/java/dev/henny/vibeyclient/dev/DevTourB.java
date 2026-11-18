@@ -172,8 +172,12 @@ public final class DevTourB {
 
         // --- start: wait for the first real screen (vanilla accessibility onboarding, Vibey onboarding or title)
         l.add(check("game started", 20 * 180, () -> {
-            if (loading(mc)) return false;
             Screen s = ClientCompat.screen();
+            if (stepTicks % 200 == 0) {
+                log("waiting: screen " + (s == null ? "none" : s.getClass().getName()) + ", loading " + loading(mc));
+                shot("waiting");
+            }
+            if (loading(mc)) return false;
             if (s == null) return false;
             if (s instanceof OnboardingScreen) {
                 sawOnboarding[0] = true;
@@ -513,7 +517,8 @@ public final class DevTourB {
 
     /** Vanilla noise of a dev (offline) account, not ours. */
     private static final java.util.Set<String> IGNORED_LOGGERS = java.util.Set.of(
-            "net.minecraft.client.multiplayer.AccountProfileKeyPairManager", "net.minecraft.client.multiplayer.ProfileKeyPairManager");
+            "net.minecraft.client.multiplayer.AccountProfileKeyPairManager", "net.minecraft.client.multiplayer.ProfileKeyPairManager",
+            "com.mojang.realmsclient.client.RealmsClient");
 
     /** Collects WARN/ERROR lines (other than the tour's own) so a step that logged errors is reported. */
     private static void installAppender() {
