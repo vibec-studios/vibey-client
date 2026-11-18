@@ -1,0 +1,226 @@
+package dev.henny.vibeyclient.module.multiplayer.host;
+
+import dev.henny.vibeyclient.module.multiplayer.MpCompat;
+import dev.henny.vibeyclient.module.multiplayer.MpLoader;
+import dev.henny.vibeyclient.module.multiplayer.MultiplayerModule;
+import dev.henny.vibeyclient.module.multiplayer.T;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * Everything that happens to players on the hosted world. Runs on the server thread; the screen only reads
+ * {@link #snapshot()} and asks for changes through {@link #run}.
+ */
+public final class Guests {
+    /** What the host screen shows per player. */
+    public record View(UUID id, String name, boolean host, boolean op, boolean hasMod) {}
+
+    private static final long MOD_CHECK_MS = 8_000;
+    private static final Set<String> NEVER_REQUIRED = Set.of(
+            "minecraft", "java", "fabricloader", "fabric-api", "fabric", "neoforge", "forge", "mixinextras",
+            // Guests need one of these anyway to send their mod list.
+            "vibeyclient", "vibey");
+
+    private static final Map<UUID, Long> awaitingMods = new ConcurrentHashMap<>();
+    private static final Map<UUID, Map<String, String>> reportedMods = new ConcurrentHashMap<>();
+    private static volatile List<View> snapshot = List.of();
+    private static int ticks;
+
+    private Guests() {}
+
+    public static List<View> snapshot() {
+        return snapshot;
+    }
+
+    /** Runs {@code task} on the hosted server's thread. */
+    public static void run(java.util.function.Consumer<MinecraftServer> task) {
+        MinecraftServer server = Minecraft.getInstance().getSingleplayerServer();
+        if (server != null) server.execute(() -> task.accept(server));
+    }
+
+    static boolean isHost(ServerPlayer p) {
+        return p.getUUID().equals(Minecraft.getInstance().getUser().getProfileId());
+    }
+
+    // -------------------------------------------------------------------------------------------- events
+
+    public static void onJoin(MinecraftServer server, ServerPlayer player) {
+        if (Minecraft.getInstance().getSingleplayerServer() != server) return;
+        if (isHost(player)) return;
+        if (!HostSession.isHosting()) {
+            // We opened the LAN port; after "stop hosting" nobody new gets in that way (1.21-26.2 cannot close it).
+            if (HostSession.openedByUs(server)) player.connection.disconnect(Component.literal(T.get("kick.stopped")));
+            return;
+        }
+        HostConfig cfg = HostConfig.get();
+        // The relay already blocks these; this catches joins over the LAN.
+        String deny = Access.denyReason(player.getName().getString());
+        if (deny != null) {
+            player.connection.disconnect(Component.literal(T.get(deny)));
+            return;
+        }
+        if (server.getPlayerList().getPlayers().size() > cfg.maxPlayers) {
+            player.connection.disconnect(Component.literal(T.get("kick.full")));
+            return;
+        }
+        // Every guest starts in the chosen game mode; OPs and cheaters can change it themselves afterwards.
+        MpCompat.command(server, "gamemode " + cfg.gameMode + " " + player.getName().getString());
+        if (cfg.forceMods) awaitingMods.put(player.getUUID(), System.currentTimeMillis() + MOD_CHECK_MS);
+        refresh(server);
+        MultiplayerModule.guestToast(T.get("toast.joined", player.getName().getString()), player.getUUID().toString());
+    }
+
+    public static void onLeave(MinecraftServer server, ServerPlayer player) {
+        if (Minecraft.getInstance().getSingleplayerServer() == server && HostSession.isHosting() && !isHost(player)) {
+            MultiplayerModule.guestToast(T.get("toast.left", player.getName().getString()), player.getUUID().toString());
+        }
+        awaitingMods.remove(player.getUUID());
+        reportedMods.remove(player.getUUID());
+        server.execute(() -> refresh(server));
+    }
+
+    public static void onModList(MinecraftServer server, ServerPlayer player, List<String> mods) {
+        Map<String, String> theirs = new HashMap<>();
+        for (String entry : mods) {
+            int at = entry.indexOf('@');
+            if (at > 0) theirs.put(entry.substring(0, at), entry.substring(at + 1));
+            else theirs.put(entry, "");
+        }
+        reportedMods.put(player.getUUID(), theirs);
+        if (awaitingMods.remove(player.getUUID()) != null) {
+            List<MpLoader.ModInfo> missing = missingMods(theirs, HostConfig.get().exactModVersions);
+            if (!missing.isEmpty()) {
+                player.connection.disconnect(Component.literal(T.get("kick.missing_mods") + "\n\n" + list(missing)));
+                return;
+            }
+        }
+        refresh(server);
+    }
+
+    public static void tick(MinecraftServer server) {
+        if (Minecraft.getInstance().getSingleplayerServer() != server) return;
+        if (++ticks % 10 != 0) return;
+        if (!awaitingMods.isEmpty()) {
+            long now = System.currentTimeMillis();
+            for (ServerPlayer p : new ArrayList<>(server.getPlayerList().getPlayers())) {
+                Long deadline = awaitingMods.get(p.getUUID());
+                if (deadline != null && now > deadline) {
+                    awaitingMods.remove(p.getUUID());
+                    List<MpLoader.ModInfo> required = requiredMods();
+                    String text = T.get("kick.needs_vibey");
+                    if (!required.isEmpty()) text += "\n\n" + list(required);
+                    p.connection.disconnect(Component.literal(text));
+                }
+            }
+        }
+        refresh(server);
+    }
+
+    public static void onServerStopped() {
+        awaitingMods.clear();
+        reportedMods.clear();
+        snapshot = List.of();
+    }
+
+    // -------------------------------------------------------------------------------------------- actions
+
+    public static void setOp(UUID id, boolean op) {
+        run(server -> {
+            ServerPlayer p = server.getPlayerList().getPlayer(id);
+            if (p == null || isHost(p)) return;
+            MpCompat.command(server, (op ? "op " : "deop ") + p.getName().getString());
+            refresh(server);
+        });
+    }
+
+    public static void kick(UUID id) {
+        run(server -> {
+            ServerPlayer p = server.getPlayerList().getPlayer(id);
+            if (p == null || isHost(p)) return;
+            p.connection.disconnect(Component.literal(T.get("kick.kicked")));
+        });
+    }
+
+    /** Bans the player (name and last known IP) and removes them right away. */
+    public static void ban(UUID id, String name) {
+        Access.ban(name);
+        run(server -> {
+            ServerPlayer p = server.getPlayerList().getPlayer(id);
+            if (p != null && !isHost(p)) p.connection.disconnect(Component.literal(T.get("kick.banned")));
+        });
+    }
+
+    public static void kickAllGuests(MinecraftServer server, String key) {
+        for (ServerPlayer p : new ArrayList<>(server.getPlayerList().getPlayers())) {
+            if (!isHost(p)) p.connection.disconnect(Component.literal(T.get(key)));
+        }
+    }
+
+    /** New game mode for every guest that is online right now. */
+    public static void applyGameMode(String mode) {
+        run(server -> {
+            for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+                if (!isHost(p)) {
+                    MpCompat.command(server, "gamemode " + mode + " " + p.getName().getString());
+                }
+            }
+        });
+    }
+
+    // -------------------------------------------------------------------------------------------- helpers
+
+    private static void refresh(MinecraftServer server) {
+        List<View> list = new ArrayList<>();
+        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+            boolean host = isHost(p);
+            View v = new View(p.getUUID(), p.getName().getString(), host, host || MpCompat.isOp(server, p),
+                    host || reportedMods.containsKey(p.getUUID()));
+            if (host) list.add(0, v);
+            else list.add(v);
+        }
+        snapshot = List.copyOf(list);
+    }
+
+    /** Mods a guest must have: everything on the host that is not client-only, a library or the game itself. */
+    public static List<MpLoader.ModInfo> requiredMods() {
+        List<MpLoader.ModInfo> out = new ArrayList<>();
+        for (MpLoader.ModInfo m : MpLoader.mods()) {
+            if (m.clientOnly() || m.library() || NEVER_REQUIRED.contains(m.id()) || m.id().startsWith("fabric-")) continue;
+            out.add(m);
+        }
+        return out;
+    }
+
+    private static List<MpLoader.ModInfo> missingMods(Map<String, String> theirs, boolean exact) {
+        List<MpLoader.ModInfo> missing = new ArrayList<>();
+        for (MpLoader.ModInfo m : requiredMods()) {
+            String v = theirs.get(m.id());
+            if (v == null || (exact && !v.equals(m.version()))) missing.add(m);
+        }
+        return missing;
+    }
+
+    private static String list(List<MpLoader.ModInfo> mods) {
+        StringBuilder sb = new StringBuilder();
+        int shown = 0;
+        for (MpLoader.ModInfo m : mods) {
+            if (shown == 10) {
+                sb.append(T.get("kick.more", mods.size() - shown));
+                break;
+            }
+            sb.append("• ").append(m.name()).append(' ').append(m.version()).append('\n');
+            shown++;
+        }
+        return sb.toString().trim();
+    }
+}

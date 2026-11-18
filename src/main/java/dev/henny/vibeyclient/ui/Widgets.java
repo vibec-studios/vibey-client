@@ -70,9 +70,9 @@ public final class Widgets {
         int track = enabled ? Theme.mix(hov ? Theme.SURFACE3 : Theme.SURFACE2, hov ? Theme.BRAND_HOVER : Theme.BRAND, t) : Theme.SURFACE2;
         g.rect(x, y, TOGGLE_W, TOGGLE_H, track);
         g.outline(x, y, TOGGLE_W, TOGGLE_H, enabled ? Theme.mix(Theme.LINE2, 0x00FFFFFF, t) : Theme.LINE);
-        int knob = TOGGLE_H - 4;
-        int kx = x + 2 + Math.round(t * (TOGGLE_W - knob - 4));
-        g.rect(kx, y + 2, knob, knob, enabled ? Theme.mix(Theme.MUTED, 0xFFFFFFFF, t) : Theme.DIM);
+        int knob = TOGGLE_H - 6;
+        int kx = x + 3 + Math.round(t * (TOGGLE_W - knob - 6));
+        g.rect(kx, y + 3, knob, knob, enabled ? Theme.mix(Theme.MUTED, 0xFFFFFFFF, t) : Theme.DIM);
         return clicked;
     }
 

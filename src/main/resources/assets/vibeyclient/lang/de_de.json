@@ -4,6 +4,13 @@
   "key.vibeyclient.core.open_menu": "Vibey-Menü öffnen",
   "key.vibeyclient.emotes.wheel": "Emote-Rad",
   "key.vibeyclient.lyrics.open": "Lyrics öffnen",
-  "modmenu.descriptionTranslation.vibeyclient": "Der Client von Vibe Craft Studios: Social, Cosmetics, Emotes, Multiplayer-Hosting und Lyrics in einer modularen Mod.",
-  "key.vibeyclient.social.open": "Social-Seitenleiste öffnen"
+  "key.vibeyclient.lyrics.play": "Song abspielen / pausieren",
+  "key.vibeyclient.lyrics.earlier": "Lyrics 0,1 s früher",
+  "key.vibeyclient.lyrics.later": "Lyrics 0,1 s später",
+  "key.vibeyclient.lyrics.next": "Nächster Song",
+  "key.vibeyclient.lyrics.previous": "Vorheriger Song",
+  "key.vibeyclient.lyrics.hide": "Lyrics aus- / einblenden",
+  "key.vibeyclient.multiplayer.host": "Host-Fenster öffnen",
+  "key.vibeyclient.social.open": "Social-Seitenleiste öffnen",
+  "modmenu.descriptionTranslation.vibeyclient": "Der Client von Vibe Craft Studios: Social, Cosmetics, Emotes, Multiplayer-Hosting und Lyrics in einer modularen Mod."
 }

@@ -46,14 +46,13 @@ export default function () {
     cosmetic: { slot: "wings" },
   });
   b.texture("main", { frames: FRAMES, frameTime: 3 });
-  for (const s of [1, -1]) {
-    const side = s > 0 ? "left" : "right";
-    const root = b.bone(`wing_${side}`, { attach: "body", pivot: [s * 1.5, 20, 3.6], rotation: [0, s * -24, 0], translucent: true });
+  for (const [side, s] of [["left", -1], ["right", 1]]) { // s = X sign of the side (right arm at +X)
+    const root = b.bone(`wing_${side}`, { attach: "body", pivot: [s * 1.5, 20, 3.6], rotation: [0, s * 24, 0], translucent: true });
     SHARDS.forEach(([L, H, ang], k) => {
-      const bone = b.bone(`wing_${side}_${k}`, { parent: root.name, pivot: [s * 1.5, 20, 3.6], rotation: [0, 0, -s * ang], translucent: true });
+      const bone = b.bone(`wing_${side}_${k}`, { parent: root.name, pivot: [s * 1.5, 20, 3.6], rotation: [0, 0, s * ang], translucent: true });
       bone.box([s > 0 ? 1.5 : -1.5 - L, 20 - H / 2, 3.2 + k * 0.02], [L, H, 1], {
-        north: (img, f) => { shardFace(img, f, k); if (s < 0) mirror(img); },
-        south: (img, f) => { shardFace(img, f, k); if (s > 0) mirror(img); },
+        north: (img, f) => { shardFace(img, f, k); if (s > 0) mirror(img); },
+        south: (img, f) => { shardFace(img, f, k); if (s < 0) mirror(img); },
         up: (img) => img.fill([235, 248, 255, 225]),
         down: (img) => img.fill([140, 195, 235, 205]),
         sides: (img) => img.fill([210, 236, 252, 215]),

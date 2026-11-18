@@ -27,7 +27,7 @@ export default function () {
   a.rot("right_leg", [[0, [0, 0, 0]], [0.45, [0, 0, 0]], [0.7, [-14, 0, 6]], [0.95, [0, 0, 0]], [2.4, [0, 0, 0]]]);
   a.rot("left_leg", [[0, [0, 0, 0]], [0.45, [0, 0, 0]], [0.7, [10, 0, -6]], [0.95, [0, 0, 0]], [2.4, [0, 0, 0]]]);
   // confetti: several small bursts in different directions so it fans out on every client
-  const dirs = [[0.045, 0.06, 0], [-0.045, 0.06, 0], [0, 0.065, 0.045], [0, 0.065, -0.045], [0.032, 0.07, 0.032], [-0.032, 0.07, -0.032]];
+  const dirs = [[-0.045, 0.06, 0], [0.045, 0.06, 0], [0, 0.065, 0.045], [0, 0.065, -0.045], [-0.032, 0.07, 0.032], [0.032, 0.07, -0.032]];
   const names = Object.keys(CONFETTI);
   dirs.forEach((v, i) =>
     a.particle(0.62 + (i % 2) * 0.03, {

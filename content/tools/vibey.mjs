@@ -1,36 +1,40 @@
 // Builder API for `.vibey` bundles (docs/SPEC.md §5) + deterministic JSON writer.
 //
-// Coordinates are Blockbench units as in the spec: pixels, origin at the player's feet, +Y up, the player
-// faces north (-Z), the player's right arm is at -X. Cubes use box UV; their texture regions are packed
-// automatically into the bundle's textures and painted by the cube's painter (see `Bone.box`).
+// Coordinates are Blockbench space exactly as in docs/SPEC.md §5 "Coordinate convention": pixels, origin at the
+// player's feet, +Y up, the player faces north (-Z), the player's right arm is at +X (pivot [5, 22, 0]) – what
+// Blockbench shows is what gets written. Face names are Blockbench's (east = +X = the player's right side).
+// Cubes use box UV; their texture regions are packed automatically into the bundle's textures and painted by the
+// cube's painter (see `Bone.box`).
 import { Img } from "./canvas.mjs";
 
 export const PLAYER_BONES = ["head", "body", "right_arm", "left_arm", "right_leg", "left_leg", "root"];
 export const ATTACH = ["head", "body", "right_arm", "left_arm", "right_leg", "left_leg", "root", "world"];
 export const FACES = ["north", "east", "south", "west", "up", "down"];
 
-/** Vanilla player part pivots (spec §5). */
+/** Vanilla player part pivots in Blockbench space (spec §5). */
 export const PIVOTS = {
   head: [0, 24, 0],
   body: [0, 24, 0],
-  right_arm: [-5, 22, 0],
-  left_arm: [5, 22, 0],
-  right_leg: [-1.9, 12, 0],
-  left_leg: [1.9, 12, 0],
+  right_arm: [5, 22, 0],
+  left_arm: [-5, 22, 0],
+  right_leg: [1.9, 12, 0],
+  left_leg: [-1.9, 12, 0],
   root: [0, 0, 0],
 };
 
 /**
- * Box UV layout (identical to vanilla ModelPart cubes): for a cube of size w (x) × h (y) × d (z) at [u, v].
- * Returns per-face [u1, v1, u2, v2] rectangles in texture pixels.
+ * Box UV layout (vanilla ModelPart / Blockbench box UV): for a cube of size w (x) × h (y) × d (z) at [u, v].
+ * Returns the texture rectangle [u1, v1, u2, v2] of each face, named by Blockbench face (east = +X). Every
+ * rectangle is given in the orientation the painter sees it: u1/v1 is the top-left texel of the face image.
+ * (Like Blockbench: east = the first d-wide column = the player's right side.)
  */
 export function boxUV(u, v, w, h, d) {
   return {
     up: [u + d, v, u + d + w, v + d],
     down: [u + d + w, v, u + d + 2 * w, v + d],
-    west: [u, v + d, u + d, v + d + h],
+    east: [u, v + d, u + d, v + d + h],
     north: [u + d, v + d, u + d + w, v + d + h],
-    east: [u + d + w, v + d, u + 2 * d + w, v + d + h],
+    west: [u + d + w, v + d, u + 2 * d + w, v + d + h],
     south: [u + 2 * d + w, v + d, u + 2 * d + 2 * w, v + d + h],
   };
 }
@@ -232,9 +236,18 @@ export class Anim {
     return this;
   }
 
+  /** Events in the Blockbench plugin's canonical order: by time, then particle < sound < visibility (stable). */
   toJSON() {
     const out = { length: this.length, loop: this.loop, bones: this.bones };
-    if (this.events.length) out.events = [...this.events].sort((a, b) => a.t - b.t).map((e) => ({ ...e, t: +e.t.toFixed(4) }));
+    const TYPE = { particle: 0, sound: 1, visibility: 2 };
+    if (this.events.length)
+      out.events = this.events
+        .map((e) => ({ ...e, t: +e.t.toFixed(4) }))
+        .sort((a, b) => a.t - b.t || TYPE[a.type] - TYPE[b.type])
+        .map((e) => {
+          if (e.emissive === false) delete e.emissive; // default
+          return e;
+        });
     return out;
   }
 }
@@ -332,10 +345,18 @@ export class Bundle {
       out.textures.push(tj);
     }
 
-    if (this.bones.size || m.kind === "emote" || !["cape", "shield"].includes(m.cosmetic?.slot)) {
+    if (this.bones.size) {
       const model = {};
-      if (this.modelTexture && this.bones.size) model.texture = this.modelTexture;
-      model.bones = [...this.bones.values()].map((b) => {
+      if (this.modelTexture) model.texture = this.modelTexture;
+      // depth-first outliner order (roots, each followed by its children) – like the Blockbench plugin writes it
+      const ordered = [];
+      const add = (b) => {
+        ordered.push(b);
+        for (const c of this.bones.values()) if (c.parent === b.name) add(c);
+      };
+      for (const b of this.bones.values()) if (!b.parent) add(b);
+      if (ordered.length !== this.bones.size) throw new Error("bone with an unknown parent");
+      model.bones = ordered.map((b) => {
         const bj = { name: b.name, parent: b.parent };
         if (!b.parent) bj.attach = b.attach;
         bj.pivot = b.pivot;
@@ -358,8 +379,10 @@ export class Bundle {
       out.model = model;
     }
 
-    out.animations = {};
-    for (const a of this.anims.values()) out.animations[a.name] = a.toJSON();
+    if (this.anims.size) {
+      out.animations = {};
+      for (const a of this.anims.values()) out.animations[a.name] = a.toJSON();
+    }
     if (this.sprites.length)
       out.sprites = this.sprites.map((s) => {
         const r = s.region;

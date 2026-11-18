@@ -1,0 +1,710 @@
+package dev.henny.vibeyclient.module.lyrics.render;
+
+import dev.henny.vibeyclient.module.lyrics.LyricsCompat;
+import dev.henny.vibeyclient.module.lyrics.LyricsConfig;
+import dev.henny.vibeyclient.module.lyrics.lyrics.Lyrics;
+import net.minecraft.client.gui.Font;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
+/**
+ * Works out what the lyrics look like at one point in time, independent of where they are drawn: a list of words
+ * with position, scale, color and glow in "font pixels" around (0, 0). The HUD and the world renderer only place
+ * and scale this frame.
+ */
+public final class LyricLayout {
+    private static final long ENTER = 280;
+    private static final long EXIT = 320;
+    public static final float ROW = 10f;
+    /** How long a line takes to fly past you in FLIGHT. */
+    private static final long FLY = 1100;
+
+    private LyricLayout() {}
+
+    /**
+     * One word (or the title) to draw, centered on x with its top at y. z points towards the viewer; yaw turns the
+     * word around its vertical axis, roll tilts it (degrees). depth: color of the 3D sides, 0 = flat.
+     */
+    public record Run(Component text, float x, float y, float z, float scale, float yaw, float roll, int color,
+                      int glow, float glowAlpha, int depth) {
+        public Run(Component text, float x, float y, float scale, int color, int glow, float glowAlpha) {
+            this(text, x, y, 0f, scale, 0f, 0f, color, glow, glowAlpha, 0);
+        }
+    }
+
+    /** Caption box behind a row. */
+    public record Box(float x1, float y1, float x2, float y2, int color) {}
+
+    public record Frame(List<Run> runs, List<Box> boxes, float width, float height) {
+        public boolean isEmpty() {
+            return runs.isEmpty();
+        }
+    }
+
+    private static final Frame EMPTY = new Frame(List.of(), List.of(), 0, 0);
+
+    /**
+     * @param room distance from the frame to the viewer in font pixels (3D animations fly up to there)
+     */
+    public static Frame build(Font font, Lyrics lyrics, String title, String artist, long t, float maxWidth, float room) {
+        LyricsConfig cfg = LyricsConfig.get();
+        Builder b = new Builder(font, cfg, maxWidth, room);
+        if (lyrics == null || lyrics.lines().isEmpty()) {
+            b.title(title, artist, 1f, 0);
+            return b.finish();
+        }
+        List<Lyrics.Line> lines = lyrics.lines();
+        int idx = lyrics.lineAt(t);
+        Lyrics.Line first = firstSung(lines);
+
+        if (idx < 0 || (first != null && t < first.start() && lines.get(Math.max(0, idx)).isBreak())) {
+            // Intro: title card until the first line, fading out just before it.
+            long until = first == null ? 4000 : first.start();
+            float a = 1f;
+            if (t > until - 600) a = clamp((until - t) / 600f);
+            a *= clamp(t / 400f);
+            if (a > 0.01f) b.title(title, artist, a, 0);
+            if (first != null && cfg.showNext && until - t < 1600) {
+                b.preview(first, clamp(1f - (until - t) / 1600f), 26);
+            }
+            return b.finish();
+        }
+
+        if (cfg.anim.is3d()) {
+            b.lines3d(lines, idx, t);
+            return b.finish();
+        }
+        if (cfg.anim == LyricsConfig.Anim.SCATTER) {
+            b.scatterLines(lines, idx, t);
+            return b.finish();
+        }
+
+        Lyrics.Line cur = lines.get(idx);
+        Lyrics.Line prev = idx > 0 ? lines.get(idx - 1) : null;
+        long sinceStart = t - cur.start();
+
+        // The previous line animates out while the new one comes in.
+        if (prev != null && !prev.isBreak() && sinceStart < EXIT) {
+            b.line(prev, t, 1f, clamp(sinceStart / (float) EXIT), 0, true);
+        }
+        if (cur.isBreak()) {
+            Lyrics.Line next = idx + 1 < lines.size() ? lines.get(idx + 1) : null;
+            long gap = next == null ? Long.MAX_VALUE : next.start() - cur.start();
+            if (gap > 4000 && sinceStart > 600) b.breakNotes(t, clamp((sinceStart - 600) / 500f) * clamp((next == null ? 3000 : next.start() - t) / 500f));
+            if (next != null && cfg.showNext && next.start() - t < 1600) {
+                b.preview(next, clamp(1f - (next.start() - t) / 1600f), 0);
+            }
+            return b.finish();
+        }
+        // Long silence after a line: let it fade away instead of hanging there.
+        Lyrics.Line next = idx + 1 < lines.size() ? lines.get(idx + 1) : null;
+        float fade = 1f;
+        long hold = cur.end() + 2500;
+        if (next == null || next.start() > hold) {
+            if (t > hold) fade = clamp(1f - (t - hold) / 600f);
+        }
+        if (fade <= 0.01f) return b.finish();
+        float enter = clamp(sinceStart / (float) ENTER);
+        float y = b.line(cur, t, enter, 0f, fade, false);
+        if (next != null && !next.isBreak() && cfg.showNext && cfg.reveal == LyricsConfig.Reveal.LINE) {
+            b.preview(next, enter * fade, y);
+        }
+        return b.finish();
+    }
+
+    private static Lyrics.Line firstSung(List<Lyrics.Line> lines) {
+        for (Lyrics.Line l : lines) if (!l.isBreak()) return l;
+        return null;
+    }
+
+    // ================================================================================================ builder
+
+    private static final class Builder {
+        final Font font;
+        final LyricsConfig cfg;
+        final float maxWidth;
+        final float room;
+        final int cText;
+        final int cHigh;
+        final int cGlow;
+        final List<Run> runs = new ArrayList<>();
+        final List<Box> boxes = new ArrayList<>();
+        final Style style;
+        float minX = Float.MAX_VALUE;
+        float maxX = -Float.MAX_VALUE;
+        float minY = Float.MAX_VALUE;
+        float maxY = -Float.MAX_VALUE;
+
+        Builder(Font font, LyricsConfig cfg, float maxWidth, float room) {
+            this.font = font;
+            this.cfg = cfg;
+            this.maxWidth = maxWidth;
+            this.room = room;
+            int[] sky = dev.henny.vibeyclient.module.lyrics.sky.SkyLook.themed(cfg);
+            this.cText = sky != null ? sky[0] : cfg.textColor;
+            this.cHigh = sky != null ? sky[1] : cfg.highlightColor;
+            this.cGlow = sky != null ? sky[2] : cfg.glowColor;
+            this.style = LyricsCompat.font(Style.EMPTY.withBold(cfg.bold), cfg.font);
+        }
+
+        Component word(String s) {
+            if (cfg.uppercase) s = s.toUpperCase(Locale.ROOT);
+            return Component.literal(s).withStyle(style);
+        }
+
+        /** Gap between words; some fonts (Monoton) have a hair-thin space, so never less than half an "n". */
+        float spaceWidth() {
+            return Math.max(font.width(word(" ")), font.width(word("n")) * 0.6f);
+        }
+
+        /** Lays a line out in rows, adds its words; returns the y below it. */
+        float line(Lyrics.Line line, long t, float enter, float exit, float fade, boolean leaving) {
+            float lineScale = 1f;
+            float alpha = fade;
+            float dy = 0;
+            float e = leaving ? 1f : enter;
+            switch (cfg.anim) {
+                case POP -> {
+                    lineScale = 0.72f + 0.28f * backOut(e);
+                    alpha *= clamp(e * 1.6f);
+                    if (leaving) lineScale *= 1f + 0.12f * exit;
+                }
+                case FADE -> alpha *= e;
+                case SLIDE, WAVE -> {
+                    dy = 16f * (1f - cubicOut(e));
+                    alpha *= e;
+                    if (leaving) dy -= 16f * cubicOut(exit);
+                }
+                case ZOOM -> {
+                    // Flies in from far away, shrinks away when it leaves.
+                    lineScale = 1f + 1.4f * (1f - cubicOut(e));
+                    alpha *= cubicOut(e);
+                    if (leaving) lineScale *= 1f - 0.35f * cubicOut(exit);
+                }
+                case GLITCH -> {
+                    if (e < 1f) alpha *= (hash(line.start(), t / 40) > 0.35f ? 1f : 0.25f) * e;
+                    if (leaving) alpha *= hash(line.start(), t / 35) > 0.5f ? 1f : 0.3f;
+                }
+                case BOUNCE, TYPE, RAINBOW -> alpha *= clamp(e * 2f);
+                case NONE -> {
+                }
+            }
+            if (leaving) alpha *= 1f - exit;
+            if (alpha <= 0.01f) return 0;
+            float spacing = ROW * (1f + cfg.lineSpacing / 100f);
+
+            List<List<Integer>> rows = wrap(line);
+            float space = spaceWidth();
+            float total = rows.size() * spacing;
+            float top = -total / 2f + dy;
+            if (leaving) top = -total / 2f + dy;
+            for (int r = 0; r < rows.size(); r++) {
+                List<Integer> row = rows.get(r);
+                float w = -space;
+                for (int i : row) w += font.width(word(line.words().get(i).text())) + space;
+                float x = -w / 2f;
+                float y = top + r * spacing;
+                float rowW = w * lineScale;
+                if (cfg.box) {
+                    int a = Math.round(0x99 * alpha);
+                    float pad = 4f * lineScale;
+                    boxes.add(new Box(-rowW / 2f - pad, y + (ROW - ROW * lineScale) / 2f - pad * 0.6f,
+                            rowW / 2f + pad, y + (ROW + ROW * lineScale) / 2f + pad * 0.4f, a << 24));
+                }
+                for (int i : row) {
+                    Lyrics.Word word = line.words().get(i);
+                    Component c = word(word.text());
+                    float ww = font.width(c);
+                    float cx = (x + ww / 2f) * lineScale;
+                    x += ww + space;
+                    addWord(c, word, i, t, cx, y, lineScale, alpha, leaving);
+                    extend(cx - ww * lineScale / 2f, y, cx + ww * lineScale / 2f, y + ROW);
+                }
+            }
+            return top + total + 4f;
+        }
+
+        void addWord(Component c, Lyrics.Word w, int index, long t, float cx, float y, float lineScale, float alpha, boolean leaving) {
+            float since = t - w.start();
+            float dur = Math.max(80, w.end() - w.start());
+            boolean sung = since >= 0 || leaving;
+            float lit = leaving ? 1f : clamp(since / 120f);
+            float active = !leaving && since >= 0 && since < dur + 120 ? (float) Math.sin(Math.PI * clamp(since / 260f)) : 0f;
+            float scale = lineScale * (1f + 0.10f * active);
+            float a = alpha;
+            float dx = 0;
+            float dy = 0;
+            int color;
+            int glowColor = cGlow;
+            boolean typing = cfg.anim == LyricsConfig.Anim.TYPE;
+            if (cfg.reveal == LyricsConfig.Reveal.WORD || typing) {
+                if (!sung) return;
+                float in = clamp(since / 180f);
+                if (!leaving && !typing) {
+                    a *= in;
+                    scale *= 0.65f + 0.35f * backOut(in);
+                }
+                color = cfg.reveal == LyricsConfig.Reveal.WORD ? mix(cHigh, cText, lit)
+                        : mix(withAlpha(cText, 0.74f), cHigh, lit);
+            } else {
+                // Karaoke: words light up in the highlight color the moment they are sung.
+                color = mix(withAlpha(cText, 0.74f), cHigh, lit);
+            }
+
+            switch (cfg.anim) {
+                case WAVE -> dy = (float) Math.sin(t / 320.0 + index * 0.8) * 2.2f;
+                case BOUNCE -> {
+                    // A sung word hops and lands with two little bounces.
+                    if (sung && !leaving && since < 700) {
+                        float d = since / 1000f;
+                        dy = -7f * (float) Math.exp(-6.5 * d) * Math.abs((float) Math.cos(11.0 * d));
+                    }
+                }
+                case TYPE -> {
+                    // Letters appear one after another while the word is sung.
+                    if (!leaving && since < dur) {
+                        String text = c.getString();
+                        int n = Math.max(1, Math.min(text.length(), (int) Math.ceil(text.length() * (since + 40) / dur)));
+                        if (n < text.length()) {
+                            float full = font.width(c);
+                            c = Component.literal(text.substring(0, n)).withStyle(c.getStyle());
+                            float part = font.width(c);
+                            dx = -(full - part) / 2f * scale;
+                        }
+                    }
+                }
+                case GLITCH -> {
+                    if (!leaving && since >= 0 && since < 260) {
+                        float p = 1f - since / 260f;
+                        dx = (hash(w.start(), t / 30) - 0.5f) * 3f * p;
+                        float split = 1.6f * p;
+                        float yy = y + (ROW - ROW * scale) / 2f;
+                        runs.add(new Run(c, cx + dx - split, yy, scale, withAlpha(0xFFFF2A6D, 0.7f * a * p), 0, 0f));
+                        runs.add(new Run(c, cx + dx + split, yy, scale, withAlpha(0xFF05D9E8, 0.7f * a * p), 0, 0f));
+                    }
+                }
+                case RAINBOW -> {
+                    if (sung) {
+                        float hue = (t / 2400f + index * 0.09f) % 1f;
+                        int rgb = hsv(hue, 0.6f, 1f);
+                        color = mix(color, (color & 0xFF000000) | (rgb & 0xFFFFFF), lit);
+                        glowColor = hsv((hue + 0.08f) % 1f, 0.9f, 0.8f);
+                    }
+                }
+                default -> {
+                }
+            }
+            if (a <= 0.01f) return;
+            float glow = cfg.glowStrength / 100f * (0.7f + 0.3f * lit + 0.4f * active);
+            float wy = y + dy + (ROW - ROW * scale) / 2f;
+            int depth = cfg.depth ? withAlpha(color, a) : 0;
+            runs.add(new Run(c, cx + dx, wy, 0f, scale, 0f, 0f, withAlpha(color, a), glowColor, glow * a, depth));
+            if (cfg.sparkles && sung && !leaving && since < 650) sparkles(w, since, cx, wy + ROW * scale / 2f, scale, a);
+        }
+
+        /** Three little stars flying off a word that was just sung. Stateless: positions come from the word's time. */
+        void sparkles(Lyrics.Word w, float since, float cx, float cy, float scale, float alpha) {
+            float p = since / 650f;
+            float fade = (1f - p) * clamp(since / 60f) * alpha;
+            if (fade <= 0.02f) return;
+            String[] glyphs = {"✦", "✧", "⋆"};
+            for (int k = 0; k < 3; k++) {
+                float angle = (float) (hash(w.start() + k * 7919L, k) * Math.PI * 2);
+                float dist = (5f + 9f * cubicOut(p)) * scale;
+                float sx = cx + (float) Math.cos(angle) * dist * 1.6f;
+                float sy = cy + (float) Math.sin(angle) * dist - 4f * p;
+                Component c = Component.literal(glyphs[k]);
+                float s = 0.55f * scale * (1f - 0.4f * p);
+                runs.add(new Run(c, sx, sy - ROW * s / 2f, s, withAlpha(cHigh | 0xFF000000, fade), cGlow, 0.5f * fade));
+            }
+        }
+
+        // ------------------------------------------------------------------------------------------ 3D
+
+        /** FLIGHT / DRIFT: the current line, plus the one before while it leaves. */
+        void lines3d(List<Lyrics.Line> lines, int idx, long t) {
+            boolean flight = cfg.anim == LyricsConfig.Anim.FLIGHT;
+            long leave = flight ? FLY : 650;
+            Lyrics.Line cur = lines.get(idx);
+            Lyrics.Line prev = idx > 0 ? lines.get(idx - 1) : null;
+            if (prev != null && !prev.isBreak()) {
+                float out = (t - cur.start()) / (float) leave;
+                if (out < 1f) ribbon(prev, idx - 1, t, out, flight);
+            }
+            if (cur.isBreak()) {
+                Lyrics.Line next = idx + 1 < lines.size() ? lines.get(idx + 1) : null;
+                long since = t - cur.start();
+                long gap = next == null ? Long.MAX_VALUE : next.start() - cur.start();
+                if (gap > 4000 && since > 600) breakNotes(t, clamp((since - 600) / 500f) * clamp((next == null ? 3000 : next.start() - t) / 500f));
+                return;
+            }
+            Lyrics.Line next = idx + 1 < lines.size() ? lines.get(idx + 1) : null;
+            long hold = cur.end() + 2500;
+            float out = -1f;
+            if ((next == null || next.start() > hold) && t > hold) out = (t - hold) / (float) leave;
+            if (out < 1f) ribbon(cur, idx, t, out, flight);
+        }
+
+        /**
+         * One line as a ribbon of separate words: turned away on one side, rising a little, every word coming in on
+         * its own when it is sung. {@code out} below 0 while the line is current, 0..1 while it leaves.
+         */
+        void ribbon(Lyrics.Line line, int index, long t, float out, boolean flight) {
+            List<Lyrics.Word> words = line.words();
+            if (words.isEmpty()) return;
+            float h1 = hash(line.start(), 11);
+            float h2 = hash(line.start(), 23);
+            float side = index % 2 == 0 ? 1f : -1f;
+            float age = Math.max(0, t - line.start());
+            float yaw = flight ? side * (16f + 20f * h1) + side * Math.min(8f, age * 0.0015f) : side * (5f + 7f * h1);
+            float roll = flight ? -(4f + 6f * h2) : (h2 - 0.5f) * 5f;
+            if (flight && hash(line.start(), 41) < 0.25f) roll = -roll;
+            float lineIn = clamp(age / (flight ? 250f : 500f));
+
+            // Words get bigger when they are held longer, the last one a bit more.
+            float[] emph = new float[words.size()];
+            for (int i = 0; i < emph.length; i++) {
+                Lyrics.Word w = words.get(i);
+                float e = 1f;
+                if (flight) {
+                    e += 0.34f * clamp((w.end() - w.start() - 380f) / 700f);
+                    if (i == emph.length - 1) e += 0.1f;
+                    e *= 0.94f + 0.12f * hash(w.start(), 5);
+                }
+                emph[i] = e;
+            }
+            List<List<Integer>> rows = wrap(line);
+            float space = spaceWidth();
+            float rowGap = ROW * (flight ? 1.45f : 1.25f) * (1f + cfg.lineSpacing / 200f);
+            float zDrift = flight ? Math.min(room * 0.18f, age * 0.010f) : (float) Math.sin(t / 1800.0 + index) * 3f;
+
+            // leaving: FLIGHT flies towards you and past, DRIFT floats up and away
+            float ox = 0, oy = 0, oz = 0, oa = 1f;
+            float tanR = (float) Math.tan(Math.toRadians(roll));
+            if (out >= 0f) {
+                if (flight) {
+                    float e = out * out;
+                    oz = e * room * 1.3f;
+                    oy = -e * 30f;
+                    ox = side * e * 24f;
+                    oa = 1f - smoothstep(0.55f, 1f, out);
+                    // and it keels over to the side as it shoots past
+                    roll += side * 55f * e;
+                    tanR = (float) Math.tan(Math.toRadians(Math.max(-70f, Math.min(70f, roll))));
+                } else {
+                    float e = cubicOut(out);
+                    oz = -e * 30f;
+                    oy = -e * 10f;
+                    oa = 1f - out;
+                }
+            }
+            double yr = Math.toRadians(yaw);
+            float cosY = (float) Math.cos(yr);
+            float sinY = (float) Math.sin(yr);
+
+            for (int r = 0; r < rows.size(); r++) {
+                List<Integer> row = rows.get(r);
+                float w = -space;
+                for (int i : row) w += font.width(word(words.get(i).text())) * emph[i] + space;
+                float rowY = (r - (rows.size() - 1) / 2f) * rowGap;
+                float u = -w / 2f;
+                for (int i : row) {
+                    Lyrics.Word word = words.get(i);
+                    Component c = word(word.text());
+                    float ww = font.width(c) * emph[i];
+                    float cu = u + ww / 2f;
+                    u += ww + space;
+
+                    float since = t - word.start();
+                    float dur = Math.max(80, word.end() - word.start());
+                    boolean sung = since >= 0 || out >= 0f;
+                    float a = oa;
+                    float scale = emph[i];
+                    float ex = 0, ey = 0, ez = 0, eyaw = 0;
+                    int color;
+                    if (flight) {
+                        if (!sung) continue;
+                        float in = out >= 0f ? 1f : clamp(since / 420f);
+                        float k = 1f - cubicOut(in);
+                        a *= out >= 0f ? 1f : clamp(since / 150f);
+                        scale *= 0.45f + 0.55f * backOut(in);
+                        ez = -k * room * 0.35f;
+                        ey = -k * 6f;
+                        eyaw = k * side * 30f;
+                        color = out >= 0f ? cText : mix(cHigh, cText, clamp((since - dur) / 250f));
+                    } else {
+                        float in = sung ? (out >= 0f ? 1f : clamp(since / 450f)) : 0f;
+                        a *= (0.3f + 0.7f * in) * lineIn;
+                        ey = (1f - cubicOut(in)) * 5f * (sung ? 1f : 0f);
+                        scale *= 0.92f + 0.08f * in;
+                        float active = !sung || out >= 0f || since > dur + 150 ? 0f : (float) Math.sin(Math.PI * clamp(since / 300f));
+                        scale *= 1f + 0.08f * active;
+                        color = sung ? mix(cHigh, cText, clamp((since - dur) / 300f)) : cText;
+                    }
+                    // position on the ribbon, then the ribbon turned around the vertical axis
+                    float lx = cu;
+                    float ly = rowY + cu * tanR;
+                    float x = lx * cosY + ox + ex;
+                    float z = -lx * sinY + zDrift + oz + ez;
+                    float y = ly + oy + ey - ROW * scale / 2f;
+                    // never let a word fly into the camera
+                    a *= clamp((room * 0.92f - z) / (room * 0.2f));
+                    if (a <= 0.01f) continue;
+                    float glow = cfg.glowStrength / 100f * (0.75f + 0.25f * clamp(since / 200f));
+                    int col = withAlpha(color, a);
+                    runs.add(new Run(c, x, y, z, scale, yaw + eyaw, roll, col, cGlow, glow * a, cfg.depth ? col : 0));
+                    float half = font.width(c) * scale / 2f;
+                    extend(x - half, y, x + half, y + ROW * scale);
+                }
+            }
+        }
+
+
+        // ------------------------------------------------------------------------------------------ scatter
+
+        /** SCATTER: the current line, plus the one before while it fades away. */
+        void scatterLines(List<Lyrics.Line> lines, int idx, long t) {
+            Lyrics.Line cur = lines.get(idx);
+            Lyrics.Line prev = idx > 0 ? lines.get(idx - 1) : null;
+            if (prev != null && !prev.isBreak()) {
+                float out = (t - cur.start()) / 450f;
+                if (out < 1f) scatter(prev, t, out);
+            }
+            if (cur.isBreak()) {
+                Lyrics.Line next = idx + 1 < lines.size() ? lines.get(idx + 1) : null;
+                long since = t - cur.start();
+                long gap = next == null ? Long.MAX_VALUE : next.start() - cur.start();
+                if (gap > 4000 && since > 600) breakNotes(t, clamp((since - 600) / 500f) * clamp((next == null ? 3000 : next.start() - t) / 500f));
+                return;
+            }
+            Lyrics.Line next = idx + 1 < lines.size() ? lines.get(idx + 1) : null;
+            long hold = cur.end() + 2500;
+            float out = -1f;
+            if ((next == null || next.start() > hold) && t > hold) out = (t - hold) / 600f;
+            if (out < 1f) scatter(cur, t, out);
+        }
+
+        /**
+         * Kinetic type: the words of a line land one by one in loose, staggered rows. The first row is big, the rest
+         * smaller; long held words get big, quick little words small; every word sits a bit tilted, off the baseline
+         * and at its own depth, and pops in (shrinking from big) when it is sung. {@code out} 0..1 while it fades.
+         */
+        void scatter(Lyrics.Line line, long t, float out) {
+            List<Lyrics.Word> words = line.words();
+            if (words.isEmpty()) return;
+            float space = spaceWidth();
+            // narrower rows than the other animations, so a line breaks into a little cluster
+            List<List<Integer>> rows = wrapAt(line, maxWidth * 0.62f);
+            float tilt = -4f - 5f * hash(line.start(), 3);
+            float tanT = (float) Math.tan(Math.toRadians(tilt));
+            float rowGap = ROW * 1.15f * (1f + cfg.lineSpacing / 200f);
+            float leaving = out >= 0f ? out : 0f;
+            float oa = 1f - smoothstep(0f, 1f, leaving);
+            float drift = (float) Math.sin(t / 1400.0 + line.start() * 0.001) * 1.2f;
+
+            float[] rowH = new float[rows.size()];
+            float total = 0;
+            for (int r = 0; r < rows.size(); r++) {
+                rowH[r] = rowGap * (r == 0 ? 1.3f : 0.85f);
+                total += rowH[r];
+            }
+            float y = -total / 2f - leaving * 6f + drift;
+            for (int r = 0; r < rows.size(); r++) {
+                List<Integer> row = rows.get(r);
+                float rowScale = r == 0 ? 1.3f : 0.8f;
+                float[] sc = new float[row.size()];
+                float w = -space * rowScale;
+                for (int k = 0; k < row.size(); k++) {
+                    Lyrics.Word word = words.get(row.get(k));
+                    float held = clamp((word.end() - word.start() - 260f) / 900f);
+                    float shortWord = word.text().length() <= 2 ? 0.8f : 1f;
+                    sc[k] = rowScale * (0.8f + 0.55f * held) * shortWord * (0.92f + 0.16f * hash(word.start(), 7));
+                    w += font.width(word(word.text())) * sc[k] + space * rowScale;
+                }
+                // rows are staggered left / right instead of centered
+                float stagger = (r % 2 == 0 ? -1f : 1f) * (6f + 10f * hash(line.start(), 13 + r));
+                float u = -w / 2f + stagger;
+                for (int k = 0; k < row.size(); k++) {
+                    int i = row.get(k);
+                    Lyrics.Word word = words.get(i);
+                    Component c = word(word.text());
+                    float ww = font.width(c) * sc[k];
+                    float cu = u + ww / 2f;
+                    u += ww + space * rowScale;
+
+                    float since = t - word.start();
+                    float dur = Math.max(80, word.end() - word.start());
+                    boolean sung = since >= 0 || out >= 0f;
+                    if (!sung) continue;
+                    float in = out >= 0f ? 1f : clamp(since / 230f);
+                    float scale = sc[k] * (1f + 0.45f * (1f - cubicOut(in)));
+                    float a = oa * (out >= 0f ? 1f : clamp(since / 110f));
+                    float active = out >= 0f || since > dur + 120 ? 0f : (float) Math.sin(Math.PI * clamp(since / 320f));
+                    scale *= 1f + 0.07f * active;
+                    float jx = (hash(word.start(), 17) - 0.5f) * 6f;
+                    float jy = (hash(word.start(), 19) - 0.5f) * 5f;
+                    float roll = tilt + (hash(word.start(), 23) - 0.5f) * 9f;
+                    float z = (hash(word.start(), 29) - 0.5f) * 14f - leaving * 10f;
+                    float x = cu + jx;
+                    float wy = y + rowH[r] / 2f + jy + cu * tanT - ROW * scale / 2f;
+                    int color = out >= 0f ? cText : mix(cHigh, cText, clamp((since - dur) / 300f));
+                    float glow = cfg.glowStrength / 100f * (0.75f + 0.5f * active);
+                    int col = withAlpha(color, a);
+                    runs.add(new Run(c, x, wy, z, scale, 0f, roll, col, cGlow, glow * a, cfg.depth ? col : 0));
+                    float half = font.width(c) * scale / 2f;
+                    extend(x - half, wy, x + half, wy + ROW * scale);
+                    if (cfg.sparkles && out < 0f && since < 650) sparkles(word, since, x, wy + ROW * scale / 2f, scale, a);
+                }
+                y += rowH[r];
+            }
+        }
+
+        /** Next line, small and faint, under the current one. */
+        void preview(Lyrics.Line line, float alpha, float y) {
+            if (alpha <= 0.01f) return;
+            List<List<Integer>> rows = wrap(line);
+            List<Integer> row = rows.get(0);
+            StringBuilder sb = new StringBuilder();
+            for (int i : row) {
+                if (!sb.isEmpty()) sb.append(' ');
+                sb.append(line.words().get(i).text());
+            }
+            if (rows.size() > 1) sb.append(" …");
+            Component c = word(sb.toString());
+            float s = 0.62f;
+            runs.add(new Run(c, 0, y + 3, s, withAlpha(cText, 0.42f * alpha), cGlow, 0f));
+            float w = font.width(c) * s;
+            extend(-w / 2, y + 3, w / 2, y + 3 + ROW * s);
+        }
+
+        void title(String title, String artist, float alpha, float y) {
+            if (title == null || title.isBlank()) return;
+            Component t = word(title);
+            float s = 1.25f;
+            runs.add(new Run(t, 0, y - ROW * s, s, withAlpha(cHigh, alpha), cGlow, cfg.glowStrength / 100f * alpha));
+            float w = font.width(t) * s;
+            extend(-w / 2, y - ROW * s, w / 2, y);
+            if (artist != null && !artist.isBlank()) {
+                Component a = word(artist);
+                float sa = 0.75f;
+                runs.add(new Run(a, 0, y + 4, sa, withAlpha(cText, 0.8f * alpha), cGlow, 0.5f * cfg.glowStrength / 100f * alpha));
+                float wa = font.width(a) * sa;
+                extend(-wa / 2, y + 4, wa / 2, y + 4 + ROW * sa);
+            }
+        }
+
+        void breakNotes(long t, float alpha) {
+            if (alpha <= 0.01f) return;
+            String[] notes = {"♪", "♫", "♪"};
+            for (int i = 0; i < 3; i++) {
+                float bounce = (float) Math.sin(t / 260.0 + i * 1.3) * 2.5f;
+                Component c = word(notes[i]);
+                runs.add(new Run(c, (i - 1) * 14f, -ROW / 2f + bounce, 1.1f, withAlpha(cHigh, 0.85f * alpha), cGlow, cfg.glowStrength / 100f * alpha));
+            }
+            extend(-24, -ROW, 24, ROW);
+        }
+
+        /** Greedy word wrap at {@link #maxWidth}. */
+        List<List<Integer>> wrap(Lyrics.Line line) {
+            return wrapAt(line, maxWidth);
+        }
+
+        List<List<Integer>> wrapAt(Lyrics.Line line, float maxWidth) {
+            List<List<Integer>> rows = new ArrayList<>();
+            List<Integer> row = new ArrayList<>();
+            float space = spaceWidth();
+            float w = 0;
+            for (int i = 0; i < line.words().size(); i++) {
+                float ww = font.width(word(line.words().get(i).text()));
+                if (!row.isEmpty() && w + space + ww > maxWidth) {
+                    rows.add(row);
+                    row = new ArrayList<>();
+                    w = 0;
+                }
+                w += (row.isEmpty() ? 0 : space) + ww;
+                row.add(i);
+            }
+            if (!row.isEmpty()) rows.add(row);
+            if (rows.isEmpty()) rows.add(List.of());
+            return rows;
+        }
+
+        void extend(float x1, float y1, float x2, float y2) {
+            minX = Math.min(minX, x1);
+            maxX = Math.max(maxX, x2);
+            minY = Math.min(minY, y1);
+            maxY = Math.max(maxY, y2);
+        }
+
+        Frame finish() {
+            if (runs.isEmpty()) return EMPTY;
+            // Far words first, so see-through ones blend over the ones behind them.
+            runs.sort((p, q) -> Float.compare(p.z(), q.z()));
+            return new Frame(List.copyOf(runs), List.copyOf(boxes), maxX - minX, maxY - minY);
+        }
+    }
+
+    // ================================================================================================ math
+
+    static float clamp(float v) {
+        return Math.max(0f, Math.min(1f, v));
+    }
+
+    static float smoothstep(float a, float b, float x) {
+        float t = clamp((x - a) / (b - a));
+        return t * t * (3 - 2 * t);
+    }
+
+    static float cubicOut(float t) {
+        float u = 1f - t;
+        return 1f - u * u * u;
+    }
+
+    static float backOut(float t) {
+        float c1 = 1.70158f;
+        float c3 = c1 + 1f;
+        float u = t - 1f;
+        return 1f + c3 * u * u * u + c1 * u * u;
+    }
+
+    /** Deterministic pseudo random number in [0, 1) for two inputs. */
+    static float hash(long a, long b) {
+        long h = a * 0x9E3779B97F4A7C15L + b * 0xC2B2AE3D27D4EB4FL;
+        h ^= h >>> 29;
+        h *= 0xBF58476D1CE4E5B9L;
+        h ^= h >>> 32;
+        return (h >>> 40) / (float) (1L << 24);
+    }
+
+    static int hsv(float h, float s, float v) {
+        float c = v * s;
+        float hp = (h * 6f) % 6f;
+        float x = c * (1 - Math.abs(hp % 2 - 1));
+        float r = 0, g = 0, b = 0;
+        if (hp < 1) { r = c; g = x; } else if (hp < 2) { r = x; g = c; } else if (hp < 3) { g = c; b = x; }
+        else if (hp < 4) { g = x; b = c; } else if (hp < 5) { r = x; b = c; } else { r = c; b = x; }
+        float m = v - c;
+        return 0xFF000000 | (Math.round((r + m) * 255) << 16) | (Math.round((g + m) * 255) << 8) | Math.round((b + m) * 255);
+    }
+
+    public static int withAlpha(int argb, float a) {
+        int base = argb >>> 24;
+        int na = Math.max(0, Math.min(255, Math.round(base * a)));
+        return (na << 24) | (argb & 0xFFFFFF);
+    }
+
+    public static int mix(int a, int b, float t) {
+        t = clamp(t);
+        int r = 0;
+        for (int s = 0; s <= 24; s += 8) {
+            int ca = (a >>> s) & 0xFF;
+            int cb = (b >>> s) & 0xFF;
+            r |= (Math.round(ca + (cb - ca) * t) & 0xFF) << s;
+        }
+        return r;
+    }
+}

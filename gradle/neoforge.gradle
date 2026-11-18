@@ -24,6 +24,9 @@ neoForge {
             client()
             gameDirectory = project.file('run')
             systemProperty 'vibeyclient.smoke', System.getProperty('vibeyclient.smoke', 'false')
+            // Multiplayer module visual check (dev only, see MpDevCheck): -Dvibeyclient.mpcheck=true [-Dvibeyclient.mpcheck.relay=127.0.0.1:26400]
+            systemProperty 'vibeyclient.mpcheck', System.getProperty('vibeyclient.mpcheck', 'false')
+            systemProperty 'vibeyclient.mpcheck.relay', System.getProperty('vibeyclient.mpcheck.relay', '')
             // Social against a local backend (see SocialGameTest): -Dvibeyclient.devAuth=true -Dvibeyclient.api=...
             ['vibeyclient.devAuth', 'vibeyclient.api'].each { k ->
                 def v = System.getProperty(k)
@@ -54,6 +57,7 @@ processResources {
     exclude 'fabric.mod.json'
     exclude 'vibeyclient.lyrics.mixins.json'
     exclude 'assets/vibeyclient/i18n/*/lyrics.json'
+    exclude 'assets/vibeyclient/font/lyrics/**', 'assets/vibeyclient/textures/lyrics/**', 'assets/vibeyclient/lyrics/**'
     def props = [
             version            : project.version,
             mod_id             : project.mod_id,
