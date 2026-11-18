@@ -58,6 +58,7 @@ public final class AvatarStates {
         Bundle b = item == null ? null : item.bundle();
         if (b == null || !b.isEmote() || b.emoteAnimation() == null) return false;
         double now = Clock.now();
+        dev.henny.vibeyclient.avatar.fx.EmbeddedSounds.prefetch(b);
         state.emote = new EmotePlay(emoteId, b, now);
         state.emote.update(now);
         return true;

@@ -58,9 +58,9 @@ public final class ItemLoader {
         if (item.bundle() != null && item.isEmote()) AvatarStates.reloadEmote(item.id());
     }
 
+    /** Worker thread: compile the mesh. (Sounds are decoded on first use: LWJGL must not be touched during startup.) */
     static void prepare(Bundle b) {
         GpuBundles.prepare(b);
-        EmbeddedSounds.prefetch(b);
     }
 
     // ============================================================================================ builtin

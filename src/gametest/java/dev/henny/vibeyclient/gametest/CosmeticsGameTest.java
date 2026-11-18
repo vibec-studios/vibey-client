@@ -117,6 +117,8 @@ public final class CosmeticsGameTest implements FabricClientGameTest {
                 mannequin.setItemInHand(net.minecraft.world.InteractionHand.OFF_HAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.SHIELD));
                 mannequin.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.SHIELD));
             });
+            wear(context, Map.of());
+            shoot(context, "c10a_shield_vanilla_side", 90f);
             wear(context, Map.of("shield", "vibey:seal_crest_shield"));
             shoot(context, "c10b_shield_front", 180f);
             shoot(context, "c10c_shield_side", 90f);
@@ -177,7 +179,26 @@ public final class CosmeticsGameTest implements FabricClientGameTest {
                 mc.options.hideGui = false;
                 mc.level.removeEntity(mannequin.getId(), net.minecraft.world.entity.Entity.RemovalReason.DISCARDED);
             });
-            System.out.println("[vibeyclient-test] layer frames: " + AvatarHooks.frames);
+            // keep a copy of the world for runtime checks on other versions (--quickPlaySingleplayer vibeytest)
+            try {
+                java.nio.file.Path src = world.getWorldSave().getSaveDirectory();
+                java.nio.file.Path dst = java.nio.file.Path.of(System.getProperty("user.dir")).resolve("../vibeytest-world").normalize();
+                copy(src, dst);
+                System.out.println("[vibeyclient-test] world copied to " + dst);
+            } catch (Exception e) {
+                System.out.println("[vibeyclient-test] world copy failed: " + e);
+            }
+        }
+    }
+
+    private static void copy(java.nio.file.Path src, java.nio.file.Path dst) throws java.io.IOException {
+        try (var walk = java.nio.file.Files.walk(src)) {
+            for (java.nio.file.Path p : (Iterable<java.nio.file.Path>) walk::iterator) {
+                if (p.getFileName().toString().equals("session.lock")) continue;
+                java.nio.file.Path t = dst.resolve(src.relativize(p).toString());
+                if (java.nio.file.Files.isDirectory(p)) java.nio.file.Files.createDirectories(t);
+                else java.nio.file.Files.copy(p, t, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
         }
     }
 

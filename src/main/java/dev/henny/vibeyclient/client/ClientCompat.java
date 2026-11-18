@@ -61,10 +61,14 @@ public final class ClientCompat {
 
     /** A new key mapping in the "Vibey Client" category (not registered yet, see {@link Keybinds}). */
     public static KeyMapping newKeyMapping(String name, int keyCode) {
+        keyCode = Keys.toNative(keyCode);
         //? if >=1.21.9 {
-        return new KeyMapping(name, keyCode, category());
+        KeyMapping m = new KeyMapping(name, keyCode, category());
         //?} else
-        /*return new KeyMapping(name, keyCode, "key.categories.vibeyclient");*/
+        /*KeyMapping m = new KeyMapping(name, keyCode, "key.categories.vibeyclient");*/
+        // unbound: the real UNKNOWN key (26.3 crashes in KeyMapping.setAll on a keyboard key with code -1)
+        if (keyCode < 0) m.setKey(InputConstants.UNKNOWN);
+        return m;
     }
 
     public static void rebind(KeyMapping mapping, int keyCode) {

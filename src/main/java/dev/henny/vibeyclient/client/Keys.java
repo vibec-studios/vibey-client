@@ -18,4 +18,39 @@ public final class Keys {
             F10 = 299, F11 = 300, F12 = 301;
     public static final int LEFT_SHIFT = 340, LEFT_CONTROL = 341, LEFT_ALT = 342, RIGHT_SHIFT = 344,
             RIGHT_CONTROL = 345, RIGHT_ALT = 346;
+
+    /**
+     * The key code the running game uses for a GLFW code: the same up to 26.2; 26.3 (SDL) uses SDL scancodes, and an
+     * out-of-range GLFW code there crashes KeyMapping.setAll. Unknown keys map to -1 (unbound).
+     */
+    public static int toNative(int glfw) {
+        //? if >=26.3 {
+        /*if (glfw < 0) return -1;
+        if (glfw >= A && glfw <= Z) return 4 + (glfw - A);
+        if (glfw >= 49 && glfw <= 57) return 30 + (glfw - 49); // 1..9
+        if (glfw == 48) return 39;                              // 0
+        if (glfw >= F1 && glfw <= F12) return 58 + (glfw - F1);
+        return switch (glfw) {
+            case ENTER -> 40;
+            case ESCAPE -> 41;
+            case BACKSPACE -> 42;
+            case TAB -> 43;
+            case SPACE -> 44;
+            case INSERT -> 73;
+            case DELETE -> 76;
+            case RIGHT -> 79;
+            case LEFT -> 80;
+            case DOWN -> 81;
+            case UP -> 82;
+            case LEFT_CONTROL -> 224;
+            case LEFT_SHIFT -> 225;
+            case LEFT_ALT -> 226;
+            case RIGHT_CONTROL -> 228;
+            case RIGHT_SHIFT -> 229;
+            case RIGHT_ALT -> 230;
+            default -> -1;
+        };
+        *///?} else
+        return glfw;
+    }
 }

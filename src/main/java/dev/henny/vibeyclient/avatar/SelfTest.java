@@ -20,10 +20,13 @@ public final class SelfTest {
     private SelfTest() {}
 
     private static final boolean ON = Vibey.platform().isDevelopment()
-            && (Boolean.getBoolean("vibeyclient.avatarTest") || "true".equals(System.getenv("VIBEYCLIENT_AVATAR_TEST")));
+            && (Boolean.getBoolean("vibeyclient.avatarTest") || System.getenv("VIBEYCLIENT_AVATAR_TEST") != null);
+    /** VIBEYCLIENT_AVATAR_TEST=world: wait for a world (quick play) and test there. */
+    private static final boolean WORLD = "world".equals(System.getenv("VIBEYCLIENT_AVATAR_TEST"));
     private static int step = -1;
     private static int wait;
     private static int settle;
+    private static int waited;
 
     public static boolean enabled() {
         return ON;
@@ -40,10 +43,21 @@ public final class SelfTest {
         Wardrobe w = Services.get(Wardrobe.class).orElse(null);
         switch (step) {
             case -1 -> {
-                if (AvatarItems.all().size() < 20 || w == null || ClientCompat.screen() == null || loading(mc)) return;
+                if (AvatarItems.all().size() < 20 || w == null || loading(mc)) return;
+                if (WORLD && ++waited % 400 == 0) {
+                    log("still waiting for a world, screen " + (ClientCompat.screen() == null ? "none" : ClientCompat.screen().getClass().getName()));
+                    shot("avatartest_waiting");
+                }
+                if (WORLD) pressLoad();
+                if (WORLD ? mc.player == null || ClientCompat.screen() != null : ClientCompat.screen() == null) return;
                 if (settle++ < 120) return;
                 log("items " + AvatarItems.all().size() + ", Minecraft " + dev.henny.vibeyclient.BuildInfo.MINECRAFT);
                 for (String id : new String[]{"vibey:vibe_cape", "vibey:crystal_wings", "vibey:seal_beanie", "vibey:seal_buddy"}) w.equip(AvatarItems.get(id));
+                if (WORLD) {
+                    step = 2;
+                    wait = 20;
+                    return;
+                }
                 ClientCompat.openScreen(new TestScreen());
                 step = 0;
                 wait = 40;
@@ -90,6 +104,22 @@ public final class SelfTest {
             }
             default -> {}
         }
+    }
+
+    /** World upgrade prompt of the copied test world: press "Load" (no backup). */
+    private static void pressLoad() {
+        //? if >=1.21.9 {
+        var s = ClientCompat.screen();
+        if (!(s instanceof net.minecraft.client.gui.screens.BackupConfirmScreen) && !(s instanceof net.minecraft.client.gui.screens.ConfirmScreen)) return;
+        for (var c : s.children()) {
+            if (c instanceof net.minecraft.client.gui.components.Button b
+                    && (b.getMessage().getString().contains("Know What") || b.getMessage().getString().equals("Yes"))) {
+                b.onPress(new net.minecraft.client.input.KeyEvent(257, 0, 0));
+                log("pressed Load on the backup prompt");
+                return;
+            }
+        }
+        //?}
     }
 
     private static boolean loading(Minecraft mc) {

@@ -53,6 +53,7 @@ public final class GpuBundles {
                 return null;
             }
             CACHE.put(b, g);
+            dev.henny.vibeyclient.avatar.fx.EmbeddedSounds.prefetch(b);
             g.animate(ticks, partial);
         }
         g.lastUsed = now;
