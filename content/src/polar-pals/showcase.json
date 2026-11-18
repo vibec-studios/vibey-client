@@ -1,0 +1,58 @@
+{
+  "tagline": "Premium collection: a seal pup and a penguin as pets, two sets of wings, a pompom beanie, an igloo backpack with a resident seal, an aurora ring and an HD snowfall cape. Everything 3D, HD textures (4×), animated with the states the 0.2.1 engine already has (idle / walk / fly / sneak) – no client change needed.",
+  "items": {
+    "vibey:polar_seal": {
+      "idle": [1.45, 2.9, 5.15, 10.0, 15.0, 18.3],
+      "moments": { "1.5": "blink", "2.9": "head tilt", "5.2": "sit up + clap (hearts, squeak)", "10.0": "roll over", "15.0": "nap with floating Zs", "18.3": "wake up + stretch" },
+      "story": "idle 20 s: breathe → blink → head tilt → sit up and clap three times (hearts + soft squeak) → look around → roll over (snow puff) → shake → nap (eyes shut, deep breaths, 3D Zs rise and spin) → wake, stretch, blink-blink. walk 1.6 s: galumph, galumph, happy belly slide. fly: superman with flapping flippers. sneak: shy, blushing loaf."
+    },
+    "vibey:polar_penguin": {
+      "idle": [0.6, 4.4, 7.6, 8.75, 9.6],
+      "moments": { "0.6": "breathing", "4.4": "happy flap + hop", "7.6": "shows you a fish", "8.8": "tosses it", "9.6": "gulp + heart" },
+      "story": "idle 16 s: look around → happy flipper flap with hops → a fish appears in the beak, tilt, toss, gulp (heart) → preen → little side-to-side dance. walk 2.4 s: four waddle steps with wiggling flippers, then a dive and belly slide. fly: frantic flapping, feet paddling. sneak: ducks into the scarf."
+    },
+    "vibey:polar_igloo_backpack": {
+      "idle": [3.4, 4.9],
+      "moments": { "3.4": "pup peeks out", "4.9": "pup waves" },
+      "story": "idle 8 s: the seal pup pops out of the door (snow puff), looks left and right, blinks, waves a flipper, ducks back in; the pennant flutters. walk: the pack bounces, the pennant flaps."
+    },
+    "vibey:polar_pompom_beanie": {
+      "idle": [0.12, 0.3],
+      "moments": { "0.1": "boing", "0.3": "boing" },
+      "story": "idle 3 s: a damped boing with squash and stretch, snowflakes off the pompom. walk: bounces with the steps, braids swing. fly: pompom, flaps and braids stream back."
+    },
+    "vibey:polar_aurora_ring": {
+      "idle": [1.0, 6.0],
+      "story": "idle 12 s: the ring turns once, a wave runs around it three times (panels bob and lean), the light drifts along the curtains (8-frame strip), three crystal snowflakes orbit the other way, sparkle sprites rise."
+    },
+    "vibey:polar_aurora_wings": {
+      "idle": [1.0],
+      "story": "Two veils per side, each a chain of three emissive translucent segments. idle: slow ripple + occasional sparkles. fly: bigger flap with a travelling ripple and a stream of sparkle sprites. sneak: veils swept back."
+    },
+    "vibey:polar_owl_wings": {
+      "idle": [2.0],
+      "story": "Arm → forearm → hand bones, lesser + greater coverts and alula as scalloped layers, 5 secondaries and 5 primaries as separate feather bones. idle: folded angel-style with a slow breath. walk: gentle bob. fly: one big clean flap, then a long glide with spread finger feathers (feathers drift off on the downstroke). sneak: tucked in tight."
+    },
+    "vibey:polar_snowfall_cape": {
+      "idle": [],
+      "story": "HD 4× cape texture, 8 frames: aurora ripples, stars twinkle, snow falls in a seamless loop, the penguin waves, the seal blinks. Purple fleece lining with teal snowflakes; the elytra get the night sky."
+    }
+  },
+  "hero": [
+    { "name": "pals_front", "yaw": 160, "slots": { "pet": "vibey:polar_seal", "hat": "vibey:polar_pompom_beanie", "aura": "vibey:polar_aurora_ring", "cape": "vibey:polar_snowfall_cape" } },
+    { "name": "pals_back", "yaw": 20, "slots": { "pet": "vibey:polar_seal", "hat": "vibey:polar_pompom_beanie", "aura": "vibey:polar_aurora_ring", "cape": "vibey:polar_snowfall_cape" } },
+    { "name": "owl_penguin", "yaw": 200, "slots": { "wings": "vibey:polar_owl_wings", "pet": "vibey:polar_penguin", "hat": "vibey:polar_pompom_beanie" } },
+    { "name": "owl_fly", "yaw": 15, "fly": true, "slots": { "wings": "vibey:polar_owl_wings", "hat": "vibey:polar_pompom_beanie" } },
+    { "name": "aurora_glow", "yaw": 25, "slots": { "wings": "vibey:polar_aurora_wings", "aura": "vibey:polar_aurora_ring", "pet": "vibey:polar_seal" } },
+    { "name": "igloo_penguin", "yaw": 30, "slots": { "back": "vibey:polar_igloo_backpack", "pet": "vibey:polar_penguin", "hat": "vibey:polar_pompom_beanie" } }
+  ],
+  "notes": [
+    "Cosmetic animation states in 0.2.1 (AvatarDraw.COSMETIC_ANIMS): idle (always), walk (blended by walk speed, pets: by their own movement), fly (elytra or creative flying), sneak. There is no state for standing still for a while, falling, sprinting, swimming or riding.",
+    "The animation clock is global (Clock.now() % length), so long idle loops play the same moment for everyone: the seal naps for 5 s of every 20 s, not after the player has been idle.",
+    "Weights are blended additively; for pets walk = pet movement and fly = player flying are independent, so a pet that moves while the player flies plays walk + fly at full weight (sum 2). The pets' walk and fly were designed to look fine combined.",
+    "Walk weight saturates at normal walking speed (pets: almost immediately), so sprinting cannot be told apart: the belly slides are a phase of the walk loop instead.",
+    "Events of idle always run (also while walking); walk/fly/sneak events only above 50 % weight. Hearts, snow puffs and sparkles are therefore short and rare in idle.",
+    "Eyelids, the fish, the peeking pup and the nap Zs rest hidden inside the model and are moved out by idle offsets, so they disappear by themselves when walk/fly takes over (idle weight 0).",
+    "Proposed client states (not part of this task): idle_long (standing still > N s), fall (falling without elytra), sprint, swim, glide (elytra only, separate from creative fly), land (one-shot), hurt (one-shot) and a pet_sit state while the owner sits/rides; plus weight normalisation so walk + fly never sum above 1."
+  ]
+}

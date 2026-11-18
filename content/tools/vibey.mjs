@@ -58,6 +58,8 @@ export class Texture {
    * @param id texture id
    * @param opts { width, height } fixed frame size, or omit for auto-sizing (power of two that fits).
    *             { frames, frameTime, frameOrder } for animated vertical strips.
+   *             { hd: k } HD texture: the PNG gets k pixels per UV unit (SPEC §5 "HD"); painters then receive
+   *             views that are k times larger (use img.width/img.height, never hard-coded sizes).
    */
   constructor(bundle, id, opts = {}) {
     this.bundle = bundle;
@@ -71,6 +73,8 @@ export class Texture {
     this.regions = [];
     this.painters = []; // whole-frame painters (img, frameIndex)
     this.minSize = opts.minSize ?? 16;
+    this.hd = opts.hd ?? 1;
+    if (this.hd !== Math.round(this.hd) || this.hd < 1) throw new Error(`texture ${id}: hd must be a positive integer`);
   }
 
   /** Paint the whole frame (for fixed-layout textures like capes/shields). painter(img, frame) */
@@ -111,7 +115,7 @@ export class Texture {
     while (!pos) {
       if (this.fixed) throw new Error(`texture ${this.id}: regions do not fit into ${this.width}x${this.height}`);
       if (W <= H) W *= 2; else H *= 2;
-      if (W > 512 || H > 512) throw new Error(`texture ${this.id}: too many regions`);
+      if (W * this.hd > 512 || H * this.hd > 512) throw new Error(`texture ${this.id}: too many regions`);
       pos = tryPack(W, H);
     }
     for (const [r, [u, v]] of pos) { r.u = u; r.v = v; }
@@ -120,11 +124,12 @@ export class Texture {
   }
 
   _render() {
-    const img = new Img(this.width, this.height * this.frames);
+    const k = this.hd, W = this.width * k, H = this.height * k;
+    const img = new Img(W, H * this.frames);
     for (let f = 0; f < this.frames; f++) {
-      const frame = img.view(0, f * this.height, this.width, this.height);
+      const frame = img.view(0, f * H, W, H);
       for (const p of this.painters) p(frame, f);
-      for (const r of this.regions) if (r.paint) r.paint(frame.view(r.u, r.v, Math.ceil(r.w), Math.ceil(r.h)), f);
+      for (const r of this.regions) if (r.paint) r.paint(frame.view(r.u * k, r.v * k, Math.ceil(r.w) * k, Math.ceil(r.h) * k), f);
     }
     return img;
   }
@@ -157,10 +162,11 @@ export class Bone {
     const tex = opts.texture ?? this.bundle.defaultTexture();
     const region = tex.region(2 * d + 2 * w, d + h, (img, frame) => {
       const L = boxUV(0, 0, w, h, d);
+      const k = tex.hd;
       const faces = {};
       for (const f of FACES) {
         const [u1, v1, u2, v2] = L[f];
-        faces[f] = img.view(u1, v1, u2 - u1, v2 - v1);
+        faces[f] = img.view(u1 * k, v1 * k, (u2 - u1) * k, (v2 - v1) * k);
       }
       if (typeof paint === "function") paint(faces, frame);
       else if (paint) {

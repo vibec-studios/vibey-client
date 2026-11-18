@@ -95,11 +95,13 @@ export function validate(input) {
     else {
       try {
         const h = readPNGHeader(buf);
+        // HD (SPEC §5): the PNG may be k× the declared UV size with the same aspect ratio (k = PNG width / width)
+        const k = h.width / t.width;
+        const fh = t.height * k; // PNG pixels per frame
         if (t.animation !== undefined) {
           if (!isObj(t.animation)) err(`${where}.animation must be an object`);
-          if (h.width !== t.width) err(`${where}: PNG width ${h.width} != width ${t.width}`);
-          if (h.height % t.height !== 0) err(`${where}: animated strip height ${h.height} is not a multiple of frame height ${t.height}`);
-          frames = Math.floor(h.height / t.height);
+          if (!Number.isInteger(fh) || h.height % fh !== 0) err(`${where}: animated strip height ${h.height} is not a multiple of the frame height ${fh} (PNG ${h.width} wide for width ${t.width})`);
+          frames = Math.max(1, Math.round(h.height / fh));
           if (h.width > LIMITS.textureMax || h.height > LIMITS.stripMaxHeight) err(`${where}: animated strip ${h.width}x${h.height} exceeds ${LIMITS.textureMax}x${LIMITS.stripMaxHeight}`);
           if (t.height > LIMITS.textureMax) err(`${where}: frame height exceeds ${LIMITS.textureMax}`);
           const a = t.animation ?? {};
@@ -109,7 +111,7 @@ export function validate(input) {
             else for (const f of a.frames) if (!Number.isInteger(f) || f < 0 || f >= frames) err(`${where}.animation.frames: frame ${f} out of range 0..${frames - 1}`);
           }
         } else {
-          if (h.width !== t.width || h.height !== t.height) err(`${where}: PNG is ${h.width}x${h.height}, declared ${t.width}x${t.height}`);
+          if (Math.abs(h.height - fh) > 1e-6) err(`${where}: PNG is ${h.width}x${h.height}, declared ${t.width}x${t.height} (not the same aspect ratio)`);
           if (h.width > LIMITS.textureMax || h.height > LIMITS.textureMax) err(`${where}: ${h.width}x${h.height} exceeds ${LIMITS.textureMax}x${LIMITS.textureMax}`);
         }
       } catch (e) {
