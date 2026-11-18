@@ -87,3 +87,5 @@ if (project.minecraft_version == '1.21.11') {
 
 // Dev tour (dev/DevTour.java): ./gradlew :<target>:runClient -Dvibeyclient.tour=<outdir>
 if (System.getProperty('vibeyclient.tour')) loom.runs.named('client') { vmArg "-Dvibeyclient.tour=${System.getProperty('vibeyclient.tour')}" }
+// Click self-test (dev/ClickTest.java): ./gradlew :<target>:runClient -Dvibeyclient.clicktest=<outdir>
+if (System.getProperty('vibeyclient.clicktest')) loom.runs.named('client') { vmArg "-Dvibeyclient.clicktest=${System.getProperty('vibeyclient.clicktest')}" }

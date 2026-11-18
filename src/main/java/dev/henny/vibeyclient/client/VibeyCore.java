@@ -63,6 +63,7 @@ public final class VibeyCore {
         mm.tick();
         dev.henny.vibeyclient.ui.title.UiShot.tick();
         dev.henny.vibeyclient.dev.DevTour.tick();
+        dev.henny.vibeyclient.dev.ClickTest.tick();
     }
 
     public static void onHud(Gfx g) {

@@ -637,7 +637,13 @@ public final class DevTour {
 
     /** Saves the last frame to {@code <out>/<name>.png}. */
     private static void shot(Minecraft mc, String name) throws Exception {
-        Path dir = Path.of(OUT).toAbsolutePath();
+        screenshot(mc, Path.of(OUT), name);
+        shots++;
+    }
+
+    /** Saves the last frame to {@code <dir>/<name>.png} (also used by {@link ClickTest}). */
+    static void screenshot(Minecraft mc, Path out, String name) throws Exception {
+        Path dir = out.toAbsolutePath();
         Files.createDirectories(dir);
         Path file = dir.resolve(name + ".png");
         Method take = null;
@@ -655,7 +661,6 @@ public final class DevTour {
         }
         Object r = take.invoke(null, args);
         if (r != null) writeImage(r, file);
-        shots++;
         log("screenshot " + file);
     }
 
