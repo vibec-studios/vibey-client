@@ -1,14 +1,20 @@
 {
   "pause": {
-    "button": "Vibey"
+    "button": "Vibey",
+    "vibey": "Vibey",
+    "host": "Welt hosten"
   },
   "tab": {
-    "modules": "Module"
+    "modules": "Module",
+    "about": "Über"
   },
   "menu": {
     "modules": "Module",
     "global": "Allgemein",
-    "globalDescription": "Einstellungen für den ganzen Client."
+    "globalDescription": "Einstellungen für den ganzen Client.",
+    "search": "Suchen",
+    "noResults": "Nichts gefunden.",
+    "close": "Schließen (Esc)"
   },
   "category": {
     "core": "Kern",
@@ -36,7 +42,10 @@
     "advanced": "Erweitert",
     "none": "Noch keine Einstellungen.",
     "pressKey": "Taste drücken",
-    "run": "Ausführen"
+    "run": "Ausführen",
+    "unbound": "Nicht belegt",
+    "conflict": "Auch belegt von: {0}",
+    "keyHelp": "Klicken, dann eine Taste drücken. Rücktaste entfernt, Esc bricht ab."
   },
   "setting": {
     "language": "Sprache",
@@ -52,6 +61,83 @@
     "backendUrl": "Backend-URL",
     "backendUrl.desc": "Nur für die Entwicklung ändern.",
     "resetBackend": "Backend-URL zurücksetzen",
-    "resetBackend.button": "Zurücksetzen"
+    "resetBackend.button": "Zurücksetzen",
+    "vibeyMainMenu": "Vibey-Hauptmenü",
+    "vibeyMainMenu.desc": "Ersetzt den Titelbildschirm. Aus: der normale mit einem kleinen Vibey-Knopf."
+  },
+  "title": {
+    "singleplayer": "Einzelspieler",
+    "multiplayer": "Mehrspieler",
+    "wardrobe": "Garderobe",
+    "friends": "Freunde",
+    "vibey": "Vibey-Einstellungen",
+    "options": "Optionen",
+    "mods": "Mods",
+    "quit": "Spiel beenden",
+    "accessibility": "Barrierefreiheit",
+    "language": "Sprache",
+    "classic": "Klassisches Menü (Vanilla-Titelbildschirm)",
+    "backToVibey": "Vibey-Menü",
+    "news": "Neuigkeiten"
+  },
+  "status": {
+    "off": "Online-Funktionen aus",
+    "checking": "Verbinde…",
+    "reachable": "Vibe online",
+    "connecting": "Anmeldung…",
+    "online": "Online",
+    "offline": "Offline",
+    "friend": "{0} Freund online",
+    "friends": "{0} Freunde online",
+    "tip": {
+      "off": "Online-Funktionen sind aus: Vibey verbindet sich mit nichts. Ändern in den Vibey-Einstellungen.",
+      "checking": "Prüfe das Vibe-Backend…",
+      "reachable": "Das Vibe-Backend ist erreichbar.",
+      "connecting": "Anmeldung bei Vibe mit deinem Minecraft-Konto…",
+      "online": "Bei Vibe angemeldet: Freunde, Chat und synchronisierte Cosmetics sind aktiv.",
+      "offline": "Das Vibe-Backend ist gerade nicht erreichbar. Alles andere funktioniert."
+    }
+  },
+  "onboarding": {
+    "next": "Weiter",
+    "back": "Zurück",
+    "skip": "Überspringen",
+    "done": "Los geht's",
+    "language": "Sprache",
+    "welcome": {
+      "title": "Willkommen bei Vibey Client",
+      "body": "Freunde, Chat, Cosmetics, Emotes, Welten hosten und mehr – in einem Client von Vibe Craft Studios. Jeder Teil ist ein Modul, das du an- oder ausschalten kannst."
+    },
+    "online": {
+      "title": "Online-Funktionen",
+      "body": "Freunde, Chat und synchronisierte Cosmetics laufen über das Vibe-Backend unter {0}. Anmeldung mit deinem Minecraft-Konto – ohne Registrierung.",
+      "token": "Die Anmeldung nutzt dieselbe Prüfung wie Minecraft-Server. Dein Minecraft-Token verlässt nie das Spiel.",
+      "data": "Gespeichert: UUID, Name, Freunde, Chats und Cosmetics – sonst nichts.",
+      "on": "An",
+      "onDesc": "Freunde, Chat, Cosmetics für alle.",
+      "off": "Aus",
+      "offDesc": "Keine Verbindung. Cosmetics nur lokal."
+    },
+    "keys": {
+      "title": "So findest du dich zurecht",
+      "menu": "Öffnet das Vibey-Menü: Module, Einstellungen, Garderobe.",
+      "emote": "Öffnet das Emote-Rad.",
+      "pause": "Auch im Pausemenü gibt es eine Vibey-Leiste.",
+      "later": "Tasten änderst du im Vibey-Menü, diese Begrüßung findest du wieder unter Über."
+    }
+  },
+  "about": {
+    "by": "von Vibe Craft Studios",
+    "website": "Website",
+    "source": "Quellcode",
+    "issues": "Fehler melden",
+    "welcome": "Begrüßung erneut zeigen",
+    "credits": "Mitwirkende",
+    "creditsText": "Gemacht von Vibe Craft Studios. Robben-Maskottchen, Schriftzug, Icons und alle Cosmetics sind eigene Arbeiten. Danke an alle, die testen und Feedback geben.",
+    "privacy": "Online-Funktionen",
+    "privacyOn": "An: Vibey spricht mit {0}. Die Anmeldung nutzt Minecrafts eigene Server-Prüfung – dein Minecraft-Token verlässt nie das Spiel.",
+    "privacyOff": "Aus: Vibey verbindet sich mit nichts.",
+    "licenses": "Lizenzen",
+    "mojang": "Kein offizielles Minecraft-Produkt. Nicht von Mojang oder Microsoft genehmigt oder mit ihnen verbunden."
   }
 }

@@ -74,6 +74,10 @@ public final class SettingsView {
             g.text(g.clip(desc, labelW), x, y + 18, Theme.DIM);
         }
         g.hline(x, y + h - 1, w, Theme.LINE);
+        String name = Lang.tr(s.nameKey());
+        if (g.width(name) > labelW || (desc != null && g.width(desc) > labelW)) {
+            ui.tooltip(s.nameKey(), x, y, labelW, h, desc == null ? name : name + "\n" + desc);
+        }
         int right = x + w;
         int cy = y + h / 2;
         control(ui, s, right, cy);
@@ -85,7 +89,7 @@ public final class SettingsView {
         if (s instanceof IntSetting i && i.isField()) return 70;
         if (s instanceof StringSetting) return CONTROL_W + 40;
         if (s instanceof ColorSetting c) return Widgets.swatchesWidth(c.presets().length);
-        if (s instanceof KeybindSetting) return 90;
+        if (s instanceof KeybindSetting) return 106;
         if (s instanceof ActionSetting a) {
             String label = Lang.has(a.nameKey() + ".button") ? Lang.tr(a.nameKey() + ".button") : Lang.tr("core.settings.run");
             return Math.max(60, g.width(label) + 16);
@@ -133,9 +137,25 @@ public final class SettingsView {
             if (picked != 0) c.set(picked);
         } else if (s instanceof KeybindSetting k) {
             boolean waiting = ui.capturing() == captureOf(k);
-            String label = waiting ? "> " + Lang.tr("core.settings.pressKey") + " <" : ClientCompat.keyName(k.mapping()).getString();
-            if (Widgets.button(ui, k, right - 90, cy - 8, 90, 16, label, waiting ? Widgets.Style.PRIMARY : Widgets.Style.SECONDARY)) {
+            boolean unbound = ClientCompat.isUnbound(k.mapping());
+            String label = waiting ? "> " + Lang.tr("core.settings.pressKey") + " <"
+                    : unbound ? Lang.tr("core.settings.unbound") : ClientCompat.keyName(k.mapping()).getString();
+            java.util.List<net.minecraft.client.KeyMapping> conflicts = waiting ? java.util.List.of() : ClientCompat.conflicts(k.mapping());
+            int bx = right - 90, by = cy - 8;
+            if (Widgets.button(ui, k, bx, by, 90, 16, label, waiting ? Widgets.Style.PRIMARY : Widgets.Style.SECONDARY)) {
                 ui.capture(captureOf(k));
+            }
+            if (!conflicts.isEmpty()) {
+                g.outline(bx, by, 90, 16, Theme.WARN);
+                dev.henny.vibeyclient.ui.Icons.draw(g, dev.henny.vibeyclient.ui.Icons.WARN, bx - 14, by + 4, Theme.WARN);
+                StringBuilder names = new StringBuilder();
+                for (net.minecraft.client.KeyMapping m : conflicts) {
+                    if (names.length() > 0) names.append(", ");
+                    names.append(ClientCompat.mappingName(m));
+                }
+                ui.tooltip(k, bx - 16, by, 106, 16, Lang.tr("core.settings.conflict", names.toString()));
+            } else {
+                ui.tooltip(k, bx, by, 90, 16, Lang.tr("core.settings.keyHelp"));
             }
         } else if (s instanceof ActionSetting a) {
             String label = Lang.tr(a.nameKey() + ".button");

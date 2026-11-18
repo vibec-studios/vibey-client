@@ -24,6 +24,8 @@ import java.util.Map;
 public final class ModulesPanel implements Panel {
     private static final int LIST_W = 168;
     private static final Object GLOBAL = new Object();
+    private static final Object SEARCH = new Object();
+    private static final int SEARCH_H = 28;
 
     /** Remembered across openings of the menu. */
     private static Object lastSelected = GLOBAL;
@@ -38,6 +40,7 @@ public final class ModulesPanel implements Panel {
     private final ScrollArea detailScroll = new ScrollArea();
     private final Map<VibeyModule, Panel> customPanels = new HashMap<>();
     private Object selected = lastSelected;
+    private String query = "";
 
     @Override
     public void draw(Ui ui, int x, int y, int w, int h) {
@@ -53,19 +56,64 @@ public final class ModulesPanel implements Panel {
 
     private void drawList(Ui ui, int x, int y, int w, int h) {
         Gfx g = ui.g;
-        int cy = listScroll.begin(ui, x, y, w, h);
+        // search (stays on top)
+        var box = Widgets.textField(ui, SEARCH, x + 8, y + 7, w - 16, query, 40, q -> {
+            query = q;
+            listScroll.reset();
+        });
+        if (query.isEmpty() && !box.isFocused()) g.text(Lang.tr("core.menu.search"), x + 13, y + 11, Theme.DIM);
+        dev.henny.vibeyclient.ui.Icons.draw(g, dev.henny.vibeyclient.ui.Icons.SEARCH, x + w - 8 - 13, y + 11, box.isFocused() ? Theme.BRAND : Theme.DIM);
+        g.hline(x, y + SEARCH_H, w, Theme.LINE);
+
+        int cy = listScroll.begin(ui, x, y + SEARCH_H + 1, w, h - SEARCH_H - 1);
         cy += 6;
-        cy = entry(ui, GLOBAL, null, x, cy, w);
-        cy += 8;
-        Widgets.caption(g, Lang.tr("core.menu.modules"), x + Theme.PAD, cy);
-        cy += 13;
+        String q = query.trim().toLowerCase(java.util.Locale.ROOT);
+        boolean any = false;
+        if (matches(q, Lang.tr("core.menu.global"), GlobalSettings.GROUP)) {
+            cy = entry(ui, GLOBAL, null, x, cy, w);
+            cy += 8;
+            any = true;
+        }
+        boolean caption = false;
         List<VibeyModule> modules = ModuleManager.get().all();
         for (VibeyModule m : modules) {
-            if (!m.visible()) continue;
+            if (!m.visible() || !matches(q, m.displayName() + " " + Lang.tr(m.descriptionKey()), m.settings())) continue;
+            if (!caption) {
+                Widgets.caption(g, Lang.tr("core.menu.modules"), x + Theme.PAD, cy);
+                cy += 13;
+                caption = true;
+            }
             cy = entry(ui, m, m, x, cy, w);
+            any = true;
+        }
+        if (!any) {
+            g.text(g.clip(Lang.tr("core.menu.noResults"), w - Theme.PAD * 2), x + Theme.PAD, cy + 4, Theme.DIM);
+            cy += 20;
         }
         cy += 6;
         listScroll.end(ui, cy);
+    }
+
+    /** Search: name/description or any setting label contains the query. */
+    private static boolean matches(String q, String text, dev.henny.vibeyclient.api.setting.SettingsGroup settings) {
+        if (q.isEmpty() || text.toLowerCase(java.util.Locale.ROOT).contains(q)) return true;
+        for (dev.henny.vibeyclient.api.setting.Setting<?, ?> s : settings.all()) {
+            if (s.isVisible() && Lang.tr(s.nameKey()).toLowerCase(java.util.Locale.ROOT).contains(q)) return true;
+        }
+        return false;
+    }
+
+    /** Built-in icon for the bundled modules (a module's own {@code icon()} texture wins). */
+    private static String iconFor(VibeyModule m) {
+        return switch (m.id()) {
+            case "social" -> dev.henny.vibeyclient.ui.Icons.FRIENDS;
+            case "cosmetics" -> dev.henny.vibeyclient.ui.Icons.SHIRT;
+            case "emotes" -> dev.henny.vibeyclient.ui.Icons.WAVE;
+            case "multiplayer" -> dev.henny.vibeyclient.ui.Icons.HOST;
+            case "lyrics" -> dev.henny.vibeyclient.ui.Icons.NOTE;
+            case "devlink" -> dev.henny.vibeyclient.ui.Icons.CUBE;
+            default -> null;
+        };
     }
 
     private int entry(Ui ui, Object key, VibeyModule m, int x, int y, int w) {
@@ -89,12 +137,15 @@ public final class ModulesPanel implements Panel {
         int iy = y + (h - 14) / 2;
         String name;
         if (m == null) {
-            g.image(Compat.id("icon.png"), ix, iy, 14, 14, 512);
+            iconTile(g, dev.henny.vibeyclient.ui.Icons.GEAR, ix, iy, Theme.MUTED);
             name = Lang.tr("core.menu.global");
         } else {
+            String builtin = iconFor(m);
             if (m.icon() != null) g.image(Compat.id(m.icon().substring(0, m.icon().indexOf(':')), m.icon().substring(m.icon().indexOf(':') + 1)), ix, iy, 14, 14, 16);
+            else if (builtin != null) iconTile(g, builtin, ix, iy, runnable ? m.accentColor() : Theme.DIM);
             else Widgets.monogram(g, m.displayName(), ix, iy, 14, runnable ? m.accentColor() : Theme.DIM);
             name = m.displayName();
+            ui.tooltip(m, x, y, Math.max(1, (m.canToggle() && runnable ? tx - 6 : x + w) - x), h, Lang.tr(m.descriptionKey()));
         }
         int textRight = m == null || !runnable ? x + w - Theme.PAD : tx - 6;
         int color = runnable ? (sel ? Theme.TEXT : Theme.mix(Theme.MUTED, Theme.TEXT, hov)) : Theme.DIM;
@@ -104,6 +155,23 @@ public final class ModulesPanel implements Panel {
             g.textRight(tag, x + w - Theme.PAD, y + 8, Theme.WARN);
         }
         return y + h;
+    }
+
+    private static void iconTile(Gfx g, String icon, int x, int y, int color) {
+        g.rect(x, y, 14, 14, Theme.alpha(color, 0.16f));
+        g.outline(x, y, 14, 14, Theme.alpha(color, 0.55f));
+        dev.henny.vibeyclient.ui.Icons.draw(g, icon, x + 3, y + 3, 1, color);
+    }
+
+    @Override
+    public boolean key(int keyCode) {
+        // Esc in a non-empty search clears it first
+        if (keyCode == dev.henny.vibeyclient.client.Keys.ESCAPE && !query.isEmpty()) {
+            query = "";
+            listScroll.reset();
+            return true;
+        }
+        return false;
     }
 
     private void select(Object key) {

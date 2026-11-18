@@ -36,6 +36,19 @@ public abstract class BaseScreen extends Screen {
         return false;
     }
 
+    /** Drag with the movement since the last call (GUI pixels); defaults to {@link #drag(double, double, int)}. */
+    protected boolean drag(double x, double y, int button, double dx, double dy) {
+        return drag(x, y, button);
+    }
+
+    /** Draws the vanilla title panorama (the rotating world background), full screen. */
+    protected void panorama(Gfx gfx, float delta) {
+        //? if >=26.1 {
+        /*extractPanorama(gfx.g, delta);
+        *///?} else
+        renderPanorama(gfx.g, delta);
+    }
+
     /** @return true if the key was used (called before the focused text field sees it) */
     protected boolean key(int keyCode) {
         return false;
@@ -76,7 +89,7 @@ public abstract class BaseScreen extends Screen {
 
     @Override
     public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
-        if (drag(event.x(), event.y(), event.button())) return true;
+        if (drag(event.x(), event.y(), event.button(), dx, dy)) return true;
         return super.mouseDragged(event, dx, dy);
     }
     //?} else {
@@ -94,7 +107,7 @@ public abstract class BaseScreen extends Screen {
 
     @Override
     public boolean mouseDragged(double x, double y, int button, double dx, double dy) {
-        if (drag(x, y, button)) return true;
+        if (drag(x, y, button, dx, dy)) return true;
         return super.mouseDragged(x, y, button, dx, dy);
     }
     *///?}
