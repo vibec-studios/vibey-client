@@ -252,6 +252,10 @@ never switch the Stonecutter active version (it rewrites `src/`), build other ta
 ./gradlew :fabric-1.21.4:runClient "-Dvibeyclient.tour=$PWD/build/tour/fabric-1.21.4"   # dev tour: every screen + cosmetics/emotes in a flat world, screenshots, PASS/FAIL per step, quit
 ```
 
+`powershell -ExecutionPolicy Bypass -File scripts/dev-install.ps1` (add `-SkipBuild` to reuse the last build) builds
+the Fabric 1.21.11 jar and installs it into a "Vibey Dev" instance of your Vibe Launcher (created if missing, with
+Fabric API, Vibey auto-update off).
+
 The client game test covers the UI (`VibeyUiGameTest`, see [docs/UI.md](docs/UI.md#testing)) and cosmetics and
 emotes (`CosmeticsGameTest`, see [docs/AVATAR.md](docs/AVATAR.md#testing)).
 
