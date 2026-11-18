@@ -4,6 +4,10 @@ How the client turns `.vibey` bundles (SPEC §5) into things on players. Modules
 wardrobe), `emotes` (wheel, local plays), `devlink` (Blockbench live link). The engine itself lives in
 `dev.henny.vibeyclient.avatar` and has no module dependencies.
 
+> See also: [FORMAT.md](FORMAT.md) (the `.vibey` format for creators) · [SPEC §5–§8](SPEC.md#5-the-vibey-asset-format-v1)
+> (format, sync, backend, live link) · [BLOCKBENCH.md](BLOCKBENCH.md) · [CONTENT.md](CONTENT.md) (starter set) ·
+> [docs index](README.md)
+
 ## Packages
 
 | Package | What |
@@ -53,10 +57,15 @@ real-Blockbench screenshots in `content/dist/blockbench/`.
   `VIBEYCLIENT_AVATAR_TEST=world ./gradlew :fabric-26.3:runClient --args="--quickPlaySingleplayer vibeytest"`
   (copy `versions/fabric-1.21.11/build/run/vibeytest-world` to `run/saves/vibeytest` first). Screenshots land in
   `versions/<target>/run/screenshots`, log lines start with `[vibeyclient-avatartest]`.
-- Whole-client runtime tour on any version/loader (`dev/DevTourB`, dev workspace only):
-  `VIBEYCLIENT_TOUR=<outdir> ./gradlew :neoforge-26.3:runClient` (or `-Dvibeyclient.tour=<outdir>` via
+- Whole client on any version/loader: `./gradlew :neoforge-1.21.5:runClient "-Dvibeyclient.tour=<absolute outdir>"`
+  (`dev/DevTour`, dev environment only; env `VIBEYCLIENT_TOUR` works too). Title, onboarding, Vibey menu, a fresh flat
+  world, every slot on the local player (third person front/back), wave/guitar/seal_summon mid-animation, wardrobe,
+  emote wheel, social sidebar, lyrics sky (Fabric), host screen, pause menu; one screenshot per step into the outdir,
+  log lines `[vibeyclient-tour] PASS|FAIL <step>` (plus errors other code logged during the step) and a `SUMMARY`.
+- Second tour, used for the 1.21.6+ / 26.x runtime pass (`dev/DevTourB`, dev workspace only, own switch so it never
+  runs together with `DevTour`): `VIBEYCLIENT_TOUR_B=<outdir> ./gradlew :neoforge-26.3:runClient` (or `-Dvibeyclient.tourB=<outdir>` via
   `JAVA_TOOL_OPTIONS`; relative paths resolve against the game dir). Title/onboarding → Vibey menu → flat creative
   world `saves/vibeytour` (created on the first run) → one item per slot front/back/first person → wave, guitar,
   seal_summon → wardrobe, emote wheel, social sidebar, lyrics in the sky (Fabric), pause menu, host screen → quit.
-  Logs `[vibeyclient-tour] PASS|FAIL <step>` (a step that logged an ERROR fails), writes `NN_<step>.png` and
+  Also the first-person shield and NeoForge's mod-loading warning screen. Logs `[vibeyclient-tourb] PASS|FAIL <step>` (a step that logged an ERROR fails), writes `NN_<step>.png` and
   `tour.txt` to the out dir.

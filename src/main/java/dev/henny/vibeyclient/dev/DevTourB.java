@@ -41,11 +41,12 @@ import java.util.List;
 
 /**
  * Dev-only runtime tour for every version and both loaders (development environment AND
- * {@code -Dvibeyclient.tour=<outdir>} or env {@code VIBEYCLIENT_TOUR=<outdir>}; relative paths are resolved against
+ * {@code -Dvibeyclient.tourB=<outdir>} or env {@code VIBEYCLIENT_TOUR_B=<outdir>}; separate from
+ * {@link DevTour}'s switch so the two never run at once; relative paths are resolved against
  * the game directory). Walks through title screen → onboarding skipped → Vibey menu (modules, about) → a flat
  * creative world ({@code saves/vibeytour}, created on the first run) → one cosmetic per slot in third person
  * front/back → three emotes mid-animation → wardrobe, emote wheel, social sidebar, lyrics demo in the sky (Fabric),
- * pause menu, host screen → quit. Every step logs {@code [vibeyclient-tour] PASS|FAIL <step>}; warnings/errors logged
+ * pause menu, host screen → quit. Every step logs {@code [vibeyclient-tourb] PASS|FAIL <step>}; warnings/errors logged
  * during a step are attached to it. Screenshots ({@code NN_name.png}) and {@code tour.txt} go to the out dir.
  */
 public final class DevTourB {
@@ -74,8 +75,8 @@ public final class DevTourB {
     }
 
     private static String outProperty() {
-        String p = System.getProperty("vibeyclient.tour");
-        if (p == null || p.isBlank()) p = System.getenv("VIBEYCLIENT_TOUR");
+        String p = System.getProperty("vibeyclient.tourB");
+        if (p == null || p.isBlank()) p = System.getenv("VIBEYCLIENT_TOUR_B");
         return p;
     }
 
@@ -99,7 +100,7 @@ public final class DevTourB {
         try {
             done = s.act.run();
         } catch (Throwable t) {
-            Vibey.LOG.error("[vibeyclient-tour] step {} threw", s.name, t);
+            Vibey.LOG.error("[vibeyclient-tourb] step {} threw", s.name, t);
             report(s, false, t.toString());
             next(s);
             return;
@@ -146,7 +147,7 @@ public final class DevTourB {
         else fail++;
         results.add(line);
         for (String e : errs) results.add("    " + e);
-        Vibey.LOG.info("[vibeyclient-tour] {}", line);
+        Vibey.LOG.info("[vibeyclient-tourb] {}", line);
     }
 
     private static void start() {
@@ -156,10 +157,10 @@ public final class DevTourB {
         try {
             Files.createDirectories(out);
         } catch (IOException e) {
-            Vibey.LOG.error("[vibeyclient-tour] cannot create {}", out, e);
+            Vibey.LOG.error("[vibeyclient-tourb] cannot create {}", out, e);
         }
         installAppender();
-        Vibey.LOG.info("[vibeyclient-tour] start on {} {}, screenshots to {}", Vibey.platform().loader(), dev.henny.vibeyclient.BuildInfo.MINECRAFT, out);
+        Vibey.LOG.info("[vibeyclient-tourb] start on {} {}, screenshots to {}", Vibey.platform().loader(), dev.henny.vibeyclient.BuildInfo.MINECRAFT, out);
         steps = build();
     }
 
@@ -499,7 +500,7 @@ public final class DevTourB {
             img.writeToFile(target);
             log("screenshot " + target);
         } catch (Exception e) {
-            Vibey.LOG.error("[vibeyclient-tour] screenshot {} failed", target, e);
+            Vibey.LOG.error("[vibeyclient-tourb] screenshot {} failed", target, e);
         }
     }
 
@@ -507,11 +508,11 @@ public final class DevTourB {
         finished = true;
         String summary = "tour done on " + Vibey.platform().loader() + " " + dev.henny.vibeyclient.BuildInfo.MINECRAFT + ": " + pass + " passed, " + fail + " failed";
         results.add(0, summary);
-        Vibey.LOG.info("[vibeyclient-tour] {}", summary);
+        Vibey.LOG.info("[vibeyclient-tourb] {}", summary);
         try {
             Files.writeString(out.resolve("tour.txt"), String.join("\n", results) + "\n", StandardCharsets.UTF_8);
         } catch (IOException e) {
-            Vibey.LOG.error("[vibeyclient-tour] cannot write tour.txt", e);
+            Vibey.LOG.error("[vibeyclient-tourb] cannot write tour.txt", e);
         }
         Wardrobe w = Services.get(Wardrobe.class).orElse(null);
         if (w != null) for (Slot s : Slot.all()) w.unequip(s);
@@ -523,7 +524,7 @@ public final class DevTourB {
     }
 
     private static void log(String s) {
-        Vibey.LOG.info("[vibeyclient-tour] {}", s);
+        Vibey.LOG.info("[vibeyclient-tourb] {}", s);
     }
 
     /** Vanilla noise of a dev (offline) account, not ours. */
@@ -540,7 +541,7 @@ public final class DevTourB {
                 public void append(LogEvent e) {
                     if (e.getLevel().isMoreSpecificThan(Level.WARN)) {
                         String msg = e.getMessage() == null ? "" : e.getMessage().getFormattedMessage();
-                        if (msg.contains("[vibeyclient-tour]") || IGNORED_LOGGERS.contains(e.getLoggerName())) return;
+                        if (msg.contains("[vibeyclient-tour") || IGNORED_LOGGERS.contains(e.getLoggerName())) return;
                         Throwable t = e.getThrown();
                         String line = e.getLevel() + " " + e.getLoggerName() + ": " + msg + (t == null ? "" : " (" + t + ")");
                         if (line.length() > 400) line = line.substring(0, 400) + "…";
@@ -554,7 +555,7 @@ public final class DevTourB {
             ctx.getConfiguration().getRootLogger().addAppender(app, Level.WARN, null);
             ctx.updateLoggers();
         } catch (Throwable t) {
-            Vibey.LOG.warn("[vibeyclient-tour] no log capture: {}", t.toString());
+            Vibey.LOG.warn("[vibeyclient-tourb] no log capture: {}", t.toString());
         }
     }
 

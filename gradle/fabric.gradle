@@ -57,7 +57,7 @@ if (project.minecraft_version == '1.21.11') {
     // -Dvibeyclient.api=http://localhost:3100 -Dvibeyclient.username=VibeyTester (see SocialGameTest)
     ['clientGameTest', 'client'].each { run ->
         loom.runs.named(run) {
-            ['vibeyclient.devAuth', 'vibeyclient.api', 'vibeyclient.socialTest'].each { k ->
+            ['vibeyclient.devAuth', 'vibeyclient.api', 'vibeyclient.socialTest', 'vibeyclient.devDriver', 'vibeyclient.devOfflineHost'].each { k ->
                 def v = System.getProperty(k)
                 if (v != null) vmArg "-D${k}=${v}"
             }
@@ -68,3 +68,6 @@ if (project.minecraft_version == '1.21.11') {
         }
     }
 }
+
+// Dev tour (dev/DevTour.java): ./gradlew :<target>:runClient -Dvibeyclient.tour=<outdir>
+if (System.getProperty('vibeyclient.tour')) loom.runs.named('client') { vmArg "-Dvibeyclient.tour=${System.getProperty('vibeyclient.tour')}" }

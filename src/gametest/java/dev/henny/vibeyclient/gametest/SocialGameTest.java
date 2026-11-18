@@ -193,7 +193,8 @@ public final class SocialGameTest implements FabricClientGameTest {
         log("done");
     }
 
-    /** Stand-in for the multiplayer module's relay hosting (that module lives in its own branch). */
+    /** Stand-in for the multiplayer module's relay hosting (no world is open in this phase; the real relay + invite path
+     * is covered by the two-client live test with scripts/live-sync-watch.ts and the dev driver). */
     static final class StubHosting implements HostingService {
         volatile boolean hosting;
 

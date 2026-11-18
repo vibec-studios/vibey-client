@@ -111,6 +111,31 @@ public final class ToastStack {
         for (Entry e : visible) if (key.equals(e.key)) e.leaving = true;
     }
 
+    /**
+     * Screen position of button {@code index} of the newest visible toast whose key starts with {@code keyPrefix}, as
+     * last drawn (for tests: feed it to {@link #click}); null if there is none.
+     */
+    public static int[] buttonCenter(String keyPrefix, int index) {
+        if (lastX == Integer.MIN_VALUE) return null;
+        net.minecraft.client.gui.Font font = net.minecraft.client.Minecraft.getInstance().font;
+        for (Entry e : visible) {
+            if (e.leaving || e.key == null || !e.key.startsWith(keyPrefix) || index < 0 || index >= e.buttons.size()) continue;
+            int w = e.linesWidth > 0 ? e.linesWidth : WIDTH;
+            int[] widths = buttonWidths(font, e, w);
+            int bx = e.hitX + 34;
+            for (int i = 0; i < index; i++) bx += widths[i] + 4;
+            return new int[]{bx + widths[index] / 2, e.hitY + e.hitH - 18 + 6};
+        }
+        return null;
+    }
+
+    /** Keys of the visible toasts (tests/diagnostics). */
+    public static String debugKeys() {
+        List<String> keys = new ArrayList<>();
+        for (Entry e : visible) if (!e.leaving) keys.add(String.valueOf(e.key));
+        return String.join(",", keys);
+    }
+
     public static boolean isEmpty() {
         synchronized (LOCK) {
             if (!incoming.isEmpty()) return false;

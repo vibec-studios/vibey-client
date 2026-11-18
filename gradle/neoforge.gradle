@@ -70,3 +70,6 @@ processResources {
     inputs.properties(props)
     filesMatching('META-INF/neoforge.mods.toml') { expand props }
 }
+
+// Dev tour (dev/DevTour.java): ./gradlew :<target>:runClient -Dvibeyclient.tour=<outdir>
+if (System.getProperty('vibeyclient.tour')) neoForge.runs.named('client') { systemProperty 'vibeyclient.tour', System.getProperty('vibeyclient.tour') }

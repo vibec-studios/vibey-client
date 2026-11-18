@@ -56,6 +56,7 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
     private boolean loaded;
     private final DevItemsImpl devItems = new DevItemsImpl(this);
     private final PreviewService preview = new PreviewService();
+    private final dev.henny.vibeyclient.module.cosmetics.ui.TitlePreview titlePreview = new dev.henny.vibeyclient.module.cosmetics.ui.TitlePreview();
 
     public CosmeticsModule() {
         super("cosmetics", ModuleCategory.COSMETICS);
@@ -95,6 +96,7 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
     @Override
     public void onEnable() {
         Services.register(Wardrobe.class, this);
+        Services.register(dev.henny.vibeyclient.api.service.MenuPreview.class, titlePreview);
         applyConfig();
         ItemLoader.refreshCatalog(false);
     }
@@ -102,6 +104,7 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
     @Override
     public void onDisable() {
         Services.unregister(Wardrobe.class, this);
+        Services.unregister(dev.henny.vibeyclient.api.service.MenuPreview.class, titlePreview);
         AvatarConfig.cosmetics = false;
     }
 

@@ -53,6 +53,7 @@ public final class MpCompat {
     // -------------------------------------------------------------------------------------------- integrated server
 
     public static boolean publish(IntegratedServer server, GameType mode, boolean cheats, int port) {
+        devOfflineHost(server);
         //? if >=26.3 {
         /*server.setGuestCommandAccess(cheats);
         return server.publishServer(MinecraftServer.MultiplayerScope.LAN, port);
@@ -62,6 +63,21 @@ public final class MpCompat {
         *///?}
         //? if <26.2
         return server.publishServer(mode, cheats, port);
+    }
+
+    /**
+     * Dev only ({@code isDevelopment()} and {@code -Dvibeyclient.devOfflineHost=true}): the hosted world accepts
+     * accounts without a Mojang session, so two dev clients can test hosting/invites through a local relay. Reflection
+     * on purpose (dev runtimes use Mojang names); never active in release builds.
+     */
+    private static void devOfflineHost(IntegratedServer server) {
+        if (!dev.henny.vibeyclient.Vibey.platform().isDevelopment() || !Boolean.getBoolean("vibeyclient.devOfflineHost")) return;
+        try {
+            MinecraftServer.class.getMethod("setUsesAuthentication", boolean.class).invoke(server, false);
+            dev.henny.vibeyclient.Vibey.LOG.warn("DEV: hosted world accepts accounts without a Mojang session (vibeyclient.devOfflineHost)");
+        } catch (ReflectiveOperationException e) {
+            dev.henny.vibeyclient.Vibey.LOG.warn("DEV: devOfflineHost not available: {}", e.toString());
+        }
     }
 
     /** Closes the LAN port again. Only 26.2+ can do that; older versions keep it open until the world closes. */

@@ -38,6 +38,7 @@ public final class VibeyCore {
         BuiltinModules.registerAll(ModuleManager.get());
         ModuleManager.get().load();
         NetDispatch.setClientHandler(VibeyNet::handle);
+        dev.henny.vibeyclient.dev.DevDriver.startIfRequested();
         Vibey.LOG.info("Vibey Client core ready, {} modules", ModuleManager.get().all().size());
     }
 
@@ -61,6 +62,7 @@ public final class VibeyCore {
         Keybinds.tick();
         mm.tick();
         dev.henny.vibeyclient.ui.title.UiShot.tick();
+        dev.henny.vibeyclient.dev.DevTour.tick();
     }
 
     public static void onHud(Gfx g) {

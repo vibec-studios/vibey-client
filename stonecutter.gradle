@@ -12,10 +12,13 @@ stonecutter.parameters {
     constants.match(loader, 'fabric', 'neoforge')
 }
 
+apply from: rootProject.file('gradle/i18n-check.gradle')
+
 tasks.register('buildAll') {
     group = 'build'
     description = 'Builds every Fabric and NeoForge version and collects the jars in build/dist.'
     def projects = rootProject.subprojects.findAll { it.name.startsWith('fabric-') || it.name.startsWith('neoforge-') }
+    dependsOn 'checkI18n'
     dependsOn projects.collect { "${it.path}:build" }
     doLast {
         def dist = rootProject.layout.buildDirectory.dir('dist').get().asFile

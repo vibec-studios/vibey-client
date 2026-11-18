@@ -134,7 +134,11 @@ public final class Gfx {
         //?} else if >=1.21.2 {
         /*g.blit(net.minecraft.client.renderer.RenderType::guiTextured, tex, x, y, u, v, w, h, uw, vh, texW, texH);
         *///?} else {
-        /*g.blit(tex, x, y, w, h, u, v, uw, vh, texW, texH);
+        /*// 1.21.1 blits without blending: soft alpha (thumbnail glows, icons) would turn opaque
+        com.mojang.blaze3d.systems.RenderSystem.enableBlend();
+        com.mojang.blaze3d.systems.RenderSystem.defaultBlendFunc();
+        g.blit(tex, x, y, w, h, u, v, uw, vh, texW, texH);
+        com.mojang.blaze3d.systems.RenderSystem.disableBlend();
         *///?}
     }
 

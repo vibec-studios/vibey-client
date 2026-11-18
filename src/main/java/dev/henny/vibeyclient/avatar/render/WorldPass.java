@@ -58,6 +58,7 @@ public final class WorldPass {
 
     private static void draw(AvatarState st, PoseStack ps, MeshSink sink, int light, double x, double y, double z, float scale,
                              double camX, double camY, double camZ, Quaternionf camRot) {
+        PoseStack.Pose saved = ps.last();
         try {
             if (gui > 0 && !st.preview) return;
             if (st.preview) camX = Double.NaN; // GUI previews: no locator world positions
@@ -69,6 +70,7 @@ public final class WorldPass {
             ps.popPose();
             if (!st.preview) SpriteParticles.render(st, ps, sink, x, y, z, CAM.set(camRot));
         } catch (RuntimeException e) {
+            PoseCompat.unwind(ps, saved);
             if (errors++ < 3) dev.henny.vibeyclient.Vibey.LOG.error("Cosmetic world pass failed", e);
         }
     }

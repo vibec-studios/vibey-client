@@ -1,9 +1,11 @@
 package dev.henny.vibeyclient.module.cosmetics.ui;
 
+import dev.henny.vibeyclient.ui.Ui;
+
 import dev.henny.vibeyclient.ui.Anim;
 
 /**
- * {@code ScrollArea} for {@link ScreenUi}: {@code int y = s.begin(ui, x, y, w, h); ...rows...; s.end(ui, y);}
+ * {@code ScrollArea} for {@link Ui}: {@code int y = s.begin(ui, x, y, w, h); ...rows...; s.end(ui, y);}
  * Clips its content, takes the mouse wheel while hovered, scrolls smoothly and draws a thin scrollbar.
  */
 final class Scroller {
@@ -13,7 +15,7 @@ final class Scroller {
     private int x, y, w, h;
     private int start;
 
-    int begin(ScreenUi ui, int x, int y, int w, int h) {
+    int begin(Ui ui, int x, int y, int w, int h) {
         this.x = x;
         this.y = y;
         this.w = w;
@@ -27,7 +29,7 @@ final class Scroller {
         return start;
     }
 
-    void end(ScreenUi ui, int endY) {
+    void end(Ui ui, int endY) {
         contentHeight = endY - start;
         ui.unclip();
         int max = maxScroll();
