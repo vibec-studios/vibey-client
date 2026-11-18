@@ -39,6 +39,7 @@ public final class Settings {
         private final int max;
         private final int step;
         private String unit = "";
+        private boolean field;
 
         public IntSetting(String key, int def, int min, int max, int step) {
             super(key, def);
@@ -52,6 +53,13 @@ public final class Settings {
         public int step() { return step; }
         public int intValue() { return value; }
         public String unit() { return unit; }
+        public boolean isField() { return field; }
+
+        /** Edit as a number field instead of a slider (ports, ids, big ranges). */
+        public IntSetting field() {
+            this.field = true;
+            return this;
+        }
 
         /** Shown after the number, e.g. "%" or " ms". */
         public IntSetting unit(String unit) {

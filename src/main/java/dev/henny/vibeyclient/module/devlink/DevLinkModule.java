@@ -14,7 +14,7 @@ import dev.henny.vibeyclient.api.setting.Settings.IntSetting;
 public final class DevLinkModule extends VibeyModule {
 
     public final BoolSetting creatorMode = bool("creatorMode", Vibey.platform().isDevelopment());
-    public final IntSetting port = intRange("port", 47821, 1024, 65535).advanced();
+    public final IntSetting port = intRange("port", 47821, 1024, 65535).field().advanced();
 
     public DevLinkModule() {
         super("devlink", ModuleCategory.CREATOR);

@@ -65,7 +65,7 @@ public final class SettingsView {
         if (!ui.visibleY(y, h)) return y + h;
         float hov = ui.anim(s, 0f).to(ui.hover(x, y, w, h) ? 1f : 0f);
         if (hov > 0f) g.rect(x - 4, y, w + 8, h, Theme.alpha(Theme.SURFACE2, hov));
-        int labelW = w - CONTROL_W - 16;
+        int labelW = w - controlWidth(g, s) - 12;
         int textColor = enabled ? Theme.TEXT : Theme.MUTED;
         if (desc == null) {
             g.text(g.clip(Lang.tr(s.nameKey()), labelW), x, y + 9, textColor);
@@ -80,11 +80,32 @@ public final class SettingsView {
         return y + h;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static int controlWidth(Gfx g, Setting<?, ?> s) {
+        if (s instanceof BoolSetting) return Widgets.TOGGLE_W;
+        if (s instanceof IntSetting i && i.isField()) return 70;
+        if (s instanceof StringSetting) return CONTROL_W + 40;
+        if (s instanceof ColorSetting c) return Widgets.swatchesWidth(c.presets().length);
+        if (s instanceof KeybindSetting) return 90;
+        if (s instanceof ActionSetting a) {
+            String label = Lang.has(a.nameKey() + ".button") ? Lang.tr(a.nameKey() + ".button") : Lang.tr("core.settings.run");
+            return Math.max(60, g.width(label) + 16);
+        }
+        return CONTROL_W;
+    }
+
     private static void control(Ui ui, Setting<?, ?> s, int right, int cy) {
         Gfx g = ui.g;
         if (s instanceof BoolSetting b) {
             if (Widgets.toggle(ui, b, right - Widgets.TOGGLE_W, cy - Widgets.TOGGLE_H / 2, b.on(), true)) b.toggle();
+        } else if (s instanceof IntSetting i && i.isField()) {
+            Widgets.textField(ui, i, right - 70, cy - 8, 70, String.valueOf(i.get()), 11, text -> {
+                try {
+                    int v = Integer.parseInt(text.trim());
+                    if (v >= i.min() && v <= i.max()) i.set(v);
+                } catch (NumberFormatException ignored) {
+                    // keep the old value until the text is a valid number
+                }
+            });
         } else if (s instanceof IntSetting i) {
             int sw = CONTROL_W - 36;
             String v = i.get() + i.unit();
