@@ -12,7 +12,7 @@ modules. Every part is a module you can switch off. **Everything is free.** Ther
 
 ![Minecraft](https://img.shields.io/badge/Minecraft-1.21%E2%80%9326.3-green)
 ![Loader](https://img.shields.io/badge/Loader-Fabric%20%7C%20NeoForge-blue)
-![License](https://img.shields.io/badge/License-MIT-yellow)
+![License](https://img.shields.io/badge/License-Apache--2.0-blue)
 
 | Title screen | Wardrobe |
 |---|---|
@@ -274,7 +274,8 @@ a hosted world accept dev accounts without a Mojang session (for invite tests th
 `ALLOW_OFFLINE=1 DOMAIN=127-0-0-1.nip.io`). None of these exist in release builds.
 
 Default backend (`https://vibe.henny.dev`) and relay are set in `gradle.properties` and baked into the generated
-`BuildInfo` class.
+`BuildInfo` class. They are our services, for official builds only: forks must set their own (see
+[SERVICES.md](SERVICES.md)), and local development uses a local backend/relay.
 
 ### Releases
 
@@ -320,12 +321,14 @@ cd ../vibey-multiplayer/relay && ALLOW_OFFLINE=1 PORT=26400 DATA_DIR=/tmp/relayd
 ./gradlew :neoforge-1.21.11:runClient -Dvibeyclient.mpcheck=true -Dvibeyclient.mpcheck.relay=127.0.0.1:26400   # NeoForge screenshots → run/screenshots
 ```
 
-## Credits and licenses
+## Credits
 
-Vibey Client is [MIT](LICENSE) licensed, © Vibe Craft Studios. The seal mascot, wordmark, icons, UI, all starter
-cosmetics and emotes (models, textures, animations, synthesized sounds) are original work.
+The seal mascot, wordmark, icons, UI, all starter cosmetics and emotes (models, textures, animations, synthesized
+sounds) are original work by Vibe Craft Studios. The multiplayer and lyrics modules come from our MIT-licensed
+[Vibey Multiplayer](https://github.com/vibec-studios/vibey-multiplayer) and
+[Vibey Lyrics](https://github.com/vibec-studios/vibey-lyrics) (notices in [`licenses/`](licenses/)).
 
-Bundled third-party parts:
+Bundled third-party parts (details in [NOTICE](NOTICE)):
 
 - **Fonts** of the lyrics module (Fabric jars only): Bebas Neue, Bungee, Caveat, Fredoka, Kanit, Kaushan Script,
   Monoton, Montserrat, Pacifico, Poppins, Press Start 2P and Unbounded under the SIL Open Font License 1.1, Permanent
@@ -337,3 +340,23 @@ Bundled third-party parts:
   demo song.
 
 Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.
+
+## Lizenz / License
+
+**Code:** [Apache License 2.0](LICENSE) (© Vibe Craft Studios, [NOTICE](NOTICE)). Forken, ändern und weitergeben ist
+erlaubt.
+
+**Nicht** von der Code-Lizenz erfasst:
+
+- **Namen und Logos** („Vibe“, „Vibey“, „Vibey Client“, „Vibe Craft Studios“, die Robbe): Forks brauchen einen
+  eigenen Namen, eine eigene Mod-ID und eigene Logos und dürfen nicht unter unseren Namen vermarktet werden –
+  [TRADEMARKS.md](TRADEMARKS.md).
+- **Grafiken und Modelle** (Logo, Icons, Robbe, Starter-Cosmetics und -Emotes, Texturen, Sounds, Screenshots, der
+  Referenzspieler des Blockbench-Plugins): alle Rechte vorbehalten – [ASSETS-LICENSE.md](ASSETS-LICENSE.md).
+- **Vibe-Dienste** (Backend `vibe.henny.dev` mit Cosmetics-Katalog, Loadouts und Downloads, Relay
+  `vibey.henny.dev`): nur für offizielle Builds; Forks müssen eigene Dienste nutzen – [SERVICES.md](SERVICES.md),
+  Nutzungsbedingungen: <https://vibe.henny.dev/terms>.
+
+*English:* the code is Apache-2.0. Our names and logos, the seal, artwork and models, and the Vibe online services are
+not included: forks must use their own name, artwork and backend. See TRADEMARKS.md, ASSETS-LICENSE.md and
+SERVICES.md. Code taken over from Vibey Multiplayer and Vibey Lyrics keeps its MIT notice (`licenses/`).

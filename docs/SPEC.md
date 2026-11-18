@@ -14,15 +14,15 @@ wings, auras, pets, shields, hats, back items), an emote system with props/parti
 with live export into the running game. Logo/mascot: the blocky grey seal ("Robbe 1"). **No shop, no payments, no
 prices anywhere** – everything in the starter set is free.
 
-Local paths on the dev machine:
+Related repositories (all under the GitHub org `vibec-studios`):
 
-| What | Path |
+| What | Repository |
 |---|---|
-| This repo | `C:\Users\henny\.t3\projects\vibey-client` |
-| Vibey Multiplayer (source of the multiplayer module + build setup) | `C:\Users\henny\.t3\projects\vibey-multiplayer` |
-| Vibey Lyrics (source of the lyrics module; working copy has uncommitted newer changes – use the working copy) | `C:\Users\henny\.t3\projects\vibey-lyrics` |
-| Vibe backend (Node/Fastify/Postgres, private, auto-deploys on push to `main`!) | `C:\Users\henny\.t3\projects\vibe-backend` |
-| Vibe launcher (design tokens `src/styles/globals.css`, seal model `src/components/seal3d.ts`, `branding/vibe-seal-*.png`) | `C:\Users\henny\.t3\projects\vibe-launcher` |
+| This repo | `vibec-studios/vibey-client` |
+| Vibey Multiplayer (origin of the multiplayer module + build setup, MIT) | `vibec-studios/vibey-multiplayer` |
+| Vibey Lyrics (origin of the lyrics module, MIT) | `vibec-studios/vibey-lyrics` |
+| Vibe backend (Node/Fastify/Postgres; not public) | `vibec-studios/vibe-backend` |
+| Vibe launcher (design tokens `src/styles/globals.css`, seal model `src/components/seal3d.ts`, API contracts `docs/VIBE-API-2.md`) | `vibec-studios/vibe-launcher` |
 
 ## 1. Targets and build
 
@@ -37,7 +37,9 @@ Local paths on the dev machine:
 - **Never switch the Stonecutter active version** (it rewrites `src/`). Build other versions with
   `./gradlew :fabric-1.21.1:build` etc. – that processes sources into the subproject build dir without touching `src/`.
 - Mod id `vibeyclient`, name `Vibey Client`, Java package `dev.henny.vibeyclient`, maven group `dev.henny`,
-  archives `vibey-client-<loader>-<mc label>`. Asset namespace `vibeyclient`. License MIT (same as the other mods).
+  archives `vibey-client-<loader>-<mc label>`. Asset namespace `vibeyclient`. License: code Apache-2.0 (`LICENSE`, `NOTICE`; the
+  multiplayer/lyrics code from the MIT standalone mods keeps its notice in `licenses/`), artwork all rights reserved
+  (`ASSETS-LICENSE.md`), names and the seal in `TRADEMARKS.md`, online services in `SERVICES.md`.
 - `environment: "*"` – the same jar can go on a server (it then only relays emote/loadout packets, see §6).
   Client-only classes must never be loaded on a dedicated server.
 - Lyrics module is **Fabric-only** (like the standalone mod). On NeoForge it is simply not registered.

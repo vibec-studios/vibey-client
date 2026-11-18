@@ -1,0 +1,44 @@
+Vibey Client
+Copyright 2026 Vibe Craft Studios
+
+The source code in this repository is licensed under the Apache License, Version 2.0 (see LICENSE). This includes
+the Minecraft mod, the Blockbench plugin code (blockbench/), the content build tools (content/tools/) and the
+scripts in tools/ and scripts/.
+
+The Apache License does not cover:
+  - the names "Vibe", "Vibey", "Vibey Client", "Vibe Craft Studios" and the seal mascot/logo (see TRADEMARKS.md),
+  - the artwork and other assets listed in ASSETS-LICENSE.md (all rights reserved), among them the starter
+    cosmetics and emotes, icons, textures, sounds and screenshots,
+  - access to the Vibe online services such as vibe.henny.dev and the Vibey relay (see SERVICES.md).
+
+Forks must use their own name, their own artwork and their own backend services.
+
+-------------------------------------------------------------------------------------------------------------------
+Code taken over from earlier Vibe Craft Studios projects (MIT)
+-------------------------------------------------------------------------------------------------------------------
+
+The multiplayer module (src/main/java/dev/henny/vibeyclient/module/multiplayer/) is based on Vibey Multiplayer
+(github.com/vibec-studios/vibey-multiplayer) and the lyrics module (src/main/java/dev/henny/vibeyclient/module/lyrics/)
+on Vibey Lyrics (github.com/vibec-studios/vibey-lyrics), both Copyright (c) 2026 Vibe Craft Studios and published
+under the MIT License. The original license texts are kept in:
+  - licenses/vibey-multiplayer-MIT.txt
+  - licenses/vibey-lyrics-MIT.txt
+The parts of these modules that came from those projects remain available under the MIT License as published there;
+the changes made in this repository are licensed under the Apache License 2.0. Lyrics-module assets that were
+published in Vibey Lyrics under MIT (see ASSETS-LICENSE.md, "Exceptions") stay under MIT.
+
+-------------------------------------------------------------------------------------------------------------------
+Third-party components
+-------------------------------------------------------------------------------------------------------------------
+
+JavaMP3 (fr.delthas:javamp3), https://github.com/delthas/JavaMP3
+  MIT License. Pure-Java MP3 decoder used by the lyrics module, bundled inside the Fabric jars.
+
+Fonts of the lyrics module (src/main/resources/assets/vibeyclient/font/lyrics/, Fabric jars only):
+  Bebas Neue, Kaushan Script (brush), Bungee, Caveat, Fredoka, Kanit, Monoton, Montserrat, Pacifico, Poppins,
+  Press Start 2P and Unbounded under the SIL Open Font License 1.1; Permanent Marker (marker) under the
+  Apache License 2.0. License texts: licenses/lyrics/fonts/ (inside every Fabric jar under
+  licenses/vibeyclient/lyrics/).
+
+Minecraft, Fabric and NeoForge are not part of this repository; the mod is compiled against them.
+Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.

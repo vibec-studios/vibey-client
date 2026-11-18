@@ -76,3 +76,8 @@ Then set *Vibey > Live link settings… > Game directory* to `C:\temp\fakegame`.
 
 `test/spec-validator.js` is an independent validator written straight from SPEC §5 (it does not share code with the
 plugin), used by the mock game server and the tests.
+
+## License
+
+The plugin code is Apache-2.0 (see `LICENSE` and `NOTICE` in the repository root). The reference player it draws, the
+seal icon and the names "Vibey"/"Vibe" are not covered: see `ASSETS-LICENSE.md` and `TRADEMARKS.md`.

@@ -23,17 +23,19 @@ import dev.henny.vibeyclient.ui.title.OnboardingScreen;
  * (incl. the lyrics fonts), plus "show the welcome again".
  */
 public final class AboutPanel implements Panel {
+    /** Our website (official builds; forks link their own, see SERVICES.md). */
     private static final String WEBSITE = "https://vibe.henny.dev";
     private static final String SOURCE = "https://github.com/vibec-studios/vibey-client";
     private static final String ISSUES = "https://github.com/vibec-studios/vibey-client/issues";
 
     /** name, license, holder – what ships inside the jar. */
     private static final String[][] LICENSES = {
-            {"Vibey Client", "MIT", "Vibe Craft Studios"},
+            {"Vibey Client (code)", "Apache 2.0", "Vibe Craft Studios"},
+            {"Artwork, seal, starter cosmetics", "All rights reserved", "Vibe Craft Studios"},
             {"Vibey Multiplayer / Vibey Lyrics modules", "MIT", "Vibe Craft Studios"},
             {"Poppins, Montserrat, Kanit, Fredoka, Unbounded", "SIL OFL 1.1", "their project authors"},
             {"Caveat, Bebas Neue, Bungee, Pacifico", "SIL OFL 1.1", "their project authors"},
-            {"Press Start 2P, Monoton", "SIL OFL 1.1", "their project authors"},
+            {"Press Start 2P, Monoton, Kaushan Script", "SIL OFL 1.1", "their project authors"},
             {"Permanent Marker", "Apache 2.0", "Font Diner"},
             {"JavaMP3 (lyrics audio)", "MIT", "delthas"},
     };

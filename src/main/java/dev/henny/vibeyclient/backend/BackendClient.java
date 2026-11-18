@@ -87,6 +87,7 @@ public final class BackendClient implements VibeBackend {
     private final ReentrantLock refreshLock = new ReentrantLock();
     private final Map<String, List<Consumer<JsonObject>>> listeners = new ConcurrentHashMap<>();
 
+    /** Starts at the official backend (official builds only; forks set their own default_backend, see SERVICES.md). */
     private volatile String baseUrl = BuildInfo.DEFAULT_BACKEND;
     private volatile String accountKey;
     private volatile String accountName;

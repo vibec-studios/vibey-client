@@ -11,7 +11,7 @@
     "sources": "https://github.com/vibec-studios/vibey-client",
     "issues": "https://github.com/vibec-studios/vibey-client/issues"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "icon": "assets/vibeyclient/icon.png",
   "environment": "*",
   "entrypoints": {

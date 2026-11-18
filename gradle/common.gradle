@@ -12,6 +12,7 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 // Build constants baked into the jar so they can be changed in one place (root gradle.properties).
+// The default backend/relay are our services, for official builds only: forks must point them at their own (SERVICES.md).
 def generatedDir = layout.buildDirectory.dir('generated/vibeyclient')
 def genTask = tasks.register('generateBuildInfo') {
     def relay = project.default_relay
@@ -37,6 +38,7 @@ public final class BuildInfo {
     public static final String MINECRAFT = "${mc}";
     /** Minecraft versions the jar is for, e.g. "1.21.6-1.21.8". */
     public static final String MINECRAFT_LABEL = "${label}";
+    /** Vibe backend + Vibey relay (default_backend/default_relay): official builds only, forks use their own (SERVICES.md). */
     public static final String DEFAULT_BACKEND = "${backend}";
     public static final String DEFAULT_RELAY = "${relay}";
     private BuildInfo() {}
@@ -61,7 +63,11 @@ processResources {
 }
 
 jar {
+    // Apache-2.0 + NOTICE (names, assets, services, third parties) and the MIT notices of the code taken over from
+    // Vibey Multiplayer / Vibey Lyrics.
     from(rootProject.file('LICENSE')) { rename { "LICENSE_vibeyclient" } }
+    from(rootProject.file('NOTICE')) { rename { "NOTICE_vibeyclient" } }
+    from(rootProject.files('licenses/vibey-multiplayer-MIT.txt', 'licenses/vibey-lyrics-MIT.txt')) { into 'licenses/vibeyclient' }
     // The fonts of the lyrics module must travel with their licenses (SIL OFL 1.1 / Apache 2.0).
     if (project.name.startsWith('fabric-')) from(rootProject.file('licenses/lyrics')) { into 'licenses/vibeyclient/lyrics' }
 }
