@@ -107,25 +107,25 @@ export function emote(id, meta, opts = {}) {
 
 /** Hands: invisible helper bones on the arms for locators (tip of each hand). */
 export function addHands(b) {
-  b.bone("right_hand", { attach: "right_arm", pivot: [-5, 22, 0] });
-  b.bone("left_hand", { attach: "left_arm", pivot: [5, 22, 0] });
-  b.locator("right_hand", "right_hand", [-6, 12, 0]);
-  b.locator("left_hand", "left_hand", [6, 12, 0]);
+  b.bone("right_hand", { attach: "right_arm", pivot: [5, 22, 0] });
+  b.bone("left_hand", { attach: "left_arm", pivot: [-5, 22, 0] });
+  b.locator("right_hand", "right_hand", [6, 12, 0]);
+  b.locator("left_hand", "left_hand", [-6, 12, 0]);
 }
 
 const DEG = 180 / Math.PI;
 /**
- * Spec rotation [rx, ry, 0] that points an arm (or leg) hanging from `from` towards `to` (both in spec coords).
- * Derived from the spec conversion (vanilla xRot = −rx, yRot = −ry, order ZYX).
+ * Spec rotation [rx, ry, 0] that points an arm (or leg) hanging from `from` towards `to` (both in Blockbench
+ * coords). Derived from the spec conversion (model dir = (−x, −y, z); vanilla xRot = −rx, yRot = −ry, order ZYX).
  */
 export function aim(from, to) {
   let d = [to[0] - from[0], to[1] - from[1], to[2] - from[2]];
   const l = Math.hypot(...d);
   d = d.map((v) => v / l);
-  const mx = d[0], my = -d[1], mz = d[2];
+  const mx = -d[0], my = -d[1], mz = d[2];
   const xr = -Math.acos(Math.max(-1, Math.min(1, my)));
   const sx = Math.sin(xr);
   const yr = Math.abs(sx) < 1e-6 ? 0 : Math.atan2(mx / sx, mz / sx);
   return [+(-xr * DEG).toFixed(1), +(-yr * DEG).toFixed(1), 0];
 }
-export const SHOULDER = { right: [-5, 22, 0], left: [5, 22, 0] };
+export const SHOULDER = { right: [5, 22, 0], left: [-5, 22, 0] };

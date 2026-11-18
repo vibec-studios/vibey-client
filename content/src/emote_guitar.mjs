@@ -2,7 +2,7 @@
 import { emote, aim, SHOULDER, C, shade } from "./_common.mjs";
 
 const P = [0, 15, -3.5]; // guitar rotation centre (in front of the belly)
-const TILT = 48; // neck towards the left hand
+const TILT = 48; // neck towards the left hand (−X)
 
 export default function () {
   const b = emote("guitar", {
@@ -46,8 +46,8 @@ export default function () {
 
   // arms: left hand on the neck, right hand strumming over the sound hole
   const rad = (TILT * Math.PI) / 180;
-  const neck = [P[0] + Math.sin(rad) * 10, P[1] + Math.cos(rad) * 10, zf - 1.5];
-  const strum = [P[0] - Math.sin(rad) * 1, P[1] + Math.cos(rad) * 0.5 - 1, zf - 2.5];
+  const neck = [P[0] - Math.sin(rad) * 10, P[1] + Math.cos(rad) * 10, zf - 1.5];
+  const strum = [P[0] + Math.sin(rad) * 1, P[1] + Math.cos(rad) * 0.5 - 1, zf - 2.5];
   const L = aim(SHOULDER.left, neck);
   const R = aim(SHOULDER.right, strum);
   const a = b.anim("main", 2.0, true);

@@ -43,7 +43,7 @@ export default function () {
   });
   // shoulder straps (visible on the chest) + chest strap
   const straps = b.bone("straps", { parent: "backpack", pivot: [0, 24, 0] });
-  for (const x of [-3, 2]) {
+  for (const x of [2, -3]) {
     straps.box([x, 15, -2.5], [1, 9, 5], {
       north: (img) => fabric(img, C.surface3, 130).set(0, 5, C.teal),
       sides: (img) => fabric(img, C.surface3, 131),
@@ -55,16 +55,16 @@ export default function () {
   straps.box([-2, 19, -2.6], [4, 1, 1], { all: (img) => fabric(img, C.surface3, 135).set(1, 0, C.dim).set(2, 0, C.dim) });
 
   // keychain: hangs from the pocket zipper on the back, seal charm facing backwards
-  const chain = b.bone("keychain", { parent: "backpack", pivot: [1.5, 17, 6.2] });
-  chain.box([1.5, 15, 6.2], [0, 2, 1], { sides: (img) => img.fill("#c9ced6").set(0, 1, "#8e95a0") });
-  chain.box([-0.5, 11, 5.7], [4, 4, 2], {
+  const chain = b.bone("keychain", { parent: "backpack", pivot: [-1.5, 17, 6.2] });
+  chain.box([-1.5, 15, 6.2], [0, 2, 1], { sides: (img) => img.fill("#c9ced6").set(0, 1, "#8e95a0") });
+  chain.box([-3.5, 11, 5.7], [4, 4, 2], {
     south: (img) => img.noisy(C.body, 0.02, 136).stamp(0, 0, ["####", "e##e", "#ss#", "snns"], { "#": C.body, e: C.eye, s: C.snout, n: C.nose }),
     north: (img) => img.noisy(C.back, 0.02, 138),
     up: (img) => img.noisy(C.back, 0.02, 139),
     down: (img) => img.noisy(C.belly, 0.02, 140),
     sides: (img) => img.noisy(C.body, 0.02, 141),
   });
-  for (const x of [-1.3, 3.3]) chain.box([x, 11.2, 6.2], [1, 1, 1], { all: (img) => img.fill(C.flipper) }, { inflate: -0.2 }); // flippers
+  for (const x of [0.3, -4.3]) chain.box([x, 11.2, 6.2], [1, 1, 1], { all: (img) => img.fill(C.flipper) }, { inflate: -0.2 }); // flippers
 
   const idle = b.anim("idle", 2.4, true);
   idle.rot("keychain", [[0, [0, 0, 0]], [0.6, [6, 0, 8]], [1.2, [0, 0, 0]], [1.8, [-6, 0, -6]], [2.4, [0, 0, 0]]]);

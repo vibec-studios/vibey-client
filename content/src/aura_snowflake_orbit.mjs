@@ -27,7 +27,7 @@ export default function () {
   const orbit = b.bone("orbit", { attach: "world", pivot: [0, 0, 0], emissive: true, translucent: true });
   FLAKES.forEach(([deg, h, r], i) => {
     const a = (deg * Math.PI) / 180;
-    const x = +(Math.cos(a) * r).toFixed(2), z = +(Math.sin(a) * r).toFixed(2);
+    const x = -(Math.cos(a) * r).toFixed(2), z = +(Math.sin(a) * r).toFixed(2);
     const flake = b.bone(`flake_${i}`, { parent: orbit.name, pivot: [x, h, z], emissive: true, translucent: true });
     // two crossed planes so the flake reads from every angle
     flake.box([x - 3.5, h - 3.5, z], [7, 7, 0], { north: paintFlake, south: paintFlake });

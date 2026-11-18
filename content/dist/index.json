@@ -12,8 +12,8 @@
       "name": {"en":"Aurora Cape","de":"Polarlicht-Umhang"},
       "rarity": "epic",
       "tags": ["aurora","animated","night","starter"],
-      "size": 12414,
-      "sha256": "ca417443bbd2ccc16484cf189716b28b1d28bb6f5494bafbead7954db6674d28",
+      "size": 12394,
+      "sha256": "262470d2dd150aedc4300b7e456132b34e24ffdabac58240f06a6505179f0215",
       "sort": 10
     },
     {
@@ -26,8 +26,8 @@
       "name": {"en":"Ice Floe Cape","de":"Eisscholle-Umhang"},
       "rarity": "rare",
       "tags": ["seal","ice","winter","starter"],
-      "size": 3025,
-      "sha256": "f2ea11826f98b7dca313bc6a4fbd32e3e9a7f04114057eeb3c16ec632a581dee",
+      "size": 3005,
+      "sha256": "e8c0da51fb2a6668e585770ea237b164935e58f088f7083ef6eed4cf67345c7c",
       "sort": 20
     },
     {
@@ -40,8 +40,8 @@
       "name": {"en":"Pixel Stars Cape","de":"Pixelsterne-Umhang"},
       "rarity": "rare",
       "tags": ["night","stars","animated","starter"],
-      "size": 7489,
-      "sha256": "db5cb10703104505d372cbf9035a1f7534daecd1240bef419d1693ba9bfcfe0d",
+      "size": 7469,
+      "sha256": "7deb0006478ce45737e51d44440199893484a56b78922cb32fcac96961141860",
       "sort": 30
     },
     {
@@ -54,8 +54,8 @@
       "name": {"en":"Vibe Cape","de":"Vibe-Umhang"},
       "rarity": "rare",
       "tags": ["vibe","seal","purple","starter"],
-      "size": 2686,
-      "sha256": "4c91be05f6acaec698ad82e62f73ec32689c3dca36aaffb42d0682acd10b0c3b",
+      "size": 2666,
+      "sha256": "13126d234cbb7270060f17692b6254589970896b5736bcfd0ef6c6537ecea6fb",
       "sort": 40
     },
     {
@@ -69,7 +69,7 @@
       "rarity": "legendary",
       "tags": ["ice","wings","crystal","starter"],
       "size": 12984,
-      "sha256": "5714022e127c13fde5c119dcaeb625d31e6eaad6e4d4915f06ccf0d3afbbb7df",
+      "sha256": "fbfba6310d725c8dd4652a4e89306e298b10d124dea81562dedd0e823eae7b75",
       "sort": 50
     },
     {
@@ -83,7 +83,7 @@
       "rarity": "epic",
       "tags": ["neon","wings","glow","vibe","starter"],
       "size": 7398,
-      "sha256": "557743d62b5bd37ecd82e6f0dc4219ba5c5e9f0cfc993c0a01d47cdb45503412",
+      "sha256": "3581825410aca9c2946a9f15ff80eb8314fc5ce3d26422ecfdf126f8d794697c",
       "sort": 60
     },
     {
@@ -97,7 +97,7 @@
       "rarity": "epic",
       "tags": ["aura","sparks","glow","vibe","starter"],
       "size": 12744,
-      "sha256": "45b794036fedae688f5e659f35a8371592b532b30c759df5d9a54ff81ff61df2",
+      "sha256": "f07e3975a1ce86ac7f986f9856615d463c1966251ebe1d56a66eabea0850773b",
       "sort": 70
     },
     {
@@ -110,8 +110,8 @@
       "name": {"en":"Snowflake Orbit","de":"Schneeflocken-Orbit"},
       "rarity": "epic",
       "tags": ["aura","snow","winter","glow","starter"],
-      "size": 10800,
-      "sha256": "5956291324629119af15d038cf3c9b8be2d80d38c4e7134b03d2dbdc8618ad38",
+      "size": 10806,
+      "sha256": "ce6432fd02999ede674074d1a9d2ed7ca286b3d09883dccfea723923af0121f4",
       "sort": 80
     },
     {
@@ -124,8 +124,8 @@
       "name": {"en":"Pixel Penguin","de":"Pixel-Pinguin"},
       "rarity": "rare",
       "tags": ["penguin","cute","winter","pet","starter"],
-      "size": 8466,
-      "sha256": "d3e88f1a13e1bb4050ac4a5c91b005c68875835a823e99730241a5a4bbba030e",
+      "size": 8468,
+      "sha256": "efa02a6395ea4c6abd076a2ba2772541820d19337ff93eb97940f62c9edcb692",
       "sort": 90
     },
     {
@@ -139,7 +139,7 @@
       "rarity": "epic",
       "tags": ["seal","cute","mascot","pet","starter"],
       "size": 10438,
-      "sha256": "bf27193044dafc92edb0c0d1b4f6f20dc733aa599473526a5e960346e962b2dd",
+      "sha256": "2649cb997d160b0683c4445c0be1257f077fd32a6c9fda6aa0b1a001a4a2034c",
       "sort": 100
     },
     {
@@ -152,8 +152,8 @@
       "name": {"en":"Glacier Shield","de":"Gletscherschild"},
       "rarity": "rare",
       "tags": ["ice","winter","snowflake","starter"],
-      "size": 2495,
-      "sha256": "25a2d4492ad1e67652a7a3974ba7dc38215b742bfd297bef71d96bd2ed43eb3f",
+      "size": 2475,
+      "sha256": "f6fd8935761f4d82e5dea509dbe3910a492730ea43c7e43b869879960396b837",
       "sort": 110
     },
     {
@@ -166,8 +166,8 @@
       "name": {"en":"Seal Crest Shield","de":"Robbenwappen-Schild"},
       "rarity": "rare",
       "tags": ["seal","vibe","crest","starter"],
-      "size": 2386,
-      "sha256": "7de3fae13a6602561f13f735d2572161ea243bd20478e6eeec3f611ae15d4ec6",
+      "size": 2366,
+      "sha256": "393b03017df65b5394fee85bf0017a8a4de61012bb6e3a6a41a470ced6c47dfb",
       "sort": 120
     },
     {
@@ -180,8 +180,8 @@
       "name": {"en":"Vibe Chevron Shield","de":"Vibe-Sparren-Schild"},
       "rarity": "common",
       "tags": ["vibe","chevron","starter"],
-      "size": 2295,
-      "sha256": "2b54aa4964636284ce8ae06c37bf05fb00722998c76bc45c3981d32eeff83030",
+      "size": 2275,
+      "sha256": "ee54c7338fb3a9e760054ab26d4e8e4854ea2e6c3ed11d7cf73586e1082b1240",
       "sort": 130
     },
     {
@@ -195,7 +195,7 @@
       "rarity": "epic",
       "tags": ["ice","crown","royal","starter"],
       "size": 4244,
-      "sha256": "61387c5580fd3f1fe4e77a5c93f0e1b6f80c75dfc9070cc56e193040bd278b89",
+      "sha256": "2f9ba0fc5cc708d9156eff537c8f053035619a67f75149c76627d9bfcd663b31",
       "sort": 140
     },
     {
@@ -209,7 +209,7 @@
       "rarity": "rare",
       "tags": ["seal","knitted","winter","cute","starter"],
       "size": 4414,
-      "sha256": "6241280f16295f73e22ea2f7cc3ac18131fa2814b6db84ac71eae7ba2884fc85",
+      "sha256": "9cb173714d28e26eac9944c1f5d09c5f91e0d3fadf07ee0ea15708a124494385",
       "sort": 150
     },
     {
@@ -222,8 +222,8 @@
       "name": {"en":"Seal Backpack","de":"Robben-Rucksack"},
       "rarity": "rare",
       "tags": ["seal","backpack","cute","starter"],
-      "size": 4750,
-      "sha256": "bcc8c261d6ab5f157f20dbccae09a557c3d8f928fb20c2ffcf4109324b3b8910",
+      "size": 4753,
+      "sha256": "54e35286c532240d7f8459d1dbe7280c8e56fbf7d0abc6a9604af92cce384653",
       "sort": 160
     },
     {
@@ -236,8 +236,8 @@
       "name": {"en":"Cheer","de":"Jubeln"},
       "rarity": "common",
       "tags": ["celebrate","confetti","particles","starter"],
-      "size": 6913,
-      "sha256": "0cb4eb823cddc884e1b85aa89593c1b863ac5b8f3d2d27e611a95de0725d9311",
+      "size": 6739,
+      "sha256": "f35944764f22a5b6b6cc59e60e94167164b9787294c1ff1ff3f46c3c971119c2",
       "sort": 170
     },
     {
@@ -250,8 +250,8 @@
       "name": {"en":"Clap","de":"Klatschen"},
       "rarity": "common",
       "tags": ["applause","sound","starter"],
-      "size": 5047,
-      "sha256": "ef8139397bc2b3467998ba0a1ff2701a5677354bbb6afbcfa75b6dbfdb49fc67",
+      "size": 5046,
+      "sha256": "6acb10b1a6c468d79046da3efd2d5698c4ce23e3d57435ecceda9a1cf30116e9",
       "sort": 180
     },
     {
@@ -264,8 +264,8 @@
       "name": {"en":"Facepalm","de":"Facepalm"},
       "rarity": "common",
       "tags": ["reaction","funny","starter"],
-      "size": 2372,
-      "sha256": "0976e46ad946183e3b92fc19f30d722c12d2a6999d234f872376b4c311632719",
+      "size": 2347,
+      "sha256": "012462e7a06787ab064cece5db383c26bbd8e9798d529ed2609bae610aaf9d56",
       "sort": 190
     },
     {
@@ -292,8 +292,8 @@
       "name": {"en":"Seal Flop","de":"Robben-Plumps"},
       "rarity": "rare",
       "tags": ["seal","funny","sound","starter"],
-      "size": 5516,
-      "sha256": "c687188d35324da08bd3f3de55d1fca70621c52c20fc2931c27708c5dbdd8ab9",
+      "size": 5491,
+      "sha256": "61821718ba44648bd010a9920a93d3720d2403a6a3d9b55f783a501cf79269a7",
       "sort": 210
     },
     {
@@ -307,7 +307,7 @@
       "rarity": "epic",
       "tags": ["seal","magic","props","particles","sound","starter"],
       "size": 39198,
-      "sha256": "bdd4532915bc6b25931d017d0deef759e3b1dfd471265532ffbf9c521691235a",
+      "sha256": "b0a4f343a182d5a8f5344ed7ddd22476e0073d1ea8912fc5226c10470afd046e",
       "sort": 220
     },
     {
@@ -320,8 +320,8 @@
       "name": {"en":"Shrug","de":"Schulterzucken"},
       "rarity": "common",
       "tags": ["reaction","starter"],
-      "size": 2163,
-      "sha256": "19b36560a9ac5a94acd24bdeb6a47a52ec0238f1a56f8c81a6266d1c24097a1f",
+      "size": 2138,
+      "sha256": "3bb4de1f9f54f8ffd5361afdfdb90ca2d7850f8f51319a8e7a7363bff2963189",
       "sort": 230
     },
     {
@@ -334,8 +334,8 @@
       "name": {"en":"Sit","de":"Hinsetzen"},
       "rarity": "common",
       "tags": ["chill","loop","starter"],
-      "size": 2238,
-      "sha256": "bdd61985c95a7872800e91a7686ec4a3091208c73bf1621d238c97dc68df9d84",
+      "size": 2213,
+      "sha256": "caa1fbce1bd66b661dea5eae8d799e85e7c4ee013d52fb3f8721a41297d94efa",
       "sort": 240
     },
     {
@@ -348,8 +348,8 @@
       "name": {"en":"Vibe Dance","de":"Vibe-Tanz"},
       "rarity": "common",
       "tags": ["dance","loop","music","starter"],
-      "size": 3563,
-      "sha256": "179f0af2f796bcea83e31176aa35de6e2c3598ca84ef187dda2097a3edf33686",
+      "size": 3538,
+      "sha256": "51e694abb72199bb2eb70dee53b999de72db67ee5bbaa8d9fcbadab8c530156b",
       "sort": 250
     },
     {
@@ -362,8 +362,8 @@
       "name": {"en":"Wave","de":"Winken"},
       "rarity": "common",
       "tags": ["greeting","friendly","starter"],
-      "size": 2085,
-      "sha256": "7f810b1994bf3128034e8237508cc9daa918d25ffb0194e1ff3e13fd62e3aa71",
+      "size": 2060,
+      "sha256": "809fa6ac13aa800b96b06cebfbbcf97210a4d8af8365649fa99dee2dfc5b88bc",
       "sort": 260
     }
   ]

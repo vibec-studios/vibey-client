@@ -1,9 +1,11 @@
 // Software preview renderer for `.vibey` bundles: evaluates bones/animations exactly by the spec conventions,
 // builds textured quads and rasterizes them with a z-buffer (opaque/cutout, translucent, emissive + bloom).
 //
-// Convention (docs/SPEC.md §5): spec coords → vanilla model space: x' = x, y' = 24 − y, z' = z;
-// rotations convert like Blockbench's Modded Entity exporter: xRot = −rx, yRot = −ry, zRot = rz (ZYX order).
-// Model space → world (player at yaw 0 facing +Z): (x, 24 − y, −z).
+// Convention (docs/SPEC.md §5 "Coordinate convention"): `.vibey` coordinates are Blockbench space (player faces
+// north/-Z, right arm at +X). Blockbench → vanilla model space: x' = −x, y' = 24 − y, z' = z (Blockbench's Modded
+// Entity exporter); rotations (rest + keyframes) → xRot = −rx, yRot = −ry, zRot = rz (ZYX order); position
+// keyframes (offsets) → (−x, −y, z). Everything below this loader works in vanilla model space, exactly like the
+// game. Model space → world (player at yaw 0 facing +Z, right arm at world −X): (x, 24 − y, −z).
 import { Img, rgba, rng } from "../canvas.mjs";
 import { decodePNG } from "../png.mjs";
 import { I, T, S, Rx, Ry, Rzyx, mul, apply, applyDir, dot, cross, norm, sub, deg } from "./math.mjs";
@@ -11,8 +13,8 @@ import { PLAYER_PARTS, playerSkin } from "./player.mjs";
 
 const WORLD = [1, 0, 0, 0, 0, -1, 0, 24, 0, 0, -1, 0, 0, 0, 0, 1];
 const PLAYER_NAMES = ["head", "body", "right_arm", "left_arm", "right_leg", "left_leg"];
-export const mcPos = (p) => [p[0], 24 - p[1], p[2]];
-export const mcOff = (p) => [p[0], -p[1], p[2]];
+export const mcPos = (p) => [-p[0], 24 - p[1], p[2]];
+export const mcOff = (p) => [-p[0], -p[1], p[2]];
 export const mcRot = (r) => [deg(-r[0]), deg(-r[1]), deg(r[2])];
 
 // ------------------------------------------------------------------------------------------------ loading
@@ -45,23 +47,39 @@ function catmull(p0, p1, p2, p3, t) {
   return 0.5 * (2 * p1 + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t3);
 }
 
-/** Sample a channel (sorted keyframes) at time t. Segment interpolation = the earlier keyframe's `i`. */
-export function sampleChannel(keys, t) {
+/**
+ * Sample a channel (keyframes sorted by t) at time t – Blockbench's rules (SPEC §5 "Format details"), ported from
+ * Blockbench 5.2's BoneAnimator.interpolate / Keyframe.getCatmullromLerp:
+ * - segment A→B runs from A.v to B.pre ?? B.v; before the first key its `pre ?? v` is held, after the last key its v;
+ * - A.i == "step" holds A; A linear and B linear/step → linear; A or B catmullrom → Catmull-Rom; otherwise
+ *   (bezier without handles, not used by the starter set) linear;
+ * - Catmull-Rom uses the neighbouring keys as control points (duplicating the end point when there is none, or when
+ *   A/B is a split key with `pre`). In looping animations with ≥ 3 keys Blockbench wraps the missing neighbours
+ *   (keys[n−2] before the first segment, keys[1] after the last one); the value itself never interpolates across
+ *   the loop end.
+ */
+export function sampleChannel(keys, t, loop = false) {
   if (!keys?.length) return null;
-  if (t <= keys[0].t) return keys[0].v;
   const n = keys.length;
+  const pre = (k) => k.pre ?? k.v;
+  if (t < keys[0].t) return pre(keys[0]);
   if (t >= keys[n - 1].t) return keys[n - 1].v;
   let k = 0;
   while (k < n - 1 && keys[k + 1].t <= t) k++;
   const a = keys[k], b = keys[k + 1];
   const f = (t - a.t) / (b.t - a.t || 1);
-  const mode = a.i ?? "linear";
-  if (mode === "step") return a.v;
-  if (mode === "catmullrom" || mode === "bezier") {
-    const p0 = keys[Math.max(0, k - 1)].v, p3 = keys[Math.min(n - 1, k + 2)].v;
-    return [0, 1, 2].map((c) => catmull(p0[c], a.v[c], b.v[c], p3[c], f));
+  const ia = a.i ?? "linear", ib = b.i ?? "linear";
+  const end = pre(b);
+  if (ia === "step") return a.v;
+  if (ia === "catmullrom" || ib === "catmullrom") {
+    const wrap = loop && n >= 3;
+    const before = keys[k - 1] ?? (wrap ? keys[n - 2] : null);
+    const after = keys[k + 2] ?? (wrap ? keys[1] : null);
+    const p0 = before && !a.pre ? before.v : a.v;
+    const p3 = after && !b.pre ? pre(after) : end;
+    return [0, 1, 2].map((c) => catmull(p0[c], a.v[c], end[c], p3[c], f));
   }
-  return [0, 1, 2].map((c) => a.v[c] + (b.v[c] - a.v[c]) * f);
+  return [0, 1, 2].map((c) => a.v[c] + (end[c] - a.v[c]) * f);
 }
 
 export function localTime(anim, t) {
@@ -74,7 +92,8 @@ export function evalAnim(anim, t, weight = 1) {
   const lt = localTime(anim, t);
   const pose = {};
   for (const [name, ch] of Object.entries(anim.bones ?? {})) {
-    const r = sampleChannel(ch.rotation, lt), p = sampleChannel(ch.position, lt), s = sampleChannel(ch.scale, lt);
+    const lp = !!anim.loop;
+    const r = sampleChannel(ch.rotation, lt, lp), p = sampleChannel(ch.position, lt, lp), s = sampleChannel(ch.scale, lt, lp);
     pose[name] = {
       rot: r ? r.map((v) => v * weight) : null,
       pos: p ? p.map((v) => v * weight) : null,
@@ -207,12 +226,25 @@ function specCubeToModel(c) {
   return { min: [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.min(a[2], b[2])], max: [Math.max(a[0], b[0]), Math.max(a[1], b[1]), Math.max(a[2], b[2])] };
 }
 
+// Blockbench face → model-space face (FACE_DEF names are model space, "up" = visually up). Blockbench's east (+X) is
+// model −X. The rect transform maps Blockbench's per-face UV orientation onto the vanilla box-UV orientation used by
+// FACE_DEF (derived from Blockbench's own box-UV → per-face conversion, which must render like vanilla box UV:
+// up = [u+d+w, v+d, u+d, v], down = [u+d+2w, v, u+d+w, v+d], the four sides unchanged).
+const BB_FACE = {
+  north: ["north", (r) => r],
+  south: ["south", (r) => r],
+  east: ["west", (r) => r],
+  west: ["east", (r) => r],
+  up: ["up", ([a, b, c, d]) => [c, d, a, b]],
+  down: ["down", ([a, b, c, d]) => [c, b, a, d]],
+};
+
 function cubeRects(c, size) {
   if (c.uv?.box) return boxRects(c.uv.box[0], c.uv.box[1], ...size);
   const r = {};
-  for (const f of Object.keys(FACE_DEF)) {
+  for (const [f, [mf, xf]] of Object.entries(BB_FACE)) {
     const fv = c.uv?.[f];
-    if (fv) r[f] = Array.isArray(fv) ? fv : fv.uv;
+    if (fv) r[mf] = xf(Array.isArray(fv) ? fv : fv.uv);
   }
   return r;
 }
@@ -329,10 +361,11 @@ export function simulateParticles(B, opts) {
         for (let i = 0; i < n; i++) {
           const sp = ev.spread ?? [0, 0, 0];
           const vel = ev.velocity ?? [0, 0, 0];
-          // spread/velocity are in blocks (spec coords), → world: z flips
+          // spread/velocity are in blocks, Blockbench handedness → world: x and z flip (spread is a symmetric
+          // half-extent, so only the velocity direction matters)
           const off = [(r() * 2 - 1) * sp[0], (r() * 2 - 1) * sp[1], (r() * 2 - 1) * sp[2]];
           const jitter = 0.3;
-          const v = vel.map((x) => x * (1 + (r() * 2 - 1) * jitter));
+          const v = vel.map((x, c) => (c === 0 ? -x : x) * (1 + (r() * 2 - 1) * jitter));
           // a little random sideways drift so bursts fan out
           const drift = [(r() * 2 - 1) * Math.abs(vel[1]) * 0.35, 0, (r() * 2 - 1) * Math.abs(vel[1]) * 0.35];
           const g = ev.gravity ?? vp?.gravity ?? 0;

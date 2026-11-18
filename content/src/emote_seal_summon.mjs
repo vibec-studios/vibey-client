@@ -26,8 +26,8 @@ export default function () {
   b.sprite("snow", "main", tex.region(3, 3, (img) => img.fill([0, 0, 0, 0]).stamp(0, 0, [".w.", "wWw", ".w."], { w: [210, 238, 255, 235], W: "#ffffff" })));
   b.sprite("sparkle", "main", tex.region(5, 5, (img) => img.fill([0, 0, 0, 0]).stamp(0, 0, ["..t..", "..t..", "ttWtt", "..t..", "..t.."], { t: C.teal, W: "#ffffff" })));
 
-  const R = aim(SHOULDER.right, [-2.2, 15, -9]);
-  const L = aim(SHOULDER.left, [2.2, 15, -9]);
+  const R = aim(SHOULDER.right, [2.2, 15, -9]);
+  const L = aim(SHOULDER.left, [-2.2, 15, -9]);
   const cup = (v, d) => [v[0] + d, v[1], 0];
   const a = b.anim("main", 4.2);
   // arms: reach out, cradle, let go
@@ -48,7 +48,7 @@ export default function () {
   a.visible(0, s.lids, false).visible(2.35, s.lids, true).visible(2.5, s.lids, false);
 
   // snow flurry in, sparkles, snow puff out
-  for (const [t, v] of [[0.35, [0.03, 0.02, 0]], [0.42, [-0.03, 0.02, 0]], [0.5, [0, 0.03, 0.03]], [0.58, [0, 0.03, -0.03]]])
+  for (const [t, v] of [[0.35, [-0.03, 0.02, 0]], [0.42, [0.03, 0.02, 0]], [0.5, [0, 0.03, 0.03]], [0.58, [0, 0.03, -0.03]]])
     a.particle(t, { sprite: "snow", locator: "hands", count: 5, lifetime: 0.9, size: 0.1, spread: [0.35, 0.25, 0.35], velocity: v, gravity: 0.002, emissive: true });
   a.particle(0.6, { particle: "minecraft:snowflake", locator: "hands", count: 8, spread: [0.4, 0.3, 0.4], velocity: [0, 0.04, 0] });
   a.particle(0.62, { sprite: "sparkle", locator: "hands", count: 5, lifetime: 0.6, size: 0.14, spread: [0.45, 0.35, 0.45], velocity: [0, 0.01, 0], emissive: true });
