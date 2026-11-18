@@ -1,0 +1,10 @@
+{
+  "name": "Social",
+  "description": "Friends, requests, invites, chats and presence.",
+  "setting": {
+    "showPresence": "Show what I am playing",
+    "showPresence.desc": "Friends see your world or server.",
+    "friendRequests": "Allow friend requests",
+    "toasts": "Notifications"
+  }
+}

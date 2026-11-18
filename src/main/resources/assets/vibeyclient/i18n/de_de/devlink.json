@@ -1,0 +1,9 @@
+{
+  "name": "Blockbench-Link",
+  "description": "Live-Verbindung zu Blockbench zum Erstellen von Cosmetics und Emotes.",
+  "setting": {
+    "creatorMode": "Creator-Modus",
+    "creatorMode.desc": "Erlaubt dem Blockbench-Plugin, Modelle ins Spiel zu schicken.",
+    "port": "Port"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${version}",
+  "name": "${mod_name}",
+  "description": "The Vibe Craft Studios client: social, cosmetics, emotes, multiplayer hosting and lyrics in one modular mod.",
+  "authors": [
+    "Vibe Craft Studios"
+  ],
+  "contact": {
+    "sources": "https://github.com/vibec-studios/vibey-client",
+    "issues": "https://github.com/vibec-studios/vibey-client/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/vibeyclient/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.henny.vibeyclient.fabric.VibeyFabric"
+    ],
+    "client": [
+      "dev.henny.vibeyclient.fabric.VibeyFabricClient"
+    ]
+  },
+  "mixins": [
+    "vibeyclient.mixins.json",
+    "vibeyclient.social.mixins.json",
+    "vibeyclient.cosmetics.mixins.json",
+    "vibeyclient.emotes.mixins.json",
+    "vibeyclient.multiplayer.mixins.json",
+    "vibeyclient.lyrics.mixins.json",
+    "vibeyclient.devlink.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.5",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_range}",
+    "java": ">=${java}"
+  }
+}

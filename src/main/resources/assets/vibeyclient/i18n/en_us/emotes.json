@@ -1,0 +1,10 @@
+{
+  "name": "Emotes",
+  "description": "Emote wheel with props, particles and sounds.",
+  "setting": {
+    "wheel": "Emote wheel",
+    "thirdPerson": "Third person while emoting",
+    "volume": "Emote volume",
+    "showOthers": "Show emotes of others"
+  }
+}

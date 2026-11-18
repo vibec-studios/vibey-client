@@ -1,0 +1,10 @@
+{
+  "name": "Cosmetics",
+  "description": "Capes, wings, auras, pets, shields, hats and back items.",
+  "setting": {
+    "showOwn": "Show my cosmetics",
+    "showOthers": "Show cosmetics of others",
+    "hideWithArmor": "Hide under armor",
+    "hideWithArmor.desc": "Some items hide when matching armor is worn."
+  }
+}

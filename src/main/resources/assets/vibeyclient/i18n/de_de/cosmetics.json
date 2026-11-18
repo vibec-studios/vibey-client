@@ -1,0 +1,10 @@
+{
+  "name": "Cosmetics",
+  "description": "Umhänge, Flügel, Auren, Begleiter, Schilde, Hüte und Rückenitems.",
+  "setting": {
+    "showOwn": "Meine Cosmetics zeigen",
+    "showOthers": "Cosmetics anderer zeigen",
+    "hideWithArmor": "Unter Rüstung verstecken",
+    "hideWithArmor.desc": "Manche Items verschwinden mit passender Rüstung."
+  }
+}

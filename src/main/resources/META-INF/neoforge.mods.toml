@@ -1,0 +1,45 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "MIT"
+issueTrackerURL = "https://github.com/vibec-studios/vibey-client/issues"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${version}"
+displayName = "${mod_name}"
+logoFile = "assets/vibeyclient/icon.png"
+authors = "Vibe Craft Studios"
+displayURL = "https://github.com/vibec-studios/vibey-client"
+description = """The Vibe Craft Studios client: social, cosmetics, emotes, multiplayer hosting and lyrics in one modular mod."""
+
+[[mixins]]
+config = "vibeyclient.mixins.json"
+
+[[mixins]]
+config = "vibeyclient.social.mixins.json"
+
+[[mixins]]
+config = "vibeyclient.cosmetics.mixins.json"
+
+[[mixins]]
+config = "vibeyclient.emotes.mixins.json"
+
+[[mixins]]
+config = "vibeyclient.multiplayer.mixins.json"
+
+[[mixins]]
+config = "vibeyclient.devlink.mixins.json"
+
+[[dependencies.${mod_id}]]
+modId = "neoforge"
+type = "required"
+versionRange = "${neo_range}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "minecraft"
+type = "required"
+versionRange = "${minecraft_neo_range}"
+ordering = "NONE"
+side = "BOTH"

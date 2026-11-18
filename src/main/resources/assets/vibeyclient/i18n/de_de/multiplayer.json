@@ -1,0 +1,8 @@
+{
+  "name": "Multiplayer",
+  "description": "Deine Einzelspielerwelt für Freunde hosten, ohne Portfreigabe.",
+  "setting": {
+    "relay": "Relay-Adresse",
+    "relay.desc": "Server, der deine Welt weiterleitet."
+  }
+}
