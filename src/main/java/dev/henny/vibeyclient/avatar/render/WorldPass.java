@@ -13,6 +13,8 @@ public final class WorldPass {
     private WorldPass() {}
 
     private static int errors;
+    /** > 0 while vanilla draws an entity into the GUI (inventory): world-space things are skipped there. */
+    public static int gui;
     //? if >=1.21.9 {
     private static final MeshSink.Submits SUBMITS = new MeshSink.Submits();
     //?}
@@ -57,13 +59,15 @@ public final class WorldPass {
     private static void draw(AvatarState st, PoseStack ps, MeshSink sink, int light, double x, double y, double z, float scale,
                              double camX, double camY, double camZ, Quaternionf camRot) {
         try {
+            if (gui > 0 && !st.preview) return;
+            if (st.preview) camX = Double.NaN; // GUI previews: no locator world positions
             AvatarDraw.camera(camX, camY, camZ);
             ps.pushPose();
             // the renderer moved crouching players down by 2 px; the world frame stays at the real feet
             if (st.crouching) ps.translate(0f, 2f / 16f * scale, 0f);
             AvatarDraw.world(st, ps, sink, light, x, y, z, 0.9375f * scale);
             ps.popPose();
-            SpriteParticles.render(st, ps, sink, x, y, z, CAM.set(camRot));
+            if (!st.preview) SpriteParticles.render(st, ps, sink, x, y, z, CAM.set(camRot));
         } catch (RuntimeException e) {
             if (errors++ < 3) dev.henny.vibeyclient.Vibey.LOG.error("Cosmetic world pass failed", e);
         }

@@ -113,6 +113,19 @@ public final class CosmeticsGameTest implements FabricClientGameTest {
             shoot(context, "c09_aura_penguin_front", 180f);
             wear(context, Map.of("aura", "vibey:ember_sparks", "cape", "vibey:aurora_cape"));
             shoot(context, "c10_ember_aurora_back", 0f);
+            context.runOnClient(mc -> {
+                mannequin.setItemInHand(net.minecraft.world.InteractionHand.OFF_HAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.SHIELD));
+                mannequin.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.SHIELD));
+            });
+            wear(context, Map.of("shield", "vibey:seal_crest_shield"));
+            shoot(context, "c10b_shield_front", 180f);
+            shoot(context, "c10c_shield_side", 90f);
+            wear(context, Map.of("shield", "vibey:glacier_shield"));
+            shoot(context, "c10d_glacier_shield_side", 270f);
+            context.runOnClient(mc -> {
+                mannequin.setItemInHand(net.minecraft.world.InteractionHand.OFF_HAND, net.minecraft.world.item.ItemStack.EMPTY);
+                mannequin.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.ItemStack.EMPTY);
+            });
             wear(context, all);
             shoot(context, "c11_all_front", 180f);
             shoot(context, "c12_all_side", 90f);

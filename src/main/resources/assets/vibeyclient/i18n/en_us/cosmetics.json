@@ -5,6 +5,28 @@
     "showOwn": "Show my cosmetics",
     "showOthers": "Show cosmetics of others",
     "hideWithArmor": "Hide under armor",
-    "hideWithArmor.desc": "Some items hide when matching armor is worn."
+    "hideWithArmor.desc": "Some items hide when matching armor is worn.",
+    "show_cape": "Capes",
+    "show_wings": "Wings",
+    "show_aura": "Auras",
+    "show_pet": "Pets",
+    "show_shield": "Shields",
+    "show_hat": "Hats",
+    "show_back": "Back items",
+    "show_cape.desc": "Show this slot on everyone (only on your screen).",
+    "wardrobe": "Open wardrobe"
+  },
+  "locked": {
+    "notUnlocked": "Not unlocked",
+    "signIn": "Sign in to use"
+  },
+  "slot": {
+    "cape": "Cape",
+    "wings": "Wings",
+    "aura": "Aura",
+    "pet": "Pet",
+    "shield": "Shield",
+    "hat": "Hat",
+    "back": "Back"
   }
 }

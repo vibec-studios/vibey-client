@@ -68,10 +68,11 @@ public final class GpuBundles {
             Map.Entry<Bundle, GpuBundle> e = it.next();
             GpuBundle g = e.getValue();
             if (now - g.lastUsed > RELEASE_AFTER_MS) {
+                Bundle key = e.getKey();
                 g.release();
                 it.remove();
                 if (drop == null) drop = new ArrayList<>();
-                drop.add(e.getKey());
+                drop.add(key);
             } else {
                 g.animate(ticks, 0f);
             }

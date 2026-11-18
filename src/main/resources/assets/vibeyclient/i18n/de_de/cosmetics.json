@@ -5,6 +5,28 @@
     "showOwn": "Meine Cosmetics zeigen",
     "showOthers": "Cosmetics anderer zeigen",
     "hideWithArmor": "Unter Rüstung verstecken",
-    "hideWithArmor.desc": "Manche Items verschwinden mit passender Rüstung."
+    "hideWithArmor.desc": "Manche Items verschwinden mit passender Rüstung.",
+    "show_cape": "Umhänge",
+    "show_wings": "Flügel",
+    "show_aura": "Auren",
+    "show_pet": "Begleiter",
+    "show_shield": "Schilde",
+    "show_hat": "Hüte",
+    "show_back": "Rückenitems",
+    "show_cape.desc": "Diesen Slot bei allen zeigen (nur auf deinem Bildschirm).",
+    "wardrobe": "Garderobe öffnen"
+  },
+  "locked": {
+    "notUnlocked": "Nicht freigeschaltet",
+    "signIn": "Zum Benutzen anmelden"
+  },
+  "slot": {
+    "cape": "Umhang",
+    "wings": "Flügel",
+    "aura": "Aura",
+    "pet": "Begleiter",
+    "shield": "Schild",
+    "hat": "Hut",
+    "back": "Rücken"
   }
 }

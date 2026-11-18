@@ -59,7 +59,7 @@ public final class AvatarDraw {
     public static void attached(AvatarState st, PoseStack ps, MeshSink sink, PlayerParts parts, int light) {
         if (st.hidden) return;
         double now = Clock.now();
-        locatorTarget = st;
+        locatorTarget = st.preview || WorldPass.gui > 0 ? null : st;
         for (Slot slot : Slot.all()) {
             if (slot == Slot.SHIELD) continue;
             Bundle b = bundle(st, slot);
@@ -102,7 +102,7 @@ public final class AvatarDraw {
     public static void world(AvatarState st, PoseStack ps, MeshSink sink, int light, double px, double py, double pz, float playerScale) {
         if (st.hidden) return;
         double now = Clock.now();
-        locatorTarget = st;
+        locatorTarget = st.preview ? null : st;
         for (Slot slot : Slot.all()) {
             if (slot == Slot.SHIELD) continue;
             Bundle b = bundle(st, slot);

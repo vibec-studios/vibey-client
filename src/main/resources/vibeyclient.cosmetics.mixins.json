@@ -8,10 +8,14 @@
   "client": [
     "AbstractClientPlayerMixin",
     "EntityRenderDispatcherAccessor",
+    "FirstPersonItemMixin",
+    "GuiEntityMixin",
+    "ItemInHandLayerMixin",
     "LivingEntityRendererAccessor",
     "LivingEntityRendererMixin",
     "PlayerRendererMixin",
-    "RenderStateMixin"
+    "RenderStateMixin",
+    "ShieldRendererMixin"
   ],
   "server": [],
   "injectors": {

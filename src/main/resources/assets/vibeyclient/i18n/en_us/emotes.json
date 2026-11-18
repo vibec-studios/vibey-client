@@ -6,5 +6,6 @@
     "thirdPerson": "Third person while emoting",
     "volume": "Emote volume",
     "showOthers": "Show emotes of others"
-  }
+  },
+  "notLoaded": "Emote is still loading"
 }
