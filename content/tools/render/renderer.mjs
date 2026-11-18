@@ -47,23 +47,39 @@ function catmull(p0, p1, p2, p3, t) {
   return 0.5 * (2 * p1 + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t3);
 }
 
-/** Sample a channel (sorted keyframes) at time t. Segment interpolation = the earlier keyframe's `i`. */
-export function sampleChannel(keys, t) {
+/**
+ * Sample a channel (keyframes sorted by t) at time t – Blockbench's rules (SPEC §5 "Format details"), ported from
+ * Blockbench 5.2's BoneAnimator.interpolate / Keyframe.getCatmullromLerp:
+ * - segment A→B runs from A.v to B.pre ?? B.v; before the first key its `pre ?? v` is held, after the last key its v;
+ * - A.i == "step" holds A; A linear and B linear/step → linear; A or B catmullrom → Catmull-Rom; otherwise
+ *   (bezier without handles, not used by the starter set) linear;
+ * - Catmull-Rom uses the neighbouring keys as control points (duplicating the end point when there is none, or when
+ *   A/B is a split key with `pre`). In looping animations with ≥ 3 keys Blockbench wraps the missing neighbours
+ *   (keys[n−2] before the first segment, keys[1] after the last one); the value itself never interpolates across
+ *   the loop end.
+ */
+export function sampleChannel(keys, t, loop = false) {
   if (!keys?.length) return null;
-  if (t <= keys[0].t) return keys[0].v;
   const n = keys.length;
+  const pre = (k) => k.pre ?? k.v;
+  if (t < keys[0].t) return pre(keys[0]);
   if (t >= keys[n - 1].t) return keys[n - 1].v;
   let k = 0;
   while (k < n - 1 && keys[k + 1].t <= t) k++;
   const a = keys[k], b = keys[k + 1];
   const f = (t - a.t) / (b.t - a.t || 1);
-  const mode = a.i ?? "linear";
-  if (mode === "step") return a.v;
-  if (mode === "catmullrom" || mode === "bezier") {
-    const p0 = keys[Math.max(0, k - 1)].v, p3 = keys[Math.min(n - 1, k + 2)].v;
-    return [0, 1, 2].map((c) => catmull(p0[c], a.v[c], b.v[c], p3[c], f));
+  const ia = a.i ?? "linear", ib = b.i ?? "linear";
+  const end = pre(b);
+  if (ia === "step") return a.v;
+  if (ia === "catmullrom" || ib === "catmullrom") {
+    const wrap = loop && n >= 3;
+    const before = keys[k - 1] ?? (wrap ? keys[n - 2] : null);
+    const after = keys[k + 2] ?? (wrap ? keys[1] : null);
+    const p0 = before && !a.pre ? before.v : a.v;
+    const p3 = after && !b.pre ? pre(after) : end;
+    return [0, 1, 2].map((c) => catmull(p0[c], a.v[c], end[c], p3[c], f));
   }
-  return [0, 1, 2].map((c) => a.v[c] + (b.v[c] - a.v[c]) * f);
+  return [0, 1, 2].map((c) => a.v[c] + (end[c] - a.v[c]) * f);
 }
 
 export function localTime(anim, t) {
@@ -76,7 +92,8 @@ export function evalAnim(anim, t, weight = 1) {
   const lt = localTime(anim, t);
   const pose = {};
   for (const [name, ch] of Object.entries(anim.bones ?? {})) {
-    const r = sampleChannel(ch.rotation, lt), p = sampleChannel(ch.position, lt), s = sampleChannel(ch.scale, lt);
+    const lp = !!anim.loop;
+    const r = sampleChannel(ch.rotation, lt, lp), p = sampleChannel(ch.position, lt, lp), s = sampleChannel(ch.scale, lt, lp);
     pose[name] = {
       rot: r ? r.map((v) => v * weight) : null,
       pos: p ? p.map((v) => v * weight) : null,
