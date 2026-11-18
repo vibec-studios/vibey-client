@@ -6,6 +6,7 @@
   "setting.open": "Screens",
   "setting.open.desc": "New screen, or the controls of the one you look at (in a world).",
   "setting.open.button": "Open",
+  "setting.open.action": "Video screens…",
   "hud.overlay": "Video overlay",
   "setting.screens": "Screens key",
   "setting.screens.desc": "Look at a screen to control it, or anywhere to make a new one.",
