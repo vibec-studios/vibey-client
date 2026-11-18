@@ -27,6 +27,7 @@ public final class VibeyCore {
 
     private static ClientPlatform platform;
     private static boolean inWorld;
+    private static boolean smokeDone;
 
     public static void init(ClientPlatform p) {
         platform = p;
@@ -81,6 +82,15 @@ public final class VibeyCore {
     public static void onScreenInit(Screen screen, List<? extends GuiEventListener> widgets,
                                     Consumer<AbstractWidget> add, Consumer<AbstractWidget> remove) {
         PauseMenu.decorate(screen, widgets, add);
+        // A fresh game directory opens the accessibility onboarding first; both mean "started".
+        boolean start = screen instanceof net.minecraft.client.gui.screens.TitleScreen || screen.getClass().getSimpleName().contains("Onboarding");
+        if (start && dev.henny.vibeyclient.Smoke.enabled() && !smokeDone) {
+            smokeDone = true;
+            StringBuilder sb = new StringBuilder();
+            for (dev.henny.vibeyclient.api.VibeyModule m : ModuleManager.get().all()) sb.append(m.id()).append('=').append(m.status()).append(' ');
+            Vibey.LOG.info("[vibeyclient-smoke] client reached the title screen on {}, modules: {}", Vibey.platform().loader(), sb.toString().trim());
+            net.minecraft.client.Minecraft.getInstance().execute(() -> net.minecraft.client.Minecraft.getInstance().stop());
+        }
         Events.post(new VibeyEvents.ScreenInit(screen, widgets, add, remove));
     }
 }

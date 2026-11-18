@@ -40,6 +40,7 @@ public final class VibeyNeoForge {
             if (e.getEntity() instanceof ServerPlayer p) ServerRelay.onLeave(p);
         });
         NeoForge.EVENT_BUS.addListener((ServerStoppedEvent e) -> ServerRelay.onServerStopped());
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.server.ServerStartedEvent e) -> dev.henny.vibeyclient.Smoke.serverStarted(e.getServer()));
     }
 
     private void registerPayloads(RegisterPayloadHandlersEvent event) {

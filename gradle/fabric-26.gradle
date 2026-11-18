@@ -14,8 +14,8 @@ dependencies {
 
 loom {
     runs {
-        client { runDir = 'run' }
-        server { runDir = 'run-server' }
+        client { runDir = 'run'; vmArg "-Dvibeyclient.smoke=${System.getProperty('vibeyclient.smoke', 'false')}" }
+        server { runDir = 'run-server'; vmArg "-Dvibeyclient.smoke=${System.getProperty('vibeyclient.smoke', 'false')}" }
     }
 }
 

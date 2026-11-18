@@ -19,6 +19,8 @@ never switch the Stonecutter active version (it rewrites `src/`), build other ta
 ./gradlew :neoforge-1.21.11:runClient           # dev client (NeoForge)
 ./gradlew :fabric-1.21.11:runServer             # dedicated server (accept the EULA in versions/fabric-1.21.11/run-server)
 ./gradlew :fabric-1.21.11:runClientGameTest     # client game test, screenshots in versions/fabric-1.21.11/build/run/clientGameTest/screenshots
+./gradlew :neoforge-1.21.11:runClient -Dvibeyclient.smoke=true   # smoke: boot, log "[vibeyclient-smoke]", quit
+./gradlew :fabric-1.21.11:runServer -Dvibeyclient.smoke=true     # same for a dedicated server (+ checks no client classes loaded)
 ```
 
 Default backend (`https://vibe.henny.dev`) and relay are set in `gradle.properties` and baked into the generated

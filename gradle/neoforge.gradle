@@ -23,11 +23,13 @@ neoForge {
         client {
             client()
             gameDirectory = project.file('run')
+            systemProperty 'vibeyclient.smoke', System.getProperty('vibeyclient.smoke', 'false')
         }
         server {
             server()
             gameDirectory = project.file('run-server')
             programArgument '--nogui'
+            systemProperty 'vibeyclient.smoke', System.getProperty('vibeyclient.smoke', 'false')
         }
     }
     mods {

@@ -203,7 +203,7 @@ public abstract class VibeyModule {
         return settings.add(new ColorSetting(key, argb));
     }
 
-    /** {@code defaultKey}: a GLFW key code ({@code GLFW.GLFW_KEY_K}) or -1 for unbound. */
+    /** {@code defaultKey}: a GLFW key code ({@code Keys.K} from client/Keys) or {@code Keys.UNBOUND}. */
     protected final KeybindSetting keybind(String key, int defaultKey) {
         KeybindSetting k = settings.add(new KeybindSetting(id, key, defaultKey));
         k.setActive(() -> enabled);

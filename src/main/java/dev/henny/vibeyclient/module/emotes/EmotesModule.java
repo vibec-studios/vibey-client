@@ -5,7 +5,7 @@ import dev.henny.vibeyclient.api.VibeyModule;
 import dev.henny.vibeyclient.api.setting.Settings.BoolSetting;
 import dev.henny.vibeyclient.api.setting.Settings.FloatSetting;
 import dev.henny.vibeyclient.api.setting.Settings.KeybindSetting;
-import org.lwjgl.glfw.GLFW;
+import dev.henny.vibeyclient.client.Keys;
 
 /**
  * Emote wheel and emotes with props, particles and sounds.
@@ -14,7 +14,7 @@ import org.lwjgl.glfw.GLFW;
  */
 public final class EmotesModule extends VibeyModule {
 
-    public final KeybindSetting wheel = keybind("wheel", GLFW.GLFW_KEY_B);
+    public final KeybindSetting wheel = keybind("wheel", Keys.B);
     public final BoolSetting thirdPerson = bool("thirdPerson", true);
     public final FloatSetting volume = floatRange("volume", 1f, 0f, 1f, 0.05f);
     public final BoolSetting showOthers = bool("showOthers", true);

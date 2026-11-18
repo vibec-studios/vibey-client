@@ -32,7 +32,7 @@ If a module ever needs server logic, put it in a server-safe class and wire it t
 
 ```java
 public final class EmotesModule extends VibeyModule {
-    public final KeybindSetting wheel = keybind("wheel", GLFW.GLFW_KEY_B).onPress(this::openWheel);
+    public final KeybindSetting wheel = keybind("wheel", Keys.B).onPress(this::openWheel);
     public final FloatSetting volume = floatRange("volume", 1f, 0f, 1f, 0.05f);
 
     public EmotesModule() { super("emotes", ModuleCategory.COSMETICS); }
@@ -81,7 +81,7 @@ thread) and rendered automatically in the Vibey menu.
 | `choice(key, Enum.DEFAULT)` | `EnumSetting<E>` | ‹ value › cycler |
 | `string(key, def[, maxLength])` | `StringSetting` | text field |
 | `color(key, argb)` | `ColorSetting` (`.presets(...)`) | swatches |
-| `keybind(key, GLFW key or -1)` | `KeybindSetting` (`.onPress(...)`, `isDown()`) | rebind button |
+| `keybind(key, Keys.X or Keys.UNBOUND)` | `KeybindSetting` (`.onPress(...)`, `isDown()`) | rebind button |
 | `action(key, runnable)` | `ActionSetting` | button |
 
 Every setting: `get()`, `set(v)` (clamped, listeners fire, save scheduled), `reset()`, `.onChange(v -> ...)`,
@@ -99,7 +99,8 @@ connection at all**), `animations`, `openMenu` keybind (Right Shift), `backendUr
 
 ## Keybinds
 
-`keybind("wheel", GLFW.GLFW_KEY_B)` creates the mapping in the "Vibey Client" category of the vanilla controls
+`keybind("wheel", Keys.B)` (key codes in `client/Keys` – do not import LWJGL, it is not on every
+classpath) creates the mapping in the "Vibey Client" category of the vanilla controls
 screen; the vanilla name key is `key.vibeyclient.<module>.<key>` and must be in `assets/vibeyclient/lang/*.json`.
 Declare it in the constructor/field or `onLoad` – later throws. Use `.onPress(Runnable)` (the core consumes the
 clicks) or `isDown()`; both only react while the module is enabled. The key itself is stored by vanilla in

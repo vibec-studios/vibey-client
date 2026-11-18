@@ -17,7 +17,7 @@ import dev.henny.vibeyclient.ui.Theme;
 import dev.henny.vibeyclient.ui.Ui;
 import dev.henny.vibeyclient.ui.VibeyScreen;
 import dev.henny.vibeyclient.ui.Widgets;
-import org.lwjgl.glfw.GLFW;
+import dev.henny.vibeyclient.client.Keys;
 
 /**
  * Renders the settings of a {@link SettingsGroup} automatically: one row per visible setting (label + optional
@@ -152,8 +152,8 @@ public final class SettingsView {
 
     /** Escape cancels, Backspace/Delete unbinds, anything else binds. */
     static void applyKey(KeybindSetting k, int keyCode) {
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE) return;
-        if (keyCode == GLFW.GLFW_KEY_BACKSPACE || keyCode == GLFW.GLFW_KEY_DELETE) keyCode = -1;
+        if (keyCode == Keys.ESCAPE) return;
+        if (keyCode == Keys.BACKSPACE || keyCode == Keys.DELETE) keyCode = -1;
         ClientCompat.rebind(k.mapping(), keyCode);
     }
 

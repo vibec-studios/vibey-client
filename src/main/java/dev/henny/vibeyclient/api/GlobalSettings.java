@@ -9,7 +9,7 @@ import dev.henny.vibeyclient.api.setting.Settings.EnumSetting;
 import dev.henny.vibeyclient.api.setting.Settings.KeybindSetting;
 import dev.henny.vibeyclient.api.setting.Settings.StringSetting;
 import dev.henny.vibeyclient.api.setting.SettingsGroup;
-import org.lwjgl.glfw.GLFW;
+import dev.henny.vibeyclient.client.Keys;
 
 /** Settings that apply to the whole client ({@code config/vibeyclient/core.json}), shown as "Global settings". */
 public final class GlobalSettings {
@@ -27,7 +27,7 @@ public final class GlobalSettings {
 
     public static final BoolSetting animations = GROUP.add(new BoolSetting("animations", true));
 
-    public static final KeybindSetting openMenu = GROUP.add(new KeybindSetting("core", "open_menu", GLFW.GLFW_KEY_RIGHT_SHIFT));
+    public static final KeybindSetting openMenu = GROUP.add(new KeybindSetting("core", "open_menu", Keys.RIGHT_SHIFT));
 
     public static final StringSetting backendUrl = GROUP.add(new StringSetting("backendUrl", BuildInfo.DEFAULT_BACKEND, 256)).advanced();
 

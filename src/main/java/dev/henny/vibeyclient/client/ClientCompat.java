@@ -68,6 +68,9 @@ public final class ClientCompat {
     }
 
     public static void rebind(KeyMapping mapping, int keyCode) {
+        //? if >=26.3 {
+        /*mapping.setKey(keyCode < 0 ? InputConstants.UNKNOWN : InputConstants.Type.KEYBOARD.getOrCreate(keyCode));
+        *///?} else
         mapping.setKey(keyCode < 0 ? InputConstants.UNKNOWN : InputConstants.Type.KEYSYM.getOrCreate(keyCode));
         KeyMapping.resetMapping();
         Minecraft.getInstance().options.save();

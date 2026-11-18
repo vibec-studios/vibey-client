@@ -12,7 +12,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.minecraft.client.gui.screens.PauseScreen;
-import org.lwjgl.glfw.GLFW;
+import dev.henny.vibeyclient.client.Keys;
 
 /**
  * Runs the real game: checks the module manager, opens the Vibey menu on the title screen and in a world (via the
@@ -57,7 +57,7 @@ public final class VibeyClientGameTest implements FabricClientGameTest {
             context.waitTicks(2);
 
             // Right Shift opens the menu
-            context.getInput().pressKey(GLFW.GLFW_KEY_RIGHT_SHIFT);
+            context.getInput().pressKey(Keys.RIGHT_SHIFT);
             context.waitTicks(10);
             boolean open = context.computeOnClient(mc -> mc.screen instanceof VibeyScreen);
             if (!open) throw new AssertionError("Right Shift did not open the Vibey menu");

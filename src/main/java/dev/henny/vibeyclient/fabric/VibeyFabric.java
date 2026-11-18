@@ -38,6 +38,7 @@ public final class VibeyFabric implements ModInitializer, Platform {
         register(MessagePayload.TYPE, MessagePayload.CODEC);
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> ServerRelay.onLeave(handler.getPlayer()));
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> ServerRelay.onServerStopped());
+        ServerLifecycleEvents.SERVER_STARTED.register(dev.henny.vibeyclient.Smoke::serverStarted);
     }
 
     private static <T extends CustomPacketPayload> void register(CustomPacketPayload.Type<T> type, StreamCodec<FriendlyByteBuf, T> codec) {
@@ -84,6 +85,11 @@ public final class VibeyFabric implements ModInitializer, Platform {
     @Override
     public boolean isClient() {
         return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT;
+    }
+
+    @Override
+    public Boolean isClassLoaded(String className) {
+        return net.fabricmc.loader.impl.launch.FabricLauncherBase.getLauncher().isClassLoaded(className);
     }
 
     @Override

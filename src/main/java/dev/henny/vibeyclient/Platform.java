@@ -30,5 +30,10 @@ public interface Platform {
     /** Sends a payload to one player. Only call it for players that registered our channel (they sent hello). */
     void sendToPlayer(ServerPlayer player, CustomPacketPayload payload);
 
+    /** Whether the class has been loaded already, or null if the loader cannot tell (dev smoke checks). */
+    default Boolean isClassLoaded(String className) {
+        return null;
+    }
+
     record ModInfo(String id, String name, String version) {}
 }
