@@ -44,9 +44,15 @@ public final class WebPlayer implements MediaPlayer {
     private volatile long pageAt;
     private boolean closed;
 
-    WebPlayer(MCEFBrowser browser, MediaSource source, int width, int height, long startMs, boolean playing) {
+    private final String url;
+    /** Commands wait until the page painted once (the native browser is created asynchronously). */
+    private boolean live;
+    private long pendingSeek = -1;
+
+    WebPlayer(MCEFBrowser browser, MediaSource source, String url, int width, int height, long startMs, boolean playing) {
         this.browser = browser;
         this.source = source;
+        this.url = url;
         this.youtube = source.kind() == MediaSource.Kind.YOUTUBE;
         this.w = width;
         this.h = height;
@@ -54,20 +60,13 @@ public final class WebPlayer implements MediaPlayer {
         this.playing = playing;
         this.baseMs = startMs;
         this.baseNanos = System.nanoTime();
-        load(startMs, playing);
     }
 
-    private void load(long startMs, boolean autoplay) {
-        String url = source.uri();
-        if (youtube) {
-            url = "https://www.youtube.com/embed/" + source.youTubeId() + "?enablejsapi=1&playsinline=1&rel=0&autoplay="
-                    + (autoplay ? 1 : 0) + (startMs >= 1000 ? "&start=" + startMs / 1000 : "");
-        }
-        CefRequest r = CefRequest.create();
-        r.setURL(url);
-        r.setMethod("GET");
-        r.setReferrer(REFERER, CefRequest.ReferrerPolicy.REFERRER_POLICY_DEFAULT);
-        browser.getCefBrowser().loadRequest(r);
+    /** The page to open: YouTube links become the official embed player. */
+    static String initialUrl(MediaSource source, long startMs, boolean autoplay) {
+        if (source.kind() != MediaSource.Kind.YOUTUBE) return source.uri();
+        return "https://www.youtube.com/embed/" + source.youTubeId() + "?enablejsapi=1&playsinline=1&rel=0&autoplay="
+                + (autoplay ? 1 : 0) + (startMs >= 1000 ? "&start=" + startMs / 1000 : "");
     }
 
     public MCEFBrowser browser() {
@@ -75,7 +74,7 @@ public final class WebPlayer implements MediaPlayer {
     }
 
     private void js(String code) {
-        if (!closed) browser.getCefBrowser().executeJavaScript("(function(){try{" + code + "}catch(e){}})();", "", 0);
+        if (!closed && live) browser.getCefBrowser().executeJavaScript("(function(){try{" + code + "}catch(e){}})();", url, 0);
     }
 
     private static final String MEDIA = "document.querySelectorAll('video,audio').forEach(function(m){%s});";
@@ -102,6 +101,10 @@ public final class WebPlayer implements MediaPlayer {
         baseMs = Math.max(0, ms);
         baseNanos = System.nanoTime();
         pagePos = -1;
+        if (!live) {
+            pendingSeek = baseMs;
+            return;
+        }
         String sec = String.format(Locale.ROOT, "%.2f", baseMs / 1000.0);
         js(youtube ? "var p=document.getElementById('movie_player');p&&p.seekTo&&p.seekTo(" + sec + ",true);"
                 : String.format(MEDIA, "m.currentTime=" + sec + ";"));
@@ -189,6 +192,16 @@ public final class WebPlayer implements MediaPlayer {
             Minecraft.getInstance().getTextureManager().register(texId, tex);
             registered = true;
         }
+        if (!live && tex.ready()) {
+            live = true;
+            lastVolume = -1;
+            if (pendingSeek >= 0) {
+                seek(pendingSeek);
+                pendingSeek = -1;
+            }
+            if (playing) play();
+            else pause();
+        }
         long now = System.currentTimeMillis();
         if (now - lastPoll > 500) {
             lastPoll = now;
@@ -214,7 +227,7 @@ public final class WebPlayer implements MediaPlayer {
     public void close() {
         if (closed) return;
         closed = true;
-        McefBridge.forget(browser.getCefBrowser());
+        McefBridge.forget(browser.getCefBrowser(), url);
         if (registered) Minecraft.getInstance().getTextureManager().release(texId);
         browser.close();
     }

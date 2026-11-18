@@ -32,6 +32,9 @@ import java.util.function.Consumer;
 public final class McefInstaller {
     private static final String API = "https://api.modrinth.com/v2/project/mcef-modern/version";
 
+    /** The jar was put into mods/ in this session: it works after a restart. */
+    public static volatile boolean installedThisSession;
+
     public record Release(String version, String fileName, long size, String url, String sha512) {}
 
     private McefInstaller() {}
@@ -102,6 +105,7 @@ public final class McefInstaller {
         }
         Path jar = mods.resolve(safeName);
         Files.move(part, jar, StandardCopyOption.REPLACE_EXISTING);
+        installedThisSession = true;
         progress.accept(1f);
         Vibey.LOG.info("Installed {} {} to {} (restart needed)", Web.MOD_NAME, rel.version(), jar);
         return jar;

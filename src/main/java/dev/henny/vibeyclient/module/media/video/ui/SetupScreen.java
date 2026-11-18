@@ -187,7 +187,8 @@ public final class SetupScreen extends CardScreen {
         buttonRight(g, left - 6, by, 18, tr("setup.later"), Style.SECONDARY, this::onClose);
     }
 
-    private void go() {
+    /** The download/continue button (public for the dev driver). */
+    public void go() {
         error = null;
         switch (need) {
             case FFMPEG -> {

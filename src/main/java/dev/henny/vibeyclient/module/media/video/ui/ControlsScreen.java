@@ -67,7 +67,7 @@ public final class ControlsScreen extends CardScreen {
 
         // Preview (the picture as it is, nothing drawn on it).
         Identifier tex = p != null && !p.audioOnly() ? p.texture() : null;
-        int ph = Math.min(120, Math.round(w / Math.max(0.3f, s.aspect())));
+        int ph = Math.min(Math.max(48, height / 4), Math.round(w / Math.max(0.3f, s.aspect())));
         int pw = Math.round(ph * s.aspect());
         int px = x + (w - pw) / 2;
         g.rect(px - 1, y - 1, pw + 2, ph + 2, 0xFF0E0E12);

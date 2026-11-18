@@ -200,6 +200,14 @@ public final class Video implements VideoFeature {
             if (applied == null && Math.abs(p.positionMs() - s.expectedMs()) > 1500 && (p.seekable() || s.durationMs > 0)) p.seek(s.expectedMs());
         }
         MediaPlayer.Status st = p.status();
+        if (!s.remote && !s.started && st == MediaPlayer.Status.PLAYING) {
+            // Own screen: the timeline starts when the picture does (loading time is not drift).
+            s.started = true;
+            if (Math.abs(p.positionMs() - s.expectedMs()) < 5000) {
+                s.setTimeline(true, p.positionMs());
+                net.sendState(s);
+            }
+        }
         if (st == MediaPlayer.Status.ENDED && s.playing) {
             if (s.loop) {
                 if (!s.remote) {
@@ -324,6 +332,7 @@ public final class Video implements VideoFeature {
             }
         }
         s.player = null;
+        s.started = false;
         s.farSince = 0;
         appliedPlaying.remove(s.id);
     }
@@ -335,6 +344,9 @@ public final class Video implements VideoFeature {
     /** One line for screens without a picture (also shown in the controls). Null when the picture is fine. */
     public String statusLine(MediaScreen s) {
         if (s.source == null) return tr("status.nosource");
+        if (s.player != null && s.player.status() != MediaPlayer.Status.ERROR && s.player.texture() != null) {
+            return s.player.audioOnly() ? "♪ " + s.source.label() : null;
+        }
         if (s.remote && !allowed(s)) {
             return cfg.others.get() == VideoSettings.Others.NEVER ? tr("status.hidden") : tr("status.ask", s.ownerName, s.source.label());
         }
@@ -342,7 +354,8 @@ public final class Video implements VideoFeature {
             Web.State st = Web.state(browserConsent());
             switch (st) {
                 case NOT_INSTALLED, NEEDS_SETUP -> {
-                    return tr("status.needbrowser");
+                    return dev.henny.vibeyclient.module.media.video.web.McefInstaller.installedThisSession
+                            ? tr("status.restart") : tr("status.needbrowser");
                 }
                 case FAILED -> {
                     return tr("status.browserfailed");
@@ -371,7 +384,9 @@ public final class Video implements VideoFeature {
         if (s.source == null) return null;
         if (s.source.kind().web()) {
             Web.State st = Web.state(browserConsent());
-            if (st == Web.State.NOT_INSTALLED) return SetupScreen.Need.BROWSER_MOD;
+            if (st == Web.State.NOT_INSTALLED) {
+                return dev.henny.vibeyclient.module.media.video.web.McefInstaller.installedThisSession ? null : SetupScreen.Need.BROWSER_MOD;
+            }
             if (st == Web.State.NEEDS_SETUP) return SetupScreen.Need.BROWSER_NATIVES;
             return null;
         }
@@ -453,11 +468,16 @@ public final class Video implements VideoFeature {
 
     /** Placement finished (new or moved screen). */
     public void placed(MediaScreen s, boolean moved) {
+        placed(s, moved, true);
+    }
+
+    /** {@code prompt}: open the setup prompt right away if something is missing (interactive placing). */
+    public void placed(MediaScreen s, boolean moved, boolean prompt) {
         screens.put(s.id, s);
         saveOwn();
         if (moved) closePlayer(s);
         net.sendScreen(s);
-        if (!moved) {
+        if (!moved && prompt) {
             SetupScreen.Need need = missing(s);
             if (need != null) dev.henny.vibeyclient.api.Tasks.onMain(() -> ClientCompat.openScreen(new SetupScreen(null, need)));
         }

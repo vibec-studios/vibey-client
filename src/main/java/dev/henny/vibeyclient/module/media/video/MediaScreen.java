@@ -47,6 +47,8 @@ public final class MediaScreen {
     public boolean accepted;
     public transient MediaPlayer player;
     public transient long farSince;
+    /** The current player has reached PLAYING once. */
+    public transient boolean started;
     public transient boolean visible;
     public transient double distance = Double.MAX_VALUE;
 

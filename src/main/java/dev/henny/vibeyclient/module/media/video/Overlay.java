@@ -51,7 +51,7 @@ public final class Overlay implements HudElement {
             o = new JsonObject();
             o.addProperty("x", 0.98f);
             o.addProperty("y", 0.02f);
-            o.addProperty("scale", 1f);
+            o.addProperty("scale", 0.6f);
             d.add("overlay", o);
         }
         return o;

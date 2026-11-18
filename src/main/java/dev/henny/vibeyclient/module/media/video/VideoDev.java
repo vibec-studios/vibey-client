@@ -28,6 +28,9 @@ final class VideoDev {
     static void register(Video v) {
         if (!DevDriver.active()) return;
         DevDriver.EXTRA.put("video", arg -> exec(v, arg));
+        if (Thread.getDefaultUncaughtExceptionHandler() == null) {
+            Thread.setDefaultUncaughtExceptionHandler((t, e) -> dev.henny.vibeyclient.Vibey.LOG.error("Uncaught in {}", t.getName(), e));
+        }
     }
 
     private static MediaScreen at(Video v, String idx) {
@@ -72,7 +75,7 @@ final class VideoDev {
                 s.height = s.width / aspect;
                 s.loop = true;
                 s.setTimeline(true, 0);
-                v.placed(s, false);
+                v.placed(s, false, false);
                 return "ok " + s.id;
             }
             case "placing": {
@@ -144,6 +147,31 @@ final class VideoDev {
             case "edit":
                 v.editOverlay();
                 return "ok";
+            case "key": // the screens key
+                v.openMenu();
+                return "ok screen=" + (mc.screen == null ? "none" : mc.screen.getClass().getSimpleName());
+            case "click": { // a real mouse click as vanilla sees it (consumed at the next tick start)
+                var km = a[1].equals("attack") ? mc.options.keyAttack : mc.options.keyUse;
+                net.minecraft.client.KeyMapping.click(com.mojang.blaze3d.platform.InputConstants.getKey(km.saveString()));
+                return "ok";
+            }
+            case "wheel": { // like the mouse wheel: moves the hotbar slot
+                var inv = mc.player.getInventory();
+                inv.setSelectedSlot(Math.floorMod(inv.getSelectedSlot() + Integer.parseInt(a[1]), 9));
+                return "ok";
+            }
+            case "placement":
+                return "ok active=" + v.placement.active() + " valid=" + v.placement.valid
+                        + (v.placement.draft() == null ? "" : String.format(Locale.ROOT, " w=%.2f normal=%s up=%s at=%.2f,%.2f,%.2f",
+                        v.placement.draft().width, v.placement.draft().normal, v.placement.draft().up, v.placement.draft().x, v.placement.draft().y, v.placement.draft().z));
+            case "setupgo":
+                if (mc.screen instanceof SetupScreen ss) {
+                    ss.go();
+                    return "ok";
+                }
+                return "err no setup screen";
+            case "screen":
+                return "ok " + (mc.screen == null ? "none" : mc.screen.getClass().getSimpleName());
             default:
                 return "err video " + sub;
         }

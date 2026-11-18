@@ -26,6 +26,7 @@
   "status.hidden": "Ausgeblendet",
   "status.ask": "{0} teilt {1} – Leinwand-Taste drücken zum Laden",
   "status.needbrowser": "Braucht den Browser – Leinwand-Taste drücken",
+  "status.restart": "Minecraft neu starten, um den Browser fertig einzurichten",
   "status.browserfailed": "Der Browser konnte nicht starten",
   "status.browserdownload": "Browser wird geladen… {0} %",
   "status.browserstart": "Browser startet…",

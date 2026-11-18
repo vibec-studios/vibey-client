@@ -26,6 +26,7 @@
   "status.hidden": "Hidden",
   "status.ask": "{0} shared {1} – press the screens key to load",
   "status.needbrowser": "Needs the browser – press the screens key",
+  "status.restart": "Restart Minecraft to finish the browser setup",
   "status.browserfailed": "The browser could not start",
   "status.browserdownload": "Getting the browser… {0} %",
   "status.browserstart": "Starting the browser…",
