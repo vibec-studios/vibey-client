@@ -37,7 +37,7 @@ If something is missing the screen says so and the screens key opens a **setup p
 downloaded, the size, the source and the licence, and does nothing until the user presses *Download*:
 
 - **FFmpeg** (Windows x64/arm64): newest `ffmpeg-n*-latest-win64-lgpl-shared` from github.com/BtbN/FFmpeg-Builds
-  (~80 MB), checked against the release's `checksums.sha256`, unpacked to `<gameDir>/vibeyclient/ffmpeg/bin`
+  (~75–80 MB), checked against the release's `checksums.sha256`, unpacked to `<gameDir>/vibeyclient/ffmpeg/bin`
   (with `LICENSE.txt` and `SOURCE.txt`). Linux/macOS: the prompt explains the package manager / Homebrew; an
   `ffmpeg` on the PATH (or in /usr/bin, /usr/local/bin, /opt/homebrew/bin) is used as is.
 - **MCEF Modern** (mod, LGPL-2.1): the release for this Minecraft version from the Modrinth API, checked with
@@ -48,9 +48,13 @@ downloaded, the size, the source and the licence, and does nothing until the use
 ## How it works
 
 - `Video` (the `VideoFeature`) owns all screens (`MediaScreen`: geometry, `MediaSource`, a **timeline** =
-  playing + position at a wall-clock time). Each tick it gives the nearest ≤ 4 allowed screens in range a
-  `MediaPlayer`, keeps it on the timeline (play/pause, seek when it drifts > 2 s), and sets the volume
+  playing + position at a wall-clock time). Each tick it gives ≤ 6 allowed screens in range a `MediaPlayer`
+  (overlay first, then playing screens, then the nearest), and sets the volume
   (`volume × screen volume × MASTER × RECORDS × distance falloff`). Out of range → paused, closed after 15 s.
+  Own screens: the owner's real playback is the truth – the timeline is re-based on it when it differs by > 0.75 s
+  (buffering) and the new state is sent. Other players' screens follow the timeline: seek when they drift > 2 s
+  (files) / 3 s (streams, web), aiming ahead by the measured start-up lag of the previous seek. Saved screens come
+  back paused after a rejoin (no surprise sound).
 - `FfmpegPlayer`: two FFmpeg processes per run. Video: `-vf fps=N,scale=W:H…,pad,format=rgba -f rawvideo` to stdout →
   3 preallocated direct buffers → `CommandEncoder.writeToTexture(GpuTexture, ByteBuffer, …)` once per new frame, only
   while the screen is in the frustum (no per-frame allocation). Audio: `-ac 1 -ar 48000 -f s16le` → streaming OpenAL
@@ -112,6 +116,14 @@ The feature is self-contained behind `VideoFeature` + `HudElement`; `VideoModule
 
 ## Dev testing
 
-- `-Dvibeyclient.mcef=true` adds MCEF Modern to `runClient` (else test the download prompt).
+- `-Dvibeyclient.mcef=true` adds MCEF Modern to `runClient` (else test the download prompt; a jar the prompt put
+  into `run*/mods/` is loaded in dev as well – Fabric remaps it at runtime).
+- DevDriver (`-Dvibeyclient.devDriver=<port>`) gets `video …` commands (`VideoDev`): `list`, `place x y z normal
+  width aspect source`, `placing <source>`, `click use|attack`, `wheel <n>`, `placement`, `play|pause|seek|open|
+  controls|overlay|accept|remove <index>`, `others ask|always|never`, `setup ffmpeg|mod|natives`, `setupgo`,
+  `hideffmpeg on|off` (ignore the system FFmpeg to test the download prompt), `edit`.
+- Windows: once Chromium runs, start `runClient` in its **own console window** (e.g. `Start-Process` a .cmd).
+  Sharing a console with the Gradle client got the client killed (daemon log: "client disconnection detected,
+  canceling the build"), which ends the game.
 - Test media: generate your own, e.g.
   `ffmpeg -f lavfi -i testsrc2=size=1280x720:rate=30:duration=20 -f lavfi -i sine=frequency=440:beep_factor=4:duration=20 -c:v libx264 -pix_fmt yuv420p -c:a aac -shortest testpattern.mp4`.

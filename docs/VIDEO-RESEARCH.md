@@ -49,7 +49,7 @@ and could clash with other mods that ship MCEF. WaterMedia (VLC based) is
 
 | Option | Licence | Size | Formats | Verdict |
 |---|---|---|---|---|
-| **FFmpeg CLI as a separate process** (LGPL build) | LGPL-2.1+ (separate program, not linked) | Windows `lgpl-shared` zip ~65 MB ([BtbN builds](https://github.com/BtbN/FFmpeg-Builds/releases)), Linux/macOS: system package | everything FFmpeg decodes (H.264/HEVC/VP9/AV1, HLS, RTMP, http) | **chosen** |
+| **FFmpeg CLI as a separate process** (LGPL build) | LGPL-2.1+ (separate program, not linked) | Windows `lgpl-shared` zip ~75–80 MB ([BtbN builds](https://github.com/BtbN/FFmpeg-Builds/releases)), Linux/macOS: system package | everything FFmpeg decodes (H.264/HEVC/VP9/AV1, HLS, RTMP, http) | **chosen** |
 | FFmpeg via JavaCV/bytedeco (JNI) | JavaCPP Apache-2.0, FFmpeg LGPL (GPL variant `-gpl`) | ~25–40 MB per platform jar | same | native code inside the game process (crashes take the game down), big jars per platform, version pinning |
 | VLCJ + installed VLC | VLCJ GPL-3 (commercial licence available) | VLC install | broad | GPL is not compatible with shipping our Apache-2.0 code linked to it; needs VLC installed |
 | jcodec (pure Java) | BSD | ~1 MB | H.264 baseline/main only, no audio decoding of AAC in practice | too slow and too narrow |
