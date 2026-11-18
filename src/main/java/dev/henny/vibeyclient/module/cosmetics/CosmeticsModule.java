@@ -79,8 +79,8 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
         ItemLoader.loadBuiltin();
         Services.register(DevItems.class, devItems);
         Services.register(AvatarPreview.class, preview);
-        on(VibeyEvents.ServerHello.class, e -> dev.henny.vibeyclient.api.net.VibeyNet.sendLoadout(sharedSlots()));
-        on(VibeyEvents.RemoteLoadout.class, e -> sync.serverLoadout(e.player(), e.slots()));
+        on(VibeyEvents.ServerHello.class, e -> dev.henny.vibeyclient.api.net.VibeyNet.sendLoadout(sharedSlots(), sync.ownToken()));
+        on(VibeyEvents.RemoteLoadout.class, e -> sync.serverLoadout(e.player(), e.slots(), e.token()));
         on(VibeyEvents.WorldLeave.class, e -> sync.worldLeft());
         on(VibeyEvents.OnlineFeaturesChanged.class, e -> {
             if (e.enabled()) ItemLoader.refreshCatalog(true);

@@ -47,6 +47,7 @@ public final class MultiplayerModule extends VibeyModule {
     public final BoolSetting toasts = bool("toasts", true);
     public final KeybindSetting hostKey = keybind("host", Keys.UNBOUND).onPress(this::openHostScreen);
     public final BoolSetting exactModVersions = bool("exactModVersions", false).advanced();
+    /** Default = BuildInfo.DEFAULT_RELAY: our relay, official builds only (forks: own default_relay, https://github.com/vibec-studios/.github/blob/main/SERVICES.md). */
     public final StringSetting relay = string("relay", BuildInfo.DEFAULT_RELAY, 253).advanced();
     public final IntSetting lanPort = intRange("lanPort", 0, 0, 65535).field().advanced();
 

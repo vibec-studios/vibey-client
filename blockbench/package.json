@@ -4,7 +4,7 @@
   "private": true,
   "description": "Blockbench plugin for Vibey Client cosmetics and emotes (.vibey) with live link",
   "author": "Vibe Craft Studios",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "scripts": {
     "test": "node --test test/unit.test.js test/server.test.js",
     "test:blockbench": "node test/blockbench-e2e.js"

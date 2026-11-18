@@ -16,6 +16,7 @@ import dev.henny.vibeyclient.avatar.fx.Effects;
 import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.client.Keys;
 import dev.henny.vibeyclient.module.cosmetics.CosmeticsModule;
+import dev.henny.vibeyclient.module.cosmetics.LoadoutSync;
 import dev.henny.vibeyclient.module.cosmetics.ui.WardrobeUi;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
@@ -54,7 +55,14 @@ public final class EmotesModule extends VibeyModule {
     public void onLoad() {
         volume.onChange(v -> Effects.volume = v);
         showOthers.onChange(v -> AvatarConfig.showOthersEmotes = v);
-        on(VibeyEvents.RemoteEmote.class, e -> remote(e.player(), e.play() ? e.emoteId() : null));
+        on(VibeyEvents.RemoteEmote.class, e -> {
+            // server channel (unverified, SPEC §6): default emotes, or granted ones in the sender's last valid token
+            if (e.play()) {
+                CosmeticsModule c = CosmeticsModule.get();
+                if (c == null ? !LoadoutSync.isDefault(e.emoteId()) : !c.sync().allowServerEmote(e.player(), e.emoteId())) return;
+            }
+            remote(e.player(), e.play() ? e.emoteId() : null);
+        });
         AvatarStates.onEmoteEnded = st -> {
             if (st.uuid != null && st.uuid.equals(EngineCompat.selfId())) restoreCamera();
         };

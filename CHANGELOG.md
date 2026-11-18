@@ -2,6 +2,29 @@
 
 All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.properties`.
 
+## Unreleased
+
+### License
+
+- The code is now licensed under the **Apache License 2.0** (was MIT); see `LICENSE` and `NOTICE`. Forks are
+  welcome, but our names and the seal, our artwork, models, textures, sounds and the starter set (all rights
+  reserved, paths in `NOTICE`) and the Vibe online services (official builds only) are not part of the code license
+  – the policies for all Vibe Craft Studios repositories are in
+  [vibec-studios/.github](https://github.com/vibec-studios/.github/blob/main/LICENSING.md). The multiplayer and lyrics modules keep the MIT notices of Vibey Multiplayer and
+  Vibey Lyrics (`licenses/`). The jars now also carry `NOTICE_vibeyclient` and those MIT notices.
+
+### Signed loadouts
+
+- On servers that run Vibey Client, other players' cosmetics and emotes from the server channel are only shown when
+  the Vibe backend signed them (Ed25519 token in the loadout packet, key from `/api/v1/meta`). Without a valid
+  signature you only see items everyone has; the rest comes from the backend. A modified client can no longer show
+  items it does not own. Server-channel protocol 2; older clients and servers keep working.
+
+### Releases
+
+- Releases are no longer pushed to the backend from CI: the GitHub release carries all jars, `vibey.js` and
+  `vibey-manifest.json` (with sha256 and size of every file), and the backend imports it from GitHub.
+
 ## 0.2.0 – nametag icons and over-the-air cosmetics
 
 ### Nametag icons

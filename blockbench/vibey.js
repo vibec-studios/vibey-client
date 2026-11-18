@@ -4,6 +4,10 @@
  * Model formats "Vibey Cosmetic" and "Vibey Emote", import/export of `.vibey` bundles (docs/SPEC.md §5),
  * a reference player, validation and the live link into the running game (docs/SPEC.md §8).
  *
+ * License: the code is Apache-2.0 (LICENSE, NOTICE). The reference player it draws, the seal icon and the names
+ * "Vibey"/"Vibe" are not covered (NOTICE of the vibey-client repository and
+ * https://github.com/vibec-studios/.github/blob/main/LICENSING.md).
+ *
  * Install: Blockbench > File > Plugins > Load Plugin from File > vibey.js (file name must stay "vibey.js").
  * The pure conversion helpers are exposed as `module.exports` under Node (tests) and as
  * `window.VibeyCore` / `window.VibeyPlugin` inside Blockbench.

@@ -43,9 +43,20 @@ public final class VibeyEvents {
     /** The server we are on has Vibey Client (answered hello): loadout/emote/module packets work now. */
     public record ServerHello(int protocol) {}
 
-    /** Another player's loadout from the server channel ({@code slot → item id}; empty = nothing / left). */
-    public record RemoteLoadout(UUID player, Map<String, String> slots) {}
+    /**
+     * Another player's loadout from the server channel ({@code slot → item id}; empty = nothing / left). The slots
+     * are what the other client claims; {@code token} ("" = none) is its backend-signed loadout (SPEC §6), verified
+     * by the cosmetics module before it shows anything that is not available to everyone.
+     */
+    public record RemoteLoadout(UUID player, Map<String, String> slots, String token) {
+        public RemoteLoadout(UUID player, Map<String, String> slots) {
+            this(player, slots, "");
+        }
+    }
 
-    /** Another player started/stopped an emote (server channel). {@code startTick} is the server tick. */
+    /**
+     * Another player started/stopped an emote (server channel). {@code startTick} is the server tick. Unverified:
+     * receivers only play {@code default} emotes or ones listed in the sender's last valid loadout token.
+     */
     public record RemoteEmote(UUID player, String emoteId, boolean play, long startTick) {}
 }

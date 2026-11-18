@@ -220,3 +220,9 @@ should show.
   locators so no locator has to reference a player bone directly (the validator also accepts player bones).
 - **Sounds:** vanilla ids are plain `minecraft:` sound events; embedded sounds (`seal_summon`: `chime`, `pop`,
   `squeak`) are mono OGG Vorbis, synthesized in `tools/synth.mjs`.
+
+## License
+
+The starter set (`content/src`, `content/dist`, `content/sounds`, `content/audit`) is artwork by Vibe Craft Studios,
+all rights reserved (`NOTICE`, [ASSETS-POLICY.md](https://github.com/vibec-studios/.github/blob/main/ASSETS-POLICY.md)); only the tools in `content/tools/` are Apache-2.0 code. Forks must make
+their own content.

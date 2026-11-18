@@ -2,27 +2,27 @@
 
 This file is the single source of truth that every part of the project (client mod, backend extension, Blockbench
 plugin, starter content) builds against. If you need to change a contract here, change this file in the same commit
-and say so in your report.
+and say so in the pull request.
 
 ## 0. Product in one paragraph
 
 **Vibey Client** is a Minecraft client mod by Vibe Craft Studios (GitHub org `vibec-studios`, repo
-`vibec-studios/vibey-client`, private for now). It bundles a modular core, a complete client UI in the Vibe design,
+`vibec-studios/vibey-client`). It bundles a modular core, a complete client UI in the Vibe design,
 the existing *Vibey Multiplayer* and *Vibey Lyrics* mods as modules, social features (friends, requests, invites,
 chats, presence) on top of the live Vibe backend (`https://vibe.henny.dev`), a data-driven cosmetic system (capes,
 wings, auras, pets, shields, hats, back items), an emote system with props/particles/sounds, and Blockbench plugins
 with live export into the running game. Logo/mascot: the blocky grey seal ("Robbe 1"). **No shop, no payments, no
 prices anywhere** – everything in the starter set is free.
 
-Local paths on the dev machine:
+Related repositories (all under the GitHub org `vibec-studios`):
 
-| What | Path |
+| What | Repository |
 |---|---|
-| This repo | `C:\Users\henny\.t3\projects\vibey-client` |
-| Vibey Multiplayer (source of the multiplayer module + build setup) | `C:\Users\henny\.t3\projects\vibey-multiplayer` |
-| Vibey Lyrics (source of the lyrics module; working copy has uncommitted newer changes – use the working copy) | `C:\Users\henny\.t3\projects\vibey-lyrics` |
-| Vibe backend (Node/Fastify/Postgres, private, auto-deploys on push to `main`!) | `C:\Users\henny\.t3\projects\vibe-backend` |
-| Vibe launcher (design tokens `src/styles/globals.css`, seal model `src/components/seal3d.ts`, `branding/vibe-seal-*.png`) | `C:\Users\henny\.t3\projects\vibe-launcher` |
+| This repo | `vibec-studios/vibey-client` |
+| Vibey Multiplayer (origin of the multiplayer module + build setup, MIT) | `vibec-studios/vibey-multiplayer` |
+| Vibey Lyrics (origin of the lyrics module, MIT) | `vibec-studios/vibey-lyrics` |
+| Vibe backend (Node/Fastify/Postgres; not public) | `vibec-studios/vibe-backend` |
+| Vibe launcher (design tokens `src/styles/globals.css`, seal model `src/components/seal3d.ts`, API contracts `docs/VIBE-API-2.md`) | `vibec-studios/vibe-launcher` |
 
 ## 1. Targets and build
 
@@ -37,7 +37,10 @@ Local paths on the dev machine:
 - **Never switch the Stonecutter active version** (it rewrites `src/`). Build other versions with
   `./gradlew :fabric-1.21.1:build` etc. – that processes sources into the subproject build dir without touching `src/`.
 - Mod id `vibeyclient`, name `Vibey Client`, Java package `dev.henny.vibeyclient`, maven group `dev.henny`,
-  archives `vibey-client-<loader>-<mc label>`. Asset namespace `vibeyclient`. License MIT (same as the other mods).
+  archives `vibey-client-<loader>-<mc label>`. Asset namespace `vibeyclient`. License: code Apache-2.0 (`LICENSE`, `NOTICE`; the
+  multiplayer/lyrics code from the MIT standalone mods keeps its notice in `licenses/`), artwork all rights reserved
+  (paths in `NOTICE`); names, the seal and the online services follow the central policies in
+  `vibec-studios/.github` (`LICENSING.md`, `TRADEMARKS.md`, `ASSETS-POLICY.md`, `SERVICES.md`).
 - `environment: "*"` – the same jar can go on a server (it then only relays emote/loadout packets, see §6).
   Client-only classes must never be loaded on a dedicated server.
 - Lyrics module is **Fabric-only** (like the standalone mod). On NeoForge it is simply not registered.
@@ -275,14 +278,48 @@ Two independent channels; the client uses whatever is available and merges by pl
 1. **Backend (works on any server, even vanilla):** see §7. The client subscribes to the UUIDs of players around it
    and gets their loadouts and emote plays via the gateway.
 2. **Server packets (only when the mod is also on the server, incl. hosted/LAN worlds):** custom payloads
-   `vibeyclient:hello` (C→S: protocol version; S→C: ack), `vibeyclient:loadout` (C→S: own `{slot: id}`;
-   S→C: `{uuid, slots}`), `vibeyclient:emote` (C→S: `{emoteId, action: play|stop}`; S→C: `{uuid, emoteId, action,
+   `vibeyclient:hello` (C→S: protocol version; S→C: ack), `vibeyclient:loadout` (C→S: own `{slot: id}` + signed
+   token; S→C: `{uuid, slots, token}`, see *Signed loadouts* below), `vibeyclient:emote` (C→S: `{emoteId, action: play|stop}`; S→C: `{uuid, emoteId, action,
    startTick}`), plus the generic module envelope `vibeyclient:msg` (C→S: `{target uuid or nil, channel, bytes ≤ 8 KiB}`;
    S→C: `{sender uuid, channel, bytes}`, used by `VibeyNet.channel(...)`). The server just validates sizes/rates and
    relays to every other player that sent `hello`. Since 0.2.0 it also announces peers: on `hello` the newcomer gets
    a (possibly empty) `loadout` of every peer and every peer an empty `loadout` of the newcomer, so clients know who
    runs Vibey Client (nametag icons, see §11). Asset
    bytes never go over the server channel – clients fetch bundles by id from the backend catalog or use built-ins.
+
+**Signed loadouts (protocol 2, after 0.2.0; backend contract: vibe-launcher `docs/VIBE-API-2.md` §6).** The server
+channel is not trusted: a modified client could claim any item. So:
+
+- The backend publishes its Ed25519 key in `GET /api/v1/meta` as `loadoutSigning: {alg: "Ed25519", keyId, publicKey}`
+  (`publicKey` = base64 of the 32 raw bytes, `keyId` = first 8 hex chars of SHA-256 over them) or `null`. The client
+  reads it on login and whenever the menus fetch meta (`backend/LoadoutKeys`), checks `keyId`, and caches it per
+  backend URL in `<game dir>/vibeyclient/cache/loadout-key.json`. `null` (or a backend without the field) removes it.
+  A token with an unknown `kid` triggers a meta refetch (at most every 5 min; key rotation).
+- Our token comes from `GET /api/v1/cosmetics/loadout/signed` → `{token, payload}` and from the `signed` field of the
+  `PUT /api/v1/cosmetics/loadout` answer; it is fetched after every loadout/ownership change and again 30 min before
+  `exp`. 404/501/413/`feature_disabled` = backend without signing → retry every 30 min, nothing breaks.
+  `token = base64url(payloadJson) + "." + base64url(ed25519(payloadJson))`,
+  `payload = {v: 1, kid, uuid, slots: {slot: id|null}, emotes: [id…], iat, exp}`.
+- Wire: `hello` carries the protocol (now **2**). `loadout` = `uuid, varint n, n × (slot, id)` as in protocol 1,
+  followed by `utf(token)` only when a token is attached (≤ 3072 chars on the wire; the backend keeps them ≤ 2 KiB). A
+  tokenless packet is byte-identical to protocol 1 and the decoder reads the token only if bytes are left. Clients
+  attach the token only when the server's hello said ≥ 2; the server strips it for peers whose hello said < 2. Older
+  clients and servers therefore never see the extra bytes (their decoders would reject them).
+- The server relay stores each peer's token with its loadout and forwards it unchanged (also to late joiners); it
+  only checks length and characters (`[A-Za-z0-9_-]*.[A-Za-z0-9_-]*`) plus the existing rate limits. It never
+  verifies signatures.
+- Receivers verify with the JDK's Ed25519 (`net/LoadoutToken`, raw key wrapped as X.509 with prefix
+  `302a300506032b6570032100`): signature over exactly the bytes of the first part, `v == 1`, `kid` = meta key,
+  `uuid` = the player the server says sent it, `exp > now − 5 min`.
+  - **Valid:** the slots of the token `payload` are shown (plus claimed slots whose item is available to everyone).
+    It then competes with the backend loadout of that player (newest wins), as before.
+  - **Missing/invalid/expired or no key:** only claimed items with availability `default` are shown (catalog
+    `default`, or built-in and not overridden by the catalog). The rest is ignored and the player is looked up via
+    `POST /api/v1/cosmetics/lookup` when the backend is available (at most once a minute per player); unverified
+    server data never overrides what the backend says.
+  - **Emotes over the server channel:** `default` emotes always; `granted` emotes only when they are listed under
+    `emotes` in the sender's last valid (not expired) token on this server. Stops always pass. Gateway emotes come
+    from the backend and are not filtered.
 
 Built-in starter bundles also ship inside the jar (`assets/vibeyclient/builtin/*.vibey`) so cosmetics work offline
 and when online features are off (then only visible to yourself and via server packets).
@@ -398,5 +435,8 @@ Contract with the backend: `vibe-launcher/docs/VIBE-API-2.md`. Client side:
   one "New cosmetics available" toast per batch (setting). Catalog `creator` → "by <name>" in the wardrobe (the
   all-zero UUID = deleted user, localised).
 - **Release:** `.github/workflows/release.yml` + `tools/release-manifest.mjs` (exact Minecraft versions per jar in
-  `gradle/mc-versions.json`, checked by `./gradlew checkMcVersions`); files are staged in batches below the proxy
-  limit, then the release is created by sha256.
+  `gradle/mc-versions.json`, checked by `./gradlew checkMcVersions`). CI attaches all jars, `vibey.js` and
+  `vibey-manifest.json` (the §2 manifest plus `sha256`/`size` per file, `file` = asset name, uploaded last) to the
+  GitHub release; the backend imports releases from GitHub (CI never calls vibe.henny.dev: Cloudflare's bot
+  protection blocks GitHub runners). Manual fallback: `release-manifest.mjs --publish` from a dev machine (files
+  staged in batches below the proxy limit, then the release by sha256).

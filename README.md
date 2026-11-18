@@ -12,7 +12,7 @@ modules. Every part is a module you can switch off. **Everything is free.** Ther
 
 ![Minecraft](https://img.shields.io/badge/Minecraft-1.21%E2%80%9326.3-green)
 ![Loader](https://img.shields.io/badge/Loader-Fabric%20%7C%20NeoForge-blue)
-![License](https://img.shields.io/badge/License-MIT-yellow)
+![License](https://img.shields.io/badge/License-Apache--2.0-blue)
 
 | Title screen | Wardrobe |
 |---|---|
@@ -274,21 +274,32 @@ a hosted world accept dev accounts without a Mojang session (for invite tests th
 `ALLOW_OFFLINE=1 DOMAIN=127-0-0-1.nip.io`). None of these exist in release builds.
 
 Default backend (`https://vibe.henny.dev`) and relay are set in `gradle.properties` and baked into the generated
-`BuildInfo` class.
+`BuildInfo` class. They are our services, for official builds only: forks must set their own (see
+[SERVICES.md](https://github.com/vibec-studios/.github/blob/main/SERVICES.md)), and local development uses a local backend/relay.
 
 ### Releases
 
 1. Bump `mod_version` (`gradle.properties`), `version` in `blockbench/package.json` and `VERSION` in `blockbench/vibey.js`;
    add a `## <version>` section to `CHANGELOG.md`. New Minecraft patch versions of a line go into
    `gradle/mc-versions.json` (checked by `./gradlew checkMcVersions`).
-2. Check locally: `./gradlew buildAll`, then `node tools/release-manifest.mjs` prints the manifest for `build/dist`
-   (`node --test tools/release-manifest.test.mjs` for the script itself).
-3. Merge to `main` and publish a GitHub release with tag `v<version>` (`-beta.N` etc. = beta channel). The release
-   text becomes the changelog (empty = the CHANGELOG.md section). `.github/workflows/release.yml` builds all jars,
-   attaches them to the release and publishes to the Vibe backend (files staged in batches below the 100 MB proxy
-   limit, then the release by sha256; secret `CLIENT_PUBLISH_TOKEN`). Re-running is safe (409 = already published).
-   Test against a local backend instead of production: `CLIENT_PUBLISH_TOKEN=<local> node tools/release-manifest.mjs
-   --tag v<version> --publish http://127.0.0.1:<port>/internal/client/v1/releases`.
+2. Check locally: `./gradlew buildAll`, then `node tools/release-manifest.mjs --hashes` prints the manifest for
+   `build/dist` (`node --test tools/release-manifest.test.mjs` for the script itself).
+3. Merge to `main` and publish a GitHub release with tag `v<version>`. A GitHub pre-release or a tag with a `-` suffix
+   (`v0.3.0-beta.1`) goes to the beta channel. The release text becomes the changelog (empty = the CHANGELOG.md
+   section). `.github/workflows/release.yml` builds all jars and attaches them, `vibey.js` and
+   **`vibey-manifest.json`** to the release. CI never contacts the Vibe backend: the backend imports releases from
+   GitHub itself and checks every download against the manifest.
+
+   `vibey-manifest.json` is the VIBE-API-2 §2 manifest plus `sha256` and `size` per file:
+   `{version, channel, changelog, files: [{loader, mcVersions, file, requires, sha256, size}], blockbench: {version,
+   file, sha256, size}}`; `file` is the GitHub asset name. It is uploaded last, so it only appears when all files are
+   there. `blockbench/vibey.js` is hashed as committed (LF; `.gitattributes` keeps it LF on Windows too, and the tool
+   refuses a CRLF copy).
+4. **Fallback** (GitHub import not available): publish from your machine, outside Cloudflare's bot protection for CI:
+   `CLIENT_PUBLISH_TOKEN=… node tools/release-manifest.mjs --tag v<version> --publish
+   https://vibe.henny.dev/internal/client/v1/releases` (files staged in batches below the 100 MB proxy limit, then
+   the release by sha256; exit code 3 = already published). Test against a local backend first
+   (`--publish http://127.0.0.1:<port>/internal/client/v1/releases`). Never commit or print the token.
 
 Layout: common, server-safe code in `dev.henny.vibeyclient` (`Vibey`, `Platform`, `Compat`, `net/`), client core in
 `client/`, the module API in `api/`, UI in `ui/`, the cosmetics/emotes engine in `avatar/`, modules in
@@ -310,12 +321,14 @@ cd ../vibey-multiplayer/relay && ALLOW_OFFLINE=1 PORT=26400 DATA_DIR=/tmp/relayd
 ./gradlew :neoforge-1.21.11:runClient -Dvibeyclient.mpcheck=true -Dvibeyclient.mpcheck.relay=127.0.0.1:26400   # NeoForge screenshots → run/screenshots
 ```
 
-## Credits and licenses
+## Credits
 
-Vibey Client is [MIT](LICENSE) licensed, © Vibe Craft Studios. The seal mascot, wordmark, icons, UI, all starter
-cosmetics and emotes (models, textures, animations, synthesized sounds) are original work.
+The seal mascot, wordmark, icons, UI, all starter cosmetics and emotes (models, textures, animations, synthesized
+sounds) are original work by Vibe Craft Studios. The multiplayer and lyrics modules come from our MIT-licensed
+[Vibey Multiplayer](https://github.com/vibec-studios/vibey-multiplayer) and
+[Vibey Lyrics](https://github.com/vibec-studios/vibey-lyrics) (notices in [`licenses/`](licenses/)).
 
-Bundled third-party parts:
+Bundled third-party parts (details in [NOTICE](NOTICE)):
 
 - **Fonts** of the lyrics module (Fabric jars only): Bebas Neue, Bungee, Caveat, Fredoka, Kanit, Kaushan Script,
   Monoton, Montserrat, Pacifico, Poppins, Press Start 2P and Unbounded under the SIL Open Font License 1.1, Permanent
@@ -327,3 +340,28 @@ Bundled third-party parts:
   demo song.
 
 Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.
+
+## Lizenz / License
+
+**Code:** [Apache License 2.0](LICENSE). Forken, ändern und weitergeben ist erlaubt.
+
+**Nicht** von der Code-Lizenz erfasst (gilt für alle Repos von Vibe Craft Studios,
+[LICENSING.md](https://github.com/vibec-studios/.github/blob/main/LICENSING.md)):
+
+- **Namen und Logos** („Vibe“, „Vibey“, „Vibey Client“, „Vibe Craft Studios“, die Robbe): Forks brauchen einen
+  eigenen Namen, eine eigene Mod-ID und eigene Logos –
+  [TRADEMARKS.md](https://github.com/vibec-studios/.github/blob/main/TRADEMARKS.md).
+- **Grafiken und Modelle** (Logo, Icons, Robbe, Starter-Cosmetics und -Emotes, Texturen, Sounds, Screenshots, der
+  Referenzspieler des Blockbench-Plugins): alle Rechte vorbehalten –
+  [ASSETS-POLICY.md](https://github.com/vibec-studios/.github/blob/main/ASSETS-POLICY.md); Pfade in [NOTICE](NOTICE).
+- **Vibe-Dienste** (Backend `vibe.henny.dev` mit Cosmetics-Katalog, Loadouts und Downloads, Relay
+  `vibey.henny.dev`): nur für offizielle Builds –
+  [SERVICES.md](https://github.com/vibec-studios/.github/blob/main/SERVICES.md).
+
+Code aus *Vibey Multiplayer* und *Vibey Lyrics*, der dort vor dem 18.11.2026 unter MIT veröffentlicht wurde, bleibt
+unter MIT ([`licenses/`](licenses/), Details in [NOTICE](NOTICE)).
+
+*English:* the code is Apache-2.0. Our names and logos, the seal, artwork and models, and the Vibe online services are
+not included: forks must use their own name, artwork and backend. See the linked policies and [NOTICE](NOTICE) for
+the asset paths in this repository. Code from Vibey Multiplayer and Vibey Lyrics that was published under MIT before
+2026-11-18 stays available under MIT (`licenses/`).

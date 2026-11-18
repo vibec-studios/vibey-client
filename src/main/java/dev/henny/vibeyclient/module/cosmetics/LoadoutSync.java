@@ -17,7 +17,10 @@ import dev.henny.vibeyclient.avatar.AvatarStates;
 import dev.henny.vibeyclient.avatar.ItemLoader;
 import dev.henny.vibeyclient.avatar.ItemSource;
 import dev.henny.vibeyclient.avatar.Slot;
+import dev.henny.vibeyclient.backend.BackendClient;
+import dev.henny.vibeyclient.backend.LoadoutKeys;
 import dev.henny.vibeyclient.client.VibeyPlayers;
+import dev.henny.vibeyclient.net.LoadoutToken;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 
@@ -35,6 +38,9 @@ import java.util.function.BiConsumer;
  * Cosmetics sync (SPEC §6/§7): our loadout to the backend ({@code PUT /loadout}, debounced) and to the server
  * channel; other players' loadouts from both (merged per player, newest wins) and their emotes. Players without
  * Vibey simply have no entry. Client thread unless noted.
+ * <p>Signed loadouts (SPEC §6, VIBE-API-2 §6): the server channel is not trusted. We send our backend-signed token
+ * with our loadout; for other players only the slots of a valid token count (plus items everyone has). Without a
+ * valid token only {@code default} items are shown and the rest is looked up on the backend.
  */
 public final class LoadoutSync {
     private final CosmeticsModule module;
@@ -42,8 +48,30 @@ public final class LoadoutSync {
     /** Loadouts of other players by source. */
     private record Remote(Map<String, String> slots, long time) {}
 
+    /**
+     * A server channel loadout: the slots the other client claims, its token and the verified token payload (null =
+     * missing/invalid).
+     */
+    private record ServerRemote(Map<String, String> claimed, String token, LoadoutToken.Verified verified, long time) {}
+
     private final Map<UUID, Remote> fromBackend = new HashMap<>();
-    private final Map<UUID, Remote> fromServer = new HashMap<>();
+    private final Map<UUID, ServerRemote> fromServer = new HashMap<>();
+    /** Last valid token per player on this server (its {@code emotes} gate their server-channel emotes). */
+    private final Map<UUID, LoadoutToken.Verified> lastValid = new HashMap<>();
+    /** Players whose server loadout had unproven items: look them up on the backend (once a minute at most). */
+    private final Set<UUID> lookupNeeded = new HashSet<>();
+    private final Map<UUID, Long> lookedUp = new HashMap<>();
+    private final Set<String> loggedFailures = new HashSet<>();
+    private int keyVersion = -1;
+
+    // our own signed token
+    private String ownToken = "";
+    private long ownTokenExp;
+    private long nextTokenFetch;
+    private boolean tokenFetching;
+    /** The backend answered 404 & co. for signed loadouts (not deployed yet): do not ask after every PUT. */
+    private boolean signingMissing;
+    private long nextMetaFetch;
 
     // backend session
     private VibeBackend backend;
@@ -87,6 +115,11 @@ public final class LoadoutSync {
         if (b != backend) attach(b);
         if (backend != null && backend.isReady() && !meLoaded) loadMe();
         if (pushPending && canPush()) pushLoadout();
+        if (LoadoutKeys.version() != keyVersion) {
+            keyVersion = LoadoutKeys.version();
+            reverifyAll();
+        }
+        if (backendReady() && ownedKnown && !tokenFetching && System.currentTimeMillis() >= nextTokenFetch && tokenDue()) fetchToken();
         if (++tickCounter % 40 == 0) updateSubscriptions();
         applyRemotes();
     }
@@ -106,6 +139,15 @@ public final class LoadoutSync {
         subscribed = Set.of();
         nextFullLookup = 0;
         fromBackend.clear();
+        lookedUp.clear();
+        boolean hadToken = !ownToken.isEmpty();
+        ownToken = "";
+        ownTokenExp = 0;
+        nextTokenFetch = 0;
+        tokenFetching = false;
+        signingMissing = false;
+        nextMetaFetch = 0;
+        if (hadToken && VibeyNet.available()) VibeyNet.sendLoadout(module.sharedSlots(), "");
         VibeyPlayers.clearBackend();
         if (b == null) return;
         listeners.add(b.onEvent("loadout.updated", d -> {
@@ -146,6 +188,7 @@ public final class LoadoutSync {
             if (o.get("owned") instanceof JsonArray a) for (JsonElement e : a) if (e.isJsonPrimitive()) own.add(e.getAsString());
             Set<String> fresh = new HashSet<>(own);
             fresh.removeAll(owned);
+            if (!own.equals(owned)) nextTokenFetch = 0; // granted emotes are part of the signed token
             owned = own;
             fresh.removeIf(id -> {
                 AvatarItem i = AvatarItems.get(id, ItemSource.CATALOG);
@@ -158,6 +201,7 @@ public final class LoadoutSync {
     private void loadMe() {
         meLoaded = true;
         VibeBackend b = backend;
+        fetchMeta();
         b.request("GET", "/api/v1/cosmetics/me", null).whenComplete((res, err) -> Tasks.onMain(() -> {
             if (b != backend) return;
             if (err != null) {
@@ -182,7 +226,8 @@ public final class LoadoutSync {
 
     /** Debounced PUT of our loadout (only items the backend knows we own). */
     void loadoutChanged() {
-        if (VibeyNet.available()) VibeyNet.sendLoadout(module.sharedSlots());
+        // the current token still describes the old loadout until the PUT answers with a new one (then we resend)
+        if (VibeyNet.available()) VibeyNet.sendLoadout(module.sharedSlots(), ownToken());
         if (backendReady()) Tasks.debounce("vibeyclient:cosmetics:put", 1200, () -> Tasks.onMain(this::pushLoadout));
     }
 
@@ -218,10 +263,135 @@ public final class LoadoutSync {
             wheel.add(item != null && canUse(item) ? new JsonPrimitive(id) : com.google.gson.JsonNull.INSTANCE);
         }
         body.add("emoteWheel", wheel);
-        backend.request("PUT", "/api/v1/cosmetics/loadout", body).whenComplete((r, e) -> {
+        VibeBackend b = backend;
+        b.request("PUT", "/api/v1/cosmetics/loadout", body).whenComplete((r, e) -> {
             if (e != null) Vibey.LOG.info("Loadout upload failed: {}", e.toString());
-            else Tasks.onMain(module::markSynced);
+            else Tasks.onMain(() -> {
+                module.markSynced();
+                if (b != backend) return;
+                // VIBE-API-2 §6: the PUT answers with a fresh signed token (older backends: fetch it separately)
+                if ((!(r instanceof JsonObject o) || !adoptToken(o.get("signed"))) && !signingMissing) nextTokenFetch = 0;
+            });
         });
+    }
+
+    // ============================================================================================ signed loadouts
+
+    /** Our current signed token ("" = none or expired). */
+    String ownToken() {
+        return !ownToken.isEmpty() && ownTokenExp > System.currentTimeMillis() / 1000 ? ownToken : "";
+    }
+
+    private boolean tokenDue() {
+        return ownToken.isEmpty() || ownTokenExp - System.currentTimeMillis() / 1000 < LoadoutToken.REFRESH_BEFORE_SECONDS;
+    }
+
+    /** {@code GET /cosmetics/loadout/signed}; 404 (backend without signing) → try again in 30 minutes. */
+    private void fetchToken() {
+        tokenFetching = true;
+        VibeBackend b = backend;
+        b.request("GET", "/api/v1/cosmetics/loadout/signed", null).whenComplete((res, err) -> Tasks.onMain(() -> {
+            if (b != backend) return;
+            tokenFetching = false;
+            long now = System.currentTimeMillis();
+            if (err != null) {
+                VibeBackend.ApiException ae = BackendClient.unwrap(err);
+                boolean unsupported = ae.status == 404 || ae.status == 501 || ae.status == 413 || "feature_disabled".equals(ae.code);
+                if (unsupported) Vibey.LOG.debug("Signed loadouts not available on this backend ({})", ae.status);
+                else Vibey.LOG.info("Signed loadout fetch failed: {}", ae.getMessage());
+                nextTokenFetch = now + (unsupported ? 30 * 60_000L : 60_000L);
+                signingMissing = unsupported;
+                return;
+            }
+            signingMissing = false;
+            if (!adoptToken(res)) nextTokenFetch = now + 5 * 60_000L;
+        }));
+    }
+
+    /** Takes {@code {token, payload}} and resends our loadout with it. False if there is no usable token. */
+    private boolean adoptToken(JsonElement e) {
+        if (!(e instanceof JsonObject o) || !(o.get("token") instanceof JsonPrimitive t) || !t.isString()) return false;
+        String token = t.getAsString();
+        LoadoutToken.Verified p = LoadoutToken.peek(token);
+        if (p == null) {
+            Vibey.LOG.warn("Backend sent an unreadable signed loadout token");
+            return false;
+        }
+        if (p.exp() <= System.currentTimeMillis() / 1000) return false;
+        boolean changed = !token.equals(ownToken);
+        ownToken = token;
+        ownTokenExp = p.exp();
+        // refresh 30 minutes before exp, but never more often than once a minute
+        nextTokenFetch = Math.max(System.currentTimeMillis() + 60_000L, (p.exp() - LoadoutToken.REFRESH_BEFORE_SECONDS) * 1000L);
+        if (changed && VibeyNet.available()) VibeyNet.sendLoadout(module.sharedSlots(), ownToken());
+        return true;
+    }
+
+    /** Signing key from {@code /api/v1/meta} (also when a token names a key we do not know: key rotation). */
+    private void fetchMeta() {
+        if (backend == null || System.currentTimeMillis() < nextMetaFetch) return;
+        nextMetaFetch = System.currentTimeMillis() + 5 * 60_000L;
+        VibeBackend b = backend;
+        b.request("GET", "/api/v1/meta", null).whenComplete((res, err) -> {
+            if (err == null && res != null) LoadoutKeys.fromMeta(b.baseUrl(), res);
+        });
+    }
+
+    private ServerRemote verify(UUID player, Map<String, String> claimed, String token, long time) {
+        LoadoutToken.Result res = LoadoutToken.verify(token, LoadoutKeys.current(), player, System.currentTimeMillis() / 1000);
+        if (res.ok()) {
+            lastValid.put(player, res.token());
+            return new ServerRemote(claimed, token, res.token(), time);
+        }
+        LoadoutToken.Failure f = res.failure();
+        if (f == LoadoutToken.Failure.WRONG_KID || f == LoadoutToken.Failure.NO_KEY) fetchMeta();
+        if (loggedFailures.add(player + "/" + f)) {
+            boolean suspicious = f == LoadoutToken.Failure.BAD_SIGNATURE || f == LoadoutToken.Failure.WRONG_UUID || f == LoadoutToken.Failure.MALFORMED;
+            if (suspicious) Vibey.LOG.info("Ignoring the loadout token of {} ({})", player, f);
+            else Vibey.LOG.debug("No valid loadout token for {} ({})", player, f);
+        }
+        for (String id : claimed.values()) {
+            if (!id.isEmpty() && !isDefault(id)) {
+                lookupNeeded.add(player);
+                break;
+            }
+        }
+        return new ServerRemote(claimed, token, null, time);
+    }
+
+    /** A new signing key: check all stored tokens again. */
+    private void reverifyAll() {
+        lastValid.clear();
+        for (Map.Entry<UUID, ServerRemote> e : fromServer.entrySet()) {
+            ServerRemote r = e.getValue();
+            e.setValue(verify(e.getKey(), r.claimed(), r.token(), r.time()));
+        }
+    }
+
+    /** Items everyone has: {@code default} in the catalog, or built in (and not overridden by the catalog). */
+    public static boolean isDefault(String id) {
+        if (id == null || id.isEmpty()) return false;
+        AvatarItem c = AvatarItems.get(id, ItemSource.CATALOG);
+        if (c != null) return "default".equals(c.availability());
+        return AvatarItems.get(id, ItemSource.BUILTIN) != null;
+    }
+
+    /**
+     * A server-channel emote of {@code player}: {@code default} emotes always, granted ones only when they are in the
+     * player's last valid token (SPEC §6).
+     */
+    public boolean allowServerEmote(UUID player, String emoteId) {
+        if (isDefault(emoteId)) return true;
+        LoadoutToken.Verified v = lastValid.get(player);
+        return v != null && v.live(System.currentTimeMillis() / 1000) && v.emotes().contains(emoteId);
+    }
+
+    /** The slots a server-channel loadout may show: a valid token's slots, plus claimed items everyone has. */
+    private static Map<String, String> effective(ServerRemote r, long nowS) {
+        Map<String, String> out = new HashMap<>();
+        for (Map.Entry<String, String> e : r.claimed().entrySet()) if (isDefault(e.getValue())) out.put(e.getKey(), e.getValue());
+        if (r.verified() != null && r.verified().live(nowS)) out.putAll(r.verified().slots());
+        return out;
     }
 
     /** Our emote to everybody: gateway op + server channel. */
@@ -254,7 +424,14 @@ public final class LoadoutSync {
         // look everybody up again every ~2 minutes (jittered so many clients do not hit the backend together).
         long ms = System.currentTimeMillis();
         boolean full = ms >= nextFullLookup;
-        if (now.equals(subscribed) && !full) return;
+        // players whose server-channel loadout had items without a valid token (at most once a minute each)
+        Set<UUID> unproven = new LinkedHashSet<>();
+        for (UUID u : lookupNeeded) {
+            Long last = lookedUp.get(u);
+            if (last == null || ms - last > 60_000) unproven.add(u);
+        }
+        lookupNeeded.clear();
+        if (now.equals(subscribed) && !full && unproven.isEmpty()) return;
         List<String> lookup = new ArrayList<>();
         if (full) {
             nextFullLookup = ms + 120_000 + java.util.concurrent.ThreadLocalRandom.current().nextInt(30_000);
@@ -262,6 +439,10 @@ public final class LoadoutSync {
             for (UUID u : now) lookup.add(u.toString());
         } else {
             for (UUID u : now) if (!subscribed.contains(u)) lookup.add(u.toString());
+        }
+        for (UUID u : unproven) {
+            lookedUp.put(u, ms);
+            if (!lookup.contains(u.toString())) lookup.add(u.toString());
         }
         if (!now.equals(subscribed)) {
             subscribed = now;
@@ -303,15 +484,23 @@ public final class LoadoutSync {
         return out;
     }
 
-    /** Server channel loadout (newest wins against the backend). */
-    void serverLoadout(UUID player, Map<String, String> slots) {
+    /**
+     * Server channel loadout. With a valid token it competes with the backend (newest wins); without one it only
+     * shows items everyone has and never replaces what the backend says about the player.
+     */
+    void serverLoadout(UUID player, Map<String, String> slots, String token) {
         if (player.equals(module.selfId())) return;
-        if (slots.isEmpty()) fromServer.remove(player);
-        else fromServer.put(player, new Remote(Map.copyOf(slots), System.currentTimeMillis()));
+        if (slots.isEmpty() && (token == null || token.isEmpty())) {
+            fromServer.remove(player);
+            return;
+        }
+        fromServer.put(player, verify(player, Map.copyOf(slots), token == null ? "" : token, System.currentTimeMillis()));
     }
 
     void worldLeft() {
         fromServer.clear();
+        lastValid.clear();
+        lookupNeeded.clear();
         subscribed = Set.of();
         if (backendReady()) {
             JsonObject sub = new JsonObject();
@@ -324,12 +513,18 @@ public final class LoadoutSync {
     private void applyRemotes() {
         Set<UUID> ids = new HashSet<>(fromBackend.keySet());
         ids.addAll(fromServer.keySet());
+        long nowS = System.currentTimeMillis() / 1000;
         for (UUID id : ids) {
-            Remote a = fromBackend.get(id), b = fromServer.get(id);
-            Remote r = a == null ? b : b == null ? a : (a.time >= b.time ? a : b);
+            Remote a = fromBackend.get(id);
+            ServerRemote b = fromServer.get(id);
+            Map<String, String> slots;
+            if (b == null) slots = a.slots;
+            else if (a == null) slots = effective(b, nowS);
+            else if (b.verified() != null && b.verified().live(nowS) && b.time() > a.time) slots = effective(b, nowS);
+            else slots = a.slots; // unproven server data never overrides the backend
             AvatarState st = AvatarStates.get(id);
             java.util.Arrays.fill(st.slots, null);
-            for (Map.Entry<String, String> e : r.slots.entrySet()) {
+            for (Map.Entry<String, String> e : slots.entrySet()) {
                 Slot s = Slot.of(e.getKey());
                 if (s != null) st.slots[s.ordinal()] = e.getValue();
             }

@@ -9,8 +9,13 @@ import java.util.regex.Pattern;
 public final class NetLimits {
     private NetLimits() {}
 
-    /** Bumped on incompatible changes; the server answers hello with its own version. */
-    public static final int PROTOCOL = 1;
+    /**
+     * Bumped on wire changes; the server answers hello with its own version. Both sides only send what the other
+     * side's version can read: 2 = {@code loadout} may carry a signed token after the slots.
+     */
+    public static final int PROTOCOL = 2;
+    /** First protocol whose {@code loadout} packets carry the signed token ({@link LoadoutToken}). */
+    public static final int PROTOCOL_TOKEN = 2;
 
     public static final int MAX_SLOTS = 16;
     public static final int MAX_SLOT_NAME = 32;
