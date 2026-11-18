@@ -5,15 +5,15 @@ import dev.henny.vibeyclient.api.ModuleManager;
 import dev.henny.vibeyclient.api.Services;
 import dev.henny.vibeyclient.api.event.Events;
 import dev.henny.vibeyclient.api.service.HostingService;
-import dev.henny.vibeyclient.module.lyrics.LyricsConfig;
-import dev.henny.vibeyclient.module.lyrics.LyricsModule;
-import dev.henny.vibeyclient.module.lyrics.Playback;
-import dev.henny.vibeyclient.module.lyrics.library.Song;
-import dev.henny.vibeyclient.module.lyrics.library.SongLibrary;
-import dev.henny.vibeyclient.module.lyrics.render.WorldLyrics;
-import dev.henny.vibeyclient.module.lyrics.screen.AdvancedScreen;
-import dev.henny.vibeyclient.module.lyrics.screen.LyricsScreen;
-import dev.henny.vibeyclient.module.lyrics.screen.SearchScreen;
+import dev.henny.vibeyclient.module.media.lyrics.LyricsConfig;
+import dev.henny.vibeyclient.module.media.lyrics.LyricsFeature;
+import dev.henny.vibeyclient.module.media.lyrics.Playback;
+import dev.henny.vibeyclient.module.media.lyrics.library.Song;
+import dev.henny.vibeyclient.module.media.lyrics.library.SongLibrary;
+import dev.henny.vibeyclient.module.media.lyrics.render.WorldLyrics;
+import dev.henny.vibeyclient.module.media.lyrics.screen.AdvancedScreen;
+import dev.henny.vibeyclient.module.media.lyrics.screen.LyricsScreen;
+import dev.henny.vibeyclient.module.media.lyrics.screen.SearchScreen;
 import dev.henny.vibeyclient.module.multiplayer.MultiplayerModule;
 import dev.henny.vibeyclient.module.multiplayer.host.HostSession;
 import dev.henny.vibeyclient.module.multiplayer.screen.AdminScreen;
@@ -63,7 +63,8 @@ public final class MultiplayerLyricsGameTest implements FabricClientGameTest {
             ModuleManager mm = ModuleManager.get();
             GlobalSettings.language.set(GlobalSettings.Language.ENGLISH);
             if (!mm.isEnabled("multiplayer")) throw new AssertionError("multiplayer should be on: " + mm.get("multiplayer").status());
-            if (!mm.isEnabled("lyrics")) throw new AssertionError("lyrics should be on: " + mm.get("lyrics").status());
+            if (!mm.isEnabled("media")) throw new AssertionError("media should be on: " + mm.get("media").status());
+            if (!LyricsFeature.running()) throw new AssertionError("lyrics part of media should run: " + dev.henny.vibeyclient.module.media.MediaModule.instance().describe());
             HostingService hs = Services.get(HostingService.class).orElseThrow(() -> new AssertionError("HostingService missing"));
             if (hs.canHost()) throw new AssertionError("canHost on the title screen");
             Events.subscribe(HostingService.HostingChanged.class, events::add);
@@ -79,7 +80,7 @@ public final class MultiplayerLyricsGameTest implements FabricClientGameTest {
         context.setScreen(() -> new VibeyScreen(null));
         context.waitTicks(10);
         context.takeScreenshot("mp_1_settings");
-        ModulesPanel.preselect("lyrics");
+        ModulesPanel.preselect("media");
         context.setScreen(() -> new VibeyScreen(null));
         context.waitTicks(10);
         context.takeScreenshot("ly_1_settings");
@@ -112,8 +113,8 @@ public final class MultiplayerLyricsGameTest implements FabricClientGameTest {
         context.runOnClient(mc -> {
             GlobalSettings.language.set(GlobalSettings.Language.ENGLISH);
             ModuleManager mm = ModuleManager.get();
-            for (String id : new String[]{"multiplayer", "lyrics"}) {
-                boolean expect = id.equals("multiplayer") ? mp : ly;
+            for (String id : new String[]{"multiplayer"}) {
+                boolean expect = mp;
                 var m = mm.get(id);
                 System.out.println("[vibeyclient-conflict-test] " + id + ": " + m.status() + " (" + m.statusReason() + ")");
                 if (expect && (m.status() != Status.CONFLICT || m.isEnabled())) throw new AssertionError(id + " should be in conflict, is " + m.status());
@@ -122,10 +123,15 @@ public final class MultiplayerLyricsGameTest implements FabricClientGameTest {
             if (mp && (Services.get(HostingService.class).isPresent() || MultiplayerModule.instance() != null)) {
                 throw new AssertionError("multiplayer module loaded although Vibey Multiplayer is installed");
             }
-            if (ly && LyricsModule.instance() != null) throw new AssertionError("lyrics module loaded although Vibey Lyrics is installed");
+            // Vibey Lyrics replaces only the lyrics part: Media itself stays on, the lyrics part is off with a reason.
+            var media = dev.henny.vibeyclient.module.media.MediaModule.instance();
+            System.out.println("[vibeyclient-conflict-test] media: " + mm.get("media").status() + " parts: " + media.describe() + " notices: " + media.notices());
+            if (ly && !mm.isEnabled("media")) throw new AssertionError("media should stay on with Vibey Lyrics installed");
+            if (ly && (LyricsFeature.instance().usable() || LyricsFeature.running())) throw new AssertionError("lyrics part runs although Vibey Lyrics is installed");
+            if (ly && media.notices().isEmpty()) throw new AssertionError("no notice about the lyrics conflict");
             for (var k : mc.options.keyMappings) {
                 String name = k.getName();
-                if ((mp && name.startsWith("key.vibeyclient.multiplayer.")) || (ly && name.startsWith("key.vibeyclient.lyrics."))) {
+                if ((mp && name.startsWith("key.vibeyclient.multiplayer.")) || (ly && name.startsWith("key.vibeyclient.media.lyrics."))) {
                     throw new AssertionError("Keybind of a module in conflict registered: " + name);
                 }
             }
@@ -148,10 +154,10 @@ public final class MultiplayerLyricsGameTest implements FabricClientGameTest {
         context.setScreen(() -> new VibeyScreen(null));
         context.waitTicks(10);
         context.takeScreenshot("conflict_1_menu_multiplayer");
-        ModulesPanel.preselect("lyrics");
+        ModulesPanel.preselect("media");
         context.setScreen(() -> new VibeyScreen(null));
         context.waitTicks(10);
-        context.takeScreenshot("conflict_2_menu_lyrics");
+        context.takeScreenshot("conflict_2_menu_media");
         context.setScreen(() -> null);
         try (TestSingleplayerContext world = context.worldBuilder().create()) {
             world.getClientWorld().waitForChunksRender();
@@ -361,8 +367,8 @@ public final class MultiplayerLyricsGameTest implements FabricClientGameTest {
         run(context, mc -> {
             LyricsConfig.get().sky = "galaxy";
             LyricsConfig.get().position = LyricsConfig.Position.SKY;
-            ModuleManager.get().setEnabled("lyrics", false);
-            if (LyricsModule.running() || Playback.isPlaying()) throw new AssertionError("lyrics still running after disable");
+            ModuleManager.get().setEnabled("media", false);
+            if (LyricsFeature.running() || Playback.isPlaying()) throw new AssertionError("lyrics still running after disable");
         });
         long before = context.computeOnClient(mc -> WorldLyrics.drawnFrames);
         context.waitTicks(10);
@@ -370,7 +376,7 @@ public final class MultiplayerLyricsGameTest implements FabricClientGameTest {
         long after = context.computeOnClient(mc -> WorldLyrics.drawnFrames);
         if (after != before) throw new AssertionError("World lyrics drawn while the module is off");
         run(context, mc -> {
-            ModuleManager.get().setEnabled("lyrics", true);
+            ModuleManager.get().setEnabled("media", true);
             LyricsConfig.get().sky = "vanilla";
             Playback.play(demo());
         });

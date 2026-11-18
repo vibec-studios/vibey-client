@@ -18,7 +18,7 @@ import java.util.function.IntConsumer;
  * One square card in the middle of the screen, drawn by hand in immediate mode: every frame lays everything out again
  * and records the clickable areas for the next click. Subclasses fill the header, a scrollable body and a footer.
  * Used by the multiplayer and lyrics modules (ported from Vibey Multiplayer / Vibey Lyrics, in the Vibe colors).
- * Texts given to {@link #row} are i18n keys relative to the prefix passed to the constructor (e.g. "lyrics.").
+ * Texts given to {@link #row} are i18n keys relative to the prefix passed to the constructor (e.g. "media.lyrics.").
  */
 public abstract class CardScreen extends BaseScreen {
     // Palette: the Vibe design tokens (Theme), square corners, 1 px lines.
@@ -45,7 +45,7 @@ public abstract class CardScreen extends BaseScreen {
     private record Hit(int x, int y, int w, int h, int button, Runnable action) {}
 
     protected final Screen parent;
-    /** i18n prefix of the owning module, e.g. "lyrics." */
+    /** i18n prefix of the owning module, e.g. "media.lyrics." */
     protected final String i18n;
     private final List<Hit> hits = new ArrayList<>();
     private final Map<String, Float> anim = new HashMap<>();

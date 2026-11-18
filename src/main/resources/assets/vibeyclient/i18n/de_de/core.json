@@ -151,5 +151,18 @@
     "privacyOff": "Aus: Vibey verbindet sich mit nichts.",
     "licenses": "Lizenzen",
     "mojang": "Kein offizielles Minecraft-Produkt. Nicht von Mojang oder Microsoft genehmigt oder mit ihnen verbunden."
+  },
+  "hud": {
+    "title": "HUD-Editor",
+    "done": "Fertig",
+    "cancel": "Abbrechen",
+    "resetAll": "Alles zurücksetzen",
+    "reset": "Zurücksetzen",
+    "hide": "Ausblenden",
+    "show": "Einblenden",
+    "hidden": "Ausgeblendet",
+    "empty": "Noch nichts zum Platzieren.",
+    "hint": "Ziehen zum Verschieben · Ecke oder Mausrad zum Skalieren · Rechtsklick setzt zurück · Strg: frei platzieren",
+    "hintEmpty": "Schalte ein Modul mit HUD-Elementen ein (z. B. Medien), um sie hier zu platzieren."
   }
 }

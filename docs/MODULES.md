@@ -20,9 +20,9 @@ src/main/resources/
     assets/vibeyclient/lang/{en_us,de_de}.json  only keybind names (shared file, add your lines)
 ```
 
-Existing stubs: `social`, `cosmetics`, `emotes`, `multiplayer` (conflicts with mod id `vibey`), `lyrics`
-(conflicts with `vibeylyrics`, Fabric only: the package is excluded from the NeoForge build and not registered
-there), `devlink`, `nametags` (seal + badge glyphs before player names; data in `client/VibeyPlayers`).
+Existing stubs: `social`, `cosmetics`, `emotes`, `multiplayer` (conflicts with mod id `vibey`), `media` (Fabric
+only: the package is excluded from the NeoForge build and not registered there; its parts are *media features*, the
+`lyrics` part conflicts with `vibeylyrics` – see [MEDIA.md](MEDIA.md)), `devlink`, `nametags` (seal + badge glyphs before player names; data in `client/VibeyPlayers`).
 
 ## Client only
 
@@ -67,7 +67,8 @@ logged (first 3 per module), they do not crash the game.
 
 Other knobs on `VibeyModule`: `nameKey()`/`descriptionKey()` (default `<id>.name`, `<id>.description`),
 `icon()` (texture id or null for a monogram tile), `accentColor()`, `visible()` (social hides itself while online
-features are off), `canToggle()`, `createSettingsPanel()` (custom page instead of the generated one).
+features are off), `canToggle()`, `createSettingsPanel()` (custom page instead of the generated one), `notices()`
+(warning lines on the settings page, e.g. "Lyrics: provided by the installed Vibey Lyrics").
 
 Look modules up with `ModuleManager.get().get(EmotesModule.class)` or `.get("emotes")`, check `isEnabled()`.
 
@@ -88,7 +89,10 @@ thread) and rendered automatically in the Vibey menu.
 | `action(key, runnable)` | `ActionSetting` | button |
 
 Every setting: `get()`, `set(v)` (clamped, listeners fire, save scheduled), `reset()`, `.onChange(v -> ...)`,
-`.advanced()` (shown under "Advanced"), `.visibleWhen(() -> ...)`.
+`.advanced()` (shown under "Advanced"), `.visibleWhen(() -> ...)`, `.labelKey("full.i18n.key")` (label from another
+file, used by media features). Settings added after the file was read still get their stored value; keys the
+current run doesn't declare are kept in the file. Keybinds: `.skipRegistration()` keeps one out of the controls
+screen (a part that is off because a standalone mod provides it).
 
 Labels come from your i18n file: `setting.<key>` (label), `setting.<key>.desc` (optional second line),
 `setting.<key>.<enum value lower case>` for enum values, `setting.<key>.button` for action buttons.
@@ -202,6 +206,12 @@ Use `tr("key", args...)` in a module (= `Lang.tr("<id>.key")`), `Lang.tr(fullKey
 the global setting (auto = game language). Every user-facing string needs both languages. Vanilla lang files are
 only for keybind names/categories and mod menu text.
 
+## HUD elements
+
+Anything a module draws on the HUD that players may want elsewhere should be a `HudElement` (`ui/hud`), so it shows
+up in the HUD editor: register it once (`HudLayout.register(HudElement.builder("<module>.<name>")...build())`) and
+draw it with `HudLayout.draw(g, element)` from `renderHud`. See [UI.md](UI.md#hud-editor).
+
 ## UI
 
 Design rules, title screen / pause menu entries (`MenuEntries`), the player preview service (`MenuPreview`),
@@ -231,7 +241,9 @@ One config per module: `vibeyclient.<id>.mixins.json`, package `dev.henny.vibeyc
 `dev.henny.vibeyclient.mixin.VibeyMixinPlugin`. Put client mixins in `"client"`, common ones in `"mixins"`.
 The plugin skips all mixins of a module when its conflicting standalone mod is installed (`ModConflicts`).
 New conflicts: add them to `ModConflicts` (read before the game starts) – `conflictingMods()` uses it by default.
-The lyrics config is not listed in `neoforge.mods.toml` and excluded from the NeoForge jar.
+The media configs (`vibeyclient.media.*.mixins.json`) are not listed in `neoforge.mods.toml` and excluded from the
+NeoForge jar. A part of a module can have its own config: the plugin checks `ModConflicts.of("<module>")` and
+`ModConflicts.of("<module>.<part>")` for `dev.henny.vibeyclient.module.<module>.<part>.mixin`.
 
 ## Version-specific code
 

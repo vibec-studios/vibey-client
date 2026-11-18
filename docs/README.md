@@ -18,6 +18,7 @@ Start with the [main README](../README.md) for what Vibey Client is, installatio
 | [MODULES.md](MODULES.md) | Writing a module: lifecycle, settings, keybinds, network channel, events, services, backend access, toasts, i18n, mixins, version-specific code. |
 | [UI.md](UI.md) | Design rules, screens (title, onboarding, Vibey menu, pause row), extension points (tabs, menu entries, title preview), widgets, UI tests. |
 | [AVATAR.md](AVATAR.md) | The cosmetics and emotes engine: packages, services, render path per Minecraft version, coordinates, tests. |
+| [VIDEO.md](VIDEO.md) | Video screens (Fabric 1.21.11): placing, players (FFmpeg / MCEF Modern), setup prompts, sharing, wiring into the Media module. Research and licences: [VIDEO-RESEARCH.md](VIDEO-RESEARCH.md). |
 | [../blockbench/README.md](../blockbench/README.md) | Developing the Blockbench plugin: tests, mock game server, code layout. |
 
 How they fit together:
@@ -30,7 +31,7 @@ How they fit together:
                               └──► Vibe backend catalog ──────┘ (SPEC §7)
 
  game: core + module API (MODULES.md) + Vibe UI (UI.md)
-       modules: social · cosmetics · emotes · multiplayer · lyrics (Fabric) · devlink
+       modules: social · cosmetics · emotes · multiplayer · media (Fabric: lyrics & skies, video) · devlink
 ```
 
 ## Screenshots
