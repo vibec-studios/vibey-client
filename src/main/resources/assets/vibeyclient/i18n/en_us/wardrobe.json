@@ -1,0 +1,73 @@
+{
+  "tab": "Wardrobe",
+  "title": "Wardrobe",
+  "items": "{0} items",
+  "search": "Search…",
+  "categories": "Categories",
+  "category": {
+    "cape": "Capes",
+    "wings": "Wings",
+    "aura": "Auras",
+    "pet": "Pets",
+    "shield": "Shields",
+    "hat": "Hats",
+    "back": "Back",
+    "emotes": "Emotes"
+  },
+  "rarity": {
+    "common": "Common",
+    "rare": "Rare",
+    "epic": "Epic",
+    "legendary": "Legendary"
+  },
+  "equipped": "Equipped",
+  "tryingOn": "Trying on",
+  "locked": "Locked",
+  "unavailable": "Cosmetics are switched off. Turn the module on to equip items.",
+  "info": {
+    "none": "Nothing equipped",
+    "noEmote": "Pick an emote"
+  },
+  "empty": {
+    "title": "No items yet",
+    "hint": "Cosmetics and emotes show up here as soon as they are loaded.",
+    "offline": "Online features are off, so only built-in items are available.",
+    "disconnected": "Not connected to Vibe. Built-in items appear once they are loaded.",
+    "search": "Nothing matches \"{0}\"",
+    "searchHint": "Try another name or tag.",
+    "category": "Nothing here yet",
+    "categoryHint": "New items for this slot will show up here.",
+    "categoryEmotes": "New emotes will show up here.",
+    "emotes": "No emotes yet"
+  },
+  "preview": {
+    "emote": "Preview emote",
+    "stop": "Stop",
+    "reset": "Reset view",
+    "unavailable": "Preview unavailable",
+    "hint": "Drag to rotate"
+  },
+  "wheel": {
+    "title": "Emote wheel",
+    "edit": "Edit wheel",
+    "assigned": "{0}/8 assigned",
+    "hintAssign": "Assign emotes in the wardrobe",
+    "release": "Release to play",
+    "click": "Click to play",
+    "empty": "Empty slot",
+    "emptyClick": "Click to assign",
+    "pick": "Point at an emote",
+    "cancel": "Esc / right click: cancel",
+    "editorHint1": "Click a slot, then an emote.",
+    "editorHint2": "Right click a slot to clear it.",
+    "clear": "Clear all",
+    "done": "Done",
+    "slot": "Slot {0}",
+    "unavailable": "Emotes are switched off."
+  },
+  "panel": {
+    "description": "Capes, wings, auras, pets and emotes. Everything is free.",
+    "open": "Open wardrobe",
+    "loadout": "Loadout"
+  }
+}

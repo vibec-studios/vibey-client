@@ -1,0 +1,73 @@
+{
+  "tab": "Garderobe",
+  "title": "Garderobe",
+  "items": "{0} Items",
+  "search": "Suchen…",
+  "categories": "Kategorien",
+  "category": {
+    "cape": "Umhänge",
+    "wings": "Flügel",
+    "aura": "Auren",
+    "pet": "Begleiter",
+    "shield": "Schilde",
+    "hat": "Hüte",
+    "back": "Rücken",
+    "emotes": "Emotes"
+  },
+  "rarity": {
+    "common": "Gewöhnlich",
+    "rare": "Selten",
+    "epic": "Episch",
+    "legendary": "Legendär"
+  },
+  "equipped": "Angelegt",
+  "tryingOn": "Anprobe",
+  "locked": "Gesperrt",
+  "unavailable": "Kosmetik ist ausgeschaltet. Schalte das Modul ein, um Items anzulegen.",
+  "info": {
+    "none": "Nichts angelegt",
+    "noEmote": "Emote auswählen"
+  },
+  "empty": {
+    "title": "Noch keine Items",
+    "hint": "Kosmetik und Emotes erscheinen hier, sobald sie geladen sind.",
+    "offline": "Online-Funktionen sind aus, deshalb gibt es nur eingebaute Items.",
+    "disconnected": "Nicht mit Vibe verbunden. Eingebaute Items erscheinen, sobald sie geladen sind.",
+    "search": "Nichts passt zu „{0}“",
+    "searchHint": "Versuch einen anderen Namen oder Tag.",
+    "category": "Hier ist noch nichts",
+    "categoryHint": "Neue Items für diesen Platz erscheinen hier.",
+    "categoryEmotes": "Neue Emotes erscheinen hier.",
+    "emotes": "Noch keine Emotes"
+  },
+  "preview": {
+    "emote": "Emote ansehen",
+    "stop": "Stopp",
+    "reset": "Zurücksetzen",
+    "unavailable": "Vorschau nicht verfügbar",
+    "hint": "Ziehen zum Drehen"
+  },
+  "wheel": {
+    "title": "Emote-Rad",
+    "edit": "Rad bearbeiten",
+    "assigned": "{0}/8 belegt",
+    "hintAssign": "Weise Emotes in der Garderobe zu",
+    "release": "Loslassen zum Abspielen",
+    "click": "Klicken zum Abspielen",
+    "empty": "Leerer Platz",
+    "emptyClick": "Klicken zum Zuweisen",
+    "pick": "Zeig auf ein Emote",
+    "cancel": "Esc / Rechtsklick: Abbrechen",
+    "editorHint1": "Platz wählen, dann ein Emote.",
+    "editorHint2": "Rechtsklick leert einen Platz.",
+    "clear": "Alle leeren",
+    "done": "Fertig",
+    "slot": "Platz {0}",
+    "unavailable": "Emotes sind ausgeschaltet."
+  },
+  "panel": {
+    "description": "Umhänge, Flügel, Auren, Begleiter und Emotes. Alles kostenlos.",
+    "open": "Garderobe öffnen",
+    "loadout": "Ausrüstung"
+  }
+}
