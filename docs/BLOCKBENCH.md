@@ -141,6 +141,15 @@ restarted the plugin reconnects automatically (0.5 s, 1 s, 2 s … up to 15 s). 
 | The game rejected the token | The token was regenerated – enable *Find game automatically* or paste the new token. |
 | Game rejected <id>: … | The game's validator found a problem; the message says which. |
 
+## Submit to Vibe
+
+*Vibey → Submit to Vibe…* sends the open item to the Vibe team for review (VIBE-API-2 §3). The plugin has no login of
+its own: it goes through the running game over the live link, and the game uploads it with its Vibe login (online
+features on, signed in). The dialog asks for name and description and can attach a 256×256 thumbnail taken from the
+viewport. *Vibey → My submissions* lists your submissions with their status (pending, approved, rejected with the
+reason, withdrawn) and lets you withdraw open ones; when the team decides, the plugin shows a short notice.
+Approved items join the catalog as `community:<path>` with your name and reach every player over the air.
+
 ## Format notes
 
 - Coordinates are stored exactly as Blockbench shows them (pixels, +Y up, facing -Z, right arm at +X). The client

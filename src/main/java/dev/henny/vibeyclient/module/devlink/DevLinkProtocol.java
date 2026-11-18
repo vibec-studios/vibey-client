@@ -49,6 +49,32 @@ public final class DevLinkProtocol implements WebSocketServer.Handler {
         default void pushed(JsonObject bundle, DevItems.PushResult result) {}
 
         default void rejected(String id, JsonObject bundle, String message) {}
+
+        /**
+         * Submit to Vibe (VIBE-API-2 §3) with the game's login: completes with the backend's {@code {submission}}, or
+         * exceptionally with a readable message. {@code thumbnail} is a PNG or null. Any thread.
+         */
+        default CompletableFuture<JsonObject> submit(JsonObject bundle, String name, String description, byte[] thumbnail) {
+            return CompletableFuture.failedFuture(new IllegalStateException("Submitting is not available"));
+        }
+
+        /** Our submissions ({@code {submissions: [...]}}). */
+        default CompletableFuture<JsonObject> submissions() {
+            return CompletableFuture.failedFuture(new IllegalStateException("Submitting is not available"));
+        }
+
+        /** Withdraws an open submission ({@code {submission}}). */
+        default CompletableFuture<JsonObject> withdraw(String submissionId) {
+            return CompletableFuture.failedFuture(new IllegalStateException("Submitting is not available"));
+        }
+    }
+
+    /** Authenticated plugin connections (for pushes like {@code submission}). */
+    private final java.util.Set<Connection> authed = java.util.concurrent.ConcurrentHashMap.newKeySet();
+
+    /** Sends {@code o} to every authenticated plugin (e.g. {@code {type: "submission", submission}}). Any thread. */
+    public void broadcast(JsonObject o) {
+        for (Connection c : authed) send(c, o);
     }
 
     /** Per connection state, stored in {@link Connection#attachment}. */
@@ -82,6 +108,7 @@ public final class DevLinkProtocol implements WebSocketServer.Handler {
 
     @Override
     public void onClose(Connection c, int code, String reason) {
+        authed.remove(c);
         if (isAuthed(c)) game.disconnected();
     }
 
@@ -111,6 +138,7 @@ public final class DevLinkProtocol implements WebSocketServer.Handler {
             welcome.addProperty("mod", game.modVersion());
             welcome.addProperty("player", orEmpty(game.playerName()));
             send(c, welcome);
+            authed.add(c);
             game.connected(s.client, s.version);
             return;
         }
@@ -127,8 +155,64 @@ public final class DevLinkProtocol implements WebSocketServer.Handler {
             }
             case "push" -> push(c, msg);
             case "remove" -> remove(c, str(msg, "id"));
+            case "submit" -> submit(c, msg);
+            case "submissions" -> answer(c, msg, "submissions", game.submissions());
+            case "withdraw" -> {
+                String id = str(msg, "submissionId");
+                if (id == null) send(c, requestError(msg, "submissionId is required"));
+                else answer(c, msg, "withdrawn", game.withdraw(id));
+            }
             default -> { /* unknown types are ignored (forward compatible) */ }
         }
+    }
+
+    // ------------------------------------------------------------------------------------- submit to Vibe
+
+    private void submit(Connection c, JsonObject msg) {
+        JsonObject bundle = msg.get("bundle") instanceof JsonObject b ? b : null;
+        if (bundle == null) {
+            send(c, requestError(msg, "submit without a bundle"));
+            return;
+        }
+        byte[] thumbnail = null;
+        String t = str(msg, "thumbnail");
+        if (t != null && !t.isEmpty()) {
+            try {
+                thumbnail = java.util.Base64.getDecoder().decode(t);
+            } catch (IllegalArgumentException e) {
+                send(c, requestError(msg, "thumbnail is not base64"));
+                return;
+            }
+        }
+        answer(c, msg, "submitted", game.submit(bundle, orEmpty(str(msg, "name")), orEmpty(str(msg, "description")), thumbnail));
+    }
+
+    /** Sends {@code {type, requestId, ...result}} or {@code {type: "error", requestId, message, code?}} when done. */
+    private void answer(Connection c, JsonObject msg, String type, CompletableFuture<JsonObject> result) {
+        result.orTimeout(60, TimeUnit.SECONDS).whenComplete((res, err) -> {
+            if (err != null) {
+                Throwable cause = err instanceof java.util.concurrent.CompletionException && err.getCause() != null ? err.getCause() : err;
+                JsonObject e = requestError(msg, cause instanceof java.util.concurrent.TimeoutException ? "The game did not answer in time"
+                        : String.valueOf(cause.getMessage() == null ? cause : cause.getMessage()));
+                if (cause instanceof dev.henny.vibeyclient.api.service.VibeBackend.ApiException api) {
+                    e.addProperty("code", api.code);
+                    e.addProperty("status", api.status);
+                }
+                send(c, e);
+                return;
+            }
+            JsonObject o = new JsonObject();
+            o.addProperty("type", type);
+            o.addProperty("requestId", orEmpty(str(msg, "requestId")));
+            if (res != null) for (var en : res.entrySet()) if (!en.getKey().equals("type")) o.add(en.getKey(), en.getValue());
+            send(c, o);
+        });
+    }
+
+    static JsonObject requestError(JsonObject msg, String message) {
+        JsonObject o = error(null, message);
+        o.addProperty("requestId", orEmpty(str(msg, "requestId")));
+        return o;
     }
 
     private void push(Connection c, JsonObject msg) {

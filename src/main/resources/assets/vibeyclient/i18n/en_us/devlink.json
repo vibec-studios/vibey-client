@@ -44,5 +44,10 @@
     "warning": "1 warning – see Blockbench",
     "warnings": "{0} warnings – see Blockbench",
     "rejected": "{0} rejected"
+  },
+  "submit": {
+    "signIn": "Sign in to Vibe first: online features on and the game connected to the Vibe backend.",
+    "sent": "Submitted {0} to Vibe",
+    "sentBody": "The Vibe team reviews it; you get a notice when it is approved."
   }
 }

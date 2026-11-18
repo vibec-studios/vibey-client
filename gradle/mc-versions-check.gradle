@@ -9,7 +9,7 @@ tasks.register('checkMcVersions') {
     def listFile = rootProject.file('gradle/mc-versions.json')
     def versionsDir = rootProject.file('versions')
     inputs.file(listFile)
-    inputs.dir(versionsDir).optional()
+    inputs.files(fileTree(versionsDir) { include '*/gradle.properties' })
     doLast {
         def cmp = { String a, String b ->
             def pa = a.tokenize('.').collect { it as int }, pb = b.tokenize('.').collect { it as int }

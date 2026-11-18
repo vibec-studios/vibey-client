@@ -127,8 +127,6 @@ public final class LoadoutSync {
             String v = d.get("catalogVersion") instanceof JsonPrimitive p ? p.getAsString() : null;
             if (v == null || !v.equals(ItemLoader.catalogVersion())) ItemLoader.requestCatalog(10_000);
         }));
-        // our submission was approved/rejected (the catalog itself follows with catalog.updated)
-        listeners.add(b.onEvent("submission.updated", d -> submissionUpdated.accept(d)));
         listeners.add(b.onEvent("emote.played", d -> {
             UUID id = uuid(d.get("userId"));
             if (id == null || id.equals(module.selfId())) return;
@@ -137,9 +135,6 @@ public final class LoadoutSync {
             remoteEmote.accept(id, play ? emote : null);
         }));
     }
-
-    /** Gateway {@code submission.updated} payloads (client thread); set by the devlink module. */
-    public static volatile java.util.function.Consumer<JsonObject> submissionUpdated = d -> {};
 
     /** Owned items changed (grant/revoke, catalog.updated): refresh the list without touching the loadout. */
     void reloadOwned() {

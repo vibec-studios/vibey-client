@@ -353,6 +353,13 @@ startup as `availability: default` (upsert by id when the hash changed; admin ed
     `{ "type": "pushed", "id": "…", "ok": true, "warnings": [] }` or `{ "type": "error", "id": "…", "message": "…" }`.
   - plugin → game `{ "type": "remove", "id": "…" }`, `{ "type": "ping" }` ↔ `{ "type": "pong" }`.
   - game → plugin `{ "type": "log", "level": "info"|"warn", "message": "…" }` (optional).
+  - Submit to Vibe (since 0.2.0; the game forwards with its own Vibe login, VIBE-API-2 §3), every request carries a
+    `requestId` that the answer repeats; failures are `{ "type": "error", "requestId", "message", "code"? }`:
+    plugin → game `{ "type": "submit", "requestId", "bundle": {…}, "name", "description", "thumbnail"?: "<base64 PNG ≤ 256×256>" }`
+    → `{ "type": "submitted", "requestId", "submission": {…} }` (multipart `POST /api/v1/cosmetics/submissions`);
+    `{ "type": "submissions", "requestId" }` → `{ "type": "submissions", "requestId", "submissions": […] }`;
+    `{ "type": "withdraw", "requestId", "submissionId" }` → `{ "type": "withdrawn", "requestId", "submission" }`.
+    game → plugin `{ "type": "submission", "submission": {…} }` when the gateway reports `submission.updated`.
 - Plugin side: auto-push on change (debounced ~300 ms, toggle), "Push now", "Play emote", connection status in the
   status bar.
 

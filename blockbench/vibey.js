@@ -1003,6 +1003,34 @@ const Core = (function () {
 	function backoffDelay(attempt) {
 		return Math.min(15000, 500 * Math.pow(2, Math.max(0, attempt)));
 	}
+	/**
+	 * The devlink "submit" message (Submit to Vibe, VIBE-API-2 §3): the game forwards it with its own Vibe login.
+	 * Throws an Error with a readable message when something is missing.
+	 */
+	const SUBMIT_LIMITS = { name: 64, description: 1000, thumbnailSize: 256, thumbnailBytes: 1024 * 1024 };
+	function submitMessage(opts) {
+		const bundle = opts && opts.bundle;
+		if (!bundle || typeof bundle !== 'object' || !bundle.id) throw new Error('no bundle');
+		const name = String(opts.name == null ? (bundle.name && bundle.name.en) || '' : opts.name).trim();
+		if (!name) throw new Error('name is required');
+		if (name.length > SUBMIT_LIMITS.name) throw new Error('name is longer than ' + SUBMIT_LIMITS.name + ' characters');
+		const description = String(opts.description || '').trim();
+		if (description.length > SUBMIT_LIMITS.description) throw new Error('description is longer than ' + SUBMIT_LIMITS.description + ' characters');
+		const msg = { type: 'submit', requestId: String(opts.requestId || ''), bundle, name, description };
+		if (opts.thumbnail) {
+			const b64 = String(opts.thumbnail).replace(/^data:image\/png;base64,/, '');
+			const bytes = base64ToBytes(b64);
+			const info = pngInfo(bytes);
+			if (!info) throw new Error('thumbnail is not a PNG');
+			if (info.width > SUBMIT_LIMITS.thumbnailSize || info.height > SUBMIT_LIMITS.thumbnailSize) throw new Error('thumbnail must be at most 256×256');
+			if (bytes.length > SUBMIT_LIMITS.thumbnailBytes) throw new Error('thumbnail is larger than 1 MB');
+			msg.thumbnail = b64;
+		}
+		return msg;
+	}
+	/** Display order + whether the plugin may offer "withdraw". Unknown statuses are shown as they are. */
+	const SUBMISSION_STATUS = { pending: { open: true }, approved: { open: false }, rejected: { open: false }, withdrawn: { open: false } };
+
 	function devlinkPath(gameDir, sep) {
 		const s = sep || (/\\/.test(gameDir) ? '\\' : '/');
 		return gameDir.replace(/[\\/]+$/, '') + s + 'vibeyclient' + s + 'devlink.json';
@@ -1018,7 +1046,7 @@ const Core = (function () {
 		RARITIES, ARMOR_SLOTS, INTERPOLATIONS, FACES, ID_RE, LIMITS, GENERATED_SUFFIX,
 		round, parseNumber, parseVec3, sanitizeId, base64ToBytes, bytesToBase64, base64Size, pngInfo, isOgg, utf8Length,
 		boxUvFaces, keyframesToSpec, specToKeyframes, compileBundle, decompileBundle, validateBundle, stringify,
-		parseDevlink, backoffDelay, devlinkPath, defaultGameDir,
+		parseDevlink, backoffDelay, devlinkPath, defaultGameDir, submitMessage, SUBMIT_LIMITS, SUBMISSION_STATUS,
 	};
 })();
 
@@ -1173,6 +1201,26 @@ const STRINGS = {
 	kp_pitch: ['Pitch', 'Tonhöhe'],
 	kp_bone: ['Visibility: bone', 'Sichtbarkeit: Knochen'],
 	kp_visible: ['Visible', 'Sichtbar'],
+	submit: ['Submit to Vibe…', 'An Vibe einreichen…'],
+	submit_title: ['Submit to Vibe', 'An Vibe einreichen'],
+	submit_intro: ['Your item goes to the Vibe team for review. Once approved it is in the catalog for everyone (as community:…, with your name). Sent through the running game with its Vibe login.', 'Dein Item geht zur Prüfung an das Vibe-Team. Nach der Freigabe ist es für alle im Katalog (als community:…, mit deinem Namen). Gesendet über das laufende Spiel mit dessen Vibe-Login.'],
+	submit_name: ['Name', 'Name'],
+	submit_description: ['Description', 'Beschreibung'],
+	submit_thumbnail: ['Thumbnail from the viewport (256×256)', 'Vorschaubild aus der Ansicht (256×256)'],
+	submit_sending: ['Submitting %0…', 'Reiche %0 ein…'],
+	submit_ok: ['Submitted "%0" – status: %1', '"%0" eingereicht – Status: %1'],
+	submit_failed: ['Submission failed: %0', 'Einreichen fehlgeschlagen: %0'],
+	submit_need_link: ['Connect to the game first (Vibey > Connect). The game must be signed in to Vibe (online features on).', 'Verbinde dich zuerst mit dem Spiel (Vibey > Verbinden). Das Spiel muss bei Vibe angemeldet sein (Online-Funktionen an).'],
+	submissions: ['My submissions', 'Meine Einreichungen'],
+	submissions_empty: ['No submissions yet.', 'Noch keine Einreichungen.'],
+	submissions_failed: ['Could not load submissions: %0', 'Einreichungen konnten nicht geladen werden: %0'],
+	withdraw: ['Withdraw', 'Zurückziehen'],
+	withdrawn_ok: ['Withdrawn', 'Zurückgezogen'],
+	status_pending: ['pending review', 'wird geprüft'],
+	status_approved: ['approved', 'freigegeben'],
+	status_rejected: ['rejected', 'abgelehnt'],
+	status_withdrawn: ['withdrawn', 'zurückgezogen'],
+	submission_update: ['Submission "%0": %1', 'Einreichung "%0": %1'],
 };
 function isGerman() {
 	try {
@@ -2026,6 +2074,8 @@ const Link = {
 	endpoint: null,
 	queued: null,
 	pending: [],
+	requests: new Map(),
+	requestCounter: 0,
 	lastResult: '',
 	setState(state, message) {
 		this.state = state;
@@ -2130,6 +2180,18 @@ const Link = {
 		} catch (e) {
 			return;
 		}
+		// answers to request() (submit, submissions, withdraw) carry the requestId
+		if (msg.requestId && this.requests.has(msg.requestId)) {
+			const r = this.requests.get(msg.requestId);
+			this.requests.delete(msg.requestId);
+			clearTimeout(r.timer);
+			r.resolve(msg);
+			return;
+		}
+		if (msg.type === 'submission' && msg.submission) {
+			Blockbench.showQuickMessage(T('submission_update', msg.submission.name || msg.submission.id, statusLabel(msg.submission.status)), 4000);
+			return;
+		}
 		switch (msg.type) {
 			case 'welcome': {
 				clearTimeout(this.welcomeTimer);
@@ -2178,6 +2240,12 @@ const Link = {
 		}
 	},
 	failPending(reason) {
+		const reqs = [...this.requests.values()];
+		this.requests.clear();
+		reqs.forEach((r) => {
+			clearTimeout(r.timer);
+			r.resolve({ type: 'error', message: reason });
+		});
 		const list = this.pending;
 		this.pending = [];
 		list.forEach((p) => {
@@ -2239,7 +2307,135 @@ const Link = {
 	remove(id) {
 		this.send({ type: 'remove', id });
 	},
+	/** Sends msg with a fresh requestId; resolves with the game's answer ({type: 'error', message} on timeout/offline). */
+	request(msg, timeoutMs) {
+		if (this.state !== 'connected' || !this.ws) return Promise.resolve({ type: 'error', message: T('submit_need_link') });
+		const requestId = 'r' + ++this.requestCounter;
+		const text = JSON.stringify(Object.assign({}, msg, { requestId }));
+		if (Core.utf8Length(text) > Core.LIMITS.messageBytes) return Promise.resolve({ type: 'error', message: T('push_too_big') });
+		return new Promise((resolve) => {
+			const timer = setTimeout(() => {
+				this.requests.delete(requestId);
+				resolve({ type: 'error', message: 'timeout', timeout: true });
+			}, timeoutMs || 20000);
+			this.requests.set(requestId, { resolve, timer });
+			this.ws.send(text);
+		});
+	},
 };
+// ------------------------------------------------------------- Submit to Vibe (VIBE-API-2 §3, through the game)
+const statusLabel = (s) => (STRINGS['status_' + s] ? T('status_' + s) : String(s || '?'));
+
+/** Viewport screenshot scaled into a 256×256 PNG (base64), or null. */
+function viewportThumbnail() {
+	return new Promise((resolve) => {
+		try {
+			const finish = (dataUrl) => {
+				if (!dataUrl) return resolve(null);
+				const img = new Image();
+				img.onload = () => {
+					const c = document.createElement('canvas');
+					c.width = c.height = 256;
+					const g = c.getContext('2d');
+					const s = Math.min(img.width, img.height);
+					g.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, 256, 256);
+					resolve(c.toDataURL('image/png').replace(/^data:image\/png;base64,/, ''));
+				};
+				img.onerror = () => resolve(null);
+				img.src = dataUrl;
+			};
+			const preview = typeof Preview !== 'undefined' ? Preview.selected : null;
+			if (!preview) return resolve(null);
+			if (typeof Screencam !== 'undefined' && Screencam.screenshotPreview) {
+				Screencam.screenshotPreview(preview, { crop: false }, finish);
+			} else {
+				preview.render && preview.render();
+				finish(preview.canvas && preview.canvas.toDataURL('image/png'));
+			}
+		} catch (e) {
+			console.warn('[Vibey] thumbnail failed', e);
+			resolve(null);
+		}
+	});
+}
+
+function ensureLinked() {
+	if (Link.state === 'connected') return true;
+	Blockbench.showMessageBox({ title: T('submit_title'), message: T('submit_need_link'), icon: 'info' });
+	if (Link.state === 'off' || Link.state === 'error') Link.connect();
+	return false;
+}
+
+function submitDialog() {
+	if (!isVibey() || !ensureLinked()) return;
+	const r = buildBundle();
+	if (r.errors.length) return showProblems(T('push_blocked'), r);
+	const dialog = new Dialog({
+		id: 'vibey_submit',
+		title: T('submit_title'),
+		width: 520,
+		lines: ['<p style="opacity:.8">' + esc(T('submit_intro')) + '</p>'],
+		form: {
+			name: { label: T('submit_name'), type: 'text', value: (r.bundle.name && r.bundle.name.en) || '' },
+			description: { label: T('submit_description'), type: 'textarea', value: (r.bundle.description && r.bundle.description.en) || '' },
+			thumbnail: { label: T('submit_thumbnail'), type: 'checkbox', value: true },
+		},
+		async onConfirm(form) {
+			let msg;
+			try {
+				const thumbnail = form.thumbnail ? await viewportThumbnail() : null;
+				msg = Core.submitMessage({ bundle: r.bundle, name: form.name, description: form.description, thumbnail });
+			} catch (e) {
+				Blockbench.showMessageBox({ title: T('submit_title'), message: T('submit_failed', e.message), icon: 'error' });
+				return;
+			}
+			Blockbench.showQuickMessage(T('submit_sending', msg.name), 1500);
+			const res = await Link.request(msg, 30000);
+			if (res.type === 'submitted' && res.submission) {
+				Blockbench.showMessageBox({ title: T('submit_title'), message: T('submit_ok', res.submission.name || msg.name, statusLabel(res.submission.status)), icon: 'check' });
+			} else {
+				Blockbench.showMessageBox({ title: T('submit_title'), message: T('submit_failed', res.message || res.type), icon: 'error' });
+			}
+		},
+	});
+	dialog.show();
+}
+
+async function submissionsDialog() {
+	if (!ensureLinked()) return;
+	const res = await Link.request({ type: 'submissions' }, 20000);
+	if (res.type !== 'submissions') {
+		Blockbench.showMessageBox({ title: T('submissions'), message: T('submissions_failed', res.message || res.type), icon: 'error' });
+		return;
+	}
+	const list = Array.isArray(res.submissions) ? res.submissions : [];
+	const rows = list.length
+		? list.map((s) => {
+			const open = Core.SUBMISSION_STATUS[s.status] && Core.SUBMISSION_STATUS[s.status].open;
+			return '<tr><td>' + esc(s.name || s.bundleId || s.id) + '</td><td>' + esc(s.kind || '') + (s.slot ? ' / ' + esc(s.slot) : '') + '</td><td>' + esc(statusLabel(s.status))
+				+ (s.reason ? '<br><small>' + esc(s.reason) + '</small>' : '') + (s.itemId ? '<br><small>' + esc(s.itemId) + '</small>' : '') + '</td><td>'
+				+ (open ? '<button class="vibey-withdraw" data-id="' + esc(s.id) + '">' + esc(T('withdraw')) + '</button>' : '') + '</td></tr>';
+		}).join('')
+		: '<tr><td colspan="4">' + esc(T('submissions_empty')) + '</td></tr>';
+	const dialog = new Dialog({
+		id: 'vibey_submissions',
+		title: T('submissions'),
+		width: 640,
+		singleButton: true,
+		lines: ['<table style="width:100%;border-collapse:collapse" class="vibey-submissions">' + rows + '</table>'],
+	});
+	dialog.show();
+	setTimeout(() => {
+		document.querySelectorAll('#vibey_submissions .vibey-withdraw, .vibey-submissions .vibey-withdraw').forEach((b) => {
+			b.onclick = async () => {
+				b.disabled = true;
+				const r = await Link.request({ type: 'withdraw', submissionId: b.getAttribute('data-id') }, 20000);
+				b.textContent = r.type === 'withdrawn' ? T('withdrawn_ok') : (r.message || 'error');
+			};
+		});
+	}, 50);
+}
+
 const defaultPushAction = () => (isEmoteFormat() ? 'play' : 'equip');
 let autoPushTimer = null;
 function scheduleAutoPush() {
@@ -2524,6 +2720,8 @@ function setup() {
 		},
 	});
 	A('vibey_link_settings', { name: T('link_settings'), icon: 'settings_ethernet', click: openLinkSettings });
+	A('vibey_submit', { name: T('submit'), icon: 'publish', condition: isVibey, click: submitDialog });
+	A('vibey_submissions', { name: T('submissions'), icon: 'inbox', click: submissionsDialog });
 	A('vibey_add_sound', { name: T('add_sound'), icon: 'music_note', condition: isVibey, click: addSoundDialog });
 	A('vibey_add_sprite', { name: T('add_sprite'), icon: 'auto_awesome', condition: isVibey, click: () => spriteDialog() });
 	MenuBar.addAction(exportAction, 'file.export');
@@ -2534,6 +2732,7 @@ function setup() {
 		'vibey_toggle_reference', 'vibey_repair_rig', '_',
 		'vibey_connect', 'vibey_push', 'vibey_play', 'vibey_auto_push', 'vibey_link_settings', '_',
 		'vibey_add_sound', 'vibey_add_sprite', '_',
+		'vibey_submit', 'vibey_submissions', '_',
 		'vibey_import', 'vibey_export',
 	], { name: 'Vibey', condition: () => true });
 	MenuBar.addMenu(menu, 'view');

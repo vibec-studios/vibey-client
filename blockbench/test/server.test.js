@@ -78,6 +78,29 @@ test('mock game server implements SPEC §8', async (t) => {
 		c.ws.close();
 	});
 
+	await t.test('submit -> submitted, submissions, withdraw (answers carry the requestId)', async () => {
+		const c = client(game.port);
+		await c.open();
+		c.send({ type: 'hello', token: game.token, client: 'blockbench-vibey', version: '0.2.0' });
+		await c.next((m) => m.type === 'welcome');
+		const bundle = Core.compileBundle(cosmeticSnapshot()).bundle;
+		c.send(Object.assign(Core.submitMessage({ bundle, name: 'Seal Hat', description: 'test' }), { requestId: 'r7' }));
+		const sub = await c.next((m) => m.requestId === 'r7');
+		assert.equal(sub.type, 'submitted');
+		assert.equal(sub.submission.status, 'pending');
+		assert.equal(sub.submission.bundleId, 'test:seal_hat');
+		c.send({ type: 'submissions', requestId: 'r8' });
+		const list = await c.next((m) => m.requestId === 'r8');
+		assert.equal(list.submissions.length, 1);
+		c.send({ type: 'withdraw', requestId: 'r9', submissionId: sub.submission.id });
+		const w = await c.next((m) => m.requestId === 'r9');
+		assert.equal(w.type, 'withdrawn');
+		assert.equal(w.submission.status, 'withdrawn');
+		c.send({ type: 'withdraw', requestId: 'r10', submissionId: 'nope' });
+		assert.equal((await c.next((m) => m.requestId === 'r10')).type, 'error');
+		c.ws.close();
+	});
+
 	await t.test('messages over 8 MiB are refused', async () => {
 		const c = client(game.port);
 		await c.open();

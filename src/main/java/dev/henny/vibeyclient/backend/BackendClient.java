@@ -463,8 +463,35 @@ public final class BackendClient implements VibeBackend {
         return URLEncoder.encode(s, StandardCharsets.UTF_8).replace("+", "%20");
     }
 
+    private static final String CRLF = "\r\n";
+
+    @Override
+    public CompletableFuture<JsonElement> requestMultipart(String path, java.util.List<Part> parts) {
+        String boundary = "----vibey" + java.util.UUID.randomUUID().toString().replace("-", "");
+        java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+        for (Part p : parts) {
+            StringBuilder h = new StringBuilder("--").append(boundary).append(CRLF)
+                    .append("Content-Disposition: form-data; name=\"").append(p.name().replace("\"", "")).append('"');
+            if (p.filename() != null) h.append("; filename=\"").append(p.filename().replace("\"", "")).append('"');
+            h.append(CRLF);
+            if (p.contentType() != null) h.append("Content-Type: ").append(p.contentType()).append(CRLF);
+            h.append(CRLF);
+            out.writeBytes(h.toString().getBytes(StandardCharsets.UTF_8));
+            out.writeBytes(p.bytes());
+            out.writeBytes(CRLF.getBytes(StandardCharsets.UTF_8));
+        }
+        out.writeBytes(("--" + boundary + "--" + CRLF).getBytes(StandardCharsets.UTF_8));
+        byte[] body = out.toByteArray();
+        return CompletableFuture.supplyAsync(() -> call("POST", path, null, body, "multipart/form-data; boundary=" + boundary, true), exec);
+    }
+
     /** One REST call, blocking, with token refresh and retries. Throws {@link ApiException}. */
     JsonElement call(String method, String path, JsonElement body, boolean auth) {
+        return call(method, path, body, null, null, auth);
+    }
+
+    /** Same with a raw body ({@code rawBody} + {@code rawType}, e.g. multipart) instead of JSON. */
+    JsonElement call(String method, String path, JsonElement body, byte[] rawBody, String rawType, boolean auth) {
         boolean idempotent = !method.equals("POST") && !method.equals("PATCH");
         boolean refreshed = false;
         for (int attempt = 0; ; attempt++) {
@@ -476,7 +503,10 @@ public final class BackendClient implements VibeBackend {
             // Cleartext (local dev): no h2c upgrade – Node rejects upgrade requests that carry a body.
             if (baseUrl.startsWith("http://")) rb.version(HttpClient.Version.HTTP_1_1);
             if (used != null) rb.header("Authorization", "Bearer " + used.accessToken());
-            if (body != null && !(body instanceof JsonNull)) {
+            if (rawBody != null) {
+                rb.header("Content-Type", rawType);
+                rb.method(method, HttpRequest.BodyPublishers.ofByteArray(rawBody));
+            } else if (body != null && !(body instanceof JsonNull)) {
                 rb.header("Content-Type", "application/json");
                 rb.method(method, HttpRequest.BodyPublishers.ofString(body.toString(), StandardCharsets.UTF_8));
             } else if (method.equals("POST") || method.equals("PUT") || method.equals("PATCH")) {

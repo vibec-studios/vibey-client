@@ -243,3 +243,26 @@ test('devlink helpers', () => {
 	assert.equal(Core.defaultGameDir('win32', { APPDATA: 'C:\\A' }, 'C:\\H'), 'C:\\A\\.minecraft');
 	assert.equal(Core.defaultGameDir('linux', {}, '/home/x'), '/home/x/.minecraft');
 });
+
+test('submit to Vibe message', () => {
+	const bundle = Core.compileBundle(cosmeticSnapshot()).bundle;
+	const thumb = pngB64(256, 256);
+	const m = Core.submitMessage({ bundle, name: '  Seal Hat ', description: 'Cosy', thumbnail: 'data:image/png;base64,' + thumb, requestId: 'r1' });
+	assert.equal(m.type, 'submit');
+	assert.equal(m.requestId, 'r1');
+	assert.equal(m.name, 'Seal Hat');
+	assert.equal(m.description, 'Cosy');
+	assert.equal(m.thumbnail, thumb);
+	assert.equal(m.bundle, bundle);
+	// name defaults to the bundle name, thumbnail is optional
+	const d = Core.submitMessage({ bundle });
+	assert.equal(d.name, bundle.name.en);
+	assert.equal(d.thumbnail, undefined);
+	assert.throws(() => Core.submitMessage({ bundle, name: 'x'.repeat(65) }), /name is longer/);
+	assert.throws(() => Core.submitMessage({ bundle, description: 'x'.repeat(1001) }), /description is longer/);
+	assert.throws(() => Core.submitMessage({ bundle, thumbnail: pngB64(512, 512) }), /256/);
+	assert.throws(() => Core.submitMessage({ bundle, thumbnail: 'AAAA' }), /not a PNG/);
+	assert.throws(() => Core.submitMessage({}), /no bundle/);
+	assert.equal(Core.SUBMISSION_STATUS.pending.open, true);
+	assert.equal(Core.SUBMISSION_STATUS.approved.open, false);
+});

@@ -31,6 +31,13 @@ All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.pr
 - More forgiving with files from newer tools: unknown attach points, interpolations, event types and fields are
   skipped with a warning instead of rejecting the item; `minClientVersion` for items that need a newer client.
 
+### Creator tools
+
+- Blockbench plugin: **Submit to Vibe** sends your item to the Vibe team for review through the running game (its
+  Vibe login), with an optional thumbnail from the viewport; **My submissions** shows the status and lets you
+  withdraw open ones. Approved items reach every player over the air.
+- Blockbench plugin version 0.2.0 (now versioned together with the mod).
+
 ### Distribution
 
 - Releases are built and published by CI (`.github/workflows/release.yml`) to the Vibe backend, where the Vibe
@@ -39,6 +46,8 @@ All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.pr
 ### Fixes
 
 - Minecraft 26.x: the dev tours can place client-side test players again.
+- Emote locators placed on player bones (e.g. `right_arm`) now follow the arm (particles and sounds came from the
+  player's position).
 
 ## 0.1.0 – first version
 
