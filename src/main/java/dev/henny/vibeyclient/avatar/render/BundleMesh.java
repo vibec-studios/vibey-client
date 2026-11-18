@@ -16,7 +16,7 @@ import java.util.List;
  * layout. Every bone gets quads relative to its own pivot, in blocks, grouped by texture and render mode.
  */
 public final class BundleMesh {
-    public enum Mode { CUTOUT, TRANSLUCENT, EMISSIVE }
+    public enum Mode { CUTOUT, TRANSLUCENT, EMISSIVE, GLOW }
 
     /** Quads of one bone with one texture and mode: 4 vertices × (x, y, z, u, v, nx, ny, nz). */
     public static final class Part {
@@ -59,7 +59,7 @@ public final class BundleMesh {
             float[] p = toModel(bone.pivot);
             piv[bone.index] = p;
             rot[bone.index] = rotToModel(bone.rotation);
-            Mode mode = bone.effectiveEmissive ? Mode.EMISSIVE : bone.effectiveTranslucent ? Mode.TRANSLUCENT : Mode.CUTOUT;
+            Mode mode = bone.effectiveEmissive ? (bone.effectiveTranslucent ? Mode.GLOW : Mode.EMISSIVE) : bone.effectiveTranslucent ? Mode.TRANSLUCENT : Mode.CUTOUT;
             Builder builder = new Builder(b, mode);
             for (Cube c : bone.cubes) builder.cube(c, p);
             parts[bone.index] = builder.build();

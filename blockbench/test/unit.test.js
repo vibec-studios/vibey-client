@@ -266,3 +266,42 @@ test('submit to Vibe message', () => {
 	assert.equal(Core.SUBMISSION_STATUS.pending.open, true);
 	assert.equal(Core.SUBMISSION_STATUS.approved.open, false);
 });
+
+test('cosmetic.offsetWhen: compiled, validated and preserved by the round trip', () => {
+	const snap = cosmeticSnapshot();
+	snap.meta.offsetWhen = [{ slot: 'back', offset: [0, 1, 8] }, { slot: 'wings', offset: [0, 0, 1], rotation: [-5, 0, 0] }];
+	const bundle = compileOk(snap);
+	assert.deepEqual(bundle.cosmetic.offsetWhen, [{ slot: 'back', offset: [0, 1, 8] }, { slot: 'wings', offset: [0, 0, 1], rotation: [-5, 0, 0] }]);
+	const again = Core.compileBundle(Core.decompileBundle(bundle)).bundle;
+	assert.deepEqual(again.cosmetic, bundle.cosmetic);
+	// no rules → no field
+	const plain = compileOk(cosmeticSnapshot());
+	assert.equal(plain.cosmetic.offsetWhen, undefined);
+	// invalid rules are errors in both validators
+	for (const bad of [[{ slot: 'hat', offset: [0, 0, 1] }], [{ slot: 'tail', offset: [0, 0, 1] }], [{ slot: 'back' }], [{ slot: 'back', offset: [0, 0, 99] }], [{ slot: 'back', rotation: [0, 400, 0] }], 'back']) {
+		const b = JSON.parse(JSON.stringify(bundle));
+		b.cosmetic.offsetWhen = bad;
+		assert.ok(Core.validateBundle(b).errors.some((e) => /offsetWhen/.test(e)), 'plugin: ' + JSON.stringify(bad));
+		assert.ok(specValidate(b).errors.length > 0, 'spec: ' + JSON.stringify(bad));
+	}
+});
+
+test('devlink push message carries an optional thumbnail', () => {
+	const bundle = Core.compileBundle(cosmeticSnapshot()).bundle;
+	const thumb = pngB64(256, 256);
+	const m = Core.pushMessage({ bundle, action: 'equip', thumbnail: 'data:image/png;base64,' + thumb });
+	assert.deepEqual(Object.keys(m), ['type', 'bundle', 'action', 'thumbnail']);
+	assert.equal(m.type, 'push');
+	assert.equal(m.thumbnail, thumb);
+	assert.equal(Core.pushMessage({ bundle, action: 'none' }).thumbnail, undefined);
+	// too big or not a PNG: left out (the push itself still goes through)
+	assert.equal(Core.pushMessage({ bundle, thumbnail: pngB64(512, 512) }).thumbnail, undefined);
+	assert.equal(Core.pushMessage({ bundle, thumbnail: 'AAAA' }).thumbnail, undefined);
+	assert.equal(Core.pushMessage({ bundle }).action, 'none');
+});
+
+test('wizard prepares the optional states for pets and wings', () => {
+	assert.deepEqual(Core.SLOT_PRESETS.pet.tracks, ['idle', 'walk', 'fly', 'idle_long', 'happy']);
+	assert.ok(Core.SLOT_PRESETS.wings.tracks.includes('glide'));
+	for (const t of ['sprint', 'glide', 'idle_long', 'happy']) assert.ok(Core.TRACK_LENGTH[t] > 0, t);
+});

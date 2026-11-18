@@ -23,12 +23,49 @@ final class ThumbnailCache {
         return t;
     });
 
+    /** Thumbnails of dev items (devlink pushes): key per id, PNG per key. Client thread. */
+    private static final Map<String, String> DEV_KEYS = new HashMap<>();
+    private static final Map<String, byte[]> DEV_PNGS = new HashMap<>();
+    private static int devCounter;
+
+    /** Registers a pushed thumbnail for dev item {@code id}; returns the key to use as the item's thumbnail. */
+    static String putDev(String id, byte[] png) {
+        removeDev(id);
+        String key = "dev:" + id + "#" + (++devCounter);
+        DEV_KEYS.put(id, key);
+        DEV_PNGS.put(key, png);
+        return key;
+    }
+
+    /** The current thumbnail key of dev item {@code id}, or null. */
+    static String devKey(String id) {
+        return DEV_KEYS.get(id);
+    }
+
+    /** Forgets (and releases) the thumbnail of dev item {@code id}. */
+    static void removeDev(String id) {
+        String old = DEV_KEYS.remove(id);
+        if (old == null) return;
+        DEV_PNGS.remove(old);
+        READY.remove(old);
+        if (STATE.remove(old) instanceof Tex t) t.release();
+    }
+
     static boolean draw(Gfx g, AvatarItem item, int x, int y, int size) {
-        // the builtin thumbnail in the jar is instant; catalog URLs only for items the jar does not have
+        // dev items show their pushed thumbnail; the builtin thumbnail in the jar is instant; catalog URLs only for
+        // items the jar does not have
         AvatarItem builtin = AvatarItems.get(item.id(), ItemSource.BUILTIN);
-        String src = builtin != null && builtin.thumbnail() != null ? builtin.thumbnail() : item.thumbnail();
+        String src = item.isDev() && item.thumbnail() != null ? item.thumbnail()
+                : builtin != null && builtin.thumbnail() != null ? builtin.thumbnail() : item.thumbnail();
         if (src == null) return false;
         Object s = STATE.get(src);
+        if (s == null && src.startsWith("dev:")) {
+            byte[] png = DEV_PNGS.get(src);
+            if (png == null) return false;
+            STATE.put(src, LOADING);
+            READY.put(src, png);
+            s = LOADING;
+        }
         if (s == null) {
             STATE.put(src, LOADING);
             LOADER.execute(() -> {

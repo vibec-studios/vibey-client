@@ -64,6 +64,9 @@ each with a validator warning. If a file really needs a newer game client, say s
   "slot": "pet",                          // cape | wings | aura | pet | shield | hat | back
   "hideWithArmor": ["head"],              // optional: hide while this armor piece is worn (head|chest|legs|feet)
   "pet":    { "follow": "ground", "scale": 0.4 },   // pets only
+  "offsetWhen": [                         // optional (client 0.2.2+): move out of the way of another slot
+    { "slot": "back", "offset": [0, 1, 8], "rotation": [0, 0, 0] }
+  ],
   "cape":   { "texture": "cape" },        // capes only: texture-only cape
   "shield": { "texture": "shield" }       // shields only: texture-only shield
 }
@@ -71,10 +74,17 @@ each with a validator warning. If a file really needs a newer game client, say s
 
 A player wears at most one item per slot.
 
+**Making room for other slots (`offsetWhen`, client 0.2.2+):** each rule `{ "slot", "offset"?, "rotation"? }` moves
+the item's **root bones** while an item is worn (and shown) in that other slot – offset in pixels like a position
+keyframe, rotation in degrees like a rotation keyframe, eased in and out. Use it so wings move back when a backpack
+is worn: `"offsetWhen": [{ "slot": "back", "offset": [0, 1, 8] }]`. Up to 8 rules, offsets within ±64 px, rotations
+within ±360°, never the item's own slot. Older clients ignore the field; the Blockbench plugin keeps it on import /
+export (edit it in the `.vibey` or keep it from an imported file).
+
 | Slot | Usual attach | Model | Notes |
 |---|---|---|---|
 | `cape` | `body` | optional | Simplest form: just a texture in the vanilla **64×32 cape layout** (`cape.texture`), drawn with the vanilla cape model (and on the elytra). Or a full model. |
-| `wings` | `body` | required | Animations `idle` and `fly` (elytra / creative flying) are worth making. |
+| `wings` | `body` | required | Animations `idle` and `fly` (elytra / creative flying) are worth making; `glide` (elytra) is optional. Use `offsetWhen` to make room for a backpack. |
 | `aura` | `world` | required | Rings, orbiting things, particles. Usually `emissive`. |
 | `pet` | `world` | required | Build it around its own feet at the origin, facing north. `pet.follow`: `ground` (default, walks beside you), `shoulder_right`, `shoulder_left` or `float`. `pet.scale` (> 0, max 8) scales the whole model; the client picks the spot beside you and lets it follow with a little lag. |
 | `shield` | `left_arm` | optional | Simplest form: a texture in the vanilla **64×64 shield layout** (`shield.texture`), drawn with the vanilla shield model. |
@@ -234,11 +244,28 @@ locator follows that bone's animation.
 }
 ```
 
-**Names that mean something on cosmetics:** `idle` (always plays), `walk` (blended in by walking speed), `fly`
-(elytra / creative flying – for wings), `sneak`. Other names are not played automatically on cosmetics. Events of
-`idle` always run; events of `walk`, `fly` and `sneak` run while that animation is the main one (weight ≥ 50 %), and
-visibility events follow the strongest playing animation that has some (else `idle`). Emotes play the animation
-named in `emote.animation` (the plugin always uses `main`).
+**Names that mean something on cosmetics:** `idle` (always plays), `walk` (blended in by walking speed; pets: by
+their own movement), `fly` (elytra / creative flying – for wings), `sneak`, and – optional, client 0.2.2+ –
+
+| Name | Plays while | If the bundle has none |
+|---|---|---|
+| `sprint` | the player sprints (pets: belly slide, fast scoot) | `walk` |
+| `glide` | elytra flight, or falling for a moment (wings spread, pets "superman") | `fly` (elytra), nothing (falling) |
+| `idle_long` | the player stood still ~10 s (pets nap) | `idle` |
+| `happy` | the owner plays an emote (pets cheer) | the lower states / `idle` |
+
+They blend by priority `glide` > `fly` > `sprint` > `walk` > `sneak` > `happy` > `idle_long` > `idle`; the weights
+always add up to 1 (a moving pet of a flying player plays `fly`, not `walk` + `fly`). The optional states start from
+their first frame when they begin; `idle`/`walk`/`fly`/`sneak` run on a shared clock. Older clients ignore the new
+names, so keep `idle`/`walk`/`fly` good on their own. An empty animation (no keyframes, no events) counts as missing.
+Other names are not played automatically on cosmetics. Events of `idle` always run; events of the other states run
+while that animation is the main one (weight ≥ 50 %), and visibility events follow the strongest playing animation
+that has some (else `idle`). Emotes play the animation named in `emote.animation` (the plugin always uses `main`).
+
+**Soft light:** bones that are both `emissive` and `translucent` render as a soft glow (full-bright, no face
+shading, no depth writes) and, on 1.21.11 and 26.1, without Minecraft's usual 0.1 alpha cutoff – alpha gradients fade out
+smoothly to 0, so aurora veils, glows and mist have no hard edges. Plain `translucent` bones keep their lighting and
+also fade smoothly (only fully transparent pixels are dropped).
 
 **Keyframes:** `t` = time in seconds, `v` = value, `i` = interpolation of the segment that starts at this key:
 

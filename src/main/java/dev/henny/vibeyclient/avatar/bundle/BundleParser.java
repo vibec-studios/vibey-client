@@ -128,6 +128,7 @@ public final class BundleParser {
         PetOptions pet = null;
         int cape = -1, shield = -1;
         EmoteOptions emote = null;
+        List<OffsetRule> offsetWhen = List.of();
         if (kind == Kind.COSMETIC) {
             if (!(o.get("cosmetic") instanceof JsonObject c)) throw new BundleException("cosmetic section is required");
             slot = Slot.of(str(c, "slot"));
@@ -145,6 +146,7 @@ public final class BundleParser {
             float scale = (float) num(p, "scale", 1);
             if (!(scale > 0) || scale > 8) throw new BundleException("cosmetic.pet.scale must be a positive number");
             pet = new PetOptions(PetFollow.of(str(p, "follow")), scale);
+            offsetWhen = offsetWhen(c.get("offsetWhen"), slot, warnings);
             if (slot == Slot.CAPE) {
                 String tid = c.get("cape") instanceof JsonObject co ? str(co, "texture") : null;
                 Integer ti = tid == null ? null : texIndex.get(tid);
@@ -192,7 +194,57 @@ public final class BundleParser {
         return new Bundle(id, kind, name, description == null ? Text.EMPTY : description, author == null ? "" : author,
                 List.copyOf(tags), rarity, slot, Collections.unmodifiableSet(hide), pet, cape, shield, emote,
                 textures.toArray(new Texture[0]), model, Collections.unmodifiableMap(animations),
-                sprites.toArray(new Sprite[0]), sounds.toArray(new Sound[0]), sha, size, List.copyOf(warnings));
+                sprites.toArray(new Sprite[0]), sounds.toArray(new Sound[0]), sha, size, List.copyOf(warnings), offsetWhen);
+    }
+
+    /** Max {@code offsetWhen} rules, max |offset| (px) and |rotation| (degrees) per axis. */
+    public static final int MAX_OFFSET_RULES = 8;
+    public static final float MAX_OFFSET = 64f, MAX_OFFSET_ROTATION = 360f;
+
+    /**
+     * {@code cosmetic.offsetWhen: [{ "slot", "offset": [x,y,z], "rotation"?: [x,y,z] }]} (since 0.2.2). Optional and
+     * lenient: a malformed rule (or one for a slot this client does not know) is skipped with a warning, the item
+     * still loads.
+     */
+    private static List<OffsetRule> offsetWhen(JsonElement e, Slot own, List<String> warnings) {
+        if (e == null || e.isJsonNull()) return List.of();
+        if (!(e instanceof JsonArray a)) {
+            warnings.add("cosmetic.offsetWhen must be an array (ignored)");
+            return List.of();
+        }
+        List<OffsetRule> out = new ArrayList<>();
+        for (int i = 0; i < a.size(); i++) {
+            String where = "cosmetic.offsetWhen[" + i + "]";
+            if (out.size() >= MAX_OFFSET_RULES) {
+                warnings.add("cosmetic.offsetWhen: more than " + MAX_OFFSET_RULES + " rules, the rest is ignored");
+                break;
+            }
+            if (!(a.get(i) instanceof JsonObject r)) {
+                warnings.add(where + " must be an object (ignored)");
+                continue;
+            }
+            Slot slot = Slot.of(str(r, "slot"));
+            if (slot == null) {
+                warnings.add(where + ": unknown slot \"" + str(r, "slot") + "\" (ignored)");
+                continue;
+            }
+            if (slot == own) {
+                warnings.add(where + ": refers to the item's own slot (ignored)");
+                continue;
+            }
+            try {
+                float[] off = r.has("offset") ? floats(r.get("offset"), 3, where + ".offset") : new float[3];
+                float[] rot = r.has("rotation") ? floats(r.get("rotation"), 3, where + ".rotation") : new float[3];
+                for (int k = 0; k < 3; k++) {
+                    if (Math.abs(off[k]) > MAX_OFFSET) throw new BundleException(where + ".offset must be within ±" + (int) MAX_OFFSET + " px");
+                    if (Math.abs(rot[k]) > MAX_OFFSET_ROTATION) throw new BundleException(where + ".rotation must be within ±" + (int) MAX_OFFSET_ROTATION + "°");
+                }
+                out.add(new OffsetRule(slot, off, rot));
+            } catch (BundleException ex) {
+                warnings.add(ex.getMessage() + " (ignored)");
+            }
+        }
+        return List.copyOf(out);
     }
 
     // ============================================================================================ textures

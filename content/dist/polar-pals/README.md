@@ -1,12 +1,13 @@
 # Polar Pals – lokal testen
 
 Premium-Kollektion für Vibey Client (8 Items, alle 3D und animiert). **Nur lokal** – nichts davon liegt im Katalog
-oder auf dem Server. Übersicht mit Ingame-Screenshots: [`polar-pals.html`](polar-pals.html) (offline, eine Datei).
+oder auf dem Server. Übersicht mit Ingame-Screenshots und Vorher/Nachher: [`polar-pals.html`](polar-pals.html)
+(offline, eine Datei).
 
 | Datei | Slot | Item |
 |---|---|---|
-| `polar_seal.vibey` | Pet | Robbenbaby (legendär) |
-| `polar_penguin.vibey` | Pet | Pinguin (episch) |
+| `polar_seal.vibey` | Pet | Robbenbaby (legendär) – schulterhoch |
+| `polar_penguin.vibey` | Pet | Pinguin (episch) – schulterhoch |
 | `polar_owl_wings.vibey` | Flügel | Schneeeulen-Flügel (legendär) |
 | `polar_aurora_wings.vibey` | Flügel | Polarlicht-Schleierflügel (episch) |
 | `polar_pompom_beanie.vibey` | Hut | Bommelmütze (selten) |
@@ -14,12 +15,29 @@ oder auf dem Server. Übersicht mit Ingame-Screenshots: [`polar-pals.html`](pola
 | `polar_aurora_ring.vibey` | Aura | Polarlicht-Ring (episch) |
 | `polar_snowfall_cape.vibey` | Umhang | Schneefall-Umhang (selten, HD) |
 
-Vorschaubilder: `previews/`, Katalog-Thumbnails (256 × 256): `thumbnails/`, je ein Ingame-Screenshot: `ingame/`,
+Vorschaubilder: `previews/`, Katalog-Thumbnails (256 × 256, gehen beim Push mit): `thumbnails/`,
+Ingame-Screenshots: `ingame/` (vorher: `ingame/before/`, neue Zustände, Flügel + Rucksack, Nacht, Mütze: `ingame/states/`),
 Import in echtes Blockbench: `blockbench/`.
+
+## Was ist neu (Feedback-Runde)
+
+- **Pets** sind deutlich größer (Kopf etwa auf Schulterhöhe), laufen mit Abstand neben dir und nie durch dich durch.
+- **Neue Zustände** (Vibey Client 0.2.2): `sprint` (Robbe: schneller Bauchrutscher, Pinguin: Bauchrutschen),
+  `glide` (Elytra oder längerer Fall: Robbe/Pinguin als „Superman“, Flügel weit gespreizt), `idle_long`
+  (ca. 10 s stillstehen: die Robbe hält ein Nickerchen, der Pinguin döst im Stehen ein – mit Zs) und `happy`
+  (wenn du ein Emote spielst, jubeln die Pets mit Herzchen).
+- **Mütze** ruhiger: drei Farben, ein klarer weißer Bommel ohne Sprenkel.
+- **Polarlicht** (Ring + Schleierflügel): weiche, fließende Lichtbänder statt bunter Platten – durchscheinend, mit
+  Farbverlauf von Mint über Blau zu Violett, wandernden Strahlen und weichen Rändern. Am schönsten nachts.
+- **Flügel + Rucksack**: Mit dem Iglu-Rucksack rücken beide Flügelpaare automatisch nach hinten
+  (`cosmetic.offsetWhen`), nichts schneidet mehr ineinander.
+- **Thumbnails**: gepushte DEV-Items zeigen in der Garderobe ihr Bild statt der Buchstaben-Kachel.
 
 ## 1. Im Spiel (Creator-Modus + ein Befehl)
 
-1. Minecraft mit Vibey Client ab 0.2.1 starten und eine Welt betreten (Fabric oder NeoForge, 1.21.1 – 26.3).
+1. Minecraft mit Vibey Client starten und eine Welt betreten (Fabric oder NeoForge, 1.21.1 – 26.3). Die neuen
+   Zustände, die weichen Polarlichter und die DEV-Thumbnails brauchen den Client aus diesem Branch (0.2.2); ältere
+   Clients zeigen die Items auch, aber nur mit `idle`/`walk`/`fly`/`sneak`.
 2. **Rechte Umschalttaste** → Vibey-Menü → Modul **Blockbench-Link** → **Creator-Modus** einschalten.
    Das Spiel schreibt dann `<Spielordner>/vibeyclient/devlink.json` (Port + Token, nur 127.0.0.1).
 3. Im Ordner `content/` des Repos:
@@ -33,12 +51,22 @@ Import in echtes Blockbench: `blockbench/`.
    `npm run push:polar -- --instance <id>` oder `npm run push:polar -- --game-dir "<Spielordner>"`.
 4. Pro Item steht eine Zeile da (`✓ … loaded + equipped` / `✗ … Grund`). Das erste Item je Slot wird direkt
    angelegt (Robbe, Schneeeulen-Flügel, Mütze, Iglu, Ring, Umhang), die anderen liegen in der **Garderobe**.
-   Alle tragen das Abzeichen **DEV** und sind **nur für dich sichtbar** – sie werden nirgends hochgeladen und sind
-   nach einem Neustart des Spiels wieder weg.
+   Alle tragen das Abzeichen **DEV**, zeigen ihr Thumbnail und sind **nur für dich sichtbar** – sie werden nirgends
+   hochgeladen und sind nach einem Neustart des Spiels wieder weg.
 
-Gut zu sehen: Robbe und Pinguin haben lange `idle`-Schleifen (Robbe 20 s: blinzeln, Kopf schief, klatschen mit
-Herzchen, Rolle, Nickerchen mit Zs); laufen = hüpfen + Bauchrutscher; fliegen (Kreativ/Elytra) und schleichen haben
-eigene Posen. Flügel: beim Fliegen ein Flügelschlag + Gleiten, beim Schleichen eng angelegt.
+Zum Ausprobieren:
+
+| Was du tust | Was passiert |
+|---|---|
+| stehen | `idle`: Robbe blinzelt, legt den Kopf schief, klatscht mit Herzchen, rollt sich; Pinguin zeigt einen Fisch |
+| ~10 s stillstehen | `idle_long`: Robbe legt sich zum Nickerchen hin, Pinguin döst ein, Zs steigen auf |
+| laufen | `walk`: Robbe robbt (galumph), Pinguin watschelt |
+| sprinten | `sprint`: Bauchrutscher mit Schneespritzern |
+| ein Emote spielen (z. B. Winken) | `happy`: die Pets hüpfen und jubeln mit Herzchen |
+| Elytra / tiefer Fall | `glide`: Superman-Pose, Flügel weit gespreizt, Polarlicht weht nach hinten |
+| Kreativ fliegen | `fly`: Flügelschlag + Gleiten, Pets flattern |
+| schleichen | `sneak`: schüchtern / Flügel eng angelegt |
+| Iglu-Rucksack + Flügel | Flügel rücken weich nach hinten |
 
 ## 2. Im Vibe Launcher (3D-Vorschau, ohne Einreichen)
 

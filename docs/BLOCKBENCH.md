@@ -1,6 +1,6 @@
 # Making cosmetics and emotes in Blockbench
 
-The Vibey Blockbench plugin (`blockbench/vibey.js`, version 0.2.2) turns Blockbench into the editor for Vibey Client
+The Vibey Blockbench plugin (`blockbench/vibey.js`, version 0.2.3) turns Blockbench into the editor for Vibey Client
 cosmetics and emotes. It writes `.vibey` bundles (see [SPEC §5](SPEC.md#5-the-vibey-asset-format-v1)) and can push
 them straight into the running game over the live link ([SPEC §8](SPEC.md#8-blockbench-live-link-devlink)).
 
@@ -34,9 +34,9 @@ Keep the file name `vibey.js` – Blockbench uses it as the plugin id. To update
    |---|---|
    | Hat | group `hat` attached to the head, animations `idle`, `walk`, hidden under a helmet, 64×64 texture |
    | Back | group `back` attached to the body at the back, `idle`, `walk`, `sneak`, 64×64 texture |
-   | Wings | group `wings` on the body at the shoulder blades with `wing_right` / `wing_left` (their pivots are the joints), `idle`, `walk`, `fly`, `sneak`, 64×64 texture |
+   | Wings | group `wings` on the body at the shoulder blades with `wing_right` / `wing_left` (their pivots are the joints), `idle`, `walk`, `fly`, `sneak`, `glide`, 64×64 texture |
    | Aura | group `aura` attached to `world` (follows the player's position) with locator `aura_center`, `idle`, 64×64 texture |
-   | Pet | group `pet` attached to `world` at the origin (reference player hidden so it does not overlap), pet follow `ground`, `idle`, `walk`, `fly`, 64×64 texture |
+   | Pet | group `pet` attached to `world` at the origin (reference player hidden so it does not overlap), pet follow `ground`, `idle`, `walk`, `fly`, `idle_long`, `happy`, 64×64 texture |
    | Cape | texture only: a 64×32 texture in the vanilla cape layout with a colour guide (purple = the side others see, dark = inside, teal = edges, grey = elytra) and a locked **preview** cape on the reference player that is never exported |
    | Shield | texture only: a 64×64 texture in the vanilla shield layout (purple = front, dark = back, teal = edges, grey = handle) and a locked, never exported **preview** shield |
    | Emote | the player rig `root > head, body, arms, legs` and an empty animation `main` (loop and length from the wizard) |
@@ -67,7 +67,9 @@ opens it again – the choice is remembered in Blockbench's local storage, like 
 ### Test live in game
 
 **Vibey > Test live in game** (*Live im Spiel testen*, also the big button in guide step 5) connects automatically and
-sends the open item: cosmetics are equipped, emotes are played. If the game cannot be reached the plugin explains what
+sends the open item: cosmetics are equipped, emotes are played. A render of the viewport goes along as the item's
+wardrobe thumbnail (256×256, smaller if the PNG would exceed 256 KiB), so the DEV item shows a picture instead of the
+letter tile; auto-pushes keep the last thumbnail. If the game cannot be reached the plugin explains what
 to do and keeps looking in the background – the item is sent as soon as the game is there:
 
 1. Start Minecraft with Vibey Client.
@@ -140,7 +142,10 @@ Toggle it with the checkbox in the *Vibey* tab or *Vibey > Advanced > Show refer
 ### Animations
 
 Use Animate mode as usual. Names with meaning for cosmetics: `idle` (always), `walk` (blended by walk speed),
-`fly` (elytra/creative flying), `sneak`. Supported: rotation, position and scale keyframes with **linear**,
+`fly` (elytra/creative flying), `sneak`, and the optional states of client 0.2.2: `sprint`, `glide` (elytra),
+`idle_long` (standing still ~10 s) and `happy` (while the owner plays an emote) – see FORMAT.md. The wizard prepares
+`idle_long` and `happy` for pets and `glide` for wings; leave them empty if you do not need them (an empty animation
+counts as missing, the item then plays `idle` / `fly` there). Supported: rotation, position and scale keyframes with **linear**,
 **catmullrom** and **step** interpolation, and split (pre/post) keyframes. Molang expressions are not supported –
 use numbers.
 
@@ -185,7 +190,8 @@ One keyframe may hold several particles/sounds (the "+" in the Keyframe panel). 
   dialog says in plain words what to fix; warnings are shown afterwards.
 - **File > Import > Vibey Bundle (.vibey)**, *Vibey > Advanced > Import .vibey file…* (or drag & drop / File > Open)
   turns a bundle back into an editable
-  project. Everything the format stores round-trips; exporting an imported file gives the same bytes.
+  project. Everything the format stores round-trips; exporting an imported file gives the same bytes (including
+  fields without an editor in the plugin such as `cosmetic.offsetWhen`, which the validator checks as well).
 - **Vibey > Advanced > Validation details…** lists problems in plain words, with the technical text under *Details*
   (same rules as SPEC §5: id, names, slot,
   references to textures/bones/locators/sprites/sounds, PNG ≤ 512×512 (strips ≤ 512×4096), ≤ 256 bones, ≤ 2048 cubes,

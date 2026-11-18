@@ -11,7 +11,7 @@
   "author": "Vibe Craft Studios",
   "tags": ["polar-pals","wings","owl","feathers","animated"],
   "rarity": "legendary",
-  "cosmetic": {"slot":"wings"},
+  "cosmetic": {"slot":"wings","offsetWhen":[{"slot":"back","offset":[0,1,9]}]},
   "textures": [
     {
       "id": "main",
@@ -1134,6 +1134,208 @@
           "gravity": 0.002
         }
       ]
+    },
+    "glide": {
+      "length": 3,
+      "loop": true,
+      "bones": {
+        "wing_r": {
+          "rotation": [
+            {"t":0,"v":[-6,-6,0],"i":"catmullrom"},
+            {"t":1.5,"v":[-4,-12,0],"i":"catmullrom"},
+            {"t":3,"v":[-6,-6,0],"i":"catmullrom"}
+          ]
+        },
+        "r_arm": {
+          "rotation": [
+            {"t":0,"v":[0,0,4],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,10],"i":"catmullrom"},
+            {"t":3,"v":[0,0,4],"i":"catmullrom"}
+          ]
+        },
+        "r_fore": {
+          "rotation": [
+            {"t":0,"v":[0,0,-6],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,-6],"i":"catmullrom"},
+            {"t":3,"v":[0,0,-6],"i":"catmullrom"}
+          ]
+        },
+        "r_hand": {
+          "rotation": [
+            {"t":0,"v":[0,0,4],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,0],"i":"catmullrom"},
+            {"t":3,"v":[0,0,4],"i":"catmullrom"}
+          ]
+        },
+        "r_sec1": {
+          "rotation": [
+            {"t":0,"v":[0,0,6],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,6],"i":"catmullrom"},
+            {"t":3,"v":[0,0,6],"i":"catmullrom"}
+          ]
+        },
+        "r_p1": {
+          "rotation": [
+            {"t":0,"v":[0,0,-12],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,-6],"i":"catmullrom"},
+            {"t":3,"v":[0,0,-12],"i":"catmullrom"}
+          ]
+        },
+        "r_sec2": {
+          "rotation": [
+            {"t":0,"v":[0,0,6],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,6],"i":"catmullrom"},
+            {"t":3,"v":[0,0,6],"i":"catmullrom"}
+          ]
+        },
+        "r_p2": {
+          "rotation": [
+            {"t":0,"v":[0,0,-6],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,-3],"i":"catmullrom"},
+            {"t":3,"v":[0,0,-6],"i":"catmullrom"}
+          ]
+        },
+        "r_sec3": {
+          "rotation": [
+            {"t":0,"v":[0,0,6],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,6],"i":"catmullrom"},
+            {"t":3,"v":[0,0,6],"i":"catmullrom"}
+          ]
+        },
+        "r_p3": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,0],"i":"catmullrom"},
+            {"t":3,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "r_sec4": {
+          "rotation": [
+            {"t":0,"v":[0,0,6],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,6],"i":"catmullrom"},
+            {"t":3,"v":[0,0,6],"i":"catmullrom"}
+          ]
+        },
+        "r_p4": {
+          "rotation": [
+            {"t":0,"v":[0,0,6],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,3],"i":"catmullrom"},
+            {"t":3,"v":[0,0,6],"i":"catmullrom"}
+          ]
+        },
+        "r_sec5": {
+          "rotation": [
+            {"t":0,"v":[0,0,6],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,6],"i":"catmullrom"},
+            {"t":3,"v":[0,0,6],"i":"catmullrom"}
+          ]
+        },
+        "r_p5": {
+          "rotation": [
+            {"t":0,"v":[0,0,12],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,6],"i":"catmullrom"},
+            {"t":3,"v":[0,0,12],"i":"catmullrom"}
+          ]
+        },
+        "wing_l": {
+          "rotation": [
+            {"t":0,"v":[-6,6,0],"i":"catmullrom"},
+            {"t":1.5,"v":[-4,12,0],"i":"catmullrom"},
+            {"t":3,"v":[-6,6,0],"i":"catmullrom"}
+          ]
+        },
+        "l_arm": {
+          "rotation": [
+            {"t":0,"v":[0,0,-4],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,-10],"i":"catmullrom"},
+            {"t":3,"v":[0,0,-4],"i":"catmullrom"}
+          ]
+        },
+        "l_fore": {
+          "rotation": [
+            {"t":0,"v":[0,0,6],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,6],"i":"catmullrom"},
+            {"t":3,"v":[0,0,6],"i":"catmullrom"}
+          ]
+        },
+        "l_hand": {
+          "rotation": [
+            {"t":0,"v":[0,0,-4],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,0],"i":"catmullrom"},
+            {"t":3,"v":[0,0,-4],"i":"catmullrom"}
+          ]
+        },
+        "l_sec1": {
+          "rotation": [
+            {"t":0,"v":[0,0,-6],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,-6],"i":"catmullrom"},
+            {"t":3,"v":[0,0,-6],"i":"catmullrom"}
+          ]
+        },
+        "l_p1": {
+          "rotation": [
+            {"t":0,"v":[0,0,12],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,6],"i":"catmullrom"},
+            {"t":3,"v":[0,0,12],"i":"catmullrom"}
+          ]
+        },
+        "l_sec2": {
+          "rotation": [
+            {"t":0,"v":[0,0,-6],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,-6],"i":"catmullrom"},
+            {"t":3,"v":[0,0,-6],"i":"catmullrom"}
+          ]
+        },
+        "l_p2": {
+          "rotation": [
+            {"t":0,"v":[0,0,6],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,3],"i":"catmullrom"},
+            {"t":3,"v":[0,0,6],"i":"catmullrom"}
+          ]
+        },
+        "l_sec3": {
+          "rotation": [
+            {"t":0,"v":[0,0,-6],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,-6],"i":"catmullrom"},
+            {"t":3,"v":[0,0,-6],"i":"catmullrom"}
+          ]
+        },
+        "l_p3": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,0],"i":"catmullrom"},
+            {"t":3,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "l_sec4": {
+          "rotation": [
+            {"t":0,"v":[0,0,-6],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,-6],"i":"catmullrom"},
+            {"t":3,"v":[0,0,-6],"i":"catmullrom"}
+          ]
+        },
+        "l_p4": {
+          "rotation": [
+            {"t":0,"v":[0,0,-6],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,-3],"i":"catmullrom"},
+            {"t":3,"v":[0,0,-6],"i":"catmullrom"}
+          ]
+        },
+        "l_sec5": {
+          "rotation": [
+            {"t":0,"v":[0,0,-6],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,-6],"i":"catmullrom"},
+            {"t":3,"v":[0,0,-6],"i":"catmullrom"}
+          ]
+        },
+        "l_p5": {
+          "rotation": [
+            {"t":0,"v":[0,0,-12],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,-6],"i":"catmullrom"},
+            {"t":3,"v":[0,0,-12],"i":"catmullrom"}
+          ]
+        }
+      }
     },
     "sneak": {
       "length": 2,

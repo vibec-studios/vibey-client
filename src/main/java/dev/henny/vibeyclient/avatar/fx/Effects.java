@@ -51,10 +51,10 @@ public final class Effects {
             Bundle b = AvatarDraw.bundle(st, slot);
             if (b == null) {
                 st.idleEventTime[si] = -1f;
-                for (int k = 0; k < 3; k++) st.moveEventTime[si * 3 + k] = -1f;
+                for (int k = 0; k < AvatarState.MOVE_ANIMS; k++) st.moveEventTime[si * AvatarState.MOVE_ANIMS + k] = -1f;
                 continue;
             }
-            // idle events always run; walk / fly / sneak events while that animation is the main one (weight >= 0.5)
+            // idle events always run; the other states' events while that animation is the main one (weight >= 0.5)
             Bundle.Animation idle = b.animation("idle");
             if (idle != null && idle.events.length > 0) {
                 float t = AvatarDraw.time(idle, now);
@@ -63,14 +63,14 @@ public final class Effects {
                 st.idleEventTime[si] = t;
             }
             AvatarDraw.weights(st, b, slot, W);
-            for (int k = 0; k < 3; k++) {
+            for (int k = 0; k < AvatarState.MOVE_ANIMS; k++) {
                 Bundle.Animation a = b.animation(AvatarDraw.COSMETIC_ANIMS[k + 1]);
-                int i = si * 3 + k;
+                int i = si * AvatarState.MOVE_ANIMS + k;
                 if (a == null || a.events.length == 0 || W[k + 1] < 0.5f) {
                     st.moveEventTime[i] = -1f;
                     continue;
                 }
-                float t = AvatarDraw.time(a, now);
+                float t = AvatarDraw.time(st, k + 1, a, now);
                 float last = st.moveEventTime[i];
                 if (last >= 0f) run(st, b, a, last, t, a.loop);
                 st.moveEventTime[i] = t;
@@ -78,7 +78,7 @@ public final class Effects {
         }
     }
 
-    private static final float[] W = new float[4];
+    private static final float[] W = new float[AvatarDraw.COSMETIC_ANIMS.length];
 
     /** Fires events with time in (from, to], wrapping for loops. {@code from < 0} = start (includes t = 0). */
     private static void run(AvatarState st, Bundle b, Bundle.Animation a, float from, float to, boolean loop) {

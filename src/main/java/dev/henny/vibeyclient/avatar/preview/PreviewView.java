@@ -64,9 +64,18 @@ final class PreviewView implements AvatarPreview.View {
         st.x = st.y = st.z = 0;
         st.bodyYaw = 180f + yaw;
         st.walk = st.fly = st.sneak = 0;
-        boolean pet = AvatarDraw.bundle(st, Slot.PET) != null;
+        st.sprint = st.glide = st.idleLong = 0;
+        // pets (and other items with a happy animation) cheer while the preview plays an emote
+        st.happyTarget = st.emote != null && !st.emote.stopping() ? 1 : 0;
+        st.happy += (st.happyTarget - st.happy) * Math.min(1f, dt * 5f);
+        dev.henny.vibeyclient.avatar.AvatarTicker.states(st, now);
+        dev.henny.vibeyclient.avatar.bundle.Bundle petBundle = AvatarDraw.bundle(st, Slot.PET);
+        boolean pet = petBundle != null;
         placePet(now);
-        float size = Math.min(h / 2.3f, w / (pet ? 3.1f : 1.6f));
+        // the view is centred on the player: fit the pet's side (big pets stand further out)
+        float span = pet ? (float) Math.max(3.1, 2 * (dev.henny.vibeyclient.avatar.AvatarTicker.petSide(petBundle)
+                + dev.henny.vibeyclient.avatar.AvatarTicker.petHalfWidth(petBundle)) + 0.3) : 1.6f;
+        float size = Math.min(h / 2.3f, w / span);
         try {
             render(g, x, y, w, h, size, now);
         } catch (RuntimeException e) {
@@ -84,8 +93,9 @@ final class PreviewView implements AvatarPreview.View {
     private void placePet(double now) {
         double a = Math.toRadians(st.bodyYaw);
         double rxw = -Math.cos(a), rzw = -Math.sin(a), fx = -Math.sin(a), fz = Math.cos(a);
-        st.petX = st.petPrevX = rxw * 0.95 - fx * 0.2;
-        st.petZ = st.petPrevZ = rzw * 0.95 - fz * 0.2;
+        double side = dev.henny.vibeyclient.avatar.AvatarTicker.petSide(AvatarDraw.bundle(st, Slot.PET));
+        st.petX = st.petPrevX = rxw * side - fx * 0.2;
+        st.petZ = st.petPrevZ = rzw * side - fz * 0.2;
         st.petY = st.petPrevY = 0;
         st.petYaw = st.petPrevYaw = st.bodyYaw;
         st.petMove = 0;

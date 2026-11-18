@@ -8,6 +8,7 @@ import dev.henny.vibeyclient.avatar.Slot;
 import dev.henny.vibeyclient.avatar.anim.Clock;
 import dev.henny.vibeyclient.avatar.anim.EmotePlay;
 import dev.henny.vibeyclient.avatar.anim.Sampler;
+import dev.henny.vibeyclient.avatar.anim.StateWeights;
 import dev.henny.vibeyclient.avatar.bundle.Bundle;
 import dev.henny.vibeyclient.avatar.bundle.Bundle.Animation;
 import org.joml.Quaternionf;
@@ -192,24 +193,29 @@ public final class AvatarDraw {
         return false;
     }
 
-    /** Cosmetic animation names with meaning (SPEC §5), in {@link #weights} order. Others are ignored. */
-    public static final String[] COSMETIC_ANIMS = {"idle", "walk", "fly", "sneak"};
-
     /**
-     * Blend weights of idle / walk / fly / sneak for a cosmetic (missing animations weigh 0): walk by walk speed
-     * (pets: by their own movement), fly, sneak; idle gets the rest.
+     * Cosmetic animation names with meaning (SPEC §5), in {@link #weights} order. Others are ignored. {@code sprint},
+     * {@code glide}, {@code idle_long} and {@code happy} are optional (since 0.2.2); a bundle without them keeps
+     * playing {@code walk} / {@code fly} / {@code idle} in those situations, exactly like older clients.
      */
+    public static final String[] COSMETIC_ANIMS = StateWeights.NAMES;
+    public static final int IDLE = StateWeights.IDLE, WALK = StateWeights.WALK, FLY = StateWeights.FLY, SNEAK = StateWeights.SNEAK,
+            SPRINT = StateWeights.SPRINT, GLIDE = StateWeights.GLIDE, IDLE_LONG = StateWeights.IDLE_LONG, HAPPY = StateWeights.HAPPY;
+    private static final boolean[] HAS = new boolean[COSMETIC_ANIMS.length];
+
+    /** Blend weights of {@link #COSMETIC_ANIMS} for a cosmetic, see {@link StateWeights}. Pets move by {@code petMove}. */
     public static void weights(AvatarState st, Bundle b, Slot slot, float[] out) {
-        Animation walk = b.animation("walk"), fly = b.animation("fly"), sneak = b.animation("sneak");
-        out[1] = walk == null ? 0 : (slot == Slot.PET ? st.petMove : st.walk * (1f - st.fly));
-        out[2] = fly == null ? 0 : st.fly;
-        out[3] = sneak == null ? 0 : st.sneak * (1f - st.fly);
-        out[0] = b.animation("idle") == null ? 0 : Math.max(0f, 1f - out[1] - out[2] - out[3]);
+        for (int k = 0; k < HAS.length; k++) {
+            // an empty optional state (e.g. a track the Blockbench wizard prepared but nobody animated) counts as missing
+            Animation a = b.animation(COSMETIC_ANIMS[k]);
+            HAS[k] = a != null && (k <= SNEAK || a.tracks.length > 0 || a.events.length > 0);
+        }
+        StateWeights.compute(HAS, st.glide, st.fly, slot == Slot.PET ? st.petMove : st.walk, st.sprint, st.sneak, st.happy, st.idleLong, out);
     }
 
-    private static final float[] W = new float[4];
+    private static final float[] W = new float[COSMETIC_ANIMS.length];
 
-    /** idle always, walk / fly / sneak blended by {@link #weights}; visibility events follow the strongest animation that has some. */
+    /** All playing animations blended by {@link #weights}; visibility events follow the strongest animation that has some. */
     private static BoneRenderer.Mix cosmeticMix(AvatarState st, Bundle b, Slot slot, double now) {
         weights(st, b, slot, W);
         MIX.clear();
@@ -217,10 +223,10 @@ public final class AvatarDraw {
         for (int k = 0; k < COSMETIC_ANIMS.length; k++) {
             Animation a = b.animation(COSMETIC_ANIMS[k]);
             if (a == null) continue;
-            float t = time(a, now);
+            float t = time(st, k, a, now);
             MIX.add(a, t, W[k]);
             // idle keeps the visibility unless another animation with visibility events clearly dominates
-            float score = k == 0 ? Math.max(W[0], 0.5f) : W[k];
+            float score = k == IDLE ? Math.max(W[0], 0.5f) : W[k];
             if (a.hasVisibility && score > best) {
                 best = score;
                 MIX.visibility = a;
@@ -234,11 +240,54 @@ public final class AvatarDraw {
                 MIX.visibilityTime = time(idle, now);
             }
         }
+        offsets(st, b, slot, now, MIX);
         return MIX;
+    }
+
+    /**
+     * {@code cosmetic.offsetWhen}: shifts / turns the item's root bones while another slot is worn (and shown), eased
+     * in and out over ~0.3 s. Writes the blended offset into {@code mix}.
+     */
+    private static void offsets(AvatarState st, Bundle b, Slot slot, double now, BoneRenderer.Mix mix) {
+        if (b.offsetWhen.isEmpty()) return;
+        int n = Slot.all().length;
+        double last = st.offsetClock[slot.ordinal()];
+        double dt = Double.isNaN(last) ? 1.0 : Math.max(0.0, Math.min(1.0, now - last));
+        float k = (float) (1.0 - Math.exp(-dt * 12.0));
+        for (Bundle.OffsetRule r : b.offsetWhen) {
+            if (r.slot() == slot) continue;
+            Bundle other = bundle(st, r.slot());
+            boolean worn = other != null && !hiddenByArmor(st, other);
+            int i = slot.ordinal() * n + r.slot().ordinal();
+            float w = st.offsetWeight[i];
+            w += ((worn ? 1f : 0f) - w) * k;
+            if (Math.abs(w - (worn ? 1f : 0f)) < 0.002f) w = worn ? 1f : 0f;
+            st.offsetWeight[i] = w;
+            if (w <= 0f) continue;
+            float e = w * w * (3f - 2f * w); // smoothstep
+            for (int c = 0; c < 3; c++) {
+                mix.rootOffset[c] += r.offset()[c] * e;
+                mix.rootRotation[c] += r.rotation()[c] * e;
+            }
+            mix.hasRootOffset = true;
+        }
+        st.offsetClock[slot.ordinal()] = now;
     }
 
     public static float time(Animation a, double now) {
         return a.loop ? (float) (now % a.length) : Sampler.localTime((float) (now % (a.length * 2)), a.length, false);
+    }
+
+    /**
+     * Animation time of state {@code k}: the optional states (sprint, glide, idle_long, happy) start from the
+     * beginning when the state begins (non-looping ones hold their last frame); the others use the global clock.
+     */
+    public static float time(AvatarState st, int k, Animation a, double now) {
+        if (k >= SPRINT && k < st.stateStart.length && !Double.isNaN(st.stateStart[k])) {
+            double el = now - st.stateStart[k];
+            return a.loop ? (float) (el % a.length) : (float) Math.min(el, a.length);
+        }
+        return time(a, now);
     }
 
     private static double lerp(float t, double a, double b) {

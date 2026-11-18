@@ -217,12 +217,29 @@ export function closedEye(img, cx, cy, w, kind = "sleep", color = P.eye, thick =
 // ------------------------------------------------------------------------------------------------ previews
 const FRONT = { yaw: 32, pitch: 12 };
 
-/** Preview panels for pets: close-ups of named moments (idle/walk/fly/sneak), plus the pet beside the player. */
+/**
+ * Sideways follow distance of a ground pet in px, like the client (AvatarTicker.petSide): player radius 0.3 + the
+ * widest body cube (cubes thinner than 2 px ignored) × scale + 0.3, at least 0.95 blocks.
+ */
+export function petSidePx(json) {
+  const sc = json.cosmetic.pet?.scale ?? 1;
+  let m = 0;
+  for (const b of json.model?.bones ?? [])
+    for (const c of b.cubes ?? []) {
+      if (Math.abs(c.to[1] - c.from[1]) < 2 || Math.abs(c.to[2] - c.from[2]) < 2) continue;
+      m = Math.max(m, Math.abs(c.from[0]), Math.abs(c.to[0]) + (c.inflate ?? 0));
+    }
+  const half = Math.min(1.5, Math.max(0.1, (m * sc) / 16));
+  return Math.max(0.95, 0.3 + half + 0.3) * 16;
+}
+
+/** Preview panels for pets: close-ups of named moments (any state), plus the pet beside the player. */
 export function petPreview(moments, opts = {}) {
   return {
     panels: (_, B) => {
       const sc = B.json.cosmetic.pet?.scale ?? 1;
-      const out = [{ label: "with player", cam: FRONT, player: true, worldOffset: [20, 0, 6], petScale: sc, anims: [{ name: "idle", t: moments[0].t }], time: moments[0].t }];
+      const side = petSidePx(B.json);
+      const out = [{ label: "with player", cam: FRONT, player: true, worldOffset: [side, 0, 6], petScale: sc, anims: [{ name: "idle", t: moments[0].t }], time: moments[0].t }];
       for (const m of moments)
         out.push({
           label: m.label, ownFit: true, player: false, cam: m.cam ?? { yaw: 35, pitch: 14 }, petScale: sc,
@@ -244,3 +261,56 @@ export function holds(list) {
   }
   return out.sort((a, b) => a[0] - b[0]);
 }
+
+// ------------------------------------------------------------------------------------------------ aurora
+const smooth01 = (a, b, x) => {
+  const t = clamp01((x - a) / (b - a));
+  return t * t * (3 - 2 * t);
+};
+
+/**
+ * Vertical aurora rays in [0, 1] at position `along` (UV units along a ribbon) and loop phase ph (0..1). A sum of
+ * drifting sines: continuous along the ribbon and seamless in time (every term drifts a whole number of cycles per
+ * loop), so animated strips loop without a jump.
+ */
+export function auroraRays(along, ph, seed = 1) {
+  const T = [[0.11, 1, 1.0], [0.23, -2, 0.7], [0.41, 3, 0.45], [0.73, -4, 0.3]];
+  let s = 0, n = 0;
+  for (const [f, m, w] of T) {
+    s += w * (0.5 + 0.5 * Math.sin(2 * Math.PI * (f * along + m * ph) + seed * 1.7 + f * 9));
+    n += w;
+  }
+  return Math.pow(s / n, 1.7);
+}
+
+/**
+ * One aurora texel: t = height in the curtain (0 bottom hem … 1 top), along = position along the ribbon (UV units),
+ * ph = loop phase. Soft everywhere: the hem fades in, the light decays upwards and fades out completely at the top,
+ * vertical rays drift, colour runs mint → teal → blue → violet → a pink hint at the top. env (0..1) fades the ribbon
+ * ends. faces = 2 when both faces of a plane are drawn on top of each other (alpha is split so they add up).
+ * Returns [r, g, b, a] or null (fully transparent).
+ */
+export function auroraTexel(t, along, ph, o = {}) {
+  const { seed = 1, env = 1, maxA = 0.95, faces = 2 } = o;
+  const hem = smooth01(0, 0.1, t);
+  const body = Math.exp(-1.35 * Math.max(0, t - 0.1));
+  const top = 1 - smooth01(0.78, 1, t);
+  const rays = auroraRays(along, ph, seed);
+  // slow large-scale breathing of the brightness along the ribbon
+  const wave = 0.75 + 0.25 * Math.sin(2 * Math.PI * (along * 0.035 - ph) + seed);
+  let a = maxA * hem * body * top * (0.32 + 0.68 * rays) * wave * env;
+  if (a < 0.003) return null;
+  let c = mix("#7dffc4", P.auroraT, smooth01(0.08, 0.45, t));
+  c = mix(c, P.auroraB, smooth01(0.3, 0.58, t) * 0.85);
+  c = mix(c, P.auroraP, smooth01(0.5, 0.82, t) * 0.9);
+  c = mix(c, P.auroraM, smooth01(0.78, 1, t) * 0.6);
+  // the bright lower edge
+  const core = Math.max(0, 1 - Math.abs(t - 0.1) / 0.07);
+  if (core > 0) c = mix(c, "#d6fff0", core * 0.45);
+  if (faces === 2) a = 1 - Math.sqrt(1 - Math.min(0.98, a));
+  const C = rgba(c);
+  return [C[0], C[1], C[2], Math.round(255 * Math.min(1, a))];
+}
+
+/** smoothstep between a and b (exported for painters). */
+export const smoothstep = smooth01;

@@ -160,8 +160,9 @@ public final class DevDriver {
                 if (wd == null) return "err no wardrobe";
                 wd.stopEmote();
                 return "ok";
-            case "wardrobe":
-                dev.henny.vibeyclient.module.cosmetics.ui.WardrobeUi.openWardrobe(ClientCompat.screen());
+            case "wardrobe": // wardrobe [slot]
+                dev.henny.vibeyclient.module.cosmetics.ui.WardrobeUi.openWardrobe(ClientCompat.screen(),
+                        arg == null || arg.isBlank() ? null : dev.henny.vibeyclient.avatar.Slot.of(arg.trim()));
                 return "ok";
             case "close":
                 ClientCompat.openScreen(null);

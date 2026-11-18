@@ -74,13 +74,13 @@ offline showcase page `polar-pals.html` with in-game screenshots). They are **no
 
 | Id | Slot | Rarity | What it does |
 |---|---|---|---|
-| `vibey:polar_seal` | pet | legendary | Chibi seal pup, 20 s `idle` (blink, head tilt, sit-up clap with hearts + squeak, roll, nap with 3D Zs, stretch), galumph + belly-slide `walk`, superman `fly`, shy `sneak`. |
-| `vibey:polar_penguin` | pet | epic | Penguin chick in a knitted scarf: flaps, shows / tosses / gulps a fish, waddles with a belly slide, flaps madly in `fly`, ducks in `sneak`. |
-| `vibey:polar_owl_wings` | wings | legendary | Feathered wings: arm/forearm/hand bones, coverts + alula layers, 5 secondaries and 5 primaries as bones; folded `idle`, flap + glide `fly` (feather sprites), tucked `sneak`. |
-| `vibey:polar_aurora_wings` | wings | epic | Emissive translucent aurora veils (3-segment chains), 8-frame shimmer, sparkle trail. |
-| `vibey:polar_pompom_beanie` | hat | rare | Knitted beanie with Nordic band, braided ear flaps, springy pompom (boing, bounce, streams back). |
+| `vibey:polar_seal` | pet | legendary | Shoulder-high chibi seal pup (`pet.scale` 1.2), 13 s `idle` (blink, head tilt, sit-up clap with hearts + squeak, roll), galumph `walk`, belly-scoot `sprint`, superman `glide`/`fly`, shy `sneak`, hop-clap `happy`, nap with 3D Zs in `idle_long`. |
+| `vibey:polar_penguin` | pet | epic | Shoulder-high penguin chick (scale 0.95) in a knitted scarf: flaps, shows / tosses / gulps a fish, waddles, belly-slides in `sprint`, superman `glide`, flaps madly in `fly`, ducks in `sneak`, cheers in `happy`, dozes off in `idle_long`. |
+| `vibey:polar_owl_wings` | wings | legendary | Feathered wings: arm/forearm/hand bones, coverts + alula layers, 5 secondaries and 5 primaries as bones; folded `idle`, flap + glide `fly` (feather sprites), soaring `glide`, tucked `sneak`; `offsetWhen` back. |
+| `vibey:polar_aurora_wings` | wings | epic | Soft aurora veils: chains of 2 px emissive translucent segments with one continuous curtain texture (12-frame interpolated strip), flowing waves, `glide`, sparkle trail; `offsetWhen` back. |
+| `vibey:polar_pompom_beanie` | hat | rare | Calm knitted beanie (three colours): purple crown, ribbed cuff, one clean snow-white pompom (boing, bounce, streams back). |
 | `vibey:polar_igloo_backpack` | back | epic | Mini igloo on straps; a seal pup peeks out, blinks, waves and hides. |
-| `vibey:polar_aurora_ring` | aura | epic | Ring of aurora curtains with a travelling wave, orbiting crystal snowflakes, rising sparkles. |
+| `vibey:polar_aurora_ring` | aura | epic | Soft northern lights: three thin curved ribbons of segments with drifting rays and alpha falloff, phase-shifted waves (fold, lift, lean, stretch), slow turn, orbiting crystal snowflakes, rising sparkles. |
 | `vibey:polar_snowfall_cape` | cape | rare | HD (4×) 8-frame cape: the pals on an ice floe under a rippling aurora in falling snow. |
 
 ```sh
@@ -99,11 +99,16 @@ instances `%APPDATA%\VibeLauncher\instances\<id>\minecraft` and `versions/*/run`
 (`VIBEYCLIENT_SHOWCASE=<folder>` + optional `VIBEYCLIENT_SHOWCASE_PLAN=content/src/polar-pals/showcase.json`, then
 `./gradlew :fabric-1.21.11:runClientGameTest`; screenshots `sc_*.png`).
 
-Design tricks that keep everything data-driven on the 0.2.1 engine (only `idle`/`walk`/`fly`/`sneak` exist and the
-clock is global): long `idle` loops tell a little story; eyelids, the fish, the peeking pup and the nap Zs rest
-*inside* the model and are moved out by `idle` position offsets, so they vanish by themselves when `walk`/`fly`
-take over; belly slides are a phase of the `walk` loop because sprinting is not a separate state; pet `walk` and
-`fly` are designed to look right when both play at full weight (moving pet + flying player).
+Design tricks: long `idle` loops tell a little story; eyelids, the fish, the peeking pup and the nap Zs rest
+*inside* the model and are moved out by position offsets, so they vanish by themselves when another state takes
+over (the Zs are additionally hidden by `idle` visibility events and shown by `idle_long`'s). The collection uses
+the optional states of client 0.2.2 (`sprint`, `glide`, `idle_long`, `happy`, SPEC §5); on 0.2.1 the items still
+play `idle`/`walk`/`fly`/`sneak` (no belly slide while sprinting, no nap). The aurora items share one painter
+(`auroraTexel` in `_polar.mjs`): sine-sum rays that loop seamlessly in time and run continuously across segments,
+alpha split over the two coplanar faces of each plane, `interpolate: true` strips. Both wings carry
+`cosmetic.offsetWhen` for the `back` slot. `b.texture(id, { interpolate: true })` writes `animation.interpolate`.
+The push script sends `thumbnails/<name>.png` with every item, so DEV items show their thumbnail in the wardrobe
+(`--no-thumbnails` leaves them out: such DEV items show a live 3D preview in their card).
 
 ## Build
 

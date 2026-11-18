@@ -684,7 +684,7 @@ async function main() {
 				{ name: 'wing_right', parent: 'wings', attach: '', origin: [1.5, 21, 2.5] },
 				{ name: 'wing_left', parent: 'wings', attach: '', origin: [-1.5, 21, 2.5] },
 			]);
-			assert.deepEqual(r.anims, ['idle:loop', 'walk:loop', 'fly:loop', 'sneak:loop']);
+			assert.deepEqual(r.anims, ['idle:loop', 'walk:loop', 'fly:loop', 'sneak:loop', 'glide:loop']);
 			assert.deepEqual(r.tex, [['main', 64, 64]]);
 			assert.deepEqual(r.meta, { id: 'creator:frost_wings', name: { en: 'Frost Wings', de: 'Frostflügel' }, slot: 'wings' });
 			assert.equal(r.ref, true);

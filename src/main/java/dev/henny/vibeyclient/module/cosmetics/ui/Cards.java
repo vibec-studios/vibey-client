@@ -3,7 +3,10 @@ package dev.henny.vibeyclient.module.cosmetics.ui;
 import dev.henny.vibeyclient.api.Lang;
 import dev.henny.vibeyclient.avatar.AvatarItem;
 import dev.henny.vibeyclient.avatar.Rarity;
+import dev.henny.vibeyclient.avatar.Slot;
 import dev.henny.vibeyclient.avatar.Thumbnails;
+import dev.henny.vibeyclient.avatar.preview.AvatarPreview;
+import dev.henny.vibeyclient.api.Services;
 import dev.henny.vibeyclient.ui.Gfx;
 import dev.henny.vibeyclient.ui.Theme;
 import dev.henny.vibeyclient.ui.Widgets;
@@ -63,11 +66,55 @@ final class Cards {
         else g.text(g.clip(rarityLabel(item.rarity()), textW), tx, ny + 10, locked ? Theme.alpha(item.rarity().color, 0.5f) : item.rarity().color);
     }
 
-    /** Thumbnail, or a monogram tile in the rarity colour while it loads / without one. */
+    /**
+     * Thumbnail, or – for a DEV item pushed without one – a small live 3D preview of the item on the player, or a
+     * monogram tile in the rarity colour while it loads / without one.
+     */
     static void thumbnail(Gfx g, AvatarItem item, int x, int y, int size) {
         if (Thumbnails.draw(g, item, x, y, size)) return;
+        if (item.isDev() && devPreview(g, item, x, y, size)) return;
         int m = Math.max(10, size / 2);
         Widgets.monogram(g, item.name(), x + (size - m) / 2, y + (size - m) / 2, m, item.rarity().color);
+    }
+
+    /** Live previews of DEV items without a thumbnail (by id + revision), least recently used first out. */
+    private static final int DEV_VIEWS_MAX = 12;
+    private static final java.util.LinkedHashMap<String, AvatarPreview.View> DEV_VIEWS = new java.util.LinkedHashMap<>(16, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(java.util.Map.Entry<String, AvatarPreview.View> e) {
+            return size() > DEV_VIEWS_MAX;
+        }
+    };
+    private static AvatarPreview devService;
+
+    private static boolean devPreview(Gfx g, AvatarItem item, int x, int y, int size) {
+        if (item.bundle() == null || size < 24) return false;
+        AvatarPreview service = Services.get(AvatarPreview.class).orElse(null);
+        if (service == null) return false;
+        if (service != devService) {
+            DEV_VIEWS.clear();
+            devService = service;
+        }
+        String key = item.id() + "#" + item.revision();
+        AvatarPreview.View v = DEV_VIEWS.get(key);
+        try {
+            if (v == null) {
+                v = service.create();
+                if (v == null) return false;
+                for (Slot s : Slot.all()) v.override(s, null);
+                if (item.isEmote()) v.playEmote(item.id());
+                else v.override(item.slot(), item.id());
+                Slot slot = item.slot();
+                v.setYaw(slot == Slot.WINGS || slot == Slot.BACK || slot == Slot.CAPE ? 160f : 25f);
+                v.setAutoRotate(false);
+                DEV_VIEWS.put(key, v);
+            }
+            v.draw(g, x, y, size, size, 0f);
+            return true;
+        } catch (RuntimeException e) {
+            DEV_VIEWS.remove(key);
+            return false;
+        }
     }
 
     static String rarityLabel(Rarity r) {

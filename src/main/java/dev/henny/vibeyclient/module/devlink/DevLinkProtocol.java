@@ -19,7 +19,7 @@ import java.util.function.Supplier;
 
 /**
  * The live link protocol of SPEC §8 on top of {@link WebSocketServer}: {@code hello} (token) → {@code welcome},
- * {@code push} → {@code pushed}/{@code error}, {@code remove}, {@code ping} → {@code pong}. Unknown types are ignored.
+ * {@code push} (optional {@code thumbnail}) → {@code pushed}/{@code error}, {@code remove}, {@code ping} → {@code pong}. Unknown types are ignored.
  * Free of Minecraft classes: the game side comes in through {@link Game} and the {@code main} executor (the client
  * thread), so it can be tested without the game.
  */
@@ -231,9 +231,22 @@ public final class DevLinkProtocol implements WebSocketServer.Handler {
             reject(c, id, bundle, "unknown action " + actionName);
             return;
         }
+        // optional wardrobe thumbnail (base64 PNG <= 256x256, <= 256 KiB); a bad one is ignored with a warning
+        byte[] thumbnail = null;
+        String thumbWarning = null;
+        String t = str(msg, "thumbnail");
+        if (t != null && !t.isEmpty()) {
+            try {
+                thumbnail = java.util.Base64.getDecoder().decode(t.startsWith("data:") ? t.substring(t.indexOf(',') + 1) : t);
+            } catch (IllegalArgumentException e) {
+                thumbWarning = "thumbnail ignored: not base64";
+            }
+        }
+        final byte[] thumb = thumbnail;
+        final String thumbWarn = thumbWarning;
         CompletableFuture.supplyAsync(() -> {
                     Optional<DevItems> engine = game.devItems();
-                    return engine.isEmpty() ? null : engine.get().push(bundle, action);
+                    return engine.isEmpty() ? null : engine.get().push(bundle, action, thumb);
                 }, main)
                 .orTimeout(PUSH_TIMEOUT_MS, TimeUnit.MILLISECONDS)
                 .whenComplete((result, err) -> {
@@ -253,6 +266,7 @@ public final class DevLinkProtocol implements WebSocketServer.Handler {
                         JsonArray warnings = new JsonArray();
                         List<String> w = result.warnings();
                         if (w != null) w.forEach(warnings::add);
+                        if (thumbWarn != null) warnings.add(thumbWarn);
                         ok.add("warnings", warnings);
                         send(c, ok);
                         game.pushed(bundle, result);

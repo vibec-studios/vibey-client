@@ -3,7 +3,9 @@
 // slot is equipped, everything else (other cosmetics, emotes) is only loaded – nothing is played.
 //
 //   node tools/push-to-game.mjs [folder] [--game-dir <dir>] [--instance <launcher instance id>] [--no-equip]
+//        [--no-thumbnails]
 //   npm run push:polar                         (= node tools/push-to-game.mjs dist/polar-pals)
+//   Each item's thumbnails/<name>.png (if any) is sent along as its wardrobe thumbnail.
 //
 // Finding the game: --game-dir wins. Otherwise every known game dir is checked for vibeyclient/devlink.json (written
 // while "Creator mode" is on): %APPDATA%\.minecraft, the Vibe Launcher instances (%APPDATA%\VibeLauncher\instances\
@@ -31,6 +33,7 @@ const flag = (k) => {
 const gameDirArg = opt("--game-dir");
 const instance = opt("--instance");
 const noEquip = flag("--no-equip");
+const noThumbs = flag("--no-thumbnails");
 if (flag("--help") || flag("-h")) {
   console.log(readFileSync(fileURLToPath(import.meta.url), "utf8").split("\n").slice(0, 12).join("\n").replace(/^\/\/ ?/gm, ""));
   process.exit(0);
@@ -200,8 +203,17 @@ for (const f of files) {
   const equip = !noEquip && bundle.kind === "cosmetic" && !equippedSlots.has(slot);
   if (equip) equippedSlots.add(slot);
   const action = equip ? "equip" : "none";
+  // wardrobe thumbnail (SPEC §8 push.thumbnail): <folder>/thumbnails/<name>.png, PNG ≤ 256×256 and ≤ 256 KiB
+  const msg = { type: "push", bundle, action };
+  const thumbFile = join(folder, "thumbnails", f.replace(/\.vibey$/, ".png"));
+  if (!noThumbs && existsSync(thumbFile)) {
+    const png = readFileSync(thumbFile);
+    const w = png.readUInt32BE(16), h = png.readUInt32BE(20);
+    if (png.length <= 256 * 1024 && w <= 256 && h <= 256) msg.thumbnail = png.toString("base64");
+    else console.log(`${C.dim}  (${thumbFile}: ${w}×${h}, ${Math.round(png.length / 1024)} KiB – too big for a thumbnail, skipped)${C.r}`);
+  }
   try {
-    const r = await request(link, { type: "push", bundle, action }, (m) => (m.type === "pushed" || m.type === "error") && (m.id === bundle.id || m.id == null));
+    const r = await request(link, msg, (m) => (m.type === "pushed" || m.type === "error") && (m.id === bundle.id || m.id == null));
     if (r.type === "pushed" && r.ok !== false) {
       const warn = r.warnings?.length ? `  ${C.dim}warnings: ${r.warnings.join("; ")}${C.r}` : "";
       console.log(`${C.ok}✓${C.r} ${bundle.id.padEnd(30)} ${slot.padEnd(7)} ${equip ? "loaded + equipped" : "loaded"}${warn}`);
