@@ -16,7 +16,7 @@ modules. Every part is a module you can switch off. **Everything is free.** Ther
 
 | Title screen | Wardrobe |
 |---|---|
-| ![Vibey title screen with the seal on its ice floe](docs/screenshots/title-screen.png) | ![Wardrobe with wings selected and a 3D preview](docs/screenshots/wardrobe.png) |
+| ![Vibey title screen with the player preview and cosmetics](docs/screenshots/title-preview.png) | ![Wardrobe with wings selected and a 3D preview](docs/screenshots/wardrobe.png) |
 | **Cosmetics in game** | **Emote wheel (B)** |
 | ![Seal beanie, neon wings, ember aura and seal pet](docs/screenshots/cosmetics-all.png) | ![Emote wheel in a world](docs/screenshots/emote-wheel.png) |
 | **Friends sidebar (G) with an invite** | **Chat** |
@@ -35,8 +35,9 @@ against a local test backend with bot accounts.*
 
 ### UI & menus
 
-- **Vibey title screen:** singleplayer, multiplayer, wardrobe, friends and settings on the left, the seal on its
-  ice floe on the right, a status line with the client version and whether
+- **Vibey title screen:** singleplayer, multiplayer, wardrobe, friends and settings on the left, your own player
+  with all equipped cosmetics on the right (drag to rotate; now and then it plays one of your emotes), the seal in
+  the corner and on its ice floe when cosmetics are off, a status line with the client version and whether
   Vibe is online. *Vibey main menu* off (or *Classic menu*) gives you the vanilla title screen back, with a small
   Vibey button.
 - **Welcome in three steps** on first start: language, online features on or off, the most important keys. You
@@ -73,6 +74,10 @@ Friends on the Vibe backend, logged in with your Minecraft account (no extra reg
 | Invite toast in game | Group chat |
 |---|---|
 | ![Invite toast: Juno invites you](docs/screenshots/social-09-invite-toast-game.png) | ![Group chat](docs/screenshots/social-07-group-chat.png) |
+
+*A friend accepted the invite and joined the hosted world – their cosmetics and emotes show up for you:*
+
+![A friend joined through an invite, with their ice crown, guitar emote and seal pet](docs/screenshots/invite-joined.png)
 
 ### Cosmetics
 
@@ -256,6 +261,12 @@ Social against a **local** backend (never the dev bypass against production): st
 
 `vibeyclient.devAuth` only works in a dev workspace (release builds always log in through Mojang). On NeoForge use
 `127.0.0.1` instead of `localhost`.
+
+Multi-client tests (dev workspace only): `-Dvibeyclient.devDriver=<port>` starts a small local remote control
+(`dev/DevDriver`) so scripts can equip items, play emotes and take screenshots in several clients at once;
+`scripts/live-sync-watch.ts` logs what the backend sends a third account; `-Dvibeyclient.devOfflineHost=true` lets
+a hosted world accept dev accounts without a Mojang session (for invite tests through a local relay started with
+`ALLOW_OFFLINE=1 DOMAIN=127-0-0-1.nip.io`). None of these exist in release builds.
 
 Default backend (`https://vibe.henny.dev`) and relay are set in `gradle.properties` and baked into the generated
 `BuildInfo` class.

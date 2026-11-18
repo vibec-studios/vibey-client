@@ -61,9 +61,10 @@ MenuEntries.register(MenuEntries.Place.PAUSE, new MenuEntries.Entry("friends", "
 
 Core orders – title: singleplayer 0, multiplayer 10, wardrobe 20, friends 30, Vibey settings 40, options 50,
 mods 60 (Mod Menu on Fabric, NeoForge's mod list), quit 1000 (pinned to the bottom); groups split at 20 / 50.
-Pause: Vibey 0, wardrobe 10, friends 20, host 30. The core already registers `wardrobe` / `friends` (open the tab
-with that id, else the module's settings page) and `host` (`HostingService.openHostScreen()` while `canHost()`);
-replace them with your own screens if you have them. Entries of disabled modules are hidden via `visible`.
+Pause: Vibey 0, wardrobe 10, friends 20. The core registers defaults for `wardrobe` / `friends` (open the tab
+with that id, else the module's settings page); the cosmetics module replaces `wardrobe` with its full-screen
+wardrobe and social replaces `friends` with the sidebar. There is no `host` pause entry: the multiplayer module puts
+*Host World* in place of vanilla's *Open to LAN*. Entries of disabled modules are hidden via `visible`.
 
 **Player preview on the title screen** – register `api/service/MenuPreview`:
 
