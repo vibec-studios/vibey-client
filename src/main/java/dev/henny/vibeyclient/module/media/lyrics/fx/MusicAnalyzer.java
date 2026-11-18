@@ -45,7 +45,7 @@ public final class MusicAnalyzer {
     public static volatile int drops;
     public static volatile float bpm;
 
-    // statistics (worker): time and allocated bytes per hop
+    // statistics (worker): time per hop, bytes allocated in steady-state hops
     public static volatile long hops;
     public static volatile double hopMicrosAvg;
     public static volatile double hopMicrosMax;
@@ -118,13 +118,17 @@ public final class MusicAnalyzer {
             if (!playing && now - lastActiveNanos > IDLE_STOP_NANOS) break;
             long allocBefore = mx != null ? mx.getCurrentThreadAllocatedBytes() : 0;
             double t = now / 1e9 - timeBase;
+            boolean built = false;
             Analysis used;
             Source src = Source.NONE;
             AudioPlayer p = player;
             if (p != null && playing) {
                 int rate = p.sampleRate();
                 int n = rate > 32000 ? 2048 : 1024;
-                if (song == null || song.rate() != rate || song.size() != n) song = new Analysis(rate, n);
+                if (song == null || song.rate() != rate || song.size() != n) {
+                    song = new Analysis(rate, n);
+                    built = true;
+                }
                 used = song;
                 src = Source.SONG;
                 if (p.ring().read(p.positionFrames(), window, n)) song.process(window, t);
@@ -133,7 +137,10 @@ public final class MusicAnalyzer {
                 PcmRing ring = LoopbackCapture.ring();
                 int rate = ring.rate();
                 int n = rate > 32000 ? 2048 : rate > 16000 ? 1024 : 512;
-                if (pc == null || pc.rate() != rate || pc.size() != n) pc = new Analysis(rate, n);
+                if (pc == null || pc.rate() != rate || pc.size() != n) {
+                    pc = new Analysis(rate, n);
+                    built = true;
+                }
                 used = pc;
                 src = Source.PC;
                 if (ring.read(ring.end(), window, n)) pc.process(window, t);
@@ -166,7 +173,8 @@ public final class MusicAnalyzer {
             }
             publish(used, src);
             long took = System.nanoTime() - now;
-            if (mx != null) allocatedBytes += Math.max(0, mx.getCurrentThreadAllocatedBytes() - allocBefore);
+            // steady state only: a hop that (re)built the analysis for a new sample rate allocates its buffers once
+            if (mx != null && !built && count > 0) allocatedBytes += Math.max(0, mx.getCurrentThreadAllocatedBytes() - allocBefore);
             count++;
             double us = took / 1000.0;
             avg = count == 1 ? us : avg * 0.98 + us * 0.02;

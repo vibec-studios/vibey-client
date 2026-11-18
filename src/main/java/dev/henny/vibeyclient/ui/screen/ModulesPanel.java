@@ -268,10 +268,16 @@ public final class ModulesPanel implements Panel {
             y += 26;
         }
         for (String notice : m.notices()) {
-            g.rect(x, y, w, 20, Theme.alpha(Theme.WARN, 0.10f));
-            g.vline(x, y, 20, Theme.WARN);
-            g.text(g.clip(notice, w - 12), x + 8, y + 6, Theme.WARN);
-            y += 26;
+            java.util.List<String> lines = Ui.wrap(g, notice, w - 12);
+            int nh = 10 + lines.size() * 10;
+            g.rect(x, y, w, nh, Theme.alpha(Theme.WARN, 0.10f));
+            g.vline(x, y, nh, Theme.WARN);
+            int ly = y + 6;
+            for (String l : lines) {
+                g.text(l, x + 8, ly, Theme.WARN);
+                ly += 10;
+            }
+            y += nh + 6;
         }
         return y + 6;
     }

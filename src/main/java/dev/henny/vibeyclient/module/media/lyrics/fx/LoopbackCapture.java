@@ -25,6 +25,7 @@ public final class LoopbackCapture {
     private static final PcmRing RING = new PcmRing(1 << 14);
     private static volatile State state = State.OFF;
     private static volatile boolean wanted;
+    private static volatile boolean pinned;
     private static volatile long unwantedSince;
     private static Thread thread;
     private static volatile Process process;
@@ -47,6 +48,7 @@ public final class LoopbackCapture {
 
     /** Client tick: whether the effects want the PC sound now; the helper stops 10 s after it is no longer wanted. */
     public static synchronized void want(boolean on) {
+        if (pinned) on = true;
         if (on) {
             wanted = true;
             unwantedSince = 0;
@@ -62,6 +64,12 @@ public final class LoopbackCapture {
             unwantedSince = System.nanoTime();
         }
         if (thread != null && unwantedSince != 0 && System.nanoTime() - unwantedSince > 10_000_000_000L) stopNow();
+    }
+
+    /** Tests: keep the helper wanted regardless of what plays (false = back to normal). */
+    public static synchronized void pin(boolean on) {
+        pinned = on;
+        want(on);
     }
 
     /** The setting changed: try again after the helper was given up on. */

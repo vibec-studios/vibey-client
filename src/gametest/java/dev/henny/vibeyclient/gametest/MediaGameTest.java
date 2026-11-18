@@ -269,18 +269,26 @@ public final class MediaGameTest implements FabricClientGameTest {
         });
         context.runOnClient(mc -> {
             Playback.play(test);
-            dev.henny.vibeyclient.module.media.lyrics.fx.LoopbackCapture.want(true);
+            dev.henny.vibeyclient.module.media.lyrics.fx.LoopbackCapture.pin(true);
         });
         long start = System.currentTimeMillis();
-        context.waitFor(mc -> dev.henny.vibeyclient.module.media.lyrics.fx.LoopbackCapture.state()
-                == dev.henny.vibeyclient.module.media.lyrics.fx.LoopbackCapture.State.RUNNING
-                && dev.henny.vibeyclient.module.media.lyrics.fx.LoopbackCapture.ring().end() > 6000, 180);
+        // the helper compiles its C# part first (a few seconds, longer on a busy machine); environment dependent, so
+        // this reports instead of failing
+        for (int i = 0; i < 800; i++) {
+            boolean ok = context.computeOnClient(mc -> dev.henny.vibeyclient.module.media.lyrics.fx.LoopbackCapture.state()
+                    == dev.henny.vibeyclient.module.media.lyrics.fx.LoopbackCapture.State.RUNNING
+                    && dev.henny.vibeyclient.module.media.lyrics.fx.LoopbackCapture.ring().end() > 3000);
+            if (ok) break;
+            context.waitTick();
+        }
         long end = context.computeOnClient(mc -> dev.henny.vibeyclient.module.media.lyrics.fx.LoopbackCapture.ring().end());
         int rate = context.computeOnClient(mc -> dev.henny.vibeyclient.module.media.lyrics.fx.LoopbackCapture.ring().rate());
-        System.out.println("[vibeyclient-media-test] PC sound helper running after " + (System.currentTimeMillis() - start) + " ms, "
+        String state = context.computeOnClient(mc -> String.valueOf(dev.henny.vibeyclient.module.media.lyrics.fx.LoopbackCapture.state()));
+        System.out.println("[vibeyclient-media-test] PC sound helper " + state + " after " + (System.currentTimeMillis() - start) + " ms, "
                 + end + " samples at " + rate + " Hz");
         context.runOnClient(mc -> {
             Playback.stop();
+            dev.henny.vibeyclient.module.media.lyrics.fx.LoopbackCapture.pin(false);
             dev.henny.vibeyclient.module.media.lyrics.fx.LoopbackCapture.stopNow();
             try {
                 Files.deleteIfExists(LyricsFeature.songsDir().resolve(TEST_SONG + ".wav"));

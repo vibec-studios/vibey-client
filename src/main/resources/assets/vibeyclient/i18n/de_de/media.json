@@ -3,7 +3,7 @@
   "description": "Musik, Songtexte, Himmel und Videos – und der HUD-Editor, um alles zu platzieren.",
   "menu": "Medien",
   "notice": {
-    "conflict": "{0}: kommt vom installierten {1}. Der Rest von Medien läuft weiter."
+    "conflict": "{0}: kommt vom installierten {1}."
   },
   "setting": {
     "editHud": "HUD-Layout",
