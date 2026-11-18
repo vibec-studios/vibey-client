@@ -74,6 +74,8 @@ public final class PlayLinks {
     private static volatile String wanted;
     /** The backend the current link was made with: still used for the DELETE when the service went away meanwhile. */
     private static volatile VibeBackend madeWith;
+    /** The last DELETE in flight: the quit hook waits for it (the world closing on quit starts it). */
+    private static volatile java.util.concurrent.CompletableFuture<?> lastDelete;
     private static int failures;
     private static ScheduledFuture<?> retryTask;
     private static boolean hookInstalled;
@@ -312,6 +314,7 @@ public final class PlayLinks {
         VibeBackend backend = Services.get(VibeBackend.class).orElse(madeWith);
         if (backend == null || l == null || l.code() == null) return;
         var f = backend.request("DELETE", PATH + "/" + l.code(), null);
+        lastDelete = f;
         if (!wait) {
             f.whenComplete((r, e) -> {
                 if (e == null) MultiplayerModule.LOG.info("Play link {} deleted", l.code());
@@ -333,7 +336,18 @@ public final class PlayLinks {
         wanted = null;
         link = null;
         generation++;
-        if (l != null) delete(l, true);
+        if (l != null) {
+            delete(l, true);
+            return;
+        }
+        var pending = lastDelete;
+        if (pending == null || pending.isDone()) return;
+        try {
+            pending.get(QUIT_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (ExecutionException | TimeoutException ignored) {
+        }
     }
 
     // ============================================================================================ body / answer

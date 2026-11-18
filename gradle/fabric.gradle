@@ -88,12 +88,15 @@ if (project.minecraft_version == '1.21.11') {
     // -Dvibeyclient.api=http://localhost:3100 -Dvibeyclient.username=VibeyTester (see SocialGameTest)
     ['clientGameTest', 'client'].each { run ->
         loom.runs.named(run) {
-            ['vibeyclient.devAuth', 'vibeyclient.api', 'vibeyclient.socialTest', 'vibeyclient.devDriver', 'vibeyclient.devOfflineHost'].each { k ->
+            ['vibeyclient.devAuth', 'vibeyclient.api', 'vibeyclient.socialTest', 'vibeyclient.devDriver', 'vibeyclient.devOfflineHost', 'vibeyclient.playLinkTest'].each { k ->
                 def v = System.getProperty(k)
                 if (v != null) vmArg "-D${k}=${v}"
             }
             def user = System.getProperty('vibeyclient.username')
             if (user) programArgs '--username', user
+            // -Dvibeyclient.quickPlay=<world>: open that singleplayer world right away (dev runs, e.g. play link quit test)
+            def quick = System.getProperty('vibeyclient.quickPlay')
+            if (quick && run == 'client') programArgs '--quickPlaySingleplayer', quick
             def dir = System.getProperty('vibeyclient.runDir')
             if (dir && run == 'client') runDir = dir
         }

@@ -28,6 +28,8 @@ public final class HostScreen extends MpCardScreen {
     private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm");
     private long copiedAt;
     private long linkCopiedAt;
+    /** Last drawn "Copy invite link" button (x, y, w, h in GUI pixels) or null; for the gametest's click. */
+    private volatile int[] inviteButton;
 
     public HostScreen(Screen parent) {
         super(T.text("title"), parent);
@@ -163,6 +165,7 @@ public final class HostScreen extends MpCardScreen {
             hit(bx, by, btnW, 18, () -> {
                 if (PlayLinks.copy()) linkCopiedAt = System.currentTimeMillis();
             });
+            inviteButton = new int[]{bx, by, btnW, 18};
         } else if (hosting && (st == PlayLinks.State.ERROR)) {
             String bl = T.get("button.retry");
             btnW = g.width(bl) + 16;
@@ -174,6 +177,7 @@ public final class HostScreen extends MpCardScreen {
             g.textCenter(bl, bx + btnW / 2, by + 5, TEXT);
             hit(bx, by, btnW, 18, PlayLinks::retry);
         }
+        if (!(hosting && link != null)) inviteButton = null;
         int textW = w - 20 - (btnW > 0 ? btnW + 8 : 0);
         String main;
         String sub;
@@ -184,7 +188,7 @@ public final class HostScreen extends MpCardScreen {
             sub = T.get("link.none.hint");
             mainColor = DIM;
         } else if (link != null) {
-            main = link.url();
+            main = link.url().replaceFirst("^https?://", "");
             sub = link.expiresAt() > 0 ? T.get("link.expires", TIME.format(Instant.ofEpochMilli(link.expiresAt()).atZone(ZoneId.systemDefault())))
                     : T.get("link.hint");
         } else {
@@ -218,6 +222,11 @@ public final class HostScreen extends MpCardScreen {
         }
         g.text(g.clip(sub, textW), x + 10, y + 32, subColor);
         return y + h;
+    }
+
+    /** Bounds of the "Copy invite link" button as last drawn, or null (tests). */
+    public int[] inviteButtonBounds() {
+        return inviteButton;
     }
 
     /** One line: players · game mode · whitelist. */

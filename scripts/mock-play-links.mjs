@@ -12,7 +12,8 @@
 // Options: --port (3201) --upstream (none: everything else 404) --public-url (http://127.0.0.1:<port>)
 //          --log <file.jsonl> --rate <n per hour> (10) --ttl <seconds> (43200) --relay-domains a.b,c.d (any)
 //          --missing (answer 404 for the routes: a backend without play links)
-// Debug: GET /__mock/log (requests so far), GET /__mock/links (active links), POST /__mock/reset.
+// Debug: GET /__mock/log (requests so far), GET /__mock/links (active links), POST /__mock/reset,
+//        POST /__mock/config {"missing": bool, "rate": n} (switch behaviour at runtime, e.g. from a gametest).
 import http from "node:http";
 import net from "node:net";
 import fs from "node:fs";
@@ -31,11 +32,11 @@ const PORT = Number(opt("port", "3201"));
 const UPSTREAM = opt("upstream", null) ? new URL(opt("upstream")) : null;
 const PUBLIC_URL = opt("public-url", `http://127.0.0.1:${PORT}`).replace(/\/+$/, "");
 const LOG_FILE = opt("log", null);
-const RATE_MAX = Number(opt("rate", "10"));
+let RATE_MAX = Number(opt("rate", "10"));
 const RATE_WINDOW_MS = 60 * 60 * 1000;
 const TTL_SECONDS = Number(opt("ttl", String(12 * 60 * 60)));
 const RELAY_DOMAINS = (opt("relay-domains", "") || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
-const MISSING = flag("missing");
+let MISSING = flag("missing");
 
 // ---------------------------------------------------------------------------------------------- contract rules
 
@@ -220,7 +221,7 @@ async function handlePlayLinks(req, res, url) {
     const now = Date.now();
     const recent = (hits.get(user.id) ?? []).filter((t) => t > now - RATE_WINDOW_MS);
     if (recent.length >= RATE_MAX) {
-      const retry = Math.ceil((recent[0] + RATE_WINDOW_MS - now) / 1000);
+      const retry = recent.length ? Math.ceil((recent[0] + RATE_WINDOW_MS - now) / 1000) : 3600;
       hits.set(user.id, recent);
       return done(429, err("rate_limited", "Zu viele neue Spiel-Links – bitte später erneut versuchen.", { retryAfter: retry }), null, { "retry-after": String(retry) });
     }
@@ -291,6 +292,16 @@ const server = http.createServer(async (req, res) => {
   try {
     if (url.pathname === "/__mock/log") return send(res, 200, requests);
     if (url.pathname === "/__mock/links") return send(res, 200, [...links.values()].map(view));
+    if (url.pathname === "/__mock/config" && req.method === "POST") {
+      const c = JSON.parse((await readBody(req)) || "{}");
+      if (typeof c.missing === "boolean") MISSING = c.missing;
+      if (Number.isInteger(c.rate)) {
+        RATE_MAX = c.rate;
+        hits.clear();
+      }
+      console.log(`[mock] config: missing=${MISSING} rate=${RATE_MAX}`);
+      return send(res, 200, { missing: MISSING, rate: RATE_MAX });
+    }
     if (url.pathname === "/__mock/reset" && req.method === "POST") {
       links.clear();
       hits.clear();
