@@ -118,6 +118,11 @@ public final class MultiplayerModule extends VibeyModule {
     }
 
     @Override
+    public void tick() {
+        if (MpDevCheck.enabled()) MpDevCheck.tick();
+    }
+
+    @Override
     public void onWorldJoin() {
         MpLoader.sendModList();
     }
@@ -194,22 +199,12 @@ public final class MultiplayerModule extends VibeyModule {
         @Override
         public String address() {
             if (!HostSession.isHosting() || HostSession.status() != HostSession.Status.ONLINE) return null;
-            String a = HostSession.address();
-            int colon = a.lastIndexOf(':');
-            return colon > 0 ? a.substring(0, colon) : a;
+            return HostSession.hostPart(HostSession.address());
         }
 
         @Override
         public int port() {
-            String a = HostSession.address();
-            int colon = a.lastIndexOf(':');
-            if (colon > 0) {
-                try {
-                    return Integer.parseInt(a.substring(colon + 1));
-                } catch (NumberFormatException ignored) {
-                }
-            }
-            return 25565;
+            return HostSession.portPart(HostSession.address());
         }
 
         @Override

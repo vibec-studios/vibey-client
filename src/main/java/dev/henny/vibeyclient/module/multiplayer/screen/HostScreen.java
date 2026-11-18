@@ -33,7 +33,7 @@ public final class HostScreen extends MpCardScreen {
 
     @Override
     protected int cardWidth() {
-        return 300;
+        return 320;
     }
 
     @Override

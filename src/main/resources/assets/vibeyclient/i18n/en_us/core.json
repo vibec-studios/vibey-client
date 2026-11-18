@@ -20,7 +20,7 @@
     "misc": "Other"
   },
   "module": {
-    "conflict": "Provided by the installed standalone mod \"{0}\".",
+    "conflict": "Provided by the installed {0} mod.",
     "unavailable": "Not available on this loader or version.",
     "missingDependency": "Needs the module \"{0}\", which cannot run.",
     "failed": "Failed to start, see the log.",

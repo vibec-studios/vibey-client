@@ -233,6 +233,26 @@ public final class HostSession {
 
     /** Posts {@link HostingService.HostingChanged} on the client thread. */
     private static void changed(boolean hosting, String addr) {
-        Minecraft.getInstance().execute(() -> Events.post(new HostingService.HostingChanged(hosting, addr)));
+        String host = hostPart(addr);
+        Minecraft.getInstance().execute(() -> Events.post(new HostingService.HostingChanged(hosting, host)));
+    }
+
+    /** "a-b-12.vibey.henny.dev:26400" -> "a-b-12.vibey.henny.dev" (null stays null). */
+    public static String hostPart(String addr) {
+        if (addr == null) return null;
+        int colon = addr.lastIndexOf(':');
+        return colon > 0 && addr.indexOf(']') < colon ? addr.substring(0, colon) : addr;
+    }
+
+    /** Port of the public address, 25565 if it has none. */
+    public static int portPart(String addr) {
+        int colon = addr == null ? -1 : addr.lastIndexOf(':');
+        if (colon > 0 && addr.indexOf(']') < colon) {
+            try {
+                return Integer.parseInt(addr.substring(colon + 1));
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        return 25565;
     }
 }

@@ -24,6 +24,9 @@ neoForge {
             client()
             gameDirectory = project.file('run')
             systemProperty 'vibeyclient.smoke', System.getProperty('vibeyclient.smoke', 'false')
+            // Multiplayer module visual check (dev only, see MpDevCheck): -Dvibeyclient.mpcheck=true [-Dvibeyclient.mpcheck.relay=127.0.0.1:26400]
+            systemProperty 'vibeyclient.mpcheck', System.getProperty('vibeyclient.mpcheck', 'false')
+            systemProperty 'vibeyclient.mpcheck.relay', System.getProperty('vibeyclient.mpcheck.relay', '')
         }
         server {
             server()

@@ -20,7 +20,7 @@
     "misc": "Sonstiges"
   },
   "module": {
-    "conflict": "Wird von der installierten Mod \"{0}\" bereitgestellt.",
+    "conflict": "Wird von der installierten Mod {0} bereitgestellt.",
     "unavailable": "Auf diesem Loader oder dieser Version nicht verfügbar.",
     "missingDependency": "Braucht das Modul \"{0}\", das nicht laufen kann.",
     "failed": "Start fehlgeschlagen, siehe Log.",
