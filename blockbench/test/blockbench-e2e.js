@@ -216,7 +216,7 @@ async function main() {
 			assert.ok(await cdp.run(page.loadPlugin, PLUGIN));
 			await cdp.waitFor(() => window.VibeyPlugin && Formats.vibey_cosmetic && Formats.vibey_emote && Codecs.vibey && MenuBar.menus.vibey);
 			const info = await cdp.eval(`({ v: VibeyPlugin.VERSION, author: Plugins.registered.vibey.author, variant: Plugins.registered.vibey.variant, exp: !!BarItems.vibey_export, imp: !!BarItems.vibey_import })`);
-			assert.deepEqual(info, { v: '1.0.0', author: 'Vibe Craft Studios', variant: 'desktop', exp: true, imp: true });
+			assert.deepEqual(info, { v: '0.2.0', author: 'Vibe Craft Studios', variant: 'desktop', exp: true, imp: true });
 		});
 		await check('loading the plugin file a second time keeps a single instance', async () => {
 			await cdp.run(async (file) => {
@@ -417,7 +417,7 @@ async function main() {
 				assert.deepEqual(specValidate(p.bundle).errors, []);
 				assert.deepEqual(p.bundle, cosmeticBundle);
 				assert.equal(game.state.hellos[0].client, 'blockbench-vibey');
-				assert.equal(game.state.hellos[0].version, '1.0.0');
+				assert.equal(game.state.hellos[0].version, '0.2.0');
 			}
 		});
 		await check('auto-push on change is debounced (~300 ms) and sends the edited model', async () => {
