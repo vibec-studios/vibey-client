@@ -16,7 +16,7 @@ import dev.henny.vibeyclient.avatar.fx.Effects;
 import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.client.Keys;
 import dev.henny.vibeyclient.module.cosmetics.CosmeticsModule;
-import dev.henny.vibeyclient.module.cosmetics.UiBridge;
+import dev.henny.vibeyclient.module.cosmetics.ui.WardrobeUi;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
@@ -88,7 +88,7 @@ public final class EmotesModule extends VibeyModule {
     private void openWheel() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || ClientCompat.screen() != null) return;
-        UiBridge.openWheel(() -> EngineCompat.isPhysicallyDown(wheel.mapping()));
+        WardrobeUi.openWheel(() -> EngineCompat.isPhysicallyDown(wheel.mapping()));
     }
 
     // ============================================================================================ local

@@ -89,7 +89,7 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
             s.onChange(v -> applyConfig());
         }
         AvatarItems.addListener(this::applySelf);
-        UiBridge.call("register");
+        dev.henny.vibeyclient.module.cosmetics.ui.WardrobeUi.register();
     }
 
     @Override
@@ -272,7 +272,7 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
     }
 
     public void openWardrobe() {
-        UiBridge.openWardrobe(dev.henny.vibeyclient.client.ClientCompat.screen());
+        dev.henny.vibeyclient.module.cosmetics.ui.WardrobeUi.openWardrobe(dev.henny.vibeyclient.client.ClientCompat.screen());
     }
 
     public static CosmeticsModule get() {

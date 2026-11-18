@@ -22,7 +22,11 @@ public final class SelfTest {
     private static final boolean ON = Vibey.platform().isDevelopment()
             && (Boolean.getBoolean("vibeyclient.avatarTest") || System.getenv("VIBEYCLIENT_AVATAR_TEST") != null);
     /** VIBEYCLIENT_AVATAR_TEST=world: wait for a world (quick play) and test there. */
-    private static final boolean WORLD = "world".equals(System.getenv("VIBEYCLIENT_AVATAR_TEST"));
+    /** VIBEYCLIENT_AVATAR_TEST=devlink: like world, then screenshot every DEV item pushed from Blockbench. */
+    private static final boolean DEVLINK = "devlink".equals(System.getenv("VIBEYCLIENT_AVATAR_TEST"));
+    private static final boolean WORLD = DEVLINK || "world".equals(System.getenv("VIBEYCLIENT_AVATAR_TEST"));
+    private static long devRevision;
+    private static int devShots, idle;
     private static int step = -1;
     private static int wait;
     private static int settle;
@@ -52,6 +56,12 @@ public final class SelfTest {
                 if (WORLD ? mc.player == null || ClientCompat.screen() != null : ClientCompat.screen() == null) return;
                 if (settle++ < 120) return;
                 log("items " + AvatarItems.all().size() + ", Minecraft " + dev.henny.vibeyclient.BuildInfo.MINECRAFT);
+                if (DEVLINK) {
+                    log("devlink mode: waiting for pushes");
+                    mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT);
+                    step = 50;
+                    return;
+                }
                 for (String id : new String[]{"vibey:vibe_cape", "vibey:crystal_wings", "vibey:seal_beanie", "vibey:seal_buddy"}) w.equip(AvatarItems.get(id));
                 if (WORLD) {
                     step = 2;
@@ -101,6 +111,33 @@ public final class SelfTest {
             case 5 -> {
                 shot("avatartest_world_back");
                 finish();
+            }
+            case 50 -> {
+                // a new DEV item (or a new version of one): look at it from the front and the back
+                long rev = 0;
+                String id = null;
+                for (AvatarItem i : AvatarItems.all()) if (i.isDev() && i.revision() > rev) { rev = i.revision(); id = i.id(); }
+                if (rev > devRevision) {
+                    devRevision = rev;
+                    idle = 0;
+                    log("dev item pushed: " + id);
+                    mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT);
+                    step = 51;
+                    wait = 25;
+                } else if (++idle > 20 * 150) {
+                    finish();
+                }
+            }
+            case 51 -> {
+                shot("devlink_" + (++devShots) + "_front");
+                mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK);
+                step = 52;
+                wait = 6;
+            }
+            case 52 -> {
+                shot("devlink_" + devShots + "_back");
+                mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT);
+                step = 50;
             }
             default -> {}
         }
