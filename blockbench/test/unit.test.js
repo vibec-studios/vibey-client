@@ -21,11 +21,16 @@ test('exports load in Node without Blockbench', () => {
 
 test('player pivots match SPEC §5', () => {
 	assert.deepEqual(Core.PLAYER_PIVOTS, {
-		root: [0, 0, 0], head: [0, 24, 0], body: [0, 24, 0], right_arm: [-5, 22, 0], left_arm: [5, 22, 0], right_leg: [-1.9, 12, 0], left_leg: [1.9, 12, 0],
+		root: [0, 0, 0], head: [0, 24, 0], body: [0, 24, 0], right_arm: [5, 22, 0], left_arm: [-5, 22, 0], right_leg: [1.9, 12, 0], left_leg: [-1.9, 12, 0],
 	});
-	// right arm is at -X, the player faces north (-Z): the head's front face ("north") is the face at min Z
-	assert.ok(Core.PLAYER_CUBES.right_arm.to[0] < 0);
-	assert.ok(Core.PLAYER_CUBES.left_arm.from[0] > 0);
+	// the player faces north (-Z), so (like Blockbench's own player template) the right arm is at +X
+	assert.ok(Core.PLAYER_CUBES.right_arm.from[0] > 0);
+	assert.ok(Core.PLAYER_CUBES.left_arm.to[0] < 0);
+	// every part converts to the vanilla PlayerModel numbers (PartPose.offset)
+	assert.deepEqual(Core.toModelSpace(Core.PLAYER_PIVOTS.right_arm), [-5, 2, 0]);
+	assert.deepEqual(Core.toModelSpace(Core.PLAYER_PIVOTS.left_arm), [5, 2, 0]);
+	assert.deepEqual(Core.toModelSpace(Core.PLAYER_PIVOTS.right_leg), [-1.9, 12, 0]);
+	assert.deepEqual(Core.toModelSpace(Core.PLAYER_PIVOTS.head), [0, 0, 0]);
 });
 
 test('box UV faces match Blockbench / vanilla skin layout', () => {
@@ -87,7 +92,7 @@ test('coordinates: a cube exactly on the reference right arm exports with SPEC n
 		kind: 'cosmetic',
 		meta: { id: 'test:sleeve', name: { en: 'Sleeve' }, slot: 'back' },
 		textures: [{ id: 'main', uvWidth: 64, uvHeight: 64, png: pngB64(64, 64), isDefault: true }],
-		nodes: [{ type: 'group', name: 'sleeve', origin: [-5, 22, 0], rotation: [0, 0, 0], attach: 'right_arm', children: [
+		nodes: [{ type: 'group', name: 'sleeve', origin: [5, 22, 0], rotation: [0, 0, 0], attach: 'right_arm', children: [
 			{ type: 'cube', name: 'cube', from: arm.from, to: arm.to, origin: [0, 0, 0], rotation: [0, 0, 0], boxUv: true, uvOffset: [40, 16], faces: Object.fromEntries(Core.FACES.map((f) => [f, { uv: [0, 0, 0, 0], texture: 'main' }])) },
 		] }],
 		animations: [],
@@ -95,18 +100,18 @@ test('coordinates: a cube exactly on the reference right arm exports with SPEC n
 	const b = compileOk(snap);
 	const bone = b.model.bones[0];
 	assert.equal(bone.attach, 'right_arm');
-	assert.deepEqual(bone.pivot, [-5, 22, 0]);
-	assert.deepEqual(bone.cubes[0].from, [-8, 12, -2]);
-	assert.deepEqual(bone.cubes[0].to, [-4, 24, 2]);
+	assert.deepEqual(bone.pivot, [5, 22, 0]);
+	assert.deepEqual(bone.cubes[0].from, [4, 12, -2]);
+	assert.deepEqual(bone.cubes[0].to, [8, 24, 2]);
 	assert.deepEqual(bone.cubes[0].uv, { box: [40, 16] });
 	// north (= the player's front, -Z) face of that box maps to the arm front in the skin layout
 	assert.deepEqual(Core.boxUvFaces([4, 12, 4], bone.cubes[0].uv.box).north, [44, 20, 48, 32]);
-	// SPEC conversion to MC model space (x' = x, y' = 24 - y, z' = z), then relative to the arm pivot,
+	// SPEC conversion to MC model space (x' = -x, y' = 24 - y, z' = z), then relative to the arm pivot,
 	// must give the vanilla right arm box: addBox(-3, -2, -2, 4, 12, 4) at PartPose.offset(-5, 2, 0).
-	const mc = (p) => [p[0], 24 - p[1], p[2]];
+	const mc = Core.toModelSpace;
 	const pivotMc = mc(bone.pivot);
 	assert.deepEqual(pivotMc, [-5, 2, 0]);
-	const fromMc = mc([bone.cubes[0].from[0], bone.cubes[0].to[1], bone.cubes[0].from[2]]); // top corner = min y in MC space
+	const fromMc = mc([bone.cubes[0].to[0], bone.cubes[0].to[1], bone.cubes[0].from[2]]); // min corner in MC space (x and y flipped)
 	assert.deepEqual(fromMc.map((v, i) => v - pivotMc[i]), [-3, -2, -2]);
 });
 
@@ -151,9 +156,9 @@ test('emote: player bones, props, generated bone, locators on player bones, roun
 	assert.equal(flag.translucent, true);
 	const gen = b1.model.bones.find((x) => x.name === 'right_arm_cubes');
 	assert.equal(gen.generated, true);
-	assert.deepEqual(gen.pivot, [-5, 22, 0]);
+	assert.deepEqual(gen.pivot, [5, 22, 0]);
 	assert.equal(gen.cubes[0].mirror, true);
-	assert.deepEqual(b1.model.locators.hand, { bone: 'right_arm', position: [-6, 10, 0] });
+	assert.deepEqual(b1.model.locators.hand, { bone: 'right_arm', position: [6, 10, 0] });
 	assert.deepEqual(Object.keys(b1.animations.main.bones).sort(), ['flag', 'right_arm', 'root']);
 	assert.equal(b1.animations.loop_variant.hold, true);
 	const snap2 = Core.decompileBundle(b1);
@@ -164,7 +169,7 @@ test('emote: player bones, props, generated bone, locators on player bones, roun
 
 test('emote errors: moved player pivot, reserved names, loose cubes', () => {
 	const snap = emoteSnapshot();
-	snap.nodes[0].children[2].origin = [-6, 22, 0];
+	snap.nodes[0].children[2].origin = [6, 22, 0];
 	snap.nodes.push({ type: 'cube', name: 'loose', from: [0, 0, 0], to: [1, 1, 1], faces: {} });
 	const r = Core.compileBundle(snap);
 	assert.ok(r.errors.some((e) => /right_arm.*pivot/.test(e)));

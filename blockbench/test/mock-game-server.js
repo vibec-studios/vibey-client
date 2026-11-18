@@ -115,10 +115,12 @@ function createMockGame(options = {}) {
 					state.listeners.push({ ev, fn });
 				},
 				waitFor(ev, predicate = () => true, timeout = 15000) {
-					return new Promise((res, rej) => {
+					const p = new Promise((res, rej) => {
 						const t = setTimeout(() => rej(new Error(`timeout waiting for ${ev}`)), timeout);
 						state.listeners.push({ ev, fn: (d) => predicate(d) && (clearTimeout(t), res(d)) });
 					});
+					p.catch(() => {}); // callers may stop awaiting after an earlier failure
+					return p;
 				},
 				/** Writes <gameDir>/vibeyclient/devlink.json like the real client does. */
 				writeDevlink(gameDir) {

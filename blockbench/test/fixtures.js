@@ -95,7 +95,7 @@ function cosmeticSnapshot() {
 }
 
 function emoteSnapshot() {
-	const P = { root: [0, 0, 0], head: [0, 24, 0], body: [0, 24, 0], right_arm: [-5, 22, 0], left_arm: [5, 22, 0], right_leg: [-1.9, 12, 0], left_leg: [1.9, 12, 0] };
+	const P = { root: [0, 0, 0], head: [0, 24, 0], body: [0, 24, 0], right_arm: [5, 22, 0], left_arm: [-5, 22, 0], right_leg: [1.9, 12, 0], left_leg: [-1.9, 12, 0] };
 	const part = (name, children = []) => ({ type: 'group', name, origin: P[name], rotation: [0, 0, 0], attach: '', children });
 	return {
 		kind: 'emote',
@@ -109,11 +109,11 @@ function emoteSnapshot() {
 				part('head'),
 				part('body'),
 				part('right_arm', [
-					{ type: 'group', name: 'flag', origin: [-6, 12, 0], rotation: [0, 0, 0], emissive: false, translucent: true, children: [
-						{ type: 'cube', name: 'pole', from: [-6.5, 2, -0.5], to: [-5.5, 14, 0.5], inflate: 0, mirror: false, origin: [0, 0, 0], rotation: [0, 0, 0], boxUv: true, uvOffset: [0, 0], faces: faces({}, 'props') },
+					{ type: 'group', name: 'flag', origin: [6, 12, 0], rotation: [0, 0, 0], emissive: false, translucent: true, children: [
+						{ type: 'cube', name: 'pole', from: [5.5, 2, -0.5], to: [6.5, 14, 0.5], inflate: 0, mirror: false, origin: [0, 0, 0], rotation: [0, 0, 0], boxUv: true, uvOffset: [0, 0], faces: faces({}, 'props') },
 					] },
-					{ type: 'cube', name: 'glove', from: [-8.5, 11.5, -2.5], to: [-3.5, 14.5, 2.5], inflate: 0, mirror: true, origin: [0, 0, 0], rotation: [0, 0, 0], boxUv: true, uvOffset: [8, 0], faces: faces({}, 'props') },
-					{ type: 'locator', name: 'hand', position: [-6, 10, 0] },
+					{ type: 'cube', name: 'glove', from: [3.5, 11.5, -2.5], to: [8.5, 14.5, 2.5], inflate: 0, mirror: true, origin: [0, 0, 0], rotation: [0, 0, 0], boxUv: true, uvOffset: [8, 0], faces: faces({}, 'props') },
+					{ type: 'locator', name: 'hand', position: [6, 10, 0] },
 				]),
 				part('left_arm'),
 				part('right_leg'),

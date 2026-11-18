@@ -25,25 +25,31 @@ const Core = (function () {
 	const FORMAT_VERSION = 1;
 	const PLAYER_PARTS = ['head', 'body', 'right_arm', 'left_arm', 'right_leg', 'left_leg'];
 	const PLAYER_BONES = ['root'].concat(PLAYER_PARTS);
-	/** Vanilla player part pivots in Blockbench space (SPEC §5). */
+	/**
+	 * Vanilla player part pivots in Blockbench space (SPEC §5) – the same space Blockbench's own player
+	 * template and "Modded Entity" format use: the player faces north (-Z), so the RIGHT arm is at +X.
+	 * Minecraft model space is x' = -x, y' = 24 - y, z' = z (right_arm [5,22,0] = PartPose.offset(-5, 2, 0)).
+	 */
 	const PLAYER_PIVOTS = {
 		root: [0, 0, 0],
 		head: [0, 24, 0],
 		body: [0, 24, 0],
-		right_arm: [-5, 22, 0],
-		left_arm: [5, 22, 0],
-		right_leg: [-1.9, 12, 0],
-		left_leg: [1.9, 12, 0],
+		right_arm: [5, 22, 0],
+		left_arm: [-5, 22, 0],
+		right_leg: [1.9, 12, 0],
+		left_leg: [-1.9, 12, 0],
 	};
 	/** Classic (wide arm) player cubes, 64x64 skin layout box UV offsets. */
 	const PLAYER_CUBES = {
 		head: { from: [-4, 24, -4], to: [4, 32, 4], uv: [0, 0] },
 		body: { from: [-4, 12, -2], to: [4, 24, 2], uv: [16, 16] },
-		right_arm: { from: [-8, 12, -2], to: [-4, 24, 2], uv: [40, 16] },
-		left_arm: { from: [4, 12, -2], to: [8, 24, 2], uv: [32, 48] },
-		right_leg: { from: [-3.9, 0, -2], to: [0.1, 12, 2], uv: [0, 16] },
-		left_leg: { from: [-0.1, 0, -2], to: [3.9, 12, 2], uv: [16, 48] },
+		right_arm: { from: [4, 12, -2], to: [8, 24, 2], uv: [40, 16] },
+		left_arm: { from: [-8, 12, -2], to: [-4, 24, 2], uv: [32, 48] },
+		right_leg: { from: [-0.1, 0, -2], to: [3.9, 12, 2], uv: [0, 16] },
+		left_leg: { from: [-3.9, 0, -2], to: [0.1, 12, 2], uv: [16, 48] },
 	};
+	/** Blockbench space -> Minecraft model space (positions). Rotations: [-rx, -ry, rz] like the Modded Entity exporter. */
+	const toModelSpace = (p) => [p[0] === 0 ? 0 : -p[0], 24 - p[1], p[2]];
 	const KINDS = ['cosmetic', 'emote'];
 	const SLOTS = ['cape', 'wings', 'aura', 'pet', 'shield', 'hat', 'back'];
 	const ATTACH = ['head', 'body', 'right_arm', 'left_arm', 'right_leg', 'left_leg', 'root', 'world'];
@@ -1008,7 +1014,7 @@ const Core = (function () {
 	}
 
 	return {
-		FORMAT_VERSION, PLAYER_PARTS, PLAYER_BONES, PLAYER_PIVOTS, PLAYER_CUBES, KINDS, SLOTS, ATTACH, SLOT_DEFAULT_ATTACH,
+		FORMAT_VERSION, PLAYER_PARTS, PLAYER_BONES, PLAYER_PIVOTS, PLAYER_CUBES, toModelSpace, KINDS, SLOTS, ATTACH, SLOT_DEFAULT_ATTACH,
 		RARITIES, ARMOR_SLOTS, INTERPOLATIONS, FACES, ID_RE, LIMITS, GENERATED_SUFFIX,
 		round, parseNumber, parseVec3, sanitizeId, base64ToBytes, bytesToBase64, base64Size, pngInfo, isOgg, utf8Length,
 		boxUvFaces, keyframesToSpec, specToKeyframes, compileBundle, decompileBundle, validateBundle, stringify,
@@ -1257,15 +1263,16 @@ function getMeta(project) {
 	project = project || (typeof Project !== 'undefined' ? Project : null);
 	if (!project) return null;
 	const kind = project.format && project.format.id === EMOTE ? 'emote' : 'cosmetic';
-	const cur = project.vibey && typeof project.vibey === 'object' ? project.vibey : {};
+	if (!project.vibey || typeof project.vibey !== 'object' || Array.isArray(project.vibey)) project.vibey = {};
+	// Normalize in place so references held by callers stay valid.
+	const meta = project.vibey;
 	const d = defaultMeta(kind);
-	const meta = Object.assign(d, cur);
-	meta.name = Object.assign({ en: '', de: '' }, cur.name);
-	meta.description = Object.assign({ en: '', de: '' }, cur.description);
-	meta.pet = Object.assign({ follow: '', scale: 1 }, cur.pet);
-	meta.emote = Object.assign(defaultMeta('emote').emote, cur.emote);
-	['tags', 'hideWithArmor', 'sounds', 'sprites'].forEach((k) => (meta[k] = Array.isArray(cur[k]) ? cur[k] : []));
-	project.vibey = meta;
+	for (const k of Object.keys(d)) if (meta[k] === undefined) meta[k] = d[k];
+	['name', 'description', 'pet', 'emote'].forEach((k) => {
+		if (!meta[k] || typeof meta[k] !== 'object') meta[k] = {};
+		for (const sub of Object.keys(d[k])) if (meta[k][sub] === undefined) meta[k][sub] = d[k][sub];
+	});
+	['tags', 'hideWithArmor', 'sounds', 'sprites'].forEach((k) => !Array.isArray(meta[k]) && (meta[k] = []));
 	return meta;
 }
 function markChanged() {
@@ -1348,7 +1355,7 @@ function paintReferenceSkin() {
 			if (face === 'up') return C.shirt;
 			if (face === 'down') return C.skin;
 			if (row < 4) return C.shirt;
-			if (part === 'right_arm' && (row === 8 || row === 9)) return C.band; // marks the RIGHT arm (-X)
+			if (part === 'right_arm' && (row === 8 || row === 9)) return C.band; // teal wrist band marks the RIGHT arm (+X)
 			return C.skin;
 		}
 		// legs
@@ -2314,6 +2321,15 @@ function on(event, fn) {
 }
 
 function setup() {
+	// If the plugin file was executed twice (e.g. loaded while Blockbench was still restoring installed plugins),
+	// dispose the older instance first so there is only ever one panel, status item and live link.
+	if (window.VibeyPlugin && typeof window.VibeyPlugin.teardown === 'function') {
+		try {
+			window.VibeyPlugin.teardown();
+		} catch (e) {
+			console.warn('Vibey: could not dispose the previous instance', e);
+		}
+	}
 	disposables.push(Blockbench.addCSS(CSS));
 
 	// ---- properties
@@ -2594,7 +2610,7 @@ function setup() {
 		VERSION, Core, Link, LinkSettings, UI, Reference,
 		buildBundle, compileProjectJSON, snapshotProject, applySnapshot, importBundle, exportBundle,
 		getMeta, applyProperties, createPlayerRig, setReferenceVisible, addSoundFiles, openPropertiesDialog,
-		openLinkSettings, validateNow, saveLinkSettings, refreshUI, T,
+		openLinkSettings, validateNow, saveLinkSettings, refreshUI, T, teardown,
 	};
 	refreshUI();
 	if (LinkSettings.autoConnect) setTimeout(() => Link.connect(), 1500);
