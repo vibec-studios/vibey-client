@@ -65,6 +65,17 @@ public final class ItemLoader {
 
     // ============================================================================================ builtin
 
+    private static volatile Map<String, AvatarItem> pendingBuiltin;
+
+    /** Client thread, every tick: registers what the loaders finished. */
+    public static void tick() {
+        Map<String, AvatarItem> b = pendingBuiltin;
+        if (b != null) {
+            pendingBuiltin = null;
+            AvatarItems.putAll(ItemSource.BUILTIN, b, true);
+        }
+    }
+
     public static void loadBuiltin() {
         Tasks.run(() -> {
             JsonObject index;
@@ -94,7 +105,8 @@ public final class ItemLoader {
                 }
             }
             Vibey.LOG.info("Loaded {} builtin cosmetics/emotes", items.size());
-            Tasks.onMain(() -> AvatarItems.putAll(ItemSource.BUILTIN, items, true));
+            // NeoForge loads mods before the game exists: hand over in tick() instead of Tasks.onMain
+            pendingBuiltin = items;
         });
     }
 

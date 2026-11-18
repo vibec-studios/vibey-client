@@ -107,6 +107,7 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
 
     @Override
     public void tick() {
+        ItemLoader.tick();
         AvatarConfig.self = EngineCompat.selfId();
         applySelf();
         sync.tick();

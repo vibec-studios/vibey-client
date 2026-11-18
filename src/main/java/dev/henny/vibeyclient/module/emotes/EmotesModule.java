@@ -134,6 +134,7 @@ public final class EmotesModule extends VibeyModule {
 
     @Override
     public void tick() {
+        dev.henny.vibeyclient.avatar.ItemLoader.tick();
         dev.henny.vibeyclient.avatar.AvatarTicker.tick();
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
