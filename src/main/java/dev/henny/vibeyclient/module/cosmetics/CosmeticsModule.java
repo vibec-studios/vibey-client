@@ -112,6 +112,7 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
         sync.tick();
         AvatarTicker.tick();
         ItemLoader.refreshCatalog(false);
+        dev.henny.vibeyclient.avatar.SelfTest.tick();
     }
 
     @Override

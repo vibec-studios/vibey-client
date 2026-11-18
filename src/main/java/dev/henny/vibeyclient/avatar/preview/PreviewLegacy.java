@@ -58,6 +58,10 @@ final class PreviewLegacy {
             slim = new net.minecraft.client.model.PlayerModel<>(mc.getEntityModels().bakeLayer(net.minecraft.client.model.geom.ModelLayers.PLAYER_SLIM), true);
         }
         net.minecraft.client.model.PlayerModel<net.minecraft.client.player.AbstractClientPlayer> m = isSlim ? slim : wide;
+        m.young = false;
+        m.riding = false;
+        m.crouching = false;
+        m.attackTime = 0f;
         for (net.minecraft.client.model.geom.ModelPart p : new net.minecraft.client.model.geom.ModelPart[]{m.head, m.hat, m.body, m.jacket,
                 m.rightArm, m.leftArm, m.rightSleeve, m.leftSleeve, m.rightLeg, m.leftLeg, m.rightPants, m.leftPants}) p.resetPose();
         float age = (float) (now * 20.0);
