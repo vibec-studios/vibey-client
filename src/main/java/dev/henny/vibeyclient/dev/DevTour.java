@@ -224,6 +224,9 @@ public final class DevTour {
         run(mc -> {
             resizeWindow(mc, 1280, 720);
             GlobalSettings.language.set(GlobalSettings.Language.ENGLISH);
+            // a crashed earlier run may have left a loadout behind
+            Wardrobe w = wardrobe();
+            for (Slot s : Slot.all()) w.unequip(s);
         });
         waitTicks(10);
 
