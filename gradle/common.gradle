@@ -48,6 +48,12 @@ public final class BuildInfo {
     }
 }
 sourceSets.main.java.srcDir(generatedDir)
+
+// The video screens (module/media/video) are written for Fabric 1.21.11 only for now; every other target leaves them out.
+if (project.name != 'fabric-1.21.11') {
+    sourceSets.main.java { exclude 'dev/henny/vibeyclient/module/media/video/**' }
+    processResources { exclude 'assets/vibeyclient/i18n/*/media.video.json' }
+}
 tasks.named('compileJava') { dependsOn genTask }
 afterEvaluate {
     tasks.matching { it.name == 'sourcesJar' }.configureEach { dependsOn genTask }
