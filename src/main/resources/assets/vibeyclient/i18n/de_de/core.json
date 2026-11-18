@@ -47,7 +47,9 @@
     "keyHelp": "Klicken, dann eine Taste drücken. Rücktaste entfernt, Esc bricht ab.",
     "advancedHint": "Technische Einstellungen",
     "advancedHide": "Ausblenden",
-    "keys": "Tasten"
+    "keys": "Tasten",
+    "serverDisabled": "Von diesem Server deaktiviert",
+    "serverDisabledHelp": "Dieser Server hat die Funktion für alle abgeschaltet. Sie geht wieder, sobald du ihn verlässt."
   },
   "setting": {
     "language": "Sprache",
