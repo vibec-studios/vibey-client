@@ -6,11 +6,18 @@ plugins {
 ext.javaVersion = 21
 apply from: rootProject.file('gradle/common.gradle')
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    // Pure-Java MP3 decoder (MIT) for the lyrics module, shipped inside the jar (like Vibey Lyrics).
+    implementation "fr.delthas:javamp3:${project.javamp3_version}"
+    include "fr.delthas:javamp3:${project.javamp3_version}"
 }
 
 loom {
