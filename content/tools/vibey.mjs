@@ -1,36 +1,40 @@
 // Builder API for `.vibey` bundles (docs/SPEC.md §5) + deterministic JSON writer.
 //
-// Coordinates are Blockbench units as in the spec: pixels, origin at the player's feet, +Y up, the player
-// faces north (-Z), the player's right arm is at -X. Cubes use box UV; their texture regions are packed
-// automatically into the bundle's textures and painted by the cube's painter (see `Bone.box`).
+// Coordinates are Blockbench space exactly as in docs/SPEC.md §5 "Coordinate convention": pixels, origin at the
+// player's feet, +Y up, the player faces north (-Z), the player's right arm is at +X (pivot [5, 22, 0]) – what
+// Blockbench shows is what gets written. Face names are Blockbench's (east = +X = the player's right side).
+// Cubes use box UV; their texture regions are packed automatically into the bundle's textures and painted by the
+// cube's painter (see `Bone.box`).
 import { Img } from "./canvas.mjs";
 
 export const PLAYER_BONES = ["head", "body", "right_arm", "left_arm", "right_leg", "left_leg", "root"];
 export const ATTACH = ["head", "body", "right_arm", "left_arm", "right_leg", "left_leg", "root", "world"];
 export const FACES = ["north", "east", "south", "west", "up", "down"];
 
-/** Vanilla player part pivots (spec §5). */
+/** Vanilla player part pivots in Blockbench space (spec §5). */
 export const PIVOTS = {
   head: [0, 24, 0],
   body: [0, 24, 0],
-  right_arm: [-5, 22, 0],
-  left_arm: [5, 22, 0],
-  right_leg: [-1.9, 12, 0],
-  left_leg: [1.9, 12, 0],
+  right_arm: [5, 22, 0],
+  left_arm: [-5, 22, 0],
+  right_leg: [1.9, 12, 0],
+  left_leg: [-1.9, 12, 0],
   root: [0, 0, 0],
 };
 
 /**
- * Box UV layout (identical to vanilla ModelPart cubes): for a cube of size w (x) × h (y) × d (z) at [u, v].
- * Returns per-face [u1, v1, u2, v2] rectangles in texture pixels.
+ * Box UV layout (vanilla ModelPart / Blockbench box UV): for a cube of size w (x) × h (y) × d (z) at [u, v].
+ * Returns the texture rectangle [u1, v1, u2, v2] of each face, named by Blockbench face (east = +X). Every
+ * rectangle is given in the orientation the painter sees it: u1/v1 is the top-left texel of the face image.
+ * (Like Blockbench: east = the first d-wide column = the player's right side.)
  */
 export function boxUV(u, v, w, h, d) {
   return {
     up: [u + d, v, u + d + w, v + d],
     down: [u + d + w, v, u + d + 2 * w, v + d],
-    west: [u, v + d, u + d, v + d + h],
+    east: [u, v + d, u + d, v + d + h],
     north: [u + d, v + d, u + d + w, v + d + h],
-    east: [u + d + w, v + d, u + 2 * d + w, v + d + h],
+    west: [u + d + w, v + d, u + 2 * d + w, v + d + h],
     south: [u + 2 * d + w, v + d, u + 2 * d + 2 * w, v + d + h],
   };
 }

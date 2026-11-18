@@ -10,7 +10,7 @@ export default function () {
   addHands(b);
   const star = b.defaultTexture().region(3, 3, (img) => img.fill([0, 0, 0, 0]).stamp(0, 0, [".w.", "wWw", ".w."], { w: C.warn, W: "#ffffff" }));
   b.sprite("star", "main", star);
-  b.locator("clap", "right_hand", [-4, 12, 0]);
+  b.locator("clap", "right_hand", [4, 12, 0]);
   const a = b.anim("main", 2.2);
   const claps = [0.5, 0.85, 1.2, 1.55];
   const R = [[0, [0, 0, 0]], [0.3, [62, -8, 0]]], L = [[0, [0, 0, 0]], [0.3, [62, 8, 0]]];

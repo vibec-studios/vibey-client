@@ -33,7 +33,7 @@ export default function () {
   ring.box([-R, 0.05, -R], [2 * R, 0, 2 * R], { up: paintRing, down: (img) => img.fill([0, 0, 0, 0]) });
   for (let i = 0; i < SPOTS; i++) {
     const a = (i / SPOTS) * Math.PI * 2;
-    b.locator(`spot_${i}`, "ring", [+(Math.cos(a) * (R - 1)).toFixed(2), 0.6, +(Math.sin(a) * (R - 1)).toFixed(2)]);
+    b.locator(`spot_${i}`, "ring", [-(Math.cos(a) * (R - 1)).toFixed(2), 0.6, +(Math.sin(a) * (R - 1)).toFixed(2)]);
   }
   const ember = tex.region(3, 3, (img) => img.fill([0, 0, 0, 0]).stamp(0, 0, [".p.", "pWp", ".p."], { p: C.brand, W: "#f3eaff" }));
   const spark = tex.region(3, 3, (img) => img.fill([0, 0, 0, 0]).stamp(0, 0, [".t.", "tWt", ".t."], { t: C.teal, W: "#e6fffa" }));

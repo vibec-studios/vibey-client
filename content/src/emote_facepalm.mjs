@@ -7,7 +7,7 @@ export default function () {
     description: { en: "When words are not enough.", de: "Wenn Worte nicht mehr reichen." },
     tags: ["reaction", "funny", "starter"],
   });
-  const face = aim(SHOULDER.right, [-0.5, 27, -8]);
+  const face = aim(SHOULDER.right, [0.5, 27, -8]);
   const press = [face[0] + 4, face[1] + 3, 0];
   const a = b.anim("main", 2.8);
   a.rot("right_arm", [[0, [0, 0, 0]], [0.3, [face[0] - 30, face[1] - 10, 0]], [0.45, face], [0.55, press], [2.1, press], [2.45, [25, 10, 0]], [2.8, [0, 0, 0]]]);

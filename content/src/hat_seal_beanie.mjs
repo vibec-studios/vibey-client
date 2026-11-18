@@ -63,8 +63,8 @@ export default function () {
     south: (img) => img.noisy(C.back, 0.025, 90),
   });
   // little flippers on the pom-pom
-  pom.box([-4, 35, -1], [1, 1, 2], { all: (img) => img.noisy(C.flipper, 0.02, 91) });
-  pom.box([3, 35, -1], [1, 1, 2], { all: (img) => img.noisy(C.flipper, 0.02, 92) });
+  pom.box([3, 35, -1], [1, 1, 2], { all: (img) => img.noisy(C.flipper, 0.02, 91) });
+  pom.box([-4, 35, -1], [1, 1, 2], { all: (img) => img.noisy(C.flipper, 0.02, 92) });
 
   const idle = b.anim("idle", 3, true);
   idle.rot("pompom", [[0, [0, 0, 0]], [0.75, [4, 0, 5]], [1.5, [0, 0, 0]], [2.25, [-3, 0, -5]], [3, [0, 0, 0]]]);

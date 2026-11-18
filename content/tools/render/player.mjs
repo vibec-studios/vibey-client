@@ -46,10 +46,10 @@ export function playerSkin() {
   H.down.noisy(P.skinShade, 0.015, 4);
   // hair: back fully, sides top 3 rows + back column, front fringe
   H.south.noisy(P.hair, 0.03, 5, 0, 0, 8, 6);
-  for (const k of ["east", "west"]) {
+  for (const k of ["west", "east"]) {
     H[k].noisy(P.hair, 0.03, 6, 0, 0, 8, 3);
-    const back = k === "west" ? 0 : 7; // west: u=0 at back (+Z); east: u=max at back
-    H[k].col(back, P.hair, 0, 5).col(k === "west" ? 1 : 6, P.hair, 0, 4);
+    const back = k === "east" ? 0 : 7; // east (right side): u=0 at back (+Z); west: u=max at back
+    H[k].col(back, P.hair, 0, 5).col(k === "east" ? 1 : 6, P.hair, 0, 4);
   }
   H.north.noisy(P.hair, 0.03, 7, 0, 0, 8, 2).px(P.hair, [[0, 2], [7, 2], [5, 2], [6, 2]]);
   H.north.px(P.hairHi, [[2, 0], [3, 0]]);
