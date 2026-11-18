@@ -33,6 +33,7 @@ public final class VibeyCore {
         platform = p;
         GlobalSettings.load();
         GlobalSettings.openMenu.onPress(VibeyCore::openMenu);
+        dev.henny.vibeyclient.ui.title.CoreMenus.register();
         BuiltinModules.registerAll(ModuleManager.get());
         ModuleManager.get().load();
         NetDispatch.setClientHandler(VibeyNet::handle);
@@ -57,6 +58,7 @@ public final class VibeyCore {
         Lang.tick();
         Keybinds.tick();
         mm.tick();
+        dev.henny.vibeyclient.ui.title.UiShot.tick();
     }
 
     public static void onHud(Gfx g) {
@@ -83,7 +85,8 @@ public final class VibeyCore {
                                     Consumer<AbstractWidget> add, Consumer<AbstractWidget> remove) {
         PauseMenu.decorate(screen, widgets, add);
         // A fresh game directory opens the accessibility onboarding first; both mean "started".
-        boolean start = screen instanceof net.minecraft.client.gui.screens.TitleScreen || screen.getClass().getSimpleName().contains("Onboarding");
+        boolean start = screen instanceof net.minecraft.client.gui.screens.TitleScreen || screen instanceof dev.henny.vibeyclient.ui.title.VibeyTitleScreen
+                || screen.getClass().getSimpleName().contains("Onboarding");
         if (start && dev.henny.vibeyclient.Smoke.enabled() && !smokeDone) {
             smokeDone = true;
             ModuleManager.get().start();

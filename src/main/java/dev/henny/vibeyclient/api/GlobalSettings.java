@@ -27,6 +27,23 @@ public final class GlobalSettings {
 
     public static final BoolSetting animations = GROUP.add(new BoolSetting("animations", true));
 
+    /** Size of the Vibey screens: the game's GUI scale or a fixed factor (whole numbers stay crisp). */
+    public enum UiScale {
+        GAME(0), X2(2), X3(3), X4(4);
+
+        public final int factor;
+
+        UiScale(int factor) {
+            this.factor = factor;
+        }
+    }
+
+    public static final EnumSetting<UiScale> uiScale = GROUP.add(new EnumSetting<>("uiScale", UiScale.GAME))
+            .onChange(v -> dev.henny.vibeyclient.ui.UiScale.refresh());
+
+    /** Replace the vanilla title screen with the Vibey one (off: only a small Vibey button on the vanilla screen). */
+    public static final BoolSetting vibeyMainMenu = GROUP.add(new BoolSetting("vibeyMainMenu", true));
+
     public static final KeybindSetting openMenu = GROUP.add(new KeybindSetting("core", "open_menu", Keys.RIGHT_SHIFT));
 
     public static final StringSetting backendUrl = GROUP.add(new StringSetting("backendUrl", BuildInfo.DEFAULT_BACKEND, 256)).advanced();
@@ -52,5 +69,16 @@ public final class GlobalSettings {
 
     public static void load() {
         GROUP.load();
+    }
+
+    /** True once the first-start welcome was finished or skipped. */
+    public static boolean onboarded() {
+        com.google.gson.JsonElement e = GROUP.data().get("onboarded");
+        return e != null && e.isJsonPrimitive() && e.getAsBoolean();
+    }
+
+    public static void setOnboarded(boolean done) {
+        GROUP.data().addProperty("onboarded", done);
+        GROUP.markDirty();
     }
 }

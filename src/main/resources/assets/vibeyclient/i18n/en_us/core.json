@@ -1,14 +1,20 @@
 {
   "pause": {
-    "button": "Vibey"
+    "button": "Vibey",
+    "vibey": "Vibey",
+    "host": "Host world"
   },
   "tab": {
-    "modules": "Modules"
+    "modules": "Modules",
+    "about": "About"
   },
   "menu": {
     "modules": "Modules",
     "global": "Global settings",
-    "globalDescription": "Settings for the whole client."
+    "globalDescription": "Settings for the whole client.",
+    "search": "Search",
+    "noResults": "Nothing found.",
+    "close": "Close (Esc)"
   },
   "category": {
     "core": "Core",
@@ -36,7 +42,10 @@
     "advanced": "Advanced",
     "none": "No settings yet.",
     "pressKey": "press a key",
-    "run": "Run"
+    "run": "Run",
+    "unbound": "Not bound",
+    "conflict": "Also bound to: {0}",
+    "keyHelp": "Click, then press a key. Backspace unbinds, Esc cancels."
   },
   "setting": {
     "language": "Language",
@@ -52,6 +61,89 @@
     "backendUrl": "Backend URL",
     "backendUrl.desc": "Only change this for development.",
     "resetBackend": "Reset backend URL",
-    "resetBackend.button": "Reset"
+    "resetBackend.button": "Reset",
+    "vibeyMainMenu": "Vibey main menu",
+    "vibeyMainMenu.desc": "Replaces the title screen. Off: the vanilla one with a small Vibey button.",
+    "uiScale": "UI scale",
+    "uiScale.desc": "Size of the Vibey menus.",
+    "uiScale.game": "Same as game",
+    "uiScale.x2": "2×",
+    "uiScale.x3": "3×",
+    "uiScale.x4": "4×"
+  },
+  "title": {
+    "singleplayer": "Singleplayer",
+    "multiplayer": "Multiplayer",
+    "wardrobe": "Wardrobe",
+    "friends": "Friends",
+    "vibey": "Vibey settings",
+    "options": "Options",
+    "mods": "Mods",
+    "quit": "Quit game",
+    "accessibility": "Accessibility",
+    "language": "Language",
+    "classic": "Classic menu (vanilla title screen)",
+    "backToVibey": "Vibey menu",
+    "news": "News"
+  },
+  "status": {
+    "off": "Online features off",
+    "checking": "Connecting…",
+    "reachable": "Vibe online",
+    "connecting": "Signing in…",
+    "online": "Online",
+    "offline": "Offline",
+    "friend": "{0} friend online",
+    "friends": "{0} friends online",
+    "tip": {
+      "off": "Online features are switched off: Vibey does not connect to anything. Change it in the Vibey settings.",
+      "checking": "Checking the Vibe backend…",
+      "reachable": "The Vibe backend is reachable.",
+      "connecting": "Signing in to Vibe with your Minecraft account…",
+      "online": "Signed in to Vibe: friends, chat and synced cosmetics are active.",
+      "offline": "The Vibe backend is not reachable right now. Everything else works."
+    }
+  },
+  "onboarding": {
+    "next": "Next",
+    "back": "Back",
+    "skip": "Skip",
+    "done": "Let's go",
+    "language": "Language",
+    "welcome": {
+      "title": "Welcome to Vibey Client",
+      "body": "Friends, chat, cosmetics, emotes, world hosting and more – in one client by Vibe Craft Studios. Every part is a module you can switch on or off."
+    },
+    "online": {
+      "title": "Online features",
+      "body": "Friends, chat and synced cosmetics use the Vibe backend at {0}. You sign in with your Minecraft account – no extra registration.",
+      "token": "Sign-in uses the same check Minecraft servers use. Your Minecraft token never leaves the game.",
+      "data": "Stored: your UUID, name, friends, chats and cosmetics – nothing else.",
+      "on": "On",
+      "onDesc": "Friends, chat, cosmetics everyone sees.",
+      "off": "Off",
+      "offDesc": "No connection. Cosmetics only locally."
+    },
+    "keys": {
+      "title": "Find your way",
+      "menu": "Opens the Vibey menu: modules, settings, wardrobe.",
+      "emote": "Opens the emote wheel.",
+      "pause": "The pause menu has a Vibey row too.",
+      "later": "You can change keys in the Vibey menu and open this welcome again under About."
+    }
+  },
+  "about": {
+    "by": "by Vibe Craft Studios",
+    "website": "Website",
+    "source": "Source code",
+    "issues": "Report a bug",
+    "welcome": "Show welcome again",
+    "credits": "Credits",
+    "creditsText": "Made by Vibe Craft Studios. Seal mascot, wordmark, icons and all cosmetics are original work. Thanks to everyone who tests and gives feedback.",
+    "privacy": "Online features",
+    "privacyOn": "On: Vibey talks to {0}. Sign-in uses Minecraft's own server check – your Minecraft token never leaves the game.",
+    "privacyOff": "Off: Vibey does not connect to anything.",
+    "licenses": "Licenses",
+    "mojang": "Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft."
   }
 }

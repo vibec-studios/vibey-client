@@ -177,6 +177,9 @@ only for keybind names/categories and mod menu text.
 
 ## UI
 
+Design rules, title screen / pause menu entries (`MenuEntries`), the player preview service (`MenuPreview`),
+icons and the widget cheat sheet: **[docs/UI.md](UI.md)**.
+
 - `Gfx` wraps GuiGraphics / GuiGraphicsExtractor (26.x): `rect`, `outline`, `text`, `bold`, `textScaled`,
   `image`, `scissor`, `push/translate/scale/pop`, `widget`. Use it for HUD and screens – never the vanilla drawing
   API directly (it differs per version).

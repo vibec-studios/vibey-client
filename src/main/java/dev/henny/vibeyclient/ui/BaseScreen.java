@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component;
 *///?} else
 import net.minecraft.client.gui.GuiGraphics;
 //? if >=1.21.9 {
+import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 //?}
@@ -34,6 +35,24 @@ public abstract class BaseScreen extends Screen {
 
     protected boolean drag(double x, double y, int button) {
         return false;
+    }
+
+    /** Drag with the movement since the last call (GUI pixels); defaults to {@link #drag(double, double, int)}. */
+    protected boolean drag(double x, double y, int button, double dx, double dy) {
+        return drag(x, y, button);
+    }
+
+    /** A typed character (only when no text field has the focus is it useful); true if used. */
+    protected boolean typed(int codepoint) {
+        return false;
+    }
+
+    /** Draws the vanilla title panorama (the rotating world background), full screen. */
+    protected void panorama(Gfx gfx, float delta) {
+        //? if >=26.1 {
+        /*extractPanorama(gfx.g, delta);
+        *///?} else
+        renderPanorama(gfx.g, delta);
     }
 
     /** @return true if the key was used (called before the focused text field sees it) */
@@ -76,7 +95,7 @@ public abstract class BaseScreen extends Screen {
 
     @Override
     public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
-        if (drag(event.x(), event.y(), event.button())) return true;
+        if (drag(event.x(), event.y(), event.button(), dx, dy)) return true;
         return super.mouseDragged(event, dx, dy);
     }
     //?} else {
@@ -94,7 +113,7 @@ public abstract class BaseScreen extends Screen {
 
     @Override
     public boolean mouseDragged(double x, double y, int button, double dx, double dy) {
-        if (drag(x, y, button)) return true;
+        if (drag(x, y, button, dx, dy)) return true;
         return super.mouseDragged(x, y, button, dx, dy);
     }
     *///?}
@@ -110,6 +129,20 @@ public abstract class BaseScreen extends Screen {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (key(keyCode)) return true;
         return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+    *///?}
+
+    //? if >=1.21.9 {
+    @Override
+    public boolean charTyped(CharacterEvent event) {
+        if (typed(event.codepoint())) return true;
+        return super.charTyped(event);
+    }
+    //?} else {
+    /*@Override
+    public boolean charTyped(char c, int modifiers) {
+        if (typed(c)) return true;
+        return super.charTyped(c, modifiers);
     }
     *///?}
 

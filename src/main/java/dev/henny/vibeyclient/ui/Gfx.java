@@ -153,6 +153,17 @@ public final class Gfx {
         w.render(g, mouseX, mouseY, delta);
     }
 
+    /**
+     * Starts a new layer: everything drawn after it is on top of everything before (1.21.6+ draws text after shapes
+     * within a layer, so overlays, popups and tooltips need this).
+     */
+    public void layer() {
+        //? if >=1.21.6 {
+        g.nextStratum();
+        //?} else
+        /*g.flush();*/
+    }
+
     // -------------------------------------------------------------------------------------------- transforms
 
     public void push() {
