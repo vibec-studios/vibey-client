@@ -30,7 +30,7 @@ public final class HudOption {
     private Supplier<String> capture;
 
     private HudOption(String key, String labelKey, Kind kind, String def, List<String> values) {
-        if (!key.matches("[a-z0-9_]{1,24}")) throw new IllegalArgumentException("Bad option key " + key);
+        if (!key.matches("[a-zA-Z0-9_]{1,24}")) throw new IllegalArgumentException("Bad option key " + key);
         this.key = key;
         this.labelKey = labelKey;
         this.kind = kind;

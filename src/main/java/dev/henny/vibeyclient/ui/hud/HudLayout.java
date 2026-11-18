@@ -124,7 +124,8 @@ public final class HudLayout {
         /** Element ids a template/share code mentions but this run does not know (kept for the file). */
         final Map<String, JsonObject> unknown = new LinkedHashMap<>();
 
-        boolean sameAs(State o) {
+        /** Same layout (styles, placements, copies). */
+        public boolean sameAs(State o) {
             if (!global.equals(o.global) || !copies.equals(o.copies) || placements.size() != o.placements.size()) return false;
             for (Map.Entry<String, Placement> en : placements.entrySet()) {
                 Placement p = o.placements.get(en.getKey());
@@ -499,7 +500,8 @@ public final class HudLayout {
         boolean wasHidden = p.hidden;
         p.reset(e);
         // a reset keeps it on the HUD (only "Hide" takes it away)
-        p.hidden = e.isCopy() ? false : wasHidden && e.startHidden() ? true : p.hidden;
+        p.hidden = wasHidden;
+        p.custom = p.hidden != e.startHidden() || e.isCopy();
         if (e.isWidget()) e.widget().invalidate();
     }
 

@@ -53,7 +53,7 @@ final class EffectsWidget extends HudWidget {
         int maxW = 0;
         for (MobEffectInstance e : sorted) {
             if (count >= MAX) break;
-            if (!e.showIcon() && !p.preview) continue;
+            // effects without particles/icon (beacons, commands) are listed too: this is an info widget
             Holder<MobEffect> h = e.getEffect();
             icons[count] = Gui.getMobEffectSprite(h);
             int d = e.getDuration();

@@ -27,7 +27,7 @@ import java.util.function.Supplier;
  *         .label("pvp.hud.sprint")                   // i18n key of the name in the editor
  *         .description("pvp.hud.sprint.desc")        // one line in the widget library
  *         .icon(Icons.WAVE).category(HudElement.Category.COMBAT)
- *         .rules("pvp.togglesprint")                 // ServerRules key: hidden when the server disables it
+ *         .rules("hud.togglestate")                 // ServerRules key: hidden when the server disables it
  *         .defaults(Anchor.BOTTOM_LEFT, 4, -4)
  *         .visibleWhen(() -> pvp.isEnabled() && pvp.toggleSprint.get())
  *         .widget(SprintIndicator::new)              // a HudWidget / TextWidget

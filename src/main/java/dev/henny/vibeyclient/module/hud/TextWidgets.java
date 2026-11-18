@@ -274,7 +274,7 @@ final class TextWidgets {
             // tick 0 = 06:00
             int minutes = (int) ((ticks / 1000.0 * 60 + 6 * 60) % (24 * 60));
             String clock = String.format(Locale.ROOT, "%02d:%02d", minutes / 60, minutes % 60);
-            if (p.detailed()) line(l("hud.label.day") + " " + day, clock + "  " + l(ticks < 12542 || ticks > 23460 ? "hud.label.daytime" : "hud.label.night"));
+            if (p.detailed()) line(l("hud.label.day") + " " + day, clock);
             else line(null, clock);
         }
     }

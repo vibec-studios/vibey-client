@@ -29,7 +29,7 @@ HudLayout.register(HudElement.builder("pvp.sprint")          // id: [a-z0-9_.], 
         .description("pvp.hud.sprint.desc")                   // i18n key: one short line in the library
         .icon(Icons.WAVE)                                      // any Icons name (Icons.register(...) for your own)
         .category(HudElement.Category.MOVEMENT)                // INFO, COMBAT, MOVEMENT, WORLD, MEDIA, OTHER
-        .rules("pvp.togglesprint")                             // ServerRules key (supports(...) is called for you)
+        .rules("hud.togglestate")                             // ServerRules key (supports(...) is called for you)
         .defaults(Anchor.BOTTOM_LEFT, 4, -24)                  // its BOTTOM_LEFT point on the screen's, moved by (4, -24)
         .scale(1f, 0.5f, 3f)                                   // default, min, max
         .visibleWhen(() -> isEnabled() && toggleSprint.get())  // in the editor/HUD only while this holds (cheap!)

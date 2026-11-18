@@ -33,6 +33,7 @@ public final class HudModule extends VibeyModule {
         if (ClientCompat.screen() == null) HudLayout.openEditor(null);
     });
     public final BoolSetting hideF3 = bool("hideF3", true);
+    public final BoolSetting hideVanillaEffects = bool("hideVanillaEffects", true);
     public final ActionSetting resetLayout = action("resetLayout", this::resetToDefault).advanced();
     public final ActionSetting intro = action("intro", () -> {
         HudLayout.setFlag("intro", false);
@@ -71,6 +72,18 @@ public final class HudModule extends VibeyModule {
         MenuEntries.register(MenuEntries.Place.PAUSE, new MenuEntries.Entry("hud", "hud.menu", HudIcons.LIBRARY, 25,
                 MenuEntries.whenEnabled(ID), HudLayout::openEditor));
         HudLayout.hideWidgetsWhen(() -> hideF3.get() && debugOpen());
+        // the game's own effect icons (top right) are hidden while our effects widget shows them
+        net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry.replaceElement(
+                net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements.STATUS_EFFECTS,
+                vanilla -> (g, tick) -> {
+                    if (!effectsReplaceVanilla()) vanilla.render(g, tick);
+                });
+    }
+
+    private boolean effectsReplaceVanilla() {
+        if (!isEnabled() || !hideVanillaEffects.get()) return false;
+        dev.henny.vibeyclient.ui.hud.HudElement e = HudLayout.get("hud.effects");
+        return e != null && !HudLayout.hidden(e) && !HudLayout.serverDisabled(e);
     }
 
     @Override

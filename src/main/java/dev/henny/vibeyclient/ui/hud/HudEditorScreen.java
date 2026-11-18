@@ -304,6 +304,20 @@ public final class HudEditorScreen extends BaseScreen {
         dock(g, sw, sh);
         panels.draw(g, mouseX, mouseY, now);
         UiHost.end(ui);
+        if (drawPointer) pointer(g, mouseX, mouseY);
+    }
+
+    /** Draws a mouse pointer (screenshots and recordings do not contain the system cursor). Tests only. */
+    public static boolean drawPointer;
+
+    private static void pointer(Gfx g, int x, int y) {
+        g.layer();
+        for (int i = 0; i < 10; i++) {
+            int w = i < 7 ? i + 1 : 10 - i;
+            g.rect(x - 1, y + i - 1, w + 2, 1, 0xFF000000);
+            g.rect(x, y + i, w, 1, 0xFFFFFFFF);
+        }
+        g.rect(x + 3, y + 9, 2, 3, 0xFFFFFFFF);
     }
 
     private void refreshLists() {
@@ -392,7 +406,7 @@ public final class HudEditorScreen extends BaseScreen {
             g.text(badge, bx + 13, by + 2, Theme.WARN);
         }
         // name tag for hover / single selection
-        if ((hov || (sel && selection.size() == 1)) && mode != MARQUEE) {
+        if ((hov || (sel && selection.size() == 1)) && mode != MARQUEE && mode != MOVE && mode != RESIZE) {
             String label = tagLabel(e);
             int tw = g.width(label) + 8;
             int ty = y - 14 >= 0 ? y - 14 : y + h + 3 + 11 <= height ? y + h + 3 : y + 1;
@@ -489,6 +503,12 @@ public final class HudEditorScreen extends BaseScreen {
             if (!handleVisible(i, w, h)) continue;
             if (Math.abs(mx - handleX(i, x, w)) <= r && Math.abs(my - handleY(i, y, h)) <= r) return i;
         }
+        // the whole edge works too (thin widgets have no room for edge handles)
+        boolean inY = my > y + 2 && my < y + h - 2, inX = mx > x + 2 && mx < x + w - 2;
+        if (inY && Math.abs(mx - (x + w - 1)) <= 1.5) return 3;
+        if (inY && Math.abs(mx - x) <= 1.5) return 7;
+        if (inX && Math.abs(my - (y + h - 1)) <= 1.5) return 5;
+        if (inX && Math.abs(my - y) <= 1.5) return 1;
         return -1;
     }
 
@@ -681,7 +701,9 @@ public final class HudEditorScreen extends BaseScreen {
         int y = Math.round(bottomY + (topY - bottomY) * t);
         int hide = Math.round((1f - shown) * (dockH + 12));
         y += t > 0.5f ? -hide : hide;
-        int x = (sw - total) / 2;
+        // centred in the free area (right of the library panel when it is open)
+        int left = panels.libraryRight();
+        int x = Math.max(left + 4, left + (sw - left - total) / 2);
         dockX = x;
         dockY = y;
         if (shown < 0.02f) return;
@@ -722,10 +744,13 @@ public final class HudEditorScreen extends BaseScreen {
 
         // one hint line on the other side of the dock
         String hint = Lang.tr("core.hud.hint");
-        String clipped = g.clip(hint, sw - 16);
+        String clipped = g.clip(hint, sw - left - 16);
         int hw = g.width(clipped);
-        int hy = t > 0.5f ? y + dockH + 4 : y - 12;
-        g.text(clipped, sw / 2 - hw / 2, hy, Theme.alpha(Theme.MUTED, 0.75f * shown));
+        int hy = t > 0.5f ? y + dockH + 4 : y - 14;
+        int hcx = x + total / 2;
+        if (hcx - hw / 2 - 5 < left) hcx = left + hw / 2 + 5;
+        g.rect(hcx - hw / 2 - 5, hy - 2, hw + 10, 12, Theme.alpha(0xC00B0B0E, shown));
+        g.text(clipped, hcx - hw / 2, hy, Theme.alpha(Theme.MUTED, shown));
     }
 
     /** Flat dock button with an icon and a label. */
@@ -1303,6 +1328,10 @@ public final class HudEditorScreen extends BaseScreen {
     public void select(String id) {
         HudElement e = HudLayout.get(id);
         selectOnly(e);
+    }
+
+    public int selectionCount() {
+        return selection.size();
     }
 
     /** Adds an element to the selection (tests). */

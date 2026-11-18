@@ -34,7 +34,7 @@ final class BuiltinTemplates {
                 .place("hud.ping", Anchor.TOP_LEFT, 4, 38, 1f)
                 .place("hud.keystrokes", Anchor.TOP_LEFT, 4, 57, 1f).style(s -> s.variant = HudStyle.Variant.DETAILED)
                 .place("hud.armor", Anchor.RIGHT, -4, 0, 1f).option("mode", "both")
-                .place("hud.effects", Anchor.TOP_RIGHT, -4, 56, 1f).style(s -> s.variant = HudStyle.Variant.DETAILED)
+                .place("hud.effects", Anchor.TOP_RIGHT, -4, 4, 1f).style(s -> s.variant = HudStyle.Variant.DETAILED)
                 .place("hud.items", Anchor.BOTTOM, 116, -3, 1f).option("item", "minecraft:arrow")
                 .place("hud.items.2", Anchor.BOTTOM, 160, -3, 1f).option("item", "minecraft:totem_of_undying")
                 .copies("hud.items", 2)
@@ -47,6 +47,7 @@ final class BuiltinTemplates {
                 .place("hud.fps", Anchor.TOP_LEFT, 3, 3, 1f)
                 .place("hud.coords", Anchor.TOP_LEFT, 3, 15, 1f)
                 .place("hud.clock", Anchor.TOP_RIGHT, -3, 3, 1f)
+                .place("hud.effects", Anchor.TOP_RIGHT, -3, 16, 1f)
                 .build();
     }
 
@@ -58,6 +59,7 @@ final class BuiltinTemplates {
                 .place("hud.time", Anchor.TOP_RIGHT, -4, 4, 1f).option("icon", "1").style(s -> s.variant = HudStyle.Variant.DETAILED)
                 .place("hud.clock", Anchor.TOP_RIGHT, -4, 21, 1f).option("icon", "1")
                 .place("hud.fps", Anchor.TOP_RIGHT, -4, 38, 1f).option("icon", "1")
+                .place("hud.effects", Anchor.TOP_RIGHT, -4, 56, 1f)
                 .build();
     }
 
@@ -65,8 +67,9 @@ final class BuiltinTemplates {
         return HudLayout.state()
                 .global(style(true, 0.72f, HudStyle.Corners.BEVEL, true, 0xFF5FA8))
                 .place("hud.server", Anchor.TOP_LEFT, 4, 4, 1f).option("hideIp", "1").option("icon", "1")
-                .place("hud.clock", Anchor.TOP_RIGHT, -4, 4, 1.25f).style(s -> s.paint = HudStyle.TextPaint.RAINBOW)
-                .place("hud.fps", Anchor.TOP_RIGHT, -4, 27, 1f)
+                .place("hud.clock", Anchor.TOP_RIGHT, -4, 4, 1.5f).style(s -> s.paint = HudStyle.TextPaint.RAINBOW)
+                .place("hud.fps", Anchor.TOP_RIGHT, -4, 31, 1f)
+                .place("hud.effects", Anchor.TOP_RIGHT, -4, 50, 1f)
                 .place("hud.keystrokes", Anchor.BOTTOM_RIGHT, -4, -4, 1f).style(s -> s.variant = HudStyle.Variant.DETAILED)
                 .build();
     }

@@ -15,7 +15,8 @@
       "dev.henny.vibeyclient.gametest.WardrobeUiGameTest",
       "dev.henny.vibeyclient.gametest.CosmeticsGameTest",
       "dev.henny.vibeyclient.gametest.AuditBundlesGameTest",
-      "dev.henny.vibeyclient.gametest.ShowcaseGameTest"
+      "dev.henny.vibeyclient.gametest.ShowcaseGameTest",
+      "dev.henny.vibeyclient.gametest.HudGameTest"
     ]
   },
   "depends": {

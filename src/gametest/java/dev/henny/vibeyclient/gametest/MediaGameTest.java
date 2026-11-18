@@ -60,6 +60,7 @@ public final class MediaGameTest implements FabricClientGameTest {
             ly.enabledSetting.set(true);
             if (!LyricsFeature.running()) throw new AssertionError("lyrics switch on failed");
             HudLayout.resetAll();
+            HudLayout.setFlag("intro", true); // the first-run intro is HudGameTest's business
             HudLayout.save();
         });
 
@@ -373,7 +374,7 @@ public final class MediaGameTest implements FabricClientGameTest {
         if (context.computeOnClient(mc -> mc.screen) != null) throw new AssertionError("editor did not close with Esc");
         context.takeScreenshot("media_12_hud_result");
         boolean saved = context.computeOnClient(mc -> {
-            Path f = dev.henny.vibeyclient.api.setting.SettingsGroup.configDir().resolve("hud.json");
+            Path f = HudLayout.file();
             try {
                 return Files.isRegularFile(f) && Files.readString(f).contains("media.lyrics.bar");
             } catch (Exception e) {

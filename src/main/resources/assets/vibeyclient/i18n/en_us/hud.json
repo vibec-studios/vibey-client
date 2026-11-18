@@ -9,6 +9,7 @@
     "edit.action": "Edit HUD",
     "editor": "Key: HUD editor",
     "hideF3": "Hide widgets while the debug screen (F3) is open",
+    "hideVanillaEffects": "Hide the game's own effect icons while the Potion effects widget is on screen",
     "resetLayout": "Start over with the default layout",
     "resetLayout.button": "Reset",
     "intro": "Show the editor intro again",
@@ -70,8 +71,6 @@
     "speed": "Speed",
     "bps": "b/s",
     "day": "Day",
-    "daytime": "day",
-    "night": "night",
     "mem": "Mem"
   },
   "dir": {

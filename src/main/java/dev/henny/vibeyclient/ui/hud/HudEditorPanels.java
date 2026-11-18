@@ -446,6 +446,8 @@ final class HudEditorPanels {
                 n++;
                 w = Math.max(w, itemW(g, "core.hud.menu.reset", "R"));
                 n++;
+                String headText = s.selection.size() > 1 ? trc("core.hud.selected", s.selection.size()) : p.displayName();
+                w = Math.max(w, Math.min(180, g.width(headText) + 14));
                 menuW = w;
                 menuH = n * ITEM_H + 6 + 13;
                 place();
@@ -570,7 +572,7 @@ final class HudEditorPanels {
         int w = 150;
         for (HudTemplates.Template t : list) {
             w = Math.max(w, g.width(Lang.tr(t.labelKey())) + 30);
-            w = Math.max(w, Math.min(230, g.width(Lang.tr(t.descKey())) + 30));
+            w = Math.max(w, Math.min(280, g.width(Lang.tr(t.descKey())) + 38));
         }
         int ih = 24;
         menuW = w;
@@ -724,7 +726,7 @@ final class HudEditorPanels {
         g.rect(0, 0, s.width, s.height, 0x90000000);
         dlgW = Math.min(300, s.width - 20);
         int listH = Math.min(5, Math.max(1, files.size())) * 14;
-        dlgH = 128 + listH;
+        dlgH = 140 + listH;
         dlgX = (s.width - dlgW) / 2;
         dlgY = Math.max(6, (s.height - dlgH) / 2);
         int x = dlgX, y = dlgY;
@@ -768,7 +770,7 @@ final class HudEditorPanels {
             ly += 14;
         }
         int by = y + dlgH - 26;
-        g.text(g.clip(Lang.tr("core.hud.import.drop"), dlgW - 200), x + 10, by + 5, Theme.DIM);
+        g.text(g.clip(Lang.tr("core.hud.import.drop"), dlgW - 20), x + 10, by - 14, Theme.DIM);
         String imp = Lang.tr("core.hud.import.apply"), cancel = Lang.tr("core.hud.cancel"), folder = Lang.tr("core.hud.import.folder");
         int wi = g.width(imp) + 16, wc = g.width(cancel) + 16, wf = g.width(folder) + 16;
         int bx = x + dlgW - 10 - wi;

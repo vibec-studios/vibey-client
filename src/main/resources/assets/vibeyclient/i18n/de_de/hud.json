@@ -9,6 +9,7 @@
     "edit.action": "HUD bearbeiten",
     "editor": "Taste: HUD-Editor",
     "hideF3": "Widgets ausblenden, solange der Debug-Bildschirm (F3) offen ist",
+    "hideVanillaEffects": "Die Effekt-Symbole des Spiels ausblenden, solange das Trankeffekte-Widget auf dem Bildschirm ist",
     "resetLayout": "Mit dem Standard-Layout neu anfangen",
     "resetLayout.button": "Zurücksetzen",
     "intro": "Die Editor-Einführung noch mal zeigen",
@@ -70,8 +71,6 @@
     "speed": "Tempo",
     "bps": "B/s",
     "day": "Tag",
-    "daytime": "Tag",
-    "night": "Nacht",
     "mem": "RAM"
   },
   "dir": {
