@@ -14,7 +14,8 @@ oder auf dem Server. Übersicht mit Ingame-Screenshots: [`polar-pals.html`](pola
 | `polar_aurora_ring.vibey` | Aura | Polarlicht-Ring (episch) |
 | `polar_snowfall_cape.vibey` | Umhang | Schneefall-Umhang (selten, HD) |
 
-Vorschaubilder: `previews/`, Katalog-Thumbnails (256 × 256): `thumbnails/`.
+Vorschaubilder: `previews/`, Katalog-Thumbnails (256 × 256): `thumbnails/`, je ein Ingame-Screenshot: `ingame/`,
+Import in echtes Blockbench: `blockbench/`.
 
 ## 1. Im Spiel (Creator-Modus + ein Befehl)
 
