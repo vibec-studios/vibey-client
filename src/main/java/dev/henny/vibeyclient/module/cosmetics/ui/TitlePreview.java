@@ -44,7 +44,9 @@ public final class TitlePreview implements MenuPreview {
             }
             nextEmoteAt = now + ThreadLocalRandom.current().nextLong(EMOTE_MIN_MS, EMOTE_MAX_MS);
         }
-        host.draw(g, x, y, w, h, delta);
+        // headroom for hats, crowns and wings above the head (the preview fits the player body into the box)
+        int top = h / 8;
+        host.draw(g, x, y + top, w, h - top, delta);
     }
 
     /** A usable emote, preferring the wheel; never the same twice in a row when there is a choice. */
