@@ -26,8 +26,8 @@
       "name": {"en":"Polar Pals · Aurora Veil Wings","de":"Polar Pals · Polarlicht-Schleierflügel"},
       "rarity": "epic",
       "tags": ["polar-pals","wings","aurora","glow","animated"],
-      "size": 121146,
-      "sha256": "8cccb2a65c26c7dadb5f8e322b96e2a2bedab6e9c850ee799828455ad53eedee",
+      "size": 204159,
+      "sha256": "42e43f108e5442c49781d1b552b7b2a8c362afaee5699074e240691e2d47e214",
       "sort": 20
     },
     {
@@ -40,8 +40,8 @@
       "name": {"en":"Polar Pals · Snowy Owl Wings","de":"Polar Pals · Schneeeulen-Flügel"},
       "rarity": "legendary",
       "tags": ["polar-pals","wings","owl","feathers","animated"],
-      "size": 100024,
-      "sha256": "61bced965014ffabd08c970c585d7775c1960a970a914c72f2b75f9abf14af45",
+      "size": 106295,
+      "sha256": "bbd32ae83f94c5e479c893243017b915698d983e5b37bae744cebd5788fdbbd0",
       "sort": 30
     },
     {
@@ -54,8 +54,8 @@
       "name": {"en":"Polar Pals · Aurora Ring","de":"Polar Pals · Polarlicht-Ring"},
       "rarity": "epic",
       "tags": ["polar-pals","aura","aurora","glow","animated"],
-      "size": 129050,
-      "sha256": "c3db974d497131a1a90c6679564f6f7f95537b90e3de94056758c5bfd14ad736",
+      "size": 294512,
+      "sha256": "73eed0d017565a8f5cd43d9b844a87b1dc3345b3d54c48b4443404f5f89048d5",
       "sort": 40
     },
     {
@@ -68,8 +68,8 @@
       "name": {"en":"Polar Pals · Penguin","de":"Polar Pals · Pinguin"},
       "rarity": "epic",
       "tags": ["polar-pals","penguin","cute","pet","animated"],
-      "size": 97343,
-      "sha256": "6a2ea961e44579217d3882562998fd2b34483b4e721b9a77b91ed76a32eee0dc",
+      "size": 109851,
+      "sha256": "7c69f620b175de1318dfa8c4d76a38b087261190f82ee9ca8a120ba369dbd88e",
       "sort": 50
     },
     {
@@ -82,8 +82,8 @@
       "name": {"en":"Polar Pals · Seal Pup","de":"Polar Pals · Robbenbaby"},
       "rarity": "legendary",
       "tags": ["polar-pals","seal","cute","pet","animated"],
-      "size": 148989,
-      "sha256": "45cf820fd01b2c221ef5c9f75ce1bf2c606185fbbfc0e4f06997bbbdde88b4ea",
+      "size": 146980,
+      "sha256": "8c966e9e67de44dc8d7c71af683dbab86cc21452988a9e8a66b6a52e7e1a8404",
       "sort": 60
     },
     {
@@ -96,8 +96,8 @@
       "name": {"en":"Polar Pals · Pompom Beanie","de":"Polar Pals · Bommelmütze"},
       "rarity": "rare",
       "tags": ["polar-pals","hat","beanie","knit","animated"],
-      "size": 29640,
-      "sha256": "68e2d012061dc6204332b55195a3c215d32576c55feedeb032aeae7cc056199d",
+      "size": 21435,
+      "sha256": "b33de22b58461efb02f5f2bf807d7e9f5bcc6b73f7aea1f0e21455b74b422156",
       "sort": 70
     },
     {

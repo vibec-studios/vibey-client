@@ -1,15 +1,15 @@
 {
-  "tagline": "Premium collection: a seal pup and a penguin as pets, two sets of wings, a pompom beanie, an igloo backpack with a resident seal, an aurora ring and an HD snowfall cape. Everything 3D, HD textures (4×), animated with the states the 0.2.1 engine already has (idle / walk / fly / sneak) – no client change needed.",
+  "tagline": "Premium collection: a seal pup and a penguin as big, shoulder-high pets, two sets of wings, a pompom beanie, an igloo backpack with a resident seal, a soft aurora ring and an HD snowfall cape. Everything 3D, HD textures, animated – with the new optional states (sprint, glide, idle_long, happy) and wings that make room for a backpack (offsetWhen).",
   "items": {
     "vibey:polar_seal": {
-      "idle": [1.45, 2.9, 5.15, 10.0, 15.0, 18.3],
-      "moments": { "1.5": "blink", "2.9": "head tilt", "5.2": "sit up + clap (hearts, squeak)", "10.0": "roll over", "15.0": "nap with floating Zs", "18.3": "wake up + stretch" },
-      "story": "idle 20 s: breathe → blink → head tilt → sit up and clap three times (hearts + soft squeak) → look around → roll over (snow puff) → shake → nap (eyes shut, deep breaths, 3D Zs rise and spin) → wake, stretch, blink-blink. walk 1.6 s: galumph, galumph, happy belly slide. fly: superman with flapping flippers. sneak: shy, blushing loaf."
+      "idle": [2.9, 5.15, 10.0],
+      "moments": { "2.9": "head tilt", "5.2": "sit up + clap (hearts, squeak)", "10.0": "roll over" },
+      "story": "idle 13 s: breathe → blink → head tilt → sit up and clap three times (hearts + soft squeak) → look around → roll over (snow puff) → shake. walk 1 s: galumph, galumph. sprint: fast belly scoot with whirling flippers and snow spray. glide: superman with spread flippers. fly: flapping superman. sneak: shy, blushing loaf. happy (while you play an emote): hop-hop-clap above the head with hearts. idle_long (you stood still ~10 s): lies down for a nap, eyes shut, 3D Zs rise."
     },
     "vibey:polar_penguin": {
-      "idle": [0.6, 4.4, 7.6, 8.75, 9.6],
-      "moments": { "0.6": "breathing", "4.4": "happy flap + hop", "7.6": "shows you a fish", "8.8": "tosses it", "9.6": "gulp + heart" },
-      "story": "idle 16 s: look around → happy flipper flap with hops → a fish appears in the beak, tilt, toss, gulp (heart) → preen → little side-to-side dance. walk 2.4 s: four waddle steps with wiggling flippers, then a dive and belly slide. fly: frantic flapping, feet paddling. sneak: ducks into the scarf."
+      "idle": [4.4, 7.6, 9.6],
+      "moments": { "4.4": "happy flap + hop", "7.6": "shows you a fish", "9.6": "gulp + heart" },
+      "story": "idle 16 s: look around → happy flipper flap with hops → a fish appears in the beak, tilt, toss, gulp (heart) → preen → little side-to-side dance. walk 0.6 s: waddle. sprint: belly slide with kicking feet. glide: superman, flippers spread wide. fly: frantic flapping. sneak: ducks into the scarf. happy: hop-hop, flapping like mad, heart. idle_long: dozes off standing, head sinks into the scarf, Zs."
     },
     "vibey:polar_igloo_backpack": {
       "idle": [3.4, 4.9],
@@ -19,19 +19,19 @@
     "vibey:polar_pompom_beanie": {
       "idle": [0.12, 0.3],
       "moments": { "0.1": "boing", "0.3": "boing" },
-      "story": "idle 3 s: a damped boing with squash and stretch, snowflakes off the pompom. walk: bounces with the steps, braids swing. fly: pompom, flaps and braids stream back."
+      "story": "Calm: soft purple knit, a ribbed cuff, one clean snow-white pompom. idle 3 s: a damped boing with squash and stretch. walk: bounces with the steps. fly: the pompom streams back."
     },
     "vibey:polar_aurora_ring": {
-      "idle": [1.0, 6.0],
-      "story": "idle 12 s: the ring turns once, a wave runs around it three times (panels bob and lean), the light drifts along the curtains (8-frame strip), three crystal snowflakes orbit the other way, sparkle sprites rise."
+      "idle": [2.0, 9.0],
+      "story": "Three thin, curved ribbons of soft light (translucent + emissive, 12-frame interpolated strip, alpha fades out at every edge). Phase-shifted waves fold, lift, lean and stretch the segments so the curtains flow; the aurora turns once in 16 s, three crystal snowflakes orbit, sparkles rise."
     },
     "vibey:polar_aurora_wings": {
       "idle": [1.0],
-      "story": "Two veils per side, each a chain of three emissive translucent segments. idle: slow ripple + occasional sparkles. fly: bigger flap with a travelling ripple and a stream of sparkle sprites. sneak: veils swept back."
+      "story": "Two soft aurora curtains per side, each a chain of 2 px segments with one continuous curtain texture. idle: slow ripple. fly: big flowing strokes with a sparkle stream. glide: swept back, streaming. sneak: folded in. Moves back 8 px while a backpack is worn (offsetWhen)."
     },
     "vibey:polar_owl_wings": {
       "idle": [2.0],
-      "story": "Arm → forearm → hand bones, lesser + greater coverts and alula as scalloped layers, 5 secondaries and 5 primaries as separate feather bones. idle: folded angel-style with a slow breath. walk: gentle bob. fly: one big clean flap, then a long glide with spread finger feathers (feathers drift off on the downstroke). sneak: tucked in tight."
+      "story": "Arm → forearm → hand bones, lesser + greater coverts and alula as scalloped layers, 5 secondaries and 5 primaries as separate feather bones. idle: folded angel-style with a slow breath. walk: gentle bob. fly: one big clean flap, then a long glide. glide (elytra): wide soaring wings. sneak: tucked in tight. Sits 9 px further back while a backpack is worn (offsetWhen)."
     },
     "vibey:polar_snowfall_cape": {
       "idle": [],
@@ -43,16 +43,39 @@
     { "name": "pals_back", "yaw": 20, "slots": { "pet": "vibey:polar_seal", "hat": "vibey:polar_pompom_beanie", "aura": "vibey:polar_aurora_ring", "cape": "vibey:polar_snowfall_cape" } },
     { "name": "owl_penguin", "yaw": 200, "slots": { "wings": "vibey:polar_owl_wings", "pet": "vibey:polar_penguin", "hat": "vibey:polar_pompom_beanie" } },
     { "name": "owl_fly", "yaw": 15, "fly": true, "slots": { "wings": "vibey:polar_owl_wings", "hat": "vibey:polar_pompom_beanie" } },
-    { "name": "aurora_glow", "yaw": 25, "slots": { "wings": "vibey:polar_aurora_wings", "aura": "vibey:polar_aurora_ring", "pet": "vibey:polar_seal" } },
-    { "name": "igloo_penguin", "yaw": 30, "slots": { "back": "vibey:polar_igloo_backpack", "pet": "vibey:polar_penguin", "hat": "vibey:polar_pompom_beanie" } }
+    { "name": "igloo_penguin", "yaw": 30, "slots": { "back": "vibey:polar_igloo_backpack", "pet": "vibey:polar_penguin", "hat": "vibey:polar_pompom_beanie" } },
+    { "name": "beanie_close", "yaw": 160, "distance": 1.7, "pitch": -12, "slots": { "hat": "vibey:polar_pompom_beanie" } },
+    { "name": "beanie_close_side", "yaw": 110, "distance": 1.7, "pitch": -12, "slots": { "hat": "vibey:polar_pompom_beanie" } },
+    { "name": "owl_pack_back", "yaw": 20, "slots": { "wings": "vibey:polar_owl_wings", "back": "vibey:polar_igloo_backpack" } },
+    { "name": "owl_pack_side", "yaw": 90, "slots": { "wings": "vibey:polar_owl_wings", "back": "vibey:polar_igloo_backpack" } },
+    { "name": "owl_pack_front", "yaw": 160, "slots": { "wings": "vibey:polar_owl_wings", "back": "vibey:polar_igloo_backpack" } },
+    { "name": "aurora_pack_back", "yaw": 20, "slots": { "wings": "vibey:polar_aurora_wings", "back": "vibey:polar_igloo_backpack" } },
+    { "name": "aurora_pack_side", "yaw": 90, "slots": { "wings": "vibey:polar_aurora_wings", "back": "vibey:polar_igloo_backpack" } },
+    { "name": "aurora_pack_front", "yaw": 160, "slots": { "wings": "vibey:polar_aurora_wings", "back": "vibey:polar_igloo_backpack" } },
+    { "name": "night_ring_front", "yaw": 160, "night": true, "slots": { "aura": "vibey:polar_aurora_ring" } },
+    { "name": "night_ring_side", "yaw": 70, "night": true, "pitch": 18, "slots": { "aura": "vibey:polar_aurora_ring" } },
+    { "name": "night_wings_back", "yaw": 20, "night": true, "slots": { "wings": "vibey:polar_aurora_wings" } },
+    { "name": "night_aurora_glow", "yaw": 200, "night": true, "slots": { "wings": "vibey:polar_aurora_wings", "aura": "vibey:polar_aurora_ring", "hat": "vibey:polar_pompom_beanie" } }
   ],
+  "states": [
+    { "name": "seal_idle_long", "state": "idle_long", "slots": { "pet": "vibey:polar_seal" } },
+    { "name": "penguin_idle_long", "state": "idle_long", "slots": { "pet": "vibey:polar_penguin" } },
+    { "name": "seal_sprint", "state": "sprint", "slots": { "pet": "vibey:polar_seal" } },
+    { "name": "penguin_sprint", "state": "sprint", "slots": { "pet": "vibey:polar_penguin" } },
+    { "name": "seal_glide", "state": "glide", "yaw": 120, "slots": { "pet": "vibey:polar_seal" } },
+    { "name": "penguin_glide", "state": "glide", "yaw": 120, "slots": { "pet": "vibey:polar_penguin" } },
+    { "name": "seal_happy", "state": "happy", "slots": { "pet": "vibey:polar_seal" } },
+    { "name": "penguin_happy", "state": "happy", "slots": { "pet": "vibey:polar_penguin" } },
+    { "name": "owl_glide", "state": "glide", "yaw": 10, "slots": { "wings": "vibey:polar_owl_wings" } },
+    { "name": "aurora_wings_glide", "state": "glide", "yaw": 10, "night": true, "slots": { "wings": "vibey:polar_aurora_wings" } }
+  ],
+  "wardrobe": { "slot": "pet", "equip": { "pet": "vibey:polar_seal", "hat": "vibey:polar_pompom_beanie" }, "noThumbnail": [] },
   "notes": [
-    "Cosmetic animation states in 0.2.1 (AvatarDraw.COSMETIC_ANIMS): idle (always), walk (blended by walk speed, pets: by their own movement), fly (elytra or creative flying), sneak. There is no state for standing still for a while, falling, sprinting, swimming or riding.",
-    "The animation clock is global (Clock.now() % length), so long idle loops play the same moment for everyone: the seal naps for 5 s of every 20 s, not after the player has been idle.",
-    "Weights are blended additively; for pets walk = pet movement and fly = player flying are independent, so a pet that moves while the player flies plays walk + fly at full weight (sum 2). The pets' walk and fly were designed to look fine combined.",
-    "Walk weight saturates at normal walking speed (pets: almost immediately), so sprinting cannot be told apart: the belly slides are a phase of the walk loop instead.",
-    "Events of idle always run (also while walking); walk/fly/sneak events only above 50 % weight. Hearts, snow puffs and sparkles are therefore short and rare in idle.",
-    "Eyelids, the fish, the peeking pup and the nap Zs rest hidden inside the model and are moved out by idle offsets, so they disappear by themselves when walk/fly takes over (idle weight 0).",
-    "Proposed client states (not part of this task): idle_long (standing still > N s), fall (falling without elytra), sprint, swim, glide (elytra only, separate from creative fly), land (one-shot), hurt (one-shot) and a pet_sit state while the owner sits/rides; plus weight normalisation so walk + fly never sum above 1."
+    "Cosmetic animation states (client 0.2.2, AvatarDraw.COSMETIC_ANIMS / StateWeights): idle, walk, fly, sneak plus the optional sprint, glide (elytra or a long fall), idle_long (standing still ~10 s) and happy (the owner plays an emote). Weights follow a capped priority (glide > fly > sprint > walk > sneak > happy > idle_long > idle) and never sum above 1. Bundles without the new states play walk / fly / idle there, like 0.2.1.",
+    "The optional states start their animation from the beginning when the state begins (per avatar); idle / walk / fly / sneak keep the global clock.",
+    "cosmetic.offsetWhen moves an item's root bones while another slot is worn (eased in/out): both wings move back when the igloo backpack is worn.",
+    "Emissive + translucent bones (the aurora) render with the engine's own soft pipeline on 1.21.11 and 26.1 (other versions: vanilla emissive): full-bright, no per-face shading, no depth writes and no 0.1 alpha cutout, so the light fades out smoothly.",
+    "Events of idle always run (also while walking); the other states' events only above 50 % weight.",
+    "Eyelids, the fish, the peeking pup and the nap Zs rest hidden inside the model and are moved out by animation offsets, so they disappear by themselves when another state takes over."
   ]
 }

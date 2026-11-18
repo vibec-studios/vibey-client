@@ -1,7 +1,8 @@
 // Polar Pals · Snowy Owl Wings – large feathered wings built like a real wing: arm → forearm → hand bones, lesser and
 // greater coverts as scalloped layers, five secondaries and five primaries as separate feather bones. idle = folded
 // on the back with a slow breath, walk = gentle bounce, fly = one big clean flap then a long glide with spread
-// "finger" primaries (feathers drift off on the downstroke), sneak = tucked in tight.
+// "finger" primaries (feathers drift off on the downstroke), glide (elytra) = wide soaring wings, sneak = tucked in
+// tight. While a backpack is worn the wings sit further back (cosmetic.offsetWhen), so they never cut into it.
 import { K, P, cosmetic, each, shape, stroke, ellipse, rim, mix, rgba, hash, vnoise } from "./_polar.mjs";
 
 const WHITE = "#f8fafd", SHADOW = "#d9e1ec", DEEP = "#b9c6d8", MARK = "#5d6475", TIP = "#c9c2ff", TIP2 = "#a9e8ff";
@@ -93,7 +94,7 @@ export default function () {
     },
     tags: ["polar-pals", "wings", "owl", "feathers", "animated"],
     rarity: "legendary",
-    cosmetic: { slot: "wings" },
+    cosmetic: { slot: "wings", offsetWhen: [{ slot: "back", offset: [0, 1, 9] }] },
     preview: {
       panels: (p) => [
         { ...p[0], label: "front · idle (folded)" },
@@ -101,6 +102,7 @@ export default function () {
         { ...p[1], label: "back · fly · flap", anims: [{ name: "fly", t: 0.32 }], time: 0.32 },
         { ...p[1], label: "back · fly · glide", anims: [{ name: "fly", t: 1.8 }], time: 1.8, cam: { yaw: 200, pitch: 20 } },
         { ...p[0], label: "front · fly · glide", anims: [{ name: "fly", t: 1.8 }], time: 1.8 },
+        { ...p[1], label: "back · glide (elytra)", anims: [{ name: "glide", t: 1.0 }], time: 1.0, cam: { yaw: 200, pitch: 24 } },
         { ...p[1], label: "side · sneak", anims: [{ name: "sneak", t: 0.5 }], time: 0.5, cam: { yaw: 270, pitch: 10 } },
         { ...p[1], label: "side · walk", anims: [{ name: "walk", t: 0.25 }], time: 0.25, cam: { yaw: 110, pitch: 10 } },
         { ...p[1], label: "rest pose (spread)", anims: [], cam: { yaw: 180, pitch: 10 } },
@@ -212,6 +214,11 @@ export default function () {
   for (const side of ["r", "l"]) {
     fly.particle(0.62, { sprite: "feather", locator: `tip_${side}`, count: 1, lifetime: 2.2, size: 0.18, spread: [0.2, 0.1, 0.2], velocity: [0, -0.02, 0.02], gravity: 0.002 });
   }
+
+  // glide (elytra / long fall): wide open and soaring, a slow tilt and the finger feathers flexing
+  const glide = b.anim("glide", 3, true);
+  const g1 = { ...GLIDE, base: [-6, -6, 0], arm: 4 }, g2 = { ...GLIDE, base: [-4, -12, 0], arm: 10, hand: 0 };
+  keys(glide, [[0, g1, 6], [1.5, g2, 3], [3, g1, 6]]);
 
   // sneak: tucked in tight
   const sneak = b.anim("sneak", 2, true);

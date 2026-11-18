@@ -23,6 +23,10 @@ const ATTACH = ["head", "body", "right_arm", "left_arm", "right_leg", "left_leg"
 const PLAYER_BONES = ["head", "body", "right_arm", "left_arm", "right_leg", "left_leg", "root"];
 const FACES = ["north", "east", "south", "west", "up", "down"];
 const INTERP = ["linear", "catmullrom", "step", "bezier"];
+/** Cosmetic animation names with meaning (SPEC §5); sprint/glide/idle_long/happy since client 0.2.2 (optional). */
+export const COSMETIC_ANIMS = ["idle", "walk", "fly", "sneak", "sprint", "glide", "idle_long", "happy"];
+/** cosmetic.offsetWhen limits (SPEC §5). */
+export const OFFSET_RULES = 8, OFFSET_MAX = 64, OFFSET_ROT_MAX = 360;
 const ID_RE = /^[a-z0-9_.-]+:[a-z0-9_./-]+$/;
 const SOUND_ID_RE = /^[a-z0-9_.-]+:[a-z0-9_./-]+$/;
 
@@ -174,6 +178,24 @@ export function validate(input) {
       if (c.pet !== undefined) {
         if (!isObj(c.pet)) err("cosmetic.pet must be an object");
         else if (c.pet.scale !== undefined && !(isNum(c.pet.scale) && c.pet.scale > 0)) err("cosmetic.pet.scale must be a positive number");
+      }
+      if (c.offsetWhen !== undefined) {
+        if (!Array.isArray(c.offsetWhen)) err("cosmetic.offsetWhen must be an array");
+        else {
+          if (c.offsetWhen.length > OFFSET_RULES) err(`cosmetic.offsetWhen: at most ${OFFSET_RULES} rules`);
+          const seen = new Set();
+          c.offsetWhen.forEach((r, i) => {
+            const w = `cosmetic.offsetWhen[${i}]`;
+            if (!isObj(r)) return err(`${w} must be an object`);
+            if (!SLOTS.includes(r.slot)) err(`${w}.slot must be one of ${SLOTS.join("|")}`);
+            else if (r.slot === c.slot) err(`${w}.slot is the item's own slot`);
+            else if (seen.has(r.slot)) warn(`${w}: a second rule for slot ${r.slot} (both apply)`);
+            seen.add(r.slot);
+            if (r.offset === undefined && r.rotation === undefined) err(`${w} needs an offset and/or a rotation`);
+            if (r.offset !== undefined && !(isVec3(r.offset) && r.offset.every((x) => Math.abs(x) <= OFFSET_MAX))) err(`${w}.offset must be [x,y,z] within ±${OFFSET_MAX} px`);
+            if (r.rotation !== undefined && !(isVec3(r.rotation) && r.rotation.every((x) => Math.abs(x) <= OFFSET_ROT_MAX))) err(`${w}.rotation must be [x,y,z] degrees within ±${OFFSET_ROT_MAX}`);
+          });
+        }
       }
       if (!["cape", "shield"].includes(c.slot) && !isObj(v.model)) err(`model is required for slot ${c.slot}`);
     }
@@ -334,6 +356,7 @@ export function validate(input) {
     if (c.slot === "wings" && !anims.fly) warn("wings without a fly animation");
     if (["pet", "aura", "wings"].includes(c.slot) && !anims.idle) warn(`${c.slot} without an idle animation`);
     if (c.slot === "pet" && !anims.walk) warn("pet without a walk animation");
+    if (isObj(anims)) for (const n of Object.keys(anims)) if (!COSMETIC_ANIMS.includes(n)) warn(`animation "${n}" is not a cosmetic state (${COSMETIC_ANIMS.join("|")}); clients ignore it`);
     for (const b of bones.values()) if (!b.parent && c.slot && ["pet", "aura"].includes(c.slot) && b.attach !== "world") warn(`${c.slot} root bone "${b.name}" is not attached to world`);
   }
   return { ok: errors.length === 0, errors, warnings };

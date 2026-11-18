@@ -57,7 +57,8 @@ export class Texture {
   /**
    * @param id texture id
    * @param opts { width, height } fixed frame size, or omit for auto-sizing (power of two that fits).
-   *             { frames, frameTime, frameOrder } for animated vertical strips.
+   *             { frames, frameTime, frameOrder, interpolate } for animated vertical strips (interpolate: clients
+   *             blend between frames, like .mcmeta).
    *             { hd: k } HD texture: the PNG gets k pixels per UV unit (SPEC §5 "HD"); painters then receive
    *             views that are k times larger (use img.width/img.height, never hard-coded sizes).
    */
@@ -69,6 +70,7 @@ export class Texture {
     this.height = opts.height ?? 0;
     this.frames = opts.frames ?? 1;
     this.frameTime = opts.frameTime ?? 2;
+    this.interpolate = !!opts.interpolate;
     this.frameOrder = opts.frameOrder ?? null;
     this.regions = [];
     this.painters = []; // whole-frame painters (img, frameIndex)
@@ -347,7 +349,10 @@ export class Bundle {
       const img = t._render();
       pngs[t.id] = img;
       const tj = { id: t.id, width: t.width, height: t.height, png: img.toPNG().toString("base64") };
-      if (t.frames > 1) tj.animation = { frameTime: t.frameTime, frames: t.frameOrder ?? [...Array(t.frames).keys()] };
+      if (t.frames > 1) {
+        tj.animation = { frameTime: t.frameTime, frames: t.frameOrder ?? [...Array(t.frames).keys()] };
+        if (t.interpolate) tj.animation.interpolate = true;
+      }
       out.textures.push(tj);
     }
 

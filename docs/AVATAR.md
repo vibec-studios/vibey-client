@@ -14,7 +14,7 @@ wardrobe), `emotes` (wheel, local plays), `devlink` (Blockbench live link). The 
 |---|---|
 | `avatar` | `AvatarItems` (registry, DEV > CATALOG > BUILTIN by id), `ItemLoader` (builtin bundles from the jar, backend catalog with ETag + SHA-256 asset cache in `<gameDir>/vibeyclient/cache`), `AvatarState`/`AvatarStates` (per player: loadout, emote, pet, movement weights), `AvatarTicker`, `Thumbnails`, `DevItemsImpl`, `EngineCompat`, `SelfTest` |
 | `avatar.bundle` | `Bundle` (immutable model), `BundleParser` (validation per SPEC §5, warnings, forward compatible) |
-| `avatar.anim` | `Sampler` (Blockbench interpolation incl. split keys and loop wrap), `EmotePlay` (fade 0.15 s, loop/hold/once) |
+| `avatar.anim` | `Sampler` (Blockbench interpolation incl. split keys and loop wrap), `EmotePlay` (fade 0.15 s, loop/hold/once), `StateWeights` (cosmetic state blending, unit tested) |
 | `avatar.render` | `BundleMesh` (Blockbench → model space, vanilla box UV, per-face UV, cube rotation), `GpuBundle(s)` (textures, animated strips copied per frame), `BoneRenderer`, `AvatarDraw`, `MeshSink` (buffer source < 1.21.9, submit collector ≥ 1.21.9), `AvatarHooks`, `CosmeticLayer`, `WorldPass`, `SkinOverride` (capes via the vanilla cape model + elytra), `ShieldDraw` |
 | `avatar.fx` | `Effects` (event runner), `SpriteParticles`, `EmbeddedSounds` (stb_vorbis + OpenAL, positional) |
 | `avatar.preview` | `AvatarPreview` service: 3D player preview without a player entity (title screen too) |
@@ -25,9 +25,31 @@ wardrobe), `emotes` (wheel, local plays), `devlink` (Blockbench live link). The 
 |---|---|---|
 | `avatar.Wardrobe` | cosmetics module (while enabled) | equip/unequip, `canUse`, emote wheel slots, play/stop emotes |
 | `avatar.preview.AvatarPreview` | cosmetics module | `create()` a `View`, call `draw(g, x, y, w, h, delta)` every frame, forward mouse with `mouse(...)`; `playEmote`, `override(slot, id)` for try-on |
-| `avatar.DevItems` | cosmetics module | devlink pushes (`push`, `remove`, `ids`) |
+| `avatar.DevItems` | cosmetics module | devlink pushes (`push` with an optional thumbnail PNG, `remove`, `ids`) |
 
-`AvatarItems.version()` changes on every registry change (poll it in UIs). `Thumbnails.draw(g, item, x, y, size)`.
+`AvatarItems.version()` changes on every registry change (poll it in UIs). `Thumbnails.draw(g, item, x, y, size)`
+(dev items: the thumbnail of their last push that had one, `ThumbnailCache.putDev`; else the letter tile).
+
+## Cosmetic states
+
+`AvatarTicker` derives per avatar (smoothed 0..1): `walk` (walk animation speed), `fly` (creative or elytra), `sneak`,
+`sprint` (sprinting and moving), `glide` (elytra, or falling > 14 ticks), `idle_long` (no movement, on the ground, no
+emote for 200 ticks; eases in over ~1.5 s) and `happy` (an emote plays). `AvatarDraw.weights` hands them to
+`StateWeights.compute`: priority glide > fly > sprint > walk > sneak > happy > idle_long > idle with a budget of 1;
+missing or empty animations weigh 0 (fallbacks: no `glide` → elytra plays `fly`, no `sprint` → `walk`). The
+optional states start at `AvatarState.stateStart` (per avatar), the others use the global `Clock`. Pets use their own
+movement (`petMove`) instead of `walk`. Ground pets keep `AvatarTicker.petSide(bundle)` to the player's right (player
+radius 0.3 + the pet's widest body cube × `pet.scale` + 0.3, at least 0.95) and are pushed out of the player's
+footprint so a big pet never walks through its owner.
+
+`cosmetic.offsetWhen` (`Bundle.offsetWhen`): `AvatarDraw.offsets` eases a weight per (item slot, other slot) towards
+1 while the other slot shows an item (smoothstep, ~0.3 s) and adds the blended offset/rotation to every root bone
+(`BoneRenderer.Mix.rootOffset`).
+
+Render types (`Tex`): cutout (opaque), translucent and emissive as before; emissive + translucent bones use `glow()`.
+On 1.21.11 and 26.1 translucent and glow are the engine's own pipelines (`Tex.SoftPipelines`, created through the
+`RenderTypeInvoker` mixin): vanilla entity shader with an alpha cutout of 0.004 instead of 0.1; glow is full-bright,
+without per-face shading and depth writes. Other versions (older, and 26.2+ with the new bind-group pipeline API) keep vanilla's entity render types.
 
 ## Over-the-air updates (ItemLoader)
 

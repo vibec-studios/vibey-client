@@ -54,6 +54,16 @@ function validate(b) {
 		if (c.cape && c.cape.texture && !tex.has(c.cape.texture)) e('cape texture');
 		if (c.shield && c.shield.texture && !tex.has(c.shield.texture)) e('shield texture');
 		if (c.hideWithArmor && !c.hideWithArmor.every((s) => ['head', 'chest', 'legs', 'feet'].includes(s))) e('hideWithArmor');
+		if (c.offsetWhen !== undefined) {
+			const v3 = (v, m) => Array.isArray(v) && v.length === 3 && v.every((x) => typeof x === 'number' && isFinite(x) && Math.abs(x) <= m);
+			if (!Array.isArray(c.offsetWhen) || c.offsetWhen.length > 8) e('offsetWhen');
+			else c.offsetWhen.forEach((r) => {
+				if (!r || !SLOTS.includes(r.slot) || r.slot === c.slot) e('offsetWhen.slot');
+				if (!r || (r.offset === undefined && r.rotation === undefined)) e('offsetWhen empty');
+				if (r && r.offset !== undefined && !v3(r.offset, 64)) e('offsetWhen.offset');
+				if (r && r.rotation !== undefined && !v3(r.rotation, 360)) e('offsetWhen.rotation');
+			});
+		}
 		if (!b.model && !['cape', 'shield'].includes(c.slot)) e('model required');
 	}
 	if (b.kind === 'emote') {

@@ -1,5 +1,6 @@
-// Polar Pals · Penguin – a round penguin chick in a knitted Vibe scarf. Waddles with wiggling flippers, belly-slides
-// every few steps, and now and then shows you a fish, tosses it up and gulps it down.
+// Polar Pals · Penguin – a round penguin chick in a knitted Vibe scarf, about shoulder high next to you. Waddles with
+// wiggling flippers, belly-slides when you sprint, glides like superman, cheers when you emote, dozes off when you
+// stand still, and now and then shows you a fish, tosses it up and gulps it down.
 import { K, P, cosmetic, fur, rim, edges, each, ellipse, blush, eye, closedEye, stroke, arc, mix, rgba, petPreview } from "./_polar.mjs";
 
 const L = 16;
@@ -50,23 +51,25 @@ export default function () {
   const b = cosmetic("polar_penguin", {
     name: { en: "Polar Pals · Penguin", de: "Polar Pals · Pinguin" },
     description: {
-      en: "A chubby penguin chick in a knitted Vibe scarf. Waddles after you, belly-slides every few steps, flaps like mad when you fly – and sometimes shows you a fish before gulping it down.",
-      de: "Ein pummeliges Pinguinküken im gestrickten Vibe-Schal. Watschelt dir hinterher, rutscht alle paar Schritte auf dem Bauch, flattert wild, wenn du fliegst – und zeigt dir manchmal einen Fisch, bevor es ihn verschlingt.",
+      en: "A chubby penguin chick in a knitted Vibe scarf. Waddles after you, belly-slides when you sprint, cheers when you emote, dozes off when you stand still – and sometimes shows you a fish before gulping it down.",
+      de: "Ein pummeliges Pinguinküken im gestrickten Vibe-Schal. Watschelt dir hinterher, rutscht beim Sprinten auf dem Bauch, jubelt bei deinen Emotes, döst ein, wenn du still stehst – und zeigt dir manchmal einen Fisch, bevor es ihn verschlingt.",
     },
     tags: ["polar-pals", "penguin", "cute", "pet", "animated"],
     rarity: "epic",
-    cosmetic: { slot: "pet", pet: { follow: "ground", scale: 0.42 } },
+    cosmetic: { slot: "pet", pet: { follow: "ground", scale: 0.95 } },
     preview: petPreview([
       { label: "idle", t: 0.6 },
       { label: "idle · flap", t: 4.5 },
       { label: "idle · fish!", t: 7.6 },
       { label: "idle · toss", t: 8.75 },
       { label: "idle · gulp", t: 9.6 },
-      { label: "walk · waddle", anim: "walk", t: 0.3 },
-      { label: "walk · belly slide", anim: "walk", t: 1.8, cam: { yaw: 70, pitch: 12 } },
+      { label: "happy · cheer", anim: "happy", t: 0.15 },
+      { label: "idle_long · doze", anim: "idle_long", t: 1.4 },
+      { label: "walk · waddle", anim: "walk", t: 0.15 },
+      { label: "sprint · belly slide", anim: "sprint", t: 0.1, cam: { yaw: 70, pitch: 12 } },
+      { label: "glide · superman", anim: "glide", t: 0.5, cam: { yaw: 50, pitch: 18 } },
       { label: "fly · flap flap", anim: "fly", t: 0.1 },
       { label: "sneak", anim: "sneak", t: 0.4 },
-      { label: "front", t: 0.6, cam: { yaw: 0, pitch: 6 } },
       { label: "back", t: 0.6, cam: { yaw: 200, pitch: 14 } },
     ], { cols: 4 }),
   });
@@ -214,6 +217,15 @@ export default function () {
   };
   fish.box([1, 15.5, 0], [2, 3, 0], { north: finTex, south: finTex });
 
+  // floating Zs for dozing off (3D glyphs, hidden inside the body at rest)
+  const zPaint = { all: (img) => rim(fur(img, { top: "#f3f0ff", bottom: "#d6ccff", seed: 70, strands: 0.0, grain: 0.01 }), 0.2, 0.5) };
+  for (const n of [1, 2, 3]) {
+    const z = b.bone(`z${n}`, { parent: "peng", pivot: [0, 5, 0] });
+    z.box([-3, 10, -0.5], [6, 1, 1], zPaint);
+    for (let k = 0; k < 4; k++) z.box([-2 + k, 9 - k, -0.5], [1, 1, 1], zPaint);
+    z.box([-3, 5, -0.5], [6, 1, 1], zPaint);
+  }
+
   b.locator("heart", "head", [0, 23, -3]);
   b.locator("beak", "head", [0, 15.5, -7]);
   b.locator("feet", "peng", [0, 0.5, -1]);
@@ -250,6 +262,7 @@ export default function () {
   idle.rot("fish", [[0, Z0, "step"], [6.6, Z0], [7.6, [0, 0, -10]], [8.2, [0, 0, 10]], [8.55, Z0, "linear"], [8.8, [0, 0, 200], "linear"], [9.05, [0, 0, 270]], [9.3, [0, 0, 270], "step"], [9.31, Z0, "step"], [L, Z0, "step"]]);
   idle.scale("fish", [[0, [1, 1, 1], "step"], [9.05, [1, 1, 1]], [9.3, [0.5, 0.5, 0.5], "step"], [9.31, [1, 1, 1], "step"], [L, [1, 1, 1], "step"]]);
   idle.visible(0, "fish", false).visible(6.6, "fish", true).visible(9.3, "fish", false);
+  for (const z of ["z1", "z2", "z3"]) idle.visible(0, z, false);
   const OUT = [0, 0, -0.3];
   const lidWin = (wins) => {
     const k = [[0, Z0, "step"]];
@@ -264,35 +277,51 @@ export default function () {
   idle.sound(9.3, "minecraft:entity.generic.eat", { volume: 0.25, pitch: 1.6 });
   idle.sound(6.6, "minecraft:entity.fish.swim", { volume: 0.2, pitch: 1.5 });
 
-  // ------------------------------------------------------------------------------------------------ walk (2.4 s)
-  // four waddle steps, then a dive onto the belly and a slide, hop back up
-  const walk = b.anim("walk", 2.4, true);
+  // ------------------------------------------------------------------------------------------------ walk (0.6 s)
+  // waddle: two steps, side to side, flippers wiggling
+  const walk = b.anim("walk", 0.6, true);
   const st = 0.3;
-  walk.rot("body", [[0, [0, 0, -9]], [st, [0, 0, 9]], [2 * st, [0, 0, -9]], [3 * st, [0, 0, 9]], [1.2, [0, 0, 0]], [1.38, [-84, 0, 0]], [2.15, [-84, 0, 0]], [2.3, [-10, 0, -4]], [2.4, [0, 0, -9]]]);
-  walk.pos("body", [[0, Z0], [1.2, Z0], [1.38, [0, 4.2, -1]], [2.15, [0, 4.2, -1]], [2.3, [0, 1.2, 0]], [2.4, Z0]]);
-  walk.pos("peng", [[0, Z0], [st / 2, [0, 0.8, 0]], [st, Z0], [1.5 * st, [0, 0.8, 0]], [2 * st, Z0], [2.5 * st, [0, 0.8, 0]], [3 * st, Z0], [3.5 * st, [0, 0.8, 0]], [1.2, Z0], [2.4, Z0]]);
-  walk.rot("head", [[0, [0, 0, 6]], [st, [0, 0, -6]], [2 * st, [0, 0, 6]], [3 * st, [0, 0, -6]], [1.2, Z0], [1.38, [60, 0, 0]], [2.15, [60, 0, 0]], [2.3, [8, 0, 0]], [2.4, [0, 0, 6]]]);
-  const wig = (sx) => [[0, [0, 0, 28 * sx]], [st / 2, [0, 0, 12 * sx]], [st, [0, 0, 28 * sx]], [1.5 * st, [0, 0, 12 * sx]], [2 * st, [0, 0, 28 * sx]], [2.5 * st, [0, 0, 12 * sx]], [3 * st, [0, 0, 28 * sx]], [1.2, [0, 0, 30 * sx]], [1.38, [0, 0, 8 * sx]], [2.15, [0, 0, 8 * sx]], [2.4, [0, 0, 28 * sx]]];
+  walk.rot("body", [[0, [0, 0, -9]], [st, [0, 0, 9]], [2 * st, [0, 0, -9]]]);
+  walk.pos("peng", [[0, Z0], [st / 2, [0, 0.8, 0]], [st, Z0], [1.5 * st, [0, 0.8, 0]], [2 * st, Z0]]);
+  walk.rot("head", [[0, [0, 0, 6]], [st, [0, 0, -6]], [2 * st, [0, 0, 6]]]);
+  const wig = (sx) => [[0, [0, 0, 28 * sx]], [st / 2, [0, 0, 12 * sx]], [st, [0, 0, 28 * sx]], [1.5 * st, [0, 0, 12 * sx]], [2 * st, [0, 0, 28 * sx]]];
   walk.rot("wing_r", wig(1));
   walk.rot("wing_l", wig(-1));
-  const step = (ph) => {
-    const k = [];
-    for (let i = 0; i < 4; i++) {
-      const t = i * st;
-      const up = (i % 2) === ph;
-      k.push([t, up ? [0, 1.4, -0.5] : Z0]);
-    }
-    k.push([1.2, Z0], [1.38, [0, 1.8, 3.5]], [2.15, [0, 1.8, 3.5]], [2.3, [0, 0.5, 0]], [2.4, ph === 0 ? [0, 1.4, -0.5] : Z0]);
-    return k;
-  };
-  walk.pos("foot_r", step(0));
-  walk.pos("foot_l", step(1));
-  walk.rot("foot_r", [[0, Z0], [1.2, Z0], [1.38, [70, 0, 0]], [2.15, [70, 0, 0]], [2.3, Z0], [2.4, Z0]]);
-  walk.rot("foot_l", [[0, Z0], [1.2, Z0], [1.38, [70, 0, 0]], [2.15, [70, 0, 0]], [2.3, Z0], [2.4, Z0]]);
-  walk.rot("scarf_end", [[0, [10, 0, 6]], [st, [10, 0, -6]], [2 * st, [10, 0, 6]], [3 * st, [10, 0, -6]], [1.2, [20, 0, 0]], [1.38, [-50, 0, 0]], [2.15, [-60, 0, 8]], [2.4, [10, 0, 6]]]);
-  walk.pos("happy", [[0, Z0, "step"], [1.3, OUT, "step"], [2.2, Z0, "step"], [2.4, Z0, "step"]], "step");
-  walk.particle(1.4, { particle: "minecraft:snowflake", locator: "feet", count: 4, spread: [0.2, 0.02, 0.2], velocity: [0, 0.03, 0] });
-  walk.particle(1.8, { particle: "minecraft:snowflake", locator: "feet", count: 2, spread: [0.2, 0.02, 0.1], velocity: [0, 0.02, 0.03] });
+  walk.pos("foot_r", [[0, [0, 1.4, -0.5]], [st, Z0], [2 * st, [0, 1.4, -0.5]]]);
+  walk.pos("foot_l", [[0, Z0], [st, [0, 1.4, -0.5]], [2 * st, Z0]]);
+  walk.rot("scarf_end", [[0, [10, 0, 6]], [st, [10, 0, -6]], [2 * st, [10, 0, 6]]]);
+
+  // ------------------------------------------------------------------------------------------------ sprint (0.6 s)
+  // belly slide (tobogganing): dives onto the belly, feet kick, flippers swept back, happy squint, snow spray
+  const sprint = b.anim("sprint", 0.6, true);
+  sprint.rot("body", [[0, [-84, 0, -3]], [0.3, [-84, 0, 3]], [0.6, [-84, 0, -3]]]);
+  sprint.pos("body", [[0, [0, 4.2, -1]], [0.15, [0, 4.6, -1]], [0.3, [0, 4.2, -1]], [0.45, [0, 4.6, -1]], [0.6, [0, 4.2, -1]]]);
+  sprint.rot("head", [[0, [62, 0, 0]], [0.3, [58, 0, 0]], [0.6, [62, 0, 0]]]);
+  sprint.rot("wing_r", [[0, [-25, 0, 10]], [0.15, [-25, 0, 22]], [0.3, [-25, 0, 10]], [0.45, [-25, 0, 22]], [0.6, [-25, 0, 10]]]);
+  sprint.rot("wing_l", [[0, [-25, 0, -22]], [0.15, [-25, 0, -10]], [0.3, [-25, 0, -22]], [0.45, [-25, 0, -10]], [0.6, [-25, 0, -22]]]);
+  sprint.pos("foot_r", [[0, [0, 1.8, 3.5]], [0.6, [0, 1.8, 3.5]]]);
+  sprint.pos("foot_l", [[0, [0, 1.8, 3.5]], [0.6, [0, 1.8, 3.5]]]);
+  sprint.rot("foot_r", [[0, [95, 0, 0]], [0.15, [60, 0, 0]], [0.3, [95, 0, 0]], [0.45, [60, 0, 0]], [0.6, [95, 0, 0]]]);
+  sprint.rot("foot_l", [[0, [60, 0, 0]], [0.15, [95, 0, 0]], [0.3, [60, 0, 0]], [0.45, [95, 0, 0]], [0.6, [60, 0, 0]]]);
+  sprint.rot("scarf_end", [[0, [-55, 0, 8]], [0.3, [-62, 0, -8]], [0.6, [-55, 0, 8]]]);
+  sprint.pos("happy", [[0, OUT, "step"], [0.6, OUT, "step"]], "step");
+  sprint.particle(0.0, { particle: "minecraft:snowflake", locator: "feet", count: 3, spread: [0.25, 0.02, 0.15], velocity: [0, 0.03, 0.05] });
+  sprint.particle(0.3, { particle: "minecraft:snowflake", locator: "feet", count: 3, spread: [0.25, 0.02, 0.15], velocity: [0, 0.03, 0.05] });
+
+  // ------------------------------------------------------------------------------------------------ glide (2 s)
+  // superman: stretched out flat in the air, flippers spread wide like wings, feet trailing, banking gently
+  const glide = b.anim("glide", 2, true);
+  glide.rot("body", [[0, [-78, 0, -6]], [1, [-74, 0, 6]], [2, [-78, 0, -6]]]);
+  glide.pos("body", [[0, [0, 6, -1]], [1, [0, 7, -1]], [2, [0, 6, -1]]]);
+  glide.rot("head", [[0, [64, 0, 0]], [1, [60, 0, 0]], [2, [64, 0, 0]]]);
+  glide.rot("wing_r", [[0, [0, 0, 82]], [0.5, [0, 0, 90]], [1, [0, 0, 82]], [1.5, [0, 0, 74]], [2, [0, 0, 82]]]);
+  glide.rot("wing_l", [[0, [0, 0, -82]], [0.5, [0, 0, -74]], [1, [0, 0, -82]], [1.5, [0, 0, -90]], [2, [0, 0, -82]]]);
+  glide.pos("foot_r", [[0, [0, 3.2, 4]], [2, [0, 3.2, 4]]]);
+  glide.pos("foot_l", [[0, [0, 3.2, 4]], [2, [0, 3.2, 4]]]);
+  glide.rot("foot_r", [[0, [85, 0, 0]], [1, [80, 0, 0]], [2, [85, 0, 0]]]);
+  glide.rot("foot_l", [[0, [80, 0, 0]], [1, [85, 0, 0]], [2, [80, 0, 0]]]);
+  glide.rot("scarf_end", [[0, [-70, 0, 10]], [1, [-76, 0, -10]], [2, [-70, 0, 10]]]);
+  glide.pos("happy", [[0, OUT, "step"], [2, OUT, "step"]], "step");
 
   // ------------------------------------------------------------------------------------------------ fly (0.5 s)
   const fly = b.anim("fly", 0.5, true);
@@ -313,5 +342,43 @@ export default function () {
   sneak.rot("head", [[0, [-6, 14, 0]], [1, [-6, -14, 0]], [2, [-6, 14, 0]]]);
   sneak.rot("wing_r", [[0, [0, 40, 12]], [2, [0, 40, 12]]]);
   sneak.rot("wing_l", [[0, [0, -40, -12]], [2, [0, -40, -12]]]);
+
+  // ------------------------------------------------------------------------------------------------ happy (1.2 s)
+  // joy while the owner plays an emote: hop-hop, flippers flapping like mad, happy squint, a heart now and then
+  const happy = b.anim("happy", 1.2, true);
+  happy.pos("peng", [[0, Z0], [0.15, [0, 2.4, 0]], [0.3, Z0], [0.6, Z0], [0.75, [0, 2.4, 0]], [0.9, Z0], [1.2, Z0]]);
+  happy.scale("body", [[0, [1.06, 0.9, 1.06]], [0.15, [0.96, 1.06, 0.96]], [0.3, [1.06, 0.9, 1.06]], [0.45, [1, 1, 1]], [0.6, [1.06, 0.9, 1.06]], [0.75, [0.96, 1.06, 0.96]], [0.9, [1.06, 0.9, 1.06]], [1.05, [1, 1, 1]], [1.2, [1.06, 0.9, 1.06]]]);
+  happy.rot("head", [[0, [8, 0, 10]], [0.6, [8, 0, -10]], [1.2, [8, 0, 10]]]);
+  const cheer = (sx) => {
+    const k = [];
+    for (let i = 0; i <= 8; i++) k.push([i * 0.15, [0, 0, (i % 2 ? 30 : 80) * sx]]);
+    return k;
+  };
+  happy.rot("wing_r", cheer(1));
+  happy.rot("wing_l", cheer(-1));
+  happy.rot("scarf_end", [[0, [14, 0, 8]], [0.3, [-6, 0, -6]], [0.6, [14, 0, 8]], [0.9, [-6, 0, -6]], [1.2, [14, 0, 8]]]);
+  happy.rot("jaw", [[0, Z0], [0.15, [20, 0, 0]], [0.45, Z0], [1.2, Z0]]);
+  happy.pos("happy", [[0, OUT, "step"], [1.2, OUT, "step"]], "step");
+  happy.particle(0.2, { particle: "minecraft:heart", locator: "heart", count: 1, spread: [0.12, 0.05, 0.12], velocity: [0, 0.03, 0] });
+
+  // ------------------------------------------------------------------------------------------------ idle_long (5 s)
+  // dozes off standing: head sinks into the scarf, eyes shut, sways softly, Zs drift up
+  const doze = b.anim("idle_long", 5, true);
+  doze.pos("head", [[0, [0, -2, 0.4]], [5, [0, -2, 0.4]]]);
+  doze.rot("head", [[0, [-22, 0, 8]], [2.5, [-25, 0, 10]], [5, [-22, 0, 8]]]);
+  doze.rot("body", [[0, [0, 0, -3]], [2.5, [0, 0, 3]], [5, [0, 0, -3]]]);
+  doze.scale("body", [[0, [1.02, 0.97, 1.02]], [1.25, [1.05, 1.0, 1.05]], [2.5, [1.02, 0.97, 1.02]], [3.75, [1.05, 1.0, 1.05]], [5, [1.02, 0.97, 1.02]]]);
+  doze.rot("wing_r", [[0, [0, 0, 3]], [5, [0, 0, 3]]]);
+  doze.rot("wing_l", [[0, [0, 0, -3]], [5, [0, 0, -3]]]);
+  doze.rot("scarf_end", [[0, [4, 0, 2]], [2.5, [2, 0, -2]], [5, [4, 0, 2]]]);
+  doze.pos("lids", [[0, OUT, "step"], [5, OUT, "step"]], "step");
+  for (const [z, t0] of Object.entries({ z1: 0.2, z2: 1.8, z3: 3.4 })) {
+    const pos = [[0, Z0, "step"]], sc = [[0, [1, 1, 1], "step"]], rot = [[0, Z0, "step"]];
+    pos.push([t0, [2, 15, -2]], [t0 + 0.6, [3.5, 19, -1.5]], [t0 + 1.5, [6, 25, 0], "step"], [t0 + 1.51, Z0, "step"], [5, Z0, "step"]);
+    sc.push([t0, [0.35, 0.35, 0.35]], [t0 + 0.6, [0.9, 0.9, 0.9]], [t0 + 1.5, [1.2, 1.2, 1.2], "step"], [t0 + 1.51, [1, 1, 1], "step"], [5, [1, 1, 1], "step"]);
+    rot.push([t0, [0, -25, 8], "linear"], [t0 + 1.5, [0, 35, -8], "step"], [t0 + 1.51, Z0, "step"], [5, Z0, "step"]);
+    doze.pos(z, pos, "catmullrom").scale(z, sc, "catmullrom").rot(z, rot, "linear");
+    doze.visible(0, z, false).visible(t0, z, true).visible(t0 + 1.5, z, false);
+  }
   return b;
 }

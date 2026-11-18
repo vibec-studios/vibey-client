@@ -126,6 +126,9 @@ Max size 2 MiB (backend-configurable).
     "slot": "pet",                    // cape | wings | aura | pet | shield | hat | back
     "hideWithArmor": ["chest"],       // optional: hide when this armor slot is worn (head|chest|legs|feet)
     "pet": { "follow": "shoulder_right", "scale": 1.0 },   // slot specific options, all optional
+    "offsetWhen": [                   // optional (client 0.2.2+): move this item while another slot is worn
+      { "slot": "back", "offset": [0, 1, 8], "rotation": [0, 0, 0] }   // Blockbench px / degrees, rotation optional
+    ],
     "cape": { "texture": "cape" },     // cape: 64x32 vanilla cape layout texture, rendered by the vanilla cape model
     "shield": { "texture": "shield" }  // shield: 64x64 vanilla shield texture layout (base + face)
   },
@@ -161,7 +164,7 @@ Max size 2 MiB (backend-configurable).
           }
         ],
         "emissive": false,            // full-bright (glowing) rendering
-        "translucent": false
+        "translucent": false          // alpha blended; emissive + translucent = soft glow (no shading, no depth write)
       }
     ],
     "locators": { "hand_tip": { "bone": "right_arm_prop", "position": [0, 10, 0] } }  // for particles/sounds
@@ -242,7 +245,30 @@ sleeves/pants) follows its part automatically.
 
 **Animation rules:** channel values are interpolated between keyframes; missing channels = rest pose; `loop`
 animations wrap; emotes fade in/out over 0.15 s when starting/stopping. Cosmetic animation names with meaning:
-`idle` (always), `walk` (blended by walk speed), `fly` (elytra/creative flying – wings), `sneak`.
+`idle` (always), `walk` (blended by walk speed; pets: by their own movement), `fly` (elytra/creative flying –
+wings), `sneak`, and since client 0.2.2 the optional states `sprint` (the player sprints), `glide` (elytra flight,
+or falling for ~0.7 s), `idle_long` (the player stood still ~10 s: on the ground, no movement, no emote) and `happy`
+(the owner plays an emote).
+
+*Cosmetic state blending (binding since 0.2.2):* each animation gets a weight from a budget of 1, in this priority:
+`glide` > `fly` > `sprint` > `walk` > `sneak` > `happy` > `idle_long` > `idle`; every state takes its share
+(its smoothed 0..1 activation) of what the higher ones left, `idle` gets the rest, so the weights never sum above
+1. A state whose animation is missing – or empty (no channels, no events; e.g. an unanimated track prepared by the
+Blockbench wizard) – weighs 0 and leaves its share to the lower ones, with two fallbacks that keep older bundles
+unchanged: without `glide`, elytra flight plays `fly` (as before); without `sprint`, sprinting plays `walk`.
+`idle`/`walk`/`fly`/`sneak` run on the global animation clock; the optional states start from their beginning when
+the state begins (per avatar), non-looping ones hold their last frame. Activations ease in and out (`idle_long` over
+~1.5 s, the others in a few ticks). Older clients ignore the new names and keep playing `idle`/`walk`/`fly`/`sneak`
+(so a bundle should keep those meaningful).
+
+*`cosmetic.offsetWhen` (optional, since 0.2.2):* a list of up to 8 rules `{ "slot", "offset"?: [x, y, z],
+"rotation"?: [x, y, z] }` (at least one of offset/rotation). While an item is shown in `slot` (worn, not hidden by
+the slot settings or by armor), this item's **root bones** get the offset (Blockbench px, the convention of position
+keyframes, |v| ≤ 64) and the rotation (degrees, Blockbench convention, |v| ≤ 360) added, eased in and out over
+~0.3 s. Several matching rules add up. `slot` must be a valid slot other than the item's own. Typical use: wings move
+back while a backpack is worn (`[{ "slot": "back", "offset": [0, 1, 8] }]`). Clients skip malformed rules (and slots
+they do not know) with a warning instead of rejecting the bundle; validators report them as errors. Older clients
+ignore the field.
 
 **Clarifications (binding; the Blockbench convention above wins everywhere):**
 
@@ -268,12 +294,13 @@ and animation names are skipped, unknown interpolations play as `linear`, unknow
 `body` (emotes `root`) – all with a warning. Optional top-level `minClientVersion` (also a catalog item field):
 clients older than that (and clients that see `formatVersion` > 1) list the item greyed out ("Update Vibey Client")
 and never render it. Unknown `kind`/`slot` values make the item invisible to that client (logged once).
-Cosmetic animation events: `idle` always, `walk`/`fly`/`sneak` while that animation has ≥ 50 % weight;
-visibility follows the strongest playing animation that has visibility events.
+Cosmetic animation events: `idle` always, every other state while its animation has ≥ 50 % weight;
+visibility follows the strongest playing animation that has visibility events (`idle` counts with at least 50 %).
 
 Validation rules (client + backend): `format == "vibey"`, `formatVersion == 1`, `id` matches
 `^[a-z0-9_.-]+:[a-z0-9_./-]+$`, kind/slot valid, all referenced textures/bones/sounds/sprites exist, textures are
-PNG ≤ 512×512 (animated strips ≤ 512×4096), ≤ 256 bones, ≤ 2048 cubes, sounds OGG ≤ 512 KiB each.
+PNG ≤ 512×512 (animated strips ≤ 512×4096), ≤ 256 bones, ≤ 2048 cubes, sounds OGG ≤ 512 KiB each,
+`cosmetic.offsetWhen` as described above.
 Unknown fields are ignored (forward compatible).
 
 ## 6. Sync of cosmetics and emotes between players
@@ -389,10 +416,15 @@ startup as `availability: default` (upsert by id when the hash changed; admin ed
 - Messages (JSON text frames):
   - plugin → game `{ "type": "hello", "token": "…", "client": "blockbench-vibey", "version": "1.0.0" }`
   - game → plugin `{ "type": "welcome", "game": "1.21.11", "mod": "1.0.0", "player": "Name" }`
-  - plugin → game `{ "type": "push", "bundle": { ….vibey JSON… }, "action": "equip" | "play" | "none" }`
+  - plugin → game `{ "type": "push", "bundle": { ….vibey JSON… }, "action": "equip" | "play" | "none",
+    "thumbnail"?: "<base64 PNG ≤ 256×256, ≤ 256 KiB>" }`
     → game loads it as a **dev item** (badge "DEV", local only, never sent to the backend or server), hot-replaces
     any previous version with the same id, equips it (cosmetic) or plays it on the local player (emote) and answers
     `{ "type": "pushed", "id": "…", "ok": true, "warnings": [] }` or `{ "type": "error", "id": "…", "message": "…" }`.
+    The optional `thumbnail` (since 0.2.2; a `data:image/png;base64,` prefix is accepted) is the item's wardrobe
+    thumbnail instead of the letter tile; a push without one keeps the thumbnail of the previous push of the same id
+    (auto pushes need not resend it). An invalid thumbnail is ignored with a warning in `warnings` – the push itself
+    still succeeds. Older games ignore the field.
   - plugin → game `{ "type": "remove", "id": "…" }`, `{ "type": "ping" }` ↔ `{ "type": "pong" }`.
   - game → plugin `{ "type": "log", "level": "info"|"warn", "message": "…" }` (optional).
   - Submit to Vibe (since 0.2.0; the game forwards with its own Vibe login, VIBE-API-2 §3), every request carries a

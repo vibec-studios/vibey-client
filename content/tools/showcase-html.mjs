@@ -3,9 +3,11 @@
 //
 //   node tools/showcase-html.mjs --dir dist/polar-pals --shots <screenshot folder> --plan src/polar-pals/showcase.json
 //        --out dist/polar-pals/polar-pals.html [--title "Polar Pals"] [--width 960] [--quality 5]
+//        [--before dist/polar-pals/ingame/before]
 //
-// Screenshots (sc_<item>_<nn>_<what>.png, sc_hero_<name>.png) are scaled to --width and JPEG-encoded with ffmpeg
-// (must be on PATH) to keep the page small.
+// Screenshots (sc_<item>_<nn>_<what>.png, sc_hero_<name>.png, sc_state_<name>.png, sc_wardrobe_*.png) are scaled to
+// --width and JPEG-encoded with ffmpeg (must be on PATH) to keep the page small. --before: a folder of earlier
+// JPEGs; every <name>.jpg that also exists in <dir>/ingame/ becomes a before/after pair.
 import { readFileSync, readdirSync, writeFileSync, mkdtempSync, rmSync, existsSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
@@ -21,6 +23,7 @@ const title = opt("--title", "Collection");
 const width = +opt("--width", "960");
 const quality = opt("--quality", "5");
 const plan = planFile ? JSON.parse(readFileSync(planFile, "utf8")) : {};
+const beforeDir = opt("--before", null) ? resolve(opt("--before", null)) : null;
 
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const tmp = mkdtempSync(join(tmpdir(), "showcase-"));
@@ -65,6 +68,35 @@ let html = "";
 html += `<section class="hero"><div class="grid hero-grid">${heroes
   .map((f) => `<figure><img loading="lazy" src="${jpeg(join(shots, f))}" alt=""><figcaption>${esc(f.replace(/^sc_hero_|\.png$/g, "").replace(/_/g, " "))}</figcaption></figure>`)
   .join("")}</div></section>`;
+
+// before / after (earlier in-game shots next to the current ones)
+const jpgData = (f) => "data:image/jpeg;base64," + readFileSync(f).toString("base64");
+const pairs = beforeDir && existsSync(beforeDir)
+  ? readdirSync(beforeDir).filter((f) => f.endsWith(".jpg") && existsSync(join(dir, "ingame", f))).sort((a, b) => pos("vibey:" + a.replace(/\.jpg$/, "")) - pos("vibey:" + b.replace(/\.jpg$/, "")))
+  : [];
+if (pairs.length) {
+  html += `<section id="before-after"><h2>Before / after <small>Vorher / nachher</small></h2><div class="pairs">${pairs
+    .map((f) => {
+      const label = f.replace(/\.jpg$/, "").replace(/^polar_/, "").replace(/_/g, " ");
+      return `<div class="pair"><figure><img loading="lazy" src="${jpgData(join(beforeDir, f))}" alt=""><figcaption>before · ${esc(label)}</figcaption></figure><figure><img loading="lazy" src="${jpgData(join(dir, "ingame", f))}" alt=""><figcaption>after · ${esc(label)}</figcaption></figure></div>`;
+    })
+    .join("")}</div></section>`;
+}
+// optional states + wardrobe
+const STATE_DE = { idle_long: "idle_long · ~10 s stillstehen", sprint: "sprint · sprinten", glide: "glide · Elytra / Fall", happy: "happy · du spielst ein Emote" };
+const stateOrder = (plan.states ?? []).map((st) => `sc_state_${st.name}.png`);
+const stateShots = allShots.filter((f) => f.startsWith("sc_state_")).sort((a, b) => stateOrder.indexOf(a) - stateOrder.indexOf(b));
+const wardrobeShots = allShots.filter((f) => f.startsWith("sc_wardrobe_"));
+if (stateShots.length || wardrobeShots.length) {
+  html += `<section id="states"><h2>New states &amp; features <small>Neue Zustände</small></h2><div class="grid hero-grid">${stateShots
+    .map((f) => {
+      const st = (plan.states ?? []).find((x) => `sc_state_${x.name}.png` === f);
+      const cap = st ? `${st.name.split("_")[0]} · ${STATE_DE[st.state] ?? st.state}` : f.replace(/^sc_state_|\.png$/g, "").replace(/_/g, " ");
+      return `<figure><img loading="lazy" src="${jpeg(join(shots, f))}" alt=""><figcaption>${esc(cap)}</figcaption></figure>`;
+    })
+    .concat(wardrobeShots.map((f) => `<figure><img loading="lazy" src="${jpeg(join(shots, f))}" alt=""><figcaption>wardrobe · DEV items with their pushed thumbnails</figcaption></figure>`))
+    .join("")}</div></section>`;
+}
 
 for (const it of index) {
   const name = it.file.replace(/\.vibey$/, "");
@@ -120,12 +152,13 @@ p{margin:4px 0;color:#d4d4d8}p.de{color:var(--muted)}p.story{color:var(--teal);f
 .rarity{border:1px solid var(--c);color:var(--c);padding:1px 7px;text-transform:uppercase;letter-spacing:.08em}
 .slot{color:var(--muted);text-transform:uppercase;letter-spacing:.08em}code{color:var(--dim);font:12px ui-monospace,Consolas,monospace}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.chip{font:12px ui-monospace,Consolas,monospace;border:1px solid var(--line);background:var(--s2);padding:2px 8px;color:var(--teal)}.chip.dim{color:var(--dim)}
+.pairs{display:grid;grid-template-columns:repeat(auto-fill,minmax(560px,1fr));gap:14px}.pair{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}.hero-grid{grid-template-columns:repeat(auto-fill,minmax(380px,1fr))}
 figure{margin:0;background:var(--s1);border:1px solid var(--line)}figure img{display:block;width:100%;height:auto}
 figcaption{padding:5px 9px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
 .notes{columns:2 360px;color:var(--muted);font-size:14px}.notes li{margin-bottom:6px;break-inside:avoid}
 footer{padding:24px 0 48px;color:var(--dim);font-size:13px}
-@media (max-width:640px){.head{flex-direction:column}h1{font-size:32px}}
+@media (max-width:640px){.head{flex-direction:column}h1{font-size:32px}.pairs{grid-template-columns:1fr}}
 </style></head><body>
 <header><div class="wrap"><h1>${esc(title)} <span>·</span> Vibey Client</h1>
 <p class="sub">${esc(plan.tagline ?? "")}</p>

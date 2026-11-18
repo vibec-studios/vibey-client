@@ -1,5 +1,5 @@
 /**
- * Vibey Client – Blockbench plugin (v0.2.2) by Vibe Craft Studios.
+ * Vibey Client – Blockbench plugin (v0.2.3) by Vibe Craft Studios.
  *
  * Model formats "Vibey Cosmetic" and "Vibey Emote", a "New item" wizard and a step-by-step guide, import/export of
  * `.vibey` bundles (docs/SPEC.md §5), a reference player, validation in plain words and the live link into the
@@ -16,7 +16,7 @@
  */
 (function () {
 'use strict';
-const VERSION = '0.2.2';
+const VERSION = '0.2.3';
 
 /* ===========================================================================
  * Vibey core – pure helpers, no Blockbench dependency.
@@ -257,6 +257,16 @@ const Core = (function () {
 	 * }
 	 * Returns { bundle, errors, warnings } (errors here are conversion problems; run validateBundle as well).
 	 */
+	/** Copy of one cosmetic.offsetWhen rule (SPEC §5): { slot, offset?: [x,y,z], rotation?: [x,y,z] }. */
+	function offsetRule(r) {
+		const out = { slot: r && r.slot };
+		if (r && Array.isArray(r.offset)) out.offset = r.offset.slice();
+		if (r && Array.isArray(r.rotation)) out.rotation = r.rotation.slice();
+		return out;
+	}
+	/** cosmetic.offsetWhen limits (SPEC §5). */
+	const OFFSET_LIMITS = { rules: 8, offset: 64, rotation: 360 };
+
 	function compileBundle(snap) {
 		const errors = [];
 		const warnings = [];
@@ -306,6 +316,7 @@ const Core = (function () {
 				if (meta.pet && isNum(Number(meta.pet.scale)) && Number(meta.pet.scale) !== 1) pet.scale = Number(meta.pet.scale);
 				if (Object.keys(pet).length) c.pet = pet;
 			}
+			if (Array.isArray(meta.offsetWhen) && meta.offsetWhen.length) c.offsetWhen = meta.offsetWhen.map(offsetRule);
 			if (meta.slot === 'cape' && meta.capeTexture) c.cape = { texture: meta.capeTexture };
 			if (meta.slot === 'shield' && meta.shieldTexture) c.shield = { texture: meta.shieldTexture };
 			bundle.cosmetic = c;
@@ -584,6 +595,7 @@ const Core = (function () {
 			slot: c.slot || 'hat',
 			hideWithArmor: (c.hideWithArmor || []).slice(),
 			pet: { follow: (c.pet && c.pet.follow) || '', scale: c.pet && isNum(c.pet.scale) ? c.pet.scale : 1 },
+			offsetWhen: Array.isArray(c.offsetWhen) ? c.offsetWhen.map(offsetRule) : [],
 			capeTexture: (c.cape && c.cape.texture) || '',
 			shieldTexture: (c.shield && c.shield.texture) || '',
 			emote: Object.assign({ animation: '', loop: false, thirdPerson: true, stopOnMove: true, hideHeldItems: true }, bundle.emote || {}),
@@ -787,6 +799,22 @@ const Core = (function () {
 				if (c.slot === 'cape' && !b.model && !(c.cape && c.cape.texture)) err('A cape needs either a cape texture (cosmetic.cape.texture) or a model.');
 				if (c.slot === 'shield' && !b.model && !(c.shield && c.shield.texture)) err('A shield needs either a shield texture (cosmetic.shield.texture) or a model.');
 				if (c.pet && c.pet.scale !== undefined && !(c.pet.scale > 0)) err('pet.scale must be a positive number.');
+				if (c.offsetWhen !== undefined) {
+					if (!Array.isArray(c.offsetWhen)) err('offsetWhen must be a list of { slot, offset, rotation } rules.');
+					else {
+						if (c.offsetWhen.length > OFFSET_LIMITS.rules) err(`offsetWhen has ${c.offsetWhen.length} rules; at most ${OFFSET_LIMITS.rules} are allowed.`);
+						const vec = (v, max) => Array.isArray(v) && v.length === 3 && v.every((x) => isNum(x) && Math.abs(x) <= max);
+						c.offsetWhen.forEach((r, i) => {
+							const w = `offsetWhen rule ${i + 1}`;
+							if (!r || typeof r !== 'object') return err(`${w} must be an object.`);
+							if (!SLOTS.includes(r.slot)) err(`${w}: slot ${JSON.stringify(r.slot)} is invalid. Use one of ${SLOTS.join(', ')}.`);
+							else if (r.slot === c.slot) err(`${w}: an item cannot move away from its own slot (${r.slot}).`);
+							if (r.offset === undefined && r.rotation === undefined) err(`${w} needs an offset and/or a rotation.`);
+							if (r.offset !== undefined && !vec(r.offset, OFFSET_LIMITS.offset)) err(`${w}: offset must be [x, y, z] in pixels within ±${OFFSET_LIMITS.offset}.`);
+							if (r.rotation !== undefined && !vec(r.rotation, OFFSET_LIMITS.rotation)) err(`${w}: rotation must be [x, y, z] in degrees within ±${OFFSET_LIMITS.rotation}.`);
+						});
+					}
+				}
 			}
 			if (b.emote !== undefined) warnings.push('"emote" block is ignored for cosmetics.');
 		}
@@ -1038,6 +1066,22 @@ const Core = (function () {
 		}
 		return msg;
 	}
+	/** Wardrobe thumbnail limits of a devlink push (SPEC §8). */
+	const PUSH_THUMB_LIMITS = { size: 256, bytes: 256 * 1024 };
+	/**
+	 * The devlink "push" message. opts: { bundle, action, thumbnail? (base64 PNG or data URL) }. A thumbnail that is
+	 * not a PNG within PUSH_THUMB_LIMITS is left out (the game keeps the last one it got for this id).
+	 */
+	function pushMessage(opts) {
+		const msg = { type: 'push', bundle: opts.bundle, action: opts.action || 'none' };
+		if (opts.thumbnail) {
+			const b64 = String(opts.thumbnail).replace(/^data:image\/png;base64,/, '');
+			const bytes = base64ToBytes(b64);
+			const info = bytes && pngInfo(bytes);
+			if (info && info.width <= PUSH_THUMB_LIMITS.size && info.height <= PUSH_THUMB_LIMITS.size && bytes.length <= PUSH_THUMB_LIMITS.bytes) msg.thumbnail = b64;
+		}
+		return msg;
+	}
 	/** Display order + whether the plugin may offer "withdraw". Unknown statuses are shown as they are. */
 	const SUBMISSION_STATUS = { pending: { open: true }, approved: { open: false }, rejected: { open: false }, withdrawn: { open: false } };
 
@@ -1089,15 +1133,15 @@ const Core = (function () {
 		hat: { root: 'hat', attach: 'head', pivot: [0, 24, 0], tracks: ['idle', 'walk'], texture: [64, 64], hideWithArmor: ['head'] },
 		back: { root: 'back', attach: 'body', pivot: [0, 24, 2], tracks: ['idle', 'walk', 'sneak'], texture: [64, 64] },
 		wings: {
-			root: 'wings', attach: 'body', pivot: [0, 21, 2], tracks: ['idle', 'walk', 'fly', 'sneak'], texture: [64, 64],
+			root: 'wings', attach: 'body', pivot: [0, 21, 2], tracks: ['idle', 'walk', 'fly', 'sneak', 'glide'], texture: [64, 64],
 			children: [{ name: 'wing_right', pivot: [1.5, 21, 2.5] }, { name: 'wing_left', pivot: [-1.5, 21, 2.5] }],
 		},
 		aura: { root: 'aura', attach: 'world', pivot: [0, 0, 0], tracks: ['idle'], texture: [64, 64], locators: [{ name: 'aura_center', position: [0, 16, 0] }] },
-		pet: { root: 'pet', attach: 'world', pivot: [0, 0, 0], tracks: ['idle', 'walk', 'fly'], texture: [64, 64], pet: { follow: 'ground', scale: 1 }, hideReference: true },
+		pet: { root: 'pet', attach: 'world', pivot: [0, 0, 0], tracks: ['idle', 'walk', 'fly', 'idle_long', 'happy'], texture: [64, 64], pet: { follow: 'ground', scale: 1 }, hideReference: true },
 		cape: { textureOnly: 'cape', texture: [64, 32] },
 		shield: { textureOnly: 'shield', texture: [64, 64] },
 	};
-	const TRACK_LENGTH = { idle: 2.4, walk: 0.8, fly: 0.8, sneak: 1 };
+	const TRACK_LENGTH = { idle: 2.4, walk: 0.8, fly: 0.8, sneak: 1, sprint: 0.8, glide: 2, idle_long: 4, happy: 1.2 };
 
 	/** Box UV cube helper for the preview geometry. */
 	const previewCube = (name, from, to, uv, extra) => {
@@ -1261,7 +1305,7 @@ const Core = (function () {
 		const meta = {
 			id: opts.id, name: { en: (opts.name && opts.name.en) || '', de: (opts.name && opts.name.de) || '' },
 			description: { en: '', de: '' }, author: opts.author || '', tags: [], rarity: opts.rarity || 'common',
-			slot: slot || 'hat', hideWithArmor: [], pet: { follow: '', scale: 1 }, capeTexture: '', shieldTexture: '',
+			slot: slot || 'hat', hideWithArmor: [], pet: { follow: '', scale: 1 }, offsetWhen: [], capeTexture: '', shieldTexture: '',
 			emote: { animation: 'main', loop: !!opts.loop, thirdPerson: true, stopOnMove: opts.stopOnMove !== false, hideHeldItems: true },
 			sounds: [], sprites: [], showReference: true,
 			wizard: { kind, slot: slot || '', template: '', version: 1 },
@@ -1457,7 +1501,8 @@ const Core = (function () {
 		RARITIES, ARMOR_SLOTS, INTERPOLATIONS, FACES, ID_RE, LIMITS, GENERATED_SUFFIX,
 		round, parseNumber, parseVec3, sanitizeId, base64ToBytes, bytesToBase64, base64Size, pngInfo, isOgg, utf8Length,
 		boxUvFaces, keyframesToSpec, specToKeyframes, compileBundle, decompileBundle, validateBundle, stringify,
-		parseDevlink, backoffDelay, devlinkPath, defaultGameDir, submitMessage, SUBMIT_LIMITS, SUBMISSION_STATUS,
+		parseDevlink, backoffDelay, devlinkPath, defaultGameDir, submitMessage, SUBMIT_LIMITS, SUBMISSION_STATUS, pushMessage, PUSH_THUMB_LIMITS,
+		OFFSET_LIMITS,
 		slugify, creatorNamespace, wizardId, checkWizardId, SLOT_PRESETS, TRACK_LENGTH, previewNodes, templateImage, encodePng,
 		starterSnapshot, templateSnapshot, TUTORIAL_STEPS, tutorialChecks, friendlyProblem, linkErrorKind, FRIENDLY_RULES,
 		ASSETS, VERSION,
@@ -1980,6 +2025,7 @@ function defaultMeta(kind) {
 		slot: 'hat',
 		hideWithArmor: [],
 		pet: { follow: '', scale: 1 },
+		offsetWhen: [],
 		capeTexture: '',
 		shieldTexture: '',
 		emote: { animation: 'main', loop: false, thirdPerson: true, stopOnMove: true, hideHeldItems: true },
@@ -2003,7 +2049,7 @@ function getMeta(project) {
 		if (!meta[k] || typeof meta[k] !== 'object') meta[k] = {};
 		for (const sub of Object.keys(d[k])) if (meta[k][sub] === undefined) meta[k][sub] = d[k][sub];
 	});
-	['tags', 'hideWithArmor', 'sounds', 'sprites'].forEach((k) => !Array.isArray(meta[k]) && (meta[k] = []));
+	['tags', 'hideWithArmor', 'offsetWhen', 'sounds', 'sprites'].forEach((k) => !Array.isArray(meta[k]) && (meta[k] = []));
 	if (!meta.tutorial || typeof meta.tutorial !== 'object') meta.tutorial = { step: 0, done: {} };
 	if (!meta.tutorial.done || typeof meta.tutorial.done !== 'object') meta.tutorial.done = {};
 	return meta;
@@ -2980,19 +3026,29 @@ const Link = {
 			p.resolve({ type: 'error', id: p.id, message: reason });
 		});
 	},
-	/** Pushes the open project. action: equip | play | none. Resolves with the game's answer. */
-	push(action, opts) {
+	/**
+	 * Pushes the open project. action: equip | play | none. Resolves with the game's answer. Manual pushes (not
+	 * opts.auto) carry a viewport render as the wardrobe thumbnail; auto pushes keep the last one in the game.
+	 */
+	async push(action, opts) {
 		opts = opts || {};
-		if (!isVibey()) return Promise.resolve(null);
+		if (!isVibey()) return null;
 		const r = buildBundle();
 		if (r.errors.length) {
 			if (opts.auto) {
 				this.lastResult = T('push_invalid', r.errors.length);
 				refreshUI();
 			} else showProblems(T('push_blocked'), r);
-			return Promise.resolve({ type: 'error', message: 'invalid bundle', errors: r.errors });
+			return { type: 'error', message: 'invalid bundle', errors: r.errors };
 		}
-		const text = JSON.stringify({ type: 'push', bundle: r.bundle, action });
+		let thumbnail = null;
+		if (!opts.auto && opts.thumbnail !== false && this.state === 'connected') {
+			for (const size of [256, 192, 128]) {
+				thumbnail = await viewportThumbnail(size);
+				if (!thumbnail || Core.base64Size(thumbnail) <= Core.PUSH_THUMB_LIMITS.bytes) break;
+			}
+		}
+		const text = JSON.stringify(Core.pushMessage({ bundle: r.bundle, action, thumbnail }));
 		if (Core.utf8Length(text) > Core.LIMITS.messageBytes) {
 			showFriendly({ key: 'too_big', icon: 'sd_card_alert', details: T('push_too_big') + ' (' + Math.round(Core.utf8Length(text) / 1024) + ' KiB)' });
 			return Promise.resolve({ type: 'error', message: 'too big' });
@@ -3059,8 +3115,9 @@ const Link = {
 // ------------------------------------------------------------- Submit to Vibe (VIBE-API-2 §3, through the game)
 const statusLabel = (s) => (STRINGS['status_' + s] ? T('status_' + s) : String(s || '?'));
 
-/** Viewport screenshot scaled into a 256×256 PNG (base64), or null. */
-function viewportThumbnail() {
+/** Viewport screenshot scaled into a size×size PNG (base64, default 256), or null. */
+function viewportThumbnail(size) {
+	size = size || 256;
 	return new Promise((resolve) => {
 		try {
 			const finish = (dataUrl) => {
@@ -3068,10 +3125,10 @@ function viewportThumbnail() {
 				const img = new Image();
 				img.onload = () => {
 					const c = document.createElement('canvas');
-					c.width = c.height = 256;
+					c.width = c.height = size;
 					const g = c.getContext('2d');
 					const s = Math.min(img.width, img.height);
-					g.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, 256, 256);
+					g.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size);
 					resolve(c.toDataURL('image/png').replace(/^data:image\/png;base64,/, ''));
 				};
 				img.onerror = () => resolve(null);

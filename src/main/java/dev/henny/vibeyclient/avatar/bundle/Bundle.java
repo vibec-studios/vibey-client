@@ -302,6 +302,12 @@ public final class Bundle {
 
     public record PetOptions(PetFollow follow, float scale) {}
 
+    /**
+     * {@code cosmetic.offsetWhen} rule: while an item in {@code slot} is worn, the root bones of this item move by
+     * {@code offset} (Blockbench px) and turn by {@code rotation} (degrees, Blockbench convention).
+     */
+    public record OffsetRule(Slot slot, float[] offset, float[] rotation) {}
+
     // ============================================================================================ fields
 
     public final String id;
@@ -327,11 +333,13 @@ public final class Bundle {
     public final String sha256;
     public final int byteSize;
     public final List<String> warnings;
+    /** {@code cosmetic.offsetWhen} rules (empty if none). */
+    public final List<OffsetRule> offsetWhen;
 
     Bundle(String id, Kind kind, Text name, Text description, String author, List<String> tags, Rarity rarity, Slot slot,
            java.util.Set<Armor> hideWithArmor, PetOptions pet, int capeTexture, int shieldTexture, EmoteOptions emote,
            Texture[] textures, Model model, Map<String, Animation> animations, Sprite[] sprites, Sound[] sounds,
-           String sha256, int byteSize, List<String> warnings) {
+           String sha256, int byteSize, List<String> warnings, List<OffsetRule> offsetWhen) {
         this.id = id;
         this.kind = kind;
         this.name = name;
@@ -353,6 +361,7 @@ public final class Bundle {
         this.sha256 = sha256;
         this.byteSize = byteSize;
         this.warnings = warnings;
+        this.offsetWhen = offsetWhen == null ? List.of() : offsetWhen;
     }
 
     public Animation animation(String name) {

@@ -25,24 +25,33 @@ import net.minecraft.client.renderer.rendertype.RenderType;
 public final class BoneRenderer {
     private BoneRenderer() {}
 
-    /** Up to 4 animations blended (cosmetics: idle/walk/fly/sneak; emote props: main). */
+    /** Up to 8 animations blended (cosmetics: idle/walk/fly/sneak/sprint/glide/idle_long/happy; emote props: main). */
     public static final class Mix {
-        public final Animation[] anims = new Animation[4];
-        public final float[] times = new float[4];
-        public final float[] weights = new float[4];
+        public static final int MAX = 8;
+        public final Animation[] anims = new Animation[MAX];
+        public final float[] times = new float[MAX];
+        public final float[] weights = new float[MAX];
         public int count;
         /** Animation whose visibility events apply (usually idle / the emote), may be null. */
         public Animation visibility;
         public float visibilityTime;
+        /** Extra position (Blockbench px) and rotation (degrees) of every root bone ({@code cosmetic.offsetWhen}). */
+        public final float[] rootOffset = new float[3], rootRotation = new float[3];
+        public boolean hasRootOffset;
 
         public Mix clear() {
             count = 0;
             visibility = null;
+            if (hasRootOffset) {
+                java.util.Arrays.fill(rootOffset, 0f);
+                java.util.Arrays.fill(rootRotation, 0f);
+                hasRootOffset = false;
+            }
             return this;
         }
 
         public Mix add(Animation a, float t, float w) {
-            if (a == null || w <= 0.001f || count == 4) return this;
+            if (a == null || w <= 0.001f || count == MAX) return this;
             anims[count] = a;
             times[count] = t;
             weights[count] = w;
@@ -129,7 +138,7 @@ public final class BoneRenderer {
                     norms[i].set(ps.last().normal());
                 }
                 vis = true;
-                transform(i, gb, mix, lx, ly, lz);
+                transform(i, gb, mix, lx, ly, lz, true);
             } else {
                 int p = bone.parent;
                 if (!drawn[p]) {
@@ -140,7 +149,7 @@ public final class BoneRenderer {
                 norms[i].set(norms[p]);
                 float[] pm = mesh.pivotM[i], pp = mesh.pivotM[p];
                 vis = visible[p];
-                transform(i, gb, mix, pm[0] - pp[0], pm[1] - pp[1], pm[2] - pp[2]);
+                transform(i, gb, mix, pm[0] - pp[0], pm[1] - pp[1], pm[2] - pp[2], false);
             }
             drawn[i] = true;
             if (vis && mix.visibility != null && mix.visibility.hasVisibility) vis = visibleAt(mix.visibility, i, mix.visibilityTime);
@@ -162,6 +171,10 @@ public final class BoneRenderer {
                 switch (part.mode) {
                     case EMISSIVE -> {
                         type = tex.emissive();
+                        l = MeshSink.FULL_BRIGHT;
+                    }
+                    case GLOW -> {
+                        type = tex.glow();
                         l = MeshSink.FULL_BRIGHT;
                     }
                     case TRANSLUCENT -> type = tex.translucent();
@@ -193,9 +206,18 @@ public final class BoneRenderer {
     }
 
     /** mats[i] *= T((local + pos) / 16) · R(rest + rot) · S(scale), blending the mix. */
-    private static void transform(int i, GpuBundle gb, Mix mix, float lx, float ly, float lz) {
+    private static void transform(int i, GpuBundle gb, Mix mix, float lx, float ly, float lz, boolean root) {
         float[] rest = gb.mesh.restRotM[i];
         float rx = 0, ry = 0, rz = 0, px = 0, py = 0, pz = 0, sx = 1, sy = 1, sz = 1;
+        if (root && mix.hasRootOffset) {
+            // offsetWhen: like an extra position/rotation keyframe on every root bone (Blockbench convention)
+            px = mix.rootOffset[0];
+            py = mix.rootOffset[1];
+            pz = mix.rootOffset[2];
+            rx = mix.rootRotation[0];
+            ry = mix.rootRotation[1];
+            rz = mix.rootRotation[2];
+        }
         for (int k = 0; k < mix.count; k++) {
             Track[] tracks = gb.tracks(mix.anims[k]);
             Track t = tracks == null ? null : tracks[i];

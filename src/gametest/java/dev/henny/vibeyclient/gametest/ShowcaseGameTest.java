@@ -31,8 +31,12 @@ import java.util.stream.Stream;
  * and takes screenshots – front / side / back at rest, chosen moments of the long {@code idle} loops (the animation
  * clock is global, so the test waits for the right phase), walking, creative flying, elytra gliding and sneaking. Pets
  * walk beside the mannequin. Optional plan {@code VIBEYCLIENT_SHOWCASE_PLAN=<json>}:
- * {@code { "items": { "<id>": { "idle": [seconds…] } }, "hero": [ { "name", "yaw", "slots": { slot: id } } ] }}.
- * {@code VIBEYCLIENT_SHOWCASE_ONLY=<id part>,…} limits the per-item shots (use {@code hero} for the hero shots only).
+ * {@code { "items": { "<id>": { "idle": [seconds…] } }, "hero": [ { "name", "yaw", "slots": { slot: id }, "fly"?,
+ * "night"?, "distance"?, "pitch"? } ], "states": [ { "name", "state": "idle_long"|"sprint"|"glide"|"happy", "slots",
+ * "yaw"?, "night"? } ], "wardrobe": { "slot", "equip": { slot: id }, "noThumbnail": [id…] } }}. Thumbnails from {@code <folder>/thumbnails}
+ * are pushed with the items (devlink {@code push.thumbnail}), the wardrobe shot shows them.
+ * {@code VIBEYCLIENT_SHOWCASE_ONLY=<id part>,…} limits the per-item shots ({@code hero} = hero + state + wardrobe
+ * shots only).
  * <p>
  * Used for the Polar Pals collection: {@code VIBEYCLIENT_SHOWCASE=<abs>/content/dist/polar-pals
  * VIBEYCLIENT_SHOWCASE_PLAN=<abs>/content/src/polar-pals/showcase.json ./gradlew :fabric-1.21.11:runClientGameTest}.
@@ -44,6 +48,8 @@ public final class ShowcaseGameTest implements FabricClientGameTest {
     private double baseX, baseY, baseZ, camZ;
 
     private record Item(String id, String slot, String file, JsonObject json) {}
+
+    private final Map<String, byte[]> thumbs = new LinkedHashMap<>();
 
     @Override
     public void runTest(ClientGameTestContext context) {
@@ -63,11 +69,16 @@ public final class ShowcaseGameTest implements FabricClientGameTest {
                     String slot = j.has("cosmetic") ? j.getAsJsonObject("cosmetic").get("slot").getAsString() : "emote";
                     items.add(new Item(j.get("id").getAsString(), slot, p.getFileName().toString(), j));
                     bytes.put(j.get("id").getAsString(), b);
+                    Path thumb = dir.resolve("thumbnails").resolve(p.getFileName().toString().replace(".vibey", ".png"));
+                    if (Files.isRegularFile(thumb)) thumbs.put(j.get("id").getAsString(), Files.readAllBytes(thumb));
                 }
             }
         } catch (Exception e) {
             throw new AssertionError("showcase folder not readable: " + dir, e);
         }
+        // items pushed without a thumbnail show the live 3D fallback in the wardrobe
+        if (plan.has("wardrobe") && plan.getAsJsonObject("wardrobe").has("noThumbnail"))
+            for (JsonElement e : plan.getAsJsonObject("wardrobe").getAsJsonArray("noThumbnail")) thumbs.remove(e.getAsString());
         System.out.println("[vibeyclient-showcase] " + items.size() + " items from " + dir);
         context.getInput().resizeWindow(1280, 720);
         context.waitFor(mc -> AvatarItems.all().size() >= 20, 600);
@@ -81,7 +92,7 @@ public final class ShowcaseGameTest implements FabricClientGameTest {
             context.runOnClient(mc -> {
                 DevItems dev = Services.get(DevItems.class).orElseThrow();
                 for (var e : bytes.entrySet()) {
-                    DevItems.PushResult r = dev.push(e.getValue(), DevItems.Action.NONE);
+                    DevItems.PushResult r = dev.push(e.getValue(), DevItems.Action.NONE, thumbs.get(e.getKey()));
                     if (!r.ok()) throw new AssertionError("push " + e.getKey() + ": " + r.error());
                     System.out.println("[vibeyclient-showcase] pushed " + r.id() + " warnings=" + r.warnings());
                 }
@@ -120,7 +131,7 @@ public final class ShowcaseGameTest implements FabricClientGameTest {
                 shoot(context, "sc_" + n + "_03_back", pet ? 330f : 0f, 0);
                 if (pet) {
                     // close-up: the camera looks at the pet itself (the mannequin faces us, so does the pet)
-                    closeOnPet(context, 1.3);
+                    closeOnPet(context, 2.0);
                     context.takeScreenshot("sc_" + n + "_04_close");
                 }
                 if (p.has("idle")) {
@@ -129,7 +140,7 @@ public final class ShowcaseGameTest implements FabricClientGameTest {
                         double t = e.getAsDouble();
                         float yaw = pet ? 180f : ("wings".equals(it.slot) || "back".equals(it.slot) || "cape".equals(it.slot) ? 20f : 160f);
                         context.runOnClient(mc -> face(mannequin, yaw));
-                        if (pet && k == 0) closeOnPet(context, 1.3);
+                        if (pet && k == 0) closeOnPet(context, 2.0);
                         waitPhase(context, idleLen, t);
                         context.takeScreenshot("sc_" + n + "_1" + (k++) + "_idle_" + String.format(java.util.Locale.ROOT, "%.1f", t).replace('.', '_'));
                     }
@@ -144,7 +155,7 @@ public final class ShowcaseGameTest implements FabricClientGameTest {
                 context.runOnClient(mc -> mannequin.setShiftKeyDown(true));
                 shoot(context, "sc_" + n + "_40_sneak", pet ? 180f : ("wings".equals(it.slot) || "back".equals(it.slot) ? 60f : 150f), pet ? 26 : 10);
                 if (pet) {
-                    closeOnPet(context, 1.3);
+                    closeOnPet(context, 2.0);
                     context.takeScreenshot("sc_" + n + "_41_sneak_close");
                     restoreCamera(context, 2.6, 22f);
                 }
@@ -170,7 +181,10 @@ public final class ShowcaseGameTest implements FabricClientGameTest {
                     wear(context, slots);
                     if (h.has("pitch")) pitch(context, h.get("pitch").getAsFloat());
                     boolean flying = h.has("fly") && h.get("fly").getAsBoolean();
-                    pitch(context, flying ? -4f : 10f);
+                    pitch(context, flying ? -4f : (h.has("pitch") ? h.get("pitch").getAsFloat() : 10f));
+                    if (h.has("distance")) distance(context, h.get("distance").getAsDouble());
+                    boolean night = h.has("night") && h.get("night").getAsBoolean();
+                    if (night) night(context, world, true);
                     if (flying) {
                         context.runOnClient(mc -> {
                             mannequin.getAbilities().flying = true;
@@ -178,11 +192,35 @@ public final class ShowcaseGameTest implements FabricClientGameTest {
                         });
                     }
                     shoot(context, "sc_hero_" + h.get("name").getAsString(), h.get("yaw").getAsFloat(), 30);
+                    if (night) night(context, world, false);
+                    if (h.has("distance")) distance(context, 2.3);
                     context.runOnClient(mc -> {
                         mannequin.getAbilities().flying = false;
                         mannequin.setPos(baseX, baseY, baseZ);
                     });
                 }
+            }
+            // optional states (idle_long, sprint, glide, happy)
+            if (plan.has("states") && (only.isEmpty() || only.contains("hero") || only.contains("states"))) {
+                for (JsonElement e : plan.getAsJsonArray("states")) state(context, world, e.getAsJsonObject());
+            }
+            // the wardrobe with the pushed DEV items and their thumbnails
+            if (plan.has("wardrobe") && (only.isEmpty() || only.contains("hero") || only.contains("wardrobe"))) {
+                JsonObject w = plan.getAsJsonObject("wardrobe");
+                context.runOnClient(mc -> {
+                    DevItems devItems = Services.get(DevItems.class).orElseThrow();
+                    if (w.has("equip")) for (var s : w.getAsJsonObject("equip").entrySet()) {
+                        byte[] b = bytes.get(s.getValue().getAsString());
+                        if (b != null) devItems.push(b, DevItems.Action.EQUIP, null);
+                    }
+                    mc.options.hideGui = false;
+                    dev.henny.vibeyclient.module.cosmetics.ui.WardrobeUi.openWardrobe(null,
+                            dev.henny.vibeyclient.avatar.Slot.of(w.has("slot") ? w.get("slot").getAsString() : "pet"));
+                });
+                context.waitTicks(60);
+                context.takeScreenshot("sc_wardrobe_dev_thumbnails");
+                context.setScreen(() -> null);
+                context.runOnClient(mc -> mc.options.hideGui = true);
             }
             context.runOnClient(mc -> {
                 AvatarStates.setLoadout(MANNEQUIN, Map.of());
@@ -193,6 +231,122 @@ public final class ShowcaseGameTest implements FabricClientGameTest {
             });
         }
         System.out.println("[vibeyclient-showcase] done");
+    }
+
+    /** Day (1000) or midnight (18000) without clouds; waits for the sky to update. */
+    private static void night(ClientGameTestContext context, TestSingleplayerContext world, boolean on) {
+        world.getServer().runCommand(on ? "time set 18000" : "time set 1000");
+        context.waitTicks(20);
+    }
+
+    /**
+     * One optional-state shot: {@code idle_long} (the mannequin stands still for 13 s), {@code sprint} (sprinting
+     * across the view), {@code glide} (elytra), {@code happy} (the mannequin plays the builtin wave emote). Pets get a
+     * close-up as well.
+     */
+    private void state(ClientGameTestContext context, TestSingleplayerContext world, JsonObject s) {
+        String name = s.get("name").getAsString(), state = s.get("state").getAsString();
+        Map<String, String> slots = new LinkedHashMap<>();
+        for (var e : s.getAsJsonObject("slots").entrySet()) slots.put(e.getKey(), e.getValue().getAsString());
+        boolean pet = slots.containsKey("pet");
+        float yaw = s.has("yaw") ? s.get("yaw").getAsFloat() : (pet ? 180f : 20f);
+        boolean night = s.has("night") && s.get("night").getAsBoolean();
+        wear(context, slots);
+        distance(context, pet ? 2.6 : 2.5);
+        pitch(context, pet ? 22f : 8f);
+        if (night) night(context, world, true);
+        switch (state) {
+            case "idle_long" -> {
+                context.runOnClient(mc -> {
+                    face(mannequin, yaw);
+                    mannequin.setOnGround(true);
+                });
+                if (pet) closeOnPet(context, 2.0);
+                context.waitTicks(20 * 13);
+                context.runOnClient(mc -> debugWeights(name));
+                context.takeScreenshot("sc_state_" + name);
+                if (pet) restoreCamera(context, 2.6, 22f);
+            }
+            case "sprint" -> {
+                distance(context, pet ? 3.6 : 3.2);
+                pitch(context, 16f);
+                context.runOnClient(mc -> {
+                    mannequin.setPos(baseX + 2.2, baseY, baseZ);
+                    mannequin.setSprinting(true);
+                    face(mannequin, 90f);
+                });
+                context.waitTicks(20);
+                for (int i = 0; i < 26; i++) {
+                    final int k = i;
+                    context.runOnClient(mc -> {
+                        mannequin.setPos(mannequin.getX() - 0.19, baseY, baseZ);
+                        mannequin.setSprinting(true);
+                        face(mannequin, 90f);
+                    });
+                    context.waitTicks(1);
+                    if (k == 20) {
+                        context.runOnClient(mc -> debugWeights(name));
+                        context.takeScreenshot("sc_state_" + name);
+                    }
+                }
+                context.runOnClient(mc -> {
+                    mannequin.setSprinting(false);
+                    mannequin.setPos(baseX, baseY, baseZ);
+                    face(mannequin, 180f);
+                });
+                context.waitTicks(30);
+            }
+            case "glide" -> {
+                // gliding without an elytra item: the vanilla elytra model would cover the item
+                distance(context, pet ? 3.4 : 3.0);
+                pitch(context, pet ? 26f : 34f);
+                context.runOnClient(mc -> {
+                    mannequin.setPos(baseX, baseY + (pet ? 0.6 : 0.2), baseZ);
+                    face(mannequin, yaw);
+                    mannequin.startFallFlying();
+                });
+                context.waitTicks(40);
+                context.runOnClient(mc -> debugWeights(name));
+                context.takeScreenshot("sc_state_" + name);
+                context.runOnClient(mc -> {
+                    mannequin.stopFallFlying();
+                    mannequin.setPos(baseX, baseY, baseZ);
+                    face(mannequin, 180f);
+                });
+                context.waitTicks(20);
+            }
+            case "happy" -> {
+                context.runOnClient(mc -> {
+                    face(mannequin, yaw);
+                    AvatarStates.play(AvatarStates.get(MANNEQUIN), s.has("emote") ? s.get("emote").getAsString() : "vibey:wave");
+                });
+                if (pet) closeOnPet(context, 2.0);
+                else context.waitTicks(25);
+                context.runOnClient(mc -> debugWeights(name));
+                context.takeScreenshot("sc_state_" + name);
+                context.runOnClient(mc -> AvatarStates.stop(AvatarStates.get(MANNEQUIN)));
+                if (pet) restoreCamera(context, 2.6, 22f);
+            }
+            default -> throw new AssertionError("unknown showcase state " + state);
+        }
+        if (night) night(context, world, false);
+    }
+
+    /** Logs the smoothed states and the blend weights of every worn item (state shots). */
+    private void debugWeights(String name) {
+        AvatarState st = AvatarStates.get(MANNEQUIN);
+        StringBuilder sb = new StringBuilder("[vibeyclient-showcase] " + name + String.format(java.util.Locale.ROOT,
+                " walk=%.2f sprint=%.2f glide=%.2f fly=%.2f idleLong=%.2f happy=%.2f petMove=%.2f sprinting=%s",
+                st.walk, st.sprint, st.glide, st.fly, st.idleLong, st.happy, st.petMove, mannequin.isSprinting()));
+        float[] w = new float[dev.henny.vibeyclient.avatar.render.AvatarDraw.COSMETIC_ANIMS.length];
+        for (dev.henny.vibeyclient.avatar.Slot slot : dev.henny.vibeyclient.avatar.Slot.all()) {
+            var b = dev.henny.vibeyclient.avatar.render.AvatarDraw.bundle(st, slot);
+            if (b == null) continue;
+            dev.henny.vibeyclient.avatar.render.AvatarDraw.weights(st, b, slot, w);
+            sb.append(" | ").append(slot.id()).append(':');
+            for (int k = 0; k < w.length; k++) if (w[k] > 0.01f) sb.append(' ').append(dev.henny.vibeyclient.avatar.render.AvatarDraw.COSMETIC_ANIMS[k]).append('=').append(String.format(java.util.Locale.ROOT, "%.2f", w[k]));
+        }
+        System.out.println(sb);
     }
 
     private void walk(ClientGameTestContext context, Item it, String n, boolean pet) {
@@ -254,13 +408,17 @@ public final class ShowcaseGameTest implements FabricClientGameTest {
 
     /**
      * Close-up of the pet: the camera stays put; the mannequin (facing the camera) moves so that its pet's follow
-     * spot (AvatarTicker: 0.95 to the right, 0.35 behind) is {@code dist} blocks in front of the camera.
+     * spot (AvatarTicker.petSide to the right, a bit behind) is {@code dist} blocks in front of the camera.
      */
     private void closeOnPet(ClientGameTestContext context, double dist) {
         context.runOnClient(mc -> {
             face(mannequin, 180f);
-            mannequin.setPos(baseX - 0.95, baseY, camZ + dist - 0.35);
-            float pitch = (float) Math.toDegrees(Math.atan2(1.62 - 0.3, dist));
+            var b = dev.henny.vibeyclient.avatar.render.AvatarDraw.bundle(AvatarStates.get(MANNEQUIN), dev.henny.vibeyclient.avatar.Slot.PET);
+            double side = dev.henny.vibeyclient.avatar.AvatarTicker.petSide(b);
+            double half = dev.henny.vibeyclient.avatar.AvatarTicker.petHalfWidth(b);
+            double back = 0.35 + Math.max(0, half - 0.3) * 0.5;
+            mannequin.setPos(baseX - side, baseY, camZ + dist - back);
+            float pitch = (float) Math.toDegrees(Math.atan2(1.62 - 0.6, dist));
             mc.player.setXRot(pitch);
             mc.player.xRotO = pitch;
         });
