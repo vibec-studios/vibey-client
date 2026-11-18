@@ -4,6 +4,9 @@ Everything a module needs lives in `dev.henny.vibeyclient.api` (client side) and
 Each module owns one package, `dev.henny.vibeyclient.module.<id>`, plus its i18n files and its mixin config, so
 several people can work on different modules without touching the same files.
 
+> See also: [UI.md](UI.md) (design rules, menus, widgets) · [AVATAR.md](AVATAR.md) (cosmetics/emotes engine) ·
+> [SPEC.md](SPEC.md) (shared contract) · [docs index](README.md)
+
 ## Layout of a module
 
 ```

@@ -4,6 +4,10 @@ How the client turns `.vibey` bundles (SPEC §5) into things on players. Modules
 wardrobe), `emotes` (wheel, local plays), `devlink` (Blockbench live link). The engine itself lives in
 `dev.henny.vibeyclient.avatar` and has no module dependencies.
 
+> See also: [FORMAT.md](FORMAT.md) (the `.vibey` format for creators) · [SPEC §5–§8](SPEC.md#5-the-vibey-asset-format-v1)
+> (format, sync, backend, live link) · [BLOCKBENCH.md](BLOCKBENCH.md) · [CONTENT.md](CONTENT.md) (starter set) ·
+> [docs index](README.md)
+
 ## Packages
 
 | Package | What |
@@ -53,3 +57,8 @@ real-Blockbench screenshots in `content/dist/blockbench/`.
   `VIBEYCLIENT_AVATAR_TEST=world ./gradlew :fabric-26.3:runClient --args="--quickPlaySingleplayer vibeytest"`
   (copy `versions/fabric-1.21.11/build/run/vibeytest-world` to `run/saves/vibeytest` first). Screenshots land in
   `versions/<target>/run/screenshots`, log lines start with `[vibeyclient-avatartest]`.
+- Whole client on any version/loader: `./gradlew :neoforge-1.21.5:runClient "-Dvibeyclient.tour=<absolute outdir>"`
+  (`dev/DevTour`, dev environment only; env `VIBEYCLIENT_TOUR` works too). Title, onboarding, Vibey menu, a fresh flat
+  world, every slot on the local player (third person front/back), wave/guitar/seal_summon mid-animation, wardrobe,
+  emote wheel, social sidebar, lyrics sky (Fabric), host screen, pause menu; one screenshot per step into the outdir,
+  log lines `[vibeyclient-tour] PASS|FAIL <step>` (plus errors other code logged during the step) and a `SUMMARY`.

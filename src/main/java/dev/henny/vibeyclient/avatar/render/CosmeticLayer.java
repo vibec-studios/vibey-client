@@ -73,9 +73,11 @@ public final class CosmeticLayer extends RenderLayer<AvatarRenderState, PlayerMo
     *///?}
 
     private void draw(AvatarState st, PoseStack ps, MeshSink sink, int light) {
+        PoseStack.Pose saved = ps.last();
         try {
             AvatarDraw.attached(st, ps, sink, PARTS.set(getParentModel()), light);
         } catch (RuntimeException e) {
+            PoseCompat.unwind(ps, saved);
             if (errors++ < 3) dev.henny.vibeyclient.Vibey.LOG.error("Cosmetic layer failed", e);
         }
     }

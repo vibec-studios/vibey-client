@@ -5,6 +5,9 @@ original work (procedural pixel textures, models and animations written in code)
 `minecraft:` ids or three tiny effects synthesized from scratch (`content/tools/synth.mjs`). **All items are free –
 there are no prices anywhere**, `rarity` is a purely cosmetic label.
 
+> See also: [FORMAT.md](FORMAT.md) (the `.vibey` format for creators) · [BLOCKBENCH.md](BLOCKBENCH.md) (making items
+> in Blockbench) · [AVATAR.md](AVATAR.md) (how the game renders them) · [docs index](README.md)
+
 ```
 content/
   package.json          npm scripts (Node 24, ESM, zero dependencies)
