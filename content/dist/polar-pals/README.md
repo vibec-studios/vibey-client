@@ -6,7 +6,7 @@ oder auf dem Server. Übersicht mit Ingame-Screenshots und Vorher/Nachher: [`pol
 
 | Datei | Slot | Item |
 |---|---|---|
-| `polar_seal.vibey` | Pet | Robbenbaby (legendär) – schulterhoch |
+| `polar_seal.vibey` | Pet | Robbenbaby (legendär) – so groß wie der Pinguin |
 | `polar_penguin.vibey` | Pet | Pinguin (episch) – schulterhoch |
 | `polar_owl_wings.vibey` | Flügel | Schneeeulen-Flügel (legendär) |
 | `polar_aurora_wings.vibey` | Flügel | Polarlicht-Schleierflügel (episch) |
@@ -16,8 +16,18 @@ oder auf dem Server. Übersicht mit Ingame-Screenshots und Vorher/Nachher: [`pol
 | `polar_snowfall_cape.vibey` | Umhang | Schneefall-Umhang (selten, HD) |
 
 Vorschaubilder: `previews/`, Katalog-Thumbnails (256 × 256, gehen beim Push mit): `thumbnails/`,
-Ingame-Screenshots: `ingame/` (vorher: `ingame/before/`, neue Zustände, Flügel + Rucksack, Nacht, Mütze: `ingame/states/`),
+Ingame-Screenshots: `ingame/` (vorher: `ingame/before/`, vor Runde 2: `ingame/before2/`, neue Zustände, Flügel + Rucksack, Nacht, Mütze: `ingame/states/`),
 Import in echtes Blockbench: `blockbench/`.
+
+## Runde 2
+
+- **Robbe kleiner**: `pet.scale` 1.2 → 0.85. Liegend reicht sie dir etwa bis zur Hüfte, aufgerichtet (Klatschen)
+  knapp unter die Schulter – ungefähr so groß wie der Pinguin, weiter rund und knuffig. Der Abstand neben dir passt
+  sich automatisch an.
+- **Flügel + Iglu-Rucksack**: Die Flügelwurzeln sitzen jetzt außen an den Schulterblättern. Mit Rucksack heben sich
+  die Eulenflügel 2,5 px, rücken nur noch 6 px (statt 9 px) nach hinten und kippen 10° (`offsetWhen`), die
+  Polarlicht-Flügel heben sich 2 px und rücken 4 px (statt 8 px) nach hinten. Beide sitzen damit seitlich am Iglu
+  statt dahinter – ohne Lücke und ohne ineinander zu schneiden (Vorher/Nachher in `polar-pals.html`).
 
 ## Was ist neu (Feedback-Runde)
 
@@ -66,7 +76,7 @@ Zum Ausprobieren:
 | Elytra / tiefer Fall | `glide`: Superman-Pose, Flügel weit gespreizt, Polarlicht weht nach hinten |
 | Kreativ fliegen | `fly`: Flügelschlag + Gleiten, Pets flattern |
 | schleichen | `sneak`: schüchtern / Flügel eng angelegt |
-| Iglu-Rucksack + Flügel | Flügel rücken weich nach hinten |
+| Iglu-Rucksack + Flügel | Flügel heben sich und rücken weich ein Stück nach hinten, seitlich ans Iglu |
 
 ## 2. Im Vibe Launcher (3D-Vorschau, ohne Einreichen)
 

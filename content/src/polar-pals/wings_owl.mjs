@@ -2,11 +2,14 @@
 // greater coverts as scalloped layers, five secondaries and five primaries as separate feather bones. idle = folded
 // on the back with a slow breath, walk = gentle bounce, fly = one big clean flap then a long glide with spread
 // "finger" primaries (feathers drift off on the downstroke), glide (elytra) = wide soaring wings, sneak = tucked in
-// tight. While a backpack is worn the wings sit further back (cosmetic.offsetWhen), so they never cut into it.
+// tight. The wing roots sit at the outer shoulder blades (DX), so with a backpack the wings only have to lift and move
+// back a little (cosmetic.offsetWhen) to sit beside it instead of behind it – nothing cuts into the pack.
 import { K, P, cosmetic, each, shape, stroke, ellipse, rim, mix, rgba, hash, vnoise } from "./_polar.mjs";
 
 const WHITE = "#f8fafd", SHADOW = "#d9e1ec", DEEP = "#b9c6d8", MARK = "#5d6475", TIP = "#c9c2ff", TIP2 = "#a9e8ff";
 const Z0 = [0, 0, 0];
+// wing roots this far out from x = ±2 (shoulder blades): leaves room for a backpack between the folded wings
+const DX = 2.5;
 
 const smooth = (a, b, x) => {
   const t = Math.max(0, Math.min(1, (x - a) / (b - a)));
@@ -94,7 +97,7 @@ export default function () {
     },
     tags: ["polar-pals", "wings", "owl", "feathers", "animated"],
     rarity: "legendary",
-    cosmetic: { slot: "wings", offsetWhen: [{ slot: "back", offset: [0, 1, 9] }] },
+    cosmetic: { slot: "wings", offsetWhen: [{ slot: "back", offset: [0, 2.5, 6], rotation: [-10, 0, 0] }] },
     preview: {
       panels: (p) => [
         { ...p[0], label: "front · idle (folded)" },
@@ -123,8 +126,8 @@ export default function () {
   b.sprite("feather", "main", featherSprite);
 
   for (const [side, s] of [["r", 1], ["l", -1]]) {
-    const X = (x) => s * x; // build the right wing, mirror for the left
-    const box = (bone, from, size, paint, opts) => bone.box(s > 0 ? from : [-from[0] - size[0], from[1], from[2]], size, paint, opts);
+    const X = (x) => s * (x + DX); // build the right wing, mirror for the left
+    const box = (bone, [fx, fy, fz], size, paint, opts) => bone.box(s > 0 ? [fx + DX, fy, fz] : [-fx - DX - size[0], fy, fz], size, paint, opts);
     const tipStart = (face) => (face === "north") === (s > 0); // north face: u = 0 is +X
     const featherPaint = (seed, marks, len) => ({
       north: (img) => feather(img, tipStart("north"), { seed, under: true, marks: marks * 0.3 }),

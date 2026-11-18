@@ -2,14 +2,17 @@
 // chain of narrow translucent, emissive segments (2 px) carrying one continuous aurora curtain (shared painter with
 // the Aurora Ring: mint hem, light fading up through teal and blue into violet, drifting rays, soft alpha everywhere).
 // Phase-shifted waves run along the chains, so the veils flow like silk. idle = slow ripple, fly = big flowing
-// strokes with a sparkle trail, glide = veils stretched back and streaming, sneak = folded in. While a backpack is
-// worn the wings move back (cosmetic.offsetWhen), so they never cut into it.
+// strokes with a sparkle trail, glide = veils stretched back and streaming, sneak = folded in. The crystal knots sit
+// at the outer shoulder blades (DX); with a backpack they lift and move back a little (cosmetic.offsetWhen) and glow
+// right beside its top, the veils never cut into it.
 import { P, cosmetic, each, stroke, ellipse, mix, auroraTexel, smoothstep } from "./_polar.mjs";
 
 const K2 = 2;
 const FRAMES = 12;
 const SEG = 2; // segment length (px)
 const Z0 = [0, 0, 0];
+// roots this far out from x = ±1.5: room for a backpack between the two knots
+const DX = 3;
 // two veils per side: a big upper curtain and a smaller lower one; heights per segment taper towards the tip
 const VEILS = [
   { name: "up", ang: 28, seed: 3, n: 12, h0: 16, h1: 9 },
@@ -26,7 +29,7 @@ export default function () {
     },
     tags: ["polar-pals", "wings", "aurora", "glow", "animated"],
     rarity: "epic",
-    cosmetic: { slot: "wings", offsetWhen: [{ slot: "back", offset: [0, 1, 8] }] },
+    cosmetic: { slot: "wings", offsetWhen: [{ slot: "back", offset: [0, 2, 4] }] },
     preview: {
       panels: (p) => [
         { ...p[1], label: "back · idle", bloom: 0.5 },
@@ -59,8 +62,8 @@ export default function () {
   b.sprite("spark", "main", spark).sprite("spark2", "main", spark2);
 
   for (const [side, s] of [["r", 1], ["l", -1]]) {
-    const X = (x) => s * x;
-    const box = (bone, from, size, paint, opts) => bone.box(s > 0 ? from : [-from[0] - size[0], from[1], from[2]], size, paint, opts);
+    const X = (x) => s * (x + DX);
+    const box = (bone, [fx, fy, fz], size, paint, opts) => bone.box(s > 0 ? [fx + DX, fy, fz] : [-fx - DX - size[0], fy, fz], size, paint, opts);
     // north face: u = 0 is +X; along the veil = distance from the root (consistent in world space on both faces)
     const fromRoot = (face, u) => ((face === "north") === (s > 0) ? SEG - u : u);
     const root = b.bone(`aurora_${side}`, { attach: "body", pivot: [X(1.5), 21, 2.4], rotation: [0, s * -22, 0], emissive: true, translucent: true });

@@ -1,5 +1,5 @@
 {
-  "tagline": "Premium collection: a seal pup and a penguin as big, shoulder-high pets, two sets of wings, a pompom beanie, an igloo backpack with a resident seal, a soft aurora ring and an HD snowfall cape. Everything 3D, HD textures, animated – with the new optional states (sprint, glide, idle_long, happy) and wings that make room for a backpack (offsetWhen).",
+  "tagline": "Premium collection: a round seal pup and a penguin as pets (sitting up they reach your shoulder), two sets of wings, a pompom beanie, an igloo backpack with a resident seal, a soft aurora ring and an HD snowfall cape. Everything 3D, HD textures, animated – with the new optional states (sprint, glide, idle_long, happy) and wings that make room for a backpack (offsetWhen).",
   "items": {
     "vibey:polar_seal": {
       "idle": [2.9, 5.15, 10.0],
@@ -27,17 +27,24 @@
     },
     "vibey:polar_aurora_wings": {
       "idle": [1.0],
-      "story": "Two soft aurora curtains per side, each a chain of 2 px segments with one continuous curtain texture. idle: slow ripple. fly: big flowing strokes with a sparkle stream. glide: swept back, streaming. sneak: folded in. Moves back 8 px while a backpack is worn (offsetWhen)."
+      "story": "Two soft aurora curtains per side, each a chain of 2 px segments with one continuous curtain texture. idle: slow ripple. fly: big flowing strokes with a sparkle stream. glide: swept back, streaming. sneak: folded in. The crystal knots sit at the outer shoulder blades; with a backpack they lift 2 px and move 4 px back (offsetWhen) and glow right beside the igloo top."
     },
     "vibey:polar_owl_wings": {
       "idle": [2.0],
-      "story": "Arm → forearm → hand bones, lesser + greater coverts and alula as scalloped layers, 5 secondaries and 5 primaries as separate feather bones. idle: folded angel-style with a slow breath. walk: gentle bob. fly: one big clean flap, then a long glide. glide (elytra): wide soaring wings. sneak: tucked in tight. Sits 9 px further back while a backpack is worn (offsetWhen)."
+      "story": "Arm → forearm → hand bones, lesser + greater coverts and alula as scalloped layers, 5 secondaries and 5 primaries as separate feather bones. idle: folded angel-style with a slow breath. walk: gentle bob. fly: one big clean flap, then a long glide. glide (elytra): wide soaring wings. sneak: tucked in tight. The roots sit at the outer shoulder blades; with a backpack the wings lift 2.5 px, move 6 px back and tilt 10° (offsetWhen), so they hang beside the igloo instead of behind it."
     },
     "vibey:polar_snowfall_cape": {
       "idle": [],
       "story": "HD 4× cape texture, 8 frames: aurora ripples, stars twinkle, snow falls in a seamless loop, the penguin waves, the seal blinks. Purple fleece lining with teal snowflakes; the elytra get the night sky."
     }
   },
+  "rounds": [
+    {
+      "before": "ingame/before2",
+      "title": "Runde 2 · vorher / nachher",
+      "note": "Robbe kleiner (pet.scale 1.2 → 0.85): liegend etwa hüfthoch, aufgerichtet knapp unter der Schulter – so groß wie der Pinguin. Flügel + Iglu-Rucksack: die Flügelwurzeln sitzen jetzt außen an den Schulterblättern; mit Rucksack heben sich die Eulenflügel 2,5 px, rücken nur 6 px statt 9 px nach hinten und kippen 10° (offsetWhen), die Polarlicht-Flügel heben sich 2 px und rücken 4 px statt 8 px nach hinten – sie sitzen seitlich am Iglu statt dahinter, ohne ineinander zu schneiden."
+    }
+  ],
   "hero": [
     { "name": "pals_front", "yaw": 160, "slots": { "pet": "vibey:polar_seal", "hat": "vibey:polar_pompom_beanie", "aura": "vibey:polar_aurora_ring", "cape": "vibey:polar_snowfall_cape" } },
     { "name": "pals_back", "yaw": 20, "slots": { "pet": "vibey:polar_seal", "hat": "vibey:polar_pompom_beanie", "aura": "vibey:polar_aurora_ring", "cape": "vibey:polar_snowfall_cape" } },
@@ -73,7 +80,7 @@
   "notes": [
     "Cosmetic animation states (client 0.2.2, AvatarDraw.COSMETIC_ANIMS / StateWeights): idle, walk, fly, sneak plus the optional sprint, glide (elytra or a long fall), idle_long (standing still ~10 s) and happy (the owner plays an emote). Weights follow a capped priority (glide > fly > sprint > walk > sneak > happy > idle_long > idle) and never sum above 1. Bundles without the new states play walk / fly / idle there, like 0.2.1.",
     "The optional states start their animation from the beginning when the state begins (per avatar); idle / walk / fly / sneak keep the global clock.",
-    "cosmetic.offsetWhen moves an item's root bones while another slot is worn (eased in/out): both wings move back when the igloo backpack is worn.",
+    "cosmetic.offsetWhen moves an item's root bones while another slot is worn (eased in/out): both wings lift and move a little back so they sit beside the igloo backpack.",
     "Emissive + translucent bones (the aurora) render with the engine's own soft pipeline on 1.21.11 and 26.1 (other versions: vanilla emissive): full-bright, no per-face shading, no depth writes and no 0.1 alpha cutout, so the light fades out smoothly.",
     "Events of idle always run (also while walking); the other states' events only above 50 % weight.",
     "Eyelids, the fish, the peeking pup and the nap Zs rest hidden inside the model and are moved out by animation offsets, so they disappear by themselves when another state takes over."
