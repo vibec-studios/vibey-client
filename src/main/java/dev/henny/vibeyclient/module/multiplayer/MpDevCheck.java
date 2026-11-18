@@ -39,7 +39,13 @@ final class MpDevCheck {
     static void tick() {
         Minecraft mc = Minecraft.getInstance();
         if (step < 0) {
-            if (ClientCompat.screen() instanceof TitleScreen) {
+            Screen current = ClientCompat.screen();
+            // A fresh game directory opens the accessibility onboarding first.
+            if (current != null && current.getClass().getSimpleName().contains("Onboarding")) {
+                ClientCompat.openScreen(new TitleScreen());
+                return;
+            }
+            if (current instanceof TitleScreen) {
                 step = 0;
                 wait = 60;
                 GlobalSettings.language.set(GlobalSettings.Language.ENGLISH);
