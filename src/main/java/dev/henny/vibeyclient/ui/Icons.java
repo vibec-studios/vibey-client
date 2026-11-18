@@ -285,6 +285,12 @@ public final class Icons {
                 "........."});
     }
 
+    /** Adds (or replaces) an icon: 9 rows of 9 characters, '#' = filled. For module-owned icon sets. */
+    public static synchronized void register(String name, String... rows) {
+        if (rows.length != SIZE) throw new IllegalArgumentException("Icon " + name + " needs " + SIZE + " rows");
+        ICONS.put(name, rows);
+    }
+
     public static boolean has(String name) {
         return name != null && ICONS.containsKey(name);
     }

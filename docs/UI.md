@@ -74,38 +74,10 @@ Rule of thumb for texts: say what the player gets, no jargon; anything only a de
 
 ## HUD editor
 
-`ui/hud`: a generic editor for 2D HUD elements, for every module. Open it with `HudLayout.openEditor(parent)`
-(Media: settings → *HUD layout → Edit*, or the *HUD editor* key). The world keeps running behind it and the real
-HUD elements pause while it is open (the editor draws them itself, with sample content when nothing plays).
-
-- **Drag** an element to move it. It snaps (4 px) to the screen edges (4 px margin), the centre lines and the edges
-  and centres of the other elements; the snap line shows in teal. **Ctrl** places freely.
-- **Resize:** drag the corner handle, scroll over the element, or *− / +* in the bar (5–10 % steps, per element
-  range). **Right-click** resets an element; *Hide/Show* hides it from the HUD; *Reset all*, *Cancel* (restores what
-  was there when the editor opened), *Done* / **Esc** saves. Keys: arrows nudge (Shift = 10 px), H hide, R reset.
-- **Look:** faint thirds and dashed centre lines, dashed outlines at rest, brand outline + corner handle when hovered
-  or selected, a name tag with the scale, a square toolbar at the bottom (moves to the top when the selection sits
-  there).
-- **Placement model:** each element remembers the nearest screen anchor (corner, edge middle or centre – chosen
-  automatically from where you drop it) and its offset from there, plus its scale, so it stays in place when the
-  window or GUI scale changes. Saved in `config/vibeyclient/hud.json`; elements never moved use their defaults.
-
-```java
-HudElement bar = HudLayout.register(HudElement.builder("mymodule.bar")
-        .label("mymodule.hud.bar")              // i18n key of the name in the editor
-        .size(200, 16)                           // unscaled GUI px (IntSuppliers allowed)
-        .defaults(Anchor.TOP, 0, 4)              // the element's TOP point on the screen's TOP point, 4 px down
-        .scale(1f, 0.5f, 2.5f)                   // default, min, max
-        .visibleWhen(() -> isEnabled())          // listed in the editor only while this holds
-        .render((g, w, h, preview) -> draw(g, w, h, preview))
-        .build());
-
-@Override public void renderHud(Gfx g) { HudLayout.draw(g, bar); }   // or HudLayout.begin(g, bar) ... end(g)
-```
-
-The renderer draws into `(0, 0)–(w, h)` with the placement's translate/scale already applied; content narrower than
-the box can follow `HudLayout.alignX(element)` (-1 left, 0 centre, 1 right, from the anchor). Media features use
-`hudElement(...)` (ids `media.<feature>.<name>`, see [MEDIA.md](MEDIA.md)).
+`ui/hud`: the HUD editor and the widget API for every module – drag, 8 resize handles (Shift = free), snapping
+with guides and distance readouts, multi-select, undo/redo, right-click menu, style popover (global + per widget),
+widget library, templates, share codes and a first-run intro. Open it with `HudLayout.openEditor(parent)`.
+**Everything about it, and how to add a widget: [HUD.md](HUD.md).**
 
 ## Extension points
 

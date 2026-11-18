@@ -59,6 +59,15 @@ public final class Gfx {
         g.drawString(font, s, x, y, color, false);
     }
 
+    /** Text with the vanilla drop shadow (HUD widgets). */
+    public void textShadow(String s, int x, int y, int color) {
+        if ((color >>> 24) < 6) return;
+        //? if >=26.1 {
+        /*g.text(font, s, x, y, color, true);
+        *///?} else
+        g.drawString(font, s, x, y, color, true);
+    }
+
     public void text(Component c, int x, int y, int color) {
         // Very low alpha would be drawn fully opaque by older versions.
         if ((color >>> 24) < 6) return;
@@ -140,6 +149,23 @@ public final class Gfx {
         g.blit(tex, x, y, w, h, u, v, uw, vh, texW, texH);
         com.mojang.blaze3d.systems.RenderSystem.disableBlend();
         *///?}
+    }
+
+    public static final int CURSOR_ARROW = 0, CURSOR_HAND = 1, CURSOR_MOVE = 2, CURSOR_RESIZE_NS = 3,
+            CURSOR_RESIZE_EW = 4, CURSOR_NOT_ALLOWED = 5;
+
+    /** Asks for a mouse cursor shape for this frame (1.21.9+; older versions keep the arrow). */
+    public void cursor(int kind) {
+        //? if >=1.21.9 {
+        g.requestCursor(switch (kind) {
+            case CURSOR_HAND -> com.mojang.blaze3d.platform.cursor.CursorTypes.POINTING_HAND;
+            case CURSOR_MOVE -> com.mojang.blaze3d.platform.cursor.CursorTypes.RESIZE_ALL;
+            case CURSOR_RESIZE_NS -> com.mojang.blaze3d.platform.cursor.CursorTypes.RESIZE_NS;
+            case CURSOR_RESIZE_EW -> com.mojang.blaze3d.platform.cursor.CursorTypes.RESIZE_EW;
+            case CURSOR_NOT_ALLOWED -> com.mojang.blaze3d.platform.cursor.CursorTypes.NOT_ALLOWED;
+            default -> com.mojang.blaze3d.platform.cursor.CursorTypes.ARROW;
+        });
+        //?}
     }
 
     public void scissor(int x1, int y1, int x2, int y2) {

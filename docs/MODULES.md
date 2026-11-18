@@ -228,8 +228,10 @@ only for keybind names/categories and mod menu text.
 ## HUD elements
 
 Anything a module draws on the HUD that players may want elsewhere should be a `HudElement` (`ui/hud`), so it shows
-up in the HUD editor: register it once (`HudLayout.register(HudElement.builder("<module>.<name>")...build())`) and
-draw it with `HudLayout.draw(g, element)` from `renderHud`. See [UI.md](UI.md#hud-editor).
+up in the HUD editor. New content should be a **widget** (`HudElement.builder("<module>.<name>")...widget(MyWidget::new)`,
+usually a `TextWidget`): the core draws, styles and saves it and hides it when the server disables its
+`.rules(key)`. Owner-drawn elements use `.render(...)` + `HudLayout.draw(g, element)` from `renderHud`.
+Full API: **[HUD.md](HUD.md)**.
 
 ## UI
 

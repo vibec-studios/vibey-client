@@ -69,6 +69,7 @@ public final class VibeyCore {
     public static void onHud(Gfx g) {
         if (ClientCompat.hudHidden()) return;
         ModuleManager.get().renderHud(g);
+        dev.henny.vibeyclient.ui.hud.HudLayout.renderWidgets(g);
         dev.henny.vibeyclient.ui.toast.ToastHooks.renderHud(g);
     }
 

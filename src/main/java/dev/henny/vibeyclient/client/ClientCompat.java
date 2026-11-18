@@ -22,6 +22,50 @@ public final class ClientCompat {
         Minecraft.getInstance().setScreen(screen);
     }
 
+    /** Opens a folder (or file) in the system file manager. */
+    public static void openFolder(java.nio.file.Path path) {
+        //? if >=26.3 {
+        /*com.mojang.blaze3d.Blaze3D.openPath(path);
+        *///?}
+        //? if >=1.21.11 <26.3 {
+        net.minecraft.util.Util.getPlatform().openPath(path);
+        //?}
+        //? if <1.21.11
+        /*net.minecraft.Util.getPlatform().openPath(path);*/
+    }
+
+    /** The system clipboard text ("" when empty or unavailable). */
+    public static String clipboard() {
+        try {
+            String s = Minecraft.getInstance().keyboardHandler.getClipboard();
+            return s == null ? "" : s;
+        } catch (RuntimeException e) {
+            return "";
+        }
+    }
+
+    public static void setClipboard(String s) {
+        Minecraft.getInstance().keyboardHandler.setClipboard(s);
+    }
+
+    /**
+     * The letter a key code stands for on the player's keyboard layout (GLFW key codes are US positions: on a German
+     * layout the key labelled Z reports Y). Upper case; the US letter when the layout name is unknown.
+     */
+    public static int layoutLetter(int glfwKey) {
+        if (glfwKey < 'A' || glfwKey > 'Z') return glfwKey;
+        try {
+            String n = InputConstants.Type.KEYSYM.getOrCreate(dev.henny.vibeyclient.client.Keys.toNative(glfwKey)).getDisplayName().getString();
+            if (n.length() == 1) {
+                char c = Character.toUpperCase(n.charAt(0));
+                if (c >= 'A' && c <= 'Z') return c;
+            }
+        } catch (RuntimeException e) {
+            // keep the US letter
+        }
+        return glfwKey;
+    }
+
     /** The screen that is open, or null. */
     public static Screen screen() {
         //? if >=26.2 {
