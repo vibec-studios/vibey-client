@@ -53,7 +53,7 @@ export function previewPlan(B, hints = {}) {
         break;
       }
       case "pet": {
-        const off = hints.petOffset ?? [-20, 0, 6];
+        const off = hints.petOffset ?? [20, 0, 6]; // 20 px to the player's right (+X)
         const sc = j.cosmetic.pet?.scale ?? 1;
         const wl = (j.animations.walk?.length ?? 1) * 0.3;
         panels = [

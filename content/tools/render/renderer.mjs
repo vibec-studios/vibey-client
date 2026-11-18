@@ -1,9 +1,11 @@
 // Software preview renderer for `.vibey` bundles: evaluates bones/animations exactly by the spec conventions,
 // builds textured quads and rasterizes them with a z-buffer (opaque/cutout, translucent, emissive + bloom).
 //
-// Convention (docs/SPEC.md §5): spec coords → vanilla model space: x' = x, y' = 24 − y, z' = z;
-// rotations convert like Blockbench's Modded Entity exporter: xRot = −rx, yRot = −ry, zRot = rz (ZYX order).
-// Model space → world (player at yaw 0 facing +Z): (x, 24 − y, −z).
+// Convention (docs/SPEC.md §5 "Coordinate convention"): `.vibey` coordinates are Blockbench space (player faces
+// north/-Z, right arm at +X). Blockbench → vanilla model space: x' = −x, y' = 24 − y, z' = z (Blockbench's Modded
+// Entity exporter); rotations (rest + keyframes) → xRot = −rx, yRot = −ry, zRot = rz (ZYX order); position
+// keyframes (offsets) → (−x, −y, z). Everything below this loader works in vanilla model space, exactly like the
+// game. Model space → world (player at yaw 0 facing +Z, right arm at world −X): (x, 24 − y, −z).
 import { Img, rgba, rng } from "../canvas.mjs";
 import { decodePNG } from "../png.mjs";
 import { I, T, S, Rx, Ry, Rzyx, mul, apply, applyDir, dot, cross, norm, sub, deg } from "./math.mjs";
@@ -11,8 +13,8 @@ import { PLAYER_PARTS, playerSkin } from "./player.mjs";
 
 const WORLD = [1, 0, 0, 0, 0, -1, 0, 24, 0, 0, -1, 0, 0, 0, 0, 1];
 const PLAYER_NAMES = ["head", "body", "right_arm", "left_arm", "right_leg", "left_leg"];
-export const mcPos = (p) => [p[0], 24 - p[1], p[2]];
-export const mcOff = (p) => [p[0], -p[1], p[2]];
+export const mcPos = (p) => [-p[0], 24 - p[1], p[2]];
+export const mcOff = (p) => [-p[0], -p[1], p[2]];
 export const mcRot = (r) => [deg(-r[0]), deg(-r[1]), deg(r[2])];
 
 // ------------------------------------------------------------------------------------------------ loading
@@ -207,12 +209,25 @@ function specCubeToModel(c) {
   return { min: [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.min(a[2], b[2])], max: [Math.max(a[0], b[0]), Math.max(a[1], b[1]), Math.max(a[2], b[2])] };
 }
 
+// Blockbench face → model-space face (FACE_DEF names are model space, "up" = visually up). Blockbench's east (+X) is
+// model −X. The rect transform maps Blockbench's per-face UV orientation onto the vanilla box-UV orientation used by
+// FACE_DEF (derived from Blockbench's own box-UV → per-face conversion, which must render like vanilla box UV:
+// up = [u+d+w, v+d, u+d, v], down = [u+d+2w, v, u+d+w, v+d], the four sides unchanged).
+const BB_FACE = {
+  north: ["north", (r) => r],
+  south: ["south", (r) => r],
+  east: ["west", (r) => r],
+  west: ["east", (r) => r],
+  up: ["up", ([a, b, c, d]) => [c, d, a, b]],
+  down: ["down", ([a, b, c, d]) => [c, b, a, d]],
+};
+
 function cubeRects(c, size) {
   if (c.uv?.box) return boxRects(c.uv.box[0], c.uv.box[1], ...size);
   const r = {};
-  for (const f of Object.keys(FACE_DEF)) {
+  for (const [f, [mf, xf]] of Object.entries(BB_FACE)) {
     const fv = c.uv?.[f];
-    if (fv) r[f] = Array.isArray(fv) ? fv : fv.uv;
+    if (fv) r[mf] = xf(Array.isArray(fv) ? fv : fv.uv);
   }
   return r;
 }
@@ -329,10 +344,11 @@ export function simulateParticles(B, opts) {
         for (let i = 0; i < n; i++) {
           const sp = ev.spread ?? [0, 0, 0];
           const vel = ev.velocity ?? [0, 0, 0];
-          // spread/velocity are in blocks (spec coords), → world: z flips
+          // spread/velocity are in blocks, Blockbench handedness → world: x and z flip (spread is a symmetric
+          // half-extent, so only the velocity direction matters)
           const off = [(r() * 2 - 1) * sp[0], (r() * 2 - 1) * sp[1], (r() * 2 - 1) * sp[2]];
           const jitter = 0.3;
-          const v = vel.map((x) => x * (1 + (r() * 2 - 1) * jitter));
+          const v = vel.map((x, c) => (c === 0 ? -x : x) * (1 + (r() * 2 - 1) * jitter));
           // a little random sideways drift so bursts fan out
           const drift = [(r() * 2 - 1) * Math.abs(vel[1]) * 0.35, 0, (r() * 2 - 1) * Math.abs(vel[1]) * 0.35];
           const g = ev.gravity ?? vp?.gravity ?? 0;

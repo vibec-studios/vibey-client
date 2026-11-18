@@ -2,14 +2,14 @@
 import { Img, mix, shade } from "../canvas.mjs";
 import { boxUV } from "../vibey.mjs";
 
-/** Player parts in spec (Blockbench) coordinates. */
+/** Player parts in spec (Blockbench) coordinates: right arm at +X (SPEC §5 "Coordinate convention"). */
 export const PLAYER_PARTS = [
   { name: "head", pivot: [0, 24, 0], from: [-4, 24, -4], to: [4, 32, 4], uv: [0, 0] },
   { name: "body", pivot: [0, 24, 0], from: [-4, 12, -2], to: [4, 24, 2], uv: [16, 16] },
-  { name: "right_arm", pivot: [-5, 22, 0], from: [-8, 12, -2], to: [-4, 24, 2], uv: [40, 16] },
-  { name: "left_arm", pivot: [5, 22, 0], from: [4, 12, -2], to: [8, 24, 2], uv: [32, 48] },
-  { name: "right_leg", pivot: [-1.9, 12, 0], from: [-3.9, 0, -2], to: [0.1, 12, 2], uv: [0, 16] },
-  { name: "left_leg", pivot: [1.9, 12, 0], from: [-0.1, 0, -2], to: [3.9, 12, 2], uv: [16, 48] },
+  { name: "right_arm", pivot: [5, 22, 0], from: [4, 12, -2], to: [8, 24, 2], uv: [40, 16] },
+  { name: "left_arm", pivot: [-5, 22, 0], from: [-8, 12, -2], to: [-4, 24, 2], uv: [32, 48] },
+  { name: "right_leg", pivot: [1.9, 12, 0], from: [-0.1, 0, -2], to: [3.9, 12, 2], uv: [0, 16] },
+  { name: "left_leg", pivot: [-1.9, 12, 0], from: [-3.9, 0, -2], to: [0.1, 12, 2], uv: [16, 48] },
 ];
 
 const P = {

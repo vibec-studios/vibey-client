@@ -28,9 +28,9 @@
         "name": "wing_left",
         "parent": null,
         "attach": "body",
-        "pivot": [1.5,21,3.6],
+        "pivot": [-1.5,21,3.6],
         "rotation": [0,-20,-12],
-        "cubes": [{"from":[1.5,11,3.1],"to":[19.5,27,4.1],"uv":{"box":[0,0]}}],
+        "cubes": [{"from":[-19.5,11,3.1],"to":[-1.5,27,4.1],"uv":{"box":[0,0]}}],
         "emissive": true,
         "translucent": true
       },
@@ -38,9 +38,9 @@
         "name": "wing_right",
         "parent": null,
         "attach": "body",
-        "pivot": [-1.5,21,3.6],
+        "pivot": [1.5,21,3.6],
         "rotation": [0,20,12],
-        "cubes": [{"from":[-19.5,11,3.1],"to":[-1.5,27,4.1],"uv":{"box":[0,17]}}],
+        "cubes": [{"from":[1.5,11,3.1],"to":[19.5,27,4.1],"uv":{"box":[0,17]}}],
         "emissive": true,
         "translucent": true
       }

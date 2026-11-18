@@ -69,7 +69,7 @@
       "rarity": "legendary",
       "tags": ["ice","wings","crystal","starter"],
       "size": 12984,
-      "sha256": "5714022e127c13fde5c119dcaeb625d31e6eaad6e4d4915f06ccf0d3afbbb7df",
+      "sha256": "fbfba6310d725c8dd4652a4e89306e298b10d124dea81562dedd0e823eae7b75",
       "sort": 50
     },
     {
@@ -83,7 +83,7 @@
       "rarity": "epic",
       "tags": ["neon","wings","glow","vibe","starter"],
       "size": 7398,
-      "sha256": "557743d62b5bd37ecd82e6f0dc4219ba5c5e9f0cfc993c0a01d47cdb45503412",
+      "sha256": "3581825410aca9c2946a9f15ff80eb8314fc5ce3d26422ecfdf126f8d794697c",
       "sort": 60
     },
     {
@@ -97,7 +97,7 @@
       "rarity": "epic",
       "tags": ["aura","sparks","glow","vibe","starter"],
       "size": 12744,
-      "sha256": "45b794036fedae688f5e659f35a8371592b532b30c759df5d9a54ff81ff61df2",
+      "sha256": "f07e3975a1ce86ac7f986f9856615d463c1966251ebe1d56a66eabea0850773b",
       "sort": 70
     },
     {
@@ -110,8 +110,8 @@
       "name": {"en":"Snowflake Orbit","de":"Schneeflocken-Orbit"},
       "rarity": "epic",
       "tags": ["aura","snow","winter","glow","starter"],
-      "size": 10800,
-      "sha256": "5956291324629119af15d038cf3c9b8be2d80d38c4e7134b03d2dbdc8618ad38",
+      "size": 10806,
+      "sha256": "ce6432fd02999ede674074d1a9d2ed7ca286b3d09883dccfea723923af0121f4",
       "sort": 80
     },
     {
@@ -124,8 +124,8 @@
       "name": {"en":"Pixel Penguin","de":"Pixel-Pinguin"},
       "rarity": "rare",
       "tags": ["penguin","cute","winter","pet","starter"],
-      "size": 8466,
-      "sha256": "d3e88f1a13e1bb4050ac4a5c91b005c68875835a823e99730241a5a4bbba030e",
+      "size": 8468,
+      "sha256": "2df81212394f9bdc5750b05c0c1b5cf822ca972624640f3bfcfb6215a621eccd",
       "sort": 90
     },
     {
@@ -139,7 +139,7 @@
       "rarity": "epic",
       "tags": ["seal","cute","mascot","pet","starter"],
       "size": 10438,
-      "sha256": "bf27193044dafc92edb0c0d1b4f6f20dc733aa599473526a5e960346e962b2dd",
+      "sha256": "2649cb997d160b0683c4445c0be1257f077fd32a6c9fda6aa0b1a001a4a2034c",
       "sort": 100
     },
     {
@@ -195,7 +195,7 @@
       "rarity": "epic",
       "tags": ["ice","crown","royal","starter"],
       "size": 4244,
-      "sha256": "61387c5580fd3f1fe4e77a5c93f0e1b6f80c75dfc9070cc56e193040bd278b89",
+      "sha256": "2f9ba0fc5cc708d9156eff537c8f053035619a67f75149c76627d9bfcd663b31",
       "sort": 140
     },
     {
@@ -209,7 +209,7 @@
       "rarity": "rare",
       "tags": ["seal","knitted","winter","cute","starter"],
       "size": 4414,
-      "sha256": "6241280f16295f73e22ea2f7cc3ac18131fa2814b6db84ac71eae7ba2884fc85",
+      "sha256": "9cb173714d28e26eac9944c1f5d09c5f91e0d3fadf07ee0ea15708a124494385",
       "sort": 150
     },
     {
@@ -222,8 +222,8 @@
       "name": {"en":"Seal Backpack","de":"Robben-Rucksack"},
       "rarity": "rare",
       "tags": ["seal","backpack","cute","starter"],
-      "size": 4750,
-      "sha256": "bcc8c261d6ab5f157f20dbccae09a557c3d8f928fb20c2ffcf4109324b3b8910",
+      "size": 4753,
+      "sha256": "54e35286c532240d7f8459d1dbe7280c8e56fbf7d0abc6a9604af92cce384653",
       "sort": 160
     },
     {
@@ -237,7 +237,7 @@
       "rarity": "common",
       "tags": ["celebrate","confetti","particles","starter"],
       "size": 6913,
-      "sha256": "0cb4eb823cddc884e1b85aa89593c1b863ac5b8f3d2d27e611a95de0725d9311",
+      "sha256": "4d09e3f17f72be8425373d20d4b89636dd858a6a3912b66df04351341b5446ce",
       "sort": 170
     },
     {
@@ -250,8 +250,8 @@
       "name": {"en":"Clap","de":"Klatschen"},
       "rarity": "common",
       "tags": ["applause","sound","starter"],
-      "size": 5047,
-      "sha256": "ef8139397bc2b3467998ba0a1ff2701a5677354bbb6afbcfa75b6dbfdb49fc67",
+      "size": 5046,
+      "sha256": "47d67bcd585b489fc47747349c575e02422384ba49092c6a0b62a23b8b166762",
       "sort": 180
     },
     {
@@ -307,7 +307,7 @@
       "rarity": "epic",
       "tags": ["seal","magic","props","particles","sound","starter"],
       "size": 39198,
-      "sha256": "bdd4532915bc6b25931d017d0deef759e3b1dfd471265532ffbf9c521691235a",
+      "sha256": "618270a328c07f8be7c1b1d6b5a02013cc5136a0db59728d9c2da2b0909680ba",
       "sort": 220
     },
     {
@@ -349,7 +349,7 @@
       "rarity": "common",
       "tags": ["dance","loop","music","starter"],
       "size": 3563,
-      "sha256": "179f0af2f796bcea83e31176aa35de6e2c3598ca84ef187dda2097a3edf33686",
+      "sha256": "88b656431ed40041d5c71373e0cb4f521b02f0620f1fea33eaf37ffe38838d36",
       "sort": 250
     },
     {

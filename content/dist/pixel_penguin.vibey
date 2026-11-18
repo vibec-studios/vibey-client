@@ -41,7 +41,7 @@
         "cubes": [
           {"from":[-3.5,1,-3],"to":[3.5,10,3],"uv":{"box":[0,0]}},
           {"from":[-3.5,8.5,-3],"to":[3.5,10.5,3],"inflate":0.35,"uv":{"box":[8,15]}},
-          {"from":[1,5,3.3],"to":[3,9,4.3],"uv":{"box":[34,15]}}
+          {"from":[-3,5,3.3],"to":[-1,9,4.3],"uv":{"box":[34,15]}}
         ],
         "emissive": false,
         "translucent": false
@@ -64,8 +64,8 @@
         "pivot": [0,14,-3],
         "rotation": [0,0,0],
         "cubes": [
-          {"from":[-2.5,13.5,-3.05],"to":[-1.5,14.5,-3.05],"uv":{"box":[8,24]}},
-          {"from":[1.5,13.5,-3.05],"to":[2.5,14.5,-3.05],"uv":{"box":[10,24]}}
+          {"from":[1.5,13.5,-3.05],"to":[2.5,14.5,-3.05],"uv":{"box":[8,24]}},
+          {"from":[-2.5,13.5,-3.05],"to":[-1.5,14.5,-3.05],"uv":{"box":[10,24]}}
         ],
         "emissive": false,
         "translucent": false
@@ -73,36 +73,36 @@
       {
         "name": "pen_flipper_left",
         "parent": "pen_body",
-        "pivot": [3.5,9,0],
+        "pivot": [-3.5,9,0],
         "rotation": [0,0,0],
-        "cubes": [{"from":[3.5,3,-1.5],"to":[4.5,9,1.5],"uv":{"box":[52,0]}}],
+        "cubes": [{"from":[-4.5,3,-1.5],"to":[-3.5,9,1.5],"uv":{"box":[52,0]}}],
         "emissive": false,
         "translucent": false
       },
       {
         "name": "pen_foot_left",
         "parent": "penguin",
-        "pivot": [1.5,1,-1],
+        "pivot": [-1.5,1,-1],
         "rotation": [0,0,0],
-        "cubes": [{"from":[0.5,0,-3.5],"to":[2.5,1,-0.5],"uv":{"box":[40,15]}}],
+        "cubes": [{"from":[-2.5,0,-3.5],"to":[-0.5,1,-0.5],"uv":{"box":[40,15]}}],
         "emissive": false,
         "translucent": false
       },
       {
         "name": "pen_flipper_right",
         "parent": "pen_body",
-        "pivot": [-3.5,9,0],
+        "pivot": [3.5,9,0],
         "rotation": [0,0,0],
-        "cubes": [{"from":[-4.5,3,-1.5],"to":[-3.5,9,1.5],"uv":{"box":[0,15]}}],
+        "cubes": [{"from":[3.5,3,-1.5],"to":[4.5,9,1.5],"uv":{"box":[0,15]}}],
         "emissive": false,
         "translucent": false
       },
       {
         "name": "pen_foot_right",
         "parent": "penguin",
-        "pivot": [-1.5,1,-1],
+        "pivot": [1.5,1,-1],
         "rotation": [0,0,0],
-        "cubes": [{"from":[-2.5,0,-3.5],"to":[-0.5,1,-0.5],"uv":{"box":[50,15]}}],
+        "cubes": [{"from":[0.5,0,-3.5],"to":[2.5,1,-0.5],"uv":{"box":[50,15]}}],
         "emissive": false,
         "translucent": false
       }

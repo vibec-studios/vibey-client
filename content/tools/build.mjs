@@ -6,6 +6,7 @@ import { createHash } from "node:crypto";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { stringify } from "./vibey.mjs";
+import { mirrorBundle } from "./_tmp_mirror.mjs";
 import { validate } from "./validate.mjs";
 import { loadBundle, sheet, thumbnail } from "./render/preview.mjs";
 import { previewPlan } from "./plans.mjs";
@@ -29,7 +30,8 @@ for (const f of files) {
   const name = bundle.file;
   const matches = !filters.length || filters.some((x) => f.includes(x) || name.includes(x));
   const t0 = Date.now();
-  const { json } = bundle.build();
+  const { json: json0 } = bundle.build();
+  const json = process.env.NO_MIRROR ? json0 : mirrorBundle(json0);
   const text = stringify(json) + "\n";
   const bytes = Buffer.from(text, "utf8");
   const v = validate(bytes);
