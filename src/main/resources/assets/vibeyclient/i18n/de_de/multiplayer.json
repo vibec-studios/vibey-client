@@ -1,6 +1,7 @@
 {
   "name": "Multiplayer",
   "description": "Hoste deine Einzelspielerwelt für Freunde, ohne Portfreigabe.",
+  "summary": "Hoste deine Welt für Freunde.",
   "title": "Welt hosten",
   "status.off": "Offline",
   "status.connecting": "Verbinde",

@@ -72,6 +72,11 @@ public final class SettingsView {
 
     /** Sections and keys (everything a normal player sees). */
     public static int drawBasic(Ui ui, SettingsGroup group, int x, int y, int w, boolean enabled) {
+        return drawBasic(ui, group, x, y, w, enabled, null, null);
+    }
+
+    /** Like {@link #drawBasic(Ui, SettingsGroup, int, int, int, boolean)}; {@code after} draws extra content right below section {@code sectionKey}. */
+    public static int drawBasic(Ui ui, SettingsGroup group, int x, int y, int w, boolean enabled, String sectionKey, Extra after) {
         Map<String, List<Setting<?, ?>>> sections = new LinkedHashMap<>();
         List<Setting<?, ?>> keys = new ArrayList<>();
         for (Setting<?, ?> s : group.all()) {
@@ -85,6 +90,7 @@ public final class SettingsView {
             first = false;
             String title = e.getKey().isEmpty() ? null : Lang.tr(e.getValue().get(0).sectionNameKey());
             y = card(ui, title, e.getValue(), x, y, w, enabled);
+            if (after != null && e.getKey().equals(sectionKey)) y = after.draw(ui, x, y, w);
         }
         if (!keys.isEmpty()) {
             if (!first) y += 10;

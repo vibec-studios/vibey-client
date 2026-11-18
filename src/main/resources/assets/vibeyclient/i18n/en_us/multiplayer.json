@@ -1,6 +1,7 @@
 {
   "name": "Multiplayer",
   "description": "Host your singleplayer world for friends, no port forwarding.",
+  "summary": "Host your world for friends.",
   "title": "Host World",
   "status.off": "Offline",
   "status.connecting": "Connecting",

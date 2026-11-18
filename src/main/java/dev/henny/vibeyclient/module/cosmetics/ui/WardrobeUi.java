@@ -31,7 +31,7 @@ public final class WardrobeUi {
     /** Same as {@link #register()} with an own visibility condition. Safe to call again (replaces the tab). */
     public static void register(BooleanSupplier visible) {
         Lang.addFile("wardrobe");
-        VibeyTabs.register(new VibeyTabs.Tab(TAB_ID, "wardrobe.tab", 20, WardrobePanel::new, visible));
+        VibeyTabs.register(new VibeyTabs.Tab(TAB_ID, "wardrobe.tab", 20, WardrobePanel::new, visible, Icons.SHIRT));
         // "Wardrobe" on the title screen and in the pause row opens the full-screen wardrobe (replaces the core
         // default, which would open the Vibey menu tab)
         MenuEntries.register(MenuEntries.Place.TITLE, new MenuEntries.Entry("wardrobe", "core.title.wardrobe", Icons.SHIRT, 10,

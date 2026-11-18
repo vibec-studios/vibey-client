@@ -36,6 +36,8 @@ public class VibeyButton extends AbstractWidget {
     /** Draws only the icon (label still used for narration and the tooltip). */
     public VibeyButton iconOnly(boolean v) {
         this.iconOnly = v;
+        // vanilla's deferred tooltip: drawn after everything else on the screen (the title logo, other widgets)
+        setTooltip(v ? net.minecraft.client.gui.components.Tooltip.create(getMessage()) : null);
         return this;
     }
 
@@ -73,7 +75,7 @@ public class VibeyButton extends AbstractWidget {
         float t = hover.to(hot ? 1f : 0f);
         if (subtle) {
             g.rect(x, y, w, h, Theme.mix(0x8C000000, 0xE618181F, t));
-            g.outline(x, y, w, h, Theme.mix(accent ? Theme.alpha(Theme.BRAND, 0.75f) : 0x3DFFFFFF, Theme.BRAND, t));
+            g.outline(x, y, w, h, Theme.mix(0x3DFFFFFF, Theme.BRAND, t));
         } else {
             g.rect(x, y, w, h, Theme.mix(0xE60B0B0E, 0xF018181F, t));
             g.outline(x, y, w, h, Theme.mix(Theme.LINE2, accent ? Theme.BRAND : 0x50FFFFFF, t));
@@ -106,7 +108,7 @@ public class VibeyButton extends AbstractWidget {
             g.rect(x + w - bw - 2, y + 2, bw, 9, Theme.BRAND);
             g.text(b, x + w - bw - 2 + (bw - g.width(b)) / 2 + 1, y + 3, 0xFFFFFFFF);
         }
-        if (isHovered() && (iconOnly || label.isEmpty() || g.width(label) > w - 28) && !label.isEmpty()) {
+        if (isHovered() && !iconOnly && g.width(label) > w - 28 && !label.isEmpty()) {
             Ui.drawTooltipBox(g, label, mouseX, mouseY);
         }
     }

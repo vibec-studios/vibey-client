@@ -1,6 +1,7 @@
 {
   "name": "Emotes",
   "description": "Emote wheel with props, particles and sounds.",
+  "summary": "Emote wheel with props and sounds.",
   "setting": {
     "wheel": "Emote wheel (hold)",
     "thirdPerson": "Third person while emoting",

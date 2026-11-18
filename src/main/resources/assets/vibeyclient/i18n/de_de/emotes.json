@@ -1,6 +1,7 @@
 {
   "name": "Emotes",
   "description": "Emote-Rad mit Requisiten, Partikeln und Sounds.",
+  "summary": "Emote-Rad mit Requisiten und Sounds.",
   "setting": {
     "wheel": "Emote-Rad (gedrückt halten)",
     "thirdPerson": "Dritte Person beim Emoten",

@@ -1,6 +1,7 @@
 {
   "name": "Freunde & Chat",
   "description": "Freunde, Chats, Welteinladungen und dein Online-Status.",
+  "summary": "Freunde, Chat und Welteinladungen.",
   "pause.button": "Freunde",
   "tab.friends": "Freunde",
   "tab.chats": "Chats",

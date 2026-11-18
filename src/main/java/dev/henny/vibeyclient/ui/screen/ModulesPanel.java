@@ -220,14 +220,16 @@ public final class ModulesPanel implements Panel {
         } else if (settingHit != null) {
             g.text(g.clip("› " + settingHit, dw), tx, y + 25, Theme.BRAND2);
         } else {
-            List<String> lines = Ui.wrap(g, Lang.tr(m.descriptionKey()), dw);
+            String summaryKey = m.id() + ".summary";
+            String summary = Lang.has(summaryKey) ? Lang.tr(summaryKey) : Lang.tr(m.descriptionKey());
+            List<String> lines = Ui.wrap(g, summary, dw);
             int ly = y + 25;
             for (int k = 0; k < Math.min(2, lines.size()); k++) {
                 String l = k == 1 && lines.size() > 2 ? g.clip(lines.get(1) + " …", dw) : lines.get(k);
                 g.text(g.clip(l, dw), tx, ly, Theme.mix(Theme.DIM, Theme.MUTED, hov));
                 ly += 10;
             }
-            if (lines.size() > 2) ui.tooltip(m, x, y, w, TILE_H, Lang.tr(m.descriptionKey()));
+            if (lines.size() > 2) ui.tooltip(m, x, y, w, TILE_H, summary);
         }
         if (toggled) ModuleManager.get().toggle(m.id());
         else if (clicked) open(m);

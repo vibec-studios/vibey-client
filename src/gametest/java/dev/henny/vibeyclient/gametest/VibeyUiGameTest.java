@@ -149,7 +149,7 @@ public final class VibeyUiGameTest implements FabricClientGameTest {
         ModulesPanel.preselect(null);
         ctx.setScreen(() -> new VibeyScreen(null));
         ctx.waitTicks(4);
-        ctx.getInput().typeChars("vol");
+        ctx.getInput().typeChars("show");
         ctx.waitTicks(6);
         ctx.takeScreenshot("ui_menu_search_" + tag);
 

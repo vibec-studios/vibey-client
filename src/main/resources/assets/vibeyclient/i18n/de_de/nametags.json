@@ -1,6 +1,7 @@
 {
   "name": "Nametag-Icons",
   "description": "Eine kleine Robbe vor den Namen von Spielern mit Vibey Client, dazu Team-, Unterstützer- und Creator-Abzeichen.",
+  "summary": "Eine Robbe vor den Namen von Vibey-Spielern.",
   "setting": {
     "nametag": "Icons über Spielern",
     "nametag.desc": "Eine kleine Robbe vor den Namen von Vibey-Spielern.",

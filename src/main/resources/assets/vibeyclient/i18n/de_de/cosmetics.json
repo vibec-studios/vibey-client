@@ -1,6 +1,7 @@
 {
   "name": "Cosmetics",
   "description": "Umhänge, Flügel, Auren, Begleiter, Schilde, Hüte und Rückenitems.",
+  "summary": "Umhänge, Flügel, Begleiter, Hüte und mehr.",
   "setting": {
     "showOwn": "Meine Cosmetics zeigen",
     "showOthers": "Cosmetics anderer Spieler zeigen",

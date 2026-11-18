@@ -41,8 +41,7 @@ public final class GeneralPanel implements Panel {
         cy += 13;
         g.text(g.clip(Lang.tr("core.general.description"), cw), cx, cy, Theme.MUTED);
         cy += 18;
-        cy = SettingsView.drawBasic(ui, GlobalSettings.GROUP, cx, cy, cw, true);
-        cy = status(ui, cx, cy + 8, cw);
+        cy = SettingsView.drawBasic(ui, GlobalSettings.GROUP, cx, cy, cw, true, "online", (u, sx, sy, sw) -> status(u, sx, sy + 6, sw) + 2);
         cy = SettingsView.drawAdvanced(ui, GlobalSettings.GROUP, cx, cy, cw, true, this::info);
         scroll.end(ui, cy + pad);
     }

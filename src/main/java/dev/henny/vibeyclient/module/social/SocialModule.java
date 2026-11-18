@@ -92,7 +92,7 @@ public final class SocialModule extends VibeyModule {
         hideServerAddress.onChange(v -> presence.changed());
 
         VibeyTabs.register(new VibeyTabs.Tab("account", "social.tab.account", 10, () -> new AccountPanel(this),
-                () -> isEnabled() && GlobalSettings.online()));
+                () -> isEnabled() && GlobalSettings.online(), Icons.USER));
 
         on(VibeyEvents.OnlineFeaturesChanged.class, e -> apply());
         // "Friends" on the Vibey title screen and in the pause menu row opens the sidebar over that screen
