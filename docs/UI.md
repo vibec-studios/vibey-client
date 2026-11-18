@@ -151,10 +151,15 @@ Screenshots: `versions/fabric-1.21.11/build/run/clientGameTest/screenshots/ui_*.
 versions are checked by `dev/ClickTest`: `./gradlew :fabric-26.3:runClient -Dvibeyclient.clicktest=<outdir>` (NeoForge:
 env `VIBEYCLIENT_CLICKTEST=<outdir>`). It feeds real mouse presses/releases into the game's `MouseHandler` (through
 `mixin/client/MouseHandlerAccessor`, so GUI scaling and the native button numbers are included) and checks an
-immediate-mode button, a right-click area and a `VibeyButton` on a test screen, then a tab of the real Vibey menu. It
+immediate-mode button, a right-click area and a `VibeyButton` on a test screen, then a tab of the real Vibey menu, the
+Vibey corner button on the vanilla title screen, a module tile (→ its page) and the key code round trip. It
 logs `[vibeyclient-clicktest] PASS|FAIL <check>` and a `SUMMARY`, writes `<outdir>/clicktest.txt` plus screenshots
-(`clicktest-screen.png`, `menu-before.png`, `menu-after.png`) and quits. Run it on 26.3 after touching input code.
+(`clicktest-screen.png`, `menu-before.png`, `menu-after.png`, `title-button-after.png`, `module-page.png`) and quits. Run it on 26.3 after touching input code.
 
 Mouse buttons: our code (`Ui`, `click(x, y, button)`, previews) uses GLFW numbers (`Keys.MOUSE_LEFT` = 0, right 1,
 middle 2). 26.3 (SDL) reports 1 left, 2 middle, 3 right; `BaseScreen` and `ToastHooks` convert with
 `Keys.mouseFromNative`, so never compare `MouseButtonEvent#button()` directly.
+
+Keys: screens compare GLFW codes (`Keys.ESCAPE`, `TAB`, ...). 26.3 reports SDL scancodes; `BaseScreen#key` and the
+screen key listeners get `Keys.fromNative(code)` (identity before 26.3; keys without a GLFW constant arrive as
+`Keys.NATIVE_ONLY + code`). `ClientCompat.matches` and the keybind capture convert back with `Keys.toNativeAny`.
