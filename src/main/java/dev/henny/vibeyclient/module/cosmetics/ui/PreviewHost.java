@@ -45,6 +45,7 @@ final class PreviewHost {
                     if (view != null) {
                         defaultYaw = view.yaw();
                         view.setAutoRotate(autoRotate);
+                        if (facing != null) view.setYaw(yawFor(facing));
                     }
                 } catch (RuntimeException e) {
                     fail(e);
@@ -96,6 +97,25 @@ final class PreviewHost {
             fail(e);
             return false;
         }
+    }
+
+    private Slot facing;
+
+    /** Turns the preview so the category's items are visible (capes, wings and back items from behind). */
+    void faceFor(Slot slot) {
+        facing = slot;
+        AvatarPreview.View v = view;
+        if (v != null && !failed) {
+            try {
+                v.setYaw(yawFor(slot));
+            } catch (RuntimeException e) {
+                fail(e);
+            }
+        }
+    }
+
+    private float yawFor(Slot slot) {
+        return slot == Slot.CAPE || slot == Slot.WINGS || slot == Slot.BACK ? 155f : defaultYaw;
     }
 
     /** Shows {@code id} in {@code slot} while hovered; null slot/id ends the try-on. Cheap to call every frame. */

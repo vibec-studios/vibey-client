@@ -70,6 +70,7 @@ final class WardrobeScreen extends BaseScreen {
         this.parent = parent;
         this.category = initial != null ? initial : lastCategory;
         lastCategory = this.category;
+        if (this.category != null) preview.faceFor(this.category.slot);
     }
 
     @Override
@@ -209,6 +210,7 @@ final class WardrobeScreen extends BaseScreen {
         grid.reset();
         gridIn.snap(0f);
         preview.tryOn(null, null);
+        preview.faceFor(c.slot);
     }
 
     // ============================================================================================ middle: grid

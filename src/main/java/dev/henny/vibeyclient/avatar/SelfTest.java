@@ -160,7 +160,7 @@ public final class SelfTest {
     }
 
     private static boolean loading(Minecraft mc) {
-        //? if >=26.3 {
+        //? if >=26.2 {
         /*return false;
         *///?} else
         return mc.getOverlay() != null;
@@ -182,7 +182,7 @@ public final class SelfTest {
     private static void shot(String name) {
         Minecraft mc = Minecraft.getInstance();
         try {
-            //? if >=26.3 {
+            //? if >=26.2 {
             /*net.minecraft.client.Screenshot.grab(mc, false);
             *///?} else if >=1.21.6 {
             net.minecraft.client.Screenshot.grab(mc.gameDirectory, name + ".png", mc.getMainRenderTarget(), 1, c -> log("screenshot " + c.getString()));
