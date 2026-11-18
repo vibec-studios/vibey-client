@@ -2,14 +2,14 @@
 import { Img, mix, shade } from "../canvas.mjs";
 import { boxUV } from "../vibey.mjs";
 
-/** Player parts in spec (Blockbench) coordinates. */
+/** Player parts in spec (Blockbench) coordinates: right arm at +X (SPEC §5 "Coordinate convention"). */
 export const PLAYER_PARTS = [
   { name: "head", pivot: [0, 24, 0], from: [-4, 24, -4], to: [4, 32, 4], uv: [0, 0] },
   { name: "body", pivot: [0, 24, 0], from: [-4, 12, -2], to: [4, 24, 2], uv: [16, 16] },
-  { name: "right_arm", pivot: [-5, 22, 0], from: [-8, 12, -2], to: [-4, 24, 2], uv: [40, 16] },
-  { name: "left_arm", pivot: [5, 22, 0], from: [4, 12, -2], to: [8, 24, 2], uv: [32, 48] },
-  { name: "right_leg", pivot: [-1.9, 12, 0], from: [-3.9, 0, -2], to: [0.1, 12, 2], uv: [0, 16] },
-  { name: "left_leg", pivot: [1.9, 12, 0], from: [-0.1, 0, -2], to: [3.9, 12, 2], uv: [16, 48] },
+  { name: "right_arm", pivot: [5, 22, 0], from: [4, 12, -2], to: [8, 24, 2], uv: [40, 16] },
+  { name: "left_arm", pivot: [-5, 22, 0], from: [-8, 12, -2], to: [-4, 24, 2], uv: [32, 48] },
+  { name: "right_leg", pivot: [1.9, 12, 0], from: [-0.1, 0, -2], to: [3.9, 12, 2], uv: [0, 16] },
+  { name: "left_leg", pivot: [-1.9, 12, 0], from: [-3.9, 0, -2], to: [0.1, 12, 2], uv: [16, 48] },
 ];
 
 const P = {
@@ -46,10 +46,10 @@ export function playerSkin() {
   H.down.noisy(P.skinShade, 0.015, 4);
   // hair: back fully, sides top 3 rows + back column, front fringe
   H.south.noisy(P.hair, 0.03, 5, 0, 0, 8, 6);
-  for (const k of ["east", "west"]) {
+  for (const k of ["west", "east"]) {
     H[k].noisy(P.hair, 0.03, 6, 0, 0, 8, 3);
-    const back = k === "west" ? 0 : 7; // west: u=0 at back (+Z); east: u=max at back
-    H[k].col(back, P.hair, 0, 5).col(k === "west" ? 1 : 6, P.hair, 0, 4);
+    const back = k === "east" ? 0 : 7; // east (right side): u=0 at back (+Z); west: u=max at back
+    H[k].col(back, P.hair, 0, 5).col(k === "east" ? 1 : 6, P.hair, 0, 4);
   }
   H.north.noisy(P.hair, 0.03, 7, 0, 0, 8, 2).px(P.hair, [[0, 2], [7, 2], [5, 2], [6, 2]]);
   H.north.px(P.hairHi, [[2, 0], [3, 0]]);

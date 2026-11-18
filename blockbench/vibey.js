@@ -1491,7 +1491,13 @@ function applyVisibilityPreview() {
 	});
 }
 function clearVisibilityPreview() {
-	hiddenByPreview.forEach((g) => g.mesh && (g.mesh.visible = g.visibility !== false));
+	hiddenByPreview.forEach((g) => {
+		// the group may belong to a project that is being closed (its 3D nodes are already gone)
+		try {
+			const mesh = g.mesh;
+			if (mesh) mesh.visible = g.visibility !== false;
+		} catch (e) {}
+	});
 	hiddenByPreview.clear();
 }
 
@@ -1500,7 +1506,38 @@ function ensureDefaultTexture() {
 	if (!isVibey() || !Texture.all.length) return;
 	if (!Texture.all.find((t) => t.use_as_default)) Texture.all[0].use_as_default = true;
 }
+/** Hash of the texture canvas pixels (detects edits of an imported texture). */
+function canvasPixelHash(tex) {
+	try {
+		const c = tex.canvas;
+		if (!c || !c.width || !tex.width) return null;
+		const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+		let h = 0x811c9dc5;
+		for (let i = 0; i < d.length; i++) h = Math.imul(h ^ d[i], 16777619);
+		return c.width + 'x' + c.height + ':' + (h >>> 0);
+	} catch (e) {
+		return null;
+	}
+}
+/**
+ * Remembers the PNG an imported texture came from. A canvas round trip is lossy for semi-transparent pixels
+ * (premultiplied alpha), so an unedited texture is exported with its original bytes.
+ */
+function rememberImportedPng(tex, png) {
+	const imp = (tex.vibey_import = { png, hash: null });
+	const capture = (tries) => {
+		if (tex.vibey_import !== imp || imp.hash) return;
+		imp.hash = canvasPixelHash(tex);
+		if (!imp.hash && tries > 0) setTimeout(() => capture(tries - 1), 50);
+	};
+	capture(200);
+}
 function textureBase64(tex) {
+	const imp = tex.vibey_import;
+	if (imp) {
+		if (!imp.hash) imp.hash = canvasPixelHash(tex);
+		if (imp.hash && canvasPixelHash(tex) === imp.hash) return imp.png;
+	}
 	try {
 		if (tex.canvas && tex.width) return tex.canvas.toDataURL('image/png').split(',')[1];
 	} catch (e) {}
@@ -1638,6 +1675,7 @@ function applySnapshot(snap) {
 			frame_order_type: t.frames && t.frames.length ? 'custom' : 'loop', frame_order: (t.frames || []).join(' '),
 			frame_interpolate: !!t.interpolate, use_as_default: !!t.isDefault,
 		}).fromDataURL('data:image/png;base64,' + t.png).add(false);
+		rememberImportedPng(tex, t.png);
 		texUuid[t.id] = tex.uuid;
 	});
 	const def = snap.textures.find((t) => t.isDefault) || snap.textures[0];

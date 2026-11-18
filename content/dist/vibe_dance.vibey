@@ -13,7 +13,6 @@
   "rarity": "common",
   "emote": {"animation":"main","loop":true,"thirdPerson":true,"stopOnMove":true,"hideHeldItems":true},
   "textures": [],
-  "model": {"bones":[]},
   "animations": {
     "main": {
       "length": 2,
@@ -22,13 +21,13 @@
         "root": {
           "position": [
             {"t":0,"v":[0,0,0],"i":"catmullrom"},
-            {"t":0.25,"v":[0.6,1.1,0],"i":"catmullrom"},
-            {"t":0.5,"v":[1.2,0,0],"i":"catmullrom"},
-            {"t":0.75,"v":[0.6,1.1,0],"i":"catmullrom"},
+            {"t":0.25,"v":[-0.6,1.1,0],"i":"catmullrom"},
+            {"t":0.5,"v":[-1.2,0,0],"i":"catmullrom"},
+            {"t":0.75,"v":[-0.6,1.1,0],"i":"catmullrom"},
             {"t":1,"v":[0,0,0],"i":"catmullrom"},
-            {"t":1.25,"v":[-0.6,1.1,0],"i":"catmullrom"},
-            {"t":1.5,"v":[-1.2,0,0],"i":"catmullrom"},
-            {"t":1.75,"v":[-0.6,1.1,0],"i":"catmullrom"},
+            {"t":1.25,"v":[0.6,1.1,0],"i":"catmullrom"},
+            {"t":1.5,"v":[1.2,0,0],"i":"catmullrom"},
+            {"t":1.75,"v":[0.6,1.1,0],"i":"catmullrom"},
             {"t":2,"v":[0,0,0],"i":"catmullrom"}
           ],
           "rotation": [

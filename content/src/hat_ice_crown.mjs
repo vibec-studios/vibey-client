@@ -39,9 +39,9 @@ export default function () {
     const zf = s < 0 ? -E : E - 1; // front / back rim
     tip(-1, zf, 2, 1, 2);
     crown.box([-0.5, 35.55, zf], [1, 1, 1], { all: (img) => img.fill([255, 255, 255, 245]) });
-    tip(-3, zf, 1, 1, 1);
     tip(2, zf, 1, 1, 1);
-    const xs = s < 0 ? -E : E - 1; // left / right rim
+    tip(-3, zf, 1, 1, 1);
+    const xs = s < 0 ? E - 1 : -E; // left (−X) / right (+X) rim
     tip(xs, -1, 1, 2, 2);
     crown.box([xs, 35.55, -0.5], [1, 1, 1], { all: (img) => img.fill([255, 255, 255, 245]) });
     tip(xs, -3, 1, 1, 1);
@@ -60,8 +60,8 @@ export default function () {
   const glint = b.defaultTexture().region(5, 5, (img) => img.stamp(0, 0, ["..w..", "..w..", "wwWww", "..w..", "..w.."], { w: "#bff7ee", W: "#ffffff" }));
   b.sprite("glint", "main", glint);
   b.locator("tip_front", "crown", [0, 36.5, -4.2]);
-  b.locator("tip_left", "crown", [4.2, 36.5, 0]);
-  b.locator("tip_right", "crown", [-4.2, 36.5, 0]);
+  b.locator("tip_left", "crown", [-4.2, 36.5, 0]);
+  b.locator("tip_right", "crown", [4.2, 36.5, 0]);
   const idle = b.anim("idle", 3, true);
   const sparkle = { sprite: "glint", count: 1, lifetime: 0.45, size: 0.14, spread: [0.02, 0.02, 0.02], velocity: [0, 0.004, 0], emissive: true };
   idle.particle(0.3, { ...sparkle, locator: "tip_front" });

@@ -1,5 +1,5 @@
 // The Vibe seal as .vibey bones – a 1:1 port of vibe-launcher/src/components/seal3d.ts (without the ice block).
-// seal3d space: head → +X, y up. Here: head → north (−Z), so (x, y, z)_seal → (z, y, −x).
+// seal3d space: head → +X, y up. Here (Blockbench space): head → north (−Z), so (x, y, z)_seal → (−z, y, −x).
 import { C } from "./_common.mjs";
 
 const N = 0.018;
@@ -65,9 +65,9 @@ export function addSeal(b, opts = {}) {
   });
   // eyelids (shown briefly for a blink): thin planes just in front of the eyes
   const lids = b.bone(names.lids, { parent: names.head, pivot: at(0, 9, -13) });
-  for (const x of [-3, 1]) {
+  for (const [x, seed] of [[1, 37], [-3, 41]]) {
     lids.box(at(x, 8, -13.05), [2, 2, 0], {
-      north: (img) => img.noisy(C.body, 0.015, s + 40 + x).row(1, C.eye),
+      north: (img) => img.noisy(C.body, 0.015, s + seed).row(1, C.eye),
     });
   }
 
@@ -77,9 +77,9 @@ export function addSeal(b, opts = {}) {
     bone.box(at(...from), [3, 1, 5], { all: (img) => img.noisy(C.flipper, 0.02, seed) });
     return bone;
   };
-  fin(names.finL, [5, 1, -4], [4.5, 0, -8], -26, s + 50);
-  fin(names.finR, [-5, 1, -4], [-7.5, 0, -8], 26, s + 51);
-  fin(names.tailL, [1.2, 1, 12], [0.7, 0, 11.5], 29, s + 52);
-  fin(names.tailR, [-1.2, 1, 12], [-3.7, 0, 11.5], -29, s + 53);
+  fin(names.finL, [-5, 1, -4], [-7.5, 0, -8], -26, s + 50);
+  fin(names.finR, [5, 1, -4], [4.5, 0, -8], 26, s + 51);
+  fin(names.tailL, [-1.2, 1, 12], [-3.7, 0, 11.5], 29, s + 52);
+  fin(names.tailR, [1.2, 1, 12], [0.7, 0, 11.5], -29, s + 53);
   return names;
 }

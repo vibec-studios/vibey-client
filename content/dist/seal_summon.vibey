@@ -54,8 +54,8 @@
         "pivot": [0,25.5,-22],
         "rotation": [0,0,0],
         "cubes": [
-          {"from":[-3,24.5,-22.05],"to":[-1,26.5,-22.05],"uv":{"box":[40,45]}},
-          {"from":[1,24.5,-22.05],"to":[3,26.5,-22.05],"uv":{"box":[44,45]}}
+          {"from":[1,24.5,-22.05],"to":[3,26.5,-22.05],"uv":{"box":[40,45]}},
+          {"from":[-3,24.5,-22.05],"to":[-1,26.5,-22.05],"uv":{"box":[44,45]}}
         ],
         "emissive": false,
         "translucent": false
@@ -63,36 +63,36 @@
       {
         "name": "seal_fin_left",
         "parent": "seal",
-        "pivot": [5,17.5,-13],
+        "pivot": [-5,17.5,-13],
         "rotation": [0,-26,0],
-        "cubes": [{"from":[4.5,16.5,-17],"to":[7.5,17.5,-12],"uv":{"box":[18,39]}}],
+        "cubes": [{"from":[-7.5,16.5,-17],"to":[-4.5,17.5,-12],"uv":{"box":[18,39]}}],
         "emissive": false,
         "translucent": false
       },
       {
         "name": "seal_fin_right",
         "parent": "seal",
-        "pivot": [-5,17.5,-13],
+        "pivot": [5,17.5,-13],
         "rotation": [0,26,0],
-        "cubes": [{"from":[-7.5,16.5,-17],"to":[-4.5,17.5,-12],"uv":{"box":[34,39]}}],
+        "cubes": [{"from":[4.5,16.5,-17],"to":[7.5,17.5,-12],"uv":{"box":[34,39]}}],
         "emissive": false,
         "translucent": false
       },
       {
         "name": "seal_tail_left",
         "parent": "seal",
-        "pivot": [1.2,17.5,3],
+        "pivot": [-1.2,17.5,3],
         "rotation": [0,29,0],
-        "cubes": [{"from":[0.7,16.5,2.5],"to":[3.7,17.5,7.5],"uv":{"box":[0,45]}}],
+        "cubes": [{"from":[-3.7,16.5,2.5],"to":[-0.7,17.5,7.5],"uv":{"box":[0,45]}}],
         "emissive": false,
         "translucent": false
       },
       {
         "name": "seal_tail_right",
         "parent": "seal",
-        "pivot": [-1.2,17.5,3],
+        "pivot": [1.2,17.5,3],
         "rotation": [0,-29,0],
-        "cubes": [{"from":[-3.7,16.5,2.5],"to":[-0.7,17.5,7.5],"uv":{"box":[16,45]}}],
+        "cubes": [{"from":[0.7,16.5,2.5],"to":[3.7,17.5,7.5],"uv":{"box":[16,45]}}],
         "emissive": false,
         "translucent": false
       },
@@ -248,7 +248,7 @@
           "lifetime": 0.9,
           "size": 0.1,
           "spread": [0.35,0.25,0.35],
-          "velocity": [0.03,0.02,0],
+          "velocity": [-0.03,0.02,0],
           "gravity": 0.002,
           "emissive": true
         },
@@ -261,7 +261,7 @@
           "lifetime": 0.9,
           "size": 0.1,
           "spread": [0.35,0.25,0.35],
-          "velocity": [-0.03,0.02,0],
+          "velocity": [0.03,0.02,0],
           "gravity": 0.002,
           "emissive": true
         },
@@ -279,7 +279,6 @@
           "gravity": 0.002,
           "emissive": true
         },
-        {"t":0.58,"type":"visibility","bone":"seal","visible":true},
         {
           "t": 0.58,
           "type": "particle",
@@ -293,6 +292,7 @@
           "gravity": 0.002,
           "emissive": true
         },
+        {"t":0.58,"type":"visibility","bone":"seal","visible":true},
         {
           "t": 0.6,
           "type": "particle",

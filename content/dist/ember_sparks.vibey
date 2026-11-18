@@ -35,12 +35,12 @@
       }
     ],
     "locators": {
-      "spot_0": {"bone":"ring","position":[11,0.6,0]},
-      "spot_1": {"bone":"ring","position":[5.5,0.6,9.53]},
-      "spot_2": {"bone":"ring","position":[-5.5,0.6,9.53]},
-      "spot_3": {"bone":"ring","position":[-11,0.6,0]},
-      "spot_4": {"bone":"ring","position":[-5.5,0.6,-9.53]},
-      "spot_5": {"bone":"ring","position":[5.5,0.6,-9.53]}
+      "spot_0": {"bone":"ring","position":[-11,0.6,0]},
+      "spot_1": {"bone":"ring","position":[-5.5,0.6,9.53]},
+      "spot_2": {"bone":"ring","position":[5.5,0.6,9.53]},
+      "spot_3": {"bone":"ring","position":[11,0.6,0]},
+      "spot_4": {"bone":"ring","position":[5.5,0.6,-9.53]},
+      "spot_5": {"bone":"ring","position":[-5.5,0.6,-9.53]}
     }
   },
   "animations": {

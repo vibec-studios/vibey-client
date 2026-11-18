@@ -38,7 +38,7 @@ export default function () {
     up: (img) => img.noisy(C.teal, 0.03, 155),
     down: (img) => img.noisy(C.tealDark, 0.03, 156),
   }, { inflate: 0.35 });
-  body.box([1, 5, 3.3], [2, 4, 1], {
+  body.box([-3, 5, 3.3], [2, 4, 1], {
     south: (img) => img.noisy(C.teal, 0.03, 157).row(3, C.brand).row(2, C.tealDark),
     all: (img) => img.noisy(C.tealDark, 0.03, 158),
   });
@@ -57,10 +57,9 @@ export default function () {
     sides: (img) => img.fill(O2),
   });
   const lids = b.bone("pen_lids", { parent: "pen_head", pivot: [0, 14, -3] });
-  for (const x of [-2.5, 1.5]) lids.box([x, 13.5, -3.05], [1, 1, 0], { north: (img) => img.fill("#8c939e") });
+  for (const x of [1.5, -2.5]) lids.box([x, 13.5, -3.05], [1, 1, 0], { north: (img) => img.fill("#8c939e") });
 
-  for (const s of [1, -1]) {
-    const side = s > 0 ? "left" : "right";
+  for (const [side, s] of [["left", -1], ["right", 1]]) { // s = X sign of the side (right at +X)
     const fl = b.bone(`pen_flipper_${side}`, { parent: "pen_body", pivot: [s * 3.5, 9, 0] });
     fl.box([s > 0 ? 3.5 : -4.5, 3, -1.5], [1, 6, 3], { all: (img) => img.noisy(K, 0.03, 165).row(img.height - 1, K2) });
     const foot = b.bone(`pen_foot_${side}`, { parent: "penguin", pivot: [s * 1.5, 1, -1] });
