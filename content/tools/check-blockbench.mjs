@@ -52,6 +52,22 @@ function pngPixels(b64) {
   const d = decodePNG(Buffer.from(b64, "base64"));
   return { w: d.width, h: d.height, data: d.data };
 }
+/** null if equal, else a summary of the pixel differences. */
+function pixelStats(pa, pb) {
+  if (pa.w !== pb.w || pa.h !== pb.h) return `size ${pa.w}x${pa.h} vs ${pb.w}x${pb.h}`;
+  let n = 0, hidden = 0, maxRGB = 0, maxA = 0;
+  for (let i = 0; i < pa.data.length; i += 4) {
+    const dA = Math.abs(pa.data[i + 3] - pb.data[i + 3]);
+    const dRGB = Math.max(...[0, 1, 2].map((c) => Math.abs(pa.data[i + c] - pb.data[i + c])));
+    if (!dA && !dRGB) continue;
+    n++;
+    if (!pa.data[i + 3] && !pb.data[i + 3]) { hidden++; continue; }
+    maxRGB = Math.max(maxRGB, dRGB);
+    maxA = Math.max(maxA, dA);
+  }
+  return n ? `${n} px, ${hidden} of them fully transparent, max visible RGB delta ${maxRGB}, max alpha delta ${maxA}` : null;
+}
+
 /** Differences between two bundles: numbers within eps, PNGs by pixels, everything else exact. */
 export function semanticDiff(a, b, path = "$", out = [], eps = 1e-6) {
   if (out.length > 20) return out;
@@ -66,7 +82,8 @@ export function semanticDiff(a, b, path = "$", out = [], eps = 1e-6) {
       else if (!(k in b)) out.push(`${path}.${k}: missing in re-export`);
       else if (k === "png" && typeof a[k] === "string" && a[k] !== b[k]) {
         const pa = pngPixels(a[k]), pb = pngPixels(b[k]);
-        if (pa.w !== pb.w || pa.h !== pb.h || Buffer.compare(Buffer.from(pa.data), Buffer.from(pb.data)) !== 0) out.push(`${path}.png: pixels differ`);
+        const st = pixelStats(pa, pb);
+        if (st) out.push(`${path}.png: pixels differ (${st})`);
       } else semanticDiff(a[k], b[k], `${path}.${k}`, out, eps);
     }
   } else if (a !== b) out.push(`${path}: ${JSON.stringify(a)} != ${JSON.stringify(b)}`);
@@ -162,6 +179,8 @@ const page = {
     Preview.selected.loadAnglePreset({ position: o.position, target: o.target });
     await new Promise((r) => setTimeout(r, 500));
     if (o.emote) { Timeline.setTime(o.t); Animator.preview(); }
+    document.getElementById("quick_message_box")?.remove(); // "Imported …" toast
+    await new Promise((r) => setTimeout(r, 100));
     const r = Preview.selected.canvas.getBoundingClientRect();
     return { x: r.x, y: r.y, width: r.width, height: r.height };
   },
@@ -186,7 +205,9 @@ async function blockbench() {
     await cdp.waitFor(page.ready, 60000);
     await cdp.waitFor(() => typeof Plugins !== "undefined" && !Plugins.loading_promise, 60000);
     await sleep(1500);
-    await cdp.send("Browser.setWindowBounds", { windowId: (await cdp.send("Browser.getWindowForTarget")).windowId, bounds: { width: 1400, height: 950, windowState: "normal" } }).catch(() => {});
+    // fixed window size so the screenshots are comparable between runs
+    await cdp.eval("(() => { try { const w = typeof currentwindow !== 'undefined' ? currentwindow : require('@electron/remote').getCurrentWindow(); w.unmaximize(); w.setSize(1400, 950); } catch (e) {} return true; })()");
+    await sleep(500);
     console.log("Blockbench " + (await cdp.eval("Blockbench.version")));
     if (!(await cdp.run(page.loadPlugin, PLUGIN))) throw new Error("plugin did not load");
     pass("plugin loaded from " + PLUGIN);
