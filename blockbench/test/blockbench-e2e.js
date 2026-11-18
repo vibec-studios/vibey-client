@@ -22,7 +22,7 @@ const WebSocket = require('ws');
 const Core = require('../vibey.js');
 const { validate: specValidate } = require('./spec-validator');
 const { createMockGame } = require('./mock-game-server');
-const { fakeOgg } = require('./fixtures');
+const { fakeOgg, pngB64 } = require('./fixtures');
 
 const args = process.argv.slice(2);
 const flag = (n) => args.includes('--' + n);
@@ -509,6 +509,28 @@ async function main() {
 			assert.deepEqual(JSON.parse(r.json), cosmeticBundle);
 			assert.equal(r.json, cosmeticJson, 'byte-identical re-export');
 		});
+		await check('re-export keeps an unedited semi-transparent texture byte-exact, painted pixels are still exported', async () => {
+			// semi-transparent pixels do not survive a canvas round trip (premultiplied alpha), so the plugin must
+			// keep the imported PNG as long as the texture is unchanged
+			const bundle = JSON.parse(cosmeticJson);
+			bundle.id = 'e2e:alpha_texture';
+			const main = bundle.textures.find((t) => t.width === 64 && !t.animation);
+			main.png = pngB64(64, 64, (x, y) => [(x * 37) & 255, (y * 53) & 255, (x * y) & 255, (x + y) % 5 === 0 ? 0 : 1 + ((x * 7 + y * 3) % 254)]);
+			const json = Core.stringify(bundle);
+			const r = await cdp.run(async (json, id) => {
+				VibeyPlugin.importBundle(json, 'alpha.vibey');
+				for (let i = 0; i < 100 && !Texture.all.every((t) => t.width); i++) await new Promise((res) => setTimeout(res, 50));
+				const first = VibeyPlugin.compileProjectJSON().json;
+				const tex = Texture.all.find((t) => t.name === id);
+				tex.canvas.getContext('2d').fillStyle = '#ff0000';
+				tex.canvas.getContext('2d').fillRect(0, 0, 2, 2);
+				const second = JSON.parse(VibeyPlugin.compileProjectJSON().json).textures.find((t) => t.id === id).png;
+				await Project.close(true);
+				return { first, second };
+			}, json, main.id);
+			assert.ok(r.first === json, 'byte-identical re-export of the unedited texture');
+			assert.notEqual(r.second, main.png, 'an edited texture must be exported from the canvas');
+		});
 
 		// ================================================================ EMOTE
 		console.log('\nVibey Emote');
@@ -644,6 +666,26 @@ async function main() {
 			assert.deepEqual(r.errors, []);
 			assert.deepEqual(r.armChildren.sort(), ['flag', 'glove']);
 			assert.equal(r.json, emoteJson);
+		});
+		await check('closing an emote tab while the visibility preview hides a bone does not throw', async () => {
+			const r = await cdp.run(async () => {
+				Modes.options.animate.select();
+				Animator.animations[0].select();
+				Timeline.setTime(1.95);
+				Animator.preview();
+				const hidden = Group.all.find((g) => g.name === 'flag').mesh.visible === false;
+				const before = ModelProject.all.length;
+				let error = null;
+				try {
+					await Project.close(true);
+				} catch (e) {
+					error = String((e && e.message) || e);
+				}
+				return { hidden, error, closed: ModelProject.all.length === before - 1 };
+			});
+			assert.equal(r.hidden, true, 'flag hidden at 1.95 s');
+			assert.equal(r.error, null);
+			assert.equal(r.closed, true, 'project tab closed');
 		});
 		await check('remove dev item + disconnect', async () => {
 			const removed = game && game.waitFor('remove', (id) => id === 'e2e:flag_wave');
