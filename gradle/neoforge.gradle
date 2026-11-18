@@ -27,6 +27,13 @@ neoForge {
             // Multiplayer module visual check (dev only, see MpDevCheck): -Dvibeyclient.mpcheck=true [-Dvibeyclient.mpcheck.relay=127.0.0.1:26400]
             systemProperty 'vibeyclient.mpcheck', System.getProperty('vibeyclient.mpcheck', 'false')
             systemProperty 'vibeyclient.mpcheck.relay', System.getProperty('vibeyclient.mpcheck.relay', '')
+            // Social against a local backend (see SocialGameTest): -Dvibeyclient.devAuth=true -Dvibeyclient.api=...
+            ['vibeyclient.devAuth', 'vibeyclient.api'].each { k ->
+                def v = System.getProperty(k)
+                if (v != null) systemProperty k, v
+            }
+            def user = System.getProperty('vibeyclient.username')
+            if (user) programArguments.addAll('--username', user)
         }
         server {
             server()

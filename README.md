@@ -23,6 +23,17 @@ never switch the Stonecutter active version (it rewrites `src/`), build other ta
 ./gradlew :fabric-1.21.11:runServer -Dvibeyclient.smoke=true     # same for a dedicated server (+ checks no client classes loaded)
 ```
 
+Social against a **local** backend (never the dev bypass against production): start vibe-backend with
+`AUTH_DEV_BYPASS=1` (see its `docs/DEPLOY.md`), then
+
+```sh
+./gradlew :fabric-1.21.11:runClient -Dvibeyclient.devAuth=true -Dvibeyclient.api=http://localhost:3100 -Dvibeyclient.username=Alex
+./gradlew :fabric-1.21.11:runClientGameTest -Dvibeyclient.socialTest=true -Dvibeyclient.devAuth=true     -Dvibeyclient.api=http://localhost:3100 -Dvibeyclient.username=VibeyTester   # bots: scripts/social-bots.ts
+```
+
+`vibeyclient.devAuth` only works in a dev workspace (release builds always log in through Mojang). On NeoForge use
+`127.0.0.1` instead of `localhost`.
+
 Default backend (`https://vibe.henny.dev`) and relay are set in `gradle.properties` and baked into the generated
 `BuildInfo` class. In game: **Right Shift** or the **Vibey** button in the pause menu opens the Vibey menu.
 
