@@ -11,7 +11,7 @@ import dev.henny.vibeyclient.ui.Icons;
  * <pre>{@code
  * public final class SprintIndicator extends TextWidget {
  *     @Override protected void lines(HudPaint p) {
- *         if (p.preview || sprinting) line(null, Lang.tr("pvp.hud.sprinting"));
+ *         if (p.preview || sprinting) line(null, sprintingText);
  *     }
  * }
  * }</pre>

@@ -14,6 +14,6 @@
   "key.vibeyclient.social.open": "Social-Seitenleiste öffnen",
   "modmenu.descriptionTranslation.vibeyclient": "Der Client von Vibe Craft Studios: Social, Cosmetics, Emotes, Multiplayer-Hosting und Lyrics in einer modularen Mod.",
   "key.vibeyclient.cosmetics.wardrobe": "Garderobe öffnen",
-  "key.vibeyclient.media.hudEditor": "HUD-Editor",
-  "key.vibeyclient.media.video.screens": "Videoleinwände"
+  "key.vibeyclient.media.video.screens": "Videoleinwände",
+  "key.vibeyclient.hud.editor": "HUD-Editor"
 }

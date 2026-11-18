@@ -54,6 +54,12 @@ if (project.name != 'fabric-1.21.11') {
     sourceSets.main.java { exclude 'dev/henny/vibeyclient/module/media/video/**' }
     processResources { exclude 'assets/vibeyclient/i18n/*/media.video.json' }
 }
+// The HUD module (module/hud: built-in widgets, templates) is Fabric 1.21.11 only for now, like the video screens.
+// The editor and widget API (ui/hud) are in every target.
+if (project.name != 'fabric-1.21.11') {
+    sourceSets.main.java { exclude 'dev/henny/vibeyclient/module/hud/**' }
+    processResources { exclude 'assets/vibeyclient/i18n/*/hud.json' }
+}
 tasks.named('compileJava') { dependsOn genTask }
 afterEvaluate {
     tasks.matching { it.name == 'sourcesJar' }.configureEach { dependsOn genTask }

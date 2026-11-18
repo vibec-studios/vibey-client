@@ -634,6 +634,16 @@ public final class HudLayout {
         /** Places an element (shown) at anchor + offset with a scale; returns a handle for style/options. */
         public Entry place(String id, Anchor a, int dx, int dy, float scale) {
             HudElement e = ELEMENTS.get(id);
+            if (e == null) {
+                // a copy that does not exist yet ("hud.items.2"): it is created when the state is applied
+                int dot = id.lastIndexOf('.');
+                HudElement base = dot > 0 ? ELEMENTS.get(id.substring(0, dot)) : null;
+                int n = copyIndexOf(id);
+                if (base != null && base.duplicable() && n >= 2 && n <= 32) {
+                    e = base.copy(n);
+                    s.copies.computeIfAbsent(base.id(), k -> new TreeSet<>()).add(n);
+                }
+            }
             Placement p = e != null ? new Placement(e) : null;
             if (p == null) {
                 // not registered (module off): keep it as raw data so the file still gets it

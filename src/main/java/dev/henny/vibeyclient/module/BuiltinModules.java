@@ -20,5 +20,18 @@ public final class BuiltinModules {
         mm.register(new dev.henny.vibeyclient.module.media.MediaModule());
         mm.register(new dev.henny.vibeyclient.module.nametags.NametagsModule());
         mm.register(new DevLinkModule());
+        // HUD widgets + templates: Fabric 1.21.11 only for now (gradle/common.gradle leaves the package out elsewhere)
+        registerIfPresent(mm, "dev.henny.vibeyclient.module.hud.HudModule");
+    }
+
+    private static void registerIfPresent(ModuleManager mm, String className) {
+        try {
+            Class<?> c = Class.forName(className);
+            mm.register((dev.henny.vibeyclient.api.VibeyModule) c.getConstructor().newInstance());
+        } catch (ClassNotFoundException e) {
+            // not built for this target
+        } catch (ReflectiveOperationException | LinkageError e) {
+            dev.henny.vibeyclient.Vibey.LOG.warn("Could not create {}", className, e);
+        }
     }
 }
