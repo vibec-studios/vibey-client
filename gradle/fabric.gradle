@@ -6,11 +6,18 @@ plugins {
 ext.javaVersion = 21
 apply from: rootProject.file('gradle/common.gradle')
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    // Pure-Java MP3 decoder (MIT) for the lyrics module, shipped inside the jar (like Vibey Lyrics).
+    implementation "fr.delthas:javamp3:${project.javamp3_version}"
+    include "fr.delthas:javamp3:${project.javamp3_version}"
 }
 
 loom {
@@ -40,5 +47,10 @@ if (project.minecraft_version == '1.21.11') {
     }
     loom.runs.named('clientGameTest') {
         vmArg '-Dfabric.client.gametest.disableNetworkSynchronizer=true'
+        // Extra mod jars for the test, e.g. the standalone mods for the conflict test:
+        // ./gradlew :fabric-1.21.11:runClientGameTest -Dvibeyclient.test.addMods=<jar>;<jar>  (fabric.addMods syntax)
+        def addMods = System.getProperty('vibeyclient.test.addMods', '')
+        if (!addMods.isEmpty()) vmArg "-Dfabric.addMods=${addMods}"
+        vmArg "-Dvibeyclient.test.relay=${System.getProperty('vibeyclient.test.relay', '127.0.0.1:26400')}"
     }
 }

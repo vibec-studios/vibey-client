@@ -5,7 +5,7 @@
   "plugin": "dev.henny.vibeyclient.mixin.VibeyMixinPlugin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [],
-  "client": [],
+  "client": ["CloudMixin", "FogMixin", "SkyMixin", "LevelRendererMixin"],
   "server": [],
   "injectors": {
     "defaultRequire": 1
