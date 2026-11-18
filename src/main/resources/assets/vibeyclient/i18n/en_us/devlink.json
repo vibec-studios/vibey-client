@@ -4,6 +4,45 @@
   "setting": {
     "creatorMode": "Creator mode",
     "creatorMode.desc": "Lets the Blockbench plugin push models into the game.",
-    "port": "Port"
+    "port": "Port",
+    "port.desc": "Local port of the live link (only reachable from this computer)."
+  },
+  "panel": {
+    "status": "Live link",
+    "state": {
+      "listening": "Listening",
+      "off": "Off",
+      "error": "Error"
+    },
+    "listeningOn": "Waiting for Blockbench on {0}",
+    "portInUse": "Port {0} is already in use – pick another port below.",
+    "failed": "Could not start the live link: {0}",
+    "offCreator": "Turn on Creator mode to accept Blockbench.",
+    "offModule": "The module is switched off.",
+    "clients": {
+      "none": "No Blockbench connected",
+      "one": "1 Blockbench connected",
+      "many": "{0} Blockbench windows connected"
+    },
+    "token": "Token",
+    "show": "Show",
+    "hide": "Hide",
+    "copy": "Copy token",
+    "copied": "Copied!",
+    "regenerate": "Regenerate",
+    "regenerateConfirm": "Click to confirm",
+    "tokenHint": "Only share the token with tools you trust. Regenerating disconnects Blockbench.",
+    "howTo": "Connect from Blockbench",
+    "hint1": "1. Install the Vibey plugin in Blockbench (vibey.js).",
+    "hint2": "2. Vibey panel → Connect. With \"Find game automatically\" the plugin reads port and token from vibeyclient/devlink.json in the game folder.",
+    "hint3": "3. Otherwise open Vibey → Live link settings… and enter the port and the token from this page."
+  },
+  "toast": {
+    "connected": "Blockbench connected",
+    "connectedBody": "Vibey plugin {0} – pushed items appear as DEV items.",
+    "pushed": "{0} updated",
+    "warning": "1 warning – see Blockbench",
+    "warnings": "{0} warnings – see Blockbench",
+    "rejected": "{0} rejected"
   }
 }
