@@ -47,7 +47,8 @@ Built like the mod screens of the big clients, in the Vibe look (`ui/screen/Modu
   description, on/off switch, accent bar while on. Modules of category `CREATOR` (Blockbench link) sit in a
   collapsed *For creators* area under the grid.
 - **Module page:** toolbar with *‹ Modules / name* and the on/off switch, then the intro (big icon, description,
-  the module's buttons = its non-advanced `ActionSetting`s, the first one primary), then the settings as cards:
+  the module's buttons = its non-advanced `ActionSetting`s labelled `<label>.action` or the label, the first one
+  primary; then `notices()`, e.g. parts provided by the standalone Vibey Lyrics), then the settings as cards:
   untitled first, then one card per `.section(...)`, three or more plain switches in two columns, the keys
   (key caps, conflicts in amber with a tooltip), and at the bottom the collapsed *Advanced · for creators* area with
   every `.advanced()` setting. Enums with up to four short values are segmented controls, else ‹ value ›.

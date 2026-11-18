@@ -110,8 +110,10 @@ normal players:
   descriptions one short sentence. Every string in English and German.
 
 Labels come from your i18n file: `setting.<key>` (label), `setting.<key>.desc` (optional second line),
-`setting.<key>.<enum value lower case>` for enum values, `setting.<key>.button` for action buttons,
-`section.<key>` for section titles (`checkI18n` checks all of them).
+`setting.<key>.<enum value lower case>` for enum values, `setting.<key>.button` for an action button in a row,
+`setting.<key>.action` for the same action as a button at the top of the module page (default: the label),
+`section.<key>` for section titles (`checkI18n` checks all of them; `.sectionLabel(fullKey)` takes the title from
+another key, e.g. each media feature's card is titled with `media.<id>.name`).
 
 Free-form persistent data (caches, lists): `settings().data()` is a `JsonObject` stored under `"_data"`; call
 `settings().markDirty()` after changing it.
