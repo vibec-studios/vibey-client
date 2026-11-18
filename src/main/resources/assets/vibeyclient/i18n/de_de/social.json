@@ -1,0 +1,10 @@
+{
+  "name": "Social",
+  "description": "Freunde, Anfragen, Einladungen, Chats und Status.",
+  "setting": {
+    "showPresence": "Zeigen, was ich spiele",
+    "showPresence.desc": "Freunde sehen deine Welt oder deinen Server.",
+    "friendRequests": "Freundschaftsanfragen erlauben",
+    "toasts": "Benachrichtigungen"
+  }
+}

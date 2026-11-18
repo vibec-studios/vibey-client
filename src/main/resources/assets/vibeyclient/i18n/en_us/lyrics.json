@@ -1,0 +1,8 @@
+{
+  "name": "Lyrics",
+  "description": "Synced lyrics in the HUD, the sky and the world.",
+  "setting": {
+    "open": "Open lyrics",
+    "hideInMenus": "Hide in menus"
+  }
+}

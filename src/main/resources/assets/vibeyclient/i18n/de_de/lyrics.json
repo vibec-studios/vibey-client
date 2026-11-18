@@ -1,0 +1,8 @@
+{
+  "name": "Lyrics",
+  "description": "Synchronisierte Songtexte im HUD, am Himmel und in der Welt.",
+  "setting": {
+    "open": "Lyrics öffnen",
+    "hideInMenus": "In Menüs ausblenden"
+  }
+}

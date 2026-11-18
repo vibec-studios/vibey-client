@@ -267,7 +267,9 @@ Two independent channels; the client uses whatever is available and merges by pl
 2. **Server packets (only when the mod is also on the server, incl. hosted/LAN worlds):** custom payloads
    `vibeyclient:hello` (C→S: protocol version; S→C: ack), `vibeyclient:loadout` (C→S: own `{slot: id}`;
    S→C: `{uuid, slots}`), `vibeyclient:emote` (C→S: `{emoteId, action: play|stop}`; S→C: `{uuid, emoteId, action,
-   startTick}`). The server just validates sizes/rates and relays to every other player that sent `hello`. Asset
+   startTick}`), plus the generic module envelope `vibeyclient:msg` (C→S: `{target uuid or nil, channel, bytes ≤ 8 KiB}`;
+   S→C: `{sender uuid, channel, bytes}`, used by `VibeyNet.channel(...)`). The server just validates sizes/rates and
+   relays to every other player that sent `hello`. Asset
    bytes never go over the server channel – clients fetch bundles by id from the backend catalog or use built-ins.
 
 Built-in starter bundles also ship inside the jar (`assets/vibeyclient/builtin/*.vibey`) so cosmetics work offline

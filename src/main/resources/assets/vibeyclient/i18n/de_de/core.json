@@ -1,0 +1,57 @@
+{
+  "pause": {
+    "button": "Vibey"
+  },
+  "tab": {
+    "modules": "Module"
+  },
+  "menu": {
+    "modules": "Module",
+    "global": "Allgemein",
+    "globalDescription": "Einstellungen für den ganzen Client."
+  },
+  "category": {
+    "core": "Kern",
+    "social": "Social",
+    "cosmetics": "Cosmetics",
+    "multiplayer": "Multiplayer",
+    "media": "Medien",
+    "creator": "Creator",
+    "misc": "Sonstiges"
+  },
+  "module": {
+    "conflict": "Wird von der installierten Mod \"{0}\" bereitgestellt.",
+    "unavailable": "Auf diesem Loader oder dieser Version nicht verfügbar.",
+    "missingDependency": "Braucht das Modul \"{0}\", das nicht laufen kann.",
+    "failed": "Start fehlgeschlagen, siehe Log.",
+    "status": {
+      "enabled": "An",
+      "disabled": "Aus",
+      "off": "Nicht verfügbar"
+    },
+    "enable": "Aktivieren",
+    "disable": "Deaktivieren"
+  },
+  "settings": {
+    "advanced": "Erweitert",
+    "none": "Noch keine Einstellungen.",
+    "pressKey": "Taste drücken",
+    "run": "Ausführen"
+  },
+  "setting": {
+    "language": "Sprache",
+    "language.desc": "Sprache der Vibey-Menüs.",
+    "language.auto": "Spielsprache",
+    "language.german": "Deutsch",
+    "language.english": "English",
+    "onlineFeatures": "Online-Funktionen",
+    "onlineFeatures.desc": "Freunde, Chat und synchronisierte Cosmetics über das Vibe-Backend.",
+    "animations": "Animationen",
+    "animations.desc": "Kurze Übergänge in den Menüs.",
+    "open_menu": "Vibey-Menü öffnen",
+    "backendUrl": "Backend-URL",
+    "backendUrl.desc": "Nur für die Entwicklung ändern.",
+    "resetBackend": "Backend-URL zurücksetzen",
+    "resetBackend.button": "Zurücksetzen"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "Multiplayer",
+  "description": "Host your singleplayer world for friends, no port forwarding.",
+  "setting": {
+    "relay": "Relay address",
+    "relay.desc": "Server that forwards your world."
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Blockbench link",
+  "description": "Live link to Blockbench for creating cosmetics and emotes.",
+  "setting": {
+    "creatorMode": "Creator mode",
+    "creatorMode.desc": "Lets the Blockbench plugin push models into the game.",
+    "port": "Port"
+  }
+}
