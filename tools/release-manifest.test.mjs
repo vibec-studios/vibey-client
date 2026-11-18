@@ -1,11 +1,12 @@
 // node --test tools/release-manifest.test.mjs
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
-import { buildManifest, changelogSection, channelOf, publish, targets } from './release-manifest.mjs';
+import { batches, buildManifest, changelogSection, channelOf, publish, sha256, targets } from './release-manifest.mjs';
 
 const dirs = [];
 after(() => dirs.forEach((d) => rmSync(d, { recursive: true, force: true })));
@@ -87,19 +88,46 @@ test('refuses mismatches and missing files', () => {
   assert.throws(() => { const f = fixture(); writeFileSync(join(f.root, 'blockbench/vibey.js'), "const VERSION = '9.9.9';"); buildManifest({ root: f.root, dist: f.dist, blockbench: f.blockbench }); }, /says version 9.9.9/);
 });
 
-test('publish sends the manifest and every file by name with the bearer token', async () => {
+test('batches stay below the request limit', () => {
+  const f = fixture();
+  const ups = ['a', 'b', 'c', 'd', 'e'].map((n) => {
+    const p = join(f.root, `${n}.jar`);
+    writeFileSync(p, Buffer.alloc(40));
+    return { name: `${n}.jar`, path: p };
+  });
+  assert.deepEqual(batches(ups, 100).map((b) => b.map((u) => u.name)), [['a.jar', 'b.jar'], ['c.jar', 'd.jar'], ['e.jar']]);
+  assert.deepEqual(batches(ups, 1000, 3).map((b) => b.length), [3, 2]);
+  assert.throws(() => batches(ups, 10), /more than one request/);
+});
+
+test('publish stages the files in batches, then creates the release by sha256 without file parts', async () => {
   const f = fixture();
   const { manifest, uploads } = buildManifest({ root: f.root, dist: f.dist, blockbench: f.blockbench });
-  let seen;
+  const seen = { auth: new Set(), stagedRequests: 0, staged: [], release: null, releaseFiles: -1 };
   const server = createServer((req, res) => {
     const chunks = [];
     req.on('data', (c) => chunks.push(c));
     req.on('end', async () => {
+      seen.auth.add(req.headers.authorization);
       const body = Buffer.concat(chunks);
       const form = await new Request('http://x', { method: 'POST', headers: { 'content-type': req.headers['content-type'] }, body }).formData();
-      seen = { auth: req.headers.authorization, manifest: JSON.parse(form.get('manifest')), files: form.getAll('file').map((x) => x.name) };
-      res.writeHead(seen.manifest.version === '0.2.0' ? 201 : 409, { 'content-type': 'application/json' });
-      res.end(JSON.stringify({ version: '0.2.0', channel: 'release', files: seen.files }));
+      const files = [...form.values()].filter((v) => typeof v !== 'string');
+      if (req.url.endsWith('/internal/client/v1/files')) {
+        seen.stagedRequests++;
+        const out = [];
+        for (const file of files) {
+          const bytes = Buffer.from(await file.arrayBuffer());
+          seen.staged.push(file.name);
+          out.push({ file: file.name, sha256: createHash('sha256').update(bytes).digest('hex'), size: bytes.length });
+        }
+        res.writeHead(201, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ files: out }));
+        return;
+      }
+      seen.release = JSON.parse(form.get('manifest'));
+      seen.releaseFiles = files.length;
+      res.writeHead(seen.release.version === '0.2.0' ? 201 : 409, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ version: '0.2.0', channel: 'release', files: seen.release.files }));
     });
   });
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
@@ -107,10 +135,14 @@ test('publish sends the manifest and every file by name with the bearer token', 
     const url = `http://127.0.0.1:${server.address().port}/internal/client/v1/releases`;
     const res = await publish(url, 'secret-token', manifest, uploads);
     assert.equal(res.version, '0.2.0');
-    assert.equal(seen.auth, 'Bearer secret-token');
-    assert.deepEqual(seen.manifest, manifest);
-    assert.deepEqual(seen.files.sort(), uploads.map((u) => u.name).sort());
-    await assert.rejects(publish(url, 't', { ...manifest, version: '0.1.0' }, uploads), /already published/);
+    assert.deepEqual([...seen.auth], ['Bearer secret-token']);
+    assert.equal(seen.stagedRequests, 1);
+    assert.deepEqual(seen.staged.sort(), uploads.map((u) => u.name).sort());
+    assert.equal(seen.releaseFiles, 0);
+    for (const file of seen.release.files) assert.equal(file.sha256, sha256(join(f.dist, file.file)));
+    assert.equal(seen.release.blockbench.sha256, sha256(f.blockbench));
+    assert.equal(seen.release.changelog, manifest.changelog);
+    await assert.rejects(publish(url, 'secret-token', { ...manifest, version: '0.1.0' }, uploads), /already published/);
   } finally {
     server.close();
   }

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Builds the release manifest for the Vibe backend (vibe-launcher/docs/VIBE-API-2.md §2) from the jars in build/dist
-// and optionally publishes it (multipart POST: field "manifest" + every jar + vibey.js, file name = name in the
-// manifest). Used by .github/workflows/release.yml; run it locally against `./gradlew buildAll` output:
+// and optionally publishes it: files staged in batches below the proxy limit (POST /internal/client/v1/files), then
+// the release (POST /internal/client/v1/releases, field "manifest" with each file's sha256, no file parts).
+// Used by .github/workflows/release.yml; run it locally against `./gradlew buildAll` output:
 //
 //   node tools/release-manifest.mjs                       # check + print the manifest for the current mod_version
 //   node tools/release-manifest.mjs --tag v0.2.0 --changelog-file notes.md --out build/release/manifest.json
@@ -160,14 +161,64 @@ export function buildManifest({ root = ROOT, dist, blockbench, changelogText, ta
   return { manifest, uploads };
 }
 
-export async function publish(url, token, manifest, uploads) {
-  const form = new FormData();
-  form.append('manifest', JSON.stringify(manifest));
+/** Groups uploads into requests below the proxy limit (Cloudflare: 100 MB per request) and the server's 48 files. */
+export function batches(uploads, maxBytes = BATCH_BYTES, maxFiles = 40) {
+  const out = [];
+  let cur = [], size = 0;
   for (const u of uploads) {
-    const type = u.name.endsWith('.js') ? 'text/javascript' : 'application/java-archive';
-    form.append('file', await openAsBlob(u.path, { type }), u.name);
+    const s = statSync(u.path).size;
+    if (s > maxBytes) throw new Error(`${u.name} is ${s} bytes, more than one request may carry (${maxBytes})`);
+    if (cur.length && (size + s > maxBytes || cur.length >= maxFiles)) {
+      out.push(cur);
+      cur = [];
+      size = 0;
+    }
+    cur.push(u);
+    size += s;
   }
-  const res = await fetch(url, { method: 'POST', headers: { authorization: `Bearer ${token}` }, body: form });
+  if (cur.length) out.push(cur);
+  return out;
+}
+
+const BATCH_BYTES = 80 * 1024 * 1024;
+
+/**
+ * Staged publish (VIBE-API-2 §2): the files go up first in batches below the proxy limit
+ * (`POST <base>/internal/client/v1/files` → `{ files: [{ file, sha256, size }] }`), then the release is created
+ * with a manifest that names every file's sha256 and carries no file parts. `url` is the releases endpoint.
+ */
+export async function publish(url, token, manifest, uploads, { log = () => {} } = {}) {
+  const filesUrl = url.replace(/\/releases\/?$/, '/files');
+  const auth = { authorization: `Bearer ${token}` };
+  const staged = new Map();
+  const groups = batches(uploads);
+  for (let i = 0; i < groups.length; i++) {
+    const form = new FormData();
+    for (const u of groups[i]) {
+      const type = u.name.endsWith('.js') ? 'text/javascript' : 'application/java-archive';
+      form.append('file', await openAsBlob(u.path, { type }), u.name);
+    }
+    const res = await fetch(filesUrl, { method: 'POST', headers: auth, body: form });
+    const text = await res.text();
+    if (!res.ok) throw Object.assign(new Error(`file upload ${i + 1}/${groups.length} failed: HTTP ${res.status} ${text.slice(0, 2000)}`), { status: res.status });
+    for (const f of JSON.parse(text).files ?? []) staged.set(f.file, f);
+    log(`uploaded batch ${i + 1}/${groups.length} (${groups[i].length} files)`);
+  }
+  // the server's hashes must match ours (the release then refers to the staged bytes by sha256)
+  const hashes = new Map();
+  for (const u of uploads) {
+    const local = sha256(u.path), remote = staged.get(u.name)?.sha256;
+    if (remote !== local) throw new Error(`staged ${u.name}: server sha256 ${remote ?? '(missing)'} != local ${local}`);
+    hashes.set(u.name, local);
+  }
+  const final = {
+    ...manifest,
+    files: manifest.files.map((f) => ({ ...f, sha256: hashes.get(f.file) })),
+    blockbench: manifest.blockbench ? { ...manifest.blockbench, sha256: hashes.get(manifest.blockbench.file) } : manifest.blockbench,
+  };
+  const form = new FormData();
+  form.append('manifest', JSON.stringify(final));
+  const res = await fetch(url, { method: 'POST', headers: auth, body: form });
   const text = await res.text();
   if (res.status === 409) throw Object.assign(new Error(`version ${manifest.version} is already published (409)`), { status: 409 });
   if (!res.ok) throw Object.assign(new Error(`publish failed: HTTP ${res.status} ${text.slice(0, 2000)}`), { status: res.status });
@@ -197,7 +248,7 @@ async function main() {
   if (a.publish) {
     const token = process.env.CLIENT_PUBLISH_TOKEN;
     if (!token) throw new Error('CLIENT_PUBLISH_TOKEN is not set');
-    const res = await publish(a.publish, token, manifest, uploads);
+    const res = await publish(a.publish, token, manifest, uploads, { log: (m) => console.error(m) });
     console.error(`published ${res.version ?? manifest.version} (${res.channel ?? manifest.channel}) with ${(res.files ?? []).length} files`);
   }
 }
