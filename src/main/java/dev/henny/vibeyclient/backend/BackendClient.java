@@ -330,7 +330,7 @@ public final class BackendClient implements VibeBackend {
                     && (devAuth() || MojangJoin.hasOnlineSession());
             if (relogin) {
                 loginAsync(generation.get());
-            } else if ("banned".equals(code) || revoked) {
+            } else if ("banned".equals(code)) {
                 setState(State.ERROR, code, message);
             } else {
                 setState(State.LOGGED_OUT, code, message);
