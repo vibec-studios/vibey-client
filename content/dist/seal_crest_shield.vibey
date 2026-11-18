@@ -1,0 +1,24 @@
+{
+  "format": "vibey",
+  "formatVersion": 1,
+  "kind": "cosmetic",
+  "id": "vibey:seal_crest_shield",
+  "name": {"en":"Seal Crest Shield","de":"Robbenwappen-Schild"},
+  "description": {
+    "en": "Carry the seal into battle – Vibe purple with a teal chevron.",
+    "de": "Trag die Robbe in den Kampf – Vibe-Lila mit türkisem Sparren."
+  },
+  "author": "Vibe Craft Studios",
+  "tags": ["seal","vibe","crest","starter"],
+  "rarity": "rare",
+  "cosmetic": {"slot":"shield","shield":{"texture":"shield"}},
+  "textures": [
+    {
+      "id": "shield",
+      "width": 64,
+      "height": 64,
+      "png": "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAE5ElEQVR42u1YTYgdRRD+uns2WY0mIcsiKhp/TmoQEQRBURE1sJhLPIWQk+g5SE65iAT1IuLNgxskBxGE7EWIrEKiQk5GkJDNyQ0+Y1CUhI3uujvvTXdLVXfP9OxP2IU38g71we5M93TNm6r6+quaUQDwxMNHPODpFEoZKADOOzRzmv5DKQXnBgA0trL+p/nP1CMPPskXtda8zMNBK8N23jsYXcDTrHO8xvM83wZaaczNX1DoAIqcv35zaUtGE7t2oOwvbMnGbPsD1lkOSgiSYu98DACNPXkcjyoGMFzTuHzlx04CUKSsffD26U0ZHHvntTrTu+98AEaFzC0t/4nx7btR6HHOLo133HYXM2BhsZcxpPHD81xgTHDWcrbBwSE22Mim7lDkgwvnF+offPP4Tj5Ov78I6wb8sE89O9G29h6V7zOV2REEW+v6caygtWnoxut8MuXrKR6UddoGvCXgeAGv9K51j6EHQCnTcqhfLcHobfj4xF+cAXrAwozD2sEqR8Dr6GGDLgSXaUzzhMqVMHqMzymz5BI5HpzVcN6Sf2HPw/MWaTTCt2y6C0AroR57X/l23YW92eebAGTzxI4iOuxh4ZyHMWEc5lUMRgWjTdjfSsG6KrLN81wQxIpFMP8VCkIzN3xo55ub3/vS7IYL9+7/rj7PbcLYxoctmAFpb1e2rCmv015WYe8TrSkQlPEkdmkupiPcO7GiqwCkH0p49/hbOPrGoQ3H+cPRUTHtm/JHOpB0RBP9lcqYozgQdJ2ynmc7VQFd2ya2hLUdBmAtJifvvuU4Z4LWBYway0LjYTnzYG3wztaKT7RPWyAdKXaUZRrTGhdLYgpCUzI7E8EmBkfNHuC9D3Ho4FQ9R+efz5zha1/UIqjjMVWCsna/MNthbT86UNQMIGdcFow0DqLnIwt03Pu+Xkv2Gp1ugSa6H9kb9fmLz73Af+tdSzb0aCSCKSCsDVy+4v71VR0Mpnfc457ZUdWbqQloaoxCQHg9ust+ZEDzA5dmHse+gxf5/Oz37Wpw8fRjuOdVtCh5/e+fW2vKwT8bjslJEkt2yDedYK5BIetBD8Led3XF6CwATQ0PGSNHL81c43PqzLhPN/vqZift7a1ibv6HblM5DA2gRoQal/5gkTNAKk6lrbLUCa60sknYs/Mhzg7ZUOt7B7W+MWjL5Q3cPj7Jgby5+CtGFa1WuPcJObmC+14f472ruSwV6E1H579c3QmHBiYFxEZmpD7AR00YZei8xh6euJ+PV0+SIwZVtYLe9HLrWnI8HC2LWWUbdhAbqBIEgeu2jx96H3DuwNXa0WufWvx+Kjz8L2fP49yB39Yax0Yn9fuIglU3RixoIx4ArtUR/epffDN1pZVtcv7pU8/wS1JjVDT1PO/UPPiNLhOLzsvYEKpAlVV3w3T+av9lHJ59lOe+PlnCqn6rY85tSCNycQw6EBZTh1i5ldEOQKu1pc4MY0zhMy/PMcWd6/NYrdONkcJzeYx9AYtebG9TW4zR1sD294CqKtkh6weRuopFPDQwbs33APr6Y10ZtCD7slN3dsSC+Go8sgHw8VWWlf7I1KaMkg198KB3/vQ67LK2mMtiYshoM0Bl3/o2+SU12qxucG7VCgsEAoFAIBAIBAKBQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCP5n/AddNYyH/80klwAAAABJRU5ErkJggg=="
+    }
+  ],
+  "animations": {}
+}

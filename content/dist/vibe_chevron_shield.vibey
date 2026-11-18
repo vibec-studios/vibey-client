@@ -1,0 +1,24 @@
+{
+  "format": "vibey",
+  "formatVersion": 1,
+  "kind": "cosmetic",
+  "id": "vibey:vibe_chevron_shield",
+  "name": {"en":"Vibe Chevron Shield","de":"Vibe-Sparren-Schild"},
+  "description": {
+    "en": "Bold purple and teal chevrons – the Vibe colours, made to block.",
+    "de": "Kräftige lila und türkise Sparren – die Vibe-Farben, gemacht zum Blocken."
+  },
+  "author": "Vibe Craft Studios",
+  "tags": ["vibe","chevron","starter"],
+  "rarity": "common",
+  "cosmetic": {"slot":"shield","shield":{"texture":"shield"}},
+  "textures": [
+    {
+      "id": "shield",
+      "width": 64,
+      "height": 64,
+      "png": "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAElUlEQVR42u1XXWtdRRTdMzdtjQHpQ4wRk1uUIkirlLSgv8Hqi019iS/+AX2wvtRHk4BJwLZ/QDDJg62P/obWgk0qaRCkRr39SBrah6g31yT3zMjeM3s+TtLihZxyC3tdDnfOfBzOWnvPmn0UAMDw8FGrlAaGtRYAFLayPqUUXdYa6GR+o/GreuPVEYvjStXA2ILmaKXpOcYUfq0CrTWtxSu0wcIvKwsKKkAPku/t7etoUavVhO3tf//3/MHBunXCkTSeuCJySJ6JIow1NO5EcCJViR6MQKNxGw4f7ofPRv+gzmNvA3x87gi1v5n5E5avu8kzV47AxsYjGBh4he77+l4AYwyRQUEOHDgUyOD9wYPPUYSbzQ0ipsAFEf85Q8D3WFtQDjB5fA6KY0Bn2bbvAsSUNTBzpQ7nzjaIMBJHRPL1XYt90EL0IiFPi8gYn+4qzDfUR3QzEbRvc3ak66tCkPbL21fpBacv1wPxNPLGWJqTC+C8gCPkUtoEL8AIMkF8NnsCXlrX3HrvHXjPz+GsMqXnVyIAR2/+UQPGf7tKL5NGe/ryML3oxMo1mlOOuLVFIIxpm2aGI69CNgRz9D8Swa/1MjkP0BoK9AYVDbHCLRDT1olwDb547R2Y+m4o9E+s/BjIQ/K6cf/aJHJlgYxv5+tMcpIUpu0F0aBVjfRUyXZQqtIt4F52+dSHQQQkzMqn5JdPjXLyxwdQ1G1JHBWizWKw4xf+cmOGrpquBQGdGbosqfoEKJlgQQSP/fQ9EZ78/XoQxJE/U4o8m1yRpLnKjDCOR9lqugcMRpzmunFVMkMWrG1dZqgKUyBIPHthlfburZNnA3Emf+vkKKC3ffv1/V0mSGe13/tkXKbIxrWPLhc+jjwT9k7vM4hKHmuCSaqQYap6E0THn71wn15gaeRMmIBtnDN3cTWcCuke5yMrrwgzmbLqUOuepAgy4SJRvDFCkANou6SiVlAIxRdGgkj0o08HYWnkg9A/d3EtkE/P+2bzr+xh7fbOE++ZGB9zsew14UjlDMF+8gZbaQKAqtdft+vr9wDL4fNjD0IlOPbJS24rXHoQyE/OD0Kr9Q9Vgp2Uwoi1tYaCLoQaGjpqHz5chd7e56nj/Nh6ECGtBCfnB/x3wCb0978M7fY2icb7eWurRaUvb4ednS26R2xu/t21Amg2sK8aC2RoE3MDuypB7ENiOCcteKKZQeYJaV+VRcy+V4JTdxbohcdnXwwTsI19U3cW96gEdXbv/vOzn8XqVmQmiASn7y7C50MnYHy2P5bDd29mleDjzmX3ARMzxJkcPBsZsPjW+4kIN8P3eEqe58TStwiOntb+7oMofuZ2dQbwOY2kFt58D0aWfiDCM/d+zipBHNvrbM/3uavbWRA80io9w/YnA1JSKMLpXZWg67MQxWIHrZVKY67n7Z4m2ZUCpN/rfN04fjpMwHY6lnoAV2jx3mSnQPlE6MotENM3T+sbx9997KJyKcx7nuv2/PO4ywVgx263250UD6HA6bwUFggEAoFAIBAIBAKBQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQPBX8B1Sx4D4ORql/AAAAAElFTkSuQmCC"
+    }
+  ],
+  "animations": {}
+}

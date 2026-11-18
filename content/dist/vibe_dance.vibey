@@ -1,0 +1,98 @@
+{
+  "format": "vibey",
+  "formatVersion": 1,
+  "kind": "emote",
+  "id": "vibey:vibe_dance",
+  "name": {"en":"Vibe Dance","de":"Vibe-Tanz"},
+  "description": {
+    "en": "A looping groove at 120 bpm. Move to stop.",
+    "de": "Ein Groove in Dauerschleife mit 120 bpm. Bewegen zum Beenden."
+  },
+  "author": "Vibe Craft Studios",
+  "tags": ["dance","loop","music","starter"],
+  "rarity": "common",
+  "emote": {"animation":"main","loop":true,"thirdPerson":true,"stopOnMove":true,"hideHeldItems":true},
+  "textures": [],
+  "model": {"bones":[]},
+  "animations": {
+    "main": {
+      "length": 2,
+      "loop": true,
+      "bones": {
+        "root": {
+          "position": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.25,"v":[0.6,1.1,0],"i":"catmullrom"},
+            {"t":0.5,"v":[1.2,0,0],"i":"catmullrom"},
+            {"t":0.75,"v":[0.6,1.1,0],"i":"catmullrom"},
+            {"t":1,"v":[0,0,0],"i":"catmullrom"},
+            {"t":1.25,"v":[-0.6,1.1,0],"i":"catmullrom"},
+            {"t":1.5,"v":[-1.2,0,0],"i":"catmullrom"},
+            {"t":1.75,"v":[-0.6,1.1,0],"i":"catmullrom"},
+            {"t":2,"v":[0,0,0],"i":"catmullrom"}
+          ],
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.5,"v":[0,12,-4],"i":"catmullrom"},
+            {"t":1,"v":[0,0,0],"i":"catmullrom"},
+            {"t":1.5,"v":[0,-12,4],"i":"catmullrom"},
+            {"t":2,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "right_arm": {
+          "rotation": [
+            {"t":0,"v":[0,0,18],"i":"catmullrom"},
+            {"t":0.5,"v":[10,0,155],"i":"catmullrom"},
+            {"t":1,"v":[0,0,18],"i":"catmullrom"},
+            {"t":1.5,"v":[70,20,0],"i":"catmullrom"},
+            {"t":2,"v":[0,0,18],"i":"catmullrom"}
+          ]
+        },
+        "left_arm": {
+          "rotation": [
+            {"t":0,"v":[70,-20,0],"i":"catmullrom"},
+            {"t":0.5,"v":[0,0,-18],"i":"catmullrom"},
+            {"t":1,"v":[10,0,-155],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,-18],"i":"catmullrom"},
+            {"t":2,"v":[70,-20,0],"i":"catmullrom"}
+          ]
+        },
+        "head": {
+          "rotation": [
+            {"t":0,"v":[-6,0,0],"i":"catmullrom"},
+            {"t":0.25,"v":[5,0,3],"i":"catmullrom"},
+            {"t":0.5,"v":[-6,8,0],"i":"catmullrom"},
+            {"t":0.75,"v":[5,0,-3],"i":"catmullrom"},
+            {"t":1,"v":[-6,0,0],"i":"catmullrom"},
+            {"t":1.25,"v":[5,0,3],"i":"catmullrom"},
+            {"t":1.5,"v":[-6,-8,0],"i":"catmullrom"},
+            {"t":1.75,"v":[5,0,-3],"i":"catmullrom"},
+            {"t":2,"v":[-6,0,0],"i":"catmullrom"}
+          ]
+        },
+        "right_leg": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.25,"v":[22,0,4],"i":"catmullrom"},
+            {"t":0.5,"v":[0,0,0],"i":"catmullrom"},
+            {"t":1,"v":[0,0,0],"i":"catmullrom"},
+            {"t":1.25,"v":[-8,0,0],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,0],"i":"catmullrom"},
+            {"t":2,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "left_leg": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.25,"v":[-8,0,0],"i":"catmullrom"},
+            {"t":0.5,"v":[0,0,0],"i":"catmullrom"},
+            {"t":1,"v":[0,0,0],"i":"catmullrom"},
+            {"t":1.25,"v":[22,0,-4],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,0],"i":"catmullrom"},
+            {"t":2,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        }
+      }
+    }
+  }
+}

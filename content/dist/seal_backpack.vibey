@@ -1,0 +1,110 @@
+{
+  "format": "vibey",
+  "formatVersion": 1,
+  "kind": "cosmetic",
+  "id": "vibey:seal_backpack",
+  "name": {"en":"Seal Backpack","de":"Robben-Rucksack"},
+  "description": {
+    "en": "A mini backpack in Vibe purple with a little seal keychain that swings as you walk.",
+    "de": "Ein Mini-Rucksack in Vibe-Lila mit einem kleinen Robben-Anhänger, der beim Laufen schaukelt."
+  },
+  "author": "Vibe Craft Studios",
+  "tags": ["seal","backpack","cute","starter"],
+  "rarity": "rare",
+  "cosmetic": {"slot":"back"},
+  "textures": [
+    {
+      "id": "main",
+      "width": 32,
+      "height": 32,
+      "png": "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAD+0lEQVR42sVXTYgdRRD+untm3viHHpTsQYh4Ug8SVBAixKCXKBGCwagBL4kuwUuyxgSTeJOYICER9KJ48WACQm4hxyQYSfxBJAjm6orR5OQSZHffzHS1VPX8vpl9+97bhzbMTne96q6qr76q6QU6xszMescPRhzj6teHxv88VnBg3GDctB1QYx6jpu3AfzeUJ49bIYq1y2/enB8KT1AB4eBclUulVEvuZZPor+pAtYEfv9+15CJ1biz9ETlQKVeHteVVxOPqD0GAlbyzRf7qEE5HPlIVFLq86ZHvz6BL3qDbmPqrVEFVz85RR/4ml69WBSUH/CFu4LBpyYdWwSCBqhy25V3db1T9EXroC49fcNV+gtYRFDT+XLjCscE5K6AVNf/Tb/tbYb5/7BNnjPGMdA5btzyPKIpgiaCVwoZHH1YrtmKje2JIwUCpEJYSecR42XBM7oTp/iwRgYhgs0ycCIIASZLkcamVGlEBGoFcikDfCetSaGUkajbGSJAQS4uMqN846ORnXzk2/vfCApTWcNZKJVy8/J04pY13+NTnpyWWudmd4k3AsC8mN3BX70EQpVhKbuGOaEaMsqbWMR64ZwMKHY5i0zMb0QtD7Ej2Oa0DXPr2MoAbCMKojJPTkGWpjzKM8MF7e3Hkw5OyPnr4nTYC5DIY1fN5UVEetUJGi5KSQkerEIEJkVk2EoEoKw9L0wRaa0lBvRJYzsZff/nFUndududgFVQpYpgZYgebG28yOsvYUJjzjPLGQwjDUGB3eaoYhUL+6rYteG7TZtG98M0lzM3mCDDTC3JZWi4P4zUjYqmPuo7nim/f1qaIctj373ljaOHvfbN2h7z/vnYKONLCkO/jFiSVEQs5Cx3+jfNuDDedCOTWdiGpfQsyqYAiUnamWNd1fLkayVZm02lcSl1+aCykE7JRX9KhpRcsoa7jSYoy8swma7uSPfnQCXd3vA7/LN8SQX1eH4V83b1PdR50/trmiW6mjU3nvsxcEBjpXFr7dhoFGqeOXxTW+1JMhR9cquevPdvYv/6L4071ItByH4r3M5lr6/ndB9XQTsjG+0kizNYa8iwuFuUYS08IdAxC2vrasfGuCA9ve6Wcv7XrgPvh5+syf/qJx1TLgV+u8t9o4IielCM7AVDeri1UXv8llL0ILklBS8vQcexvJjrA6YU/QGkm7fnM7b/w0tVfm/sYdm4YRL6B1OcFIsz6upzTw+ikWQayFsaEeDv5yBM07sH1U+n/nGBlmh+t+V3NNATXfzQ1OnTNowHKePm5d6/Ie+uJjfL+/dNDk5OQr2Xbt+8QwdmzX8u7vi6uVfuOHJM8f3z0UOd6Df8ZNQ0Woy57bfeeoQdN6sS/hZIRDUWlpokAAAAASUVORK5CYII="
+    }
+  ],
+  "model": {
+    "texture": "main",
+    "bones": [
+      {
+        "name": "backpack",
+        "parent": null,
+        "attach": "body",
+        "pivot": [0,24,0],
+        "rotation": [0,0,0],
+        "cubes": [
+          {"from":[-3,13,2],"to":[3,21,5],"uv":{"box":[0,14]}},
+          {"from":[-3,19,2],"to":[3,21,5],"inflate":0.3,"uv":{"box":[0,25]}},
+          {"from":[-2,14,5],"to":[2,17,6],"uv":{"box":[18,25]}}
+        ],
+        "emissive": false,
+        "translucent": false
+      },
+      {
+        "name": "straps",
+        "parent": "backpack",
+        "pivot": [0,24,0],
+        "rotation": [0,0,0],
+        "cubes": [
+          {"from":[-3,15,-2.5],"to":[-2,24,2.5],"inflate":0.05,"uv":{"box":[0,0]}},
+          {"from":[2,15,-2.5],"to":[3,24,2.5],"inflate":0.05,"uv":{"box":[12,0]}},
+          {"from":[-2,19,-2.6],"to":[2,20,-1.6],"uv":{"box":[0,30]}}
+        ],
+        "emissive": false,
+        "translucent": false
+      },
+      {
+        "name": "keychain",
+        "parent": "backpack",
+        "pivot": [1.5,17,6.2],
+        "rotation": [0,0,0],
+        "cubes": [
+          {"from":[1.5,15,6.2],"to":[1.5,17,7.2],"uv":{"box":[28,25]}},
+          {"from":[-0.5,11,5.7],"to":[3.5,15,7.7],"uv":{"box":[18,14]}},
+          {"from":[-1.3,11.2,6.2],"to":[-0.3,12.2,7.2],"inflate":-0.2,"uv":{"box":[10,30]}},
+          {"from":[3.3,11.2,6.2],"to":[4.3,12.2,7.2],"inflate":-0.2,"uv":{"box":[14,30]}}
+        ],
+        "emissive": false,
+        "translucent": false
+      }
+    ]
+  },
+  "animations": {
+    "idle": {
+      "length": 2.4,
+      "loop": true,
+      "bones": {
+        "keychain": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.6,"v":[6,0,8],"i":"catmullrom"},
+            {"t":1.2,"v":[0,0,0],"i":"catmullrom"},
+            {"t":1.8,"v":[-6,0,-6],"i":"catmullrom"},
+            {"t":2.4,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        }
+      }
+    },
+    "walk": {
+      "length": 0.8,
+      "loop": true,
+      "bones": {
+        "keychain": {
+          "rotation": [
+            {"t":0,"v":[14,0,0],"i":"catmullrom"},
+            {"t":0.2,"v":[-6,0,18],"i":"catmullrom"},
+            {"t":0.4,"v":[14,0,0],"i":"catmullrom"},
+            {"t":0.6,"v":[-6,0,-18],"i":"catmullrom"},
+            {"t":0.8,"v":[14,0,0],"i":"catmullrom"}
+          ]
+        },
+        "backpack": {
+          "position": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.2,"v":[0,0.4,0],"i":"catmullrom"},
+            {"t":0.4,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.6,"v":[0,0.4,0],"i":"catmullrom"},
+            {"t":0.8,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        }
+      }
+    }
+  }
+}

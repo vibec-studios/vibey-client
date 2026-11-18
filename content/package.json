@@ -1,0 +1,15 @@
+{
+  "name": "vibey-starter-content",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Free starter cosmetics and emotes for Vibey Client (.vibey bundles) + build/preview toolkit",
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "build:fast": "node tools/build.mjs --no-preview",
+    "validate": "node tools/validate.mjs",
+    "synth": "node tools/synth.mjs"
+  },
+  "license": "MIT"
+}

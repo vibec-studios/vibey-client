@@ -1,0 +1,216 @@
+{
+  "format": "vibey",
+  "formatVersion": 1,
+  "kind": "cosmetic",
+  "id": "vibey:pixel_penguin",
+  "name": {"en":"Pixel Penguin","de":"Pixel-Pinguin"},
+  "description": {
+    "en": "A tiny penguin in a teal scarf that waddles after you and flaps when it gets excited.",
+    "de": "Ein kleiner Pinguin mit türkisem Schal, der dir hinterherwatschelt und vor Freude mit den Flügeln schlägt."
+  },
+  "author": "Vibe Craft Studios",
+  "tags": ["penguin","cute","winter","pet","starter"],
+  "rarity": "rare",
+  "cosmetic": {"slot":"pet","pet":{"follow":"ground","scale":0.55}},
+  "textures": [
+    {
+      "id": "main",
+      "width": 64,
+      "height": 32,
+      "png": "iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAYAAACinX6EAAAElElEQVR42u0Yy24cRbC6Z4zx2k5uEImXgp1ThMRDRkigwEdwABQhgSJOHLjYQnwAQohT4AJCXODKJyCBACUB4uAAJ9skKyLxEKckPtiz24Wqa6qnpmd6d8cia0hc0mi3a7qq613VYyABy8snERHAWguIDgAMACAYY2Fubt7vMYZxBH4zGLh8+byBDkDnEM+KB/N1zsH8/GJYM24Isndj45yZhDf9bm39ktxrUy/oIFaelSYBSD5aE96ULFlm4x9jOumu6AF6vYVgzCCczUrlbZCJ5XAT80YcvScfLRiWB2LwQmkeLwx5Sd5rD3YBMibx2dm5AVUkOOVxOZ/xiKY0+HhYWDgyds8IAzh/qHMYIkErKsZgr2AwzH4igPgTkCH4LMJpY/M7MXwcKanU3dm57nFLSydRUjlOhzydAibkuFa4FFt5G2vCdwf0Rhb+clYVdaI8hPAfdY42UGVcrKXbhDXAJMJahDUhMsTzImi3CNDRZGppR8pq5XWBHMdPalW8bugpVVgzrQSpQl/XAE6PNE0TD7V3dW9DOKfeCSqPpmhivNQTLWu83tz8KU4Bo8JLig0LcfHShYbFnnjsSUjRVBEBJQ6U8ZrCCf0P6+3niLdjGjZw3aOCF5zIEa8bKaCLG7c3bjXrP37fSnDx0neQohFl+VATBNf1owpvDPyWjj9cO4PWhE/RxErJO8JTO6WHZgh64nWjC8TemKSdpWi0oFpIPeDoMJZI2r7ya42/rHV90DQcFRDapgDhJxmQahEgHtJCjhtoUjSaLvWuwnO6HPlyo/UMwqdoJMLi4refLpTHOVYvXO0wiiYej+NBSkcX/V9+44zH65DnOgNJGs03ToXOBpABQWjjA1PTWxtNHPq6dW5u/jzSqkcXe3AQYNmbNgw30sLEC83qvAIpmqoN2Sj0LfxXIU/NyzdvXofHH12pdQMyCjl2khn7/wKm6/VR4NT210jU2d2z4Hb3wOQZ4NABFgPof3WOBwFKB4dcE8hyWQb9V1aTvB/6+B2kPTActu7Fz5/28v253ffrY2vXWnlNuq8xCk9yfQyEM3yNcHsF4GAIYDNwe2wIyCyYPC+HcTYEGQdGjLBeeb0+9RQ8e/VbvOUp0PX6GIw1HIKdmQEcDMDO3sVeo5wnD1Kv3ivYGISjYamXAe4WaYZZBkg0FDXEw0wpBZpffqpbVNv1UeC5a+eRQp+va8hGsManwNUvvgFDximKMvodG8Y56J95s5Xfgx++jYZ40PmUUmWEXfj77L+qcJwOedfrY7CczcDOznol6cMFbXa7hVfU14NCUoPTwYzxqleYUoR6/EwOr6+vssAfrN3SWMi7Xh9DCgwGrCDlO7W/ovBRQIZBKnx0xydDOM59z9enRzv0X60rugpr02mDbXO6Xn904zf87K8r/v/pe47Dp79vQdabg5eO3gceP3Bw+l7GE7y4eAzg+RcgSfPMCrbhX1t8wBxIGzxx4hFsU1zWxVsvT0WQOAKmNgjx19g0bByQYFMHGh7o+ePd+/0j+Pfe/wT17+0GZj/T0+0Eufa2BsHfKYY4hEM4hEO4I+EfL78jmVKUp+sAAAAASUVORK5CYII="
+    }
+  ],
+  "model": {
+    "texture": "main",
+    "bones": [
+      {
+        "name": "penguin",
+        "parent": null,
+        "attach": "world",
+        "pivot": [0,0,0],
+        "rotation": [0,0,0],
+        "cubes": [],
+        "emissive": false,
+        "translucent": false
+      },
+      {
+        "name": "pen_body",
+        "parent": "penguin",
+        "pivot": [0,1,0],
+        "rotation": [0,0,0],
+        "cubes": [
+          {"from":[-3.5,1,-3],"to":[3.5,10,3],"uv":{"box":[0,0]}},
+          {"from":[-3.5,8.5,-3],"to":[3.5,10.5,3],"inflate":0.35,"uv":{"box":[8,15]}},
+          {"from":[1,5,3.3],"to":[3,9,4.3],"uv":{"box":[34,15]}}
+        ],
+        "emissive": false,
+        "translucent": false
+      },
+      {
+        "name": "pen_head",
+        "parent": "pen_body",
+        "pivot": [0,10.5,0],
+        "rotation": [0,0,0],
+        "cubes": [
+          {"from":[-3.5,10.5,-3],"to":[3.5,16.5,3],"uv":{"box":[26,0]}},
+          {"from":[-1,12,-5],"to":[1,13,-3],"uv":{"box":[0,24]}}
+        ],
+        "emissive": false,
+        "translucent": false
+      },
+      {
+        "name": "pen_lids",
+        "parent": "pen_head",
+        "pivot": [0,14,-3],
+        "rotation": [0,0,0],
+        "cubes": [
+          {"from":[-2.5,13.5,-3.05],"to":[-1.5,14.5,-3.05],"uv":{"box":[8,24]}},
+          {"from":[1.5,13.5,-3.05],"to":[2.5,14.5,-3.05],"uv":{"box":[10,24]}}
+        ],
+        "emissive": false,
+        "translucent": false
+      },
+      {
+        "name": "pen_flipper_left",
+        "parent": "pen_body",
+        "pivot": [3.5,9,0],
+        "rotation": [0,0,0],
+        "cubes": [{"from":[3.5,3,-1.5],"to":[4.5,9,1.5],"uv":{"box":[52,0]}}],
+        "emissive": false,
+        "translucent": false
+      },
+      {
+        "name": "pen_foot_left",
+        "parent": "penguin",
+        "pivot": [1.5,1,-1],
+        "rotation": [0,0,0],
+        "cubes": [{"from":[0.5,0,-3.5],"to":[2.5,1,-0.5],"uv":{"box":[40,15]}}],
+        "emissive": false,
+        "translucent": false
+      },
+      {
+        "name": "pen_flipper_right",
+        "parent": "pen_body",
+        "pivot": [-3.5,9,0],
+        "rotation": [0,0,0],
+        "cubes": [{"from":[-4.5,3,-1.5],"to":[-3.5,9,1.5],"uv":{"box":[0,15]}}],
+        "emissive": false,
+        "translucent": false
+      },
+      {
+        "name": "pen_foot_right",
+        "parent": "penguin",
+        "pivot": [-1.5,1,-1],
+        "rotation": [0,0,0],
+        "cubes": [{"from":[-2.5,0,-3.5],"to":[-0.5,1,-0.5],"uv":{"box":[50,15]}}],
+        "emissive": false,
+        "translucent": false
+      }
+    ]
+  },
+  "animations": {
+    "idle": {
+      "length": 3.2,
+      "loop": true,
+      "bones": {
+        "pen_head": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.8,"v":[0,18,4],"i":"catmullrom"},
+            {"t":1.5,"v":[0,18,4],"i":"catmullrom"},
+            {"t":2.1,"v":[-6,-12,-3],"i":"catmullrom"},
+            {"t":2.7,"v":[0,-8,0],"i":"catmullrom"},
+            {"t":3.2,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "pen_flipper_left": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":2.2,"v":[0,0,0],"i":"catmullrom"},
+            {"t":2.35,"v":[0,0,-35],"i":"catmullrom"},
+            {"t":2.5,"v":[0,0,-5],"i":"catmullrom"},
+            {"t":2.65,"v":[0,0,-35],"i":"catmullrom"},
+            {"t":2.85,"v":[0,0,0],"i":"catmullrom"},
+            {"t":3.2,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "pen_flipper_right": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":2.2,"v":[0,0,0],"i":"catmullrom"},
+            {"t":2.35,"v":[0,0,35],"i":"catmullrom"},
+            {"t":2.5,"v":[0,0,5],"i":"catmullrom"},
+            {"t":2.65,"v":[0,0,35],"i":"catmullrom"},
+            {"t":2.85,"v":[0,0,0],"i":"catmullrom"},
+            {"t":3.2,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "pen_body": {
+          "position": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":2.2,"v":[0,0,0],"i":"catmullrom"},
+            {"t":2.4,"v":[0,0.8,0],"i":"catmullrom"},
+            {"t":2.6,"v":[0,0,0],"i":"catmullrom"},
+            {"t":3.2,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        }
+      },
+      "events": [
+        {"t":0,"type":"visibility","bone":"pen_lids","visible":false},
+        {"t":1.1,"type":"visibility","bone":"pen_lids","visible":true},
+        {"t":1.24,"type":"visibility","bone":"pen_lids","visible":false}
+      ]
+    },
+    "walk": {
+      "length": 0.6,
+      "loop": true,
+      "bones": {
+        "pen_body": {
+          "rotation": [
+            {"t":0,"v":[0,0,-8],"i":"catmullrom"},
+            {"t":0.3,"v":[0,0,8],"i":"catmullrom"},
+            {"t":0.6,"v":[0,0,-8],"i":"catmullrom"}
+          ]
+        },
+        "pen_head": {
+          "rotation": [
+            {"t":0,"v":[0,0,5],"i":"catmullrom"},
+            {"t":0.3,"v":[0,0,-5],"i":"catmullrom"},
+            {"t":0.6,"v":[0,0,5],"i":"catmullrom"}
+          ]
+        },
+        "pen_flipper_left": {
+          "rotation": [
+            {"t":0,"v":[0,0,-18],"i":"catmullrom"},
+            {"t":0.3,"v":[0,0,-8],"i":"catmullrom"},
+            {"t":0.6,"v":[0,0,-18],"i":"catmullrom"}
+          ]
+        },
+        "pen_flipper_right": {
+          "rotation": [
+            {"t":0,"v":[0,0,8],"i":"catmullrom"},
+            {"t":0.3,"v":[0,0,18],"i":"catmullrom"},
+            {"t":0.6,"v":[0,0,8],"i":"catmullrom"}
+          ]
+        },
+        "pen_foot_left": {
+          "position": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.15,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.3,"v":[0,0.8,-1],"i":"catmullrom"},
+            {"t":0.45,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.6,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "pen_foot_right": {
+          "position": [
+            {"t":0,"v":[0,0.8,-1],"i":"catmullrom"},
+            {"t":0.15,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.45,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.6,"v":[0,0.8,-1],"i":"catmullrom"}
+          ]
+        }
+      }
+    }
+  }
+}
