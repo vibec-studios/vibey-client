@@ -288,7 +288,7 @@ public final class DevTour {
             command(mc, "gamerule doDaylightCycle false");
             command(mc, "gamerule advance_time false");
             command(mc, "gamemode creative");
-            mc.options.hideGui = false;
+            hideHud(mc, false);
             // the "move with WASD" tutorial toast would cover every screenshot's corner
             mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE);
         });
@@ -303,7 +303,7 @@ public final class DevTour {
             for (Slot s : Slot.all()) w.unequip(s);
             for (String id : new String[]{"vibey:vibe_cape", "vibey:crystal_wings", "vibey:ember_sparks", "vibey:seal_buddy",
                     "vibey:seal_crest_shield", "vibey:seal_beanie", "vibey:seal_backpack"}) equip(w, id);
-            mc.options.hideGui = true;
+            hideHud(mc, true);
             look(mc, 0f, 10f);
             mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT);
         });
@@ -352,7 +352,7 @@ public final class DevTour {
         step("wardrobe_world");
         run(mc -> {
             requireWorld(mc);
-            mc.options.hideGui = false;
+            hideHud(mc, false);
             mc.options.setCameraType(CameraType.FIRST_PERSON);
             equip(wardrobe(), "vibey:seal_buddy");
             WardrobeUi.openWardrobe(null, Slot.CAPE);
@@ -397,7 +397,7 @@ public final class DevTour {
             var demo = dev.henny.vibeyclient.module.lyrics.library.SongLibrary.find(
                     dev.henny.vibeyclient.module.lyrics.library.SongLibrary.DEMO.toLowerCase(java.util.Locale.ROOT));
             if (demo == null) throw new IllegalStateException("demo song missing");
-            mc.options.hideGui = true;
+            hideHud(mc, true);
             mc.options.setCameraType(CameraType.FIRST_PERSON);
             look(mc, -45f, -14f);
             var c = dev.henny.vibeyclient.module.lyrics.LyricsConfig.get();
@@ -427,7 +427,7 @@ public final class DevTour {
             long drawn = dev.henny.vibeyclient.module.lyrics.render.WorldLyrics.drawnFrames;
             dev.henny.vibeyclient.module.lyrics.LyricsConfig.get().sky = "vanilla";
             dev.henny.vibeyclient.module.lyrics.Playback.stop();
-            mc.options.hideGui = false;
+            hideHud(mc, false);
             if (drawn <= 0) throw new IllegalStateException("world lyrics were never drawn");
         });
         //?}
@@ -435,7 +435,7 @@ public final class DevTour {
         step("host_screen");
         run(mc -> {
             requireWorld(mc);
-            mc.options.hideGui = false;
+            hideHud(mc, false);
             look(mc, 0f, 10f);
             ClientCompat.openScreen(new HostScreen(null));
         });
@@ -462,7 +462,7 @@ public final class DevTour {
             requireWorld(mc);
             Wardrobe w = wardrobe();
             for (Slot s : Slot.all()) w.unequip(s);
-            mc.options.hideGui = true;
+            hideHud(mc, true);
             look(mc, 0f, 10f);
             mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT);
             if (AvatarItems.get(id) == null) throw new IllegalStateException("emote missing: " + id);
@@ -490,6 +490,15 @@ public final class DevTour {
         w.equip(i);
         Slot slot = i.slot();
         if (slot != null && !id.equals(w.equipped(slot))) throw new IllegalStateException("equip failed: " + id + " (" + w.lockedReason(i) + ")");
+    }
+
+    /** F1 on/off (26.2 moved it from the options to the HUD, which only has a toggle). */
+    private static void hideHud(Minecraft mc, boolean hidden) {
+        if (ClientCompat.hudHidden() == hidden) return;
+        //? if >=26.2 {
+        /*mc.gui.hud.toggle();
+        *///?} else
+        mc.options.hideGui = hidden;
     }
 
     private static void requireWorld(Minecraft mc) {
