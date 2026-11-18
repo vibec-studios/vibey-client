@@ -4,6 +4,45 @@
   "setting": {
     "creatorMode": "Creator-Modus",
     "creatorMode.desc": "Erlaubt dem Blockbench-Plugin, Modelle ins Spiel zu schicken.",
-    "port": "Port"
+    "port": "Port",
+    "port.desc": "Lokaler Port der Live-Verbindung (nur von diesem Computer erreichbar)."
+  },
+  "panel": {
+    "status": "Live-Verbindung",
+    "state": {
+      "listening": "Bereit",
+      "off": "Aus",
+      "error": "Fehler"
+    },
+    "listeningOn": "Wartet auf Blockbench unter {0}",
+    "portInUse": "Port {0} ist schon belegt – wähle unten einen anderen Port.",
+    "failed": "Die Live-Verbindung konnte nicht starten: {0}",
+    "offCreator": "Schalte den Creator-Modus ein, um Blockbench zu verbinden.",
+    "offModule": "Das Modul ist ausgeschaltet.",
+    "clients": {
+      "none": "Kein Blockbench verbunden",
+      "one": "1 Blockbench verbunden",
+      "many": "{0} Blockbench-Fenster verbunden"
+    },
+    "token": "Token",
+    "show": "Zeigen",
+    "hide": "Verbergen",
+    "copy": "Token kopieren",
+    "copied": "Kopiert!",
+    "regenerate": "Neu erzeugen",
+    "regenerateConfirm": "Zum Bestätigen klicken",
+    "tokenHint": "Gib den Token nur an Tools weiter, denen du vertraust. Neu erzeugen trennt Blockbench.",
+    "howTo": "Mit Blockbench verbinden",
+    "hint1": "1. Installiere das Vibey-Plugin in Blockbench (vibey.js).",
+    "hint2": "2. Vibey-Panel → Verbinden. Mit „Spiel automatisch finden“ liest das Plugin Port und Token aus vibeyclient/devlink.json im Spielordner.",
+    "hint3": "3. Sonst öffne Vibey → Live-Link-Einstellungen… und trage Port und Token von dieser Seite ein."
+  },
+  "toast": {
+    "connected": "Blockbench verbunden",
+    "connectedBody": "Vibey-Plugin {0} – geschickte Items erscheinen als DEV-Items.",
+    "pushed": "{0} aktualisiert",
+    "warning": "1 Warnung – siehe Blockbench",
+    "warnings": "{0} Warnungen – siehe Blockbench",
+    "rejected": "{0} abgelehnt"
   }
 }

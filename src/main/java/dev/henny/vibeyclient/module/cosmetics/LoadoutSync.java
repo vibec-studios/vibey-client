@@ -1,0 +1,272 @@
+package dev.henny.vibeyclient.module.cosmetics;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import dev.henny.vibeyclient.Vibey;
+import dev.henny.vibeyclient.api.GlobalSettings;
+import dev.henny.vibeyclient.api.Services;
+import dev.henny.vibeyclient.api.Tasks;
+import dev.henny.vibeyclient.api.net.VibeyNet;
+import dev.henny.vibeyclient.api.service.VibeBackend;
+import dev.henny.vibeyclient.avatar.AvatarItem;
+import dev.henny.vibeyclient.avatar.AvatarItems;
+import dev.henny.vibeyclient.avatar.AvatarState;
+import dev.henny.vibeyclient.avatar.AvatarStates;
+import dev.henny.vibeyclient.avatar.ItemSource;
+import dev.henny.vibeyclient.avatar.Slot;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.player.Player;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.BiConsumer;
+
+/**
+ * Cosmetics sync (SPEC §6/§7): our loadout to the backend ({@code PUT /loadout}, debounced) and to the server
+ * channel; other players' loadouts from both (merged per player, newest wins) and their emotes. Players without
+ * Vibey simply have no entry. Client thread unless noted.
+ */
+public final class LoadoutSync {
+    private final CosmeticsModule module;
+
+    /** Loadouts of other players by source. */
+    private record Remote(Map<String, String> slots, long time) {}
+
+    private final Map<UUID, Remote> fromBackend = new HashMap<>();
+    private final Map<UUID, Remote> fromServer = new HashMap<>();
+
+    // backend session
+    private VibeBackend backend;
+    private final List<AutoCloseable> listeners = new ArrayList<>();
+    private Set<String> owned = Set.of();
+    private boolean meLoaded;
+    private Set<UUID> subscribed = Set.of();
+    private int tickCounter;
+
+    /** Emote plays from the backend gateway or the server channel: (player, emoteId or null = stop). */
+    public BiConsumer<UUID, String> remoteEmote = (u, e) -> {};
+
+    LoadoutSync(CosmeticsModule module) {
+        this.module = module;
+    }
+
+    // ============================================================================================ ownership
+
+    /** Online items need to be owned; builtin and dev items are always usable locally. */
+    public boolean canUse(AvatarItem item) {
+        if (item == null) return false;
+        if (item.source() != ItemSource.CATALOG) return true;
+        if ("default".equals(item.availability())) return true;
+        return owned.contains(item.id());
+    }
+
+    public boolean backendReady() {
+        return backend != null && backend.isReady();
+    }
+
+    // ============================================================================================ tick
+
+    void tick() {
+        VibeBackend b = GlobalSettings.online() ? Services.get(VibeBackend.class).orElse(null) : null;
+        if (b != backend) attach(b);
+        if (backend != null && backend.isReady() && !meLoaded) loadMe();
+        if (++tickCounter % 40 == 0) updateSubscriptions();
+        applyRemotes();
+    }
+
+    private void attach(VibeBackend b) {
+        for (AutoCloseable c : listeners) {
+            try {
+                c.close();
+            } catch (Exception ignored) {
+            }
+        }
+        listeners.clear();
+        backend = b;
+        meLoaded = false;
+        subscribed = Set.of();
+        fromBackend.clear();
+        if (b == null) return;
+        listeners.add(b.onEvent("loadout.updated", d -> {
+            UUID id = uuid(d.get("userId"));
+            if (id == null || id.equals(module.selfId())) return;
+            fromBackend.put(id, new Remote(slots(d.get("slots")), System.currentTimeMillis()));
+        }));
+        listeners.add(b.onEvent("emote.played", d -> {
+            UUID id = uuid(d.get("userId"));
+            if (id == null || id.equals(module.selfId())) return;
+            String emote = d.has("emoteId") ? d.get("emoteId").getAsString() : null;
+            boolean play = !d.has("action") || "play".equals(d.get("action").getAsString());
+            remoteEmote.accept(id, play ? emote : null);
+        }));
+    }
+
+    private void loadMe() {
+        meLoaded = true;
+        VibeBackend b = backend;
+        b.request("GET", "/api/v1/cosmetics/me", null).whenComplete((res, err) -> Tasks.onMain(() -> {
+            if (b != backend) return;
+            if (err != null) {
+                Vibey.LOG.info("cosmetics/me failed: {}", err.toString());
+                return;
+            }
+            JsonObject o = res.getAsJsonObject();
+            Set<String> own = new HashSet<>();
+            if (o.get("owned") instanceof JsonArray a) for (JsonElement e : a) own.add(e.getAsString());
+            owned = own;
+            if (module.localDirty()) {
+                pushLoadout();
+            } else if (o.get("loadout") instanceof JsonObject l) {
+                module.adoptRemoteLoadout(Loadout.fromJson(l));
+            }
+            subscribed = Set.of();
+            updateSubscriptions();
+        }));
+    }
+
+    /** Debounced PUT of our loadout (only items the backend knows we own). */
+    void loadoutChanged() {
+        if (VibeyNet.available()) VibeyNet.sendLoadout(module.sharedSlots());
+        if (backendReady()) Tasks.debounce("vibeyclient:cosmetics:put", 1200, () -> Tasks.onMain(this::pushLoadout));
+    }
+
+    private void pushLoadout() {
+        if (!backendReady()) return;
+        Loadout l = module.loadout();
+        JsonObject body = new JsonObject();
+        JsonObject slots = new JsonObject();
+        for (Slot s : Slot.all()) {
+            String id = l.get(s);
+            AvatarItem item = AvatarItems.get(id);
+            boolean online = item != null && item.source() != ItemSource.DEV && AvatarItems.get(id, ItemSource.CATALOG) != null
+                    && canUse(AvatarItems.get(id, ItemSource.CATALOG));
+            slots.add(s.id(), online ? new JsonPrimitive(id) : com.google.gson.JsonNull.INSTANCE);
+        }
+        body.add("slots", slots);
+        JsonArray wheel = new JsonArray();
+        for (String id : l.wheel) {
+            AvatarItem item = AvatarItems.get(id, ItemSource.CATALOG);
+            wheel.add(item != null && canUse(item) ? new JsonPrimitive(id) : com.google.gson.JsonNull.INSTANCE);
+        }
+        body.add("emoteWheel", wheel);
+        backend.request("PUT", "/api/v1/cosmetics/loadout", body).whenComplete((r, e) -> {
+            if (e != null) Vibey.LOG.info("Loadout upload failed: {}", e.toString());
+            else Tasks.onMain(module::markSynced);
+        });
+    }
+
+    /** Our emote to everybody: gateway op + server channel. */
+    void sendEmote(String emoteId, boolean play) {
+        AvatarItem item = AvatarItems.get(emoteId);
+        if (item == null || item.isDev()) return; // dev items stay local
+        VibeyNet.sendEmote(emoteId, play);
+        if (backendReady()) {
+            JsonObject d = new JsonObject();
+            d.addProperty("emoteId", emoteId);
+            d.addProperty("action", play ? "play" : "stop");
+            backend.sendOp("emote", d);
+        }
+    }
+
+    // ============================================================================================ players around us
+
+    private void updateSubscriptions() {
+        if (!backendReady()) return;
+        Minecraft mc = Minecraft.getInstance();
+        Set<UUID> now = new LinkedHashSet<>();
+        if (mc.level != null) {
+            UUID self = module.selfId();
+            for (Player p : mc.level.players()) {
+                if (now.size() >= 200) break;
+                if (!p.getUUID().equals(self)) now.add(p.getUUID());
+            }
+        }
+        if (now.equals(subscribed)) return;
+        List<String> fresh = new ArrayList<>();
+        for (UUID u : now) if (!subscribed.contains(u)) fresh.add(u.toString());
+        subscribed = now;
+        JsonObject sub = new JsonObject();
+        JsonArray ids = new JsonArray();
+        for (UUID u : now) ids.add(u.toString());
+        sub.add("userIds", ids);
+        backend.sendOp("cosmetics.subscribe", sub);
+        if (fresh.isEmpty()) return;
+        JsonObject body = new JsonObject();
+        JsonArray list = new JsonArray();
+        for (String s : fresh) list.add(s);
+        body.add("userIds", list);
+        VibeBackend b = backend;
+        b.request("POST", "/api/v1/cosmetics/lookup", body).whenComplete((res, err) -> Tasks.onMain(() -> {
+            if (err != null || b != backend || !(res instanceof JsonObject o) || !(o.get("users") instanceof JsonObject users)) return;
+            long t = System.currentTimeMillis();
+            for (Map.Entry<String, JsonElement> e : users.entrySet()) {
+                UUID id = uuid(new JsonPrimitive(e.getKey()));
+                if (id == null || !(e.getValue() instanceof JsonObject u)) continue;
+                Remote old = fromBackend.get(id);
+                if (old == null || old.time < t) fromBackend.put(id, new Remote(slots(u.get("slots")), t));
+            }
+        }));
+    }
+
+    /** Server channel loadout (newest wins against the backend). */
+    void serverLoadout(UUID player, Map<String, String> slots) {
+        if (player.equals(module.selfId())) return;
+        if (slots.isEmpty()) fromServer.remove(player);
+        else fromServer.put(player, new Remote(Map.copyOf(slots), System.currentTimeMillis()));
+    }
+
+    void worldLeft() {
+        fromServer.clear();
+        subscribed = Set.of();
+        if (backendReady()) {
+            JsonObject sub = new JsonObject();
+            sub.add("userIds", new JsonArray());
+            backend.sendOp("cosmetics.subscribe", sub);
+        }
+    }
+
+    /** Writes the merged loadout of every known player into their avatar state. */
+    private void applyRemotes() {
+        Set<UUID> ids = new HashSet<>(fromBackend.keySet());
+        ids.addAll(fromServer.keySet());
+        for (UUID id : ids) {
+            Remote a = fromBackend.get(id), b = fromServer.get(id);
+            Remote r = a == null ? b : b == null ? a : (a.time >= b.time ? a : b);
+            AvatarState st = AvatarStates.get(id);
+            java.util.Arrays.fill(st.slots, null);
+            for (Map.Entry<String, String> e : r.slots.entrySet()) {
+                Slot s = Slot.of(e.getKey());
+                if (s != null) st.slots[s.ordinal()] = e.getValue();
+            }
+        }
+    }
+
+    // ============================================================================================ util
+
+    private static UUID uuid(JsonElement e) {
+        if (e == null || !e.isJsonPrimitive()) return null;
+        try {
+            return UUID.fromString(e.getAsString());
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
+    }
+
+    private static Map<String, String> slots(JsonElement e) {
+        Map<String, String> m = new HashMap<>();
+        if (e instanceof JsonObject o) {
+            for (Map.Entry<String, JsonElement> en : o.entrySet()) {
+                if (en.getValue().isJsonPrimitive() && Slot.of(en.getKey()) != null) m.put(en.getKey(), en.getValue().getAsString());
+            }
+        }
+        return m;
+    }
+}

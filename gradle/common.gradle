@@ -53,6 +53,11 @@ afterEvaluate {
 processResources {
     // The seal logo lives once at the repo root.
     from(rootProject.file('assets/icon.png')) { into 'assets/vibeyclient' }
+    // Built-in starter cosmetics/emotes (SPEC section 6): the committed bundles of content/dist, not duplicated in git.
+    from(rootProject.file('content/dist')) {
+        into 'assets/vibeyclient/builtin'
+        include '*.vibey', 'index.json', 'thumbnails/*.png'
+    }
 }
 
 jar {

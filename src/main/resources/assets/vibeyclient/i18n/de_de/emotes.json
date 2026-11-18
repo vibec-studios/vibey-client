@@ -6,5 +6,6 @@
     "thirdPerson": "Dritte Person beim Emoten",
     "volume": "Emote-Lautstärke",
     "showOthers": "Emotes anderer zeigen"
-  }
+  },
+  "notLoaded": "Emote lädt noch"
 }

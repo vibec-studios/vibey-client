@@ -9,8 +9,12 @@
       "dev.henny.vibeyclient.gametest.VibeyClientGameTest",
       "dev.henny.vibeyclient.gametest.MultiplayerLyricsGameTest",
       "dev.henny.vibeyclient.gametest.VibeyUiGameTest",
-      "dev.henny.vibeyclient.gametest.SocialGameTest"
+      "dev.henny.vibeyclient.gametest.SocialGameTest",
+      "dev.henny.vibeyclient.gametest.WardrobeUiGameTest",
+      "dev.henny.vibeyclient.gametest.CosmeticsGameTest"
     ]
   },
-  "depends": { "vibeyclient": "*" }
+  "depends": {
+    "vibeyclient": "*"
+  }
 }

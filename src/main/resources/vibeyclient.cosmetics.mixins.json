@@ -5,7 +5,18 @@
   "plugin": "dev.henny.vibeyclient.mixin.VibeyMixinPlugin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [],
-  "client": [],
+  "client": [
+    "AbstractClientPlayerMixin",
+    "EntityRenderDispatcherAccessor",
+    "FirstPersonItemMixin",
+    "GuiEntityMixin",
+    "ItemInHandLayerMixin",
+    "LivingEntityRendererAccessor",
+    "LivingEntityRendererMixin",
+    "PlayerRendererMixin",
+    "RenderStateMixin",
+    "ShieldRendererMixin"
+  ],
   "server": [],
   "injectors": {
     "defaultRequire": 1
