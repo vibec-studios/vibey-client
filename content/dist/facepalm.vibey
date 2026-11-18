@@ -1,0 +1,66 @@
+{
+  "format": "vibey",
+  "formatVersion": 1,
+  "kind": "emote",
+  "id": "vibey:facepalm",
+  "name": {"en":"Facepalm","de":"Facepalm"},
+  "description": {"en":"When words are not enough.","de":"Wenn Worte nicht mehr reichen."},
+  "author": "Vibe Craft Studios",
+  "tags": ["reaction","funny","starter"],
+  "rarity": "common",
+  "emote": {"animation":"main","loop":false,"thirdPerson":true,"stopOnMove":true,"hideHeldItems":true},
+  "textures": [],
+  "model": {"bones":[]},
+  "animations": {
+    "main": {
+      "length": 2.8,
+      "loop": false,
+      "bones": {
+        "right_arm": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.3,"v":[97.4,30.2,0],"i":"catmullrom"},
+            {"t":0.45,"v":[127.4,40.2,0],"i":"catmullrom"},
+            {"t":0.55,"v":[133.4,42.2,0],"i":"catmullrom"},
+            {"t":2.1,"v":[133.4,42.2,0],"i":"catmullrom"},
+            {"t":2.45,"v":[25,10,0],"i":"catmullrom"},
+            {"t":2.8,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "head": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.45,"v":[-8,0,0],"i":"catmullrom"},
+            {"t":0.6,"v":[-20,0,0],"i":"catmullrom"},
+            {"t":1,"v":[-20,12,0],"i":"catmullrom"},
+            {"t":1.4,"v":[-20,-12,0],"i":"catmullrom"},
+            {"t":1.8,"v":[-20,8,0],"i":"catmullrom"},
+            {"t":2.1,"v":[-14,0,0],"i":"catmullrom"},
+            {"t":2.5,"v":[-4,0,0],"i":"catmullrom"},
+            {"t":2.8,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "left_arm": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.5,"v":[-12,0,-22],"i":"catmullrom"},
+            {"t":2.2,"v":[-12,0,-22],"i":"catmullrom"},
+            {"t":2.8,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "root": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.6,"v":[-4,0,0],"i":"catmullrom"},
+            {"t":2.2,"v":[-4,0,0],"i":"catmullrom"},
+            {"t":2.8,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        }
+      },
+      "events": [
+        {"t":0.52,"type":"sound","sound":"minecraft:entity.player.attack.weak","volume":0.6,"pitch":1.4},
+        {"t":1,"type":"sound","sound":"minecraft:entity.villager.no","volume":0.5,"pitch":1.15}
+      ]
+    }
+  }
+}

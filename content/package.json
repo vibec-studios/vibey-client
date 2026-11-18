@@ -8,7 +8,8 @@
   "scripts": {
     "build": "node tools/build.mjs",
     "build:fast": "node tools/build.mjs --no-preview",
-    "validate": "node tools/validate.mjs dist/*.vibey"
+    "validate": "node tools/validate.mjs",
+    "synth": "node tools/synth.mjs"
   },
   "license": "MIT"
 }

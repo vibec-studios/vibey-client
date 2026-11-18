@@ -1,0 +1,61 @@
+{
+  "format": "vibey",
+  "formatVersion": 1,
+  "kind": "emote",
+  "id": "vibey:wave",
+  "name": {"en":"Wave","de":"Winken"},
+  "description": {"en":"Say hi! A big friendly wave.","de":"Sag hallo! Ein großes, freundliches Winken."},
+  "author": "Vibe Craft Studios",
+  "tags": ["greeting","friendly","starter"],
+  "rarity": "common",
+  "emote": {"animation":"main","loop":false,"thirdPerson":true,"stopOnMove":true,"hideHeldItems":true},
+  "textures": [],
+  "model": {"bones":[]},
+  "animations": {
+    "main": {
+      "length": 2.2,
+      "loop": false,
+      "bones": {
+        "right_arm": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.35,"v":[10,0,150],"i":"catmullrom"},
+            {"t":0.6,"v":[10,0,128],"i":"catmullrom"},
+            {"t":0.85,"v":[10,0,158],"i":"catmullrom"},
+            {"t":1.1,"v":[10,0,128],"i":"catmullrom"},
+            {"t":1.35,"v":[10,0,158],"i":"catmullrom"},
+            {"t":1.6,"v":[10,0,135],"i":"catmullrom"},
+            {"t":1.95,"v":[0,0,8],"i":"catmullrom"},
+            {"t":2.2,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "left_arm": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.4,"v":[-6,0,-6],"i":"catmullrom"},
+            {"t":1.7,"v":[-6,0,-6],"i":"catmullrom"},
+            {"t":2.2,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "head": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.4,"v":[6,-10,-6],"i":"catmullrom"},
+            {"t":0.85,"v":[8,-12,-8],"i":"catmullrom"},
+            {"t":1.35,"v":[4,-8,-4],"i":"catmullrom"},
+            {"t":1.8,"v":[2,-4,0],"i":"catmullrom"},
+            {"t":2.2,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "body": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.4,"v":[0,-4,-2],"i":"catmullrom"},
+            {"t":1.7,"v":[0,-4,-2],"i":"catmullrom"},
+            {"t":2.2,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        }
+      }
+    }
+  }
+}

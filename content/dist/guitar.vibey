@@ -1,0 +1,153 @@
+{
+  "format": "vibey",
+  "formatVersion": 1,
+  "kind": "emote",
+  "id": "vibey:guitar",
+  "name": {"en":"Guitar Jam","de":"Gitarrensolo"},
+  "description": {
+    "en": "Jam a little riff on the Vibe guitar. Move to stop.",
+    "de": "Spiel ein kleines Riff auf der Vibe-Gitarre. Bewegen zum Beenden."
+  },
+  "author": "Vibe Craft Studios",
+  "tags": ["music","props","loop","sound","starter"],
+  "rarity": "rare",
+  "emote": {"animation":"main","loop":true,"thirdPerson":true,"stopOnMove":true,"hideHeldItems":true},
+  "textures": [
+    {
+      "id": "main",
+      "width": 32,
+      "height": 32,
+      "png": "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADCklEQVR42u1Wz0tVURD+Zu59TzGkf0DCRRIluOkHYoFGBYkg+i9EuGwREQQtkyCTauMiCP+DftgPXZgtwiKkQCEigqhw0zJFy/fuPRMz59x7n+DTKHL1Bh733HPOnfnOfDPfeQQAPYf2CxPBiSAiwsv3nwjB+rvmJOImpO4XBA46JkS2lrifIDAEKWJuQeLWQRSBqQQnVYikmFk6k/vayliDTz5+gXtTczaRiuBEZ4dkG4jYnAHkg4nASRLmYMGZygZOQSg4DawgIipjJ4sZwNOZ5x6NOYQF6f0ybyDWajbfTffZcyT6FmZK+dpq37wFFXGQAE49Hm6/KTr37uvlLTMRgwgDZ0/Zy/2JUZCIHhatQ3Z+rD4UDIx1o6RQLyzbvsHxHv0Mjy6+yvetaGCkRoG6NSd5huL6GdDTZqZjIrJnKhuWcj1lHDM2qtV8X5ImRo2nzO8joysGLANpvs6IIZD6ALTwMgp0rBnwNKRFwMRh4cMkFs4XHx47eC6ATvN0O6kYAAWioBwShZgX7ZYAYuacggcTox6EuqNSqAhYVro7RzxIl6BUijWOD5vvc2CUIMqNvhODhEMlY/sMZJaNxbKgLemL7Mml13UdFPvYuoO5nGdFJLGacK5SHwBqugBF72F68aTH3Y7/apYjpSCjIUDHbhkzFQTpWF93L7y2YQ0FVkqi6sS7BmCT5pNlQIumagIScbNVvfa0NacImGNTu2eLfZu+VSmmwGo2nl46TX9UA5liafDUbYC5CUxNvpu0neB/EZf9pZT1YAg+PN+B3uMnMDx/IJyKLZv9XbM7shmrA420PtUcplpqGwQtg4mB+77y1ifMWkw1fkxItR8OP660oRwDa1fbIPgYtAHbSnCRAUIuOEO3evD5yLj9+m8crSFJTM3UoaqcPrMs6PLe68uophXsubac3wCqBek2/V/chhTnV2uSFhmLuDiFXxcTFi9YFaNJ6VCep1vDRxN/0QVacPonwwclzL6549XvdlDHsC6m8ZEvSHFwbsOKtGENa1jDGtawhv2r/QYfVWifOzOWqAAAAABJRU5ErkJggg=="
+    }
+  ],
+  "model": {
+    "texture": "main",
+    "bones": [
+      {
+        "name": "guitar",
+        "parent": null,
+        "attach": "body",
+        "pivot": [0,15,-3.5],
+        "rotation": [0,0,48],
+        "cubes": [
+          {"from":[-4,8,-5.5],"to":[4,14,-3.5],"uv":{"box":[6,0]}},
+          {"from":[-3,14,-5.5],"to":[3,18,-3.5],"uv":{"box":[0,12]}},
+          {"from":[-1,18,-5.2],"to":[1,29,-4.2],"uv":{"box":[0,0]}},
+          {"from":[-1.5,29,-5.2],"to":[1.5,32,-4.2],"uv":{"box":[16,12]}}
+        ],
+        "emissive": false,
+        "translucent": false
+      }
+    ],
+    "locators": {"sound_hole":{"bone":"guitar","position":[0,18,-6.5]}}
+  },
+  "animations": {
+    "main": {
+      "length": 2,
+      "loop": true,
+      "bones": {
+        "right_arm": {
+          "rotation": [
+            {"t":0,"v":[53.9,31.3,0],"i":"catmullrom"},
+            {"t":0.25,"v":[37.9,35.3,0],"i":"catmullrom"},
+            {"t":0.5,"v":[53.9,31.3,0],"i":"catmullrom"},
+            {"t":0.75,"v":[37.9,35.3,0],"i":"catmullrom"},
+            {"t":1,"v":[53.9,31.3,0],"i":"catmullrom"},
+            {"t":1.25,"v":[37.9,35.3,0],"i":"catmullrom"},
+            {"t":1.5,"v":[53.9,31.3,0],"i":"catmullrom"},
+            {"t":1.75,"v":[37.9,35.3,0],"i":"catmullrom"},
+            {"t":2,"v":[53.9,31.3,0],"i":"catmullrom"}
+          ]
+        },
+        "left_arm": {
+          "rotation": [
+            {"t":0,"v":[87.3,22.1,0],"i":"catmullrom"},
+            {"t":0.5,"v":[90.3,19.1,0],"i":"catmullrom"},
+            {"t":1,"v":[87.3,22.1,0],"i":"catmullrom"},
+            {"t":1.5,"v":[90.3,25.1,0],"i":"catmullrom"},
+            {"t":2,"v":[87.3,22.1,0],"i":"catmullrom"}
+          ]
+        },
+        "head": {
+          "rotation": [
+            {"t":0,"v":[-10,8,0],"i":"catmullrom"},
+            {"t":0.25,"v":[0,8,4],"i":"catmullrom"},
+            {"t":0.5,"v":[-10,8,0],"i":"catmullrom"},
+            {"t":0.75,"v":[0,8,-4],"i":"catmullrom"},
+            {"t":1,"v":[-10,8,0],"i":"catmullrom"},
+            {"t":1.25,"v":[0,8,4],"i":"catmullrom"},
+            {"t":1.5,"v":[-10,8,0],"i":"catmullrom"},
+            {"t":1.75,"v":[0,8,-4],"i":"catmullrom"},
+            {"t":2,"v":[-10,8,0],"i":"catmullrom"}
+          ]
+        },
+        "root": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.5,"v":[0,0,3],"i":"catmullrom"},
+            {"t":1,"v":[0,0,0],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,-3],"i":"catmullrom"},
+            {"t":2,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "right_leg": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.25,"v":[12,0,0],"i":"catmullrom"},
+            {"t":0.5,"v":[0,0,0],"i":"catmullrom"},
+            {"t":1,"v":[0,0,0],"i":"catmullrom"},
+            {"t":1.25,"v":[12,0,0],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,0],"i":"catmullrom"},
+            {"t":2,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        }
+      },
+      "events": [
+        {"t":0,"type":"sound","sound":"minecraft:block.note_block.guitar","volume":0.7,"pitch":0.749},
+        {
+          "t": 0.05,
+          "type": "particle",
+          "particle": "minecraft:note",
+          "locator": "sound_hole",
+          "count": 1,
+          "spread": [0.2,0.1,0.1],
+          "velocity": [0,0.05,0]
+        },
+        {"t":0.25,"type":"sound","sound":"minecraft:block.note_block.guitar","volume":0.7,"pitch":0.944},
+        {"t":0.5,"type":"sound","sound":"minecraft:block.note_block.guitar","volume":0.7,"pitch":1.122},
+        {
+          "t": 0.55,
+          "type": "particle",
+          "particle": "minecraft:note",
+          "locator": "sound_hole",
+          "count": 1,
+          "spread": [0.2,0.1,0.1],
+          "velocity": [0,0.05,0]
+        },
+        {"t":0.75,"type":"sound","sound":"minecraft:block.note_block.guitar","volume":0.7,"pitch":0.944},
+        {"t":1,"type":"sound","sound":"minecraft:block.note_block.guitar","volume":0.7,"pitch":0.841},
+        {
+          "t": 1.05,
+          "type": "particle",
+          "particle": "minecraft:note",
+          "locator": "sound_hole",
+          "count": 1,
+          "spread": [0.2,0.1,0.1],
+          "velocity": [0,0.05,0]
+        },
+        {"t":1.25,"type":"sound","sound":"minecraft:block.note_block.guitar","volume":0.7,"pitch":1},
+        {"t":1.5,"type":"sound","sound":"minecraft:block.note_block.guitar","volume":0.7,"pitch":1.26},
+        {
+          "t": 1.55,
+          "type": "particle",
+          "particle": "minecraft:note",
+          "locator": "sound_hole",
+          "count": 1,
+          "spread": [0.2,0.1,0.1],
+          "velocity": [0,0.05,0]
+        },
+        {"t":1.75,"type":"sound","sound":"minecraft:block.note_block.guitar","volume":0.7,"pitch":1.122}
+      ]
+    }
+  }
+}

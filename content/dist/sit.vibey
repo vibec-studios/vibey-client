@@ -1,0 +1,71 @@
+{
+  "format": "vibey",
+  "formatVersion": 1,
+  "kind": "emote",
+  "id": "vibey:sit",
+  "name": {"en":"Sit","de":"Hinsetzen"},
+  "description": {
+    "en": "Take a seat and chill for a while. Move to get up.",
+    "de": "Setz dich hin und entspann dich. Bewegen zum Aufstehen."
+  },
+  "author": "Vibe Craft Studios",
+  "tags": ["chill","loop","starter"],
+  "rarity": "common",
+  "emote": {"animation":"main","loop":true,"thirdPerson":true,"stopOnMove":true,"hideHeldItems":true},
+  "textures": [],
+  "model": {"bones":[]},
+  "animations": {
+    "main": {
+      "length": 4,
+      "loop": true,
+      "bones": {
+        "root": {"position":[{"t":0,"v":[0,-10,0],"i":"catmullrom"},{"t":4,"v":[0,-10,0],"i":"catmullrom"}]},
+        "right_leg": {
+          "rotation": [
+            {"t":0,"v":[88,-6,0],"i":"catmullrom"},
+            {"t":2,"v":[86,-9,0],"i":"catmullrom"},
+            {"t":4,"v":[88,-6,0],"i":"catmullrom"}
+          ]
+        },
+        "left_leg": {
+          "rotation": [
+            {"t":0,"v":[88,6,0],"i":"catmullrom"},
+            {"t":2,"v":[86,9,0],"i":"catmullrom"},
+            {"t":4,"v":[88,6,0],"i":"catmullrom"}
+          ]
+        },
+        "right_arm": {
+          "rotation": [
+            {"t":0,"v":[-32,0,12],"i":"catmullrom"},
+            {"t":2,"v":[-30,0,13],"i":"catmullrom"},
+            {"t":4,"v":[-32,0,12],"i":"catmullrom"}
+          ]
+        },
+        "left_arm": {
+          "rotation": [
+            {"t":0,"v":[-32,0,-12],"i":"catmullrom"},
+            {"t":2,"v":[-30,0,-13],"i":"catmullrom"},
+            {"t":4,"v":[-32,0,-12],"i":"catmullrom"}
+          ]
+        },
+        "body": {
+          "rotation": [
+            {"t":0,"v":[-3,0,0],"i":"catmullrom"},
+            {"t":2,"v":[-4,0,0],"i":"catmullrom"},
+            {"t":4,"v":[-3,0,0],"i":"catmullrom"}
+          ]
+        },
+        "head": {
+          "rotation": [
+            {"t":0,"v":[6,0,0],"i":"catmullrom"},
+            {"t":0.9,"v":[8,22,0],"i":"catmullrom"},
+            {"t":1.7,"v":[8,22,0],"i":"catmullrom"},
+            {"t":2.4,"v":[2,-16,3],"i":"catmullrom"},
+            {"t":3.2,"v":[4,-10,0],"i":"catmullrom"},
+            {"t":4,"v":[6,0,0],"i":"catmullrom"}
+          ]
+        }
+      }
+    }
+  }
+}

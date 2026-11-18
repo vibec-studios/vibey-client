@@ -1,6 +1,8 @@
 // Validator for `.vibey` v1 bundles – implements every rule of docs/SPEC.md §5.
-// Usage: node tools/validate.mjs <file.vibey> [...]   (exit code 1 on errors)
-import { readFileSync } from "node:fs";
+// Usage: node tools/validate.mjs [file.vibey ...]   (no args: all of content/dist; exit code 1 on errors)
+import { readFileSync, readdirSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { pathToFileURL } from "node:url";
 import { readPNGHeader } from "./png.mjs";
 
@@ -338,7 +340,12 @@ export function validate(input) {
 // CLI
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   let bad = 0;
-  for (const f of process.argv.slice(2)) {
+  let files = process.argv.slice(2);
+  if (!files.length) {
+    const dist = join(dirname(fileURLToPath(import.meta.url)), "..", "dist");
+    files = readdirSync(dist).filter((f) => f.endsWith(".vibey")).sort().map((f) => join(dist, f));
+  }
+  for (const f of files) {
     const r = validate(readFileSync(f));
     console.log(`${r.ok ? "OK  " : "FAIL"} ${f}`);
     for (const e of r.errors) console.log(`   error: ${e}`);

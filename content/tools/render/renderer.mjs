@@ -142,7 +142,7 @@ export function computeNodes(B, opts = {}) {
         if (hidden.has(b.parent)) hidden.add(b.name);
       } else parent = nodes.get(b.attach ?? "body");
       nodes.set("bone:" + b.name, childNode(parent, b.pivot ?? [0, 0, 0], b.rotation, pose[b.name]));
-      if (vis.get(b.name) === false) hidden.add(b.name);
+      if (vis.get(b.name) === false || opts.hideBones?.includes(b.name)) hidden.add(b.name);
     };
     for (const b of B.bones.values()) visit(b);
   }
@@ -285,7 +285,7 @@ export function buildScene(B, opts = {}) {
 // ------------------------------------------------------------------------------------------------ particles
 const VANILLA_PARTICLES = {
   "minecraft:note": { life: 0.6, color: null, glyph: "note", size: 0.25, emissive: true },
-  "minecraft:snowflake": { life: 1.6, color: "#ffffff", glyph: "flake", size: 0.18, gravity: 0.0025 },
+  "minecraft:snowflake": { life: 1.2, color: "#ffffff", glyph: "flake", size: 0.1, gravity: 0.0025 },
   "minecraft:heart": { life: 0.8, color: "#ff4d6d", glyph: "heart", size: 0.25 },
   "minecraft:end_rod": { life: 1.5, color: "#fffbe8", glyph: "dot", size: 0.12, emissive: true },
   "minecraft:happy_villager": { life: 0.8, color: "#5dd36b", glyph: "dot", size: 0.12 },
@@ -383,13 +383,13 @@ export function camera(yawDeg, pitchDeg) {
 
 const proj = (cam, p) => [dot(p, cam.right), -dot(p, cam.up), dot(p, cam.toCam)];
 
-export function sceneBounds(scene, cam, b = { x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity }) {
+export function sceneBounds(scene, cam, b = { x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity }, withParticles = true) {
   for (const q of scene.quads)
     for (const pt of q.pts) {
       const [x, y] = proj(cam, pt.p);
       b.x0 = Math.min(b.x0, x); b.x1 = Math.max(b.x1, x); b.y0 = Math.min(b.y0, y); b.y1 = Math.max(b.y1, y);
     }
-  for (const pa of scene.particles) {
+  for (const pa of withParticles ? scene.particles : []) {
     const [x, y] = proj(cam, pa.p);
     const r = pa.size / 2;
     b.x0 = Math.min(b.x0, x - r); b.x1 = Math.max(b.x1, x + r); b.y0 = Math.min(b.y0, y - r); b.y1 = Math.max(b.y1, y + r);

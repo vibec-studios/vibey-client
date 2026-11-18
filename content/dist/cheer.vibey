@@ -1,0 +1,215 @@
+{
+  "format": "vibey",
+  "formatVersion": 1,
+  "kind": "emote",
+  "id": "vibey:cheer",
+  "name": {"en":"Cheer","de":"Jubeln"},
+  "description": {"en":"Jump for joy with a burst of confetti!","de":"Spring vor Freude – mit einer Ladung Konfetti!"},
+  "author": "Vibe Craft Studios",
+  "tags": ["celebrate","confetti","particles","starter"],
+  "rarity": "common",
+  "emote": {"animation":"main","loop":false,"thirdPerson":true,"stopOnMove":true,"hideHeldItems":true},
+  "textures": [
+    {
+      "id": "main",
+      "width": 16,
+      "height": 16,
+      "png": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAP0lEQVR42mPszvn/n4GBgWFLyTEQxXBg3kcwzWA+EUwxeu9kZMAHYAbYPzgKpv/XbYPQW93/M4yCUTAKhhAAADCaFQaFLIUrAAAAAElFTkSuQmCC"
+    }
+  ],
+  "model": {
+    "texture": "main",
+    "bones": [
+      {
+        "name": "burst",
+        "parent": null,
+        "attach": "root",
+        "pivot": [0,34,0],
+        "rotation": [0,0,0],
+        "cubes": [],
+        "emissive": false,
+        "translucent": false
+      }
+    ],
+    "locators": {"above":{"bone":"burst","position":[0,35,-1]}}
+  },
+  "animations": {
+    "main": {
+      "length": 2.4,
+      "loop": false,
+      "bones": {
+        "root": {
+          "position": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.3,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.55,"v":[0,4.5,0],"i":"catmullrom"},
+            {"t":0.7,"v":[0,5.5,0],"i":"catmullrom"},
+            {"t":0.95,"v":[0,0,0],"i":"catmullrom"},
+            {"t":1.15,"v":[0,1.6,0],"i":"catmullrom"},
+            {"t":1.35,"v":[0,0,0],"i":"catmullrom"},
+            {"t":2.4,"v":[0,0,0],"i":"catmullrom"}
+          ],
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.3,"v":[-6,0,0],"i":"catmullrom"},
+            {"t":0.6,"v":[3,0,0],"i":"catmullrom"},
+            {"t":0.95,"v":[0,0,0],"i":"catmullrom"},
+            {"t":2.4,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "right_arm": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.3,"v":[-35,0,8],"i":"catmullrom"},
+            {"t":0.6,"v":[12,0,150],"i":"catmullrom"},
+            {"t":0.95,"v":[10,0,145],"i":"catmullrom"},
+            {"t":1.15,"v":[10,0,160],"i":"catmullrom"},
+            {"t":1.35,"v":[10,0,140],"i":"catmullrom"},
+            {"t":1.85,"v":[8,0,135],"i":"catmullrom"},
+            {"t":2.4,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "left_arm": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.3,"v":[-35,0,-8],"i":"catmullrom"},
+            {"t":0.6,"v":[12,0,-150],"i":"catmullrom"},
+            {"t":0.95,"v":[10,0,-145],"i":"catmullrom"},
+            {"t":1.15,"v":[10,0,-160],"i":"catmullrom"},
+            {"t":1.35,"v":[10,0,-140],"i":"catmullrom"},
+            {"t":1.85,"v":[8,0,-135],"i":"catmullrom"},
+            {"t":2.4,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "head": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.3,"v":[-12,0,0],"i":"catmullrom"},
+            {"t":0.65,"v":[16,0,0],"i":"catmullrom"},
+            {"t":1,"v":[10,0,0],"i":"catmullrom"},
+            {"t":1.6,"v":[8,0,0],"i":"catmullrom"},
+            {"t":2.4,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "right_leg": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.45,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.7,"v":[-14,0,6],"i":"catmullrom"},
+            {"t":0.95,"v":[0,0,0],"i":"catmullrom"},
+            {"t":2.4,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "left_leg": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.45,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.7,"v":[10,0,-6],"i":"catmullrom"},
+            {"t":0.95,"v":[0,0,0],"i":"catmullrom"},
+            {"t":2.4,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        }
+      },
+      "events": [
+        {"t":0.6,"type":"sound","sound":"minecraft:entity.firework_rocket.blast","volume":0.5,"pitch":1.3},
+        {
+          "t": 0.62,
+          "type": "particle",
+          "sprite": "confetti_purple",
+          "locator": "above",
+          "count": 4,
+          "lifetime": 1.5,
+          "size": 0.09,
+          "spread": [0.2,0.08,0.2],
+          "velocity": [0.045,0.06,0],
+          "gravity": 0.005,
+          "emissive": false
+        },
+        {
+          "t": 0.62,
+          "type": "particle",
+          "sprite": "confetti_pink",
+          "locator": "above",
+          "count": 4,
+          "lifetime": 1.5,
+          "size": 0.09,
+          "spread": [0.2,0.08,0.2],
+          "velocity": [0,0.065,0.045],
+          "gravity": 0.005,
+          "emissive": false
+        },
+        {
+          "t": 0.62,
+          "type": "particle",
+          "sprite": "confetti_purple",
+          "locator": "above",
+          "count": 4,
+          "lifetime": 1.5,
+          "size": 0.09,
+          "spread": [0.2,0.08,0.2],
+          "velocity": [0.032,0.07,0.032],
+          "gravity": 0.005,
+          "emissive": false
+        },
+        {
+          "t": 0.65,
+          "type": "particle",
+          "sprite": "confetti_teal",
+          "locator": "above",
+          "count": 4,
+          "lifetime": 1.5,
+          "size": 0.09,
+          "spread": [0.2,0.08,0.2],
+          "velocity": [-0.045,0.06,0],
+          "gravity": 0.005,
+          "emissive": false
+        },
+        {
+          "t": 0.65,
+          "type": "particle",
+          "sprite": "confetti_gold",
+          "locator": "above",
+          "count": 4,
+          "lifetime": 1.5,
+          "size": 0.09,
+          "spread": [0.2,0.08,0.2],
+          "velocity": [0,0.065,-0.045],
+          "gravity": 0.005,
+          "emissive": false
+        },
+        {
+          "t": 0.65,
+          "type": "particle",
+          "sprite": "confetti_teal",
+          "locator": "above",
+          "count": 4,
+          "lifetime": 1.5,
+          "size": 0.09,
+          "spread": [0.2,0.08,0.2],
+          "velocity": [-0.032,0.07,-0.032],
+          "gravity": 0.005,
+          "emissive": false
+        },
+        {"t":0.75,"type":"sound","sound":"minecraft:entity.firework_rocket.twinkle","volume":0.6,"pitch":1.2},
+        {
+          "t": 1.15,
+          "type": "particle",
+          "sprite": "confetti_teal",
+          "locator": "above",
+          "count": 5,
+          "lifetime": 1.1,
+          "size": 0.08,
+          "spread": [0.4,0.1,0.4],
+          "velocity": [0,0.04,0],
+          "gravity": 0.005
+        }
+      ]
+    }
+  },
+  "sprites": [
+    {"id":"confetti_purple","texture":"main","uv":[0,0,2,2]},
+    {"id":"confetti_teal","texture":"main","uv":[2,0,4,2]},
+    {"id":"confetti_pink","texture":"main","uv":[4,0,6,2]},
+    {"id":"confetti_gold","texture":"main","uv":[6,0,8,2]}
+  ]
+}

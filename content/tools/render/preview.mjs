@@ -56,7 +56,7 @@ function panelView(B, p) {
   const scene = buildScene(B, p);
   const cam = camera(p.cam.yaw, p.cam.pitch);
   if (p.focusHead) scene.quads = scene.quads.filter((q) => q.pts.every((pt) => pt.p[1] >= 23.5));
-  return { b: sceneBounds(scene, cam), cam, own: !!(p.focusHead || p.ownFit) };
+  return { b: sceneBounds(scene, cam, undefined, !!p.fitParticles), cam, own: !!(p.focusHead || p.ownFit) };
 }
 
 /**
@@ -127,7 +127,7 @@ export function sheet(B, title, panels, opts = {}) {
 export function thumbnail(B, p, size = 256) {
   const scene = buildScene(B, p);
   const cam = camera(p.cam.yaw, p.cam.pitch);
-  const view = fitView(sceneBounds(scene, cam), size, size, p.margin ?? 18, p.maxScale ?? 14);
+  const view = fitView(sceneBounds(scene, cam, undefined, p.fitParticles ?? false), size, size, p.margin ?? 18, p.maxScale ?? 14);
   return render(scene, { width: size, height: size, cam, view, ss: 4, bloom: p.bloom ?? 0.5 });
 }
 

@@ -16,11 +16,11 @@ export function previewPlan(B, hints = {}) {
     const n = hints.frames ?? 8;
     const times = hints.times ?? [...Array(n).keys()].map((i) => (a.loop ? (i / n) * a.length : (i / (n - 1)) * a.length * 0.999));
     panels = times.map((t) => ({
-      label: `t = ${t.toFixed(2)}s`, cam: hints.cam ?? FRONT, player: true, time: t,
+      label: `t = ${t.toFixed(2)}s`, cam: hints.cam ?? FRONT, player: true, time: t, fitParticles: true,
       anims: [{ name: j.emote.animation, t }],
     }));
     const hero = hints.hero ?? a.length * 0.5;
-    thumb = { cam: hints.cam ?? FRONT, player: true, time: hero, anims: [{ name: j.emote.animation, t: hero }] };
+    thumb = { cam: hints.cam ?? FRONT, player: true, time: hero, anims: [{ name: j.emote.animation, t: hero }], fitParticles: true };
     sheet = { cols: 4, panelW: 230, panelH: 270, sharedBounds: true, margin: 14 };
   } else {
     const slot = j.cosmetic.slot;
@@ -61,11 +61,12 @@ export function previewPlan(B, hints = {}) {
           { ...base, label: "idle · close", ownFit: true, player: false, cam: { yaw: 35, pitch: 14 }, petScale: sc },
           { ...base, label: "walk", ownFit: true, player: false, cam: { yaw: 90, pitch: 10 }, anims: anim("walk", wl), time: wl, petScale: sc },
         ];
-        thumb = { ...base, player: false, cam: { yaw: 35, pitch: 14 }, petScale: sc };
+        thumb = { ...base, player: false, cam: { yaw: 28, pitch: 10 }, petScale: sc, maxScale: 60 };
         sheet = { maxScale: 14 };
         break;
       }
       case "aura":
+        base.fitParticles = true;
         panels = [
           { ...base, label: "front", cam: FRONT },
           { ...base, label: "back", cam: BACK, time: tIdle + idleLen * 0.4, anims: anim("idle", tIdle + idleLen * 0.4) },
