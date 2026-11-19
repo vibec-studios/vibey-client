@@ -75,9 +75,6 @@ public final class VibeyCore {
         ModuleManager.get().renderHud(g);
         dev.henny.vibeyclient.ui.hud.HudLayout.renderWidgets(g);
         dev.henny.vibeyclient.ui.toast.ToastHooks.renderHud(g);
-        // vanilla draws its toasts right after the HUD in the same layer, where text goes over shapes: without a new
-        // layer our widgets' text (e.g. the clock top right) would show through an advancement toast
-        g.layer();
     }
 
     public static void onWorldJoin() {
