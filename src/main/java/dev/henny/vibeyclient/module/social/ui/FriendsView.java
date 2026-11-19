@@ -113,7 +113,7 @@ final class FriendsView {
         SocialUi.head(g, f.user().id(), f.user().skinUrl(), x + 10, y + 5, 16, f.presence().status());
         int tx = x + 32;
         int tw = right - tx - 4;
-        g.text(g.clip(f.user().name(), tw), tx, y + 4, online ? Theme.TEXT : Theme.MUTED);
+        SocialNames.draw(g, f.user(), tx, y + 4, tw, online ? Theme.TEXT : Theme.MUTED);
         String sub = online ? s.service.activityText(f.presence()) : f.user().statusText();
         if (sub == null && !online) sub = s.module.tr("status.offline");
         if (sub != null) g.text(g.clip(sub, tw), tx, y + 14, Theme.DIM);

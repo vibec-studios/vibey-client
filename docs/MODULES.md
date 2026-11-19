@@ -22,7 +22,7 @@ src/main/resources/
 
 Existing stubs: `social`, `cosmetics`, `emotes`, `multiplayer` (conflicts with mod id `vibey`), `media` (Fabric
 only: the package is excluded from the NeoForge build and not registered there; its parts are *media features*, the
-`lyrics` part conflicts with `vibeylyrics` – see [MEDIA.md](MEDIA.md)), `devlink`, `nametags` (seal + badge glyphs before player names; data in `client/VibeyPlayers`), `pvp` (zoom, crosshair,
+`lyrics` part conflicts with `vibeylyrics` – see [MEDIA.md](MEDIA.md)), `devlink`, `nametags` (seal, rank icons and name styles before player names; data in `client/VibeyPlayers`, `client/ranks`, see [NAMETAGS.md](NAMETAGS.md)), `pvp` (zoom, crosshair,
 toggle sprint, outlines; Fabric 1.21.11 only for now, see [PVP.md](PVP.md)).
 
 ## Targets and boundaries

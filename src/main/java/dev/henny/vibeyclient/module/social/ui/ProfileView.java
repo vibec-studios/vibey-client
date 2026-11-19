@@ -58,10 +58,11 @@ final class ProfileView {
         int nx = cx + 42;
         g.textScaled(g.clip(u.name(), (cw - 42) / 2 + 20), nx, cy + 1, 2, Theme.TEXT, false);
         int ly = cy + 21;
-        if (!"user".equals(u.badge())) {
+        boolean ranked = SocialNames.rankChip(g, u, nx, ly);
+        if (!ranked && !"user".equals(u.badge())) {
             int col = "staff".equals(u.badge()) ? Theme.BRAND : Theme.BRAND2;
             Widgets.chip(g, s.module.tr("badge." + u.badge()), nx, ly, col);
-        } else if (p != null) {
+        } else if (!ranked && p != null) {
             g.rect(nx, ly + 3, 5, 5, SocialUi.statusColor(p.status()));
             g.text(s.module.tr("status." + p.status()), nx + 9, ly + 1, Theme.MUTED);
         }

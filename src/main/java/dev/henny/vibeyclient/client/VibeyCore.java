@@ -64,6 +64,7 @@ public final class VibeyCore {
         Lang.tick();
         Keybinds.tick();
         ServerRulesClient.tick();
+        dev.henny.vibeyclient.client.ranks.RanksSync.tick();
         mm.tick();
         dev.henny.vibeyclient.launcher.LauncherStatus.tick();
         dev.henny.vibeyclient.ui.notice.Announcements.tick();

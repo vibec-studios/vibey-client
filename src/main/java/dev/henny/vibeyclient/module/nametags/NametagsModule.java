@@ -1,21 +1,21 @@
 package dev.henny.vibeyclient.module.nametags;
 
 import dev.henny.vibeyclient.api.ModuleCategory;
+import dev.henny.vibeyclient.api.ServerRules;
 import dev.henny.vibeyclient.api.VibeyModule;
 import dev.henny.vibeyclient.api.setting.Settings.BoolSetting;
+import dev.henny.vibeyclient.ui.Panel;
 
-/**
- * A small seal before the names of players who run Vibey Client (in-world nametag and tab list), plus badge icons
- * (staff, supporter, creator) from the backend (VIBE-API-2 §5). Who runs Vibey comes from
- * {@link dev.henny.vibeyclient.client.VibeyPlayers} (cosmetics lookup + server channel). The icons are glyphs of
- * the own font {@code vibeyclient:icons}; the mixins only prepend a component to the vanilla name.
- */
 public final class NametagsModule extends VibeyModule {
     static volatile NametagsModule instance;
 
-    public final BoolSetting nametag = bool("nametag", true);
-    public final BoolSetting tabList = bool("tabList", true);
-    public final BoolSetting badges = bool("badges", true);
+    public final BoolSetting nametag = bool("nametag", true).section("show");
+    public final BoolSetting tabList = bool("tabList", true).section("show");
+    public final BoolSetting chat = bool("chat", true).section("show");
+    public final BoolSetting ranks = bool("ranks", true).section("icons").serverRule(NametagRules.RANKS);
+    public final BoolSetting badges = bool("badges", true).section("icons").serverRule(NametagRules.RANKS);
+    public final BoolSetting nameStyles = bool("nameStyles", true).section("names").serverRule(NametagRules.STYLES);
+    public final BoolSetting animate = bool("animate", true).section("names").serverRule(NametagRules.STYLES);
 
     public NametagsModule() {
         super("nametags", ModuleCategory.SOCIAL);
@@ -29,13 +29,25 @@ public final class NametagsModule extends VibeyModule {
 
     @Override
     public void onLoad() {
-        nametag.onChange(v -> NameIcons.clearCaches());
-        tabList.onChange(v -> NameIcons.clearCaches());
-        badges.onChange(v -> NameIcons.clearCaches());
+        NametagRules.declare();
+        for (BoolSetting s : new BoolSetting[] {nametag, tabList, chat, ranks, badges, nameStyles, animate}) {
+            s.onChange(v -> NameIcons.clearCaches());
+        }
+        ServerRules.listen(NameIcons::clearCaches);
+    }
+
+    @Override
+    public void tick() {
+        AnimatedSet.update(Surface.NAMETAG.flags(this));
     }
 
     @Override
     public void onDisable() {
         NameIcons.clearCaches();
+    }
+
+    @Override
+    public Panel createSettingsPanel() {
+        return new NametagsPanel(this);
     }
 }

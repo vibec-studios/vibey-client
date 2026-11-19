@@ -1,0 +1,226 @@
+{
+  "version": 1,
+  "size": 7,
+  "cell": 8,
+  "transparent": ".",
+  "palette": {
+    "B": "#8f9aa6",
+    "D": "#7d8894",
+    "S": "#e8ecf0",
+    "E": "#141418",
+    "N": "#2a2a30",
+    "K": "#ff9db8",
+    "k": "#d9708f",
+    "W": "#ffffff",
+    "L": "#c8ccd2",
+    "P": "#8b6cff",
+    "Q": "#6a4fe0",
+    "R": "#ff5470",
+    "r": "#d93a58",
+    "H": "#ffc2cf",
+    "T": "#3fe0c5",
+    "t": "#26b39c",
+    "Y": "#f4d6a0",
+    "y": "#d9b77a",
+    "G": "#2a2a30",
+    "X": "#ffb547",
+    "x": "#d98f1f",
+    "O": "#ff8a3d",
+    "A": "#4aa8ff",
+    "a": "#2f7fd6"
+  },
+  "icons": {
+    "seal": {
+      "codepoint": "U+E000",
+      "rows": [
+        ".DDDDD.",
+        "DBBBBBD",
+        "BEBBBEB",
+        "BBBBBBB",
+        "KSSNSSK",
+        ".SSSSS.",
+        "..BBB.."
+      ]
+    },
+    "staff": {
+      "codepoint": "U+E001",
+      "rows": [
+        "PPPPPPP",
+        "PPPWPPP",
+        "PWWWWWP",
+        "QPWWWPQ",
+        ".QWPWQ.",
+        "..QQQ..",
+        "...Q..."
+      ]
+    },
+    "heart": {
+      "codepoint": "U+E002",
+      "rows": [
+        ".RR.RR.",
+        "RHRRRRR",
+        "RRRRRRR",
+        "rRRRRRr",
+        ".rRRRr.",
+        "..rRr..",
+        "...r..."
+      ]
+    },
+    "pencil": {
+      "codepoint": "U+E003",
+      "rows": [
+        ".....XX",
+        "....TXX",
+        "...TTt.",
+        "..TTt..",
+        ".TTt...",
+        "YTt....",
+        "GY....."
+      ]
+    },
+    "shield-crown": {
+      "codepoint": "U+E010",
+      "rows": [
+        "XXXXXXX",
+        "XWXWXWX",
+        "XWWWWWX",
+        "xWWWWWx",
+        ".xXXXx.",
+        "..xxx..",
+        "...x..."
+      ]
+    },
+    "shield": {
+      "codepoint": "U+E011",
+      "rows": [
+        "RRRRRRR",
+        "RRRWRRR",
+        "RWWWWWR",
+        "rRRWRRr",
+        ".rRWRr.",
+        "..rrr..",
+        "...r..."
+      ]
+    },
+    "shield-hammer": {
+      "codepoint": "U+E012",
+      "rows": [
+        "TTTTTTT",
+        "TWWWWWT",
+        "TWWWWWT",
+        "tTTWTTt",
+        ".tTWTt.",
+        "..ttt..",
+        "...t..."
+      ]
+    },
+    "shield-code": {
+      "codepoint": "U+E013",
+      "rows": [
+        "PPPPPPP",
+        "PWPPPPP",
+        "PPWPPPP",
+        "QWPWWWQ",
+        ".QPPPQ.",
+        "..QQQ..",
+        "...Q..."
+      ]
+    },
+    "star": {
+      "codepoint": "U+E014",
+      "rows": [
+        "...Y...",
+        "..YYY..",
+        "YYYYYYY",
+        ".YYYYY.",
+        "..YyY..",
+        ".YY.YY.",
+        ".y...y."
+      ]
+    },
+    "flask": {
+      "codepoint": "U+E015",
+      "rows": [
+        ".BBBBB.",
+        "..BSB..",
+        "..BSB..",
+        ".BSSSB.",
+        "BTTTTTB",
+        "BtTTTtB",
+        ".BBBBB."
+      ]
+    },
+    "crown": {
+      "codepoint": "U+E016",
+      "rows": [
+        ".......",
+        "K..K..K",
+        "KK.K.KK",
+        "KKKKKKK",
+        "KWKWKWK",
+        "kkkkkkk",
+        "......."
+      ]
+    },
+    "check": {
+      "codepoint": "U+E017",
+      "rows": [
+        "......T",
+        ".....TT",
+        "T...TT.",
+        "TT.TT..",
+        ".TTT...",
+        "..T....",
+        "......."
+      ]
+    },
+    "gem": {
+      "codepoint": "U+E018",
+      "rows": [
+        ".AAAAA.",
+        "AWAAAaA",
+        "aaaaaaa",
+        ".aAAAa.",
+        "..aAa..",
+        "...a...",
+        "......."
+      ]
+    },
+    "flame": {
+      "codepoint": "U+E019",
+      "rows": [
+        "...O...",
+        "..OO...",
+        ".OOXO..",
+        ".OXXOO.",
+        "OXXYXO.",
+        "OXYYXO.",
+        ".OOOO.."
+      ]
+    },
+    "generic": {
+      "codepoint": "U+E02F",
+      "rows": [
+        "...W...",
+        "..WWW..",
+        ".WWWWL.",
+        "WWWWLLL",
+        ".WWLLL.",
+        "..LLL..",
+        "...L..."
+      ],
+      "tint": true
+    }
+  },
+  "ranks": {
+    "owner": "shield-crown",
+    "admin": "shield",
+    "mod": "shield-hammer",
+    "dev": "shield-code",
+    "partner": "star",
+    "creator": "pencil",
+    "supporter": "crown",
+    "beta": "flask",
+    "staff": "staff"
+  }
+}

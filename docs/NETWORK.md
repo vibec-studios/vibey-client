@@ -42,7 +42,8 @@ Every HTTP request Vibey Client makes, how it is cached, and how to measure it. 
 | login done | `GET /ws` (WebSocket) → hello → identify → `ready` | | own HTTP/1.1 upgrade connection; heartbeat ping every 30 s |
 | every fresh `ready` | `POST /api/v1/client/bootstrap` with the 9 GETs below, **or** the 9 single GETs | `Bootstrap`: each path handed out once within 20 s | feature-detected: `ready.features.clientBootstrap`; older backends get the single GETs |
 | (bundled) | `friends/requests`, `blocks`, `chats`, `invites?direction=incoming&pendingOnly=true`, `notifications?limit=50`, `hosting/friends`, `hosting/sessions`, `cosmetics/me`, `cosmetics/loadout/signed` | | |
-| players around (every 2–2.5 min, alone every 10–10.5 min), newcomers | `POST /api/v1/cosmetics/lookup` | batched per 2 s (40 ticks) | `client`/`badges` have no push event yet |
+| players around (every 2–2.5 min, alone every 10–10.5 min), newcomers | `POST /api/v1/cosmetics/lookup` | batched per 2 s (40 ticks) | also `rank`/`tags`/`nameStyle`; changes are pushed as `nametag.updated` (new backends) |
+| `ready.ranksVersion` / `ranks.updated` differs from the cached version | `GET /api/v1/ranks` | disk copy `cache/ranks.json` + `ranks.etag`, `If-None-Match` | old backends (no `ranksVersion`): never; see NAMETAGS.md |
 | loadout change (debounced 1.2 s) | `PUT /api/v1/cosmetics/loadout` | answer carries the signed token | |
 | signed token 30 min before expiry (6 h) | `GET /cosmetics/loadout/signed` | | |
 | user actions | chats, invites, play links, search, submissions … | | unchanged |

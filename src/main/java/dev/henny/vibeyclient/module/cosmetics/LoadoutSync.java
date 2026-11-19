@@ -21,6 +21,7 @@ import dev.henny.vibeyclient.backend.BackendClient;
 import dev.henny.vibeyclient.backend.LoadoutKeys;
 import dev.henny.vibeyclient.backend.net.Meta;
 import dev.henny.vibeyclient.client.VibeyPlayers;
+import dev.henny.vibeyclient.client.ranks.PlayerEntry;
 import dev.henny.vibeyclient.net.LoadoutToken;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
@@ -154,9 +155,7 @@ public final class LoadoutSync {
         listeners.add(b.onEvent("loadout.updated", d -> {
             UUID id = uuid(d.get("userId"));
             if (id == null) return;
-            // VIBE-API-2 §5: client/badges also come with loadout updates (absent on older backends)
-            if (d.has("client") || d.has("badges"))
-                VibeyPlayers.backend(id, d.get("client") instanceof JsonPrimitive c && "vibey".equals(c.getAsString()), badges(d.get("badges")));
+            if (PlayerEntry.carriesNametag(d)) PlayerEntry.apply(id, d);
             if (id.equals(module.selfId())) return;
             fromBackend.put(id, new Remote(slots(d.get("slots")), System.currentTimeMillis()));
         }));
@@ -476,19 +475,12 @@ public final class LoadoutSync {
             for (Map.Entry<String, JsonElement> e : users.entrySet()) {
                 UUID id = uuid(new JsonPrimitive(e.getKey()));
                 if (id == null || !(e.getValue() instanceof JsonObject u)) continue;
-                VibeyPlayers.backend(id, u.get("client") instanceof JsonPrimitive c && "vibey".equals(c.getAsString()), badges(u.get("badges")));
+                PlayerEntry.apply(id, u);
                 if (id.equals(me)) continue; // our own loadout is local
                 Remote old = fromBackend.get(id);
                 if (old == null || old.time < t) fromBackend.put(id, new Remote(slots(u.get("slots")), t));
             }
         }));
-    }
-
-    private static List<String> badges(JsonElement e) {
-        if (!(e instanceof JsonArray a)) return List.of();
-        List<String> out = new ArrayList<>();
-        for (JsonElement x : a) if (x instanceof JsonPrimitive p && p.isString()) out.add(p.getAsString());
-        return out;
     }
 
     /**
