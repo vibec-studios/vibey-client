@@ -395,15 +395,13 @@ public final class HudEditorScreen extends BaseScreen {
             dashed(g, x - 1, y - 1, w + 2, h + 2, 0x30FFFFFF);
         }
         if (disabled) {
-            String badge = Lang.tr("core.settings.serverDisabled");
-            int bw = g.width(badge) + 16;
+            // the shared "Disabled by this server" badge (with the server's message as tooltip)
+            int bw = dev.henny.vibeyclient.ui.ServerBadge.width(g);
             int bx = x + w / 2 - bw / 2;
             int by = h >= 14 ? y + h / 2 - 6 : y + h + 3;
             bx = Math.max(2, Math.min(width - bw - 2, bx));
-            g.rect(bx, by, bw, 12, 0xF0201418);
-            g.outline(bx, by, bw, 12, Theme.alpha(Theme.WARN, 0.8f));
-            Icons.draw(g, HudIcons.LOCK, bx + 3, by + 2, 1, Theme.WARN);
-            g.text(badge, bx + 13, by + 2, Theme.WARN);
+            g.rect(bx, by, bw, dev.henny.vibeyclient.ui.ServerBadge.H, 0xF0201418);
+            dev.henny.vibeyclient.ui.ServerBadge.draw(ui, e, bx, by);
         }
         // name tag for hover / single selection
         if ((hov || (sel && selection.size() == 1)) && mode != MARQUEE && mode != MOVE && mode != RESIZE) {

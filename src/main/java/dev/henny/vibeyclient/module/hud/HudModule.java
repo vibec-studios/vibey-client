@@ -60,6 +60,12 @@ public final class HudModule extends VibeyModule {
         return instance;
     }
 
+    /** The widgets' server-rule keys (tile and page say "Disabled by this server" while one is off). */
+    @Override
+    public java.util.List<String> serverRuleKeys() {
+        return BuiltinWidgets.RULE_KEYS;
+    }
+
     @Override
     public int accentColor() {
         return Theme.BRAND2;

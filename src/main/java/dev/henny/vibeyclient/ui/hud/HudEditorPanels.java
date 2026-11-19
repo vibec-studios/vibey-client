@@ -389,10 +389,10 @@ final class HudEditorPanels {
         int tx = x + 32;
         int maxW = tgx - tx - (e.duplicable() && !e.isCopy() ? 26 : 6);
         g.text(g.clip(e.displayName(), maxW), tx, y + 5, shown ? Theme.TEXT : Theme.MUTED);
-        String sub = disabled ? Lang.tr("core.settings.serverDisabled")
+        String sub = disabled ? dev.henny.vibeyclient.ui.ServerBadge.label()
                 : e.descriptionKey() != null ? Lang.tr(e.descriptionKey()) : null;
         if (sub != null) g.text(g.clip(sub, maxW), tx, y + 15, disabled ? Theme.WARN : Theme.DIM);
-        if (disabled) ui.tooltip(key(e, 2), x, y, w, h, ServerRulesText.message());
+        if (disabled) ui.tooltip(key(e, 2), x, y, w, h, dev.henny.vibeyclient.ui.ServerBadge.hint());
         if (toggled) {
             if (shown) {
                 s.checkpoint(null);
@@ -406,15 +406,6 @@ final class HudEditorPanels {
             else s.selectOnly(e);
         }
         return y + h;
-    }
-
-    /** The server's message for disabled widgets (or a default line). */
-    static final class ServerRulesText {
-        static String message() {
-            String m = dev.henny.vibeyclient.api.ServerRules.message();
-            String help = Lang.tr("core.settings.serverDisabledHelp");
-            return m != null ? help + "\n" + m : help;
-        }
     }
 
     // ============================================================================================ menus
