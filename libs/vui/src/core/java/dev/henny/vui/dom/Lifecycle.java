@@ -12,10 +12,10 @@ public final class Lifecycle {
         Document doc = e.document();
         if (doc != null && doc.isMounted() && !e.flags().internal) {
             e.flags().entering = true;
-            doc.entering(e);
+            doc.hooks().entering(e);
         }
         if (e.behavior() != null) e.behavior().mount(e);
-        if (doc != null) doc.registerMounted(e);
+        if (doc != null) doc.hooks().registerMounted(e);
         for (int i = 0; i < e.childCount(); i++) mountQuietly(e.child(i));
     }
 
@@ -23,7 +23,7 @@ public final class Lifecycle {
         if (e.flags().mounted) return;
         e.flags().mounted = true;
         if (e.behavior() != null) e.behavior().mount(e);
-        if (e.document() != null) e.document().registerMounted(e);
+        if (e.document() != null) e.document().hooks().registerMounted(e);
         for (int i = 0; i < e.childCount(); i++) mountQuietly(e.child(i));
     }
 
@@ -34,6 +34,6 @@ public final class Lifecycle {
         e.effects().clear();
         for (ChildSource s : e.sources()) s.dispose();
         if (e.behavior() != null && e.flags().mounted) e.behavior().unmount(e);
-        if (e.document() != null) e.document().forget(e);
+        if (e.document() != null) e.document().hooks().forget(e);
     }
 }

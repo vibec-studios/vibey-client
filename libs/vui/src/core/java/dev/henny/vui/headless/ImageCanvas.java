@@ -86,9 +86,12 @@ public final class ImageCanvas implements Canvas {
     @Override
     public void text(CharSequence text, int start, int end, float x, float y, int argb, boolean shadow, boolean bold) {
         float pen = x;
-        for (int i = start; i < end; i++) {
-            glyph(text.charAt(i), pen, y, argb, shadow, bold);
+        int i = start;
+        while (i < end) {
+            int cp = Character.codePointAt(text, i);
+            glyph(cp, pen, y, argb, shadow, bold);
             pen += PixelFont.ADVANCE + (bold ? 1 : 0);
+            i += Character.charCount(cp);
         }
     }
 

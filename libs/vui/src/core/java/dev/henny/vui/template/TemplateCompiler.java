@@ -80,7 +80,10 @@ public final class TemplateCompiler {
                     if (a.name().equals("id")) id = a.value();
                     else if (a.name().equals("class")) staticClass = a.value();
                     else if (a.name().equals("style")) style.addAll(CssParser.parseInline(nonNull(a.value()), vp, diagnostics));
-                    else if (StyleAttributes.isStyle(a.name()) && a.value() != null) style.add(new Declaration(a.name(), a.value(), vp));
+                    else if (StyleAttributes.isStyle(a.name()) && a.value() != null) {
+                        style.add(new Declaration(a.name(), a.value(), vp));
+                        attrs.put(a.name(), a.value());
+                    }
                     else attrs.put(a.name(), a.value() == null ? "true" : a.value());
                 }
                 case BIND -> {

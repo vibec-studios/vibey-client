@@ -56,11 +56,12 @@ final class DocumentBuilder implements BuildHost {
     @Override
     public void registerRef(String name, Element element) {
         element.ref(name);
-        document.registerRef(name, element);
+        document.hooks().registerRef(name, element);
     }
 
     @Override
     public void useComponentStyles(CompiledTemplate template) {
+        document.hooks().useComponent(template);
         document.styles().addComponentSheet(template.id(), template.styles());
     }
 

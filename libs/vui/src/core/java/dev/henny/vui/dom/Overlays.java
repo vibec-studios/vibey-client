@@ -29,6 +29,7 @@ public final class Overlays {
     }
 
     public List<Element> open() {
+        refreshOpen();
         return open;
     }
 
@@ -37,11 +38,12 @@ public final class Overlays {
     }
 
     public Element tooltipBubble() {
-        if (tooltipBubble == null) tooltipBubble = document.createTooltipBubble();
+        if (tooltipBubble == null) tooltipBubble = document.hooks().createTooltipBubble();
         return tooltipBubble;
     }
 
     public Element trapScope() {
+        refreshOpen();
         for (int i = open.size() - 1; i >= 0; i--) {
             Element e = open.get(i);
             if (e.behavior() instanceof FocusTrap) return e;
@@ -50,6 +52,7 @@ public final class Overlays {
     }
 
     public boolean closeTop() {
+        refreshOpen();
         for (int i = open.size() - 1; i >= 0; i--) {
             Element e = open.get(i);
             if (e.behavior() instanceof Dismissable d) {
@@ -71,6 +74,26 @@ public final class Overlays {
     void layout(LayoutEngine engine, float vw, float vh) {
         refreshOpen();
         for (int i = 0; i < open.size(); i++) place(open.get(i), engine, vw, vh);
+    }
+
+    public void lightDismiss(Element target) {
+        refreshOpen();
+        for (int i = open.size() - 1; i >= 0; i--) {
+            Element o = open.get(i);
+            if (!(o.behavior() instanceof dev.henny.vui.component.builtin.OverlayBehavior b) || !b.lightDismiss()) continue;
+            if (inside(target, o) || inside(target, anchorOf(o))) continue;
+            b.dismiss(o);
+        }
+    }
+
+    private static Element anchorOf(Element o) {
+        return o.prop("$anchor") instanceof Element a ? a : o.parent();
+    }
+
+    private static boolean inside(Element node, Element ancestor) {
+        if (ancestor == null) return false;
+        for (Element p = node; p != null; p = p.parent()) if (p == ancestor) return true;
+        return false;
     }
 
     private void place(Element e, LayoutEngine engine, float vw, float vh) {

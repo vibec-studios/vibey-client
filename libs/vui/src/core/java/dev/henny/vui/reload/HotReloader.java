@@ -81,11 +81,7 @@ public final class HotReloader implements AutoCloseable {
 
     private DocumentId idOf(Path p) {
         for (ResourceRoot root : registry.allRoots()) {
-            if (root.directory() == null) continue;
-            Path dir = root.directory();
-            if (!p.startsWith(dir)) continue;
-            String rel = dir.relativize(p).toString().replace('\\', '/');
-            DocumentId id = DocumentId.fromResource(rel);
+            DocumentId id = root.idFor(p);
             if (id != null) return id;
         }
         return null;

@@ -52,11 +52,11 @@ public final class PointerEvent extends Event {
     }
 
     public float localX() {
-        return x - currentTarget().box().x;
+        return x - dev.henny.vui.layout.ScreenRects.of(currentTarget()).x();
     }
 
     public float localY() {
-        return y - currentTarget().box().y;
+        return y - dev.henny.vui.layout.ScreenRects.of(currentTarget()).y();
     }
 
     public float dx() {

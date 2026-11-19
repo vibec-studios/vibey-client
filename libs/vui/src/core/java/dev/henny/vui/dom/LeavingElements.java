@@ -6,27 +6,22 @@ import java.util.List;
 final class LeavingElements {
     private final List<Element> elements = new ArrayList<>();
     private final List<ChildSource> owners = new ArrayList<>();
-    private final List<Integer> frames = new ArrayList<>();
     private DocumentStyles styles;
 
     void add(Element e, ChildSource owner, DocumentStyles styles) {
         this.styles = styles;
         elements.add(e);
         owners.add(owner);
-        frames.add(0);
     }
 
     void update() {
         for (int i = elements.size() - 1; i >= 0; i--) {
             Element e = elements.get(i);
-            int seen = frames.get(i) + 1;
-            frames.set(i, seen);
             boolean animating = styles != null && styles.isAnimating(e);
-            if (seen < 2 || animating) continue;
+            if (e.flags().style || animating) continue;
             ChildSource owner = owners.get(i);
             elements.remove(i);
             owners.remove(i);
-            frames.remove(i);
             owner.removeLeft(e);
             Lifecycle.dispose(e);
         }
@@ -35,7 +30,6 @@ final class LeavingElements {
     void clear() {
         elements.clear();
         owners.clear();
-        frames.clear();
     }
 
     int size() {

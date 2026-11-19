@@ -28,8 +28,11 @@ final class KeyframePlayer {
     }
 
     boolean touches(boolean layout, boolean inherited) {
-        for (Keyframes.Stop stop : frames.stops()) {
-            for (Declaration d : stop.declarations()) {
+        List<Keyframes.Stop> stops = frames.stops();
+        for (int s = 0; s < stops.size(); s++) {
+            List<Declaration> decls = stops.get(s).declarations();
+            for (int k = 0; k < decls.size(); k++) {
+                Declaration d = decls.get(k);
                 for (int i = 0; i < d.size(); i++) {
                     Prop p = d.prop(i);
                     if (layout && p.affectsLayout() || inherited && p.inherited()) return true;
@@ -71,7 +74,9 @@ final class KeyframePlayer {
         if (stops.isEmpty()) return;
         float eased = spec.easing().apply(progress);
         for (int s = 0; s < stops.size(); s++) {
-            for (Declaration d : stops.get(s).declarations()) {
+            List<Declaration> decls = stops.get(s).declarations();
+            for (int k = 0; k < decls.size(); k++) {
+                Declaration d = decls.get(k);
                 if (!d.resolve(theme, errors)) continue;
                 for (int i = 0; i < d.size(); i++) applyProp(d.prop(i), eased, stops, base, out, theme, errors);
             }
@@ -83,7 +88,8 @@ final class KeyframePlayer {
         float toOffset = 1f;
         StyleValue from = null;
         StyleValue to = null;
-        for (Keyframes.Stop stop : stops) {
+        for (int s = 0; s < stops.size(); s++) {
+            Keyframes.Stop stop = stops.get(s);
             StyleValue v = valueIn(stop, p, theme, errors);
             if (v == null) continue;
             if (stop.offset() <= t) {
@@ -107,7 +113,9 @@ final class KeyframePlayer {
 
     private static StyleValue valueIn(Keyframes.Stop stop, Prop p, Theme theme, ErrorSink errors) {
         StyleValue found = null;
-        for (Declaration d : stop.declarations()) {
+        List<Declaration> decls = stop.declarations();
+        for (int k = 0; k < decls.size(); k++) {
+            Declaration d = decls.get(k);
             if (!d.resolve(theme, errors)) continue;
             for (int i = 0; i < d.size(); i++) if (d.prop(i) == p) found = d.value(i);
         }

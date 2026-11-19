@@ -41,14 +41,11 @@ public class Element implements StyleTarget {
     private String ref;
     private Scope scope;
     private TextContent text;
-    private List<Declaration> staticStyle = List.of();
-    private List<Declaration> boundStyle = List.of();
-    private List<Declaration> inlineStyle = List.of();
+    private final InlineStyles inline = new InlineStyles();
     private StyleAnimator animator;
     private Object behaviorState;
     private ChildSource owner;
-    private float scrollX;
-    private float scrollY;
+    private final ScrollOffset scroll = new ScrollOffset();
 
     public Element(String tag, Behavior behavior, SourcePos pos) {
         this.tag = tag;
@@ -194,51 +191,32 @@ public class Element implements StyleTarget {
     }
 
     public float scrollX() {
-        return scrollX;
+        return scroll.x();
     }
 
     public float scrollY() {
-        return scrollY;
+        return scroll.y();
     }
 
     public void scrollTo(float x, float y) {
-        float maxX = Math.max(0, box.contentWidth - box.innerWidth());
-        float maxY = Math.max(0, box.contentHeight - box.innerHeight());
-        float nx = Math.max(0, Math.min(maxX, x));
-        float ny = Math.max(0, Math.min(maxY, y));
-        if (nx == scrollX && ny == scrollY) return;
-        scrollX = nx;
-        scrollY = ny;
-        if (behavior != null) behavior.scrolled(this);
+        if (scroll.clampTo(box, x, y) && behavior != null) behavior.scrolled(this);
     }
 
     public void restoreScroll(float x, float y) {
-        scrollX = x;
-        scrollY = y;
+        scroll.set(x, y);
     }
 
     public List<Declaration> inlineStyle() {
-        return inlineStyle;
+        return inline.merged();
     }
 
     public void staticStyle(List<Declaration> declarations) {
-        staticStyle = declarations;
-        mergeInline();
+        inline.fixed(declarations);
+        markStyleDirty();
     }
 
     public void boundStyle(List<Declaration> declarations) {
-        boundStyle = declarations;
-        mergeInline();
-    }
-
-    private void mergeInline() {
-        if (boundStyle.isEmpty()) inlineStyle = staticStyle;
-        else if (staticStyle.isEmpty()) inlineStyle = boundStyle;
-        else {
-            List<Declaration> all = new ArrayList<>(staticStyle);
-            all.addAll(boundStyle);
-            inlineStyle = all;
-        }
+        inline.bound(declarations);
         markStyleDirty();
     }
 
@@ -246,9 +224,6 @@ public class Element implements StyleTarget {
         return props.get(name);
     }
 
-    public boolean hasProp(String name) {
-        return props.containsKey(name);
-    }
 
     public void prop(String name, Object value) {
         boolean had = props.containsKey(name);
@@ -290,16 +265,7 @@ public class Element implements StyleTarget {
         parent = p;
     }
 
-    public void appendChild(Element child) {
-        sources.add(new StaticChild(child));
-        rebuildChildren();
-    }
 
-    public void removeAllChildren() {
-        for (ChildSource s : sources) s.dispose();
-        sources.clear();
-        rebuildChildren();
-    }
 
     public void rebuildChildren() {
         ChildListBuilder.rebuild(this);

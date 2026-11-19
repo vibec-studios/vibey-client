@@ -65,6 +65,8 @@ public final class EventSystem {
         state.lastY = y;
         tooltips.hide();
         Element target = hit(x, y);
+        document.overlays().lightDismiss(target);
+        target = hit(x, y);
         Hover.update(state, target, this);
         state.press(target, button, x, y);
         Hover.active(target, true);

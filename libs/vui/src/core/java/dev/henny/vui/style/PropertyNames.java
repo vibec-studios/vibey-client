@@ -27,39 +27,10 @@ public final class PropertyNames {
     }
 
     public static String suggest(String name) {
-        String best = null;
-        int bestDistance = Integer.MAX_VALUE;
-        for (Prop p : Prop.values()) {
-            int d = distance(name, p.cssName());
-            if (d < bestDistance) {
-                bestDistance = d;
-                best = p.cssName();
-            }
-        }
-        for (String s : Shorthands.names()) {
-            int d = distance(name, s);
-            if (d < bestDistance) {
-                bestDistance = d;
-                best = s;
-            }
-        }
-        return bestDistance <= 3 ? best : null;
-    }
-
-    private static int distance(String a, String b) {
-        int[] prev = new int[b.length() + 1];
-        int[] cur = new int[b.length() + 1];
-        for (int j = 0; j <= b.length(); j++) prev[j] = j;
-        for (int i = 1; i <= a.length(); i++) {
-            cur[0] = i;
-            for (int j = 1; j <= b.length(); j++) {
-                int cost = a.charAt(i - 1) == b.charAt(j - 1) ? 0 : 1;
-                cur[j] = Math.min(Math.min(cur[j - 1] + 1, prev[j] + 1), prev[j - 1] + cost);
-            }
-            int[] t = prev;
-            prev = cur;
-            cur = t;
-        }
-        return prev[b.length()];
+        java.util.List<String> all = new java.util.ArrayList<>();
+        for (Prop p : Prop.values()) all.add(p.cssName());
+        all.addAll(Shorthands.names());
+        all.addAll(ALIASES.keySet());
+        return dev.henny.vui.diag.Suggest.closest(name, all, 3);
     }
 }

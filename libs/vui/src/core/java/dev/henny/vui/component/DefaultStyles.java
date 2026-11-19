@@ -88,6 +88,5 @@ public final class DefaultStyles {
             colorpicker-panel { width: 110; height: 80; padding: 4; background: $surface; border: 1 $line2; cursor: pointer; }
             toast { display: row; align-items: center; gap: 6; padding: 6 8; min-width: 140; background: $surface;
                     border: 1 $line2; transition: opacity 150ms out, translate-y 150ms out; }
-            toast:enter, toast:leave { opacity: 0; translate-y: 8; }
             """;
 }

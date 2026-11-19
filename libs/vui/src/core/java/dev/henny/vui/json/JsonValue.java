@@ -51,6 +51,7 @@ public final class JsonValue {
     }
 
     public String asString() {
+        if (value instanceof Double d && d == Math.rint(d) && Math.abs(d) < 1e15) return Long.toString(d.longValue());
         return value == null ? null : String.valueOf(toPlain());
     }
 

@@ -18,6 +18,7 @@ import dev.henny.vui.component.builtin.SliderBehavior;
 import dev.henny.vui.component.builtin.SpinnerBehavior;
 import dev.henny.vui.component.builtin.TextFieldBehavior;
 import dev.henny.vui.component.builtin.ToggleBehavior;
+import dev.henny.vui.component.builtin.TooltipBehavior;
 import dev.henny.vui.dom.Element;
 import dev.henny.vui.template.TagCatalog;
 
@@ -49,8 +50,8 @@ public final class Behaviors implements TagCatalog {
         b.register("segmented", new OptionGroupBehavior("segment"));
         b.register("tabs", new OptionGroupBehavior("tab"));
         b.register("list", new ListBehavior());
-        b.register("tooltip", new OverlayBehavior("bottom", false));
-        b.register("tooltip-bubble", new OverlayBehavior("bottom", false));
+        b.register("tooltip", new TooltipBehavior());
+        b.register("tooltip-bubble", new TooltipBehavior());
         b.register("popover", new PopoverBehavior());
         b.register("modal", new ModalBehavior());
         b.register("keybind", new KeybindBehavior());

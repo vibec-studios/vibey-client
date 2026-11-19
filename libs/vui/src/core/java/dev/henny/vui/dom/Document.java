@@ -7,14 +7,11 @@ import dev.henny.vui.diag.SourcePos;
 import dev.henny.vui.event.EventSystem;
 import dev.henny.vui.expr.ControllerScope;
 import dev.henny.vui.layout.LayoutEngine;
+import dev.henny.vui.layout.Size;
 import dev.henny.vui.render.Canvas;
-import dev.henny.vui.style.StateFlags;
 import dev.henny.vui.template.CompiledTemplate;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public final class Document {
     private final Vui vui;
@@ -24,13 +21,11 @@ public final class Document {
     private final DocumentEffects effects;
     private final DocumentStyles styles;
     private final Overlays overlays = new Overlays(this);
+    private final MountRegistry mounts = new MountRegistry();
+    private final DocumentHooks hooks = new DocumentHooks(this);
     private final EventSystem events;
     private final LayoutEngine layout;
     private final DocumentRenderer renderer;
-    private final Map<String, Element> refs = new HashMap<>();
-    private final List<Element> entering = new ArrayList<>();
-    private final LeavingElements leaving = new LeavingElements();
-    private final List<Element> framed = new ArrayList<>();
     private final ControllerScope rootScope;
     private CompiledTemplate template;
     private Element root;
@@ -67,19 +62,6 @@ public final class Document {
         invalidateLayout();
     }
 
-    public void reloadFailed(Diagnostics diagnostics) {
-        reloadErrors = diagnostics;
-        errors.touch();
-    }
-
-    public String documentId() {
-        return documentId != null ? documentId : template.id();
-    }
-
-    public void documentId(String id) {
-        documentId = id;
-    }
-
     public void swap(CompiledTemplate next) {
         reloadErrors = new Diagnostics();
         TreeState saved = TreeState.capture(this);
@@ -91,14 +73,16 @@ public final class Document {
         saved.restore(this);
     }
 
+    public void reloadFailed(Diagnostics diagnostics) {
+        reloadErrors = diagnostics;
+        errors.touch();
+    }
+
     private void disposeTree() {
         events.focus().blur();
         events.tooltips().reset();
         Lifecycle.dispose(root);
-        refs.clear();
-        entering.clear();
-        leaving.clear();
-        framed.clear();
+        mounts.clear();
         errors.clear();
     }
 
@@ -117,19 +101,13 @@ public final class Document {
         time += dt;
         scheduler.flush();
         styles.pass(root);
-        if (!entering.isEmpty()) finishEntering();
+        if (mounts.finishEntering()) styles.pass(root);
         if (styles.animate(dt)) styles.pass(root);
-        leaving.update();
-        for (int i = 0; i < framed.size(); i++) framed.get(i).behavior().frame(framed.get(i), dt);
+        mounts.updateLeaving();
+        mounts.runFramed(dt);
+        scheduler.flush();
         events.tooltips().frame(dt);
         layoutIfNeeded();
-    }
-
-    private void finishEntering() {
-        for (int i = 0; i < entering.size(); i++) entering.get(i).state(StateFlags.ENTER, false);
-        for (int i = 0; i < entering.size(); i++) entering.get(i).flags().entering = false;
-        entering.clear();
-        styles.pass(root);
     }
 
     public void layoutIfNeeded() {
@@ -140,6 +118,13 @@ public final class Document {
         overlays.layout(layout, width, height);
     }
 
+    public Size measureContent(float maxWidth, float maxHeight) {
+        styles.pass(root);
+        layout.beginPass(maxWidth, maxHeight);
+        layout.measure(root, maxWidth, maxHeight);
+        return new Size().set(root.box().measuredWidth, root.box().measuredHeight);
+    }
+
     public void render(Canvas canvas) {
         layoutIfNeeded();
         renderer.render(canvas);
@@ -147,6 +132,10 @@ public final class Document {
 
     public boolean pointerMove(float x, float y) {
         return events.pointerMove(x, y, 0);
+    }
+
+    public boolean pointerMove(float x, float y, int mods) {
+        return events.pointerMove(x, y, mods);
     }
 
     public boolean pointerDown(float x, float y, int button, int mods) {
@@ -191,11 +180,7 @@ public final class Document {
     }
 
     public Element ref(String name) {
-        return refs.get(name);
-    }
-
-    public Map<String, Element> refs() {
-        return refs;
+        return mounts.refs().get(name);
     }
 
     public void onEscape(Runnable handler) {
@@ -211,8 +196,17 @@ public final class Document {
     public Diagnostics diagnostics() {
         Diagnostics all = new Diagnostics().addAll(reloadErrors);
         all.addAll(template.diagnostics());
+        for (CompiledTemplate c : mounts.components()) all.addAll(c.diagnostics());
         all.addAll(errors.diagnostics());
         return all;
+    }
+
+    public String documentId() {
+        return documentId != null ? documentId : template.id();
+    }
+
+    public void documentId(String id) {
+        documentId = id;
     }
 
     public Vui vui() {
@@ -259,10 +253,6 @@ public final class Document {
         return errors;
     }
 
-    public Scheduler scheduler() {
-        return scheduler;
-    }
-
     public float width() {
         return width;
     }
@@ -295,42 +285,19 @@ public final class Document {
         layoutDirty = true;
     }
 
-    public void entering(Element e) {
-        if (!styles.hasEnterRules()) {
-            e.flags().entering = false;
-            return;
-        }
-        e.state(StateFlags.ENTER, true);
-        entering.add(e);
-    }
-
     public void leaving(Element e, ChildSource owner) {
-        leaving.add(e, owner, styles);
+        mounts.leaving(e, owner, styles);
     }
 
     public void wantsFrames(Element e, boolean on) {
-        if (on && !framed.contains(e)) framed.add(e);
-        if (!on) framed.remove(e);
+        mounts.framed(e, on);
     }
 
-    void registerRef(String name, Element e) {
-        refs.put(name, e);
+    DocumentHooks hooks() {
+        return hooks;
     }
 
-    void registerMounted(Element e) {
-        if (e.behavior().overlay(e)) overlays.register(e);
-    }
-
-    void forget(Element e) {
-        events.forget(e);
-        overlays.forget(e);
-        styles.forget(e);
-        framed.remove(e);
-        entering.remove(e);
-        if (e.ref() != null && refs.get(e.ref()) == e) refs.remove(e.ref());
-    }
-
-    Element createTooltipBubble() {
-        return TooltipBubble.create(this);
+    MountRegistry mounts() {
+        return mounts;
     }
 }

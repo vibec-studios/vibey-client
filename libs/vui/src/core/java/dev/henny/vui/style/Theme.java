@@ -74,7 +74,8 @@ public final class Theme {
     }
 
     private String suggestion(String name) {
-        for (String t : tokens.keySet()) if (t.startsWith(name) || name.startsWith(t)) return "did you mean $" + t + "?";
+        String best = dev.henny.vui.diag.Suggest.closest(name, tokens.keySet(), 2);
+        if (best != null) return "did you mean $" + best + "?";
         return "known tokens: $" + String.join(", $", tokens.keySet());
     }
 
