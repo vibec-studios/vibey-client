@@ -25,6 +25,19 @@ only: the package is excluded from the NeoForge build and not registered there; 
 `lyrics` part conflicts with `vibeylyrics` – see [MEDIA.md](MEDIA.md)), `devlink`, `nametags` (seal + badge glyphs before player names; data in `client/VibeyPlayers`), `pvp` (zoom, crosshair,
 toggle sprint, outlines; Fabric 1.21.11 only for now, see [PVP.md](PVP.md)).
 
+## Targets and boundaries
+
+`gradle/modules.gradle` is the one place that says which targets build a module: `'all'`, a loader (`'fabric'`,
+`'neoforge'`) or a list of target names; a dotted id is a part (`'media.video'` = `module/media/video`). For every
+target that does not build it, `gradle/modules-filter.gradle` leaves out the package, `i18n/*/<id>[.*].json`,
+`vibeyclient.<id>[.*].mixins.json`, the matching lines in `fabric.mod.json` / `neoforge.mods.toml` and the extra
+resources listed in `clientModuleResources`. Modules present only in some jars are registered by reflection in
+`BuiltinModules`. To port a module, widen its entry.
+
+Modules must not use each other: `checkModuleBoundaries` (part of `:fabric-1.21.11:check` and `buildAll`) fails when
+a file in `module/<a>/` names `dev.henny.vibeyclient.module.<b>.…`. Shared code goes to `api`, `client`, `ui` or a
+lib. Existing exceptions still to remove are listed in `knownModuleImports`.
+
 ## Client only
 
 Modules only exist on the client. On a dedicated server the jar runs just `Vibey.initCommon` and the packet relay

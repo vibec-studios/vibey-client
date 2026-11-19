@@ -1,0 +1,25 @@
+// Client modules (dev.henny.vibeyclient.module.<id>) and the targets that build them: 'all', a loader
+// ('fabric', 'neoforge') or a list of target names. A dotted id is a part of a module (its subpackage).
+// Read by gradle/modules-filter.gradle and gradle/module-boundaries.gradle, see docs/MODULES.md.
+ext.clientModules = [
+        social       : 'all',
+        cosmetics    : 'all',
+        emotes       : 'all',
+        multiplayer  : 'all',
+        devlink      : 'all',
+        nametags     : 'all',
+        media        : 'fabric',
+        'media.video': ['fabric-1.21.11'],
+        hud          : ['fabric-1.21.11'],
+        pvp          : ['fabric-1.21.11'],
+        clips        : ['fabric-1.21.11'],
+]
+
+// Resources a module owns besides its i18n files (i18n/*/<id>[.*].json) and mixin configs (vibeyclient.<id>[.*].mixins.json).
+ext.clientModuleResources = [
+        media: ['assets/vibeyclient/font/lyrics/**', 'assets/vibeyclient/textures/lyrics/**', 'assets/vibeyclient/lyrics/**'],
+        clips: ['assets/vibeyclient/shaders/core/clips_*'],
+]
+
+// Module -> module imports that exist and still have to be removed; checkModuleBoundaries fails on any other.
+ext.knownModuleImports = ['emotes -> cosmetics', 'clips -> media']

@@ -4,7 +4,7 @@ sourceSets.main.java { exclude 'dev/henny/vibeyclient/neoforge/**' }
 
 processResources {
     exclude 'META-INF/neoforge.mods.toml'
-    def props = [
+    def props = libVersionProps + [
             version        : project.version,
             mod_id         : project.mod_id,
             mod_name       : project.mod_name,

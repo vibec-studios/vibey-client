@@ -1,0 +1,22 @@
+// checkCorePurity: src/core must not import Minecraft or a mod loader (part of check).
+def forbidden = ~/^\s*import\s+(static\s+)?(net\.minecraft|com\.mojang|net\.fabricmc|net\.neoforged)\./
+def coreDir = file('src/core')
+def checkTask = tasks.register('checkCorePurity') {
+    group = 'verification'
+    description = 'Fails when a file in src/core imports net.minecraft, com.mojang, net.fabricmc or net.neoforged.'
+    inputs.files(fileTree(coreDir) { include '**/*.java' }).withPropertyName('core')
+    def stamp = layout.buildDirectory.file('checkCorePurity.ok')
+    outputs.file(stamp)
+    doLast {
+        def bad = []
+        if (coreDir.exists()) coreDir.eachFileRecurse { File f ->
+            if (!f.name.endsWith('.java')) return
+            f.readLines('UTF-8').eachWithIndex { String line, int i ->
+                if (line =~ forbidden) bad << "${coreDir.toPath().relativize(f.toPath())}:${i + 1}: ${line.trim()}"
+            }
+        }
+        if (bad) throw new GradleException("Core of ${project.name} imports Minecraft/loader classes:\n  " + bad.join('\n  '))
+        stamp.get().asFile.text = 'ok'
+    }
+}
+tasks.named('check') { dependsOn checkTask }

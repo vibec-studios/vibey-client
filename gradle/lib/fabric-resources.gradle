@@ -1,0 +1,14 @@
+base { archivesName = "${libId}-fabric-${project.minecraft_label}" }
+
+sourceSets.main.java { exclude '**/mc/neoforge/**' }
+
+processResources {
+    exclude 'META-INF/neoforge.mods.toml'
+    def props = libResourceProps + [minecraft_range: project.minecraft_range, loader_version: project.loader_version]
+    inputs.properties(props)
+    filesMatching('fabric.mod.json') { expand props }
+}
+
+loom.runConfigs.configureEach { ideConfigGenerated = false }
+
+apply from: rootProject.file('gradle/lib/publish.gradle')

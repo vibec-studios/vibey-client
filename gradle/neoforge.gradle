@@ -5,6 +5,8 @@ plugins {
 }
 
 ext.javaVersion = project.minecraft_version.startsWith('1.') ? 21 : 25
+ext.libDep = { String id -> dependencies.project(path: ":${id}:${project.name}") }
+ext.libNest = 'jarJar'
 apply from: rootProject.file('gradle/common.gradle')
 
 base { archivesName = "${project.archives_base_name}-neoforge-${project.minecraft_label}" }
@@ -47,18 +49,12 @@ neoForge {
     }
 }
 
-// Fabric entry points and the Fabric-only lyrics module are not part of the NeoForge jar.
-sourceSets.main.java {
-    exclude 'dev/henny/vibeyclient/fabric/**'
-    exclude 'dev/henny/vibeyclient/module/media/**'
-}
+// Fabric entry points are not part of the NeoForge jar (Fabric-only modules: gradle/modules.gradle).
+sourceSets.main.java { exclude 'dev/henny/vibeyclient/fabric/**' }
 
 processResources {
     exclude 'fabric.mod.json'
-    exclude 'vibeyclient.media.lyrics.mixins.json'
-    exclude 'assets/vibeyclient/i18n/*/media*.json'
-    exclude 'assets/vibeyclient/font/lyrics/**', 'assets/vibeyclient/textures/lyrics/**', 'assets/vibeyclient/lyrics/**'
-    def props = [
+    def props = libVersionProps + [
             version            : project.version,
             mod_id             : project.mod_id,
             mod_name           : project.mod_name,

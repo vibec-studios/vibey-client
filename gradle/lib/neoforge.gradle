@@ -1,0 +1,37 @@
+// Lib target, NeoForge.
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev'
+}
+
+apply from: rootProject.file('gradle/lib/props.gradle')
+ext.javaVersion = project.minecraft_version.startsWith('1.') ? 21 : 25
+ext.libDep = { String id -> dependencies.project(path: ":${id}:${project.name}") }
+apply from: rootProject.file('gradle/lib/common.gradle')
+
+base { archivesName = "${libId}-neoforge-${project.minecraft_label}" }
+
+repositories {
+    maven { name = 'NeoForged'; url = 'https://maven.neoforged.net/releases' }
+}
+
+neoForge {
+    enable {
+        version = project.neo_version
+        disableRecompilation = true
+    }
+}
+
+sourceSets.main.java { exclude '**/mc/fabric/**' }
+
+processResources {
+    exclude 'fabric.mod.json'
+    def props = libResourceProps + [
+            neo_range          : project.neo_range,
+            minecraft_neo_range: project.minecraft_neo_range,
+    ]
+    inputs.properties(props)
+    filesMatching('META-INF/neoforge.mods.toml') { expand props }
+}
+
+apply from: rootProject.file('gradle/lib/publish.gradle')

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${version}",
+  "name": "r3",
+  "description": "3D library: world panels, 3D text, effects and interaction in the Minecraft world.",
+  "authors": [
+    "Vibe Craft Studios"
+  ],
+  "contact": {
+    "sources": "https://github.com/vibec-studios/vibey-client",
+    "issues": "https://github.com/vibec-studios/vibey-client/issues"
+  },
+  "license": "Apache-2.0",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "dev.henny.r3.mc.fabric.R3Fabric"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.5",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_range}",
+    "java": ">=${java}",
+    "vui": ">=${vui_version}"
+  }
+}

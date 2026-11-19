@@ -419,7 +419,7 @@ pauses. GPU TDR flakiness on the Intel Arc test PC affects long gametests. Drive
 
 ## 13. What is built (MVP + auto clips, Fabric 1.21.11)
 
-Package `module/clips` (1.21.11-only wiring like `pvp`: gradle/common.gradle leaves package, mixin config, strings and
+Package `module/clips` (1.21.11-only wiring like `pvp`: gradle/modules.gradle leaves package, mixin config, strings and
 the shader out of every other target; `BuiltinModules` registers it by reflection).
 
 | Part | Where | Notes |

@@ -24,7 +24,7 @@ import java.util.List;
  * buffer is off by default; while it runs it records only in game (not in menus, the pause screen, inventories
  * unless enabled, an unfocused or minimised window, or at low FPS). Encoding is FFmpeg with a hardware encoder.
  *
- * <p>Fabric 1.21.11 only for now: gradle/common.gradle leaves the package (and its mixin config) out of every other
+ * <p>Fabric 1.21.11 only for now: gradle/modules.gradle leaves the package (and its mixin config) out of every other
  * target and {@code BuiltinModules} registers it by reflection.
  */
 public final class ClipsModule extends VibeyModule {

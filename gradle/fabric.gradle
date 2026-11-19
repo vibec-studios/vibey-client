@@ -4,6 +4,8 @@ plugins {
 }
 
 ext.javaVersion = 21
+ext.libDep = { String id -> dependencies.project(path: ":${id}:${project.name}", configuration: 'namedElements') }
+ext.libNest = 'include'
 apply from: rootProject.file('gradle/common.gradle')
 
 repositories {

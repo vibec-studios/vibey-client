@@ -1,0 +1,33 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "Apache-2.0"
+issueTrackerURL = "https://github.com/vibec-studios/vibey-client/issues"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${version}"
+displayName = "r3"
+authors = "Vibe Craft Studios"
+displayURL = "https://github.com/vibec-studios/vibey-client"
+description = """3D library: world panels, 3D text, effects and interaction in the Minecraft world."""
+
+[[dependencies.${mod_id}]]
+modId = "neoforge"
+type = "required"
+versionRange = "${neo_range}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "minecraft"
+type = "required"
+versionRange = "${minecraft_neo_range}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "vui"
+type = "required"
+versionRange = "[${vui_version},)"
+ordering = "AFTER"
+side = "BOTH"

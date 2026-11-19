@@ -1,0 +1,19 @@
+// Lib target, Fabric 1.21.x (remapped by Loom like the client).
+plugins {
+    id 'fabric-loom' version '1.15-SNAPSHOT'
+}
+
+ext.javaVersion = 21
+ext.libDep = { String id -> dependencies.project(path: ":${id}:${project.name}", configuration: 'namedElements') }
+apply from: rootProject.file('gradle/lib/common.gradle')
+
+repositories { mavenCentral() }
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+}
+
+apply from: rootProject.file('gradle/lib/fabric-resources.gradle')

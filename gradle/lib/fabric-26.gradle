@@ -1,0 +1,18 @@
+// Lib target, Fabric 26.x (unobfuscated game, no remapping).
+plugins {
+    id 'net.fabricmc.fabric-loom' version '1.15-SNAPSHOT'
+}
+
+ext.javaVersion = 25
+ext.libDep = { String id -> dependencies.project(path: ":${id}:${project.name}") }
+apply from: rootProject.file('gradle/lib/common.gradle')
+
+repositories { mavenCentral() }
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+}
+
+apply from: rootProject.file('gradle/lib/fabric-resources.gradle')

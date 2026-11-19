@@ -38,6 +38,9 @@
     "fabricloader": ">=0.16.5",
     "fabric-api": "*",
     "minecraft": "${minecraft_range}",
-    "java": ">=${java}"
+    "java": ">=${java}",
+    "vui": ">=${vui_version}",
+    "r3": ">=${r3_version}",
+    "cosmetico": ">=${cosmetico_version}"
   }
 }
