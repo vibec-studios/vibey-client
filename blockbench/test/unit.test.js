@@ -305,3 +305,41 @@ test('wizard prepares the optional states for pets and wings', () => {
 	assert.ok(Core.SLOT_PRESETS.wings.tracks.includes('glide'));
 	for (const t of ['sprint', 'glide', 'idle_long', 'happy']) assert.ok(Core.TRACK_LENGTH[t] > 0, t);
 });
+
+test('client versions: parse + compare (welcome "mod")', () => {
+	assert.deepEqual(Core.parseVersion('0.2.1'), [0, 2, 1]);
+	assert.deepEqual(Core.parseVersion('v0.3.0-beta.1'), [0, 3, 0]);
+	assert.deepEqual(Core.parseVersion('0.3.0+build.5'), [0, 3, 0]);
+	assert.equal(Core.parseVersion(''), null);
+	assert.equal(Core.parseVersion(undefined), null);
+	assert.equal(Core.parseVersion('dev'), null);
+	assert.ok(Core.compareVersions('0.2.1', '0.3.0') < 0);
+	assert.ok(Core.compareVersions('0.10.0', '0.3.0') > 0);
+	assert.equal(Core.compareVersions('0.3.0-beta.1', '0.3.0'), 0);
+	assert.equal(Core.compareVersions('x', '0.3.0'), 0);
+});
+
+test('feature gaps: what an older game (0.2.x) ignores in a push', () => {
+	const key = (t, v) => ({ t, v: [0, v, 0], i: 'linear' });
+	const anim = { loop: true, length: 1, bones: { wings: { rotation: [key(0, 0), key(1, 10)] } } };
+	const bundle = {
+		kind: 'cosmetic', id: 'e2e:w', cosmetic: { slot: 'wings', offsetWhen: [{ slot: 'back', offset: [0, 0, 4] }] },
+		animations: { idle: anim, walk: anim, glide: anim, happy: { loop: true, length: 1, bones: {} } },
+	};
+	const thumb = pngB64(64, 64);
+	const msg = Core.pushMessage({ bundle, action: 'equip', thumbnail: thumb });
+	const gaps = Core.featureGaps(msg, '0.2.1');
+	assert.deepEqual(gaps.map((g) => g.feature), ['thumbnail', 'states', 'offsetWhen']);
+	assert.deepEqual(gaps[1].detail, ['glide'], 'empty tracks (wizard placeholders) are not counted');
+	assert.ok(gaps.every((g) => g.since === '0.3.0'));
+	// a current game, an unknown version or a plain push: nothing to say
+	assert.deepEqual(Core.featureGaps(msg, '0.3.0'), []);
+	assert.deepEqual(Core.featureGaps(msg, '0.3.0-beta.2'), []);
+	assert.deepEqual(Core.featureGaps(msg, ''), []);
+	assert.deepEqual(Core.featureGaps(msg, undefined), []);
+	const plain = Core.pushMessage({ bundle: Core.compileBundle(cosmeticSnapshot()).bundle, action: 'equip' });
+	assert.deepEqual(Core.featureGaps(plain, '0.2.0'), []);
+	// emotes have no cosmetic states
+	const emote = Core.pushMessage({ bundle: { kind: 'emote', id: 'e2e:e', animations: { glide: anim } }, action: 'play' });
+	assert.deepEqual(Core.featureGaps(emote, '0.2.1'), []);
+});

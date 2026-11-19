@@ -14,7 +14,7 @@ import { batches, buildManifest, changelogSection, channelOf, publish, sha256, t
 const dirs = [];
 after(() => dirs.forEach((d) => rmSync(d, { recursive: true, force: true })));
 
-function fixture({ version = '0.2.0', bbVersion = '0.2.0', jars = true, extraJar = false } = {}) {
+function fixture({ version = '0.2.0', jars = true, extraJar = false } = {}) {
   const root = mkdtempSync(join(tmpdir(), 'vibey-release-'));
   dirs.push(root);
   writeFileSync(join(root, 'gradle.properties'), `mod_version=${version}\narchives_base_name=vibey-client\n`);
@@ -24,9 +24,6 @@ function fixture({ version = '0.2.0', bbVersion = '0.2.0', jars = true, extraJar
     mkdirSync(join(root, 'versions', dir), { recursive: true });
     writeFileSync(join(root, 'versions', dir, 'gradle.properties'), `minecraft_version=x\nminecraft_label=${label}\n`);
   }
-  mkdirSync(join(root, 'blockbench'));
-  writeFileSync(join(root, 'blockbench/package.json'), JSON.stringify({ version: bbVersion }));
-  writeFileSync(join(root, 'blockbench/vibey.js'), `const VERSION = '${bbVersion}';\n`);
   writeFileSync(join(root, 'CHANGELOG.md'), `# Changelog\n\n## ${version} – second\n\n- Nametag icons\n- OTA cosmetics\n\n## 0.1.0 – first\n\n- old\n`);
   const dist = join(root, 'build/dist');
   mkdirSync(dist, { recursive: true });
@@ -34,7 +31,7 @@ function fixture({ version = '0.2.0', bbVersion = '0.2.0', jars = true, extraJar
     for (const f of ['fabric-1.21-1.21.1', 'fabric-1.21.9-1.21.10', 'fabric-26.1', 'neoforge-1.21-1.21.1']) writeFileSync(join(dist, `vibey-client-${f}-${version}.jar`), `jar ${f}`);
   }
   if (extraJar) writeFileSync(join(dist, `vibey-client-fabric-9.9-${version}.jar`), 'x');
-  return { root, dist, blockbench: join(root, 'blockbench/vibey.js') };
+  return { root, dist };
 }
 
 test('changelog section and channel', () => {
@@ -61,11 +58,11 @@ test('real repo: every target has exact Minecraft versions', () => {
 
 test('manifest from build output', () => {
   const f = fixture();
-  const { manifest, uploads } = buildManifest({ root: f.root, dist: f.dist, blockbench: f.blockbench, tag: 'v0.2.0' });
+  const { manifest, uploads } = buildManifest({ root: f.root, dist: f.dist, tag: 'v0.2.0' });
   assert.equal(manifest.version, '0.2.0');
   assert.equal(manifest.channel, 'release');
   assert.equal(manifest.changelog, '- Nametag icons\n- OTA cosmetics');
-  assert.deepEqual(manifest.blockbench, { version: '0.2.0', file: 'vibey.js' });
+  assert.equal(manifest.blockbench, null, 'the plugin has its own releases (blockbench-v*)');
   assert.deepEqual(manifest.files.map((x) => [x.loader, x.file, x.mcVersions.join(',')]), [
     ['fabric', 'vibey-client-fabric-1.21-1.21.1-0.2.0.jar', '1.21,1.21.1'],
     ['fabric', 'vibey-client-fabric-1.21.9-1.21.10-0.2.0.jar', '1.21.9,1.21.10'],
@@ -75,26 +72,27 @@ test('manifest from build output', () => {
   assert.deepEqual(manifest.files[0].requires, [{ modrinth: 'P7dR8mSH', name: 'Fabric API' }]);
   assert.deepEqual(manifest.files[3].requires, []);
   for (const k of ['url', 'sha256', 'size']) assert.ok(!(k in manifest.files[0]));
-  assert.equal(uploads.length, 5);
+  assert.equal(uploads.length, 4);
+  assert.ok(uploads.every((u) => u.name.endsWith('.jar')), 'no vibey.js in client releases');
 });
 
 test('release body wins over CHANGELOG.md; beta tags', () => {
-  const f = fixture({ version: '0.3.0-beta.1', bbVersion: '0.3.0-beta.1' });
-  const { manifest } = buildManifest({ root: f.root, dist: f.dist, blockbench: f.blockbench, tag: 'refs/tags/v0.3.0-beta.1', changelogText: '  From the release  ' });
+  const f = fixture({ version: '0.3.0-beta.1' });
+  const { manifest } = buildManifest({ root: f.root, dist: f.dist, tag: 'refs/tags/v0.3.0-beta.1', changelogText: '  From the release  ' });
   assert.equal(manifest.channel, 'beta');
   assert.equal(manifest.changelog, 'From the release');
 });
 
 test('GitHub pre-release goes to beta', () => {
   const f = fixture();
-  const { manifest } = buildManifest({ root: f.root, dist: f.dist, blockbench: f.blockbench, tag: 'v0.2.0', prerelease: true });
+  const { manifest } = buildManifest({ root: f.root, dist: f.dist, tag: 'v0.2.0', prerelease: true });
   assert.equal(manifest.channel, 'beta');
   assert.equal(manifest.version, '0.2.0');
 });
 
 test('vibey-manifest.json carries sha256 and size of every asset', () => {
   const f = fixture();
-  const { manifest, uploads } = buildManifest({ root: f.root, dist: f.dist, blockbench: f.blockbench, tag: 'v0.2.0' });
+  const { manifest, uploads } = buildManifest({ root: f.root, dist: f.dist, tag: 'v0.2.0' });
   const m = withHashes(manifest, uploads);
   assert.deepEqual(Object.keys(m), ['version', 'channel', 'changelog', 'files', 'blockbench']);
   assert.equal(m.files.length, 4);
@@ -105,12 +103,12 @@ test('vibey-manifest.json carries sha256 and size of every asset', () => {
     assert.equal(file.size, statSync(path).size);
     assert.ok(file.loader && file.mcVersions.length && Array.isArray(file.requires));
   }
-  assert.deepEqual(m.blockbench, { version: '0.2.0', file: 'vibey.js', sha256: sha256(f.blockbench), size: statSync(f.blockbench).size });
+  assert.equal(m.blockbench, null);
   // `file` = GitHub asset name = the uploaded file's basename
-  assert.deepEqual([...m.files.map((x) => x.file), m.blockbench.file].sort(), uploads.map((u) => u.name).sort());
+  assert.deepEqual(m.files.map((x) => x.file).sort(), uploads.map((u) => u.name).sort());
   for (const u of uploads) assert.equal(u.name, u.path.split(/[\\/]/).pop());
   // the plain manifest is unchanged (the manual --publish path adds the backend's staged hashes itself)
-  assert.ok(!('sha256' in manifest.files[0]) && !('size' in manifest.blockbench));
+  assert.ok(!('sha256' in manifest.files[0]) && !('size' in manifest.files[0]));
 });
 
 test('CLI writes vibey-manifest.json with --hashes and --prerelease', () => {
@@ -123,26 +121,19 @@ test('CLI writes vibey-manifest.json with --hashes and --prerelease', () => {
   assert.equal(m.channel, 'beta');
   assert.equal(m.files.length, 4);
   for (const x of m.files) assert.equal(x.sha256, sha256(join(f.dist, x.file)));
-  assert.equal(m.blockbench.sha256, sha256(f.blockbench));
-  assert.equal(m.blockbench.size, statSync(f.blockbench).size);
+  assert.equal(m.blockbench, null);
 });
 
-test('refuses a CRLF vibey.js (its hash would differ from the committed file)', () => {
+test('--blockbench is refused: the plugin has its own releases', () => {
   const f = fixture();
-  writeFileSync(f.blockbench, "const VERSION = '0.2.0';\r\nmore();\r\n");
-  assert.throws(() => buildManifest({ root: f.root, dist: f.dist, blockbench: f.blockbench }), /CRLF/);
-});
-
-test('real repo: blockbench/vibey.js is checked out with LF', () => {
-  const real = fileURLToPath(new URL('../blockbench/vibey.js', import.meta.url));
-  assert.ok(!readFileSync(real, 'utf8').includes('\r'), 'blockbench/vibey.js has CRLF; .gitattributes wants eol=lf (re-checkout the file)');
+  const tool = fileURLToPath(new URL('./release-manifest.mjs', import.meta.url));
+  assert.throws(() => execFileSync(process.execPath, [tool, '--root', f.root, '--blockbench', 'blockbench/vibey.js', '--quiet'], { stdio: 'pipe' }), /own releases/);
 });
 
 test('refuses mismatches and missing files', () => {
-  assert.throws(() => { const f = fixture(); buildManifest({ root: f.root, dist: f.dist, blockbench: f.blockbench, tag: 'v0.2.1' }); }, /does not match mod_version/);
-  assert.throws(() => { const f = fixture({ jars: false }); buildManifest({ root: f.root, dist: f.dist, blockbench: f.blockbench }); }, /missing vibey-client-fabric-1.21-1.21.1-0.2.0.jar/);
-  assert.throws(() => { const f = fixture({ extraJar: true }); buildManifest({ root: f.root, dist: f.dist, blockbench: f.blockbench }); }, /unexpected jar/);
-  assert.throws(() => { const f = fixture(); writeFileSync(join(f.root, 'blockbench/vibey.js'), "const VERSION = '9.9.9';"); buildManifest({ root: f.root, dist: f.dist, blockbench: f.blockbench }); }, /says version 9.9.9/);
+  assert.throws(() => { const f = fixture(); buildManifest({ root: f.root, dist: f.dist, tag: 'v0.2.1' }); }, /does not match mod_version/);
+  assert.throws(() => { const f = fixture({ jars: false }); buildManifest({ root: f.root, dist: f.dist }); }, /missing vibey-client-fabric-1.21-1.21.1-0.2.0.jar/);
+  assert.throws(() => { const f = fixture({ extraJar: true }); buildManifest({ root: f.root, dist: f.dist }); }, /unexpected jar/);
 });
 
 test('batches stay below the request limit', () => {
@@ -159,7 +150,7 @@ test('batches stay below the request limit', () => {
 
 test('publish stages the files in batches, then creates the release by sha256 without file parts', async () => {
   const f = fixture();
-  const { manifest, uploads } = buildManifest({ root: f.root, dist: f.dist, blockbench: f.blockbench });
+  const { manifest, uploads } = buildManifest({ root: f.root, dist: f.dist });
   const seen = { auth: new Set(), stagedRequests: 0, staged: [], release: null, releaseFiles: -1 };
   const server = createServer((req, res) => {
     const chunks = [];
@@ -197,7 +188,7 @@ test('publish stages the files in batches, then creates the release by sha256 wi
     assert.deepEqual(seen.staged.sort(), uploads.map((u) => u.name).sort());
     assert.equal(seen.releaseFiles, 0);
     for (const file of seen.release.files) assert.equal(file.sha256, sha256(join(f.dist, file.file)));
-    assert.equal(seen.release.blockbench.sha256, sha256(f.blockbench));
+    assert.equal(seen.release.blockbench, null);
     assert.equal(seen.release.changelog, manifest.changelog);
     await assert.rejects(publish(url, 'secret-token', { ...manifest, version: '0.1.0' }, uploads), /already published/);
   } finally {

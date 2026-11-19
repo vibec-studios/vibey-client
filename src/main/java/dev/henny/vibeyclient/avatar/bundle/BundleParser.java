@@ -202,7 +202,7 @@ public final class BundleParser {
     public static final float MAX_OFFSET = 64f, MAX_OFFSET_ROTATION = 360f;
 
     /**
-     * {@code cosmetic.offsetWhen: [{ "slot", "offset": [x,y,z], "rotation"?: [x,y,z] }]} (since 0.2.2). Optional and
+     * {@code cosmetic.offsetWhen: [{ "slot", "offset": [x,y,z], "rotation"?: [x,y,z] }]} (since 0.3.0). Optional and
      * lenient: a malformed rule (or one for a slot this client does not know) is skipped with a warning, the item
      * still loads.
      */

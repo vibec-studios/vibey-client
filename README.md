@@ -302,22 +302,25 @@ Default backend (`https://vibe.henny.dev`) and relay are set in `gradle.properti
 
 ### Releases
 
-1. Bump `mod_version` (`gradle.properties`), `version` in `blockbench/package.json` and `VERSION` in `blockbench/vibey.js`;
-   add a `## <version>` section to `CHANGELOG.md`. New Minecraft patch versions of a line go into
+Client and Blockbench plugin are released separately. The plugin has its own GitHub releases (tag
+`blockbench-v<version>`, assets `vibey.js` + `vibey-blockbench.json`, never marked *Latest*); the Vibe Launcher
+downloads it from there. How to release it: [docs/BLOCKBENCH.md → Releases](docs/BLOCKBENCH.md#releases). Client
+releases (tag `v<version>`):
+
+1. Bump `mod_version` (`gradle.properties`); add a `## <version>` section to `CHANGELOG.md`. New Minecraft patch versions of a line go into
    `gradle/mc-versions.json` (checked by `./gradlew checkMcVersions`).
 2. Check locally: `./gradlew buildAll`, then `node tools/release-manifest.mjs --hashes` prints the manifest for
    `build/dist` (`node --test tools/release-manifest.test.mjs` for the script itself).
 3. Merge to `main` and publish a GitHub release with tag `v<version>`. A GitHub pre-release or a tag with a `-` suffix
    (`v0.3.0-beta.1`) goes to the beta channel. The release text becomes the changelog (empty = the CHANGELOG.md
-   section). `.github/workflows/release.yml` builds all jars and attaches them, `vibey.js` and
-   **`vibey-manifest.json`** to the release. CI never contacts the Vibe backend: the backend imports releases from
-   GitHub itself and checks every download against the manifest.
+   section). `.github/workflows/release.yml` builds all jars and attaches them and **`vibey-manifest.json`** to the
+   release (it only runs for `v<digit>…` tags, never for `blockbench-v*`). CI never contacts the Vibe backend: the
+   backend imports releases from GitHub itself and checks every download against the manifest; releases without a
+   `vibey-manifest.json` (the plugin releases) are skipped.
 
    `vibey-manifest.json` is the VIBE-API-2 §2 manifest plus `sha256` and `size` per file:
-   `{version, channel, changelog, files: [{loader, mcVersions, file, requires, sha256, size}], blockbench: {version,
-   file, sha256, size}}`; `file` is the GitHub asset name. It is uploaded last, so it only appears when all files are
-   there. `blockbench/vibey.js` is hashed as committed (LF; `.gitattributes` keeps it LF on Windows too, and the tool
-   refuses a CRLF copy).
+   `{version, channel, changelog, files: [{loader, mcVersions, file, requires, sha256, size}], blockbench: null}`;
+   `file` is the GitHub asset name. It is uploaded last, so it only appears when all files are there.
 4. **Fallback** (GitHub import not available): publish from your machine, outside Cloudflare's bot protection for CI:
    `CLIENT_PUBLISH_TOKEN=… node tools/release-manifest.mjs --tag v<version> --publish
    https://vibe.henny.dev/internal/client/v1/releases` (files staged in batches below the 100 MB proxy limit, then

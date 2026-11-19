@@ -27,7 +27,7 @@ public final class AvatarState {
     public float walk, fly, sneak;
     public float walkTarget, flyTarget, sneakTarget;
     /**
-     * Optional states (since 0.2.2): sprinting, gliding (elytra or a long fall), standing still for a while
+     * Optional states (since 0.3.0): sprinting, gliding (elytra or a long fall), standing still for a while
      * ({@code idle_long}) and {@code happy} (the owner plays an emote). 0..1, smoothed in tick.
      */
     public float sprint, glide, idleLong, happy;

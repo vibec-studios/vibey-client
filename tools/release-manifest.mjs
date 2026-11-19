@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 // Builds the release manifest (vibe-launcher/docs/VIBE-API-2.md §2) from the jars in build/dist.
 //
-// Normal path (.github/workflows/release.yml): CI attaches every jar, vibey.js and this manifest as
-// `vibey-manifest.json` (with --hashes: sha256 + size of every file) to the GitHub release; the Vibe backend imports
-// releases from GitHub itself. CI never talks to the backend.
+// Normal path (.github/workflows/release.yml): CI attaches every jar and this manifest as `vibey-manifest.json`
+// (with --hashes: sha256 + size of every file) to the GitHub release; the Vibe backend imports releases from GitHub
+// itself. CI never talks to the backend. The Blockbench plugin is not part of client releases any more: it has its
+// own GitHub releases (tag blockbench-v<version>, .github/workflows/blockbench-release.yml), so the manifest says
+// `"blockbench": null`.
 //
 // Manual fallback: --publish uploads straight to the backend from your machine: files staged in batches below the
 // proxy limit (POST /internal/client/v1/files), then the release (POST /internal/client/v1/releases, field
@@ -15,12 +17,12 @@
 //   CLIENT_PUBLISH_TOKEN=… node tools/release-manifest.mjs --tag v0.2.0 --publish https://vibe.henny.dev/internal/client/v1/releases
 //
 // Sources of truth: gradle.properties (mod_version, archives_base_name), versions/<loader>-<line>/gradle.properties
-// (minecraft_label → jar name), gradle/mc-versions.json (exact Minecraft versions per line), blockbench/package.json
-// (plugin version), CHANGELOG.md (section "## <version>") unless a changelog file (the GitHub release body) is given.
+// (minecraft_label → jar name), gradle/mc-versions.json (exact Minecraft versions per line), CHANGELOG.md
+// (section "## <version>") unless a changelog file (the GitHub release body) is given.
 // The token is only read from the environment and never printed.
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, openAsBlob, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
-import { basename, dirname, join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -29,7 +31,7 @@ const MAX_CHANGELOG = 20000;
 const VERSION_RE = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 
 export function parseArgs(argv) {
-  const a = { dist: 'build/dist', blockbench: 'blockbench/vibey.js', changelog: null, tag: null, version: null, out: null, publish: null, quiet: false, prerelease: false, hashes: false, root: null };
+  const a = { dist: 'build/dist', changelog: null, tag: null, version: null, out: null, publish: null, quiet: false, prerelease: false, hashes: false, root: null };
   for (let i = 0; i < argv.length; i++) {
     const k = argv[i], v = () => {
       if (i + 1 >= argv.length) throw new Error(`${k} needs a value`);
@@ -37,7 +39,7 @@ export function parseArgs(argv) {
     };
     if (k === '--dist') a.dist = v();
     else if (k === '--root') a.root = v();
-    else if (k === '--blockbench') a.blockbench = v();
+    else if (k === '--blockbench') throw new Error('--blockbench: the Blockbench plugin has its own releases now (tag blockbench-v<version>, docs/BLOCKBENCH.md)');
     else if (k === '--changelog-file') a.changelog = v();
     else if (k === '--tag') a.tag = v();
     else if (k === '--version') a.version = v();
@@ -106,7 +108,7 @@ export function sha256(file) {
   return createHash('sha256').update(readFileSync(file)).digest('hex');
 }
 
-export function buildManifest({ root = ROOT, dist, blockbench, changelogText, tag, version, prerelease = false }) {
+export function buildManifest({ root = ROOT, dist, changelogText, tag, version, prerelease = false }) {
   const props = readProperties(join(root, 'gradle.properties'));
   const modVersion = props.mod_version;
   const base = props.archives_base_name || 'vibey-client';
@@ -141,19 +143,6 @@ export function buildManifest({ root = ROOT, dist, blockbench, changelogText, ta
     problems.push(`${dist} does not exist (run ./gradlew buildAll)`);
   }
 
-  let bb = null;
-  if (blockbench) {
-    if (!existsSync(blockbench)) problems.push(`missing ${blockbench}`);
-    else {
-      const pkg = JSON.parse(readFileSync(join(root, 'blockbench/package.json'), 'utf8'));
-      const src = readFileSync(blockbench, 'utf8');
-      const m = /const VERSION\s*=\s*['"]([^'"]+)['"]/.exec(src);
-      if (m && m[1] !== pkg.version) problems.push(`blockbench/vibey.js says version ${m[1]} but package.json ${pkg.version}`);
-      // the release must carry the committed bytes (LF), or the hash differs between Windows and CI
-      if (src.includes('\r')) problems.push(`${basename(blockbench)} has CRLF line endings; the committed file is LF (see .gitattributes, re-checkout it)`);
-      bb = { manifest: { version: pkg.version, file: basename(blockbench) }, path: blockbench };
-    }
-  }
   if (problems.length) throw new Error(`release check failed:\n  ${problems.join('\n  ')}`);
 
   let changelog = (changelogText ?? '').trim();
@@ -166,15 +155,16 @@ export function buildManifest({ root = ROOT, dist, blockbench, changelogText, ta
     channel: channelOf(v, prerelease),
     changelog,
     files: files.map((f) => f.manifest),
-    blockbench: bb ? bb.manifest : null,
+    // the plugin is released on its own (blockbench-v* tags); the backend accepts null
+    blockbench: null,
   };
-  const uploads = [...files.map((f) => ({ name: f.manifest.file, path: f.path })), ...(bb ? [{ name: bb.manifest.file, path: bb.path }] : [])];
+  const uploads = files.map((f) => ({ name: f.manifest.file, path: f.path }));
   return { manifest, uploads };
 }
 
 /**
  * The manifest attached to the GitHub release as `vibey-manifest.json`: the same fields plus `sha256` and `size` of
- * every jar and of the Blockbench plugin, so the backend can verify what it downloads. `file` = GitHub asset name.
+ * every jar, so the backend can verify what it downloads. `file` = GitHub asset name.
  */
 export function withHashes(manifest, uploads) {
   const info = new Map(uploads.map((u) => [u.name, { sha256: sha256(u.path), size: statSync(u.path).size }]));
@@ -186,7 +176,7 @@ export function withHashes(manifest, uploads) {
   return {
     ...manifest,
     files: manifest.files.map((f) => ({ ...f, ...of(f.file) })),
-    blockbench: manifest.blockbench ? { ...manifest.blockbench, ...of(manifest.blockbench.file) } : null,
+    blockbench: null,
   };
 }
 
@@ -224,8 +214,7 @@ export async function publish(url, token, manifest, uploads, { log = () => {} } 
   for (let i = 0; i < groups.length; i++) {
     const form = new FormData();
     for (const u of groups[i]) {
-      const type = u.name.endsWith('.js') ? 'text/javascript' : 'application/java-archive';
-      form.append('file', await openAsBlob(u.path, { type }), u.name);
+      form.append('file', await openAsBlob(u.path, { type: 'application/java-archive' }), u.name);
     }
     const res = await fetch(filesUrl, { method: 'POST', headers: auth, body: form });
     const text = await res.text();
@@ -243,7 +232,7 @@ export async function publish(url, token, manifest, uploads, { log = () => {} } 
   const final = {
     ...manifest,
     files: manifest.files.map((f) => ({ ...f, sha256: hashes.get(f.file) })),
-    blockbench: manifest.blockbench ? { ...manifest.blockbench, sha256: hashes.get(manifest.blockbench.file) } : manifest.blockbench,
+    blockbench: null,
   };
   const form = new FormData();
   form.append('manifest', JSON.stringify(final));
@@ -261,10 +250,10 @@ async function main() {
     return;
   }
   const changelogText = a.changelog && existsSync(a.changelog) ? readFileSync(a.changelog, 'utf8') : null;
-  // --root: another checkout (tests); --dist/--blockbench are relative to it
+  // --root: another checkout (tests); --dist is relative to it
   const root = a.root ? resolve(a.root) : ROOT;
   const { manifest, uploads } = buildManifest({
-    root, dist: resolve(root, a.dist), blockbench: a.blockbench ? resolve(root, a.blockbench) : null, changelogText, tag: a.tag, version: a.version,
+    root, dist: resolve(root, a.dist), changelogText, tag: a.tag, version: a.version,
     prerelease: a.prerelease,
   });
   const json = JSON.stringify(a.hashes ? withHashes(manifest, uploads) : manifest, null, 2);
@@ -274,7 +263,7 @@ async function main() {
   }
   if (!a.quiet) {
     console.log(json);
-    console.error(`\n${manifest.files.length} jars + ${manifest.blockbench ? 'vibey.js' : 'no Blockbench plugin'}, channel ${manifest.channel}:`);
+    console.error(`\n${manifest.files.length} jars, channel ${manifest.channel}:`);
     for (const u of uploads) console.error(`  ${u.name}  ${statSync(u.path).size} B  sha256 ${sha256(u.path)}`);
   }
   if (a.publish) {

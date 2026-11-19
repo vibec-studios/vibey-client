@@ -374,6 +374,40 @@ async function main() {
 				return true;
 			});
 		});
+		await check('older game (welcome "mod" < 0.3.0): the push still works and the plugin names what the game ignores', async () => {
+			// real game: whatever it is (0.2.1 for the compatibility run); mock: pretend to be 0.2.1
+			const realMod = await cdp.eval('VibeyPlugin.Link.game && VibeyPlugin.Link.game.mod');
+			const mod = REAL ? realMod : '0.2.1';
+			if (!REAL) await cdp.eval('VibeyPlugin.Link.game.mod = "0.2.1", true');
+			const old = !!Core.parseVersion(mod) && Core.compareVersions(mod, '0.3.0') < 0;
+			const r = await cdp.run(async () => {
+				const meta = VibeyPlugin.getMeta();
+				const before = meta.offsetWhen;
+				meta.offsetWhen = [{ slot: 'back', offset: [0, 0, 2] }];
+				const ws = VibeyPlugin.Link.ws;
+				const orig = ws.send.bind(ws);
+				let sent = null;
+				ws.send = (t) => ((sent = JSON.parse(t)), orig(t));
+				const res = await VibeyPlugin.Link.push('equip');
+				ws.send = orig;
+				VibeyPlugin.refreshUI();
+				await new Promise((ok) => setTimeout(ok, 400));
+				const el = document.querySelector('.vibey_compat');
+				meta.offsetWhen = before;
+				return { res, note: VibeyPlugin.Link.compatNote, shown: el ? el.textContent : '', thumbnail: !!(sent && sent.thumbnail), offsetWhen: !!(sent && sent.bundle.cosmetic.offsetWhen) };
+			});
+			assert.equal(r.res.type, 'pushed', JSON.stringify(r.res));
+			assert.equal(r.offsetWhen, true, 'offsetWhen is still sent (an older game ignores it)');
+			console.log('    game reports Vibey Client ' + mod + (r.thumbnail ? ', push carried a thumbnail' : '') + (r.note ? '\n    note: ' + r.note : ''));
+			if (old) {
+				assert.ok(r.note.includes('0.3.0') && r.note.includes(mod), r.note);
+				assert.match(r.note, /offsetWhen/);
+				if (r.thumbnail) assert.match(r.note, DE ? /Vorschaubilder/ : /thumbnails/);
+				assert.ok(r.shown.includes(r.note), 'note in the Vibey panel');
+				await screenshot(cdp, 'blockbench-older-client-note.png');
+			} else assert.equal(r.note, '');
+			if (!REAL) await cdp.eval(`VibeyPlugin.Link.game.mod = ${JSON.stringify(realMod)}, VibeyPlugin.Link.compatNote = '', true`);
+		});
 		if (!REAL) {
 			await check('reconnects with backoff after the game restarts', async () => {
 				const { port, token } = game;
@@ -771,22 +805,49 @@ async function main() {
 			const cards = await cdp.eval(`[...document.querySelectorAll('#vibey_export_submit [data-value]')].map((e) => e.getAttribute('data-value'))`);
 			assert.deepEqual(cards, ['save', 'submit', 'submissions']);
 			await cdp.eval('Dialog.open.cancel(), true');
-			// submit through the game (mock): the guide marks the export step done
-			if (game) {
-				const sub = await cdp.run(async () => {
+			// submit through the game (mock, or the real game signed in to a LOCAL backend): the guide marks the export
+			// step done; the real run also sends the viewport thumbnail and checks My submissions + withdraw
+			const sub = await cdp.run(async (withThumb) => {
+				VibeyPlugin.exportSubmitDialog();
+				await new Promise((r) => setTimeout(r, 50));
+				document.querySelector('#vibey_export_submit [data-value=submit]').click();
+				await new Promise((r) => setTimeout(r, 200));
+				Dialog.open.setFormValues({ thumbnail: withThumb });
+				Dialog.open.confirm();
+				for (let i = 0; i < 400 && !VibeyPlugin.sessionOf().submitted && !(Dialog.open && Dialog.open.id === 'vibey_friendly'); i++) await new Promise((r) => setTimeout(r, 50));
+				const ok = Dialog.open && Dialog.open.id;
+				const text = Dialog.open && Dialog.open.object ? Dialog.open.object.textContent.replace(/\s+/g, ' ').trim() : '';
+				if (Dialog.open) Dialog.open.cancel();
+				return { submitted: VibeyPlugin.sessionOf().submitted, dialog: ok, text };
+			}, REAL);
+			assert.equal(sub.submitted, true, JSON.stringify(sub));
+			if (game) assert.equal(game.state.submissions.slice(-1)[0].bundleId, 'creator:frost_wings');
+			if (REAL) {
+				console.log('    submitted: ' + sub.text);
+				const list = await cdp.run(async () => {
 					VibeyPlugin.exportSubmitDialog();
 					await new Promise((r) => setTimeout(r, 50));
-					document.querySelector('#vibey_export_submit [data-value=submit]').click();
+					document.querySelector('#vibey_export_submit [data-value=submissions]').click();
+					for (let i = 0; i < 400 && !(Dialog.open && /vibey_submissions|vibey_friendly/.test(Dialog.open.id)); i++) await new Promise((r) => setTimeout(r, 50));
 					await new Promise((r) => setTimeout(r, 200));
-					Dialog.open.setFormValues({ thumbnail: false });
-					Dialog.open.confirm();
-					for (let i = 0; i < 100 && !VibeyPlugin.sessionOf().submitted; i++) await new Promise((r) => setTimeout(r, 50));
-					const ok = Dialog.open && Dialog.open.id;
-					if (Dialog.open) Dialog.open.cancel();
-					return { submitted: VibeyPlugin.sessionOf().submitted, dialog: ok };
+					const rows = [...document.querySelectorAll('.vibey-submissions tr')].map((tr) => tr.textContent.replace(/\s+/g, ' ').trim());
+					return { dialog: Dialog.open && Dialog.open.id, rows, withdraw: document.querySelectorAll('.vibey-withdraw').length };
 				});
-				assert.equal(sub.submitted, true, JSON.stringify(sub));
-				assert.equal(game.state.submissions.slice(-1)[0].bundleId, 'creator:frost_wings');
+				assert.equal(list.dialog, 'vibey_submissions', JSON.stringify(list));
+				assert.ok(list.rows.some((r) => /Frost Wings|frost_wings/i.test(r)), JSON.stringify(list.rows));
+				console.log('    my submissions: ' + list.rows.join(' | '));
+				await screenshot(cdp, 'blockbench-real-submissions.png');
+				const w = await cdp.run(async () => {
+					const b = document.querySelector('.vibey-withdraw');
+					if (!b) return 'no withdraw button';
+					b.click();
+					for (let i = 0; i < 200 && !b.disabled; i++) await new Promise((r) => setTimeout(r, 50));
+					for (let i = 0; i < 400 && b.textContent === VibeyPlugin.T('withdraw'); i++) await new Promise((r) => setTimeout(r, 50));
+					const t = b.textContent;
+					Dialog.open && Dialog.open.cancel();
+					return t;
+				});
+				assert.equal(w, T('withdrawn_ok'));
 			}
 			// the game refuses a push -> friendly dialog with the reason under Details
 			const r = await cdp.run(async () => {

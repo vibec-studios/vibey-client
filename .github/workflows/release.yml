@@ -1,21 +1,24 @@
 name: Release
 
-# Builds every jar + the Blockbench plugin for a version tag and attaches them to the GitHub release together with
-# `vibey-manifest.json` (VIBE-API-2 §2 manifest plus sha256 and size of every file). The Vibe backend imports
-# releases from GitHub itself; this workflow never talks to vibe.henny.dev (Cloudflare blocks GitHub runners there).
+# Builds every jar for a version tag and attaches them to the GitHub release together with `vibey-manifest.json`
+# (VIBE-API-2 §2 manifest plus sha256 and size of every file, "blockbench": null). The Vibe backend imports releases
+# from GitHub itself; this workflow never talks to vibe.henny.dev (Cloudflare blocks GitHub runners there).
 # Manual fallback without GitHub: `node tools/release-manifest.mjs --publish …` from your machine (README "Releases").
+# The Blockbench plugin is NOT part of client releases: it has its own releases (tag blockbench-v<version>,
+# blockbench-release.yml), which this workflow skips.
 #
-# Cut a release: bump mod_version (gradle.properties) and blockbench/package.json + VERSION in blockbench/vibey.js,
-# add a "## <version>" section to CHANGELOG.md, merge to main, then publish a GitHub release with tag v<version>
-# (the release text becomes the changelog; empty = the CHANGELOG.md section). A GitHub pre-release or a tag with a
-# "-" suffix (v0.3.0-beta.1) goes to the beta channel. Pushing a v* tag without a release creates the release.
-# Re-running replaces the assets (--clobber); vibey-manifest.json is uploaded last, once every file it lists is there.
+# Cut a release: bump mod_version (gradle.properties), add a "## <version>" section to CHANGELOG.md, merge to main,
+# then publish a GitHub release with tag v<version> (the release text becomes the changelog; empty = the CHANGELOG.md
+# section). A GitHub pre-release or a tag with a "-" suffix (v0.3.0-beta.1) goes to the beta channel. Pushing a
+# v<digit>… tag without a release creates the release. Re-running replaces the assets (--clobber);
+# vibey-manifest.json is uploaded last, once every file it lists is there.
 
 on:
   release:
     types: [published]
   push:
-    tags: ["v*"]
+    # v0.3.0, v0.3.0-beta.1 – never blockbench-v* (glob is anchored; the digit makes it explicit)
+    tags: ["v[0-9]*"]
   workflow_dispatch:
     inputs:
       tag:
@@ -36,6 +39,8 @@ env:
 jobs:
   release:
     name: Build and attach to the GitHub release
+    # A Blockbench plugin release (blockbench-v*) published by hand also fires "release: published": not ours.
+    if: ${{ startsWith(github.event.release.tag_name || inputs.tag || github.ref_name, 'v') }}
     runs-on: ubuntu-latest # free GitHub-hosted runner
     timeout-minutes: 120
     steps:
@@ -78,12 +83,6 @@ jobs:
           -Porg.gradle.java.installations.auto-download=false
           -Porg.gradle.java.installations.fromEnv=JAVA_HOME_21_X64,JAVA_HOME_25_X64
 
-      - name: Blockbench plugin tests
-        working-directory: blockbench
-        run: |
-          npm ci || npm install
-          npm test
-
       - name: Release notes and channel
         env:
           GH_TOKEN: ${{ github.token }}
@@ -105,7 +104,6 @@ jobs:
 
       - name: Manifest (vibey-manifest.json)
         run: |
-          # vibey.js must be the committed LF bytes (the manifest hashes it; the tool refuses CRLF)
           flag=""; [ "$PRERELEASE" = "true" ] && flag="--prerelease"
           node tools/release-manifest.mjs --tag "$TAG" --changelog-file build/release/notes.md --hashes $flag \
             --out build/release/vibey-manifest.json
@@ -115,7 +113,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          files=(build/dist/*.jar blockbench/vibey.js server-plugins/vibey-rules/build/libs/VibeyRules-*.jar)
+          files=(build/dist/*.jar server-plugins/vibey-rules/build/libs/VibeyRules-*.jar)
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" "${files[@]}" --clobber
           else

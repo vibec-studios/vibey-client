@@ -1,0 +1,101 @@
+name: Blockbench plugin release
+
+# Standalone release of the Vibey Blockbench plugin (docs/BLOCKBENCH.md "Releases"). Pushing the tag
+# blockbench-v<version> creates the GitHub release "Vibey Blockbench Plugin <version>" with exactly two assets:
+#   vibey.js               the plugin, the committed (LF) bytes of blockbench/vibey.js at the tag
+#   vibey-blockbench.json  { version, file, sha256, size, min_client, notes } (blockbench/tools/release-json.mjs)
+# The release is never marked "Latest" (that stays the client release), and it is not a pre-release or draft.
+# The Vibe Launcher downloads the plugin from here; the backend's client import skips it (no vibey-manifest.json).
+#
+# Release a new plugin version: bump blockbench/package.json (+ package-lock.json) and VERSION in vibey.js, add a
+# "## <version>" section with a German "Kurz:" line to blockbench/CHANGELOG.md, merge to main, then
+#   git tag blockbench-v<version> && git push origin blockbench-v<version>
+# Re-running (or workflow_dispatch with the tag) is safe: assets are replaced (--clobber) and the release is reset to
+# not-latest, not-prerelease, not-draft with the title and notes from the changelog.
+
+on:
+  push:
+    tags: ["blockbench-v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to (re-)release (e.g. blockbench-v0.2.4)"
+        required: true
+
+concurrency:
+  group: blockbench-release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  TAG: ${{ inputs.tag || github.ref_name }}
+
+jobs:
+  release:
+    name: Test and publish the plugin
+    if: ${{ startsWith(inputs.tag || github.ref_name, 'blockbench-v') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Plugin unit tests
+        working-directory: blockbench
+        run: |
+          npm ci
+          npm test
+
+      - name: Build vibey.js + vibey-blockbench.json
+        run: |
+          mkdir -p build/blockbench
+          # the uploaded file = the git blob at the tag (LF), never a working-tree conversion
+          git cat-file blob "HEAD:blockbench/vibey.js" > build/blockbench/vibey.js
+          # checks tag == package.json == package-lock.json == VERSION in vibey.js, LF, changelog section + "Kurz:"
+          node blockbench/tools/release-json.mjs --tag "$TAG" --plugin build/blockbench/vibey.js \
+            --out build/blockbench/vibey-blockbench.json --notes-out build/blockbench/notes.md
+          VERSION="$(node -p "require('./build/blockbench/vibey-blockbench.json').version")"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          cat build/blockbench/vibey-blockbench.json
+
+      - name: Create or update the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd build/blockbench
+          title="Vibey Blockbench Plugin $VERSION"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" vibey.js vibey-blockbench.json --clobber
+            gh release edit "$TAG" --title "$title" --notes-file notes.md --latest=false --prerelease=false --draft=false
+          else
+            gh release create "$TAG" vibey.js vibey-blockbench.json --verify-tag --title "$title" --notes-file notes.md --latest=false
+          fi
+
+      - name: Verify the published assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p build/check && cd build/check
+          gh release download "$TAG" --clobber --pattern vibey.js --pattern vibey-blockbench.json
+          node -e '
+            const fs = require("fs"), crypto = require("crypto");
+            const json = JSON.parse(fs.readFileSync("vibey-blockbench.json", "utf8"));
+            const js = fs.readFileSync("vibey.js");
+            const sha = crypto.createHash("sha256").update(js).digest("hex");
+            if (sha !== json.sha256 || js.length !== json.size) { console.error("asset does not match vibey-blockbench.json", sha, js.length, json); process.exit(1); }
+            console.log("ok", json.version, sha, js.length);
+          '
+          names="$(gh release view "$TAG" --json assets --jq '[.assets[].name] | sort | join(",")')"
+          if [ "$names" != "vibey-blockbench.json,vibey.js" ]; then echo "::error::unexpected assets: $names"; exit 1; fi
+          state="$(gh release view "$TAG" --json isDraft,isPrerelease --jq '"\(.isDraft),\(.isPrerelease)"')"
+          if [ "$state" != "false,false" ]; then echo "::error::release is draft/prerelease: $state"; exit 1; fi
+          latest="$(gh api "repos/$GITHUB_REPOSITORY/releases/latest" --jq .tag_name 2>/dev/null || true)"
+          case "$latest" in blockbench-*) echo "::error::$TAG became the latest release"; exit 1;; esac
+          echo "latest release: ${latest:-none}"

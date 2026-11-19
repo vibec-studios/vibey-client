@@ -1,5 +1,5 @@
 /**
- * Vibey Client – Blockbench plugin (v0.2.3) by Vibe Craft Studios.
+ * Vibey Client – Blockbench plugin (v0.2.4) by Vibe Craft Studios.
  *
  * Model formats "Vibey Cosmetic" and "Vibey Emote", a "New item" wizard and a step-by-step guide, import/export of
  * `.vibey` bundles (docs/SPEC.md §5), a reference player, validation in plain words and the live link into the
@@ -16,7 +16,7 @@
  */
 (function () {
 'use strict';
-const VERSION = '0.2.3';
+const VERSION = '0.2.4';
 
 /* ===========================================================================
  * Vibey core – pure helpers, no Blockbench dependency.
@@ -1082,6 +1082,46 @@ const Core = (function () {
 		}
 		return msg;
 	}
+	/**
+	 * Parts of a push that only newer Vibey Clients use (older ones ignore them silently): the oldest client version
+	 * per feature. The game names its version in the devlink "welcome" ("mod").
+	 */
+	const CLIENT_FEATURES = { thumbnail: '0.3.0', states: '0.3.0', offsetWhen: '0.3.0' };
+	/** Cosmetic animation states added in Vibey Client 0.3.0 (older clients play idle/walk/fly instead). */
+	const NEW_STATES = ['sprint', 'glide', 'idle_long', 'happy'];
+	/** [major, minor, patch] of "0.2.1", "v0.3.0-beta.1", "0.3.0+build"; null if there is no x.y.z. */
+	function parseVersion(v) {
+		const m = /^v?(\d+)\.(\d+)\.(\d+)/.exec(String(v == null ? '' : v).trim());
+		return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null;
+	}
+	/** a < b → negative, equal → 0, a > b → positive (x.y.z only, pre-release suffixes count as that version). */
+	function compareVersions(a, b) {
+		const x = parseVersion(a), y = parseVersion(b);
+		if (!x || !y) return 0;
+		for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] - y[i];
+		return 0;
+	}
+	/**
+	 * What a push message uses that the game (modVersion from "welcome") does not know yet:
+	 * [{ feature, since, detail? }]. Unknown or unparseable game versions → [] (assume a current game).
+	 */
+	function featureGaps(msg, modVersion) {
+		if (!msg || !parseVersion(modVersion)) return [];
+		const older = (f) => compareVersions(modVersion, CLIENT_FEATURES[f]) < 0;
+		const out = [];
+		const b = msg.bundle || {};
+		if (msg.thumbnail && older('thumbnail')) out.push({ feature: 'thumbnail', since: CLIENT_FEATURES.thumbnail });
+		if (b.kind === 'cosmetic' && older('states')) {
+			const used = NEW_STATES.filter((s) => {
+				const a = b.animations && b.animations[s];
+				return a && a.bones && Object.keys(a.bones).length;
+			});
+			if (used.length) out.push({ feature: 'states', since: CLIENT_FEATURES.states, detail: used });
+		}
+		if (b.cosmetic && Array.isArray(b.cosmetic.offsetWhen) && b.cosmetic.offsetWhen.length && older('offsetWhen'))
+			out.push({ feature: 'offsetWhen', since: CLIENT_FEATURES.offsetWhen });
+		return out;
+	}
 	/** Display order + whether the plugin may offer "withdraw". Unknown statuses are shown as they are. */
 	const SUBMISSION_STATUS = { pending: { open: true }, approved: { open: false }, rejected: { open: false }, withdrawn: { open: false } };
 
@@ -1502,7 +1542,7 @@ const Core = (function () {
 		round, parseNumber, parseVec3, sanitizeId, base64ToBytes, bytesToBase64, base64Size, pngInfo, isOgg, utf8Length,
 		boxUvFaces, keyframesToSpec, specToKeyframes, compileBundle, decompileBundle, validateBundle, stringify,
 		parseDevlink, backoffDelay, devlinkPath, defaultGameDir, submitMessage, SUBMIT_LIMITS, SUBMISSION_STATUS, pushMessage, PUSH_THUMB_LIMITS,
-		OFFSET_LIMITS,
+		OFFSET_LIMITS, CLIENT_FEATURES, NEW_STATES, parseVersion, compareVersions, featureGaps,
 		slugify, creatorNamespace, wizardId, checkWizardId, SLOT_PRESETS, TRACK_LENGTH, previewNodes, templateImage, encodePng,
 		starterSnapshot, templateSnapshot, TUTORIAL_STEPS, tutorialChecks, friendlyProblem, linkErrorKind, FRIENDLY_RULES,
 		ASSETS, VERSION,
@@ -1594,6 +1634,11 @@ const STRINGS = {
 	link_off: ['Not connected', 'Nicht verbunden'],
 	link_connecting: ['Connecting to %0…', 'Verbinde mit %0…'],
 	link_connected: ['Connected – Minecraft %0 (%1)', 'Verbunden – Minecraft %0 (%1)'],
+	compat_thumbnail: ['Wardrobe thumbnails', 'Vorschaubilder in der Garderobe'],
+	compat_states: ['the animations %0', 'die Animationen %0'],
+	compat_offsetWhen: ['offsetWhen (moving aside for other items)', 'offsetWhen (Ausweichen für andere Items)'],
+	compat_and: [' and ', ' und '],
+	compat_note: ['%0 need Vibey Client %1 – your game has %2. Everything else works; the game ignores these parts until you update.', '%0 brauchen Vibey Client %1 – dein Spiel hat %2. Alles andere funktioniert; bis zum Update ignoriert das Spiel diese Teile.'],
 	link_short_off: ['offline', 'offline'],
 	link_short_connecting: ['connecting…', 'verbinde…'],
 	link_short_connected: ['connected', 'verbunden'],
@@ -1601,9 +1646,9 @@ const STRINGS = {
 	link_unreachable: ['Game not reachable on 127.0.0.1:%0. Is Minecraft running with Vibey Client and Creator mode on?', 'Spiel auf 127.0.0.1:%0 nicht erreichbar. Läuft Minecraft mit Vibey Client und ist der Creator-Modus an?'],
 	link_lost: ['Connection to the game was lost.', 'Verbindung zum Spiel verloren.'],
 	link_retry: [' Retrying in %0 s…', ' Neuer Versuch in %0 s…'],
-	link_token_rejected: ['The game rejected the token. Copy the current token from the game (Vibey menu > Creator > Blockbench link), or enable "Find game automatically".', 'Das Spiel hat den Token abgelehnt. Kopiere den aktuellen Token aus dem Spiel (Vibey-Menü > Creator > Blockbench-Link) oder aktiviere "Spiel automatisch finden".'],
+	link_token_rejected: ['The game rejected the token. Copy the current token from the game (Vibey menu (Right Shift) → Modules → Blockbench link (from Vibey Client 0.3.0 under "For creators")), or enable "Find game automatically".', 'Das Spiel hat den Token abgelehnt. Kopiere den aktuellen Token aus dem Spiel (Vibey-Menü (rechte Umschalttaste) → Module → Blockbench-Link (ab Vibey Client 0.3.0 unter „Für Creator“)) oder aktiviere "Spiel automatisch finden".'],
 	link_no_welcome: ['The game did not answer the hello message.', 'Das Spiel hat nicht auf die Begrüßung geantwortet.'],
-	devlink_missing: ['Could not find %0. Start Minecraft with Vibey Client and turn on Creator mode (Vibey menu > Creator > Blockbench link), or check the game directory in the live link settings.', '%0 nicht gefunden. Starte Minecraft mit Vibey Client und aktiviere den Creator-Modus (Vibey-Menü > Creator > Blockbench-Link) oder prüfe den Spielordner in den Live-Link-Einstellungen.'],
+	devlink_missing: ['Could not find %0. Start Minecraft with Vibey Client and turn on Creator mode (Vibey menu (Right Shift) → Modules → Blockbench link (from Vibey Client 0.3.0 under "For creators")), or check the game directory in the live link settings.', '%0 nicht gefunden. Starte Minecraft mit Vibey Client und aktiviere den Creator-Modus (Vibey-Menü (rechte Umschalttaste) → Module → Blockbench-Link (ab Vibey Client 0.3.0 unter „Für Creator“)) oder prüfe den Spielordner in den Live-Link-Einstellungen.'],
 	token_missing: ['No token set. Enable "Find game automatically" or paste the token from the game settings.', 'Kein Token gesetzt. Aktiviere "Spiel automatisch finden" oder füge den Token aus den Spieleinstellungen ein.'],
 	push_sent: ['Pushing %0…', 'Sende %0…'],
 	push_ok: ['Pushed %0 to the game', '%0 an das Spiel gesendet'],
@@ -1788,7 +1833,7 @@ Object.assign(STRINGS, {
 	g_live_how: ['Not connected yet? In 4 steps:', 'Noch nicht verbunden? In 4 Schritten:'],
 	g_live_how1: ['Start Minecraft with Vibey Client.', 'Starte Minecraft mit Vibey Client.'],
 	g_live_how2: ['Open the Vibey menu (Right Shift, or the Vibey button on the title or pause screen).', 'Öffne das Vibey-Menü (rechte Umschalttaste oder der Vibey-Knopf im Titel- oder Pausenmenü).'],
-	g_live_how3: ['Go to <b>Creator</b> → <b>Blockbench link</b> and turn on <b>Creator mode</b>.', 'Geh zu <b>Creator</b> → <b>Blockbench-Link</b> und schalte den <b>Creator-Modus</b> ein.'],
+	g_live_how3: ['Go to <b>Modules</b> → <b>Blockbench link</b> and turn on <b>Creator mode</b>. (From Vibey Client 0.3.0 the Blockbench link is under <b>For creators</b> at the bottom of Modules.)', 'Geh zu <b>Module</b> → <b>Blockbench-Link</b> und schalte den <b>Creator-Modus</b> ein. (Ab Vibey Client 0.3.0 steht der Blockbench-Link unter <b>Für Creator</b> unten in den Modulen.)'],
 	g_live_how4: ['Click "Test live in game" again – it connects automatically.', 'Klicke erneut auf "Live im Spiel testen" – es verbindet sich automatisch.'],
 	g_live_instance: ['Playing from a launcher instance? Choose its game folder once in Vibey > Advanced > Live link settings.', 'Spielst du aus einer Launcher-Instanz? Wähle ihren Spielordner einmal unter Vibey > Erweitert > Live-Link-Einstellungen.'],
 	g_live_tip: ['Turn on auto-push (Vibey panel) and every change shows up in game right away.', 'Schalte Auto-Senden ein (Vibey-Panel), dann erscheint jede Änderung sofort im Spiel.'],
@@ -1861,16 +1906,16 @@ Object.assign(STRINGS, {
 	fe_keeps_trying: ['Blockbench keeps looking in the background and sends your item as soon as the game is ready.', 'Blockbench sucht im Hintergrund weiter und sendet dein Item, sobald das Spiel bereit ist.'],
 	fe_unreachable_title: ['Can\'t reach the game', 'Spiel nicht erreichbar'],
 	fe_unreachable_msg: ['Blockbench could not talk to Minecraft.', 'Blockbench konnte nicht mit Minecraft sprechen.'],
-	fe_unreachable_fix: ['Start Minecraft with Vibey Client.\nIn the game open the Vibey menu (Right Shift) → Creator → Blockbench link and turn on Creator mode.\nThen click "Try again".', 'Starte Minecraft mit Vibey Client.\nÖffne im Spiel das Vibey-Menü (rechte Umschalttaste) → Creator → Blockbench-Link und schalte den Creator-Modus ein.\nKlicke dann auf "Nochmal versuchen".'],
+	fe_unreachable_fix: ['Start Minecraft with Vibey Client.\nIn the game open Vibey menu (Right Shift) → Modules → Blockbench link (from Vibey Client 0.3.0 under "For creators") and turn on Creator mode.\nThen click "Try again".', 'Starte Minecraft mit Vibey Client.\nÖffne im Spiel Vibey-Menü (rechte Umschalttaste) → Module → Blockbench-Link (ab Vibey Client 0.3.0 unter „Für Creator“) und schalte den Creator-Modus ein.\nKlicke dann auf "Nochmal versuchen".'],
 	fe_devlink_missing_title: ['Can\'t find the game', 'Spiel nicht gefunden'],
 	fe_devlink_missing_msg: ['Minecraft with Vibey Client does not seem to be running with Creator mode on.', 'Minecraft mit Vibey Client scheint nicht mit eingeschaltetem Creator-Modus zu laufen.'],
-	fe_devlink_missing_fix: ['Start Minecraft with Vibey Client.\nIn the game open the Vibey menu (Right Shift) → Creator → Blockbench link and turn on Creator mode.\nPlaying from a launcher instance? Choose its game folder in Live link settings.', 'Starte Minecraft mit Vibey Client.\nÖffne im Spiel das Vibey-Menü (rechte Umschalttaste) → Creator → Blockbench-Link und schalte den Creator-Modus ein.\nSpielst du aus einer Launcher-Instanz? Wähle ihren Spielordner in den Live-Link-Einstellungen.'],
+	fe_devlink_missing_fix: ['Start Minecraft with Vibey Client.\nIn the game open Vibey menu (Right Shift) → Modules → Blockbench link (from Vibey Client 0.3.0 under "For creators") and turn on Creator mode.\nPlaying from a launcher instance? Choose its game folder in Live link settings.', 'Starte Minecraft mit Vibey Client.\nÖffne im Spiel Vibey-Menü (rechte Umschalttaste) → Module → Blockbench-Link (ab Vibey Client 0.3.0 unter „Für Creator“) und schalte den Creator-Modus ein.\nSpielst du aus einer Launcher-Instanz? Wähle ihren Spielordner in den Live-Link-Einstellungen.'],
 	fe_bad_devlink_title: ['The game\'s link file is unreadable', 'Die Link-Datei des Spiels ist unlesbar'],
 	fe_bad_devlink_msg: ['The connection file written by the game is damaged.', 'Die vom Spiel geschriebene Verbindungsdatei ist beschädigt.'],
-	fe_bad_devlink_fix: ['Turn Creator mode off and on again in the game (Vibey menu → Creator → Blockbench link).\nThen click "Try again".', 'Schalte im Spiel den Creator-Modus aus und wieder ein (Vibey-Menü → Creator → Blockbench-Link).\nKlicke dann auf "Nochmal versuchen".'],
+	fe_bad_devlink_fix: ['Turn Creator mode off and on again in the game (Vibey menu (Right Shift) → Modules → Blockbench link (from Vibey Client 0.3.0 under "For creators")).\nThen click "Try again".', 'Schalte im Spiel den Creator-Modus aus und wieder ein (Vibey-Menü (rechte Umschalttaste) → Module → Blockbench-Link (ab Vibey Client 0.3.0 unter „Für Creator“)).\nKlicke dann auf "Nochmal versuchen".'],
 	fe_token_title: ['The game didn\'t let Blockbench in', 'Das Spiel hat Blockbench nicht reingelassen'],
 	fe_token_msg: ['The access code (token) does not match – it was probably renewed in the game.', 'Der Zugangscode (Token) passt nicht – er wurde vermutlich im Spiel erneuert.'],
-	fe_token_fix: ['Open Live link settings and turn on "Find game automatically".\nOr copy the token from the game (Vibey menu → Creator → Blockbench link) and paste it there.', 'Öffne die Live-Link-Einstellungen und schalte "Spiel automatisch finden" ein.\nOder kopiere den Token aus dem Spiel (Vibey-Menü → Creator → Blockbench-Link) und füge ihn dort ein.'],
+	fe_token_fix: ['Open Live link settings and turn on "Find game automatically".\nOr copy the token from the game (Vibey menu (Right Shift) → Modules → Blockbench link (from Vibey Client 0.3.0 under "For creators")) and paste it there.', 'Öffne die Live-Link-Einstellungen und schalte "Spiel automatisch finden" ein.\nOder kopiere den Token aus dem Spiel (Vibey-Menü (rechte Umschalttaste) → Module → Blockbench-Link (ab Vibey Client 0.3.0 unter „Für Creator“)) und füge ihn dort ein.'],
 	fe_timeout_title: ['The game didn\'t answer', 'Das Spiel hat nicht geantwortet'],
 	fe_timeout_msg: ['Minecraft is connected but did not answer in time.', 'Minecraft ist verbunden, hat aber nicht rechtzeitig geantwortet.'],
 	fe_timeout_fix: ['Make sure the game is not paused in a loading screen.\nThen click "Try again".', 'Achte darauf, dass das Spiel nicht in einem Ladebildschirm hängt.\nKlicke dann auf "Nochmal versuchen".'],
@@ -1879,7 +1924,7 @@ Object.assign(STRINGS, {
 	fe_lost_fix: ['Start the game again – Blockbench reconnects by itself.', 'Starte das Spiel erneut – Blockbench verbindet sich von selbst.'],
 	fe_not_signed_in_title: ['The game isn\'t signed in to Vibe', 'Das Spiel ist nicht bei Vibe angemeldet'],
 	fe_not_signed_in_msg: ['Submitting goes through the game\'s Vibe account.', 'Das Einreichen läuft über das Vibe-Konto des Spiels.'],
-	fe_not_signed_in_fix: ['In the game open the Vibey menu → Global settings and turn on Online features.\nWait until you are signed in, then click "Try again".', 'Öffne im Spiel das Vibey-Menü → Allgemein und schalte die Online-Funktionen ein.\nWarte, bis du angemeldet bist, und klicke dann auf "Nochmal versuchen".'],
+	fe_not_signed_in_fix: ['In the game open the Vibey menu → Global settings (from Vibey Client 0.3.0: the General tab) and turn on Online features.\nWait until you are signed in, then click "Try again".', 'Öffne im Spiel das Vibey-Menü → Allgemein und schalte die Online-Funktionen ein.\nWarte, bis du angemeldet bist, und klicke dann auf "Nochmal versuchen".'],
 	fe_need_game_msg: ['Submitting goes through the running game and its Vibe login.', 'Das Einreichen läuft über das laufende Spiel und dessen Vibe-Login.'],
 	fe_game_rejected_title: ['The game couldn\'t load your item', 'Das Spiel konnte dein Item nicht laden'],
 	fe_game_rejected_msg: ['Minecraft found a problem in "%0".', 'Minecraft hat ein Problem in "%0" gefunden.'],
@@ -2841,6 +2886,8 @@ const Link = {
 	requests: new Map(),
 	requestCounter: 0,
 	lastResult: '',
+	compatNote: '', // what the last push used that the connected (older) game ignores
+	compatShown: new Set(),
 	setState(state, message) {
 		this.state = state;
 		this.message = message || '';
@@ -2970,6 +3017,8 @@ const Link = {
 				this.attempt = 0;
 				this.errorCode = '';
 				this.game = msg;
+				this.compatNote = '';
+				this.compatShown = new Set();
 				this.lastPong = Date.now();
 				this.setState('connected', T('link_connected', msg.game || '?', msg.player || '?'));
 				clearInterval(this.pingTimer);
@@ -3048,7 +3097,8 @@ const Link = {
 				if (!thumbnail || Core.base64Size(thumbnail) <= Core.PUSH_THUMB_LIMITS.bytes) break;
 			}
 		}
-		const text = JSON.stringify(Core.pushMessage({ bundle: r.bundle, action, thumbnail }));
+		const pushMsg = Core.pushMessage({ bundle: r.bundle, action, thumbnail });
+		const text = JSON.stringify(pushMsg);
 		if (Core.utf8Length(text) > Core.LIMITS.messageBytes) {
 			showFriendly({ key: 'too_big', icon: 'sd_card_alert', details: T('push_too_big') + ' (' + Math.round(Core.utf8Length(text) / 1024) + ' KiB)' });
 			return Promise.resolve({ type: 'error', message: 'too big' });
@@ -3076,8 +3126,14 @@ const Link = {
 			if (res.type === 'pushed' && res.ok !== false) {
 				this.lastResult = T('push_ok', id) + (res.warnings && res.warnings.length ? ' (' + res.warnings.length + ' ' + T('warnings') + ')' : '');
 				sessionOf(project).pushed = true;
-				if (!opts.auto) Blockbench.showQuickMessage(T('live_sent'), 2500);
 				if (res.warnings && res.warnings.length) res.warnings.forEach((w) => console.warn('[Vibey game] ' + w));
+				// an older game ignores newer parts silently: say so once per connection and kind of gap
+				this.compatNote = compatNote(Core.featureGaps(pushMsg, this.game && this.game.mod), this.game && this.game.mod);
+				if (this.compatNote && !this.compatShown.has(this.compatNote)) {
+					this.compatShown.add(this.compatNote);
+					console.warn('[Vibey] ' + this.compatNote);
+					if (!opts.auto) Blockbench.showQuickMessage(this.compatNote, 6000);
+				} else if (!opts.auto) Blockbench.showQuickMessage(T('live_sent'), 2500);
 			} else if (res.timeout) {
 				this.lastResult = T('push_timeout', id);
 				if (!opts.auto) showFriendly({ key: 'timeout', icon: 'hourglass_empty', details: this.lastResult, buttons: [{ label: T('fe_try_again'), action: () => testLive() }] });
@@ -3112,6 +3168,14 @@ const Link = {
 		});
 	},
 };
+/** Friendly sentence for Core.featureGaps(...), or '' when the game knows everything the push used. */
+function compatNote(gaps, mod) {
+	if (!gaps || !gaps.length) return '';
+	const parts = gaps.map((g) => (g.feature === 'states' ? T('compat_states', g.detail.join(', ')) : T('compat_' + g.feature)));
+	const list = parts.length > 1 ? parts.slice(0, -1).join(', ') + T('compat_and') + parts[parts.length - 1] : parts[0];
+	const since = gaps.map((g) => g.since).sort(Core.compareVersions).pop();
+	return T('compat_note', list.charAt(0).toUpperCase() + list.slice(1), since, mod);
+}
 // ------------------------------------------------------------- Submit to Vibe (VIBE-API-2 §3, through the game)
 const statusLabel = (s) => (STRINGS['status_' + s] ? T('status_' + s) : String(s || '?'));
 
@@ -3823,7 +3887,7 @@ function scheduleAutoPush() {
 // ------------------------------------------------------------- UI state
 const UI = {
 	kind: '', id: '', name: '', slot: '', showReference: true, sounds: [], sprites: [],
-	linkState: 'off', linkText: '', lastResult: '', autoPush: false, active: false, errors: 0, warnings: 0,
+	linkState: 'off', linkText: '', lastResult: '', compatNote: '', autoPush: false, active: false, errors: 0, warnings: 0,
 	guide: null,
 };
 let refreshQueued = false;
@@ -3844,6 +3908,7 @@ function refreshUI() {
 		UI.linkState = Link.state;
 		UI.linkText = Link.message || T('link_off');
 		UI.lastResult = Link.lastResult;
+		UI.compatNote = Link.state === 'connected' ? Link.compatNote : '';
 		UI.autoPush = !!LinkSettings.autoPush;
 		if (meta && typeof Validator !== 'undefined') {
 			const check = Validator.checks.find((c) => c.id === 'vibey_bundle');
@@ -4392,6 +4457,7 @@ function setup() {
 	</div>
 	<label class="vibey_check"><input type="checkbox" :checked="ui.autoPush" @change="setAutoPush($event.target.checked)"> ${esc(T('auto_push'))}</label>
 	<div class="vibey_result" v-if="ui.lastResult">{{ ui.lastResult }}</div>
+	<div class="vibey_result vibey_compat" v-if="ui.compatNote"><i class="material-icons" style="font-size:14px;vertical-align:middle">info</i> {{ ui.compatNote }}</div>
 
 	<h4>${esc(T('sounds'))}<i class="material-icons tool" @click="addSound()" title="${esc(T('add_sound'))}">add</i></h4>
 	<ul class="vibey_list">
