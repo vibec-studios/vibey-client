@@ -2,6 +2,18 @@
 
 All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.properties`.
 
+## Unreleased – Clips
+
+**Clips** *(Fabric 1.21.11 for now)*
+- A replay buffer: switch it on and press **F8** to save the last 30 seconds (10–120 s) as a video. Off by default.
+- Automatic clips after a kill, a multi-kill or a clutch (and optionally your own death), from what the game already
+  shows you. Servers can switch clips (`clips`) or only the automatic ones (`clips.auto`) off.
+- Light on your PC: your graphics card's video encoder (NVIDIA, AMD, Intel, or Windows'), 720p30 by default, only while
+  you play (not in menus, inventories, when the window is in the background or the FPS are low), at most 96 MB of
+  memory and a 2 GB clips folder that cleans up after itself (kept clips stay).
+- A gallery in the game: watch, keep, rename and delete clips, open the folder. The Vibe Launcher shows them too.
+- FFmpeg is downloaded only after you agree (the same download as for video screens).
+
 ## Unreleased – faster online features
 
 - Online features load much faster: friends, chats and your cosmetics are there sooner after the game starts, and

@@ -113,5 +113,10 @@
   "accept.load": "Load",
   "accept.no": "Not now",
   "browser.title": "Web page",
-  "browser.hint": "Mouse and keyboard go to the page · Esc to leave"
+  "browser.hint": "Mouse and keyboard go to the page · Esc to leave",
+  "setup.ffmpegclips.title": "Clips need FFmpeg",
+  "setup.ffmpegclips.what": "Clips are recorded with FFmpeg, a free open-source video program, using your graphics card's video encoder. It runs as its own program next to Minecraft; it is the same download as for video screens.",
+  "setup.ffmpegmanualclips.title": "Clips need FFmpeg",
+  "setup.ffmpegmanualclips.what": "Clips are recorded with FFmpeg, a free open-source video program. Install it with your system's package manager, then press \"Check again\".",
+  "setup.done.clips": "Done. The replay buffer records once you play."
 }

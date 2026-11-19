@@ -25,14 +25,21 @@ public final class SetupScreen extends CardScreen {
     private enum Step { ASK, LOOKUP, DOWNLOAD, DONE, FAILED }
 
     private final Need need;
+    /** Asked by the Clips module: same download, texts about recording instead of playing. */
+    private final boolean forClips;
     private volatile Step step = Step.ASK;
     private volatile float progress;
     private volatile String error;
     private volatile String sizeText;
 
     public SetupScreen(Screen parent, Need need) {
+        this(parent, need, false);
+    }
+
+    public SetupScreen(Screen parent, Need need, boolean forClips) {
         super(Component.literal(Video.tr("setup.title")), parent, "media.video.");
         this.need = need;
+        this.forClips = forClips && need == Need.FFMPEG;
         if (need == Need.FFMPEG && Ffmpeg.downloadable()) {
             sizeText = tr("setup.ffmpeg.size", "~80");
         }
@@ -60,7 +67,7 @@ public final class SetupScreen extends CardScreen {
 
     private String key() {
         return switch (need) {
-            case FFMPEG -> Ffmpeg.downloadable() ? "setup.ffmpeg" : "setup.ffmpegmanual";
+            case FFMPEG -> (Ffmpeg.downloadable() ? "setup.ffmpeg" : "setup.ffmpegmanual") + (forClips ? "clips" : "");
             case BROWSER_MOD -> "setup.mod";
             case BROWSER_NATIVES -> "setup.natives";
         };
@@ -136,7 +143,7 @@ public final class SetupScreen extends CardScreen {
                 y += 14;
             }
             case DONE -> {
-                for (String line : wrapAll(g, tr(need == Need.BROWSER_MOD ? "setup.done.restart" : "setup.done"), w)) {
+                for (String line : wrapAll(g, tr(need == Need.BROWSER_MOD ? "setup.done.restart" : forClips ? "setup.done.clips" : "setup.done"), w)) {
                     g.text(line, x, y, GREEN);
                     y += 11;
                 }

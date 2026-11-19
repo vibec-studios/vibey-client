@@ -69,6 +69,15 @@ if (project.name != 'fabric-1.21.11') {
         filesMatching('fabric.mod.json') { filter { String line -> line.contains('vibeyclient.pvp.mixins.json') ? null : line } }
     }
 }
+// The Clips module (module/clips: replay buffer, auto clips, gallery) is Fabric 1.21.11 only for now, like pvp: package,
+// mixin config, strings, shader and its fabric.mod.json line are left out everywhere else (registered by reflection).
+if (project.name != 'fabric-1.21.11') {
+    sourceSets.main.java { exclude 'dev/henny/vibeyclient/module/clips/**' }
+    processResources {
+        exclude 'vibeyclient.clips.mixins.json', 'assets/vibeyclient/i18n/*/clips.json', 'assets/vibeyclient/shaders/core/clips_*'
+        filesMatching('fabric.mod.json') { filter { String line -> line.contains('vibeyclient.clips.mixins.json') ? null : line } }
+    }
+}
 tasks.named('compileJava') { dependsOn genTask }
 afterEvaluate {
     tasks.matching { it.name == 'sourcesJar' }.configureEach { dependsOn genTask }
