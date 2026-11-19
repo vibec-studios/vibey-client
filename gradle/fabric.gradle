@@ -60,6 +60,21 @@ if (project.minecraft_version == '1.21.11') {
         java.srcDirs = [rootProject.file('src/gametest/java')]
         resources.srcDirs = [rootProject.file('src/gametest/resources')]
     }
+    // Only some game tests: -Dvibeyclient.test.only=ToastGameTest,PlayLinksGameTest (drops the other entrypoints)
+    def only = System.getProperty('vibeyclient.test.only', '').split(',').collect { it.trim() }.findAll { it }
+    tasks.named('processGametestResources') {
+        inputs.property('vibeyclientTestOnly', only.join(','))
+        if (!only.isEmpty()) filesMatching('fabric.mod.json') {
+            int kept = 0
+            filter { String line ->
+                def m = line =~ /"dev\.henny\.vibeyclient\.gametest\.(\w+)"/
+                if (!m.find()) return line
+                if (!only.contains(m.group(1))) return null
+                // keep the JSON array valid whatever is dropped: commas in front of every entry but the first
+                (kept++ > 0 ? '      ,' : '      ') + m.group(0)
+            }
+        }
+    }
     // Plain JUnit tests (pure logic such as the signed-loadout check): ./gradlew :fabric-1.21.11:test (part of build).
     // They live in src/junit, not src/test: Stonecutter would hand src/test to every version, which has no JUnit.
     sourceSets.named('test') {

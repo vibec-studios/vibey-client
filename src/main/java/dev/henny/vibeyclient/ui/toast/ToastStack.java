@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * The toast stack (implements {@link Notify.Sink}): top right, newest at the top, at most {@link #MAX_VISIBLE} at a
+ * The toast stack (implements {@link Notify.Sink}): top right (below any vanilla toasts), newest at the top, at most {@link #MAX_VISIBLE} at a
  * time (the rest wait), 150 ms slide in/out, auto-hide (paused while hovered), click = action, optional buttons.
  * Drawn over every screen ({@link ToastHooks}) and on the HUD in game (hidden with F1). Client thread only, except
  * {@link #show} which may be called from anywhere.
@@ -70,6 +70,10 @@ public final class ToastStack {
 
     private static int lastX = Integer.MIN_VALUE;
     private static java.util.function.Supplier<String> hint = () -> Lang.tr("toast.openHint");
+
+    /** Lay the stack out below the vanilla toasts (tests switch it off for a comparison shot). */
+    public static volatile boolean belowVanilla = true;
+    private static int lastTop = -1;
 
     private static int reserveRight;
     private static long reserveUntil;
@@ -129,6 +133,11 @@ public final class ToastStack {
         return null;
     }
 
+    /** Target y of the topmost toast in the last frame (tests), -1 before the first frame with toasts. */
+    public static int debugTop() {
+        return lastTop;
+    }
+
     /** Keys of the visible toasts (tests/diagnostics). */
     public static String debugKeys() {
         List<String> keys = new ArrayList<>();
@@ -182,7 +191,9 @@ public final class ToastStack {
         int w = Math.min(WIDTH, sw - reserve - MARGIN * 2);
         int x = sw - MARGIN - w - reserve;
         lastX = x;
-        int y = MARGIN;
+        // below the vanilla toasts (advancements, recipes, "chat messages can't be verified"): they share the corner
+        int y = MARGIN + (belowVanilla ? vanillaOffset() : 0);
+        lastTop = y;
         for (int i = 0; i < visible.size(); i++) {
             Entry e = visible.get(i);
             layout(g, e, w);
@@ -211,6 +222,17 @@ public final class ToastStack {
             e.hitH = h;
             y += h + GAP;
         }
+    }
+
+    /** Room taken by vanilla toasts at the top right (0 if none; follows their slide-out). */
+    private static int vanillaOffset() {
+        float bottom;
+        try {
+            bottom = dev.henny.vibeyclient.client.ClientCompat.vanillaToastBottom();
+        } catch (Throwable t) {
+            bottom = 0f; // accessor missing (another mod replaced the toast manager)
+        }
+        return bottom <= 0.5f ? 0 : Math.round(bottom) - MARGIN + GAP;
     }
 
     private static void layout(Gfx g, Entry e, int w) {

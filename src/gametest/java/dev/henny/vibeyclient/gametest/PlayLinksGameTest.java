@@ -32,11 +32,17 @@ import java.time.Duration;
 import java.util.function.Predicate;
 
 /**
- * Play links + {@code .vibe/session.json} (vibe-launcher docs/PLAY-LINKS.md §2/§3) against LOCAL services only:
- * {@code scripts/mock-play-links.mjs} (play-link routes, proxies login/gateway to a local vibe-backend with
- * AUTH_DEV_BYPASS) and a local relay ({@code ALLOW_OFFLINE=1 DOMAIN=127-0-0-1.nip.io}). Runs only with
- * {@code -Dvibeyclient.playLinkTest=<review dir> -Dvibeyclient.api=http://127.0.0.1:<mock> -Dvibeyclient.devAuth=true
- * -Dvibeyclient.test.relay=127.0.0.1:<relay>}. Screenshots, session.json samples go to the review dir.
+ * Play links + {@code .vibe/session.json} (vibe-launcher docs/PLAY-LINKS.md §2/§3) against LOCAL services only, either
+ * <ul>
+ *   <li>a local <b>vibe-backend</b> (AUTH_DEV_BYPASS) with the play-link routes and a local relay started with
+ *       {@code ALLOW_OFFLINE=1 DOMAIN=vibey.henny.dev} (the backend only accepts relay hosts under its relay domain; the
+ *       client still connects through {@code 127.0.0.1:<port>}), or</li>
+ *   <li>{@code scripts/mock-play-links.mjs} (play-link routes, proxies login/gateway to a local vibe-backend), which
+ *       also simulates a backend without the routes. Detected by its {@code /__mock/links} route.</li>
+ * </ul>
+ * Runs only with {@code -Dvibeyclient.playLinkTest=<review dir> -Dvibeyclient.api=http://127.0.0.1:<port>
+ * -Dvibeyclient.devAuth=true -Dvibeyclient.test.relay=127.0.0.1:<relay>}. Screenshots, session.json samples, the
+ * backend's link JSON and the landing page HTML go to the review dir.
  */
 public final class PlayLinksGameTest implements FabricClientGameTest {
     private static final int SEC = 20;
@@ -46,6 +52,10 @@ public final class PlayLinksGameTest implements FabricClientGameTest {
     private String api;
     private Path review;
     private Path vibeDir;
+    /** Against the real backend (no /__mock routes). */
+    private boolean real;
+    /** Code charset of the contract (§3): no 0/o, 1/i/l. */
+    private static final String CODE_RE = "[23456789abcdefghjkmnpqrstuvwxyz]{6,8}";
 
     @Override
     public void runTest(ClientGameTestContext ctx) {
@@ -53,7 +63,7 @@ public final class PlayLinksGameTest implements FabricClientGameTest {
         if (out == null || out.isBlank()) return;
         api = System.getProperty("vibeyclient.api", "");
         if (!api.startsWith("http://127.0.0.1:") && !api.startsWith("http://localhost:")) {
-            throw new AssertionError("Play link test only runs against a local mock, not " + api);
+            throw new AssertionError("Play link test only runs against a local backend or mock, not " + api);
         }
         String relay = System.getProperty("vibeyclient.test.relay", "127.0.0.1:26400");
         review = Path.of(out);
@@ -64,8 +74,12 @@ public final class PlayLinksGameTest implements FabricClientGameTest {
         }
         ctx.getInput().resizeWindow(1280, 720);
         ctx.runOnClient(mc -> GlobalSettings.language.set(GlobalSettings.Language.ENGLISH));
-        mock("POST", "/__mock/reset", null);
-        mock("POST", "/__mock/config", "{\"missing\":false,\"rate\":10}");
+        real = status("GET", "/__mock/links") != 200;
+        log(real ? "against the real local backend at " + api : "against the mock at " + api);
+        if (!real) {
+            mock("POST", "/__mock/reset", null);
+            mock("POST", "/__mock/config", "{\"missing\":false,\"rate\":10}");
+        }
 
         Path game = Vibey.platform().gameDir().toAbsolutePath();
         vibeDir = game.resolve(".vibe");
@@ -98,9 +112,29 @@ public final class PlayLinksGameTest implements FabricClientGameTest {
             String address = ctx.computeOnClient(mc -> HostSession.address());
             String url = PlayLinks.url();
             log("hosting at " + address + ", link " + url);
-            JsonArray links = links();
-            if (links.size() != 1) throw new AssertionError("mock links: " + links);
-            JsonObject l = links.get(0).getAsJsonObject();
+            String code0 = PlayLinks.link().code();
+            if (!code0.matches(CODE_RE)) throw new AssertionError("code outside the contract charset: " + code0);
+            if (!real) {
+                JsonArray links = links();
+                if (links.size() != 1) throw new AssertionError("mock links: " + links);
+            }
+            // the public view (GET /api/v1/play-links/<code>) is what the launcher and the landing page read
+            JsonObject l = linkInfo(code0);
+            if (l == null) throw new AssertionError("link " + code0 + " not found on the backend");
+            save("backend-link.json", l);
+            check(l, "code", code0);
+            check(l, "url", url);
+            checkTimes(l, PlayLinks.link().expiresAt());
+            if (!l.has("host") || str(l.getAsJsonObject("host"), "uuid") == null) throw new AssertionError("host: " + l);
+            if (!l.has("active")) throw new AssertionError("no 'active': " + l);
+            String landing = get("/j/" + code0);
+            if (landing == null || !landing.contains(code0)) throw new AssertionError("landing page /j/" + code0 + ": " + landing);
+            try {
+                Files.writeString(review.resolve("landing-" + code0 + ".html"), landing);
+            } catch (IOException e) {
+                throw new AssertionError(e);
+            }
+            log("backend link " + l);
             check(l, "relay_host", address.toLowerCase());
             check(l, "world_name", str(sp, "world"));
             check(l, "client_pack", "vibey");
@@ -167,19 +201,22 @@ public final class PlayLinksGameTest implements FabricClientGameTest {
                     && PlayLinks.link() != null && !PlayLinks.link().code().equals(oldCode), 20 * SEC);
             if (rotated) {
                 String addr2 = ctx.computeOnClient(mc -> HostSession.address());
-                JsonArray after = links();
-                if (after.size() != 1 || !addr2.toLowerCase().equals(str(after.get(0).getAsJsonObject(), "relay_host"))) {
-                    throw new AssertionError("after the new address: " + after);
-                }
-                log("new address " + addr2 + " -> new link " + PlayLinks.url());
+                JsonObject now = linkInfo(PlayLinks.link().code());
+                if (now == null || !addr2.toLowerCase().equals(str(now, "relay_host"))) throw new AssertionError("after the new address: " + now);
+                if (linkInfo(oldCode) != null) throw new AssertionError("old link " + oldCode + " still there");
+                if (!real && links().size() != 1) throw new AssertionError("after the new address: " + links());
+                log("new address " + addr2 + " -> new link " + PlayLinks.url() + " (old " + oldCode + " gone)");
             } else {
                 log("relay gave no new address (" + HostSession.notice() + "), re-create check skipped");
             }
 
             // ---- stop hosting: link deleted, session back to singleplayer
+            String lastCode = PlayLinks.link().code();
             ctx.runOnClient(mc -> Services.get(HostingService.class).orElseThrow().stopHosting());
             ctx.waitFor(mc -> HostSession.status() == HostSession.Status.OFF, 5 * SEC);
-            if (!waitUntil(ctx, () -> links().isEmpty(), 10 * SEC)) throw new AssertionError("link not deleted: " + links());
+            if (!waitUntil(ctx, () -> linkInfo(lastCode) == null && (real || links().isEmpty()), 10 * SEC)) {
+                throw new AssertionError("link " + lastCode + " not deleted");
+            }
             log("stopped hosting: link deleted");
             JsonObject after = waitSession(ctx, o -> "singleplayer".equals(str(o, "state")), "singleplayer after hosting");
             if (after.has("play_link")) throw new AssertionError("play_link after hosting: " + after);
@@ -189,30 +226,39 @@ public final class PlayLinksGameTest implements FabricClientGameTest {
             shot(ctx, "playlinks_5_host_dialog_stopped");
             ctx.setScreen(() -> null);
 
-            // ---- backend without the routes (404): hosting works, no invite UI
-            mock("POST", "/__mock/config", "{\"missing\":true}");
-            hostAndWait(ctx, PlayLinks.State.HIDDEN);
-            if (PlayLinks.visible()) throw new AssertionError("invite UI visible although the backend has no play links");
-            ctx.setScreen(() -> new HostScreen(null));
-            ctx.waitTicks(10);
-            shot(ctx, "playlinks_6_backend_without_links");
-            ctx.setScreen(() -> null);
-            stopHosting(ctx);
-            mock("POST", "/__mock/config", "{\"missing\":false,\"rate\":0}");
+            if (!real) {
+                // ---- backend without the routes (404): hosting works, no invite UI (mock only)
+                mock("POST", "/__mock/config", "{\"missing\":true}");
+                hostAndWait(ctx, PlayLinks.State.HIDDEN);
+                if (PlayLinks.visible()) throw new AssertionError("invite UI visible although the backend has no play links");
+                ctx.setScreen(() -> new HostScreen(null));
+                ctx.waitTicks(10);
+                shot(ctx, "playlinks_6_backend_without_links");
+                ctx.setScreen(() -> null);
+                stopHosting(ctx);
+                mock("POST", "/__mock/config", "{\"missing\":false,\"rate\":0}");
+            } else {
+                // ---- the real limit: 10 new links per hour and user; use up the rest with the same (dev) account
+                String name = ctx.computeOnClient(mc -> mc.getUser().getName());
+                exhaustRateLimit(name);
+            }
 
-            // ---- rate limit (10 per hour; mock set to 0)
+            // ---- rate limit (10 per hour)
             hostAndWait(ctx, PlayLinks.State.RATE_LIMITED);
+            long wait = PlayLinks.retryAt() - System.currentTimeMillis();
+            if (wait <= 0 || wait > 3_700_000L) throw new AssertionError("retry in " + wait + " ms");
+            log("rate limited, retry in " + wait / 1000 + " s");
             ctx.setScreen(() -> new HostScreen(null));
             ctx.waitTicks(10);
             shot(ctx, "playlinks_7_rate_limited");
             ctx.setScreen(() -> null);
             stopHosting(ctx);
-            mock("POST", "/__mock/config", "{\"rate\":10}");
+            if (!real) mock("POST", "/__mock/config", "{\"rate\":10}");
 
             // ---- online features off: no link, no UI; switch "show to the launcher" off deletes session.json
             ctx.runOnClient(mc -> GlobalSettings.onlineFeatures.set(false));
             hostAndWait(ctx, PlayLinks.State.HIDDEN);
-            if (!links().isEmpty()) throw new AssertionError("link created with online features off");
+            if (PlayLinks.link() != null || !real && !links().isEmpty()) throw new AssertionError("link created with online features off");
             stopHosting(ctx);
             ctx.runOnClient(mc -> GlobalSettings.onlineFeatures.set(true));
 
@@ -224,7 +270,7 @@ public final class PlayLinksGameTest implements FabricClientGameTest {
         }
         JsonObject end = waitSession(ctx, o -> "menu".equals(str(o, "state")), "menu after the world");
         log("back in the menu: " + end);
-        save("mock-links-at-end.json", links());
+        if (!real) save("mock-links-at-end.json", links());
         ctx.runOnClient(mc -> GlobalSettings.language.set(GlobalSettings.Language.AUTO));
         log("done");
     }
@@ -312,6 +358,108 @@ public final class PlayLinksGameTest implements FabricClientGameTest {
             ctx.waitTicks(10);
         }
         return cond.getAsBoolean();
+    }
+
+    /** The public view of a link, null when the backend says 404 (unknown, expired or deleted). */
+    private JsonObject linkInfo(String code) {
+        String body = get("/api/v1/play-links/" + code);
+        return body == null ? null : JsonParser.parseString(body).getAsJsonObject();
+    }
+
+    /** GET → body, null on 404. */
+    private String get(String path) {
+        try {
+            HttpResponse<String> r = HTTP.send(HttpRequest.newBuilder(URI.create(api + path)).timeout(Duration.ofSeconds(10)).GET().build(),
+                    HttpResponse.BodyHandlers.ofString());
+            if (r.statusCode() == 404) return null;
+            if (r.statusCode() >= 300) throw new AssertionError("GET " + path + ": " + r.statusCode() + " " + r.body());
+            return r.body();
+        } catch (IOException e) {
+            throw new AssertionError("backend not reachable at " + api, e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new AssertionError(e);
+        }
+    }
+
+    private int status(String method, String path) {
+        try {
+            return HTTP.send(HttpRequest.newBuilder(URI.create(api + path)).timeout(Duration.ofSeconds(10))
+                    .method(method, HttpRequest.BodyPublishers.noBody()).build(), HttpResponse.BodyHandlers.discarding()).statusCode();
+        } catch (IOException e) {
+            throw new AssertionError("backend not reachable at " + api, e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new AssertionError(e);
+        }
+    }
+
+    /** created_at / expires_at: ISO-8601, 12 h apart (§3), and the client read the same expiry. */
+    private static void checkTimes(JsonObject l, long clientExpiry) {
+        java.time.Instant created = java.time.Instant.parse(str(l, "created_at"));
+        java.time.Instant expires = java.time.Instant.parse(str(l, "expires_at"));
+        long ttl = expires.getEpochSecond() - created.getEpochSecond();
+        if (ttl < 12 * 3600 - 60 || ttl > 12 * 3600 + 60) throw new AssertionError("link lifetime " + ttl + " s: " + l);
+        if (Math.abs(expires.toEpochMilli() - clientExpiry) > 2_000) throw new AssertionError("client expiry " + clientExpiry + " vs " + l);
+        if (Math.abs(created.toEpochMilli() - System.currentTimeMillis()) > 120_000) throw new AssertionError("created_at: " + l);
+    }
+
+    /**
+     * Logs in as {@code name} through the backend's dev login (local backend only) and creates links for a made-up
+     * relay address until the backend answers 429; the last one is deleted again.
+     */
+    private void exhaustRateLimit(String name) {
+        JsonObject ch = JsonParser.parseString(post("/api/v1/auth/challenge", "{}", null)).getAsJsonObject();
+        JsonObject verify = new JsonObject();
+        verify.addProperty("name", name);
+        verify.addProperty("serverId", str(ch, "serverId"));
+        JsonObject client = new JsonObject();
+        client.addProperty("name", "vibey-client");
+        client.addProperty("version", "0.0.0");
+        client.addProperty("platform", "windows");
+        verify.add("client", client);
+        JsonObject tokens = JsonParser.parseString(post("/api/v1/auth/verify", verify.toString(), null)).getAsJsonObject();
+        String token = str(tokens, "accessToken");
+        if (token == null) throw new AssertionError("dev login: " + tokens);
+        String body = "{\"relay_host\":\"ratelimit-test.vibey.henny.dev\",\"mc_version\":\"1.21.11\",\"loader\":{\"kind\":\"fabric\"}}";
+        String last = null;
+        for (int i = 0; i < 12; i++) {
+            String res = post("/api/v1/play-links", body, token);
+            if (res == null) {
+                log("rate limit reached after " + i + " extra links");
+                if (last != null) {
+                    try {
+                        HTTP.send(HttpRequest.newBuilder(URI.create(api + "/api/v1/play-links/" + last)).timeout(Duration.ofSeconds(10))
+                                .header("authorization", "Bearer " + token).DELETE().build(), HttpResponse.BodyHandlers.discarding());
+                    } catch (IOException e) {
+                        // only cleanup
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+                return;
+            }
+            last = str(JsonParser.parseString(res).getAsJsonObject(), "code");
+        }
+        throw new AssertionError("no 429 after 12 links");
+    }
+
+    /** POST → body on 2xx, null on 429, else an assertion error. */
+    private String post(String path, String body, String token) {
+        try {
+            HttpRequest.Builder rb = HttpRequest.newBuilder(URI.create(api + path)).timeout(Duration.ofSeconds(10))
+                    .header("content-type", "application/json").POST(HttpRequest.BodyPublishers.ofString(body));
+            if (token != null) rb.header("authorization", "Bearer " + token);
+            HttpResponse<String> r = HTTP.send(rb.build(), HttpResponse.BodyHandlers.ofString());
+            if (r.statusCode() == 429) return null;
+            if (r.statusCode() >= 300) throw new AssertionError("POST " + path + ": " + r.statusCode() + " " + r.body());
+            return r.body();
+        } catch (IOException e) {
+            throw new AssertionError("backend not reachable at " + api, e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new AssertionError(e);
+        }
     }
 
     private JsonArray links() {

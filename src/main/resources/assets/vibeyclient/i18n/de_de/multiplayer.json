@@ -134,6 +134,8 @@
   "link.error": "Gerade kein Einladungslink",
   "link.error.offline": "Vibe nicht erreichbar, neuer Versuch gleich",
   "link.error.generic": "Der Einladungslink konnte nicht erstellt werden",
+  "link.error.relay": "Einladungslinks gibt es nur über das Vibey-Relay",
+  "link.error.taken": "Unter dieser Adresse hostet gerade jemand anderes",
   "link.manual": "{0} Mods wurden von Hand hinzugefügt – Freunde brauchen sie auch",
   "link.manual.one": "1 Mod wurde von Hand hinzugefügt – Freunde brauchen sie auch"
 }
