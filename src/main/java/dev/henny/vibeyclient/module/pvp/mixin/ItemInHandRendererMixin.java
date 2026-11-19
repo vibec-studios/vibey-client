@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  */
 @Mixin(ItemInHandRenderer.class)
 abstract class ItemInHandRendererMixin {
-    @Inject(method = "renderArmWithItem", at = @At(value = "INVOKE",
+    @Inject(method = "renderArmWithItem", require = 0, at = @At(value = "INVOKE",
             target = "Lnet/minecraft/client/renderer/ItemInHandRenderer;renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;I)V"))
     private void vibey$lowShield(AbstractClientPlayer player, float partialTick, float pitch, InteractionHand hand, float swing,
                                  ItemStack stack, float equip, PoseStack poseStack, SubmitNodeCollector collector, int light,

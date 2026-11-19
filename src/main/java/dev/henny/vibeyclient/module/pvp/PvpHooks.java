@@ -17,8 +17,12 @@ public final class PvpHooks {
 
     // ---------------------------------------------------------------------------------------- crosshair
 
+    /** How often the crosshair hook ran (tests: proves it landed, also next to other crosshair mods). */
+    public static volatile long crosshairCalls;
+
     /** Draws the custom crosshair instead of vanilla's sprite; false = draw vanilla. */
     public static boolean crosshair(GuiGraphics g) {
+        crosshairCalls++;
         return Crosshair.drawHud(g);
     }
 

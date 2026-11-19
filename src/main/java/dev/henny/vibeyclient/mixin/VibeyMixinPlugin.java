@@ -1,5 +1,6 @@
 package dev.henny.vibeyclient.mixin;
 
+import dev.henny.vibeyclient.MixinHealth;
 import dev.henny.vibeyclient.ModConflicts;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -73,5 +74,10 @@ public final class VibeyMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
+        // Optional hooks use require = 0: note the ones another mod left nothing to hook into (never throws).
+        try {
+            MixinHealth.check(targetClassName, targetClass, mixinClassName, mixinInfo.getClassNode(0));
+        } catch (Throwable ignored) {
+        }
     }
 }

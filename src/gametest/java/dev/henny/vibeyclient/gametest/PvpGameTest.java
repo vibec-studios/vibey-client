@@ -1,10 +1,12 @@
 package dev.henny.vibeyclient.gametest;
 
+import dev.henny.vibeyclient.MixinHealth;
 import dev.henny.vibeyclient.api.GlobalSettings;
 import dev.henny.vibeyclient.api.ModuleManager;
 import dev.henny.vibeyclient.api.ServerRules;
 import dev.henny.vibeyclient.module.pvp.Crosshair;
 import dev.henny.vibeyclient.module.pvp.HitColor;
+import dev.henny.vibeyclient.module.pvp.PvpHooks;
 import dev.henny.vibeyclient.module.pvp.PvpModule;
 import dev.henny.vibeyclient.module.pvp.ToggleMovement;
 import dev.henny.vibeyclient.module.pvp.Zoom;
@@ -42,6 +44,7 @@ public final class PvpGameTest implements FabricClientGameTest {
                 if (!ServerRules.supportedKeys().contains(key)) throw new AssertionError("rule key not declared: " + key);
             }
             m.settings().all().forEach(s -> s.reset());
+            checkHooks("start");
         });
 
         // ---------------------------------------------------------------------------------------- module page
@@ -69,6 +72,25 @@ public final class PvpGameTest implements FabricClientGameTest {
         shot(context, "pvp_04_editor_title");
         context.setScreen(() -> null);
         context.runOnClient(mc -> m().settings().all().forEach(s -> s.reset()));
+        // what a player sees when another mod took a hook away (simulated: with Centered Crosshair and Crosshair
+        // Indicator our wrap still lands, see checkHooks)
+        context.runOnClient(mc -> MixinHealth.simulateForTest(GUI_MIXIN, "vibey$crosshair", true));
+        ModulesPanel.preselect("pvp");
+        context.setScreen(() -> new VibeyScreen(null));
+        context.waitTicks(10);
+        shot(context, "pvp_05_page_crosshair_unavailable_en");
+        context.runOnClient(mc -> GlobalSettings.language.set(GlobalSettings.Language.GERMAN));
+        ModulesPanel.preselect("pvp");
+        context.setScreen(() -> new VibeyScreen(null));
+        context.waitTicks(10);
+        shot(context, "pvp_06_page_crosshair_unavailable_de");
+        context.runOnClient(mc -> {
+            System.out.println(P + "simulated notice: " + m().notices());
+            if (m().notices().isEmpty()) throw new AssertionError("no notice for a failed crosshair hook");
+            MixinHealth.simulateForTest(GUI_MIXIN, "vibey$crosshair", false);
+            GlobalSettings.language.set(GlobalSettings.Language.ENGLISH);
+        });
+        context.setScreen(() -> null);
 
         try (TestSingleplayerContext world = context.worldBuilder()
                 .setUseConsistentSettings(false)
@@ -95,7 +117,11 @@ public final class PvpGameTest implements FabricClientGameTest {
             look(context, 180, -9);
             context.waitTicks(5);
 
+            long before = context.computeOnClient(mc -> PvpHooks.crosshairCalls);
             crosshairs(context, world);
+            long calls = context.computeOnClient(mc -> PvpHooks.crosshairCalls) - before;
+            System.out.println(P + "crosshair hook calls during the crosshair shots: " + calls);
+            if (calls <= 0) throw new AssertionError("crosshair hook never ran");
             zoom(context, world, x, y, z);
             outline(context, world, x, y, z);
             hitColor(context, world, x, y, z);
@@ -105,6 +131,7 @@ public final class PvpGameTest implements FabricClientGameTest {
             serverRule(context);
 
             context.setScreen(() -> null);
+            context.runOnClient(mc -> checkHooks("end"));
             context.runOnClient(mc -> {
                 mc.options.hideGui = false;
                 m().settings().all().forEach(s -> s.reset());
@@ -492,6 +519,26 @@ public final class PvpGameTest implements FabricClientGameTest {
 
     private static PvpModule m() {
         return ModuleManager.get().get(PvpModule.class);
+    }
+
+    private static final String GUI_MIXIN = "dev.henny.vibeyclient.module.pvp.mixin.GuiMixin";
+
+    /**
+     * Every pvp hook must land, in a plain game and next to other crosshair mods (0.3.1 crash fix: run with
+     * -Dvibeyclient.test.addMods=<centered-crosshair.jar>;<crosshairindicator.jar>); our wraps stack with theirs.
+     */
+    private static void checkHooks(String when) {
+        java.util.Set<String> failed = MixinHealth.failures();
+        System.out.println(P + "hooks (" + when + "): foreign crosshair mods " + foreignCrosshairMods() + ", failed "
+                + failed + ", notices " + m().notices());
+        if (!failed.isEmpty()) throw new AssertionError("hooks did not apply: " + failed);
+        if (!m().notices().isEmpty()) throw new AssertionError("unexpected notices: " + m().notices());
+    }
+
+    /** Other crosshair mods in this run (the compatibility check of 0.3.1). */
+    private static boolean foreignCrosshairMods() {
+        var loader = net.fabricmc.loader.api.FabricLoader.getInstance();
+        return loader.isModLoaded("centered-crosshair") || loader.isModLoaded("crosshairindicator");
     }
 
     private static void reset(PvpModule m) {

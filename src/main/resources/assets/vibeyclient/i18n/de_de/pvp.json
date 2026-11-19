@@ -82,5 +82,18 @@
     "vanilla": "Das normale Minecraft-Fadenkreuz. Wähle eine Form für dein eigenes.",
     "reset": "Zurücksetzen",
     "done": "Fertig"
+  },
+  "notice": {
+    "unavailable": "{0}: nicht verfügbar – ein anderer Mod ändert schon {1}.",
+    "unavailableBy": "{0}: nicht verfügbar – ein anderer Mod ({1}) ändert schon {2}.",
+    "what": {
+      "crosshair": "das Fadenkreuz",
+      "zoom": "den Zoom",
+      "zoomMouse": "die Maus beim Zoomen",
+      "movement": "die Sprint- und Schleichtasten",
+      "outline": "den Block-Rahmen",
+      "fire": "das Feuer im Bild",
+      "shield": "den gehaltenen Schild"
+    }
   }
 }

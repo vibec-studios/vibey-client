@@ -1,16 +1,17 @@
 package dev.henny.vibeyclient.module.pvp.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.henny.vibeyclient.module.pvp.Zoom;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
-import net.minecraft.client.Options;
+import net.minecraft.client.player.LocalPlayer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
@@ -21,25 +22,22 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 abstract class MouseHandlerMixin {
     @Shadow @Final private Minecraft minecraft;
 
-    @ModifyArg(method = "turnPlayer", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/client/player/LocalPlayer;turn(DD)V"), index = 0)
-    private double vibey$zoomYaw(double dx) {
-        return dx * Zoom.mouseScale();
+    /** Slower mouse while zoomed (one wrap for both axes, stacks with other mods that wrap or redirect the call). */
+    @WrapOperation(method = "turnPlayer", require = 0, at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/client/player/LocalPlayer;turn(DD)V"))
+    private void vibey$zoomTurn(LocalPlayer player, double dx, double dy, Operation<Void> original) {
+        double s = Zoom.mouseScale();
+        original.call(player, dx * s, dy * s);
     }
 
-    @ModifyArg(method = "turnPlayer", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/client/player/LocalPlayer;turn(DD)V"), index = 1)
-    private double vibey$zoomPitch(double dy) {
-        return dy * Zoom.mouseScale();
-    }
-
-    @Redirect(method = "turnPlayer", at = @At(value = "FIELD",
+    /** Cinematic smoothing while zoomed: vanilla's {@code smoothCamera} read, or-ed with ours. */
+    @ModifyExpressionValue(method = "turnPlayer", require = 0, at = @At(value = "FIELD",
             target = "Lnet/minecraft/client/Options;smoothCamera:Z", opcode = org.objectweb.asm.Opcodes.GETFIELD))
-    private boolean vibey$cinematic(Options options) {
-        return options.smoothCamera || Zoom.cinematic();
+    private boolean vibey$cinematic(boolean smoothCamera) {
+        return smoothCamera || Zoom.cinematic();
     }
 
-    @Inject(method = "onScroll", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "onScroll", require = 0, at = @At("HEAD"), cancellable = true)
     private void vibey$zoomScroll(long window, double dx, double dy, CallbackInfo ci) {
         Minecraft mc = minecraft;
         if (window != mc.getWindow().handle() || mc.screen != null || mc.getOverlay() != null || mc.player == null) return;

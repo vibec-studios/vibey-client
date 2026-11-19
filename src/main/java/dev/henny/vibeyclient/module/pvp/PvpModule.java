@@ -1,5 +1,8 @@
 package dev.henny.vibeyclient.module.pvp;
 
+import dev.henny.vibeyclient.MixinHealth;
+import dev.henny.vibeyclient.Vibey;
+import dev.henny.vibeyclient.api.Lang;
 import dev.henny.vibeyclient.api.ModuleCategory;
 import dev.henny.vibeyclient.api.ServerRules;
 import dev.henny.vibeyclient.api.VibeyModule;
@@ -138,6 +141,68 @@ public final class PvpModule extends VibeyModule {
         return java.util.List.of(RULES);
     }
 
+    // ---------------------------------------------------------------------------------------- hooks other mods may take
+
+    /**
+     * One mixin hook a feature needs. Every pvp hook is {@code require = 0}: when another mod already changed that
+     * vanilla code, the game still starts and the page says the feature is not available ({@link #notices()}).
+     * {@code mods} are known mods that change the same thing, only used to name the culprit.
+     */
+    private record Hook(String mixin, String[] handlers, String label, String what, String... mods) {
+        boolean failed() {
+            for (String h : handlers) if (MixinHealth.failed(MIXINS + mixin, h)) return true;
+            return false;
+        }
+    }
+
+    private static final String MIXINS = "dev.henny.vibeyclient.module.pvp.mixin.";
+    private static final Hook HOOK_CROSSHAIR = new Hook("GuiMixin", new String[] {"vibey$crosshair"},
+            "pvp.section.crosshair", "crosshair", "centered-crosshair", "crosshairindicator", "dynamiccrosshair");
+    private static final Hook HOOK_ZOOM = new Hook("GameRendererMixin", new String[] {"vibey$zoom"},
+            "pvp.section.zoom", "zoom", "ok_zoomer", "zoomify", "logical_zoom");
+    private static final Hook HOOK_ZOOM_MOUSE = new Hook("MouseHandlerMixin",
+            new String[] {"vibey$zoomTurn", "vibey$cinematic", "vibey$zoomScroll"},
+            "pvp.section.zoom", "zoomMouse", "ok_zoomer", "zoomify", "logical_zoom");
+    private static final Hook HOOK_MOVEMENT = new Hook("KeyboardInputMixin", new String[] {"vibey$toggles"},
+            "pvp.section.movement", "movement");
+    private static final Hook HOOK_OUTLINE = new Hook("LevelRendererMixin", new String[] {"vibey$outline"},
+            "pvp.section.outline", "outline");
+    private static final Hook HOOK_FIRE = new Hook("ScreenEffectRendererMixin", new String[] {"vibey$lowFire"},
+            "pvp.setting.lowFire", "fire");
+    private static final Hook HOOK_SHIELD = new Hook("ItemInHandRendererMixin", new String[] {"vibey$lowShield"},
+            "pvp.setting.lowShield", "shield");
+    private static final Hook[] HOOKS = {HOOK_CROSSHAIR, HOOK_ZOOM, HOOK_ZOOM_MOUSE, HOOK_MOVEMENT, HOOK_OUTLINE,
+            HOOK_FIRE, HOOK_SHIELD};
+
+    /** "Crosshair: not available – another mod (Centered Crosshair) already changes the crosshair." */
+    @Override
+    public java.util.List<String> notices() {
+        java.util.List<String> out = new java.util.ArrayList<>();
+        for (Hook h : HOOKS) {
+            if (!h.failed()) continue;
+            String what = Lang.tr("pvp.notice.what." + h.what());
+            String by = installed(h.mods());
+            String line = by == null ? Lang.tr("pvp.notice.unavailable", Lang.tr(h.label()), what)
+                    : Lang.tr("pvp.notice.unavailableBy", Lang.tr(h.label()), by, what);
+            if (!out.contains(line)) out.add(line);
+        }
+        return out;
+    }
+
+    /** Names of the installed mods out of {@code ids} ("Centered Crosshair, Crosshair Indicator"), or null. */
+    private static String installed(String... ids) {
+        if (ids.length == 0) return null;
+        java.util.List<String> names = new java.util.ArrayList<>();
+        try {
+            for (var info : Vibey.platform().mods()) {
+                for (String id : ids) if (info.id().equals(id)) names.add(info.name());
+            }
+        } catch (RuntimeException e) {
+            return null;
+        }
+        return names.isEmpty() ? null : String.join(", ", names);
+    }
+
     @Override
     public void onLoad() {
         for (String key : RULES) ServerRules.supports(key);
@@ -204,16 +269,18 @@ public final class PvpModule extends VibeyModule {
         return isEnabled() && s.on() && !ServerRules.isDisabled(rule);
     }
 
+    /** Zoom needs the FOV hook (without it the zoom key would only slow the mouse down). */
     public boolean zoomActive() {
-        return active(zoom, RULE_ZOOM);
+        return active(zoom, RULE_ZOOM) && !HOOK_ZOOM.failed();
     }
 
+    /** The toggles need the key hook (without it the HUD indicator would claim a sprint that never happens). */
     public boolean sprintActive() {
-        return active(toggleSprint, RULE_SPRINT);
+        return active(toggleSprint, RULE_SPRINT) && !HOOK_MOVEMENT.failed();
     }
 
     public boolean sneakActive() {
-        return active(toggleSneak, RULE_SNEAK);
+        return active(toggleSneak, RULE_SNEAK) && !HOOK_MOVEMENT.failed();
     }
 
     public boolean hudActive() {
