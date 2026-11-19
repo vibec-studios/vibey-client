@@ -16,6 +16,11 @@ This file is the contract between the agents of this round. Change it only throu
   hooks. A check task fails the build if a core file imports Minecraft.
 - **Same API on every version.** Public API types never expose Minecraft classes (one exception: small `mc` entry
   helpers like opening a screen). Version differences live behind backend interfaces.
+- **Many small files.** One class/component per file, one clear job each, files under ~200–300 lines. Big existing
+  classes are split when they move. Clear package structure over deep hierarchies.
+- **No code comments** (no javadoc either). Names, small functions and packages explain the code; explanations go
+  into `docs/` (and the website developer docs). Allowed: license headers if required, and Stonecutter `//?`
+  version comments (they are build directives).
 - **Less text.** UI shows the minimum: icon + short label, details on hover. No paragraphs in menus.
 - **Direct manipulation everywhere.** Anything placed in the world or on the HUD can be grabbed, moved, resized and
   used where it is (see "Interaction model"). Think like that for every feature.
