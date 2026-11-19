@@ -2,7 +2,7 @@
 
 All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.properties`.
 
-## Unreleased – Clips
+## 0.3.2 – Clips and faster online features
 
 **Clips** *(Fabric 1.21.11 for now)*
 - A replay buffer: switch it on and press **F8** to save the last 30 seconds (10–120 s) as a video. Off by default.
@@ -14,10 +14,9 @@ All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.pr
 - A gallery in the game: watch, keep, rename and delete clips, open the folder. The Vibe Launcher shows them too.
 - FFmpeg is downloaded only after you agree (the same download as for video screens).
 
-## Unreleased – faster online features
-
-- Online features load much faster: friends, chats and your cosmetics are there sooner after the game starts, and
-  the friends list no longer freezes everything else while it loads skins.
+**Faster online features**
+- Friends, chats and your cosmetics are there sooner after the game starts, and the friends list no longer freezes
+  everything else while it loads skins.
 - Your cosmetics show right away from the last session and are then checked for updates in the background.
 - Far fewer requests to the Vibe servers while you play (changes still arrive instantly over the live connection).
 
