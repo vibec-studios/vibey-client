@@ -15,3 +15,4 @@ node_modules/
 blockbench/node_modules/
 tools/**/node_modules/
 versions/*/logs/
+.ranks-seed-totp

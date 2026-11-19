@@ -2,6 +2,8 @@ package dev.henny.vibeyclient.module.social.model;
 
 import com.google.gson.JsonObject;
 import dev.henny.vibeyclient.backend.J;
+import dev.henny.vibeyclient.ranks.Identity;
+import dev.henny.vibeyclient.ranks.IdentityJson;
 
 import java.time.Instant;
 import java.util.List;
@@ -24,13 +26,13 @@ public final class Model {
 
     // ============================================================================================ users
 
-    public record User(String id, String name, String skinUrl, boolean slim, String statusText, String badge, long createdAt) {
+    public record User(String id, String name, String skinUrl, boolean slim, String statusText, String badge, long createdAt, Identity identity) {
         public static User from(JsonObject o) {
             if (o == null) return null;
             JsonObject skin = J.obj(o, "skin");
             return new User(J.str(o, "id", "").intern(), J.str(o, "name", "?"), J.str(skin, "url"),
                     "slim".equals(J.str(skin, "model")), J.str(o, "statusText"), J.str(o, "badge", "user"),
-                    time(J.str(o, "createdAt")));
+                    time(J.str(o, "createdAt")), IdentityJson.parse(o));
         }
     }
 

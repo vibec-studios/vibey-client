@@ -54,11 +54,15 @@ ignored, so you can list keys that only newer clients know.
 | `discord.server` | The server name in the Discord / launcher status ("Playing on …"), and in saved clips |
 | `clips` | Clips: no recording at all. The replay buffer stops at once and what it held is thrown away; the save key shows "Clips are off on this server" |
 | `clips.auto` | Clips: no automatic clips (kill, multi-kill, clutch, death). Saving with the key still works |
+| `nametags.*` | Every key below |
+| `nametags.seal` | The Vibey seal before player names |
+| `nametags.ranks` | Rank and badge icons before player names (nametag, tab list, chat) |
+| `nametags.styles` | Coloured / animated name styles (nametag, tab list, chat) |
 
 The authoritative list for a given client is what it announces in `vibey:hello` (the plugin logs it, see below);
 the keys come from `ServerRules.supports(...)` calls in the modules. The current Vibey Client declares `zoom`,
 `togglesprint`, `togglesneak`, `crosshair`, `blockoutline`, `hitcolor`, `lowfire`, `lowshield`, `hud.togglestate`
-(PvP module), `clips`, `clips.auto` (Clips module), `emotes`, `cosmetics.*` slots and `discord.server`; `freelook` and the other `hud.*` keys arrive with
+(PvP module), `clips`, `clips.auto` (Clips module), `nametags.seal`, `nametags.ranks`, `nametags.styles` (Names and ranks), `emotes`, `cosmetics.*` slots and `discord.server`; `freelook` and the other `hud.*` keys arrive with
 the HUD editor. Listing a key an older client does not know is harmless.
 
 ## Paper / Spigot: the VibeyRules plugin

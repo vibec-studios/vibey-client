@@ -1,13 +1,25 @@
 {
-  "name": "Nametag icons",
-  "description": "A small seal before the names of players who use Vibey Client, plus staff, supporter and creator badges.",
-  "summary": "A seal before Vibey players' names.",
+  "name": "Names and ranks",
+  "description": "Seal, rank icons and name styles next to player names.",
+  "summary": "Ranks and styled names.",
+  "section": {
+    "show": "Where",
+    "icons": "Icons",
+    "names": "Name styles",
+    "mine": "My name"
+  },
   "setting": {
-    "nametag": "Icons above players",
-    "nametag.desc": "A small seal before the names of Vibey players.",
-    "tabList": "Icons in the player list",
-    "tabList.desc": "While you hold Tab.",
-    "badges": "Badges",
-    "badges.desc": "Staff, supporter and creator icons next to the seal."
+    "nametag": "Above players",
+    "tabList": "Player list",
+    "chat": "Chat",
+    "ranks": "Rank",
+    "badges": "Extra badge",
+    "nameStyles": "Name styles",
+    "animate": "Animated"
+  },
+  "mine": {
+    "showRank": "Show my rank",
+    "noStyle": "None",
+    "autoRank": "Auto"
   }
 }
