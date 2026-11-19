@@ -21,6 +21,8 @@ public final class BuiltinModules {
         mm.register(new dev.henny.vibeyclient.module.nametags.NametagsModule());
         // PvP basics: only in the Fabric 1.21.11 jar for now (gradle/common.gradle leaves the package out elsewhere).
         registerIfPresent(mm, "dev.henny.vibeyclient.module.pvp.PvpModule");
+        // Clips (replay buffer, auto clips, gallery): Fabric 1.21.11 only for now, like pvp
+        registerIfPresent(mm, "dev.henny.vibeyclient.module.clips.ClipsModule");
         mm.register(new DevLinkModule());
         // HUD widgets + templates: Fabric 1.21.11 only for now (gradle/common.gradle leaves the package out elsewhere)
         registerIfPresent(mm, "dev.henny.vibeyclient.module.hud.HudModule");

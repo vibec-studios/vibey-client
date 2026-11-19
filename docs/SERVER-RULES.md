@@ -51,12 +51,14 @@ ignored, so you can list keys that only newer clients know.
 | `cosmetics.*` | Every cosmetic below |
 | `cosmetics.pets` | Pets (own and other players') |
 | `cosmetics.capes`, `cosmetics.wings`, `cosmetics.auras`, `cosmetics.shields`, `cosmetics.hats`, `cosmetics.backs` | That cosmetic slot (own and other players') |
-| `discord.server` | The server name in the Discord / launcher status ("Playing on …") |
+| `discord.server` | The server name in the Discord / launcher status ("Playing on …"), and in saved clips |
+| `clips` | Clips: no recording at all. The replay buffer stops at once and what it held is thrown away; the save key shows "Clips are off on this server" |
+| `clips.auto` | Clips: no automatic clips (kill, multi-kill, clutch, death). Saving with the key still works |
 
 The authoritative list for a given client is what it announces in `vibey:hello` (the plugin logs it, see below);
 the keys come from `ServerRules.supports(...)` calls in the modules. The current Vibey Client declares `zoom`,
 `togglesprint`, `togglesneak`, `crosshair`, `blockoutline`, `hitcolor`, `lowfire`, `lowshield`, `hud.togglestate`
-(PvP module), `emotes`, `cosmetics.*` slots and `discord.server`; `freelook` and the other `hud.*` keys arrive with
+(PvP module), `clips`, `clips.auto` (Clips module), `emotes`, `cosmetics.*` slots and `discord.server`; `freelook` and the other `hud.*` keys arrive with
 the HUD editor. Listing a key an older client does not know is harmless.
 
 ## Paper / Spigot: the VibeyRules plugin

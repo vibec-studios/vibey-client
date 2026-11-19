@@ -11,6 +11,7 @@
       "dev.henny.vibeyclient.gametest.MultiplayerLyricsGameTest",
       "dev.henny.vibeyclient.gametest.MediaGameTest",
       "dev.henny.vibeyclient.gametest.PvpGameTest",
+      "dev.henny.vibeyclient.gametest.ClipsGameTest",
       "dev.henny.vibeyclient.gametest.VibeyUiGameTest",
       "dev.henny.vibeyclient.gametest.SocialGameTest",
       "dev.henny.vibeyclient.gametest.WardrobeUiGameTest",

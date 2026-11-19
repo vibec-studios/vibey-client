@@ -127,7 +127,11 @@ public final class Ffmpeg {
         HttpResponse<String> r = c.send(HttpRequest.newBuilder(URI.create(RELEASE_API))
                 .header("Accept", "application/vnd.github+json").header("User-Agent", "VibeyClient")
                 .timeout(Duration.ofSeconds(20)).build(), HttpResponse.BodyHandlers.ofString());
-        if (r.statusCode() != 200) throw new IOException("GitHub answered " + r.statusCode());
+        if (r.statusCode() != 200) {
+            // the API is rate limited per IP (403/429, e.g. shared networks); the release's checksum file is not
+            Vibey.LOG.info("FFmpeg lookup: GitHub API answered {}, using the release's checksum list", r.statusCode());
+            return lookupFromChecksums(c);
+        }
         JsonObject rel = JsonParser.parseString(r.body()).getAsJsonObject();
         JsonArray assets = rel.getAsJsonArray("assets");
         Pattern p = Pattern.compile(String.format(Locale.ROOT, ASSET.pattern(), platformTag()));
@@ -158,6 +162,51 @@ public final class Ffmpeg {
         }
         if (sha == null) throw new IOException("No checksum for " + name);
         return new Asset(name, best.get("size").getAsLong(), best.get("browser_download_url").getAsString(), sha);
+    }
+
+    private static final String LATEST_DOWNLOAD = "https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/";
+
+    /**
+     * Fallback without the API: {@code releases/latest/download/checksums.sha256} lists every asset with its sha256;
+     * the newest matching LGPL build is downloaded from {@code releases/latest/download/<name>} (size from the server).
+     */
+    static Asset lookupFromChecksums(HttpClient c) throws IOException, InterruptedException {
+        HttpResponse<String> s = c.send(HttpRequest.newBuilder(URI.create(LATEST_DOWNLOAD + "checksums.sha256"))
+                .header("User-Agent", "VibeyClient").timeout(Duration.ofSeconds(20)).build(), HttpResponse.BodyHandlers.ofString());
+        if (s.statusCode() != 200) throw new IOException("GitHub answered " + s.statusCode());
+        Asset a = pickFromChecksums(s.body(), platformTag());
+        if (a == null) throw new IOException("No matching FFmpeg build in the latest release");
+        long size = -1;
+        try {
+            HttpResponse<Void> h = c.send(HttpRequest.newBuilder(URI.create(a.url())).method("HEAD", HttpRequest.BodyPublishers.noBody())
+                    .header("User-Agent", "VibeyClient").timeout(Duration.ofSeconds(20)).build(), HttpResponse.BodyHandlers.discarding());
+            size = h.headers().firstValueAsLong("Content-Length").orElse(-1);
+        } catch (IOException ignored) {
+            // the size is only shown in the prompt
+        }
+        return new Asset(a.name(), size > 0 ? size : 85L * 1024 * 1024, a.url(), a.sha256());
+    }
+
+    /** The newest {@code ffmpeg-nX.Y-latest-<tag>-lgpl-shared-X.Y.zip} in a checksum list, or null (pure). */
+    public static Asset pickFromChecksums(String sums, String tag) {
+        if (tag == null) return null;
+        Pattern p = Pattern.compile(String.format(Locale.ROOT, ASSET.pattern(), tag));
+        String best = null, sha = null;
+        int bestVer = -1;
+        for (String line : sums.split("\n")) {
+            String[] parts = line.trim().split("\\s+");
+            if (parts.length != 2) continue;
+            String name = parts[1].replace("*", "");
+            Matcher m = p.matcher(name);
+            if (!m.matches()) continue;
+            int ver = Integer.parseInt(m.group(1)) * 1000 + Integer.parseInt(m.group(2));
+            if (ver > bestVer) {
+                bestVer = ver;
+                best = name;
+                sha = parts[0].toLowerCase(Locale.ROOT);
+            }
+        }
+        return best == null ? null : new Asset(best, -1, LATEST_DOWNLOAD + best, sha);
     }
 
     /** Downloads, verifies and unpacks {@code asset} into {@link #ownDir()} (blocking). {@code progress}: 0..1. */

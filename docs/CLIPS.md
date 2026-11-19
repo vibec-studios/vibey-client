@@ -1,6 +1,6 @@
 # Clips: proposal and contract draft (2026-11-19)
 
-**Status: proposal, nothing built yet.** This covers an optional module `clips` with a replay buffer ("save the last
+**Status: phases 1 and 2 built (Fabric 1.21.11), see §13.** This covers an optional module `clips` with a replay buffer ("save the last
 30 s"), automatic clips in PvP (kill, multi-kill, clutch), an in-game gallery, and a file contract the Vibe Launcher
 gallery is built against (§10). It is Fabric 1.21.11 first, then the other targets.
 
@@ -416,3 +416,23 @@ pauses. GPU TDR flakiness on the Intel Arc test PC affects long gametests. Drive
   [ApplicationLoopback sample](https://learn.microsoft.com/en-us/samples/microsoft/windows-classic-samples/applicationloopbackaudio-sample/).
 - Repo: `module/media/video/player/{Ffmpeg,FfmpegPlayer,FrameTexture}`, `module/media/lyrics/fx/LoopbackCapture`,
   `launcher/{SessionFile,LauncherStatus}`, `api/ServerRules`; benchmark `tools/clips-bench.py`.
+
+## 13. What is built (MVP + auto clips, Fabric 1.21.11)
+
+Package `module/clips` (1.21.11-only wiring like `pvp`: gradle/common.gradle leaves package, mixin config, strings and
+the shader out of every other target; `BuiltinModules` registers it by reflection).
+
+| Part | Where | Notes |
+|---|---|---|
+| Capture | `capture/FrameGrabber`, `mixin/MinecraftMixin`, `assets/vibeyclient/shaders/core/clips_nv12.fsh` | One fullscreen pass scales + letterboxes the main target and converts to NV12 (BT.709 limited) into an RGBA8 target of W/4 × 1.5·H, so its bytes **are** the NV12 frame (no RG8 format in 1.21.11). Three readback buffers, `copyTextureToBuffer` + fenced callback, paced at the clip fps. |
+| Readback | `FrameGrabber.Readback` | **Finding:** blaze3d persistently maps `MAP_READ` buffers; on this PC (Intel Arc, dedicated) the mapping is uncached even with `USAGE_HINT_CLIENT_STORAGE`, so copying 1.38 MB takes 4–6 ms. Measured per capture on the render thread: MAP 4.4 ms, `glGetBufferSubData` 2.8 ms, **ASYNC 0.013 ms** (map on the render thread, copy on the `Vibey clips copy` thread, ~4 ms there, unmap a frame later). ASYNC is the default (`-Dvibeyclient.clips.readback=MAP|GET|ASYNC`). Also tried: a GPU copy into an own `GL_STREAM_READ` buffer, read on the render thread: 4–5 ms as well, dropped. The copy thread costs ~4 ms per captured frame (≈12 % of one core at 30 fps); a smaller clip size or a GPU-side encoder input would be the next lever. |
+| Encoder | `encode/Encoder`, `EncoderProbe`, `EncodeSession`, `Priority` | Probe order NVENC → AMF → QSV → MF hw → MF sw → x264 → OpenH264, cached in `config/vibeyclient/clips-encoder.json`; 1080p/60 fps only with hardware. FFmpeg at below-normal priority (JNA `SetPriorityClass`), raw NV12 on stdin, MPEG-TS on stdout, closed 2 s GOPs (`-force_key_frames` + forced IDR), no B-frames. Writer thread keeps a constant frame rate (repeats the last frame when the game is slower). |
+| Ring | `ring/TsChunker`, `ClipRing`, `Chunk`, `BlockPool` | Cut at video PES with `random_access_indicator`; PAT/PMT kept per session; pooled 64 KiB blocks; keeps length + 2 s, never above the RAM cap; an open chunk is only used up to its newest complete frame. JUnit: `TsChunkerTest`. |
+| Saving | `ClipSaver`, `store/ClipStore`, `store/ClipMeta` | One `.ts` part per FFmpeg session → `-f concat -c copy -movflags +faststart` → `.<id>.mp4.part` → rename; thumbnail via `.part`; JSON last (atomic). Cleanup after every save and at start (never `kept`), orphans at start. Own I/O thread, not the shared `Tasks` pool. JUnit: `ClipStoreTest` (contract §10). |
+| Rules | `Recorder` | Records only with module + buffer on, a world, no screen but chat (containers only with the setting), focused, not minimised, not low FPS (3 s below the threshold / 5 s above +10; the threshold never exceeds 85 % of the frame cap or the monitor rate with vsync), not "encoder behind" (> 10 % skipped in 5 s → 10 s pause). FFmpeg exits after 60 s of pause and on world leave (the ring is dropped on world leave). Server rule `clips` stops and drops the ring at once; `clips.auto` stops automatic clips. |
+| Auto clips | `AutoClips`, `mixin/ClientPacketListenerMixin`, `MultiPlayerGameModeMixin`, Fabric `ClientReceiveMessageEvents.GAME` | As in §5; post-roll merge, 10 s cooldown, max per session. |
+| UI | `ui/ClipsGalleryScreen`, `ui/ClipViewScreen`, `ui/Thumbs`, `ClipsHud`, `ClipsStats` | Gallery (filter, storage bar), player with the video screens' `FfmpegPlayer` (keep, rename, delete, open folder, copy path, kill marks on the seek bar). The REC dot is a plain HUD element (HUD templates hide unknown *widgets* on first start). `ClipsStats`: `-Dvibeyclient.clips.stats=true`. FFmpeg consent: the video screens' `SetupScreen` with Clips texts. |
+
+Not built yet (prepared): sound (phase 3: the encoder command has no audio input yet, `audio_codec` stays absent),
+other Minecraft versions and NeoForge (phase 4), disk ring and trimming (phase 5).
+

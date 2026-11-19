@@ -131,7 +131,7 @@ public final class LauncherStatus {
     }
 
     /** What the game does right now (client thread). */
-    static SessionFile.Snapshot sample() {
+    public static SessionFile.Snapshot sample() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) return SessionFile.Snapshot.menu();
         IntegratedServer sp = mc.getSingleplayerServer();
@@ -154,7 +154,7 @@ public final class LauncherStatus {
     }
 
     /** The server asked us to (rule {@code discord.server}) or the player hides server addresses (social privacy). */
-    static boolean hideServer() {
+    public static boolean hideServer() {
         if (ServerRules.isDisabled("discord.server")) return true;
         VibeyModule social = ModuleManager.get().get("social");
         if (social == null) return false;

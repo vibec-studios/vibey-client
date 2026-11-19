@@ -113,5 +113,10 @@
   "accept.load": "Laden",
   "accept.no": "Nicht jetzt",
   "browser.title": "Webseite",
-  "browser.hint": "Maus und Tastatur gehen an die Seite · Esc zum Verlassen"
+  "browser.hint": "Maus und Tastatur gehen an die Seite · Esc zum Verlassen",
+  "setup.ffmpegclips.title": "Clips brauchen FFmpeg",
+  "setup.ffmpegclips.what": "Clips werden mit FFmpeg aufgenommen, einem freien Open-Source-Videoprogramm, über den Video-Encoder deiner Grafikkarte. Es läuft als eigenes Programm neben Minecraft – derselbe Download wie für Video-Leinwände.",
+  "setup.ffmpegmanualclips.title": "Clips brauchen FFmpeg",
+  "setup.ffmpegmanualclips.what": "Clips werden mit FFmpeg aufgenommen, einem freien Open-Source-Videoprogramm. Installiere es mit der Paketverwaltung deines Systems und drück dann „Erneut prüfen“.",
+  "setup.done.clips": "Fertig. Der Rückblick-Puffer nimmt auf, sobald du spielst."
 }
