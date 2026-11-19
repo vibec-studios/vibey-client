@@ -50,6 +50,11 @@ public final class MultiplayerModule extends VibeyModule {
     public final BoolSetting exactModVersions = bool("exactModVersions", false).advanced();
     /** Default = BuildInfo.DEFAULT_RELAY: our relay, official builds only (forks: own default_relay, https://github.com/vibec-studios/.github/blob/main/SERVICES.md). */
     public final StringSetting relay = string("relay", BuildInfo.DEFAULT_RELAY, 253).advanced();
+
+    {
+        // 0.3.0: the old default relay (relay.vibey.henny.dev) moves to relay.axolite.cc, own relays stay
+        settings().migration(dev.henny.vibeyclient.backend.DomainMove.ID, dev.henny.vibeyclient.backend.DomainMove::migrateMultiplayer);
+    }
     public final IntSetting lanPort = intRange("lanPort", 0, 0, 65535).field().advanced();
 
     private final HostingService service = new Service();

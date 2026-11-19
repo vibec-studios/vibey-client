@@ -22,11 +22,11 @@ class SessionFileTest {
 
     @Test
     void hostingLikeTheContract() {
-        JsonObject o = json(new Snapshot(State.HOSTING, "ignored.example", "Neue Welt", "https://vibe.henny.dev/j/k3x9q2", 3, 8));
+        JsonObject o = json(new Snapshot(State.HOSTING, "ignored.example", "Neue Welt", "https://axolite.cc/j/k3x9q2", 3, 8));
         assertEquals(1, o.get("schema").getAsInt());
         assertEquals("hosting", o.get("state").getAsString());
         assertEquals("Neue Welt", o.get("world").getAsString());
-        assertEquals("https://vibe.henny.dev/j/k3x9q2", o.get("play_link").getAsString());
+        assertEquals("https://axolite.cc/j/k3x9q2", o.get("play_link").getAsString());
         assertEquals(3, o.get("players").getAsInt());
         assertEquals(8, o.get("max_players").getAsInt());
         assertEquals(1795040000L, o.get("updated_at").getAsLong());

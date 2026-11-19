@@ -95,7 +95,7 @@ public final class LoadoutKeys {
                 if (!Files.isRegularFile(f)) return;
                 JsonObject o = JsonParser.parseString(Files.readString(f, StandardCharsets.UTF_8)).getAsJsonObject();
                 LoadoutToken.SigningKey k = LoadoutToken.parseKey(o.get("loadoutSigning"));
-                if (k != null && o.has("backend") && keyBackend == null) set(norm(o.get("backend").getAsString()), k, false);
+                if (k != null && o.has("backend") && keyBackend == null) set(norm(DomainMove.cachedBackend(o.get("backend").getAsString())), k, false);
             } catch (Exception e) {
                 Vibey.LOG.debug("Could not read the cached loadout signing key: {}", e.toString());
             }

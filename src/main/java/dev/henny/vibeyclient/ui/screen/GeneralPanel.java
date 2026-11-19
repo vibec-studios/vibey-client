@@ -18,7 +18,8 @@ import net.minecraft.client.Minecraft;
 /**
  * "General" tab: the settings of the whole client (language, menu size, animations, online features, the menu key)
  * in plain words, the connection status, and in the collapsed advanced area the server address and the technical
- * facts (version, loader, protocol) with a "copy" button for bug reports.
+ * facts (version, loader, protocol) with a "copy" button for bug reports. Notices (built-in and the backend's
+ * announcements) are cards at the top until dismissed.
  */
 public final class GeneralPanel implements Panel {
     private static final Object COPY = new Object();
@@ -41,6 +42,7 @@ public final class GeneralPanel implements Panel {
         cy += 13;
         g.text(g.clip(Lang.tr("core.general.description"), cw), cx, cy, Theme.MUTED);
         cy += 18;
+        cy = dev.henny.vibeyclient.ui.notice.NoticeCards.draw(ui, cx, cy, cw);
         cy = SettingsView.drawBasic(ui, GlobalSettings.GROUP, cx, cy, cw, true, "online", (u, sx, sy, sw) -> status(u, sx, sy + 6, sw) + 2);
         cy = SettingsView.drawAdvanced(ui, GlobalSettings.GROUP, cx, cy, cw, true, this::info);
         scroll.end(ui, cy + pad);

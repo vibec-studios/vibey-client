@@ -19,7 +19,8 @@
       "dev.henny.vibeyclient.gametest.ShowcaseGameTest",
       "dev.henny.vibeyclient.gametest.ToastGameTest",
       "dev.henny.vibeyclient.gametest.PlayLinksGameTest",
-      "dev.henny.vibeyclient.gametest.HudGameTest"
+      "dev.henny.vibeyclient.gametest.HudGameTest",
+      "dev.henny.vibeyclient.gametest.NoticesGameTest"
     ]
   },
   "depends": {

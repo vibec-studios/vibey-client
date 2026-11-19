@@ -12,7 +12,7 @@ public interface HostingService {
     /** True while the world is online on the relay. */
     boolean isHosting();
 
-    /** Public address friends join with (e.g. {@code mossy-otter-27.vibey.henny.dev}), or null when not hosting. */
+    /** Public address friends join with (e.g. {@code mossy-otter-27.axolite.cc}), or null when not hosting. */
     String address();
 
     /** Port of {@link #address()} (25565 unless the relay says otherwise). */
@@ -27,7 +27,7 @@ public interface HostingService {
     /** Opens the multiplayer module's own host/admin screen. */
     void openHostScreen();
 
-    /** The invite link ({@code https://vibe.henny.dev/j/<code>}) while hosting with one, else null. */
+    /** The invite link ({@code https://axolite.cc/j/<code>}, the {@code url} the backend returned) while hosting with one, else null. */
     default String playLink() {
         return null;
     }

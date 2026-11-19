@@ -32,6 +32,7 @@ public final class VibeyCore {
     public static void init(ClientPlatform p) {
         platform = p;
         GlobalSettings.load();
+        dev.henny.vibeyclient.ui.notice.Announcements.init();
         GlobalSettings.openMenu.onPress(VibeyCore::openMenu);
         dev.henny.vibeyclient.ui.toast.ToastHooks.init();
         dev.henny.vibeyclient.ui.title.CoreMenus.register();
@@ -65,6 +66,7 @@ public final class VibeyCore {
         ServerRulesClient.tick();
         mm.tick();
         dev.henny.vibeyclient.launcher.LauncherStatus.tick();
+        dev.henny.vibeyclient.ui.notice.Announcements.tick();
         dev.henny.vibeyclient.ui.title.UiShot.tick();
         dev.henny.vibeyclient.dev.DevTour.tick();
         dev.henny.vibeyclient.dev.ClickTest.tick();

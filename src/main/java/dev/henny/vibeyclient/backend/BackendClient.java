@@ -285,7 +285,7 @@ public final class BackendClient implements VibeBackend {
         String serverId = J.str(challenge, "serverId");
         if (serverId == null) throw new ApiException(502, "bad_response", "No serverId");
         if (devAuth()) {
-            if (baseUrl.contains("vibe.henny.dev")) {
+            if (DomainMove.isProduction(baseUrl)) {
                 throw new ApiException(0, "dev_auth_production", "Dev login is only for a local backend");
             }
             LOG.warn("DEV login without Mojang (vibeyclient.devAuth) against {}", baseUrl);

@@ -9,7 +9,7 @@ and say so in the pull request.
 **Vibey Client** is a Minecraft client mod by Vibe Craft Studios (GitHub org `vibec-studios`, repo
 `vibec-studios/vibey-client`). It bundles a modular core, a complete client UI in the Vibe design,
 the existing *Vibey Multiplayer* and *Vibey Lyrics* mods as modules, social features (friends, requests, invites,
-chats, presence) on top of the live Vibe backend (`https://vibe.henny.dev`), a data-driven cosmetic system (capes,
+chats, presence) on top of the live Vibe backend (`https://vibe.axolite.app`, until 0.2.x `https://vibe.henny.dev`, which keeps working), a data-driven cosmetic system (capes,
 wings, auras, pets, shields, hats, back items), an emote system with props/particles/sounds, and Blockbench plugins
 with live export into the running game. Logo/mascot: the blocky grey seal ("Robbe 1"). **No shop, no payments, no
 prices anywhere** – everything in the starter set is free.
@@ -474,6 +474,35 @@ Contract with the backend: `vibe-launcher/docs/VIBE-API-2.md`. Client side:
 - **Release:** `.github/workflows/release.yml` + `tools/release-manifest.mjs` (exact Minecraft versions per jar in
   `gradle/mc-versions.json`, checked by `./gradlew checkMcVersions`). CI attaches all jars, `vibey.js` and
   `vibey-manifest.json` (the §2 manifest plus `sha256`/`size` per file, `file` = asset name, uploaded last) to the
-  GitHub release; the backend imports releases from GitHub (CI never calls vibe.henny.dev: Cloudflare's bot
+  GitHub release; the backend imports releases from GitHub (CI never calls the backend: Cloudflare's bot
   protection blocks GitHub runners). Manual fallback: `release-manifest.mjs --publish` from a dev machine (files
   staged in batches below the proxy limit, then the release by sha256).
+
+## 12. Domain move henny.dev → axolite (0.3.0)
+
+Contract: `vibe-launcher/docs/DOMAINS.md`. New defaults: backend `https://vibe.axolite.app`, relay
+`relay.axolite.cc:25565` (`gradle.properties`), invite links `https://axolite.cc/j/<code>` (always the `url` the
+backend returns, never built by the client), world addresses `<name>.axolite.cc` (given by the relay; the client has
+no domain list or address check). Never use `axolite.app` itself or `api.axolite.app` (another app).
+
+- **Old addresses keep working** (same server and database). The client never parses relay addresses or invite
+  links by domain, so `*.vibey.henny.dev` and `vibe.henny.dev/j/<code>` keep working as they are. The dev-login guard
+  (`-Dvibeyclient.devAuth`) refuses both production names (`DomainMove.isProduction`).
+- **Migration** (`backend/DomainMove`, once, id `domain-move-2026-11` recorded in `_data.migrations` of the settings
+  file, also when nothing had to change): `core.json backendUrl` exactly `https://vibe.henny.dev` (trailing slashes
+  ignored) → `https://vibe.axolite.app`; `multiplayer.json relay` (and `_data.host.relay`, and a Vibey Multiplayer
+  `vibey.json` import) `relay.vibey.henny.dev` / `vibey.henny.dev` without a port or with 25565 →
+  `relay.axolite.cc:25565` (another port is kept). Custom values stay. `<gameDir>/vibeyclient/auth.json`: entries
+  `https://vibe.henny.dev|<account>` are renamed to `https://vibe.axolite.app|<account>` (an existing new entry wins;
+  recorded in `migrations` of that file). The cached loadout signing key of the old backend counts for the new one.
+  The cosmetics disk cache (`vibeyclient/cache`: catalog, assets by hash) is not keyed by backend.
+- **Notices** (`ui/notice/Announcements`, cards on the General tab via `NoticeCards`): the built-in notice
+  `domain-move-2026-11` (DE/EN in `core.notice.domainMove`, until 2027-03-01) and
+  `GET {backend}/api/v1/announcements?app=client&version=<mod version>&lang=de|en` (public; `items[]` with `id, level,
+  title, body, url, until, apps, max_version`; parsed by `backend/Notices`: at most 20 items, title ≤ 120 and body
+  ≤ 600 characters, formatting codes stripped, only http(s) links, an unreadable `until` drops the item). Shown: not
+  expired, `apps` empty or containing `client`, our version ≤ `max_version`. A remote item with the built-in id
+  replaces the built-in one. Each id once as a toast (after onboarding, on the title screen, in the menu or in game)
+  and as a card until dismissed; `core.json _data.notices.{toasted,dismissed}`. Fetched on a worker thread at start
+  and every 6 h (1 h after an error), again when the backend or language changes; only while online features are on;
+  errors are logged at debug level and then nothing remote is shown. Links open through the game's link confirmation.

@@ -248,7 +248,7 @@ public final class HostSession {
         Minecraft.getInstance().execute(() -> Events.post(new HostingService.HostingChanged(hosting, host)));
     }
 
-    /** "a-b-12.vibey.henny.dev:26400" -> "a-b-12.vibey.henny.dev" (null stays null). */
+    /** "a-b-12.axolite.cc:26400" -> "a-b-12.axolite.cc" (null stays null). */
     public static String hostPart(String addr) {
         if (addr == null) return null;
         int colon = addr.lastIndexOf(':');

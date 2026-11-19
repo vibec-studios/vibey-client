@@ -103,7 +103,7 @@ if (project.minecraft_version == '1.21.11') {
     // -Dvibeyclient.api=http://localhost:3100 -Dvibeyclient.username=VibeyTester (see SocialGameTest)
     ['clientGameTest', 'client'].each { run ->
         loom.runs.named(run) {
-            ['vibeyclient.devAuth', 'vibeyclient.api', 'vibeyclient.socialTest', 'vibeyclient.devDriver', 'vibeyclient.devOfflineHost', 'vibeyclient.playLinkTest'].each { k ->
+            ['vibeyclient.devAuth', 'vibeyclient.api', 'vibeyclient.socialTest', 'vibeyclient.devDriver', 'vibeyclient.devOfflineHost', 'vibeyclient.playLinkTest', 'vibeyclient.noticeTest'].each { k ->
                 def v = System.getProperty(k)
                 if (v != null) vmArg "-D${k}=${v}"
             }
