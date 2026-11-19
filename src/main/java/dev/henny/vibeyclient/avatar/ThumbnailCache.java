@@ -69,15 +69,17 @@ final class ThumbnailCache {
         if (s == null) {
             STATE.put(src, LOADING);
             LOADER.execute(() -> {
+                if (!src.startsWith("/")) {
+                    // disk cache read here, downloads asynchronously (several at a time, no thread waits)
+                    ItemLoader.thumbnail(src).whenComplete((png, e) -> {
+                        if (e != null) dev.henny.vibeyclient.Vibey.LOG.debug("Thumbnail {} failed: {}", src, e.toString());
+                        READY.put(src, png == null ? new byte[0] : png);
+                    });
+                    return;
+                }
                 byte[] png = null;
-                try {
-                    if (src.startsWith("/")) {
-                        try (InputStream in = ThumbnailCache.class.getResourceAsStream(src)) {
-                            if (in != null) png = in.readAllBytes();
-                        }
-                    } else {
-                        png = ItemLoader.thumbnail(src);
-                    }
+                try (InputStream in = ThumbnailCache.class.getResourceAsStream(src)) {
+                    if (in != null) png = in.readAllBytes();
                 } catch (Exception e) {
                     dev.henny.vibeyclient.Vibey.LOG.debug("Thumbnail {} failed: {}", src, e.toString());
                 }

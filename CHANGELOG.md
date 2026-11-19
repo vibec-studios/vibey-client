@@ -2,6 +2,13 @@
 
 All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.properties`.
 
+## Unreleased – faster online features
+
+- Online features load much faster: friends, chats and your cosmetics are there sooner after the game starts, and
+  the friends list no longer freezes everything else while it loads skins.
+- Your cosmetics show right away from the last session and are then checked for updates in the background.
+- Far fewer requests to the Vibe servers while you play (changes still arrive instantly over the live connection).
+
 ## 0.3.1 – crash fix
 
 - Fixed a crash at startup together with other crosshair mods (Centered Crosshair, Crosshair Indicator, …). Vibey's

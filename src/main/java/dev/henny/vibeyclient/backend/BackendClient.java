@@ -15,16 +15,13 @@ import dev.henny.vibeyclient.backend.AuthStore.Tokens;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.ConnectException;
-import java.net.URI;
+import dev.henny.vibeyclient.backend.net.Bootstrap;
+import dev.henny.vibeyclient.backend.net.Meta;
+import dev.henny.vibeyclient.backend.net.Net;
+import dev.henny.vibeyclient.backend.net.Rest;
+
 import java.net.URLEncoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpConnectTimeoutException;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -33,8 +30,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -67,22 +65,58 @@ public final class BackendClient implements VibeBackend {
     public static final String EV_STATE = "$state";
     public static final String EV_GATEWAY_ERROR = "$error";
 
-    private static final int TIMEOUT_MS = 15_000;
-
-    private final ExecutorService exec = Executors.newCachedThreadPool(r -> {
-        Thread t = new Thread(r, "VibeyClient-Backend-" + THREADS.incrementAndGet());
+    /**
+     * The one thread that may block: login (Mojang join + challenge/verify) and token refreshes, which are strictly
+     * serialised anyway. REST calls themselves are asynchronous on the shared {@link Net} client (no thread per call).
+     * Gone after a minute without use.
+     */
+    private final ThreadPoolExecutor authExec = new ThreadPoolExecutor(1, 1, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), r -> {
+        Thread t = new Thread(r, "VibeyClient-Auth");
         t.setDaemon(true);
         return t;
     });
-    private static final AtomicInteger THREADS = new AtomicInteger();
 
-    final HttpClient http = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(10))
-            .followRedirects(HttpClient.Redirect.NORMAL)
-            .executor(exec)
-            .build();
+    {
+        authExec.allowCoreThreadTimeOut(true);
+        Net.userAgent("vibey-client/" + BuildInfo.VERSION);
+    }
+
+    /** GETs answered by the last {@code ready}'s bootstrap request (null = none / backend without it). */
+    private volatile Bootstrap bootstrap;
+
+    /** What the client GETs after every ready (SocialService.reloadRest, LoadoutSync.loadMe/fetchToken). */
+    static final List<String> BOOTSTRAP_PATHS = List.of(
+            "/api/v1/friends/requests", "/api/v1/blocks", "/api/v1/chats",
+            "/api/v1/invites?direction=incoming&pendingOnly=true", "/api/v1/notifications?limit=50",
+            "/api/v1/hosting/friends", "/api/v1/hosting/sessions",
+            "/api/v1/cosmetics/me", "/api/v1/cosmetics/loadout/signed");
+    private static final long BOOTSTRAP_TTL_MS = 20_000;
+    private static final long META_MAX_AGE_MS = 5 * 60_000;
 
     private final AuthStore store;
+    private final Rest rest = new Rest(() -> this.baseUrl, new Rest.Auth() {
+        @Override
+        public CompletableFuture<String> token() {
+            Tokens t = tokens;
+            if (t == null) return CompletableFuture.failedFuture(new ApiException(401, "unauthorized", "Not logged in"));
+            if (t.expiresAt() - System.currentTimeMillis() > 30_000) return CompletableFuture.completedFuture(t.accessToken());
+            return CompletableFuture.supplyAsync(() -> refresh(t).accessToken(), authExec);
+        }
+
+        @Override
+        public CompletableFuture<String> refreshed(String failed) {
+            return CompletableFuture.supplyAsync(() -> {
+                Tokens t = tokens;
+                Tokens f = t != null && t.accessToken().equals(failed) ? t : new Tokens(failed, "", 0, null);
+                return refresh(f).accessToken();
+            }, authExec);
+        }
+
+        @Override
+        public void banned(ApiException e) {
+            authLost(e.code, e.getMessage(), false);
+        }
+    });
     private final Gateway gateway;
     private final ReentrantLock refreshLock = new ReentrantLock();
     private final Map<String, List<Consumer<JsonObject>>> listeners = new ConcurrentHashMap<>();
@@ -102,6 +136,10 @@ public final class BackendClient implements VibeBackend {
     private volatile boolean autoLogin;
     /** Bumped by start/stop so late results of an old run are ignored. */
     private final AtomicInteger generation = new AtomicInteger();
+
+    static {
+        LoadoutKeys.install();
+    }
 
     public BackendClient(AuthStore store) {
         this.store = store;
@@ -275,7 +313,7 @@ public final class BackendClient implements VibeBackend {
                 LOG.warn("Login failed", e);
                 setState(State.ERROR, "network", e.toString());
             }
-        }, exec);
+        }, authExec);
     }
 
     private Tokens loginBlocking() {
@@ -331,7 +369,7 @@ public final class BackendClient implements VibeBackend {
                 }
                 if (running) setState(State.LOGGED_OUT, null, null);
             }
-        }, exec);
+        }, authExec);
     }
 
     /** The login is gone for good (refresh rejected, banned, session revoked). */
@@ -452,12 +490,20 @@ public final class BackendClient implements VibeBackend {
 
     @Override
     public CompletableFuture<JsonElement> request(String method, String path, JsonElement body) {
-        return CompletableFuture.supplyAsync(() -> call(method, path, body, true), exec);
+        if ("GET".equals(method)) {
+            Bootstrap b = bootstrap;
+            CompletableFuture<JsonElement> fromBoot = b == null ? null : b.take(path);
+            if (fromBoot != null) {
+                return fromBoot.thenCompose(v -> v != null ? CompletableFuture.completedFuture(v) : rest.call(Rest.Call.of(method, path, body, true)));
+            }
+        }
+        return rest.call(Rest.Call.of(method, path, body, true));
     }
 
-    /** Unauthenticated GET (e.g. {@code /api/v1/meta}). */
+    /** Unauthenticated GET (e.g. {@code /api/v1/meta}, which comes from the shared {@link Meta} cache). */
     public CompletableFuture<JsonElement> publicGet(String path) {
-        return CompletableFuture.supplyAsync(() -> call("GET", path, null, false), exec);
+        if ("/api/v1/meta".equals(path)) return Meta.get(baseUrl, META_MAX_AGE_MS).thenApply(o -> (JsonElement) o);
+        return rest.call(Rest.Call.of("GET", path, null, false));
     }
 
     public static String enc(String s) {
@@ -483,121 +529,37 @@ public final class BackendClient implements VibeBackend {
         }
         out.writeBytes(("--" + boundary + "--" + CRLF).getBytes(StandardCharsets.UTF_8));
         byte[] body = out.toByteArray();
-        return CompletableFuture.supplyAsync(() -> call("POST", path, null, body, "multipart/form-data; boundary=" + boundary, true), exec);
+        return rest.call(new Rest.Call("POST", path, null, body, "multipart/form-data; boundary=" + boundary, true, false, Net.Kind.BULK));
     }
 
-    /** One REST call, blocking, with token refresh and retries. Throws {@link ApiException}. */
+    /**
+     * One REST call, blocking, with token refresh and retries. Throws {@link ApiException}. Only for the auth thread
+     * (login, refresh): never call it on a {@link Net} thread, which has to complete it.
+     */
     JsonElement call(String method, String path, JsonElement body, boolean auth) {
-        return call(method, path, body, null, null, auth);
-    }
-
-    /** Same with a raw body ({@code rawBody} + {@code rawType}, e.g. multipart) instead of JSON. */
-    JsonElement call(String method, String path, JsonElement body, byte[] rawBody, String rawType, boolean auth) {
-        boolean idempotent = !method.equals("POST") && !method.equals("PATCH");
-        boolean refreshed = false;
-        for (int attempt = 0; ; attempt++) {
-            Tokens used = auth ? validTokens() : null;
-            HttpRequest.Builder rb = HttpRequest.newBuilder(URI.create(baseUrl + path))
-                    .timeout(Duration.ofMillis(TIMEOUT_MS))
-                    .header("Accept", "application/json")
-                    .header("User-Agent", "vibey-client/" + BuildInfo.VERSION);
-            // Cleartext (local dev): no h2c upgrade – Node rejects upgrade requests that carry a body.
-            if (baseUrl.startsWith("http://")) rb.version(HttpClient.Version.HTTP_1_1);
-            if (used != null) rb.header("Authorization", "Bearer " + used.accessToken());
-            if (rawBody != null) {
-                rb.header("Content-Type", rawType);
-                rb.method(method, HttpRequest.BodyPublishers.ofByteArray(rawBody));
-            } else if (body != null && !(body instanceof JsonNull)) {
-                rb.header("Content-Type", "application/json");
-                rb.method(method, HttpRequest.BodyPublishers.ofString(body.toString(), StandardCharsets.UTF_8));
-            } else if (method.equals("POST") || method.equals("PUT") || method.equals("PATCH")) {
-                rb.header("Content-Type", "application/json");
-                rb.method(method, HttpRequest.BodyPublishers.ofString("{}"));
-            } else {
-                rb.method(method, HttpRequest.BodyPublishers.noBody());
-            }
-            HttpResponse<String> res;
-            try {
-                res = http.send(rb.build(), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-            } catch (IOException e) {
-                // Connection refused/timed out before sending is safe to retry for any method.
-                boolean notSent = e instanceof ConnectException || e instanceof HttpConnectTimeoutException;
-                if ((idempotent || notSent) && attempt < 2) {
-                    sleep(backoff(attempt));
-                    continue;
-                }
-                throw new ApiException(0, "network", e.getMessage() == null ? e.toString() : e.getMessage());
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new ApiException(0, "network", "interrupted");
-            }
-            int status = res.statusCode();
-            String text = res.body();
-            if (status >= 200 && status < 300) {
-                if (text == null || text.isBlank()) return JsonNull.INSTANCE;
-                try {
-                    return JsonParser.parseString(text);
-                } catch (RuntimeException e) {
-                    throw new ApiException(status, "bad_response", "Invalid JSON");
-                }
-            }
-            ApiException err = parseError(status, text, res.headers().firstValue("Retry-After").orElse(null));
-            if (status == 401 && auth && !refreshed && ("token_expired".equals(err.code) || "invalid_token".equals(err.code))) {
-                refreshed = true;
-                refresh(used); // throws when the login is gone
-                attempt--;
-                continue;
-            }
-            if (status == 429 && idempotent && attempt == 0 && err.retryAfter >= 0 && err.retryAfter <= 5) {
-                sleep(Math.max(250, err.retryAfter * 1000L));
-                continue;
-            }
-            boolean transientError = (status == 502 || status == 504 || (status == 503 && !"feature_disabled".equals(err.code)));
-            if (transientError && idempotent && attempt < 2) {
-                sleep(backoff(attempt));
-                continue;
-            }
-            if ("banned".equals(err.code) && auth) authLost(err.code, err.getMessage(), false);
-            throw err;
+        try {
+            return rest.call(Rest.Call.of(method, path, body, auth)).join();
+        } catch (CompletionException e) {
+            throw unwrap(e);
         }
     }
 
     static ApiException parseError(int status, String text, String retryHeader) {
-        String code = "http_error";
-        String message = "HTTP " + status;
-        int retryAfter = -1;
-        JsonElement details = null;
-        try {
-            JsonObject err = J.obj(J.obj(JsonParser.parseString(text)), "error");
-            if (err != null) {
-                code = J.str(err, "code", code);
-                message = J.str(err, "message", message);
-                retryAfter = J.num(err, "retryAfter", -1);
-                details = err.get("details");
-            }
-        } catch (RuntimeException ignored) {
-            // not JSON (proxy error page)
-        }
-        if (retryAfter < 0 && retryHeader != null) {
-            try {
-                retryAfter = Integer.parseInt(retryHeader.trim());
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return new ApiException(status, code, message, retryAfter, details);
+        return Rest.parseError(status, text, retryHeader);
     }
 
-    private static long backoff(int attempt) {
-        long base = 500L << Math.min(attempt, 4);
-        return base / 2 + (long) (Math.random() * base);
-    }
-
-    private static void sleep(long ms) {
-        try {
-            Thread.sleep(ms);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+    /** Starts the bootstrap request of a fresh {@code ready} when the backend has it (feature-detected). */
+    private void startBootstrap(JsonObject ready) {
+        JsonObject features = J.obj(ready, "features");
+        if (!J.bool(features, Bootstrap.FEATURE, false)) {
+            bootstrap = null;
+            return;
         }
+        CompletableFuture<JsonElement> answer = rest.call(Rest.Call.of("POST", Bootstrap.PATH, Bootstrap.body(BOOTSTRAP_PATHS), true).idempotent(true));
+        answer.whenComplete((r, e) -> {
+            if (e != null) LOG.debug("Bootstrap request failed, single requests instead: {}", unwrap(e).getMessage());
+        });
+        bootstrap = new Bootstrap(BOOTSTRAP_PATHS, answer, BOOTSTRAP_TTL_MS);
     }
 
     /** The {@link ApiException} inside a failed future's exception, or a generic one. */
@@ -654,6 +616,8 @@ public final class BackendClient implements VibeBackend {
     void onGatewayReady(int gen, JsonObject d) {
         synchronized (this) {
             if (stale(gen)) return;
+            // before READY is visible: whoever loads data after ready must find the bootstrap already running
+            startBootstrap(d);
             setState(State.READY, null, null);
         }
         readyPayload = d;
@@ -723,8 +687,13 @@ public final class BackendClient implements VibeBackend {
         dispatch(EV_GATEWAY_ERROR, d);
     }
 
-    ExecutorService executor() {
-        return exec;
+    /** Gateway: a usable token, refreshed first when {@code refresh} and {@code failed} is still the current one. */
+    CompletableFuture<Tokens> gatewayTokens(boolean refresh, String failed) {
+        return CompletableFuture.supplyAsync(() -> {
+            Tokens t = validTokens();
+            if (refresh && failed != null && failed.equals(t.accessToken())) t = refresh(t);
+            return t;
+        }, authExec);
     }
 
     // ============================================================================================ helpers for UI

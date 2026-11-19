@@ -133,12 +133,8 @@ final class Gateway {
             sessionId = null; // too late to resume, start fresh
             seq = 0;
         }
-        // Token (may refresh = network) on a backend worker, then back on the loop.
-        CompletableFuture.supplyAsync(() -> {
-            Tokens t = client.validTokens();
-            if (refresh && failed != null && failed.equals(t.accessToken())) t = client.refresh(t);
-            return t;
-        }, client.executor()).whenCompleteAsync((tokens, err) -> {
+        // Token (may refresh = network) on the backend's auth thread, then back on the loop.
+        client.gatewayTokens(refresh, failed).whenCompleteAsync((tokens, err) -> {
             if (id != connectionId || !wanted) return; // stale: a newer open/disconnect owns `opening`
             if (err != null) {
                 opening = false;
@@ -152,8 +148,9 @@ final class Gateway {
             }
             String token = tokens.accessToken();
             currentToken = token;
-            client.http.newWebSocketBuilder()
-                    .connectTimeout(Duration.ofSeconds(10))
+            // the shared client (the WebSocket itself is always its own HTTP/1.1 upgrade connection)
+            dev.henny.vibeyclient.backend.net.Net.client().newWebSocketBuilder()
+                    .connectTimeout(dev.henny.vibeyclient.backend.net.Net.CONNECT_TIMEOUT)
                     .buildAsync(URI.create(client.gatewayUrl()), new Listener(id, token))
                     .whenCompleteAsync((w, e2) -> {
                         if (id != connectionId || !wanted) {
