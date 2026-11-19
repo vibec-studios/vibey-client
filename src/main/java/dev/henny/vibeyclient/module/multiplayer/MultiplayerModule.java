@@ -17,6 +17,7 @@ import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.client.Keys;
 import dev.henny.vibeyclient.module.multiplayer.host.HostConfig;
 import dev.henny.vibeyclient.module.multiplayer.host.HostSession;
+import dev.henny.vibeyclient.module.multiplayer.host.PlayLinks;
 import dev.henny.vibeyclient.module.multiplayer.screen.HostScreen;
 import net.minecraft.client.Minecraft;
 import org.slf4j.Logger;
@@ -52,6 +53,7 @@ public final class MultiplayerModule extends VibeyModule {
     public final IntSetting lanPort = intRange("lanPort", 0, 0, 65535).field().advanced();
 
     private final HostingService service = new Service();
+    private int ticks;
 
     public MultiplayerModule() {
         super("multiplayer", ModuleCategory.MULTIPLAYER);
@@ -102,6 +104,12 @@ public final class MultiplayerModule extends VibeyModule {
         lanPort.onChange(v -> sync());
 
         MpLoader.register();
+        PlayLinks.install();
+        on(dev.henny.vibeyclient.api.event.VibeyEvents.OnlineFeaturesChanged.class, e -> PlayLinks.onOnlineChanged(e.enabled()));
+        on(dev.henny.vibeyclient.api.service.VibeBackend.Ready.class, e -> Minecraft.getInstance().execute(PlayLinks::onBackendReady));
+        dev.henny.vibeyclient.ui.MenuEntries.register(dev.henny.vibeyclient.ui.MenuEntries.Place.PAUSE,
+                new dev.henny.vibeyclient.ui.MenuEntries.Entry("invite", "multiplayer.pause.invite", dev.henny.vibeyclient.ui.Icons.LINK, 25,
+                        () -> isEnabled() && PlayLinks.url() != null, p -> PlayLinks.copy()));
         on(VibeyEvents.ScreenInit.class, e -> {
             if (pauseButton.get()) MpPauseMenu.decorate(e.screen(), e.widgets(), e.addWidget(), e.removeWidget());
         });
@@ -121,6 +129,7 @@ public final class MultiplayerModule extends VibeyModule {
     @Override
     public void tick() {
         if (MpDevCheck.enabled()) MpDevCheck.tick();
+        if (++ticks % 10 == 0) PlayLinks.tick();
     }
 
     @Override
@@ -223,6 +232,21 @@ public final class MultiplayerModule extends VibeyModule {
         @Override
         public void openHostScreen() {
             Minecraft.getInstance().execute(MultiplayerModule.this::openHostScreen);
+        }
+
+        @Override
+        public String playLink() {
+            return HostSession.isHosting() ? PlayLinks.url() : null;
+        }
+
+        @Override
+        public int players() {
+            return HostSession.playerCount();
+        }
+
+        @Override
+        public int maxPlayers() {
+            return HostSession.isHosting() ? HostConfig.get().maxPlayers : -1;
         }
     }
 }

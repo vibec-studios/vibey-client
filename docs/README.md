@@ -20,6 +20,7 @@ Start with the [main README](../README.md) for what Vibey Client is, installatio
 | [HUD.md](HUD.md) | HUD widgets and the HUD editor: the widget API for modules, styles, placement model, templates, share codes, server rules. |
 | [AVATAR.md](AVATAR.md) | The cosmetics and emotes engine: packages, services, render path per Minecraft version, coordinates, tests. |
 | [VIDEO.md](VIDEO.md) | Video screens (Fabric 1.21.11): placing, players (FFmpeg / MCEF Modern), setup prompts, sharing, wiring into the Media module. Research and licences: [VIDEO-RESEARCH.md](VIDEO-RESEARCH.md). |
+| [PVP.md](PVP.md) | PvP & View module (Fabric 1.21.11): zoom, toggle sprint/sneak, crosshair editor, block outline, hit colour, low fire, lower shield, server-rule keys. |
 | [../blockbench/README.md](../blockbench/README.md) | Developing the Blockbench plugin: tests, mock game server, code layout. |
 
 How they fit together:
@@ -32,7 +33,7 @@ How they fit together:
                               └──► Vibe backend catalog ──────┘ (SPEC §7)
 
  game: core + module API (MODULES.md) + Vibe UI (UI.md)
-       modules: social · cosmetics · emotes · multiplayer · media (Fabric: lyrics & skies, video) · devlink
+       modules: social · cosmetics · emotes · multiplayer · media (Fabric: lyrics & skies, video) · pvp (Fabric 1.21.11) · devlink
 ```
 
 ## Screenshots

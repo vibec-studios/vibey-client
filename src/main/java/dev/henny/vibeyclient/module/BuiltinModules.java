@@ -19,19 +19,21 @@ public final class BuiltinModules {
         //? if fabric
         mm.register(new dev.henny.vibeyclient.module.media.MediaModule());
         mm.register(new dev.henny.vibeyclient.module.nametags.NametagsModule());
+        // PvP basics: only in the Fabric 1.21.11 jar for now (gradle/common.gradle leaves the package out elsewhere).
+        registerIfPresent(mm, "dev.henny.vibeyclient.module.pvp.PvpModule");
         mm.register(new DevLinkModule());
         // HUD widgets + templates: Fabric 1.21.11 only for now (gradle/common.gradle leaves the package out elsewhere)
         registerIfPresent(mm, "dev.henny.vibeyclient.module.hud.HudModule");
     }
 
+    /** Registers a module whose package is only part of some builds. */
     private static void registerIfPresent(ModuleManager mm, String className) {
         try {
-            Class<?> c = Class.forName(className);
-            mm.register((dev.henny.vibeyclient.api.VibeyModule) c.getConstructor().newInstance());
-        } catch (ClassNotFoundException e) {
-            // not built for this target
+            mm.register((dev.henny.vibeyclient.api.VibeyModule) Class.forName(className).getConstructor().newInstance());
+        } catch (ClassNotFoundException absent) {
+            // not in this jar
         } catch (ReflectiveOperationException | LinkageError e) {
-            dev.henny.vibeyclient.Vibey.LOG.warn("Could not create {}", className, e);
+            dev.henny.vibeyclient.Vibey.LOG.error("Could not create module {}", className, e);
         }
     }
 }

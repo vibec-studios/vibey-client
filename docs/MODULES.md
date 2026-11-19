@@ -22,7 +22,8 @@ src/main/resources/
 
 Existing stubs: `social`, `cosmetics`, `emotes`, `multiplayer` (conflicts with mod id `vibey`), `media` (Fabric
 only: the package is excluded from the NeoForge build and not registered there; its parts are *media features*, the
-`lyrics` part conflicts with `vibeylyrics` – see [MEDIA.md](MEDIA.md)), `devlink`, `nametags` (seal + badge glyphs before player names; data in `client/VibeyPlayers`).
+`lyrics` part conflicts with `vibeylyrics` – see [MEDIA.md](MEDIA.md)), `devlink`, `nametags` (seal + badge glyphs before player names; data in `client/VibeyPlayers`), `pvp` (zoom, crosshair,
+toggle sprint, outlines; Fabric 1.21.11 only for now, see [PVP.md](PVP.md)).
 
 ## Client only
 
@@ -91,7 +92,8 @@ thread) and rendered automatically in the Vibey menu.
 | `action(key, runnable)` | `ActionSetting` | button at the top of the module page (advanced: a row) |
 
 Every setting: `get()`, `set(v)` (clamped, listeners fire, save scheduled), `reset()`, `.onChange(v -> ...)`,
-`.section("key")` (titled card), `.advanced()`, `.visibleWhen(() -> ...)`, `.labelKey("full.i18n.key")` (label from
+`.section("key")` (titled card), `.advanced()`, `.serverRule("zoom")` (row shows *Disabled by this server* while
+`ServerRules.isDisabled(key)`; the feature still has to check it itself), `.visibleWhen(() -> ...)`, `.labelKey("full.i18n.key")` (label from
 another file, used by media features). Settings added after the file was read still get their stored value; keys the
 current run doesn't declare are kept in the file. Keybinds: `.skipRegistration()` keeps one out of the controls
 screen (a part that is off because a standalone mod provides it).

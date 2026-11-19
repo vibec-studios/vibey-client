@@ -169,6 +169,7 @@ public final class ModulesPanel implements Panel {
             case "devlink" -> Icons.CUBE;
             case "nametags" -> Icons.SEAL;
             case "hud" -> "hud_library";
+            case "pvp" -> Icons.CROSSHAIR;
             default -> null;
         };
     }

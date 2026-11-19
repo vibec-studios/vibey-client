@@ -395,7 +395,7 @@ public final class HudEditorScreen extends BaseScreen {
             dashed(g, x - 1, y - 1, w + 2, h + 2, 0x30FFFFFF);
         }
         if (disabled) {
-            String badge = Lang.tr("core.hud.serverDisabled");
+            String badge = Lang.tr("core.settings.serverDisabled");
             int bw = g.width(badge) + 16;
             int bx = x + w / 2 - bw / 2;
             int by = h >= 14 ? y + h / 2 - 6 : y + h + 3;

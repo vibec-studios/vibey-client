@@ -17,7 +17,7 @@ public final class Icons {
             SEAL = "seal", GEAR = "gear", PUZZLE = "puzzle", POWER = "power", HOST = "host", GLOBE = "globe",
             ACCESS = "access", SEARCH = "search", CLOSE = "close", BACK = "back", NEXT = "next", CHECK = "check",
             LINK = "link", KEY = "key", INFO = "info", WARN = "warn", CHAT = "chat", STAR = "star", MODULES = "modules",
-            WAVE = "wave", USER = "user", NOTE = "note", CUBE = "cube";
+            WAVE = "wave", USER = "user", NOTE = "note", CUBE = "cube", CROSSHAIR = "crosshair";
 
     private static final Map<String, String[]> ICONS = new HashMap<>();
 
@@ -263,6 +263,16 @@ public final class Icons {
                 "####.####",
                 "####.####",
                 ".##...##."});
+        ICONS.put(CROSSHAIR, new String[] {
+                "....#....",
+                "..#####..",
+                ".#.....#.",
+                ".#.....#.",
+                "###.#.###",
+                ".#.....#.",
+                ".#.....#.",
+                "..#####..",
+                "....#...."});
         ICONS.put(CUBE, new String[] {
                 "....#....",
                 "..##.##..",

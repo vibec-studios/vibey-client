@@ -27,6 +27,21 @@ public interface HostingService {
     /** Opens the multiplayer module's own host/admin screen. */
     void openHostScreen();
 
+    /** The invite link ({@code https://vibe.henny.dev/j/<code>}) while hosting with one, else null. */
+    default String playLink() {
+        return null;
+    }
+
+    /** Players in the hosted world (host included), or -1 when not hosting. */
+    default int players() {
+        return -1;
+    }
+
+    /** Player limit of the hosted world, or -1 when not hosting. */
+    default int maxPlayers() {
+        return -1;
+    }
+
     /** Posted on the event bus (client thread) whenever hosting starts, stops or the address changes. */
     record HostingChanged(boolean hosting, String address) {}
 }
