@@ -1,0 +1,49 @@
+animation idle 2.4 true
+time 0.3 0.3
+time 7.77 0.5699997
+time 123.456 1.0559951
+local -0.5 0.0 1.9000001
+local 0.2 0.2 0.2
+local 3.6000001 2.4 1.2
+local 7.8 2.4 0.5999999
+sample 0 rotation -0.05 0.0 0.0 0.0
+sample 0 rotation 0.2 2.4444442 0.0 3.111111
+sample 0 rotation 0.45 5.3437495 0.0 7.078125
+sample 0 rotation 0.7 5.6944447 0.0 7.5694447
+sample 0 rotation 0.95 3.1076398 0.0 4.001737
+sample 0 rotation 1.2 0.0 0.0 0.0
+sample 0 rotation 1.45 -3.1076396 0.0 -3.2494218
+sample 0 rotation 1.7 -5.694445 0.0 -5.717593
+sample 0 rotation 1.95 -5.3437495 0.0 -5.3906245
+sample 0 rotation 2.2 -2.444444 0.0 -2.5925922
+sample 0 rotation 2.45 0.0 0.0 0.0
+animation walk 0.8 true
+time 0.3 0.3
+time 7.77 0.5699999
+time 123.456 0.25599816
+local -0.5 0.0 0.3
+local 0.2 0.2 0.2
+local 1.2 0.8 0.40000004
+local 2.6000001 0.8 0.2000001
+sample 0 rotation -0.05 14.0 0.0 0.0
+sample 0 rotation 0.040000003 11.92 0.0 4.1760006
+sample 0 rotation 0.13000001 -0.36500072 0.0 14.361752
+sample 0 rotation 0.22000001 -5.4399996 0.0 17.657999
+sample 0 rotation 0.31 5.495001 0.0 10.10475
+sample 0 rotation 0.39999998 14.0 0.0 1.9073486E-6
+sample 0 rotation 0.49 5.495 0.0 -10.10475
+sample 0 rotation 0.58 -5.4399986 0.0 -17.657999
+sample 0 rotation 0.67 -0.36499977 0.0 -14.36175
+sample 0 rotation 0.76000005 11.920004 0.0 -4.175995
+sample 0 rotation 0.84999996 14.0 0.0 0.0
+sample 1 position -0.05 0.0 0.0 0.0
+sample 1 position 0.040000003 0.0 0.04160001 0.0
+sample 1 position 0.13000001 0.0 0.28730005 0.0
+sample 1 position 0.22000001 0.0 0.3888 0.0
+sample 1 position 0.31 0.0 0.17009999 0.0
+sample 1 position 0.39999998 0.0 -8.940697E-8 0.0
+sample 1 position 0.49 0.0 0.1701 0.0
+sample 1 position 0.58 0.0 0.38879997 0.0
+sample 1 position 0.67 0.0 0.2873 0.0
+sample 1 position 0.76000005 0.0 0.0415999 0.0
+sample 1 position 0.84999996 0.0 0.0 0.0

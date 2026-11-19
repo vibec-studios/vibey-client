@@ -1,0 +1,14 @@
+id vibey:vibe_cape
+kind COSMETIC
+name Vibe Cape | Vibe-Umhang
+description The classic Vibe purple with our seal emblem and a teal hem. | Das klassische Vibe-Lila mit unserem Robben-Emblem und türkisem Saum.
+author Vibe Craft Studios
+tags [vibe, seal, purple, starter]
+rarity RARE
+slot CAPE
+hideWithArmor []
+pet GROUND 1.0
+cape 0 shield -1
+emote null
+sha256 13126d234cbb7270060f17692b6254589970896b5736bcfd0ef6c6537ecea6fb size 2666
+texture 0 cape 64 32 64 32 1 1 [0] false false 1 aea68d1a495087ba80fc92d82458c2379c89281197fd7d0c7c8b1b3595994b91

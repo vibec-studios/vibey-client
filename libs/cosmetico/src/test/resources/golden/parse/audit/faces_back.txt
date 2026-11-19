@@ -1,0 +1,32 @@
+id vibeytest:faces_back
+kind COSMETIC
+name Audit Faces Back | Audit Faces Back
+description  | null
+author Vibey audit
+tags [audit]
+rarity RARE
+slot BACK
+hideWithArmor []
+pet GROUND 1.0
+cape -1 shield -1
+emote null
+sha256 0088548cc061b6da8728f83c59e154fbf38cc1998a478b13b75f9fd5c13f868b size 2516
+texture 0 main 16 16 16 16 1 1 [0] false false 1 77cb2532b6e094403e18fca25c9cab8799f3b76d799113068a361ef6e567bdce
+texture 1 strip 16 16 16 64 4 5 [0 1 2 3] true true 20 e381f98a06651f9d7b47f623314d758e8ede925be2425f64c04044d1390b5715
+texture 2 hd 16 16 128 128 1 1 [0] false false 1 cd62f4e44a0872de4ef53a145b578a3e2c4136628183d8f9efd0536bc3b618a9
+model 0 cubes 2 bones 2 locators 0
+bone 0 panel -1 BODY [0.0 24.0 2.0] [0.0 0.0 0.0] false false false false 1
+cube [-4.0 14.0 2.0] [4.0 22.0 4.0] 0.0 false null null null 0
+face 0 0.0 0.0 8.0 8.0 0
+face 1 0.0 0.0 2.0 8.0 0
+face 2 0.0 0.0 16.0 16.0 1
+face 3 0.0 0.0 2.0 8.0 0
+face 4 null
+face 5 0.0 0.0 8.0 2.0 2
+bone 1 badge 0 null [0.0 18.0 4.0] [0.0 0.0 45.0] true false true false 1
+cube [-1.5 16.5 4.0] [1.5 19.5 5.0] 0.0 false null null [0.0 0.0] 2
+animation idle 4.0 true false false tracks 1 events 0
+track 1 null
+channel rotation 2
+key 0.0 [0.0 0.0 45.0] [NaN NaN NaN] LINEAR
+key 4.0 [0.0 0.0 405.0] [NaN NaN NaN] LINEAR

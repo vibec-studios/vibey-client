@@ -1,0 +1,14 @@
+id vibey:pixel_stars_cape
+kind COSMETIC
+name Pixel Stars Cape | Pixelsterne-Umhang
+description A clear night sky full of twinkling pixel stars. | Ein klarer Nachthimmel voller funkelnder Pixelsterne.
+author Vibe Craft Studios
+tags [night, stars, animated, starter]
+rarity RARE
+slot CAPE
+hideWithArmor []
+pet GROUND 1.0
+cape 0 shield -1
+emote null
+sha256 7deb0006478ce45737e51d44440199893484a56b78922cb32fcac96961141860 size 7469
+texture 0 cape 64 32 64 128 4 8 [0 1 2 3] false true 32 ce02708c3c11d3a5da592ee968d6b0ddcc24fc301e527f5b5ec50165616bafc7

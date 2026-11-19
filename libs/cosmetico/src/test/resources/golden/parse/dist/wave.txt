@@ -1,0 +1,45 @@
+id vibey:wave
+kind EMOTE
+name Wave | Winken
+description Say hi! A big friendly wave. | Sag hallo! Ein großes, freundliches Winken.
+author Vibe Craft Studios
+tags [greeting, friendly, starter]
+rarity COMMON
+slot null
+hideWithArmor []
+pet null
+cape -1 shield -1
+emote main false true true true
+sha256 809fa6ac13aa800b96b06cebfbbcf97210a4d8af8365649fa99dee2dfc5b88bc size 2060
+animation main 2.2 false false false tracks 4 events 0
+track -1 RIGHT_ARM
+channel rotation 9
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.35 [10.0 0.0 150.0] [NaN NaN NaN] CATMULLROM
+key 0.6 [10.0 0.0 128.0] [NaN NaN NaN] CATMULLROM
+key 0.85 [10.0 0.0 158.0] [NaN NaN NaN] CATMULLROM
+key 1.1 [10.0 0.0 128.0] [NaN NaN NaN] CATMULLROM
+key 1.35 [10.0 0.0 158.0] [NaN NaN NaN] CATMULLROM
+key 1.6 [10.0 0.0 135.0] [NaN NaN NaN] CATMULLROM
+key 1.95 [0.0 0.0 8.0] [NaN NaN NaN] CATMULLROM
+key 2.2 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track -1 LEFT_ARM
+channel rotation 4
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.4 [-6.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 1.7 [-6.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 2.2 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track -1 HEAD
+channel rotation 6
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.4 [6.0 -10.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 0.85 [8.0 -12.0 -8.0] [NaN NaN NaN] CATMULLROM
+key 1.35 [4.0 -8.0 -4.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [2.0 -4.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.2 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track -1 BODY
+channel rotation 4
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.4 [0.0 -4.0 -2.0] [NaN NaN NaN] CATMULLROM
+key 1.7 [0.0 -4.0 -2.0] [NaN NaN NaN] CATMULLROM
+key 2.2 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM

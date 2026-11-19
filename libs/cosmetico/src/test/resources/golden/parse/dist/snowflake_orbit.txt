@@ -1,0 +1,103 @@
+id vibey:snowflake_orbit
+kind COSMETIC
+name Snowflake Orbit | Schneeflocken-Orbit
+description Five glowing snowflakes circle around you and drop tiny flakes. | Fünf leuchtende Schneeflocken kreisen um dich und lassen kleine Flocken rieseln.
+author Vibe Craft Studios
+tags [aura, snow, winter, glow, starter]
+rarity EPIC
+slot AURA
+hideWithArmor []
+pet GROUND 1.0
+cape -1 shield -1
+emote null
+sha256 ce6432fd02999ede674074d1a9d2ed7ca286b3d09883dccfea723923af0121f4 size 10806
+texture 0 main 64 64 64 64 1 1 [0] false false 1 d9084d5305c014f74607a31ab953ce1b3c4a839de219f66204eaa37f1a694c20
+sprite 0 snow 0 28.0 28.0 31.0 31.0
+model 0 cubes 10 bones 6 locators 5
+bone 0 orbit -1 WORLD [0.0 0.0 0.0] [0.0 0.0 0.0] true true true true 0
+bone 1 flake_0 0 null [-13.0 7.0 0.0] [0.0 0.0 0.0] true true true true 2
+cube [-16.5 3.5 0.0] [-9.5 10.5 0.0] 0.0 false null null [14.0 14.0] 0
+cube [-13.0 3.5 -3.5] [-13.0 10.5 3.5] 0.0 false null null [0.0 0.0] 0
+bone 2 flake_1 0 null [-3.71 23.0 11.41] [0.0 0.0 0.0] true true true true 2
+cube [-7.21 19.5 11.41] [-0.21 26.5 11.41] 0.0 false null null [28.0 14.0] 0
+cube [-3.71 19.5 7.91] [-3.71 26.5 14.91] 0.0 false null null [14.0 0.0] 0
+bone 3 flake_2 0 null [11.33 13.0 8.23] [0.0 0.0 0.0] true true true true 2
+cube [7.83 9.5 8.23] [14.83 16.5 8.23] 0.0 false null null [42.0 14.0] 0
+cube [11.33 9.5 4.73] [11.33 16.5 11.73] 0.0 false null null [28.0 0.0] 0
+bone 4 flake_3 0 null [9.71 28.0 -7.05] [0.0 0.0 0.0] true true true true 2
+cube [6.21 24.5 -7.05] [13.21 31.5 -7.05] 0.0 false null null [0.0 28.0] 0
+cube [9.71 24.5 -10.55] [9.71 31.5 -3.55] 0.0 false null null [42.0 0.0] 0
+bone 5 flake_4 0 null [-4.33 18.0 -13.31] [0.0 0.0 0.0] true true true true 2
+cube [-7.83 14.5 -13.31] [-0.83 21.5 -13.31] 0.0 false null null [14.0 28.0] 0
+cube [-4.33 14.5 -16.81] [-4.33 21.5 -9.81] 0.0 false null null [0.0 14.0] 0
+locator flake_0 1 null [-13.0 4.0 0.0]
+locator flake_1 2 null [-3.71 20.0 11.41]
+locator flake_2 3 null [11.33 10.0 8.23]
+locator flake_3 4 null [9.71 25.0 -7.05]
+locator flake_4 5 null [-4.33 15.0 -13.31]
+animation idle 8.0 true false false tracks 6 events 16
+track 0 null
+channel rotation 2
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] LINEAR
+key 8.0 [0.0 -360.0 0.0] [NaN NaN NaN] LINEAR
+track 1 null
+channel rotation 2
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] LINEAR
+key 8.0 [0.0 720.0 0.0] [NaN NaN NaN] LINEAR
+channel position 4
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 1.5 0.0] [NaN NaN NaN] CATMULLROM
+key 6.0 [0.0 -1.5 0.0] [NaN NaN NaN] CATMULLROM
+key 8.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 2 null
+channel rotation 2
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] LINEAR
+key 8.0 [0.0 720.0 0.0] [NaN NaN NaN] LINEAR
+channel position 4
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.8 [0.0 1.5 0.0] [NaN NaN NaN] CATMULLROM
+key 5.2 [0.0 -1.5 0.0] [NaN NaN NaN] CATMULLROM
+key 8.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 3 null
+channel rotation 2
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] LINEAR
+key 8.0 [0.0 720.0 0.0] [NaN NaN NaN] LINEAR
+channel position 4
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 3.6 [0.0 1.5 0.0] [NaN NaN NaN] CATMULLROM
+key 4.4 [0.0 -1.5 0.0] [NaN NaN NaN] CATMULLROM
+key 8.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 4 null
+channel rotation 2
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] LINEAR
+key 8.0 [0.0 720.0 0.0] [NaN NaN NaN] LINEAR
+channel position 4
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.4 [0.0 1.5 0.0] [NaN NaN NaN] CATMULLROM
+key 5.6 [0.0 -1.5 0.0] [NaN NaN NaN] CATMULLROM
+key 8.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 5 null
+channel rotation 2
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] LINEAR
+key 8.0 [0.0 720.0 0.0] [NaN NaN NaN] LINEAR
+channel position 4
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 1.5 0.0] [NaN NaN NaN] CATMULLROM
+key 4.8 [0.0 -1.5 0.0] [NaN NaN NaN] CATMULLROM
+key 8.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+event 0.1 PARTICLE null 0 -1 flake_0 1 [0.1 0.05 0.1] [0.0 -0.015 0.0] 1.6 0.09 5.0E-4 true 1.0 1.0 -1 true
+event 0.6 PARTICLE null 0 -1 flake_1 1 [0.1 0.05 0.1] [0.0 -0.015 0.0] 1.6 0.09 5.0E-4 true 1.0 1.0 -1 true
+event 1.1 PARTICLE null 0 -1 flake_2 1 [0.1 0.05 0.1] [0.0 -0.015 0.0] 1.6 0.09 5.0E-4 true 1.0 1.0 -1 true
+event 1.6 PARTICLE null 0 -1 flake_3 1 [0.1 0.05 0.1] [0.0 -0.015 0.0] 1.6 0.09 5.0E-4 true 1.0 1.0 -1 true
+event 2.1 PARTICLE null 0 -1 flake_4 1 [0.1 0.05 0.1] [0.0 -0.015 0.0] 1.6 0.09 5.0E-4 true 1.0 1.0 -1 true
+event 2.6 PARTICLE null 0 -1 flake_0 1 [0.1 0.05 0.1] [0.0 -0.015 0.0] 1.6 0.09 5.0E-4 true 1.0 1.0 -1 true
+event 3.1 PARTICLE null 0 -1 flake_1 1 [0.1 0.05 0.1] [0.0 -0.015 0.0] 1.6 0.09 5.0E-4 true 1.0 1.0 -1 true
+event 3.6 PARTICLE null 0 -1 flake_2 1 [0.1 0.05 0.1] [0.0 -0.015 0.0] 1.6 0.09 5.0E-4 true 1.0 1.0 -1 true
+event 4.1 PARTICLE null 0 -1 flake_3 1 [0.1 0.05 0.1] [0.0 -0.015 0.0] 1.6 0.09 5.0E-4 true 1.0 1.0 -1 true
+event 4.6 PARTICLE null 0 -1 flake_4 1 [0.1 0.05 0.1] [0.0 -0.015 0.0] 1.6 0.09 5.0E-4 true 1.0 1.0 -1 true
+event 5.1 PARTICLE null 0 -1 flake_0 1 [0.1 0.05 0.1] [0.0 -0.015 0.0] 1.6 0.09 5.0E-4 true 1.0 1.0 -1 true
+event 5.6 PARTICLE null 0 -1 flake_1 1 [0.1 0.05 0.1] [0.0 -0.015 0.0] 1.6 0.09 5.0E-4 true 1.0 1.0 -1 true
+event 6.1 PARTICLE null 0 -1 flake_2 1 [0.1 0.05 0.1] [0.0 -0.015 0.0] 1.6 0.09 5.0E-4 true 1.0 1.0 -1 true
+event 6.6 PARTICLE null 0 -1 flake_3 1 [0.1 0.05 0.1] [0.0 -0.015 0.0] 1.6 0.09 5.0E-4 true 1.0 1.0 -1 true
+event 7.1 PARTICLE null 0 -1 flake_4 1 [0.1 0.05 0.1] [0.0 -0.015 0.0] 1.6 0.09 5.0E-4 true 1.0 1.0 -1 true
+event 7.6 PARTICLE null 0 -1 flake_0 1 [0.1 0.05 0.1] [0.0 -0.015 0.0] 1.6 0.09 5.0E-4 true 1.0 1.0 -1 true

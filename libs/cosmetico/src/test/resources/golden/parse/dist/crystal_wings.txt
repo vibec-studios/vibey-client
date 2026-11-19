@@ -1,0 +1,109 @@
+id vibey:crystal_wings
+kind COSMETIC
+name Crystal Ice Wings | Kristalleisflügel
+description Shards of glacier ice that shimmer as a glint runs along them. | Splitter aus Gletschereis, über die ein Lichtfunke wandert.
+author Vibe Craft Studios
+tags [ice, wings, crystal, starter]
+rarity LEGENDARY
+slot WINGS
+hideWithArmor []
+pet GROUND 1.0
+cape -1 shield -1
+emote null
+sha256 fbfba6310d725c8dd4652a4e89306e298b10d124dea81562dedd0e823eae7b75 size 12984
+texture 0 main 64 64 64 384 6 3 [0 1 2 3 4 5] false true 18 6cf98a2d06da3a51350b08cebb932e177f8771cca63641aeba1c65d6bc8d8981
+model 0 cubes 10 bones 12 locators 0
+bone 0 wing_left -1 BODY [-1.5 20.0 3.6] [0.0 -24.0 0.0] false true false true 0
+bone 1 wing_left_0 0 null [-1.5 20.0 3.6] [0.0 0.0 -50.0] false true false true 1
+cube [-23.5 18.0 3.2] [-1.5 22.0 4.2] 0.0 false null null [0.0 0.0] 0
+bone 2 wing_left_1 0 null [-1.5 20.0 3.6] [0.0 0.0 -32.0] false true false true 1
+cube [-20.5 18.5 3.22] [-1.5 21.5 4.22] 0.0 false null null [0.0 10.0] 0
+bone 3 wing_left_2 0 null [-1.5 20.0 3.6] [0.0 0.0 -15.0] false true false true 1
+cube [-17.5 18.5 3.24] [-1.5 21.5 4.24] 0.0 false null null [0.0 18.0] 0
+bone 4 wing_left_3 0 null [-1.5 20.0 3.6] [0.0 0.0 1.0] false true false true 1
+cube [-13.5 18.5 3.26] [-1.5 21.5 4.26] 0.0 false null null [34.0 22.0] 0
+bone 5 wing_left_4 0 null [-1.5 20.0 3.6] [0.0 0.0 17.0] false true false true 1
+cube [-10.5 19.0 3.28] [-1.5 21.0 4.28] 0.0 false null null [26.0 26.0] 0
+bone 6 wing_right -1 BODY [1.5 20.0 3.6] [0.0 24.0 0.0] false true false true 0
+bone 7 wing_right_0 6 null [1.5 20.0 3.6] [0.0 0.0 50.0] false true false true 1
+cube [1.5 18.0 3.2] [23.5 22.0 4.2] 0.0 false null null [0.0 5.0] 0
+bone 8 wing_right_1 6 null [1.5 20.0 3.6] [0.0 0.0 32.0] false true false true 1
+cube [1.5 18.5 3.22] [20.5 21.5 4.22] 0.0 false null null [0.0 14.0] 0
+bone 9 wing_right_2 6 null [1.5 20.0 3.6] [0.0 0.0 15.0] false true false true 1
+cube [1.5 18.5 3.24] [17.5 21.5 4.24] 0.0 false null null [0.0 22.0] 0
+bone 10 wing_right_3 6 null [1.5 20.0 3.6] [0.0 0.0 -1.0] false true false true 1
+cube [1.5 18.5 3.26] [13.5 21.5 4.26] 0.0 false null null [0.0 26.0] 0
+bone 11 wing_right_4 6 null [1.5 20.0 3.6] [0.0 0.0 -17.0] false true false true 1
+cube [1.5 19.0 3.28] [10.5 21.0 4.28] 0.0 false null null [0.0 30.0] 0
+animation idle 3.0 true false false tracks 2 events 0
+track 0 null
+channel rotation 3
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 -7.0 2.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 6 null
+channel rotation 3
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 7.0 -2.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+animation fly 0.8 true false false tracks 12 events 0
+track 0 null
+channel rotation 3
+key 0.0 [0.0 10.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.4 [0.0 -45.0 8.0] [NaN NaN NaN] CATMULLROM
+key 0.8 [0.0 10.0 0.0] [NaN NaN NaN] CATMULLROM
+track 6 null
+channel rotation 3
+key 0.0 [0.0 -10.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.4 [0.0 45.0 -8.0] [NaN NaN NaN] CATMULLROM
+key 0.8 [0.0 -10.0 0.0] [NaN NaN NaN] CATMULLROM
+track 1 null
+channel rotation 3
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.4 [0.0 0.0 4.0] [NaN NaN NaN] CATMULLROM
+key 0.8 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 7 null
+channel rotation 3
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.4 [0.0 0.0 -4.0] [NaN NaN NaN] CATMULLROM
+key 0.8 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 2 null
+channel rotation 3
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.4 [0.0 0.0 5.0] [NaN NaN NaN] CATMULLROM
+key 0.8 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 8 null
+channel rotation 3
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.4 [0.0 0.0 -5.0] [NaN NaN NaN] CATMULLROM
+key 0.8 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 3 null
+channel rotation 3
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.4 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 0.8 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 9 null
+channel rotation 3
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.4 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 0.8 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 4 null
+channel rotation 3
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.4 [0.0 0.0 7.0] [NaN NaN NaN] CATMULLROM
+key 0.8 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 10 null
+channel rotation 3
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.4 [0.0 0.0 -7.0] [NaN NaN NaN] CATMULLROM
+key 0.8 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 5 null
+channel rotation 3
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.4 [0.0 0.0 8.0] [NaN NaN NaN] CATMULLROM
+key 0.8 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 11 null
+channel rotation 3
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.4 [0.0 0.0 -8.0] [NaN NaN NaN] CATMULLROM
+key 0.8 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM

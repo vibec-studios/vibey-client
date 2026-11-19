@@ -1,0 +1,61 @@
+id vibey:ember_sparks
+kind COSMETIC
+name Ember Sparks | Glutfunken
+description A glowing rune ring at your feet with purple and teal embers drifting up. | Ein leuchtender Runenring zu deinen Füßen, aus dem lila und türkise Funken aufsteigen.
+author Vibe Craft Studios
+tags [aura, sparks, glow, vibe, starter]
+rarity EPIC
+slot AURA
+hideWithArmor []
+pet GROUND 1.0
+cape -1 shield -1
+emote null
+sha256 f07e3975a1ce86ac7f986f9856615d463c1966251ebe1d56a66eabea0850773b size 12744
+texture 0 main 128 64 128 64 1 1 [0] false false 1 d2b78e64f57a0ae24e5ebc835f69c4cab14a336e82acc91bd05fc2176c94b6e7
+sprite 0 ember 0 96.0 0.0 99.0 3.0
+sprite 1 spark 0 99.0 0.0 102.0 3.0
+sprite 2 mote 0 102.0 0.0 104.0 2.0
+model 0 cubes 1 bones 1 locators 6
+bone 0 ring -1 WORLD [0.0 0.0 0.0] [0.0 0.0 0.0] true true true true 1
+cube [-12.0 0.05 -12.0] [12.0 0.05 12.0] 0.0 false null null [0.0 0.0] 0
+locator spot_0 0 null [-11.0 0.6 0.0]
+locator spot_1 0 null [-5.5 0.6 9.53]
+locator spot_2 0 null [5.5 0.6 9.53]
+locator spot_3 0 null [11.0 0.6 0.0]
+locator spot_4 0 null [5.5 0.6 -9.53]
+locator spot_5 0 null [-5.5 0.6 -9.53]
+animation idle 6.0 true false false tracks 1 events 30
+track 0 null
+channel rotation 2
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] LINEAR
+key 6.0 [0.0 360.0 0.0] [NaN NaN NaN] LINEAR
+event 0.0 PARTICLE null 0 -1 spot_0 1 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.12 -0.0012 true 1.0 1.0 -1 true
+event 0.2 PARTICLE null 1 -1 spot_5 1 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.12 -0.0012 true 1.0 1.0 -1 true
+event 0.4 PARTICLE null 0 -1 spot_4 1 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.12 -0.0012 true 1.0 1.0 -1 true
+event 0.6 PARTICLE null 2 -1 spot_3 2 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.06 -0.0012 true 1.0 1.0 -1 true
+event 0.8 PARTICLE null 0 -1 spot_2 1 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.12 -0.0012 true 1.0 1.0 -1 true
+event 1.0 PARTICLE null 1 -1 spot_1 1 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.12 -0.0012 true 1.0 1.0 -1 true
+event 1.2 PARTICLE null 0 -1 spot_0 1 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.12 -0.0012 true 1.0 1.0 -1 true
+event 1.4 PARTICLE null 2 -1 spot_5 2 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.06 -0.0012 true 1.0 1.0 -1 true
+event 1.6 PARTICLE null 0 -1 spot_4 1 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.12 -0.0012 true 1.0 1.0 -1 true
+event 1.8 PARTICLE null 1 -1 spot_3 1 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.12 -0.0012 true 1.0 1.0 -1 true
+event 2.0 PARTICLE null 0 -1 spot_2 1 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.12 -0.0012 true 1.0 1.0 -1 true
+event 2.2 PARTICLE null 2 -1 spot_1 2 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.06 -0.0012 true 1.0 1.0 -1 true
+event 2.4 PARTICLE null 0 -1 spot_0 1 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.12 -0.0012 true 1.0 1.0 -1 true
+event 2.6 PARTICLE null 1 -1 spot_5 1 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.12 -0.0012 true 1.0 1.0 -1 true
+event 2.8 PARTICLE null 0 -1 spot_4 1 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.12 -0.0012 true 1.0 1.0 -1 true
+event 3.0 PARTICLE null 2 -1 spot_3 2 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.06 -0.0012 true 1.0 1.0 -1 true
+event 3.2 PARTICLE null 0 -1 spot_2 1 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.12 -0.0012 true 1.0 1.0 -1 true
+event 3.4 PARTICLE null 1 -1 spot_1 1 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.12 -0.0012 true 1.0 1.0 -1 true
+event 3.6 PARTICLE null 0 -1 spot_0 1 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.12 -0.0012 true 1.0 1.0 -1 true
+event 3.8 PARTICLE null 2 -1 spot_5 2 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.06 -0.0012 true 1.0 1.0 -1 true
+event 4.0 PARTICLE null 0 -1 spot_4 1 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.12 -0.0012 true 1.0 1.0 -1 true
+event 4.2 PARTICLE null 1 -1 spot_3 1 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.12 -0.0012 true 1.0 1.0 -1 true
+event 4.4 PARTICLE null 0 -1 spot_2 1 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.12 -0.0012 true 1.0 1.0 -1 true
+event 4.6 PARTICLE null 2 -1 spot_1 2 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.06 -0.0012 true 1.0 1.0 -1 true
+event 4.8 PARTICLE null 0 -1 spot_0 1 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.12 -0.0012 true 1.0 1.0 -1 true
+event 5.0 PARTICLE null 1 -1 spot_5 1 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.12 -0.0012 true 1.0 1.0 -1 true
+event 5.2 PARTICLE null 0 -1 spot_4 1 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.12 -0.0012 true 1.0 1.0 -1 true
+event 5.4 PARTICLE null 2 -1 spot_3 2 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.06 -0.0012 true 1.0 1.0 -1 true
+event 5.6 PARTICLE null 0 -1 spot_2 1 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.12 -0.0012 true 1.0 1.0 -1 true
+event 5.8 PARTICLE null 1 -1 spot_1 1 [0.15 0.05 0.15] [0.0 0.035 0.0] 1.5 0.12 -0.0012 true 1.0 1.0 -1 true

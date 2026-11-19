@@ -1,0 +1,2 @@
+bones 1 stride 8
+bone 0 [-0.0 -10.0 0.0] [-0.0 -0.0 0.0] parts 0
