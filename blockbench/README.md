@@ -19,12 +19,18 @@ Full guide with screenshots: [`docs/BLOCKBENCH.md`](../docs/BLOCKBENCH.md).
 
 ## Install
 
+The Vibe Launcher installs it for you. By hand: download `vibey.js` from the newest **Vibey Blockbench Plugin**
+release ([GitHub releases](https://github.com/vibec-studios/vibey-client/releases), tags `blockbench-v<version>`).
+
 1. Blockbench > **File > Plugins…** > the "Load Plugin from File" icon (top right of the dialog) > pick
-   `blockbench/vibey.js` and confirm.
+   `vibey.js` and confirm.
 2. The file name must stay `vibey.js` (Blockbench uses it as the plugin id).
 3. To update, load the new file the same way (or use *Reload* in the plugin list).
 
-The plugin is desktop only (`variant: "desktop"`); it needs Blockbench 5.0 or newer.
+The plugin is desktop only (`variant: "desktop"`); it needs Blockbench 5.0 or newer and, for the live link and
+*Submit to Vibe*, Vibey Client 0.2.0 or newer. Wardrobe thumbnails, the optional animations `sprint` / `glide` /
+`idle_long` / `happy` and `offsetWhen` need Vibey Client 0.3.0; with an older client the plugin says once what the game
+ignores (it reads the version from the live link's `welcome`).
 
 ## Getting started
 
@@ -38,8 +44,8 @@ The plugin is desktop only (`variant: "desktop"`); it needs Blockbench 5.0 or ne
    **Test live in game** → export / submit. Each step checks your project ("No keyframes in idle yet", "Not connected to
    the game") and can be ticked off. Reopen it with **Vibey > Tutorial** (*Anleitung*).
 4. **Vibey > Test live in game** (*Live im Spiel testen*) finds the running game by itself. If it can't: start
-   Minecraft with Vibey Client, open the Vibey menu (Right Shift) → **Creator → Blockbench link** → turn on
-   **Creator mode**, and click again.
+   Minecraft with Vibey Client, open the Vibey menu (Right Shift) → **Modules → Blockbench link** (from Vibey Client
+   0.3.0 under **For creators**) → turn on **Creator mode**, and click again.
 5. **Vibey > Export / Submit…** (*Exportieren / Einreichen…*) saves a `.vibey` file or submits the item to Vibe.
    Everything else is under **Vibey > Advanced ▸** (*Erweitert*).
 
@@ -74,7 +80,18 @@ npm run test:blockbench -- --game-dir "%APPDATA%\.minecraft"      # uses <dir>/v
 npm run test:blockbench -- --devlink C:\path\to\devlink.json
 ```
 
-Other options: `--keep-open`, `--no-screenshots`, `--lang de` (run both languages before a release).
+Other options: `--keep-open`, `--no-screenshots`, `--lang de` (run both languages before a release). With
+`--game-dir` the run also submits the wizard item through the game (*Submit to Vibe*, *My submissions*, withdraw) –
+use a dev client signed in to a **local** backend (`-Dvibeyclient.devAuth=true -Dvibeyclient.api=http://127.0.0.1:<port>`,
+backend with `AUTH_DEV_BYPASS=1`), never production. To check compatibility with an older client, run that tag's
+client (`git archive v0.2.1 | tar -x -C <dir>`, then `./gradlew :fabric-1.21.11:runClient` there) and point
+`--game-dir` at its run directory; the "older game" check then expects the 0.3.0 note.
+
+## Releases
+
+Standalone GitHub releases, tag `blockbench-v<version>`, assets `vibey.js` + `vibey-blockbench.json`
+(`tools/release-json.mjs`, notes from [`CHANGELOG.md`](CHANGELOG.md)). Steps: [docs/BLOCKBENCH.md →
+Releases](../docs/BLOCKBENCH.md#releases).
 
 `npm run shots` uses the same harness and the mock game to photograph every wizard step, the guide at several steps
 (including failing checks and *Test live in game* connected / not connected), the menu, *Export / Submit* and the

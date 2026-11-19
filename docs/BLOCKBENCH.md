@@ -1,6 +1,6 @@
 # Making cosmetics and emotes in Blockbench
 
-The Vibey Blockbench plugin (`blockbench/vibey.js`, version 0.2.3) turns Blockbench into the editor for Vibey Client
+The Vibey Blockbench plugin (`blockbench/vibey.js`, version 0.2.4) turns Blockbench into the editor for Vibey Client
 cosmetics and emotes. It writes `.vibey` bundles (see [SPEC §5](SPEC.md#5-the-vibey-asset-format-v1)) and can push
 them straight into the running game over the live link ([SPEC §8](SPEC.md#8-blockbench-live-link-devlink)).
 
@@ -11,12 +11,31 @@ them straight into the running game over the live link ([SPEC §8](SPEC.md#8-blo
 
 ## Install
 
-1. Install the Blockbench desktop app (5.0 or newer).
-2. **File > Plugins…** → click the *Load Plugin from File* icon in the top right of the dialog → choose
-   `blockbench/vibey.js` from this repository → confirm.
-3. A **Vibey** menu appears in the menu bar. The first time, the **New Vibey item** wizard opens by itself.
+The **Vibe Launcher** installs and updates the plugin for you. By hand:
+
+1. Install the Blockbench desktop app (5.0 or newer) and Vibey Client **0.2.0 or newer** (for the live link and
+   *Submit to Vibe*).
+2. Download `vibey.js` from the newest **Vibey Blockbench Plugin** release on GitHub
+   ([releases](https://github.com/vibec-studios/vibey-client/releases), tags `blockbench-v<version>` – the plugin is
+   released on its own, not with the client).
+3. **File > Plugins…** → click the *Load Plugin from File* icon in the top right of the dialog → choose the
+   downloaded `vibey.js` → confirm.
+4. A **Vibey** menu appears in the menu bar. The first time, the **New Vibey item** wizard opens by itself.
 
 Keep the file name `vibey.js` – Blockbench uses it as the plugin id. To update, load the new file again.
+Developers can load `blockbench/vibey.js` straight from a checkout.
+
+### Which Vibey Client?
+
+| Plugin feature | Vibey Client |
+|---|---|
+| Live link, push / play, auto-push, *Submit to Vibe*, *My submissions* | 0.2.0 or newer |
+| Wardrobe thumbnails of pushed items, optional animations `sprint` / `glide` / `idle_long` / `happy`, `cosmetic.offsetWhen` | 0.3.0 or newer |
+
+An older client simply ignores the 0.3.0 parts – the item still loads and plays (missing states fall back to
+`idle` / `walk` / `fly`). The plugin reads the client version when it connects and, after a push, says once what the
+game ignores, e.g. *"Wardrobe thumbnails and offsetWhen need Vibey Client 0.3.0 – your game has 0.2.1."* (also in the
+*Vibey* tab under the live link). Exports always contain everything and validate the same way.
 
 ## Getting started
 
@@ -69,12 +88,13 @@ opens it again – the choice is remembered in Blockbench's local storage, like 
 **Vibey > Test live in game** (*Live im Spiel testen*, also the big button in guide step 5) connects automatically and
 sends the open item: cosmetics are equipped, emotes are played. A render of the viewport goes along as the item's
 wardrobe thumbnail (256×256, smaller if the PNG would exceed 256 KiB), so the DEV item shows a picture instead of the
-letter tile; auto-pushes keep the last thumbnail. If the game cannot be reached the plugin explains what
+letter tile (Vibey Client 0.3.0 or newer; older clients ignore it); auto-pushes keep the last thumbnail. If the game cannot be reached the plugin explains what
 to do and keeps looking in the background – the item is sent as soon as the game is there:
 
 1. Start Minecraft with Vibey Client.
 2. Open the Vibey menu (Right Shift, or the Vibey button on the title / pause screen).
-3. **Creator → Blockbench link** and turn on **Creator mode** (German: *Creator → Blockbench-Link → Creator-Modus*).
+3. **Modules → Blockbench link** and turn on **Creator mode** (German: *Module → Blockbench-Link → Creator-Modus*).
+   From Vibey Client 0.3.0 the Blockbench link sits under **For creators** (*Für Creator*) at the bottom of Modules.
 4. Click *Test live in game* again.
 
 Playing from a launcher instance? Pick its game folder once in *Vibey > Advanced > Live link settings…*.
@@ -94,7 +114,8 @@ Menu texts follow Blockbench's language setting (English or German).
 ### When something goes wrong
 
 Problems are explained in plain words with numbered steps to fix them, for example *"Can't reach the game – Start
-Minecraft with Vibey Client. In the game open the Vibey menu → Creator → Blockbench link and turn on Creator mode."*
+Minecraft with Vibey Client. In the game open Vibey menu (Right Shift) → Modules → Blockbench link (from Vibey Client
+0.3.0 under "For creators") and turn on Creator mode."*
 The technical message stays available under **Details**. This covers validation ("Almost there – 2 things to fix",
 with a button to the properties when the id or name is the problem), the live link (game not found, wrong token,
 connection lost, no answer), the game rejecting an item, export, import and *Submit to Vibe* (e.g. "The game isn't
@@ -142,7 +163,7 @@ Toggle it with the checkbox in the *Vibey* tab or *Vibey > Advanced > Show refer
 ### Animations
 
 Use Animate mode as usual. Names with meaning for cosmetics: `idle` (always), `walk` (blended by walk speed),
-`fly` (elytra/creative flying), `sneak`, and the optional states of client 0.2.2: `sprint`, `glide` (elytra),
+`fly` (elytra/creative flying), `sneak`, and the optional states of client 0.3.0: `sprint`, `glide` (elytra),
 `idle_long` (standing still ~10 s) and `happy` (while the owner plays an emote) – see FORMAT.md. The wizard prepares
 `idle_long` and `happy` for pets and `glide` for wings; leave them empty if you do not need them (an empty animation
 counts as missing, the item then plays `idle` / `fly` there). Supported: rotation, position and scale keyframes with **linear**,
@@ -203,7 +224,7 @@ Save your working file as a normal `.bbmodel` (Ctrl+S) – all Vibey settings ar
 
 ## Live link
 
-1. In Minecraft: Vibey menu (Right Shift) → **Creator** → **Blockbench link** → turn on **Creator mode**. The game
+1. In Minecraft: Vibey menu (Right Shift) → **Modules** → **Blockbench link** (from Vibey Client 0.3.0 under **For creators** at the bottom of Modules) → turn on **Creator mode**. The game
    writes `<game dir>/vibeyclient/devlink.json` with port and token.
 2. In Blockbench: **Vibey > Test live in game** connects and sends the item (or *Connect* in the *Vibey* tab, or click
    *Vibey: offline* in the status bar).
@@ -214,7 +235,8 @@ Save your working file as a normal `.bbmodel` (Ctrl+S) – all Vibey settings ar
 
 - **Find game automatically** (default): reads port + token from `devlink.json` in the **game directory**
   (default `%APPDATA%\.minecraft`; pick another folder once – e.g. a launcher instance – it is remembered).
-- Otherwise enter **port** (default 47821) and **token** (copy it from the game: Creator → Blockbench link).
+- Otherwise enter **port** (default 47821) and **token** (copy it from the game: Modules → Blockbench link, from
+  0.3.0 under For creators).
 - **Auto-push on change**: every edit is pushed ~300 ms after you stop (cosmetics are equipped, emotes replayed
   unless *Replay emote on auto-push* is off). Invalid states are skipped and reported in the panel.
 - **Connect on startup**.
@@ -240,7 +262,8 @@ its own: it goes through the running game over the live link, and the game uploa
 features on, signed in). The dialog asks for name and description and can attach a 256×256 thumbnail taken from the
 viewport. *My submissions* (in the same dialog and under *Advanced*) lists your submissions with their status (pending, approved, rejected with the
 reason, withdrawn) and lets you withdraw open ones; when the team decides, the plugin shows a short notice. If the
-game is not signed in to Vibe the plugin says so and how to fix it (Vibey menu → Global settings → Online features).
+game is not signed in to Vibe the plugin says so and how to fix it (Vibey menu → Global settings – from Vibey Client
+0.3.0 the *General* tab – → Online features).
 Approved items join the catalog as `community:<path>` with your name and reach every player over the air.
 
 ## Format notes
@@ -253,3 +276,41 @@ Approved items join the catalog as `community:<path>` with your name and reach e
 - Cube names and `generated` bones are editor hints; the game ignores unknown fields.
 
 All details: [SPEC §5](SPEC.md#5-the-vibey-asset-format-v1).
+
+## Releases
+
+The plugin is released on its own, independent of the client: one GitHub release per plugin version, tag
+**`blockbench-v<version>`**, title *Vibey Blockbench Plugin &lt;version&gt;*, never marked *Latest* (that stays the
+client release), not a pre-release. Assets, exactly:
+
+- `vibey.js` – the plugin, byte for byte the committed file (LF).
+- `vibey-blockbench.json` – what the Vibe Launcher reads:
+
+  ```json
+  { "version": "0.2.4", "file": "vibey.js", "sha256": "<hex of vibey.js>", "size": 380619,
+    "min_client": "0.2.0", "notes": "<short German text>" }
+  ```
+
+  `sha256`/`size` describe the uploaded `vibey.js`. `min_client` is the oldest Vibey Client with which live link,
+  push and *Submit to Vibe* work (`"vibey": { "minClient" }` in `blockbench/package.json`; 0.2.0 added *Submit to
+  Vibe*). Features of newer clients degrade gracefully (see *Which Vibey Client?*). `notes` is the `Kurz:` line of
+  the version's section in [`blockbench/CHANGELOG.md`](../blockbench/CHANGELOG.md).
+
+The Vibe backend's client import ignores these releases (they have no `vibey-manifest.json`), and client releases no
+longer carry `vibey.js` (their manifest says `"blockbench": null`).
+
+**Release a new plugin version:**
+
+1. Bump the version in `blockbench/package.json`, `blockbench/package-lock.json` (`npm install` does it) and
+   `VERSION` + the header comment in `blockbench/vibey.js` (`npm test` checks they agree).
+2. Add a `## <version>` section to `blockbench/CHANGELOG.md`: first a `Kurz: …` line (one short German sentence for
+   the launcher), then the English release text. Raise `vibey.minClient` in `package.json` only if the plugin now
+   needs a newer client for live link / push / submit.
+3. Check locally: `cd blockbench && npm test && npm run test:blockbench` (also `--lang de`, and once with
+   `--game-dir` against a real client), then `node tools/release-json.mjs --tag blockbench-v<version>` prints the
+   json for the current `vibey.js`.
+4. Merge to `main`, then `git tag blockbench-v<version> && git push origin blockbench-v<version>`.
+   [`.github/workflows/blockbench-release.yml`](../.github/workflows/blockbench-release.yml) runs the unit tests,
+   checks tag = `package.json` = `VERSION`, takes `vibey.js` from the git blob, builds `vibey-blockbench.json`,
+   creates the release (`--latest=false`) and downloads the assets again to verify hash and size. Re-running it
+   (or *Run workflow* with the tag) replaces the assets and resets title, notes and the not-latest flag.

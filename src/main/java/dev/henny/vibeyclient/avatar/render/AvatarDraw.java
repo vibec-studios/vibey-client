@@ -195,7 +195,7 @@ public final class AvatarDraw {
 
     /**
      * Cosmetic animation names with meaning (SPEC §5), in {@link #weights} order. Others are ignored. {@code sprint},
-     * {@code glide}, {@code idle_long} and {@code happy} are optional (since 0.2.2); a bundle without them keeps
+     * {@code glide}, {@code idle_long} and {@code happy} are optional (since 0.3.0); a bundle without them keeps
      * playing {@code walk} / {@code fly} / {@code idle} in those situations, exactly like older clients.
      */
     public static final String[] COSMETIC_ANIMS = StateWeights.NAMES;

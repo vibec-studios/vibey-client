@@ -104,7 +104,7 @@ instances `%APPDATA%\VibeLauncher\instances\<id>\minecraft` and `versions/*/run`
 Design tricks: long `idle` loops tell a little story; eyelids, the fish, the peeking pup and the nap Zs rest
 *inside* the model and are moved out by position offsets, so they vanish by themselves when another state takes
 over (the Zs are additionally hidden by `idle` visibility events and shown by `idle_long`'s). The collection uses
-the optional states of client 0.2.2 (`sprint`, `glide`, `idle_long`, `happy`, SPEC §5); on 0.2.1 the items still
+the optional states of client 0.3.0 (`sprint`, `glide`, `idle_long`, `happy`, SPEC §5); on 0.2.1 the items still
 play `idle`/`walk`/`fly`/`sneak` (no belly slide while sprinting, no nap). The aurora items share one painter
 (`auroraTexel` in `_polar.mjs`): sine-sum rays that loop seamlessly in time and run continuously across segments,
 alpha split over the two coplanar faces of each plane, `interpolate: true` strips. Both wings carry

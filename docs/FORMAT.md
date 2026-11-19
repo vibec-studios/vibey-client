@@ -64,7 +64,7 @@ each with a validator warning. If a file really needs a newer game client, say s
   "slot": "pet",                          // cape | wings | aura | pet | shield | hat | back
   "hideWithArmor": ["head"],              // optional: hide while this armor piece is worn (head|chest|legs|feet)
   "pet":    { "follow": "ground", "scale": 0.4 },   // pets only
-  "offsetWhen": [                         // optional (client 0.2.2+): move out of the way of another slot
+  "offsetWhen": [                         // optional (client 0.3.0+): move out of the way of another slot
     { "slot": "back", "offset": [0, 1, 8], "rotation": [0, 0, 0] }
   ],
   "cape":   { "texture": "cape" },        // capes only: texture-only cape
@@ -74,7 +74,7 @@ each with a validator warning. If a file really needs a newer game client, say s
 
 A player wears at most one item per slot.
 
-**Making room for other slots (`offsetWhen`, client 0.2.2+):** each rule `{ "slot", "offset"?, "rotation"? }` moves
+**Making room for other slots (`offsetWhen`, client 0.3.0+):** each rule `{ "slot", "offset"?, "rotation"? }` moves
 the item's **root bones** while an item is worn (and shown) in that other slot – offset in pixels like a position
 keyframe, rotation in degrees like a rotation keyframe, eased in and out. Use it so wings move back when a backpack
 is worn: `"offsetWhen": [{ "slot": "back", "offset": [0, 1, 8] }]`. Up to 8 rules, offsets within ±64 px, rotations
@@ -245,7 +245,7 @@ locator follows that bone's animation.
 ```
 
 **Names that mean something on cosmetics:** `idle` (always plays), `walk` (blended in by walking speed; pets: by
-their own movement), `fly` (elytra / creative flying – for wings), `sneak`, and – optional, client 0.2.2+ –
+their own movement), `fly` (elytra / creative flying – for wings), `sneak`, and – optional, client 0.3.0+ –
 
 | Name | Plays while | If the bundle has none |
 |---|---|---|

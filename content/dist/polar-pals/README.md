@@ -32,7 +32,7 @@ Import in echtes Blockbench: `blockbench/`.
 ## Was ist neu (Feedback-Runde)
 
 - **Pets** sind deutlich größer (Kopf etwa auf Schulterhöhe), laufen mit Abstand neben dir und nie durch dich durch.
-- **Neue Zustände** (Vibey Client 0.2.2): `sprint` (Robbe: schneller Bauchrutscher, Pinguin: Bauchrutschen),
+- **Neue Zustände** (Vibey Client 0.3.0): `sprint` (Robbe: schneller Bauchrutscher, Pinguin: Bauchrutschen),
   `glide` (Elytra oder längerer Fall: Robbe/Pinguin als „Superman“, Flügel weit gespreizt), `idle_long`
   (ca. 10 s stillstehen: die Robbe hält ein Nickerchen, der Pinguin döst im Stehen ein – mit Zs) und `happy`
   (wenn du ein Emote spielst, jubeln die Pets mit Herzchen).
@@ -46,7 +46,7 @@ Import in echtes Blockbench: `blockbench/`.
 ## 1. Im Spiel (Creator-Modus + ein Befehl)
 
 1. Minecraft mit Vibey Client starten und eine Welt betreten (Fabric oder NeoForge, 1.21.1 – 26.3). Die neuen
-   Zustände, die weichen Polarlichter und die DEV-Thumbnails brauchen den Client aus diesem Branch (0.2.2); ältere
+   Zustände, die weichen Polarlichter und die DEV-Thumbnails brauchen den Client aus diesem Branch (0.3.0); ältere
    Clients zeigen die Items auch, aber nur mit `idle`/`walk`/`fly`/`sneak`.
 2. **Rechte Umschalttaste** → Vibey-Menü → Modul **Blockbench-Link** → **Creator-Modus** einschalten.
    Das Spiel schreibt dann `<Spielordner>/vibeyclient/devlink.json` (Port + Token, nur 127.0.0.1).

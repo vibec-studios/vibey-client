@@ -2,6 +2,13 @@
 
 All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.properties`.
 
+## Unreleased – Blockbench plugin released on its own
+
+- Client releases no longer carry `vibey.js`; `vibey-manifest.json` says `"blockbench": null`. The plugin has its own
+  GitHub releases (tag `blockbench-v<version>`, assets `vibey.js` + `vibey-blockbench.json`, never *Latest*) and its
+  own changelog ([blockbench/CHANGELOG.md](blockbench/CHANGELOG.md)); the Vibe Launcher installs it from there.
+- The optional cosmetic states, `offsetWhen` and DEV thumbnails ship with client 0.3.0 (docs said 0.2.2).
+
 ## Unreleased – HUD editor and widgets (Fabric 1.21.11 first)
 
 ### HUD (new module, de: *HUD*)
