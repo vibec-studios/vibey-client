@@ -2,7 +2,48 @@
 
 All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.properties`.
 
-## Unreleased (0.3.0) – Domain move to axolite
+## 0.3.0 – HUD editor, PvP, media and a cleaner client
+
+**Looks and feel**
+- The title screen is vanilla again, with four small Vibey buttons in the top right (wardrobe, friends, media, Vibey
+  menu).
+- New Vibey settings: module tiles with an on/off switch, search, plain language; technical options are tucked away
+  under *Advanced*.
+- Vibey messages no longer cover Minecraft's own messages.
+- Minecraft 26.3: buttons in Vibey menus can be clicked again (keys and shortcuts work too).
+
+**HUD editor and widgets** *(Fabric 1.21.11 for now)*
+- Press **H**: drag, resize and style everything on your screen, with snapping guides, multi-select, undo/redo and
+  right-click options. Layouts stay put at any window size.
+- 14 widgets: FPS, CPS, keystrokes, coordinates, armour, effects, clock, ping, server, speed, in-game time, item
+  counter, memory, compass. Templates *PvP*, *Minimal*, *Building*, *Streamer*; share your layout as a code.
+
+**PvP & view** *(Fabric 1.21.11 for now)*
+- Zoom (**C**, mouse wheel for more), toggle sprint/sneak, your own crosshair, block outline colour, hit colour, lower
+  fire and shield. Nothing beyond what vanilla allows.
+
+**Media** *(Fabric)*
+- *Lyrics* is now *Media*: lyrics float in the sky where you look, and the sky moves with the music (soft pulses,
+  sparkling stars, aurora; flashes off by default).
+- In-world screens *(Fabric 1.21.11 for now)*: put YouTube, web pages, your own videos or streams on a wall; friends
+  with Vibey see them too (only after a click). Needed downloads are only fetched after you agree.
+
+**Cosmetics**
+- Pets can nap, slide when you sprint, glide and cheer when you play an emote; wings make room for backpacks.
+  Soft, see-through effects like aurora look smooth now.
+
+**Friends and servers**
+- *Copy invite link* while you host – friends open it with the Vibe Launcher and land in your world.
+- Servers can switch off single Vibey features (for example zoom) and tell you why when you join.
+- The Vibe launcher can show what you are playing in your Discord status.
+- Vibe moved to new addresses (vibe.axolite.app, *.axolite.cc). Your settings and login move along automatically, old
+  links keep working, and a short notice explains it once.
+
+The Blockbench plugin now has its own releases (`blockbench-v…`).
+
+## Technical details of 0.3.0
+
+### Domain move to axolite
 
 Vibe moves from `henny.dev` to new addresses (vibe-launcher `docs/DOMAINS.md`). The old addresses keep working in
 parallel for now, with the same server and database.
@@ -21,14 +62,14 @@ parallel for now, with the same server and database.
   6 hours, only with online features on), each once, respecting `until`, `apps` and `max_version`.
 - README: resolved a leftover merge conflict in the multiplayer/HUD sections.
 
-## Unreleased – Blockbench plugin released on its own
+### Blockbench plugin released on its own
 
 - Client releases no longer carry `vibey.js`; `vibey-manifest.json` says `"blockbench": null`. The plugin has its own
   GitHub releases (tag `blockbench-v<version>`, assets `vibey.js` + `vibey-blockbench.json`, never *Latest*) and its
   own changelog ([blockbench/CHANGELOG.md](blockbench/CHANGELOG.md)); the Vibe Launcher installs it from there.
 - The optional cosmetic states, `offsetWhen` and DEV thumbnails ship with client 0.3.0 (docs said 0.2.2).
 
-## Unreleased – HUD editor and widgets (Fabric 1.21.11 first)
+### HUD editor and widgets (Fabric 1.21.11 first)
 
 ### HUD (new module, de: *HUD*)
 
@@ -56,7 +97,7 @@ parallel for now, with the same server and database.
 - Widgets a server switched off (`vibey:rules`, keys `hud.fps` … `hud.compass`) are hidden in game and shown greyed
   with *Disabled by server* in the editor. Modules add their own widgets through the widget API (docs/HUD.md).
 
-## Unreleased – Media module
+### Media module
 
 ### Server rules
 
