@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /** Toggle sprint / sneak: reports the vanilla sprint/sneak key as held while it is toggled on. */
 @Mixin(KeyboardInput.class)
 abstract class KeyboardInputMixin {
-    @Inject(method = "tick", at = @At("RETURN"))
+    @Inject(method = "tick", require = 0, at = @At("RETURN"))
     private void vibey$toggles(CallbackInfo ci) {
         boolean sprint = ToggleMovement.sprintHeld(), sneak = ToggleMovement.sneakHeld();
         if (!sprint && !sneak) return;

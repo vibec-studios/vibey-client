@@ -2,6 +2,14 @@
 
 All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.properties`.
 
+## 0.3.1 – crash fix
+
+- Fixed a crash at startup together with other crosshair mods (Centered Crosshair, Crosshair Indicator, …). Vibey's
+  crosshair now works alongside them.
+- If another mod already changes something a Vibey feature needs, the game still starts: the feature's settings page
+  says it is not available and which mod is involved, instead of crashing.
+- Low fire is drawn more safely next to other mods that change the fire overlay.
+
 ## 0.3.0 – HUD editor, PvP, media and a cleaner client
 
 **Looks and feel**

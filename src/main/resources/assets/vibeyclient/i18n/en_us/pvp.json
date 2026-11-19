@@ -82,5 +82,18 @@
     "vanilla": "The normal Minecraft crosshair. Pick a shape to make your own.",
     "reset": "Reset",
     "done": "Done"
+  },
+  "notice": {
+    "unavailable": "{0}: not available – another mod already changes {1}.",
+    "unavailableBy": "{0}: not available – another mod ({1}) already changes {2}.",
+    "what": {
+      "crosshair": "the crosshair",
+      "zoom": "the zoom",
+      "zoomMouse": "the mouse while zooming",
+      "movement": "the sprint and sneak keys",
+      "outline": "the block outline",
+      "fire": "the fire overlay",
+      "shield": "the held shield"
+    }
   }
 }

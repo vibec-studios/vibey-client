@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /** Zoom: divides the world FOV (not the hand's, {@code useFovSetting = false}) by the current zoom factor. */
 @Mixin(GameRenderer.class)
 abstract class GameRendererMixin {
-    @Inject(method = "getFov", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "getFov", require = 0, at = @At("RETURN"), cancellable = true)
     private void vibey$zoom(Camera camera, float partialTick, boolean useFovSetting, CallbackInfoReturnable<Float> cir) {
         if (!useFovSetting) return;
         double f = Zoom.factor();

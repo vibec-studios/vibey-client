@@ -28,7 +28,7 @@ abstract class LevelRendererMixin {
         throw new AssertionError();
     }
 
-    @Inject(method = "renderBlockOutline", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderBlockOutline", require = 0, at = @At("HEAD"), cancellable = true)
     private void vibey$outline(MultiBufferSource.BufferSource buffers, PoseStack poseStack, boolean translucentPass,
                                LevelRenderState level, CallbackInfo ci) {
         if (!PvpHooks.outlineActive()) return;

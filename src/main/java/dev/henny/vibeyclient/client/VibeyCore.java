@@ -98,6 +98,8 @@ public final class VibeyCore {
 
     public static void onScreenInit(Screen screen, List<? extends GuiEventListener> widgets,
                                     Consumer<AbstractWidget> add, Consumer<AbstractWidget> remove) {
+        // optional mixin hooks another mod left nothing to hook into: one warning each, at the title screen
+        dev.henny.vibeyclient.MixinHealth.scanNow();
         PauseMenu.decorate(screen, widgets, add);
         // A fresh game directory opens the accessibility onboarding first; both mean "started".
         boolean start = screen instanceof net.minecraft.client.gui.screens.TitleScreen
