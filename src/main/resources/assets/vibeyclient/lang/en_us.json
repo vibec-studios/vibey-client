@@ -15,5 +15,6 @@
   "modmenu.descriptionTranslation.vibeyclient": "The Vibe Craft Studios client: social, cosmetics, emotes, multiplayer hosting and lyrics in one modular mod.",
   "key.vibeyclient.cosmetics.wardrobe": "Open wardrobe",
   "key.vibeyclient.media.hudEditor": "HUD editor",
-  "key.vibeyclient.media.video.screens": "Video screens"
+  "key.vibeyclient.media.video.screens": "Video screens",
+  "key.vibeyclient.pvp.zoomKey": "Zoom (hold)"
 }

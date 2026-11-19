@@ -47,7 +47,9 @@
     "keyHelp": "Click, then press a key. Backspace unbinds, Esc cancels.",
     "advancedHint": "Technical settings",
     "advancedHide": "Hide",
-    "keys": "Keys"
+    "keys": "Keys",
+    "serverDisabled": "Disabled by this server",
+    "serverDisabledHelp": "This server switched the feature off for everyone. It works again when you leave."
   },
   "setting": {
     "language": "Language",

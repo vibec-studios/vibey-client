@@ -159,8 +159,12 @@ public final class SettingsView {
 
     private static int card(Ui ui, String title, List<Setting<?, ?>> list, int x, int y, int w, boolean enabled) {
         Gfx g = ui.g;
+        boolean allBlocked = !list.isEmpty();
+        for (Setting<?, ?> s : list) allBlocked &= s.blockedByServer();
+        boolean rowBadge = !(allBlocked && title != null);
         if (title != null) {
             Widgets.caption(g, title, x + 1, y);
+            if (allBlocked) serverBadge(ui, list.get(0), x + w, y - 2);
             y += 12;
         }
         int h = measure(g, list, w);
@@ -176,16 +180,16 @@ public final class SettingsView {
                 int colW = w / 2;
                 for (int k = 0; k < run; k += 2) {
                     if (k > 0) g.hline(x + 1, cy, w - 2, Theme.LINE);
-                    boolRow(ui, (BoolSetting) list.get(i + k), x, cy, colW, 24, enabled);
+                    boolRow(ui, (BoolSetting) list.get(i + k), x, cy, colW, 24, enabled, rowBadge);
                     if (k + 1 < run) {
                         g.vline(x + colW, cy + 4, 16, Theme.LINE);
-                        boolRow(ui, (BoolSetting) list.get(i + k + 1), x + colW, cy, w - colW, 24, enabled);
+                        boolRow(ui, (BoolSetting) list.get(i + k + 1), x + colW, cy, w - colW, 24, enabled, rowBadge);
                     }
                     cy += 24;
                 }
                 i += run;
             } else {
-                cy = row(ui, list.get(i), x, cy, w, enabled);
+                cy = row(ui, list.get(i), x, cy, w, enabled, rowBadge);
                 i++;
             }
         }
@@ -235,8 +239,12 @@ public final class SettingsView {
     }
 
     /** A switch cell of the two-column grid: the whole cell is the click target. */
-    private static void boolRow(Ui ui, BoolSetting b, int x, int y, int w, int h, boolean enabled) {
+    private static void boolRow(Ui ui, BoolSetting b, int x, int y, int w, int h, boolean enabled, boolean rowBadge) {
         Gfx g = ui.g;
+        if (b.blockedByServer()) {
+            blockedRow(ui, b, x, y, w, h, rowBadge);
+            return;
+        }
         boolean clicked = ui.clicked(x + 1, y, w - 1, h);
         boolean hot = ui.focusedLast() || ui.hover(x + 1, y, w - 1, h);
         float hov = ui.anim(b, 0f).to(hot ? 1f : 0f);
@@ -250,12 +258,16 @@ public final class SettingsView {
         if (clicked) b.toggle();
     }
 
-    private static int row(Ui ui, Setting<?, ?> s, int x, int y, int w, boolean enabled) {
+    private static int row(Ui ui, Setting<?, ?> s, int x, int y, int w, boolean enabled, boolean rowBadge) {
         Gfx g = ui.g;
         int labelW = labelWidth(g, s, w);
         List<String> desc = descLines(g, s, labelW);
         int h = desc.isEmpty() ? 26 : 22 + desc.size() * 10;
         if (!ui.visibleY(y, h)) return y + h;
+        if (s.blockedByServer()) {
+            blockedRow(ui, s, x, y, w, h, rowBadge);
+            return y + h;
+        }
         boolean whole = s instanceof BoolSetting; // a switch row toggles anywhere
         boolean clicked = whole && ui.clicked(x + 1, y, w - 2, h);
         boolean hot = (whole && ui.focusedLast()) || ui.hover(x + 1, y, w - 2, h);
@@ -288,6 +300,32 @@ public final class SettingsView {
         }
         return y + h;
     }
+
+    /**
+     * A row whose feature the current server disables ({@link Setting#serverRule}): dimmed label, no control, and the
+     * "Disabled by this server" badge in place of the control (unless the card title already shows it).
+     */
+    private static void blockedRow(Ui ui, Setting<?, ?> s, int x, int y, int w, int h, boolean badge) {
+        Gfx g = ui.g;
+        int right = x + w - ROW_PAD;
+        int chipW = badge ? g.width(Lang.tr("core.settings.serverDisabled")) + 8 : 0;
+        int labelW = right - (x + ROW_PAD) - chipW - 8;
+        g.text(g.clip(Lang.tr(s.nameKey()), labelW), x + ROW_PAD, y + (h - 8) / 2, Theme.DIM);
+        if (badge) serverBadge(ui, s, right, y + (h - 12) / 2);
+    }
+
+    /** The amber "Disabled by this server" chip, right-aligned at {@code right}; the server's message as tooltip. */
+    private static void serverBadge(Ui ui, Setting<?, ?> s, int right, int y) {
+        Gfx g = ui.g;
+        String text = Lang.tr("core.settings.serverDisabled");
+        int cw = g.width(text) + 8;
+        Widgets.chip(g, text, right - cw, y, Theme.WARN);
+        String msg = dev.henny.vibeyclient.api.ServerRules.message();
+        ui.tooltip(BADGE_KEYS.computeIfAbsent(s, k -> new Object()), right - cw, y, cw, 12,
+                msg == null ? Lang.tr("core.settings.serverDisabledHelp") : Lang.tr("core.settings.serverDisabledHelp") + "\n" + msg);
+    }
+
+    private static final Map<Setting<?, ?>, Object> BADGE_KEYS = new IdentityHashMap<>();
 
     private static int controlWidth(Gfx g, Setting<?, ?> s, int rowW) {
         if (s instanceof BoolSetting) return Widgets.TOGGLE_W;

@@ -26,6 +26,7 @@ public abstract class Setting<T, S extends Setting<T, S>> {
     private String sectionLabel;
     private BooleanSupplier visible = () -> true;
     private String nameKey;
+    private String serverRule;
     private final List<Consumer<T>> listeners = new CopyOnWriteArrayList<>();
 
     protected Setting(String key, T defaultValue) {
@@ -110,6 +111,26 @@ public abstract class Setting<T, S extends Setting<T, S>> {
         if (section == null) return null;
         if (sectionLabel != null) return sectionLabel;
         return (group == null ? "core" : group.id()) + ".section." + section;
+    }
+
+    /**
+     * The {@link dev.henny.vibeyclient.api.ServerRules} key of the feature this setting belongs to (e.g. {@code zoom}).
+     * While the current server disables that key the settings page shows the row dimmed, without its control, and with
+     * a "Disabled by this server" badge. The feature itself still has to check {@code ServerRules.isDisabled}.
+     */
+    public final S serverRule(String ruleKey) {
+        serverRule = ruleKey;
+        return self();
+    }
+
+    /** The server-rule key, or null. */
+    public final String serverRule() {
+        return serverRule;
+    }
+
+    /** True while the current server disables this setting's feature ({@link #serverRule(String)}). */
+    public final boolean blockedByServer() {
+        return serverRule != null && dev.henny.vibeyclient.api.ServerRules.isDisabled(serverRule);
     }
 
     public final S visibleWhen(BooleanSupplier condition) {

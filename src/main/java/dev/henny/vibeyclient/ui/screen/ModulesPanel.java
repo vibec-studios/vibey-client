@@ -168,6 +168,7 @@ public final class ModulesPanel implements Panel {
             case "lyrics", "media" -> Icons.NOTE;
             case "devlink" -> Icons.CUBE;
             case "nametags" -> Icons.SEAL;
+            case "pvp" -> Icons.CROSSHAIR;
             default -> null;
         };
     }
