@@ -139,13 +139,15 @@ public final class ClientCompat {
                 if (!(o instanceof dev.henny.vibeyclient.mixin.client.ToastInstanceAccessor t)) continue;
                 net.minecraft.client.gui.components.toasts.Toast toast = t.vibeyclient$toast();
                 if (toast == null) continue;
-                //? if >=1.21.2 {
+                //? if >=1.21.6 {
                 float top = toast.yPos(t.vibeyclient$slot());
+                //?} else
+                /*float top = t.vibeyclient$slot() * 32f;*/
+                //? if >=1.21.2 {
                 float shown = t.vibeyclient$visibility() == net.minecraft.client.gui.components.toasts.Toast.Visibility.SHOW
                         ? 1f : Math.max(0f, Math.min(1f, t.vibeyclient$visiblePortion()));
                 //?} else {
-                /*float top = t.vibeyclient$slot() * 32f;
-                float shown = t.vibeyclient$visibility() == net.minecraft.client.gui.components.toasts.Toast.Visibility.SHOW ? 1f : 0.5f;
+                /*float shown = t.vibeyclient$visibility() == net.minecraft.client.gui.components.toasts.Toast.Visibility.SHOW ? 1f : 0.5f;
                 *///?}
                 bottom = Math.max(bottom, (top + toast.height()) * shown);
             }
