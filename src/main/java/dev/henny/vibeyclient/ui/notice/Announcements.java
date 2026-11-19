@@ -22,13 +22,11 @@ import dev.henny.vibeyclient.ui.VibeyScreen;
 import dev.henny.vibeyclient.ui.VibeyTabs;
 import net.minecraft.client.gui.screens.TitleScreen;
 
-import java.net.URI;
+import dev.henny.vibeyclient.backend.net.Net;
+
 import java.net.URLEncoder;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +58,6 @@ public final class Announcements {
     private static volatile long lastFetchDone;
     private static int ticks;
     private static boolean initDone;
-    private static HttpClient http;
     private static final List<String> TOASTED_THIS_RUN = new java.util.concurrent.CopyOnWriteArrayList<>();
 
     /** Startup (client thread, after the global settings were read). */
@@ -167,29 +164,38 @@ public final class Announcements {
                 + "&lang=" + lang;
     }
 
+    /** ETag + parsed list of the last answer (per backend/language key): a 304 reuses the list. */
+    private static volatile String lastEtag, lastEtagFor;
+    private static volatile List<Notice> lastList;
+
     private static void fetch(String key) {
         fetching = true;
         String url = url(BackendClient.configuredBaseUrl(), BuildInfo.VERSION, lang());
         try {
-            if (http == null) http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(6)).executor(Tasks.executor()).build();
-            http.sendAsync(HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(10))
-                            .header("Accept", "application/json").GET().build(), HttpResponse.BodyHandlers.ofString())
-                    .whenComplete((res, err) -> {
-                        List<Notice> list = null;
-                        if (err != null) {
-                            Vibey.LOG.debug("Announcements not available: {}", err.toString());
-                        } else if (res.statusCode() / 100 != 2) {
-                            Vibey.LOG.debug("Announcements not available: HTTP {}", res.statusCode());
-                        } else {
-                            try {
-                                list = Notices.parse(JsonParser.parseString(res.body()));
-                            } catch (RuntimeException e) {
-                                Vibey.LOG.debug("Announcements unreadable: {}", e.toString());
-                            }
-                        }
-                        List<Notice> got = list;
-                        Tasks.onMain(() -> done(key, got));
-                    });
+            HttpRequest.Builder rb = Net.request(url, Net.Kind.API).header("Accept", "application/json").GET();
+            String etag = key.equals(lastEtagFor) ? lastEtag : null;
+            if (etag != null && lastList != null) rb.header("If-None-Match", etag);
+            Net.send(rb.build()).whenComplete((res, err) -> {
+                List<Notice> list = null;
+                if (err != null) {
+                    Vibey.LOG.debug("Announcements not available: {}", Net.cause(err).toString());
+                } else if (res.status() == 304 && etag != null) {
+                    list = lastList;
+                } else if (!res.ok()) {
+                    Vibey.LOG.debug("Announcements not available: HTTP {}", res.status());
+                } else {
+                    try {
+                        list = Notices.parse(JsonParser.parseString(res.text()));
+                        lastEtag = res.header("ETag");
+                        lastEtagFor = key;
+                        lastList = list;
+                    } catch (RuntimeException e) {
+                        Vibey.LOG.debug("Announcements unreadable: {}", e.toString());
+                    }
+                }
+                List<Notice> got = list;
+                Tasks.onMain(() -> done(key, got));
+            });
         } catch (RuntimeException e) {
             Vibey.LOG.debug("Announcements not requested: {}", e.toString());
             done(key, null);

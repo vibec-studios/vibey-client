@@ -20,6 +20,7 @@ Start with the [main README](../README.md) for what Vibey Client is, installatio
 | [HUD.md](HUD.md) | HUD widgets and the HUD editor: the widget API for modules, styles, placement model, templates, share codes, server rules. |
 | [AVATAR.md](AVATAR.md) | The cosmetics and emotes engine: packages, services, render path per Minecraft version, coordinates, tests. |
 | [VIDEO.md](VIDEO.md) | Video screens (Fabric 1.21.11): placing, players (FFmpeg / MCEF Modern), setup prompts, sharing, wiring into the Media module. Research and licences: [VIDEO-RESEARCH.md](VIDEO-RESEARCH.md). |
+| [NETWORK.md](NETWORK.md) | Every HTTP request the client makes (startup and during play), the shared HTTP client, caching/ETags, bootstrap, timeouts and retries, and how to measure it (`tools/net-bench`). |
 | [PVP.md](PVP.md) | PvP & View module (Fabric 1.21.11): zoom, toggle sprint/sneak, crosshair editor, block outline, hit colour, low fire, lower shield, server-rule keys. |
 | [../blockbench/README.md](../blockbench/README.md) | Developing the Blockbench plugin: tests, mock game server, code layout. |
 

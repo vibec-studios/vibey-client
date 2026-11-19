@@ -177,7 +177,7 @@ public final class Cover {
 
     private static InputStream open(String source) throws Exception {
         if (source.startsWith("http://") || source.startsWith("https://")) {
-            if (http == null) http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).followRedirects(HttpClient.Redirect.NORMAL).build();
+            if (http == null) http = dev.henny.vibeyclient.backend.net.Net.client(); // shared client
             HttpRequest req = HttpRequest.newBuilder(URI.create(source)).timeout(Duration.ofSeconds(8)).GET().build();
             return http.send(req, HttpResponse.BodyHandlers.ofInputStream()).body();
         }

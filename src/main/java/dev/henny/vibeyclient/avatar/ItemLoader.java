@@ -12,19 +12,22 @@ import dev.henny.vibeyclient.avatar.bundle.BundleParser;
 import dev.henny.vibeyclient.avatar.fx.EmbeddedSounds;
 import dev.henny.vibeyclient.avatar.render.GpuBundles;
 
+import dev.henny.vibeyclient.api.Services;
+import dev.henny.vibeyclient.api.service.VibeBackend;
+import dev.henny.vibeyclient.backend.net.HttpCache;
+import dev.henny.vibeyclient.backend.net.Limiter;
+import dev.henny.vibeyclient.backend.net.Net;
+import dev.henny.vibeyclient.backend.net.SingleFlight;
+
 import java.io.InputStream;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -38,7 +41,6 @@ public final class ItemLoader {
 
     public static final String BUILTIN = "/assets/vibeyclient/builtin/";
     private static final AtomicBoolean CATALOG_RUNNING = new AtomicBoolean();
-    private static volatile HttpClient http;
     private static volatile long lastCatalog;
     /** True while catalog items are in the registry (fresh or from the disk cache); client thread. */
     private static boolean catalogLoaded;
@@ -114,24 +116,47 @@ public final class ItemLoader {
 
     // ============================================================================================ catalog (OTA)
     //
-    // Over-the-air cosmetics (VIBE-API-2 §4): the catalog is polled every ~10 minutes (jittered), on world join and
-    // when the gateway says `catalog.updated`. With ETag a poll is one small request (304 = nothing to do). Changed
+    // Over-the-air cosmetics (VIBE-API-2 §4), see docs/NETWORK.md. At start the cached catalog is shown right away
+    // (no waiting for the network), then revalidated with its ETag (304 = a few hundred bytes). After that the gateway
+    // pushes `catalog.updated` and `ready` carries `catalogVersion`, so while it is connected the poll is only a
+    // safety net (every ~60 min); without a gateway (not logged in) it stays at ~10 min, plus on world join. Changed
     // items reuse their parsed bundle when the asset hash is the same; new/changed assets are downloaded in parallel
-    // on worker threads and swapped in all at once on the client thread (the old version stays visible until then).
-    // Textures of the new bundles upload lazily, a few per frame (GpuBundles). Equipped ids stay equipped.
+    // (at most 4 at a time, each hash once) and swapped in all at once on the client thread (the old version stays
+    // visible until then). Textures of the new bundles upload lazily, a few per frame (GpuBundles). Equipped ids stay
+    // equipped. Network futures never block a thread; hashing, parsing and disk I/O run on CATALOG_IO.
 
     private static final long POLL_MS = 10 * 60_000, POLL_JITTER_MS = 3 * 60_000, MIN_GAP_MS = 15_000;
+    /** Poll interval while the gateway is connected (it pushes `catalog.updated`): only a safety net. */
+    private static final long PUSH_POLL_MS = 60 * 60_000, PUSH_POLL_JITTER_MS = 15 * 60_000;
     private static final int PARALLEL_DOWNLOADS = 4;
     /**
-     * Own small pool for catalog loads and asset downloads: a load waits for its downloads, so they must not share the
-     * general worker pool (which the HTTP client also needs to complete responses).
+     * Hashing, parsing and disk I/O of the catalog and its assets (never on the HTTP client's threads, never waiting
+     * for other jobs). Threads end after 30 s without work.
      */
-    private static final java.util.concurrent.ExecutorService CATALOG_IO = java.util.concurrent.Executors.newFixedThreadPool(PARALLEL_DOWNLOADS + 1, r -> {
+    private static final java.util.concurrent.ThreadPoolExecutor CATALOG_IO = new java.util.concurrent.ThreadPoolExecutor(2, 2,
+            30, java.util.concurrent.TimeUnit.SECONDS, new java.util.concurrent.LinkedBlockingQueue<>(), r -> {
         Thread t = new Thread(r, "VibeyClient-Catalog");
         t.setDaemon(true);
         t.setPriority(Thread.NORM_PRIORITY - 1);
         return t;
     });
+
+    static {
+        CATALOG_IO.allowCoreThreadTimeOut(true);
+    }
+
+    private static final Limiter DOWNLOADS = new Limiter(PARALLEL_DOWNLOADS);
+    private static final Limiter THUMB_DOWNLOADS = new Limiter(PARALLEL_DOWNLOADS);
+    private static final SingleFlight<String, byte[]> ASSET_FLIGHT = new SingleFlight<>();
+    private static final SingleFlight<String, byte[]> THUMB_FLIGHT = new SingleFlight<>();
+    /**
+     * Bundles of the last apply by asset hash (worker side: the registry is only updated later on the client thread,
+     * so the revalidation right after the disk copy would otherwise parse everything twice).
+     */
+    private static volatile Map<String, Bundle> parsed = Map.of();
+    /** What the registry shows (or is about to): generation + ETag, and whether no asset was missing. */
+    private record Applied(int gen, String etag, boolean complete) {}
+    private static volatile Applied applied;
     /** Next time the catalog is fetched (epoch ms); 0 = as soon as possible. */
     private static volatile long nextCatalog;
     /** Bumped when the catalog is dropped (online off, other backend): loads started before are discarded. */
@@ -144,9 +169,16 @@ public final class ItemLoader {
     public static volatile java.util.function.Consumer<java.util.Set<String>> onNewItems = ids -> {};
     /** The catalog's version string of the last apply (compared with the gateway's ready.catalogVersion). */
     private static volatile String catalogVersion;
+    /** ready.catalogVersion that arrived while a load was running ("" = none): compared once the load is done. */
+    private static String pendingReadyVersion;
 
     public static String catalogVersion() {
         return catalogVersion;
+    }
+
+    /** The gateway is connected, so `catalog.updated` arrives by push. */
+    public static boolean catalogPushed() {
+        return Services.get(VibeBackend.class).map(VibeBackend::isReady).orElse(false);
     }
 
     /**
@@ -160,20 +192,24 @@ public final class ItemLoader {
         if (now < nextCatalog) return;
         if (!CATALOG_RUNNING.compareAndSet(false, true)) return;
         lastCatalog = now;
-        nextCatalog = now + POLL_MS + java.util.concurrent.ThreadLocalRandom.current().nextLong(POLL_JITTER_MS);
+        boolean pushed = catalogPushed();
+        nextCatalog = now + (pushed ? PUSH_POLL_MS : POLL_MS)
+                + java.util.concurrent.ThreadLocalRandom.current().nextLong(pushed ? PUSH_POLL_JITTER_MS : POLL_JITTER_MS);
         int gen = GENERATION.get();
-        CATALOG_IO.execute(() -> {
-            try {
-                loadCatalog(gen);
-            } catch (Exception e) {
-                Vibey.LOG.info("Cosmetics catalog not available: {}", e.toString());
-                if (!catalogLoaded) loadCachedCatalog(gen);
+        String url = base() + "/api/v1/cosmetics/catalog";
+        CompletableFuture.supplyAsync(() -> loadCatalog(gen, url), CATALOG_IO).thenCompose(f -> f).whenComplete((v, e) -> {
+            if (e != null) {
+                Vibey.LOG.info("Cosmetics catalog not available: {}", Net.cause(e).toString());
                 // try again sooner than the normal interval
                 nextCatalog = Math.min(nextCatalog, System.currentTimeMillis() + 60_000
                         + java.util.concurrent.ThreadLocalRandom.current().nextLong(30_000));
-            } finally {
-                CATALOG_RUNNING.set(false);
             }
+            CATALOG_RUNNING.set(false);
+            Tasks.onMain(() -> { // after the swap (same queue)
+                // the network answered (or failed, then the disk copy is all there is – as before)
+                if (catalogLoaded && gen == GENERATION.get()) catalogConfirmed = true;
+                checkReadyVersion();
+            });
         });
     }
 
@@ -186,12 +222,35 @@ public final class ItemLoader {
         nextCatalog = Math.min(nextCatalog, Math.max(at, lastCatalog + MIN_GAP_MS));
     }
 
+    /**
+     * Client thread: the gateway's {@code ready} names the catalog version (null = unknown). A different version
+     * than the one shown → refresh soon; while a load is running (start: ready usually arrives during the first
+     * load) the comparison waits for it instead of asking for a second load right away.
+     */
+    public static void readyVersion(String v) {
+        if (CATALOG_RUNNING.get()) {
+            pendingReadyVersion = v == null ? "" : v;
+            return;
+        }
+        if (v == null || !v.equals(catalogVersion)) requestCatalog(10_000);
+    }
+
+    private static void checkReadyVersion() {
+        String v = pendingReadyVersion;
+        if (v == null) return;
+        pendingReadyVersion = null;
+        if (v.isEmpty() || !v.equals(catalogVersion)) requestCatalog(10_000);
+    }
+
     /** Online features switched off: forget catalog items (they stay cached on disk). */
     public static void dropCatalog() {
         GENERATION.incrementAndGet();
         nextCatalog = 0;
         catalogLoaded = false;
+        catalogConfirmed = false;
         lastIds = null;
+        applied = null;
+        parsed = Map.of();
         AvatarItems.putAll(ItemSource.CATALOG, Map.of(), true);
     }
 
@@ -203,13 +262,15 @@ public final class ItemLoader {
         return catalogLoaded;
     }
 
-    private static HttpClient http() {
-        if (http == null) {
-            http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(6)).followRedirects(HttpClient.Redirect.NORMAL)
-                    .executor(Tasks.executor()).build();
-        }
-        return http;
+    /**
+     * Client thread: the catalog shown is the one the network answered with (or the network failed and the disk copy
+     * is all there is, as before). The disk copy shown at start before that is not enough for a loadout upload.
+     */
+    public static boolean catalogConfirmed() {
+        return catalogConfirmed;
     }
+
+    private static boolean catalogConfirmed;
 
     private static String base() {
         String b = GlobalSettings.backend();
@@ -222,45 +283,73 @@ public final class ItemLoader {
         return base() + (url.startsWith("/") ? url : "/" + url);
     }
 
-    private static void loadCatalog(int gen) throws Exception {
-        Path dir = cacheDir();
-        Files.createDirectories(dir.resolve("assets"));
-        Path cached = dir.resolve("catalog.json"), etagFile = dir.resolve("catalog.etag");
-        HttpRequest.Builder rb = HttpRequest.newBuilder(URI.create(base() + "/api/v1/cosmetics/catalog"))
-                .timeout(Duration.ofSeconds(10)).header("Accept", "application/json").GET();
-        if (Files.isRegularFile(cached) && Files.isRegularFile(etagFile)) rb.header("If-None-Match", Files.readString(etagFile).trim());
-        HttpResponse<byte[]> res = http().send(rb.build(), HttpResponse.BodyHandlers.ofByteArray());
-        byte[] body;
-        if (res.statusCode() == 304) {
-            if (catalogLoaded) return; // nothing changed and the registry already has it
-            body = Files.readAllBytes(cached);
-        } else if (res.statusCode() == 200) {
-            body = res.body();
-            write(cached, body);
-            String etag = res.headers().firstValue("ETag").orElse(null);
-            if (etag != null) write(etagFile, etag.getBytes(StandardCharsets.UTF_8));
-            else Files.deleteIfExists(etagFile);
-        } else {
-            throw new IllegalStateException("HTTP " + res.statusCode());
+    /**
+     * CATALOG_IO: shows the disk copy first (if nothing is shown for this generation yet) while the conditional
+     * request is already on its way, then applies what the network says.
+     */
+    private static CompletableFuture<Void> loadCatalog(int gen, String url) {
+        try {
+            Files.createDirectories(cacheDir().resolve("assets"));
+        } catch (java.io.IOException e) {
+            return CompletableFuture.failedFuture(e);
         }
-        apply(JsonParser.parseString(new String(body, StandardCharsets.UTF_8)).getAsJsonObject(), true, gen);
+        HttpCache cache = new HttpCache(cacheDir());
+        HttpCache.Entry cached = cache.load("catalog");
+        String base = url.substring(0, url.length() - "/api/v1/cosmetics/catalog".length());
+        CompletableFuture<HttpCache.Result> net = cache.fetch("catalog", url, cached, Net.Kind.API, CATALOG_IO).thenApply(r -> {
+            writeCacheBase(base); // the backend confirmed (304) or replaced (200) the disk copy: it is this backend's
+            return r;
+        });
+        Applied a = applied;
+        CompletableFuture<Void> shown = CompletableFuture.completedFuture(null);
+        // only a copy of this very backend's catalog (another backend, e.g. after switching, has other items)
+        if (cached != null && (a == null || a.gen != gen) && base.equals(readCacheBase())) {
+            try {
+                JsonObject cat = JsonParser.parseString(new String(cached.body(), StandardCharsets.UTF_8)).getAsJsonObject();
+                shown = apply(cat, false, gen, true).thenAccept(complete -> applied = new Applied(gen, cached.etag(), complete));
+            } catch (RuntimeException e) {
+                Vibey.LOG.debug("Cached catalog unreadable: {}", e.toString());
+            }
+        }
+        // the disk apply must be done before the network result is applied (never two applies at once)
+        return shown.handle((x, e) -> null).thenCompose(x -> net).thenComposeAsync(res -> {
+            Applied now = applied;
+            if (res.notModified() && now != null && now.gen == gen && now.complete && java.util.Objects.equals(now.etag, res.etag())) {
+                return CompletableFuture.completedFuture(null); // nothing changed and the registry already has it
+            }
+            JsonObject cat = JsonParser.parseString(new String(res.body(), StandardCharsets.UTF_8)).getAsJsonObject();
+            return apply(cat, true, gen, false).thenAccept(complete -> applied = new Applied(gen, res.etag(), complete));
+        }, CATALOG_IO);
     }
 
-    private static void loadCachedCatalog(int gen) {
+    /** {@code catalog.base}: the backend the disk copy of the catalog belongs to. */
+    private static String readCacheBase() {
         try {
-            Path cached = cacheDir().resolve("catalog.json");
-            if (!Files.isRegularFile(cached)) return;
-            apply(JsonParser.parseString(Files.readString(cached)).getAsJsonObject(), false, gen);
-        } catch (Exception e) {
-            Vibey.LOG.debug("Cached catalog unreadable: {}", e.toString());
+            Path f = cacheDir().resolve("catalog.base");
+            return Files.isRegularFile(f) ? Files.readString(f, StandardCharsets.UTF_8).trim() : null;
+        } catch (java.io.IOException e) {
+            return null;
+        }
+    }
+
+    private static void writeCacheBase(String base) {
+        try {
+            if (!base.equals(readCacheBase())) write(cacheDir().resolve("catalog.base"), base.getBytes(StandardCharsets.UTF_8));
+        } catch (java.io.IOException e) {
+            Vibey.LOG.debug("catalog.base not written: {}", e.toString());
         }
     }
 
     /** One catalog entry as read from the JSON (tolerant: unknown fields are ignored). */
     private record Entry(String id, String hash, String url, JsonObject json, String minClient) {}
 
-    /** Worker thread: turns the catalog JSON into registry items and hands them to the client thread. */
-    static void apply(JsonObject catalog, boolean download, int gen) {
+    /**
+     * CATALOG_IO: turns the catalog JSON into registry items and hands them to the client thread. Completes (true =
+     * every asset was there) once the swap is queued on the client thread. {@code fromDisk}: the cached copy shown
+     * before the network answered – it never counts for "new cosmetics" (only network catalogs are compared, as
+     * before).
+     */
+    static CompletableFuture<Boolean> apply(JsonObject catalog, boolean download, int gen, boolean fromDisk) {
         JsonArray list = catalog.get("items") instanceof JsonArray a ? a : new JsonArray();
         String version = catalog.get("version") instanceof com.google.gson.JsonPrimitive v ? v.getAsString() : null;
         List<Entry> entries = new java.util.ArrayList<>();
@@ -284,7 +373,10 @@ public final class ItemLoader {
 
         // 1. what we already have (same hash: reuse the parsed bundle) or have on disk
         Map<String, AvatarItem> items = new HashMap<>();
+        Map<String, Bundle> bundles = new java.util.concurrent.ConcurrentHashMap<>();
+        Map<String, Bundle> before = parsed;
         List<Entry> missing = new java.util.ArrayList<>();
+        boolean skipped = false;
         for (Entry e : entries) {
             try {
                 if (e.minClient != null && !ClientVersion.satisfies(e.minClient)) {
@@ -294,12 +386,17 @@ public final class ItemLoader {
                 }
                 AvatarItem old = AvatarItems.get(e.id, ItemSource.CATALOG);
                 Bundle b = old != null && old.bundle() != null && e.hash.equals(old.hash()) ? old.bundle() : null;
+                if (b == null) b = before.get(e.hash);
                 if (b == null) b = fromDisk(e);
                 if (b == null) {
                     if (download && !FAILED.contains(e.hash)) missing.add(e);
-                    else if (old != null && old.bundle() != null) items.put(e.id, old); // keep the old version for now
+                    else {
+                        skipped = true;
+                        if (old != null && old.bundle() != null) items.put(e.id, old); // keep the old version for now
+                    }
                     continue;
                 }
+                bundles.put(e.hash, b);
                 items.put(e.id, item(e, b));
             } catch (dev.henny.vibeyclient.avatar.bundle.NeedsUpdateException nu) {
                 AvatarItem stub = stub(e, nu.required);
@@ -309,37 +406,43 @@ public final class ItemLoader {
             }
         }
 
-        // 2. new or changed assets: download in parallel (worker threads), verify, cache, parse
-        if (!missing.isEmpty()) {
-            java.util.concurrent.Semaphore slots = new java.util.concurrent.Semaphore(PARALLEL_DOWNLOADS);
-            List<java.util.concurrent.CompletableFuture<Void>> jobs = new java.util.ArrayList<>();
-            for (Entry e : missing) {
-                jobs.add(java.util.concurrent.CompletableFuture.runAsync(() -> {
-                    slots.acquireUninterruptibly();
-                    try {
-                        Bundle b = downloadAsset(e);
-                        if (b != null) synchronized (items) { items.put(e.id, item(e, b)); }
-                    } catch (dev.henny.vibeyclient.avatar.bundle.NeedsUpdateException nu) {
-                        AvatarItem stub = stub(e, nu.required);
-                        if (stub != null) synchronized (items) { items.put(e.id, stub); }
-                    } catch (Exception ex) {
-                        if (FAILED.add(e.hash)) Vibey.LOG.warn("Catalog item {} skipped: {}", e.id, ex.toString());
-                    } finally {
-                        slots.release();
-                    }
-                    // a failed download keeps the previous version of the item (if any) until the next poll
-                    AvatarItem old = AvatarItems.get(e.id, ItemSource.CATALOG);
-                    synchronized (items) {
-                        if (!items.containsKey(e.id) && old != null && old.bundle() != null) items.put(e.id, old);
-                    }
-                }, CATALOG_IO));
-            }
-            java.util.concurrent.CompletableFuture.allOf(jobs.toArray(new java.util.concurrent.CompletableFuture[0])).join();
-            Vibey.LOG.info("Cosmetics catalog: downloaded {} new/changed asset(s)", missing.size());
+        // 2. new or changed assets: download in parallel (no thread waits), verify, cache, parse on CATALOG_IO
+        List<CompletableFuture<Void>> jobs = new java.util.ArrayList<>();
+        for (Entry e : missing) {
+            jobs.add(DOWNLOADS.submit(() -> ASSET_FLIGHT.run(e.hash, () -> fetch(absolute(e.url), Net.Kind.BULK)))
+                    .thenApplyAsync(bytes -> verifyAndParse(e, bytes), CATALOG_IO)
+                    .handle((b, ex) -> {
+                        if (ex == null) {
+                            bundles.put(e.hash, b);
+                            synchronized (items) {
+                                items.put(e.id, item(e, b));
+                            }
+                        } else if (Net.cause(ex) instanceof dev.henny.vibeyclient.avatar.bundle.NeedsUpdateException nu) {
+                            AvatarItem stub = stub(e, nu.required);
+                            if (stub != null) synchronized (items) { items.put(e.id, stub); }
+                        } else if (FAILED.add(e.hash)) {
+                            Vibey.LOG.warn("Catalog item {} skipped: {}", e.id, Net.cause(ex).toString());
+                        }
+                        // a failed download keeps the previous version of the item (if any) until the next poll
+                        AvatarItem old = AvatarItems.get(e.id, ItemSource.CATALOG);
+                        synchronized (items) {
+                            if (!items.containsKey(e.id) && old != null && old.bundle() != null) items.put(e.id, old);
+                        }
+                        return null;
+                    }));
         }
-        Vibey.LOG.info("Cosmetics catalog: {} items", items.size());
+        boolean complete = !skipped;
+        return CompletableFuture.allOf(jobs.toArray(new CompletableFuture[0])).thenApply(x -> {
+            if (!missing.isEmpty()) Vibey.LOG.info("Cosmetics catalog: downloaded {} new/changed asset(s)", missing.size());
+            Vibey.LOG.info("Cosmetics catalog: {} items", items.size());
+            if (gen == GENERATION.get()) parsed = Map.copyOf(bundles);
+            swap(items, version, gen, fromDisk);
+            return complete;
+        });
+    }
 
-        // 3. swap in on the client thread
+    /** 3. swap in on the client thread. */
+    private static void swap(Map<String, AvatarItem> items, String version, int gen, boolean fromDisk) {
         Tasks.onMain(() -> {
             if (!GlobalSettings.online() || gen != GENERATION.get()) return; // dropped meanwhile (other backend / offline)
             for (AvatarItem old : AvatarItems.all()) {
@@ -350,10 +453,10 @@ public final class ItemLoader {
                     EmbeddedSounds.evict(old.bundle());
                 }
             }
-            boolean first = lastIds == null;
+            boolean first = lastIds == null || fromDisk;
             java.util.Set<String> fresh = new java.util.HashSet<>(items.keySet());
             if (!first) fresh.removeAll(lastIds);
-            lastIds = java.util.Set.copyOf(items.keySet());
+            if (!fromDisk) lastIds = java.util.Set.copyOf(items.keySet());
             AvatarItems.putAll(ItemSource.CATALOG, items, true);
             for (AvatarItem i : items.values()) if (i.bundle() != null && i.isEmote()) AvatarStates.reloadEmote(i.id());
             catalogLoaded = true;
@@ -380,16 +483,26 @@ public final class ItemLoader {
         return parse(e, bytes);
     }
 
-    private static Bundle downloadAsset(Entry e) throws Exception {
-        String url = absolute(e.url);
-        HttpResponse<byte[]> r = http().send(HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(30)).GET().build(),
-                HttpResponse.BodyHandlers.ofByteArray());
-        if (r.statusCode() != 200) throw new IllegalStateException("asset HTTP " + r.statusCode());
-        byte[] bytes = r.body();
-        if (!BundleParser.sha256(bytes).equals(e.hash)) throw new IllegalStateException("asset has a wrong hash");
-        Files.createDirectories(cacheDir().resolve("assets"));
-        write(cacheDir().resolve("assets").resolve(e.hash + ".vibey"), bytes);
-        return parse(e, bytes);
+    /** GET of an asset or thumbnail: the bytes of a 200, else a failed future. */
+    private static CompletableFuture<byte[]> fetch(String url, Net.Kind kind) {
+        return Net.send(Net.request(url, kind).GET().build()).thenApply(r -> {
+            if (r.status() != 200) throw new java.util.concurrent.CompletionException(new HttpCache.StatusException(r.status()));
+            return r.body();
+        });
+    }
+
+    /** CATALOG_IO: checks the hash, caches the asset on disk and parses it. */
+    private static Bundle verifyAndParse(Entry e, byte[] bytes) {
+        try {
+            if (!BundleParser.sha256(bytes).equals(e.hash)) throw new IllegalStateException("asset has a wrong hash");
+            Files.createDirectories(cacheDir().resolve("assets"));
+            write(cacheDir().resolve("assets").resolve(e.hash + ".vibey"), bytes);
+            return parse(e, bytes);
+        } catch (RuntimeException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new java.util.concurrent.CompletionException(ex);
+        }
     }
 
     private static Bundle parse(Entry e, byte[] bytes) {
@@ -457,18 +570,29 @@ public final class ItemLoader {
         return new Bundle.Text(en, de);
     }
 
-    /** Downloads (or reads from cache) a catalog thumbnail; worker thread. */
-    static byte[] thumbnail(String url) throws Exception {
-        String key = BundleParser.sha256(url.getBytes(StandardCharsets.UTF_8));
-        Path file = cacheDir().resolve("thumbs").resolve(key + ".png");
-        if (Files.isRegularFile(file)) return Files.readAllBytes(file);
-        if (!GlobalSettings.online()) return null;
-        HttpResponse<byte[]> r = http().send(HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(10)).GET().build(),
-                HttpResponse.BodyHandlers.ofByteArray());
-        if (r.statusCode() != 200 || r.body().length > 1 << 20) return null;
-        Files.createDirectories(file.getParent());
-        write(file, r.body());
-        return r.body();
+    /**
+     * A catalog thumbnail: from the disk cache (read on the calling thread), else downloaded – at most 4 at a time,
+     * each URL once – and cached. Completes with null when there is none to show.
+     */
+    static CompletableFuture<byte[]> thumbnail(String url) {
+        try {
+            String key = BundleParser.sha256(url.getBytes(StandardCharsets.UTF_8));
+            Path file = cacheDir().resolve("thumbs").resolve(key + ".png");
+            if (Files.isRegularFile(file)) return CompletableFuture.completedFuture(Files.readAllBytes(file));
+            if (!GlobalSettings.online()) return CompletableFuture.completedFuture(null);
+            return THUMB_FLIGHT.run(url, () -> THUMB_DOWNLOADS.submit(() -> fetch(url, Net.Kind.BULK))).thenApplyAsync(body -> {
+                if (body.length > 1 << 20) return null;
+                try {
+                    Files.createDirectories(file.getParent());
+                    write(file, body);
+                } catch (java.io.IOException e) {
+                    Vibey.LOG.debug("Thumbnail not cached: {}", e.toString());
+                }
+                return body;
+            }, CATALOG_IO);
+        } catch (Exception e) {
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
     private static void write(Path file, byte[] bytes) throws java.io.IOException {

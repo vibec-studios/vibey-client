@@ -8,19 +8,18 @@ import net.minecraft.client.Minecraft;
 
 import com.mojang.blaze3d.platform.NativeImage;
 
+import dev.henny.vibeyclient.backend.net.Net;
+import dev.henny.vibeyclient.backend.net.SingleFlight;
+
 import java.io.InputStream;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Player heads (8×8 face + hat layer) for lists and toasts. Skins are fetched and decoded on a worker thread into
+ * Player heads (8×8 face + hat layer) for lists and toasts. Skins are fetched (shared client) and decoded on a worker thread into
  * 64 ARGB values and drawn as plain rectangles – no textures to register, identical on every Minecraft version.
  * Players without a known skin get the vanilla default skin of their UUID.
  */
@@ -34,7 +33,6 @@ public final class Heads {
     private static final Set<String> LOADING = ConcurrentHashMap.newKeySet();
     private static final Set<String> FAILED = ConcurrentHashMap.newKeySet();
     private static final Map<String, String> SKIN_OF_USER = new ConcurrentHashMap<>();
-    private static volatile HttpClient http;
 
     /** Remembers the skin URL of a user, so heads drawn by id alone (toasts) find it. */
     public static void remember(String userId, String skinUrl) {
@@ -89,48 +87,73 @@ public final class Heads {
         return DEFAULTS[idx];
     }
 
+    /**
+     * Default skins are read from the game's resources on a worker; real skins are downloaded asynchronously on the
+     * shared client (no worker waits for the network – blocking downloads on the {@code Tasks} pool used to stall
+     * every request of the client when a friends list showed three or more heads) and only decoded on a worker.
+     */
     private static void load(String key) {
         if (!LOADING.add(key)) return;
-        Tasks.run(() -> {
-            try {
-                NativeImage img;
-                if (key.startsWith("default:")) {
-                    var rm = Minecraft.getInstance().getResourceManager();
-                    var res = rm.getResource(Compat.id("minecraft", "textures/entity/player/wide/" + key.substring(8) + ".png"));
-                    if (res.isEmpty()) throw new IllegalStateException("no default skin " + key);
-                    try (InputStream in = res.get().open()) {
-                        img = NativeImage.read(in);
-                    }
-                } else {
-                    img = NativeImage.read(fetch(key));
+        if (key.startsWith("default:")) {
+            Tasks.run(() -> decode(key, () -> {
+                var rm = Minecraft.getInstance().getResourceManager();
+                var res = rm.getResource(Compat.id("minecraft", "textures/entity/player/wide/" + key.substring(8) + ".png"));
+                if (res.isEmpty()) throw new IllegalStateException("no default skin " + key);
+                try (InputStream in = res.get().open()) {
+                    return NativeImage.read(in);
                 }
-                try {
-                    FACES.put(key, face(img));
-                } finally {
-                    img.close();
-                }
-            } catch (Exception e) {
-                FAILED.add(key);
-                dev.henny.vibeyclient.Vibey.LOG.debug("Skin {} failed: {}", key, e.toString());
-            } finally {
-                LOADING.remove(key);
+            }));
+            return;
+        }
+        CompletableFuture<byte[]> bytes;
+        try {
+            bytes = fetch(key);
+        } catch (Exception e) {
+            bytes = CompletableFuture.failedFuture(e);
+        }
+        bytes.whenComplete((b, e) -> {
+            if (e != null) {
+                failed(key, e);
+                return;
             }
+            Tasks.run(() -> decode(key, () -> NativeImage.read(b)));
         });
     }
 
-    private static byte[] fetch(String url) throws Exception {
+    private interface ImageSource {
+        NativeImage open() throws Exception;
+    }
+
+    private static void decode(String key, ImageSource src) {
+        try {
+            NativeImage img = src.open();
+            try {
+                FACES.put(key, face(img));
+            } finally {
+                img.close();
+            }
+            LOADING.remove(key);
+        } catch (Exception e) {
+            failed(key, e);
+        }
+    }
+
+    private static void failed(String key, Throwable e) {
+        FAILED.add(key);
+        LOADING.remove(key);
+        dev.henny.vibeyclient.Vibey.LOG.debug("Skin {} failed: {}", key, Net.cause(e).toString());
+    }
+
+    private static final SingleFlight<String, byte[]> FLIGHT = new SingleFlight<>();
+
+    private static CompletableFuture<byte[]> fetch(String url) {
         if (url.startsWith("http://textures.minecraft.net/")) url = "https://" + url.substring(7);
         if (!url.startsWith("https://") && !url.startsWith("http://")) throw new IllegalArgumentException("bad url");
-        HttpClient c = http;
-        if (c == null) {
-            c = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(8)).followRedirects(HttpClient.Redirect.NORMAL)
-                    .executor(Tasks.executor()).build();
-            http = c;
-        }
-        HttpResponse<byte[]> res = c.send(HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(10)).build(),
-                HttpResponse.BodyHandlers.ofByteArray());
-        if (res.statusCode() != 200 || res.body().length > MAX_BYTES) throw new IllegalStateException("HTTP " + res.statusCode());
-        return res.body();
+        String u = url;
+        return FLIGHT.run(u, () -> Net.send(Net.request(u, Net.Kind.API).GET().build()).thenApply(res -> {
+            if (res.status() != 200 || res.body().length > MAX_BYTES) throw new IllegalStateException("HTTP " + res.status());
+            return res.body();
+        }));
     }
 
     /** Face (8,8)–(16,16) with the hat layer (40,8)–(48,16) on top, scaled for HD skins. */

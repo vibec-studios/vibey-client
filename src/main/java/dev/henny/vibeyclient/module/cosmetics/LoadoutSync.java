@@ -19,6 +19,7 @@ import dev.henny.vibeyclient.avatar.ItemSource;
 import dev.henny.vibeyclient.avatar.Slot;
 import dev.henny.vibeyclient.backend.BackendClient;
 import dev.henny.vibeyclient.backend.LoadoutKeys;
+import dev.henny.vibeyclient.backend.net.Meta;
 import dev.henny.vibeyclient.client.VibeyPlayers;
 import dev.henny.vibeyclient.net.LoadoutToken;
 import net.minecraft.client.Minecraft;
@@ -164,10 +165,11 @@ public final class LoadoutSync {
             ItemLoader.requestCatalog(5_000);
             Tasks.debounce("vibeyclient:cosmetics:owned", 2_000, () -> Tasks.onMain(this::reloadOwned));
         }));
-        // after a reconnect the catalog may have changed while we were away (ready carries catalogVersion)
+        // after a reconnect the catalog may have changed while we were away (ready carries catalogVersion); at start
+        // the first catalog load is usually still running: then it is compared once that load is done
         listeners.add(b.onEvent(dev.henny.vibeyclient.backend.BackendClient.EV_READY, d -> {
             String v = d.get("catalogVersion") instanceof JsonPrimitive p ? p.getAsString() : null;
-            if (v == null || !v.equals(ItemLoader.catalogVersion())) ItemLoader.requestCatalog(10_000);
+            ItemLoader.readyVersion(v);
         }));
         listeners.add(b.onEvent("emote.played", d -> {
             UUID id = uuid(d.get("userId"));
@@ -201,7 +203,7 @@ public final class LoadoutSync {
     private void loadMe() {
         meLoaded = true;
         VibeBackend b = backend;
-        fetchMeta();
+        fetchMeta(false);
         b.request("GET", "/api/v1/cosmetics/me", null).whenComplete((res, err) -> Tasks.onMain(() -> {
             if (b != backend) return;
             if (err != null) {
@@ -232,7 +234,7 @@ public final class LoadoutSync {
     }
 
     private boolean canPush() {
-        return backendReady() && ownedKnown && ItemLoader.catalogLoaded();
+        return backendReady() && ownedKnown && ItemLoader.catalogConfirmed();
     }
 
     /**
@@ -327,14 +329,16 @@ public final class LoadoutSync {
         return true;
     }
 
-    /** Signing key from {@code /api/v1/meta} (also when a token names a key we do not know: key rotation). */
-    private void fetchMeta() {
+    /**
+     * Signing key from {@code /api/v1/meta} (also when a token names a key we do not know: key rotation, {@code fresh}).
+     * The shared {@link Meta} hands the key to {@link LoadoutKeys}; a meta the title screen fetched in the last
+     * 5 minutes is good enough unless {@code fresh}.
+     */
+    private void fetchMeta(boolean fresh) {
         if (backend == null || System.currentTimeMillis() < nextMetaFetch) return;
         nextMetaFetch = System.currentTimeMillis() + 5 * 60_000L;
-        VibeBackend b = backend;
-        b.request("GET", "/api/v1/meta", null).whenComplete((res, err) -> {
-            if (err == null && res != null) LoadoutKeys.fromMeta(b.baseUrl(), res);
-        });
+        LoadoutKeys.install();
+        Meta.get(backend.baseUrl(), fresh ? 0 : 5 * 60_000L).exceptionally(t -> null);
     }
 
     private ServerRemote verify(UUID player, Map<String, String> claimed, String token, long time) {
@@ -344,7 +348,7 @@ public final class LoadoutSync {
             return new ServerRemote(claimed, token, res.token(), time);
         }
         LoadoutToken.Failure f = res.failure();
-        if (f == LoadoutToken.Failure.WRONG_KID || f == LoadoutToken.Failure.NO_KEY) fetchMeta();
+        if (f == LoadoutToken.Failure.WRONG_KID || f == LoadoutToken.Failure.NO_KEY) fetchMeta(true);
         if (loggedFailures.add(player + "/" + f)) {
             boolean suspicious = f == LoadoutToken.Failure.BAD_SIGNATURE || f == LoadoutToken.Failure.WRONG_UUID || f == LoadoutToken.Failure.MALFORMED;
             if (suspicious) Vibey.LOG.info("Ignoring the loadout token of {} ({})", player, f);
@@ -422,7 +426,10 @@ public final class LoadoutSync {
         }
         // `client` ("vibey" while connected or seen in the last 2 minutes) and badges change without an event:
         // look everybody up again every ~2 minutes (jittered so many clients do not hit the backend together).
+        // Alone (main menu, singleplayer) only our own badges are left to ask for: every ~10 minutes is plenty.
         long ms = System.currentTimeMillis();
+        // somebody is around again: back to the 2-minute rhythm (the newcomers are looked up right below anyway)
+        if (!now.isEmpty() && subscribed.isEmpty()) nextFullLookup = Math.min(nextFullLookup, ms + 120_000 + java.util.concurrent.ThreadLocalRandom.current().nextInt(30_000));
         boolean full = ms >= nextFullLookup;
         // players whose server-channel loadout had items without a valid token (at most once a minute each)
         Set<UUID> unproven = new LinkedHashSet<>();
@@ -434,7 +441,7 @@ public final class LoadoutSync {
         if (now.equals(subscribed) && !full && unproven.isEmpty()) return;
         List<String> lookup = new ArrayList<>();
         if (full) {
-            nextFullLookup = ms + 120_000 + java.util.concurrent.ThreadLocalRandom.current().nextInt(30_000);
+            nextFullLookup = ms + (now.isEmpty() ? 600_000 : 120_000) + java.util.concurrent.ThreadLocalRandom.current().nextInt(30_000);
             if (self != null) lookup.add(self.toString()); // our own badges
             for (UUID u : now) lookup.add(u.toString());
         } else {

@@ -136,7 +136,8 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
     public void onWorldJoin() {
         AvatarStates.clear();
         applySelf();
-        ItemLoader.requestCatalog(3_000);
+        // without a gateway nobody tells us about catalog changes: check on world join (with it: `catalog.updated`)
+        if (!ItemLoader.catalogPushed()) ItemLoader.requestCatalog(3_000);
     }
 
     // ============================================================================================ OTA: new items

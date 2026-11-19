@@ -26,6 +26,19 @@ public final class LoadoutKeys {
     private static volatile boolean diskRead;
     private static volatile int version;
 
+    private static final java.util.concurrent.atomic.AtomicBoolean INSTALLED = new java.util.concurrent.atomic.AtomicBoolean();
+
+    /**
+     * Takes the key from every meta document of the configured backend fetched through the shared
+     * {@link dev.henny.vibeyclient.backend.net.Meta} (title screen status, social, signed loadouts). Idempotent.
+     */
+    public static void install() {
+        if (!INSTALLED.compareAndSet(false, true)) return;
+        dev.henny.vibeyclient.backend.net.Meta.onUpdate((base, meta) -> {
+            if (norm(base).equals(norm(BackendClient.configuredBaseUrl()))) fromMeta(base, meta);
+        });
+    }
+
     /** The key for the configured backend, or null. */
     public static LoadoutToken.SigningKey current() {
         readDisk();

@@ -25,10 +25,8 @@ public final class LrcLib {
     private static final String BASE = "https://lrclib.net/api";
     private static final String USER_AGENT =
             "Vibey Lyrics " + BuildInfo.VERSION + " (https://github.com/vibec-studios/vibey-lyrics)";
-    private static final HttpClient HTTP = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(8))
-            .followRedirects(HttpClient.Redirect.NORMAL)
-            .build();
+    /** The shared client of Vibey Client (no own selector thread and pool for lyrics). */
+    private static final HttpClient HTTP = dev.henny.vibeyclient.backend.net.Net.client();
 
     private LrcLib() {}
 
