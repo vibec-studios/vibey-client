@@ -166,6 +166,14 @@ public final class ClientCompat {
         }
     }
 
+    /** The loading overlay (resource reload) is up. */
+    public static boolean loadingOverlay() {
+        //? if >=26.2 {
+        /*return Minecraft.getInstance().gui.overlay() != null;
+        *///?} else
+        return Minecraft.getInstance().getOverlay() != null;
+    }
+
     public static boolean inWorld() {
         Minecraft mc = Minecraft.getInstance();
         return mc.level != null && mc.player != null;

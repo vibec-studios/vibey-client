@@ -20,7 +20,6 @@ import dev.henny.vibeyclient.backend.Notices.Notice;
 import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.ui.VibeyScreen;
 import dev.henny.vibeyclient.ui.VibeyTabs;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.TitleScreen;
 
 import java.net.URI;
@@ -133,9 +132,9 @@ public final class Announcements {
     // ============================================================================================ toasts
 
     private static void toastPending() {
-        Minecraft mc = Minecraft.getInstance();
-        if (!GlobalSettings.onboarded() || !ModuleManager.get().isStarted() || mc.getOverlay() != null) return;
-        boolean place = mc.screen instanceof TitleScreen || mc.screen instanceof VibeyScreen || (mc.screen == null && mc.level != null);
+        if (!GlobalSettings.onboarded() || !ModuleManager.get().isStarted() || ClientCompat.loadingOverlay()) return;
+        net.minecraft.client.gui.screens.Screen screen = ClientCompat.screen();
+        boolean place = screen instanceof TitleScreen || screen instanceof VibeyScreen || (screen == null && ClientCompat.inWorld());
         if (!place) return;
         for (Notice n : active()) {
             if (toasted(n.id())) continue;
