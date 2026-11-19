@@ -134,6 +134,8 @@
   "link.error": "No invite link right now",
   "link.error.offline": "Vibe is not reachable, trying again soon",
   "link.error.generic": "The invite link could not be created",
+  "link.error.relay": "Invite links only work through the Vibey relay",
+  "link.error.taken": "Someone else is hosting at this address",
   "link.manual": "{0} mods were added by hand – friends need them too",
   "link.manual.one": "1 mod was added by hand – friends need it too"
 }

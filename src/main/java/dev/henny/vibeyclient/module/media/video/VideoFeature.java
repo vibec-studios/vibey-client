@@ -46,11 +46,16 @@ public final class VideoFeature extends MediaFeature {
 
     private final Video video = new Video(this);
 
-    /** Picture-in-picture of one screen; moved and scaled in the HUD editor ("media.video.overlay"). */
+    /**
+     * Picture-in-picture of one screen; moved and scaled in the HUD editor ("media.video.overlay"). Only in the editor
+     * while a screen is actually shown as the overlay: a big empty preview box in the corner of every editor view was
+     * just clutter. Saved placements are kept as they are.
+     */
     public final HudElement overlay = hudElement(HudElement.builder("overlay")
             .size(() -> 160, () -> Math.max(24, Math.round(160 / overlayAspect())))
             .defaults(Anchor.TOP_RIGHT, -6, 30)
             .scale(1f, 0.4f, 3f)
+            .visibleWhen(() -> video.overlayScreen() != null)
             .render(this::drawOverlay));
 
     public VideoFeature(MediaModule media) {

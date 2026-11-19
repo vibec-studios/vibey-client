@@ -354,17 +354,28 @@ VIBEY_TEST_RELAY=127.0.0.1:26400 ./gradlew :fabric-1.21.11:test --tests '*RelayH
 ```
 
 **Play links** (contract: vibe-launcher `docs/PLAY-LINKS.md` §2/§3; code: `launcher/` for `instance.json` /
-`session.json`, `module/multiplayer/host/PlayLinks`). Until the backend has the routes, test against the local mock
-`scripts/mock-play-links.mjs`: it serves `POST/GET/DELETE /api/v1/play-links` and a `/j/<code>` stub with the backend's
-rules (code charset, one link per host, 10 per hour, 500 mods) and proxies everything else (login, gateway) to a local
-vibe-backend. `POST /__mock/config {"missing":true}` simulates a backend without the routes, `{"rate":0}` the rate
-limit. Never point the dev login or test links at production.
+`session.json`, `module/multiplayer/host/PlayLinks`). `PlayLinksGameTest` runs against a **local** vibe-backend
+(main has the routes; `AUTH_DEV_BYPASS=1`, own port and pglite dir) and a local relay. The backend only accepts relay
+addresses under its relay domain (`PLAY_LINK_RELAY_DOMAINS`, default `vibey.henny.dev`), so start the relay with
+`DOMAIN=vibey.henny.dev`: the address is just a string for backend and client, which still connect through
+`127.0.0.1:<port>`. The test checks the link through the public `GET /api/v1/play-links/<code>`, saves the landing
+page `/j/<code>` and uses up the real rate limit (10 new links per hour, kept in memory: restart the backend or use
+another `-Dvibeyclient.username` to run it again within the hour). Never point the dev login or test links at
+production.
 
 ```sh
-# local backend (vibe-backend/apps/api, AUTH_DEV_BYPASS=1 PORT=3460 …), relay on 26460, then:
-node scripts/mock-play-links.mjs --port 3461 --upstream http://127.0.0.1:3460 --log build/review/playlinks/mock-requests.jsonl
-./gradlew :fabric-1.21.11:runClientGameTest -Dvibeyclient.playLinkTest=$PWD/build/review/playlinks   -Dvibeyclient.api=http://127.0.0.1:3461 -Dvibeyclient.devAuth=true -Dvibeyclient.test.relay=127.0.0.1:26460 -Dvibeyclient.devOfflineHost=true
+# vibe-backend/apps/api: NODE_ENV=development AUTH_DEV_BYPASS=1 PORT=3470 PUBLIC_URL=http://127.0.0.1:3470 DATABASE_URL=pglite://./data/pglite-links …
+# vibey-multiplayer/relay: ALLOW_OFFLINE=1 DOMAIN=vibey.henny.dev PORT=26470 DATA_DIR=<tmp> node src/main.ts
+./gradlew :fabric-1.21.11:runClientGameTest -Dvibeyclient.test.only=PlayLinksGameTest -Dvibeyclient.playLinkTest=$PWD/build/review/playlinks   -Dvibeyclient.api=http://127.0.0.1:3470 -Dvibeyclient.devAuth=true -Dvibeyclient.test.relay=127.0.0.1:26470 -Dvibeyclient.devOfflineHost=true -Dvibeyclient.username=LinkHost
 ```
+
+`scripts/mock-play-links.mjs` is still there for cases the real backend can't show on demand: it serves the play-link
+routes itself, proxies login and gateway to a local vibe-backend, and `POST /__mock/config {"missing":true}` simulates
+a backend without the routes (the test detects the mock and adds that step):
+`node scripts/mock-play-links.mjs --port 3461 --upstream http://127.0.0.1:3460`, then the same gametest with
+`-Dvibeyclient.api=http://127.0.0.1:3461`.
+
+`-Dvibeyclient.test.only=<Class>,<Class>` runs only those client game tests (any of them, e.g. `ToastGameTest`).
 
 ## Credits
 

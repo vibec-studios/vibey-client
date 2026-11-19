@@ -27,7 +27,8 @@ own on/off switch on Media's settings page, settings stored in `media.json` as `
   players' screens* (Ask first / Always load / Hide), volume; under Advanced: max resolution (360p–1080p, default
   720p), max frame rate (default 30), play distance (default 48 m), remove all my screens here.
 - **Overlay:** *Show as overlay* in a screen's controls; move and scale it in the HUD editor (Media → *HUD layout →
-  Edit*, element "Video overlay", id `media.video.overlay`, default top right).
+  Edit*, element "Video overlay", id `media.video.overlay`, default top right; it is only listed there while a screen
+  is shown as the overlay).
 
 ## What plays where
 

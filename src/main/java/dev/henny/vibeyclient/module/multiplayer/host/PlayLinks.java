@@ -280,15 +280,21 @@ public final class PlayLinks {
         } else if ("feature_disabled".equals(e.code)) {
             unsupported = true; // hosting/links switched off on the backend
             state = State.HIDDEN;
-        } else if (e.status == 401 || "not_logged_in".equals(e.code) || "unauthorized".equals(e.code)) {
+        } else if (e.status == 401 || "unauthorized".equals(e.code) || "token_expired".equals(e.code) || "invalid_token".equals(e.code)) {
             state = State.SIGNED_OUT;
         } else if (e.status == 429 || "rate_limited".equals(e.code)) {
             retryAt = System.currentTimeMillis() + (e.retryAfter > 0 ? e.retryAfter : 600) * 1000L;
             state = State.RATE_LIMITED;
         } else if (e.status == 0) {
             fail(T.get("link.error.offline"), true);
+        } else if ("bad_request".equals(e.code)) {
+            // the backend only makes links for addresses at its own relay (e.g. not for a self-hosted relay)
+            fail(T.get("link.error.relay"), false);
+        } else if ("forbidden".equals(e.code)) {
+            fail(T.get("link.error.taken"), false); // someone else is online at this address
         } else {
-            fail(e.getMessage() == null || e.getMessage().isBlank() ? T.get("link.error.generic") : e.getMessage(), e.status >= 500);
+            // the backend's own message is German only: show ours (the code is in the log)
+            fail(T.get("link.error.generic"), e.status >= 500);
         }
         LauncherStatus.changed();
     }

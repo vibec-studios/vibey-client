@@ -119,6 +119,44 @@ public final class ClientCompat {
         net.minecraft.client.gui.screens.ConfirmLinkScreen.confirmLinkNow(parent, java.net.URI.create(url));
     }
 
+    /**
+     * Lower edge (GUI px from the top) of the vanilla toasts in the top right corner (advancements, recipes, "chat
+     * messages can't be verified", ...), 0 if there are none. A toast that is sliding out counts with the part that is
+     * still on screen, so a stack laid out below follows it up smoothly. Client thread.
+     */
+    public static float vanillaToastBottom() {
+        Minecraft mc = Minecraft.getInstance();
+        //? if >=26.2 {
+        /*Object manager = mc.gui.toastManager();
+        *///?} else if >=1.21.2 {
+        Object manager = mc.getToastManager();
+        //?} else
+        /*Object manager = mc.getToasts();*/
+        if (!(manager instanceof dev.henny.vibeyclient.mixin.client.ToastManagerAccessor access)) return 0f;
+        float bottom = 0f;
+        try {
+            for (Object o : access.vibeyclient$visible()) {
+                if (!(o instanceof dev.henny.vibeyclient.mixin.client.ToastInstanceAccessor t)) continue;
+                net.minecraft.client.gui.components.toasts.Toast toast = t.vibeyclient$toast();
+                if (toast == null) continue;
+                //? if >=1.21.6 {
+                float top = toast.yPos(t.vibeyclient$slot());
+                //?} else
+                /*float top = t.vibeyclient$slot() * 32f;*/
+                //? if >=1.21.2 {
+                float shown = t.vibeyclient$visibility() == net.minecraft.client.gui.components.toasts.Toast.Visibility.SHOW
+                        ? 1f : Math.max(0f, Math.min(1f, t.vibeyclient$visiblePortion()));
+                //?} else {
+                /*float shown = t.vibeyclient$visibility() == net.minecraft.client.gui.components.toasts.Toast.Visibility.SHOW ? 1f : 0.5f;
+                *///?}
+                bottom = Math.max(bottom, (top + toast.height()) * shown);
+            }
+        } catch (RuntimeException e) {
+            return 0f; // list changed while iterating (never on the client thread) – skip this frame
+        }
+        return bottom;
+    }
+
     /** Name of the logged-in Minecraft account. */
     public static String playerName() {
         try {

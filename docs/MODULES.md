@@ -227,7 +227,7 @@ AutoCloseable h = backend.onEvent("loadout.updated", d -> ...);       // client 
 `<gameDir>/vibeyclient/auth.json` (per backend URL and Minecraft account), never in `config/`.
 
 Toasts from any module: `Notify.info/success/warn/error(title, body)` or `Notify.show(new Notify.Toast(...))`
-(icon key = a player UUID for a head). The sink is `ui/toast/ToastStack` (top right, max 4, over every screen and
+(icon key = a player UUID for a head). The sink is `ui/toast/ToastStack` (top right below any vanilla toasts, max 4, over every screen and
 on the HUD; `ToastStack.show(toast, buttons, durationMs, key)` for toasts with buttons).
 
 ## Background work

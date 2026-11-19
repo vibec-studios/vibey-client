@@ -8,7 +8,9 @@
   "client": [
     "client.MouseHandlerAccessor",
     "client.RenderTypeInvoker",
-    "client.ScreenSwapMixin"
+    "client.ScreenSwapMixin",
+    "client.ToastInstanceAccessor",
+    "client.ToastManagerAccessor"
   ],
   "server": [],
   "injectors": {
