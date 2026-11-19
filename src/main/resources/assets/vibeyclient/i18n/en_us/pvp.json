@@ -69,6 +69,8 @@
   },
   "hud": {
     "togglestate": "Sprint / sneak indicator",
+    "togglestate.desc": "Shows when toggle sprint or sneak is on",
+    "togglestate.icon": "Show icon",
     "sprinting": "Sprinting (toggled)",
     "sprintReady": "Sprint ready (toggled)",
     "sneaking": "Sneaking (toggled)"

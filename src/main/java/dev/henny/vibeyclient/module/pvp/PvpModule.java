@@ -170,7 +170,7 @@ public final class PvpModule extends VibeyModule {
 
     @Override
     public void renderHud(Gfx g) {
-        PvpHud.draw(g);
+        // the toggle-state widget is drawn by the core HUD widget system (PvpHud)
     }
 
     @Override

@@ -435,7 +435,10 @@ public final class PvpGameTest implements FabricClientGameTest {
         ctx.getInput().pressKey(mc -> mc.keyShift);
         ctx.waitTicks(2);
         // the indicator in the HUD editor
-        ctx.runOnClient(mc -> dev.henny.vibeyclient.ui.hud.HudLayout.openEditor(null));
+        ctx.runOnClient(mc -> {
+            dev.henny.vibeyclient.ui.hud.HudLayout.setFlag("intro", true); // the first-run intro is HudGameTest's
+            dev.henny.vibeyclient.ui.hud.HudLayout.openEditor(null);
+        });
         ctx.waitTicks(6);
         shot(ctx, "pvp_82_hud_editor_indicator");
         ctx.setScreen(() -> null);

@@ -123,11 +123,21 @@ the pause menu, a *Manage* menu with players, whitelist and ban list (enforced b
 *Force mods*. Friends join with a normal Minecraft through *Multiplayer → Direct Connection*, or with one click from
 your invite.
 
+<<<<<<< HEAD
+### HUD module (Fabric 1.21.11 for now)
+
+FPS, CPS, keystrokes, coordinates, armour, potion effects, clock, ping, server, speed, in-game time, item counters,
+memory and a compass – placed with the **HUD editor** (**H** or *HUD* in the pause menu): drag with snapping and
+guides, eight resize handles, multi-select, undo/redo, a style popover (colours, background, corners, rainbow text,
+size, detail), a widget library, templates (PvP, Minimal, Building, Streamer) and share codes. Layouts keep their
+place at every window size and GUI scale. Details: [docs/HUD.md](docs/HUD.md).
+=======
 While you host, Vibey also makes an **invite link** (`https://vibe.henny.dev/j/<code>`, needs a Vibe login): *Copy
 invite link* in the host window and in the pause menu. Friends with the Vibe Launcher open it, the launcher installs
 your modpack/mods and joins your world. The host window also tells you when mods were added by hand (friends need
 those too). With the Vibe Launcher the client writes `.vibe/session.json` for the launcher's Discord status (world,
 server, invite link); switch it off under *General → Online* ("Show what I'm playing to the launcher").
+>>>>>>> main
 
 ### Media module (Fabric)
 
@@ -166,7 +176,7 @@ and the now playing bar with the **HUD editor**. Fabric only, just like the stan
 | *unbound* | Open the wardrobe | Cosmetics |
 | *unbound* | Open the host screen | Multiplayer |
 | *unbound* | Play / pause song, next / previous song, hide / show lyrics, lyrics 0.1 s earlier / later | Media (Fabric) |
-| *unbound* | HUD editor (move and resize HUD elements) | Media (Fabric) |
+| **H** | HUD editor (move, resize and style HUD widgets) | HUD (Fabric 1.21.11) |
 
 Change them under *Options → Controls → Vibey Client* or in the module settings in the Vibey menu. The keys only
 work while their module is switched on.

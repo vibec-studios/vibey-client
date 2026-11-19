@@ -10,7 +10,6 @@
     "editHud": "HUD layout",
     "editHud.desc": "Move and resize the lyrics, the now playing bar and other overlays.",
     "editHud.button": "Edit",
-    "hudEditor": "Key: HUD editor",
     "editHud.action": "Edit HUD layout"
   }
 }

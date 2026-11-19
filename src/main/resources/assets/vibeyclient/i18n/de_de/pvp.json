@@ -69,6 +69,8 @@
   },
   "hud": {
     "togglestate": "Sprint-/Schleich-Anzeige",
+    "togglestate.desc": "Zeigt, wenn Dauer-Sprint oder -Schleichen an ist",
+    "togglestate.icon": "Symbol zeigen",
     "sprinting": "Sprintet (umgeschaltet)",
     "sprintReady": "Sprint bereit (umgeschaltet)",
     "sneaking": "Schleicht (umgeschaltet)"

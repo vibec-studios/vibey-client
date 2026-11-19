@@ -35,9 +35,6 @@ public final class MediaModule extends VibeyModule {
     private static MediaModule instance;
 
     public final ActionSetting editHud = action("editHud", () -> HudLayout.openEditor(ClientCompat.screen()));
-    public final KeybindSetting hudEditor = keybind("hudEditor", Keys.UNBOUND).onPress(() -> {
-        if (ClientCompat.screen() == null) HudLayout.openEditor(null);
-    });
 
     private final List<MediaFeature> features = new ArrayList<>();
     private boolean loaded;
