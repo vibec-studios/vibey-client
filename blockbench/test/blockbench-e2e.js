@@ -22,6 +22,26 @@ const { validate: specValidate } = require('./spec-validator');
 const { createMockGame } = require('./mock-game-server');
 const { fakeOgg, pngB64 } = require('./fixtures');
 const { launchBlockbench, sleep } = require('./bb-harness');
+const { execFileSync } = require('child_process');
+
+/** Every starter bundle (content/dist and content/dist/polar-pals). */
+function starterFiles() {
+	const dir = path.join(path.resolve(__dirname, '..', '..'), 'content', 'dist');
+	const list = (d) => (fs.existsSync(d) ? fs.readdirSync(d).filter((f) => f.endsWith('.vibey')).map((f) => path.join(d, f)) : []);
+	return list(dir).concat(list(path.join(dir, 'polar-pals')));
+}
+/** The last released plugin (0.2.4, before "build on the player") from git, or null. */
+function oldPluginFile() {
+	try {
+		const src = execFileSync('git', ['show', 'blockbench-v0.2.4:blockbench/vibey.js'], { cwd: path.resolve(__dirname, '..'), maxBuffer: 64 * 1024 * 1024 });
+		const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vibey-old-plugin-'));
+		const file = path.join(dir, 'vibey.js');
+		fs.writeFileSync(file, src);
+		return file;
+	} catch (e) {
+		return null;
+	}
+}
 
 const args = process.argv.slice(2);
 const flag = (n) => args.includes('--' + n);
@@ -180,7 +200,8 @@ async function main() {
 			const r = await cdp.run((oggB64) => {
 				const main = Texture.all.find((t) => t.name === 'main');
 				const glow = Texture.all.find((t) => t.name === 'glow');
-				const hat = new Group({ name: 'hat', origin: [0, 24, 0], vibey_attach: 'head' }).addTo().init();
+				const refs = VibeyPlugin.Refs.map();
+				const hat = new Group({ name: 'hat', origin: [0, 24, 0] }).addTo(refs.head).init();
 				new Cube({ name: 'brim', from: [-5, 32, -5], to: [5, 33, 5], box_uv: true, uv_offset: [0, 0] }).addTo(hat).init();
 				const top = new Group({ name: 'top', origin: [0, 33, 0], rotation: [0, 10, 0], vibey_emissive: true }).addTo(hat).init();
 				const f = (uv) => ({ uv, texture: glow.uuid });
@@ -189,7 +210,7 @@ async function main() {
 					faces: { north: f([0, 0, 6, 4]), south: f([6, 0, 12, 4]), east: { uv: [0, 0, 1, 1], texture: null }, west: f([0, 4, 6, 8]), up: f([6, 6, 0, 0]), down: f([12, 0, 6, 6]) },
 				}).addTo(top).init();
 				new Locator({ name: 'tip', position: [0, 38, 0] }).addTo(top).init();
-				const sleeve = new Group({ name: 'sleeve', origin: [5, 22, 0], vibey_attach: 'right_arm', vibey_translucent: true }).addTo().init();
+				const sleeve = new Group({ name: 'sleeve', origin: [5, 22, 0], vibey_translucent: true }).addTo(refs.right_arm).init();
 				// exactly on the reference player's right arm (same box + uv as the arm)
 				new Cube({ name: 'arm_cover', from: [4, 12, -2], to: [8, 24, 2], box_uv: true, uv_offset: [40, 16] }).addTo(sleeve).init();
 				const bytes = Uint8Array.from(atob(oggB64), (c) => c.charCodeAt(0));
@@ -212,7 +233,7 @@ async function main() {
 				fx.addKeyframe({ channel: 'timeline', time: 1.2, data_points: [{ vibey_bone: 'top', vibey_visible: false }] });
 				fx.addKeyframe({ channel: 'timeline', time: 1.8, data_points: [{ vibey_bone: 'top', vibey_visible: true }] });
 				Canvas.updateAll();
-				return { groups: Group.all.length, cubes: Cube.all.length, sounds: VibeyPlugin.getMeta().sounds.map((s) => s.id), fx: !!anim.animators.effects };
+				return { groups: Group.all.filter((g) => !g.vibey_ref).length, cubes: Cube.all.length, sounds: VibeyPlugin.getMeta().sounds.map((s) => s.id), fx: !!anim.animators.effects };
 			}, ogg);
 			assert.deepEqual(r, { groups: 3, cubes: 3, sounds: ['pop'], fx: true });
 		});
@@ -220,8 +241,8 @@ async function main() {
 		await check('reference player: toggleable, and the right-arm cube coincides with the reference arm (north = -Z)', async () => {
 			const r = await cdp.run(() => {
 				VibeyPlugin.Reference.ensure();
-				const ref = Project.model_3d.children.find((c) => c.name === 'vibey_reference');
-				const refArm = ref.getObjectByName('vibey_ref_right_arm');
+				const refs = VibeyPlugin.Refs.map();
+				const refArm = refs.right_arm.mesh.getObjectByName('vibey_ref_right_arm');
 				const cube = Cube.all.find((c) => c.name === 'arm_cover');
 				Project.model_3d.updateMatrixWorld(true);
 				const b1 = new THREE.Box3().setFromObject(refArm);
@@ -231,13 +252,13 @@ async function main() {
 				const nIdx = Canvas.face_order.indexOf('north');
 				const pos = cube.mesh.geometry.attributes.position;
 				const zs = [0, 1, 2, 3].map((j) => new THREE.Vector3().fromBufferAttribute(pos, nIdx * 4 + j).applyMatrix4(cube.mesh.matrixWorld).z);
-				const headNorth = ref.getObjectByName('vibey_ref_head').geometry.attributes.position;
+				const headNorth = refs.head.mesh.getObjectByName('vibey_ref_head').geometry.attributes.position;
 				const headZ = [0, 1, 2, 3].map((j) => headNorth.getZ(nIdx * 4 + j));
 				const scene = Project.model_3d.position.toArray();
 				VibeyPlugin.setReferenceVisible(false);
-				const hidden = ref.visible;
+				const hidden = refArm.visible;
 				VibeyPlugin.setReferenceVisible(true);
-				return { refBox: [round(b1.min), round(b1.max)], cubeBox: [round(b2.min), round(b2.max)], northZ: zs, headZ, scene, hidden, shown: ref.visible, sleevePivot: Group.all.find((g) => g.name === 'sleeve').origin.slice() };
+				return { refBox: [round(b1.min), round(b1.max)], cubeBox: [round(b2.min), round(b2.max)], northZ: zs, headZ, scene, hidden, shown: refArm.visible, sleevePivot: Group.all.find((g) => g.name === 'sleeve').origin.slice() };
 			});
 			assert.deepEqual(r.refBox, r.cubeBox, 'cube on the right arm must coincide with the reference right arm');
 			assert.deepEqual(r.cubeBox, [[4, 12, -2], [8, 24, 2]].map((v) => v.map((n, i) => n + r.scene[i])));
@@ -248,23 +269,164 @@ async function main() {
 			assert.equal(r.shown, true);
 		});
 
-		await check('element panel shows attach/emissive/translucent for root groups', async () => {
+		await check('element panel: glowing/translucent, no attach setting (the player group decides)', async () => {
 			const r = await cdp.run(async () => {
 				Modes.options.edit.select();
 				const g = Group.all.find((x) => x.name === 'sleeve');
 				g.select();
 				updateSelection();
 				await new Promise((res) => setTimeout(res, 300));
-				const form = Panels.element.form;
-				return { attach: form.getResult().group__vibey_attach, translucent: form.getResult().group__vibey_translucent };
+				const form = Panels.element.form.getResult();
+				return { attach: 'group__vibey_attach' in form, translucent: form.group__vibey_translucent };
 			});
-			assert.deepEqual(r, { attach: 'right_arm', translucent: true });
+			assert.deepEqual(r, { attach: false, translucent: true });
 			const panels = await cdp.eval(`[...document.querySelectorAll('.vibey_panel')].map(e => { const p = []; for (let n = e; n && p.length < 6; n = n.parentElement) p.push(n.id || n.className); return p.join(' < '); })`);
 			assert.equal(panels.length, 1, 'Vibey panel must exist once: ' + JSON.stringify(panels));
 			await cdp.eval(`Preview.selected.loadAnglePreset({position: [55, 42, -60], target: [0, 18, 0]}), true`);
-			// show the Element tab (Attach / Glowing / Translucent) for the screenshot
-			await cdp.eval(`(() => { try { const host = Panels.element.getHostPanel(); host.selectTab(Panels.element); } catch (e) {} return true; })()`);
+			await cdp.eval(`(() => { const g = VibeyPlugin.Refs.map(); g.head.isOpen = true; g.right_arm.isOpen = true; return true; })()`);
 			await screenshot(cdp, 'blockbench-cosmetic-edit.png');
+		});
+
+		// ------------------------------------------------- build on the player
+		console.log('\nBuild on the player');
+		const TT = (k, ...a) => Core.STRINGS[k][DE ? 1 : 0].replace(/%(\d)/g, (m, i) => a[i]);
+		const label = (id) => '◆ ' + TT('ref_' + id);
+		await check('player groups: vanilla pivots, labelled + coloured in the UI language, never exported', async () => {
+			const r = await cdp.run(() => {
+				const refs = VibeyPlugin.Refs.map();
+				const css = (document.getElementById('vibey_ref_styles') || {}).textContent || '';
+				return {
+					refs: Object.keys(refs).map((id) => [id, refs[id].name, refs[id].origin.slice(), refs[id].parent === 'root' ? null : refs[id].parent.vibey_ref]),
+					styled: Object.values(refs).every((g) => css.includes(g.uuid)),
+					outliner: [...document.querySelectorAll('#cubes_list li.outliner_node > .outliner_object input.cube_name')].slice(0, 4).map((i) => i.value),
+					bones: VibeyPlugin.buildBundle().bundle.model.bones.map((b) => b.name),
+				};
+			});
+			const want = Core.refGroupsFor('cosmetic', 'hat');
+			assert.deepEqual(r.refs.map((x) => x[0]).sort(), want.map((d) => d.id).sort());
+			for (const [id, name, origin, parent] of r.refs) {
+				assert.equal(name, label(id));
+				assert.deepEqual(origin, Core.refPivot(id, {}), id + ' pivot');
+				assert.equal(parent, Core.refParent(Core.REF_BY_ID[id], 'cosmetic'), id + ' parent');
+			}
+			for (const p of Core.PLAYER_PARTS) assert.deepEqual(r.refs.find((x) => x[0] === p)[2], Core.PLAYER_PIVOTS[p], p + ' = SPEC pivot');
+			assert.equal(r.styled, true, 'every player group is coloured in the outliner');
+			assert.equal(r.outliner[0], label('head'));
+			assert.deepEqual(r.bones.sort(), ['hat', 'sleeve', 'top']);
+		});
+		await check('right-click › Attach to … moves a part to another player group (undoable)', async () => {
+			const r = await cdp.run(async () => {
+				Modes.options.edit.select();
+				const sleeve = Group.all.find((g) => g.name === 'sleeve');
+				sleeve.select();
+				updateSelection();
+				const entry = Group.prototype.menu.structure.find((x) => x && x.id === 'vibey_attach_to');
+				const items = entry.children();
+				sleeve.showContextMenu(new MouseEvent('contextmenu', { clientX: 400, clientY: 300 }));
+				await new Promise((res) => setTimeout(res, 300));
+				const shown = [...document.querySelectorAll('.contextMenu li')].map((li) => li.textContent.trim()).filter(Boolean);
+				if (window.open_menu && open_menu.hide) open_menu.hide();
+				items.find((i) => i.id === 'vibey_attach_left_arm').click();
+				await new Promise((res) => setTimeout(res, 200));
+				const moved = { parent: sleeve.parent.vibey_ref, attach: VibeyPlugin.buildBundle().bundle.model.bones.find((b) => b.name === 'sleeve').attach, toast: [...document.querySelectorAll('.toast_notification')].map((t) => t.textContent.trim()) };
+				Undo.undo();
+				await new Promise((res) => setTimeout(res, 200));
+				const s2 = Group.all.find((g) => g.name === 'sleeve');
+				return { name: entry.name, items: items.filter((i) => typeof i === 'object').map((i) => i.id), shown, moved, back: s2.parent.vibey_ref, attachBack: VibeyPlugin.buildBundle().bundle.model.bones.find((b) => b.name === 'sleeve').attach };
+			});
+			assert.equal(r.name, TT('attach_to'));
+			assert.ok(r.shown.some((t) => t.endsWith(TT('attach_to')) || t.includes(TT('attach_to') + 'radio')), 'context menu shows "' + TT('attach_to') + '": ' + r.shown.slice(-30).join(' | '));
+			assert.ok(r.items.includes('vibey_attach_back') && r.items.includes('vibey_attach_root'), r.items.join());
+			assert.deepEqual(r.moved.parent, 'left_arm');
+			assert.equal(r.moved.attach, 'left_arm');
+			assert.ok(r.moved.toast.some((t) => t.includes(TT('attached_manual', label('left_arm')))), 'hint: ' + r.moved.toast.join(' | '));
+			assert.equal(r.back, 'right_arm', 'Ctrl+Z puts it back');
+			assert.equal(r.attachBack, 'right_arm');
+		});
+		await check('auto-assign: a new part outside the player groups snaps to the nearest one, with a hint; Ctrl+Z keeps it where it was', async () => {
+			const r = await cdp.run(async () => {
+				const wait = (ms) => new Promise((res) => setTimeout(res, ms));
+				document.querySelectorAll('.toast_notification').forEach((t) => t.remove());
+				// a halo floating above the head, added at the top level of the outliner
+				Undo.initEdit({ outliner: true, elements: [] });
+				const halo = new Group({ name: 'halo', origin: [0, 38, 0] }).addTo().init();
+				new Cube({ name: 'ring', from: [-3, 37, -3], to: [3, 38, 3], box_uv: true }).addTo(halo).init();
+				Undo.finishEdit('add halo', { outliner: true, elements: Cube.all.filter((c) => c.name === 'ring') });
+				await wait(400);
+				const placed = { ref: VibeyPlugin.refOfNode(halo), toast: [...document.querySelectorAll('.toast_notification')].map((t) => t.textContent.trim()), auto: halo.vibey_auto };
+				// moving an automatically attached part to the back re-attaches it
+				Undo.initEdit({ elements: halo.children.slice(), outliner: true });
+				halo.children.forEach((c) => {
+					c.from.V3_set(-3, 18, 4);
+					c.to.V3_set(3, 22, 6);
+				});
+				halo.origin.V3_set(0, 20, 5);
+				Undo.finishEdit('move halo', { elements: halo.children.slice(), outliner: true });
+				await wait(400);
+				const followed = VibeyPlugin.refOfNode(Group.all.find((g) => g.name === 'halo'));
+				// Ctrl+Z of the automatic step: the part stays where the creator put it
+				Undo.undo();
+				await wait(300);
+				const afterUndo = VibeyPlugin.refOfNode(Group.all.find((g) => g.name === 'halo'));
+				// a later edit does not grab it again
+				Undo.initEdit({ outliner: true, elements: [] });
+				new Locator({ name: 'spot', position: [0, 30, -4] }).addTo(VibeyPlugin.Refs.map().head).init();
+				Undo.finishEdit('add locator', { outliner: true });
+				await wait(400);
+				const stays = VibeyPlugin.refOfNode(Group.all.find((g) => g.name === 'halo'));
+				// tidy up: remove the test parts again
+				Undo.initEdit({ outliner: true, elements: Cube.all.slice() });
+				Group.all.find((g) => g.name === 'halo').remove();
+				Locator.all.filter((l) => l.name === 'spot').forEach((l) => l.remove());
+				Undo.finishEdit('remove test parts');
+				await wait(300);
+				return { placed, followed, afterUndo, stays, left: Group.all.filter((g) => !g.vibey_ref).map((g) => g.name).sort() };
+			});
+			assert.equal(r.placed.ref, 'above_head', 'a floating halo goes to Above head');
+			assert.equal(r.placed.auto, true);
+			assert.ok(r.placed.toast.some((t) => t.includes(TT('attached_hint', label('above_head')))), 'non-blocking hint: ' + r.placed.toast.join(' | '));
+			assert.equal(r.followed, 'back', 'moved to the back -> follows to Back');
+			assert.equal(r.afterUndo, 'above_head', 'Ctrl+Z undoes the automatic step only');
+			assert.equal(r.stays, 'above_head', 'not attached again after the undo');
+			assert.deepEqual(r.left, ['hat', 'sleeve', 'top']);
+		});
+		await check('outliner drag into a player group is kept; moved player groups snap back', async () => {
+			const r = await cdp.run(async () => {
+				const wait = (ms) => new Promise((res) => setTimeout(res, ms));
+				const refs = VibeyPlugin.Refs.map();
+				const sleeve = Group.all.find((g) => g.name === 'sleeve');
+				// what the outliner does on drop: an outliner edit that changes the parent
+				Undo.initEdit({ outliner: true });
+				sleeve.addTo(refs.hips);
+				Undo.finishEdit('Drag elements in outliner');
+				await wait(400);
+				const dropped = VibeyPlugin.refOfNode(sleeve);
+				// a stray gizmo drag of a player group: it (and what is inside) goes back, with a note
+				document.querySelectorAll('.toast_notification').forEach((t) => t.remove());
+				const hips = refs.hips;
+				Undo.initEdit({ outliner: true, elements: Cube.all.slice() });
+				// what the move gizmo does to a group: the pivot and everything inside move together
+				const d = [3, -9, 3];
+				hips.origin.V3_set(hips.origin[0] + d[0], hips.origin[1] + d[1], hips.origin[2] + d[2]);
+				sleeve.origin.V3_set(sleeve.origin[0] + d[0], sleeve.origin[1] + d[1], sleeve.origin[2] + d[2]);
+				sleeve.children.forEach((c) => (c.from.V3_set(c.from[0] + d[0], c.from[1] + d[1], c.from[2] + d[2]), c.to.V3_set(c.to[0] + d[0], c.to[1] + d[1], c.to[2] + d[2])));
+				hips.rotation.V3_set(0, 30, 0);
+				Undo.finishEdit('Move group');
+				await wait(400);
+				const kept = { origin: refs.hips.origin.slice(), rotation: refs.hips.rotation.slice(), sleeve: sleeve.origin.slice(), cube: sleeve.children[0].from.slice(), toast: [...document.querySelectorAll('.toast_notification')].map((t) => t.textContent.trim()) };
+				Undo.initEdit({ outliner: true });
+				sleeve.addTo(refs.right_arm);
+				Undo.finishEdit('Drag elements in outliner');
+				await wait(300);
+				return { dropped, kept, final: VibeyPlugin.refOfNode(sleeve), errors: VibeyPlugin.buildBundle().errors };
+			});
+			assert.equal(r.dropped, 'hips', 'a part dragged by hand is never moved again');
+			assert.deepEqual(r.kept.origin, [0, 12, 0]);
+			assert.deepEqual(r.kept.rotation, [0, 0, 0]);
+			assert.deepEqual([r.kept.sleeve, r.kept.cube], [[5, 22, 0], [4, 12, -2]], 'the content moves back with the player group');
+			assert.ok(r.kept.toast.some((t) => t.includes(TT('ref_kept'))), r.kept.toast.join(' | '));
+			assert.equal(r.final, 'right_arm');
+			assert.deepEqual(r.errors, []);
 		});
 
 		let cosmeticJson, cosmeticBundle;
@@ -460,11 +622,11 @@ async function main() {
 				VibeyPlugin.importBundle(json, p);
 				for (let i = 0; i < 100 && !Texture.all.every((t) => t.width); i++) await new Promise((res) => setTimeout(res, 50));
 				const c = VibeyPlugin.compileProjectJSON();
-				return { json: c.json, errors: c.errors, format: Format.id, groups: Group.all.map((g) => g.name), tabs: ModelProject.all.length };
+				return { json: c.json, errors: c.errors, format: Format.id, groups: Group.all.filter((g) => !g.vibey_ref).map((g) => g.name + '@' + VibeyPlugin.refOfNode(g)), tabs: ModelProject.all.length };
 			}, cosmeticJson, file);
 			assert.deepEqual(r.errors, []);
 			assert.equal(r.format, 'vibey_cosmetic');
-			assert.deepEqual(r.groups.sort(), ['hat', 'sleeve', 'top']);
+			assert.deepEqual(r.groups.sort(), ['hat@head', 'sleeve@right_arm', 'top@head']);
 			assert.deepEqual(JSON.parse(r.json), cosmeticBundle);
 			assert.equal(r.json, cosmeticJson, 'byte-identical re-export');
 		});
@@ -502,16 +664,18 @@ async function main() {
 			});
 			await screenshot(cdp, 'blockbench-new-emote-dialog.png');
 			await cdp.eval('Dialog.open.confirm(), true');
-			const rig = await cdp.eval(`Group.all.map(g => ({ name: g.name, parent: g.parent === 'root' ? null : g.parent.name, origin: g.origin.slice() }))`);
+			const rig = await cdp.eval(`Group.all.filter(g => VibeyPlugin.Core.PLAYER_BONES.includes(g.vibey_ref)).map(g => ({ ref: g.vibey_ref, name: g.name, parent: g.parent === 'root' ? null : g.parent.vibey_ref, origin: g.origin.slice() }))`);
 			assert.deepEqual(rig, [
-				{ name: 'root', parent: null, origin: [0, 0, 0] },
-				{ name: 'head', parent: 'root', origin: [0, 24, 0] },
-				{ name: 'body', parent: 'root', origin: [0, 24, 0] },
-				{ name: 'right_arm', parent: 'root', origin: [5, 22, 0] },
-				{ name: 'left_arm', parent: 'root', origin: [-5, 22, 0] },
-				{ name: 'right_leg', parent: 'root', origin: [1.9, 12, 0] },
-				{ name: 'left_leg', parent: 'root', origin: [-1.9, 12, 0] },
+				{ ref: 'root', name: label('root'), parent: null, origin: [0, 0, 0] },
+				{ ref: 'head', name: label('head'), parent: 'root', origin: [0, 24, 0] },
+				{ ref: 'body', name: label('body'), parent: 'root', origin: [0, 24, 0] },
+				{ ref: 'right_arm', name: label('right_arm'), parent: 'root', origin: [5, 22, 0] },
+				{ ref: 'left_arm', name: label('left_arm'), parent: 'root', origin: [-5, 22, 0] },
+				{ ref: 'right_leg', name: label('right_leg'), parent: 'root', origin: [1.9, 12, 0] },
+				{ ref: 'left_leg', name: label('left_leg'), parent: 'root', origin: [-1.9, 12, 0] },
 			]);
+			const subs = await cdp.eval(`Group.all.filter(g => g.vibey_ref && !VibeyPlugin.Core.PLAYER_BONES.includes(g.vibey_ref)).map(g => g.vibey_ref + '<' + (g.parent === 'root' ? '' : g.parent.vibey_ref)).sort()`);
+			assert.deepEqual(subs, ['above_head<head', 'around<', 'back<body', 'hips<body', 'shoulder_left<body', 'shoulder_right<body'], 'same sub-points as cosmetics');
 			const meta = await cdp.eval('JSON.parse(JSON.stringify(VibeyPlugin.getMeta()))');
 			assert.equal(meta.id, 'e2e:flag_wave');
 			assert.equal(meta.emote.stopOnMove, false);
@@ -520,7 +684,7 @@ async function main() {
 		await check('build emote: prop on right arm, cube directly in a player bone, locator, keyframes, events', async () => {
 			await cdp.run(page.makeTextures);
 			const r = await cdp.run(() => {
-				const arm = Group.all.find((g) => g.name === 'right_arm');
+				const arm = VibeyPlugin.findBone('right_arm');
 				const flag = new Group({ name: 'flag', origin: [6, 12, 0] }).addTo(arm).init();
 				new Cube({ name: 'pole', from: [5.5, 2, -0.5], to: [6.5, 14, 0.5], box_uv: true, uv_offset: [0, 0] }).addTo(flag).init();
 				new Cube({ name: 'cloth', from: [6, 9, 0], to: [6, 14, 8], box_uv: false, faces: { east: { uv: [0, 0, 8, 5] }, west: { uv: [8, 0, 0, 5] }, north: { uv: [0, 0, 0, 0], texture: null }, south: { uv: [0, 0, 0, 0], texture: null }, up: { uv: [0, 0, 0, 0], texture: null }, down: { uv: [0, 0, 0, 0], texture: null } } }).addTo(flag).init();
@@ -533,10 +697,10 @@ async function main() {
 				ra.addKeyframe({ channel: 'rotation', time: 0.5, interpolation: 'catmullrom', data_points: [{ x: 0, y: 0, z: 160 }] });
 				ra.addKeyframe({ channel: 'rotation', time: 1, interpolation: 'catmullrom', data_points: [{ x: 0, y: 0, z: 130 }] });
 				ra.addKeyframe({ channel: 'rotation', time: 2, data_points: [{ x: 0, y: 0, z: 0 }] });
-				const root = anim.getBoneAnimator(Group.all.find((g) => g.name === 'root'));
+				const root = anim.getBoneAnimator(VibeyPlugin.findBone('root'));
 				root.addKeyframe({ channel: 'position', time: 0, interpolation: 'step', data_points: [{ x: 0, y: 0, z: 0 }] });
 				root.addKeyframe({ channel: 'position', time: 1, data_points: [{ x: 0, y: 1, z: 0 }] });
-				const head = anim.getBoneAnimator(Group.all.find((g) => g.name === 'head'));
+				const head = anim.getBoneAnimator(VibeyPlugin.findBone('head'));
 				head.addKeyframe({ channel: 'rotation', time: 0.5, data_points: [{ x: -15, y: 20, z: 0 }] });
 				const fa = anim.getBoneAnimator(Group.all.find((g) => g.name === 'flag'));
 				fa.addKeyframe({ channel: 'rotation', time: 0.75, data_points: [{ x: 0, y: 25, z: 0 }] });
@@ -545,9 +709,9 @@ async function main() {
 				fx.addKeyframe({ channel: 'sound', time: 0.4, data_points: [{ effect: 'minecraft:entity.player.attack.sweep', vibey_pitch: '1.4' }] });
 				fx.addKeyframe({ channel: 'timeline', time: 1.9, data_points: [{ vibey_bone: 'flag', vibey_visible: false }] });
 				Canvas.updateAll();
-				return Group.all.length;
+				return Group.all.filter((g) => !g.vibey_ref).length;
 			});
-			assert.equal(r, 8);
+			assert.equal(r, 1);
 		});
 		await check('animate mode: reference cubes follow the animated player bones (screenshot)', async () => {
 			const r = await cdp.run(async () => {
@@ -557,7 +721,7 @@ async function main() {
 				Timeline.setTime(0.5);
 				Animator.preview();
 				await new Promise((res) => setTimeout(res, 200));
-				const arm = Group.all.find((g) => g.name === 'right_arm');
+				const arm = VibeyPlugin.findBone('right_arm');
 				const ref = arm.mesh.children.find((c) => c.name === 'vibey_ref_right_arm');
 				Project.model_3d.updateMatrixWorld(true);
 				const box = new THREE.Box3().setFromObject(ref);
@@ -618,7 +782,7 @@ async function main() {
 				// the same path as File > Open / drag & drop: Blockbench picks the codec by its load_filter
 				loadModelFile({ path: 'emote.vibey', name: 'emote.vibey', content: json });
 				for (let i = 0; i < 100 && !Texture.all.every((t) => t.width); i++) await new Promise((res) => setTimeout(res, 50));
-				const arm = Group.all.find((g) => g.name === 'right_arm');
+				const arm = VibeyPlugin.findBone('right_arm');
 				const c = VibeyPlugin.compileProjectJSON();
 				return { json: c.json, errors: c.errors, armChildren: arm.children.map((x) => x.name) };
 			}, emoteJson);
@@ -682,6 +846,11 @@ async function main() {
 			const click = (sel) => cdp.run((s) => (document.querySelector(s).click(), true), sel);
 			await click('#vibey_wizard .vw_card[data-value=cosmetic]');
 			await cdp.waitFor(() => !!document.querySelector('#vibey_wizard .vw_card[data-value=wings]'));
+			const chips = await cdp.eval(`Object.fromEntries([...document.querySelectorAll('#vibey_wizard .vw_card')].map((c) => [c.getAttribute('data-value'), (c.querySelector('.vw_on') || {}).textContent || '']))`);
+			assert.equal(chips.wings, TT('wz_builds_on', label('back')));
+			assert.equal(chips.hat, TT('wz_builds_on', label('head') + ' / ' + label('above_head')));
+			assert.equal(chips.pet, TT('wz_builds_on', label('beside')));
+			assert.equal(chips.cape, '', 'texture-only slots build on nothing');
 			await click('#vibey_wizard .vw_card[data-value=wings]');
 			await cdp.waitFor(() => !!document.querySelector('#vibey_wizard input.vw_name_en'));
 			// "Next" is refused without a name
@@ -705,19 +874,24 @@ async function main() {
 			await cdp.waitFor(() => !Dialog.open && Format.id === 'vibey_cosmetic' && Texture.all.length && Texture.all[0].width, 8000);
 			await cdp.waitFor(() => VibeyPlugin.getMeta().wizard && VibeyPlugin.getMeta().wizard.textureHash, 5000);
 			const r = await cdp.run(() => {
-				const groups = Group.all.map((g) => ({ name: g.name, parent: g.parent === 'root' ? null : g.parent.name, attach: g.vibey_attach, origin: g.origin.slice() }));
+				const groups = Group.all.filter((g) => !g.vibey_ref).map((g) => ({ name: g.name, parent: g.parent === 'root' ? null : g.parent.vibey_ref ? '◆' + g.parent.vibey_ref : g.parent.name, origin: g.origin.slice() }));
+				const css = (document.getElementById('vibey_ref_styles') || {}).textContent || '';
+				const back = VibeyPlugin.Refs.map().back;
 				const c = VibeyPlugin.compileProjectJSON();
 				return {
 					groups, anims: Animator.animations.map((a) => a.name + ':' + a.loop), tex: Texture.all.map((t) => [t.name, t.width, t.height]),
 					meta: { id: VibeyPlugin.getMeta().id, name: VibeyPlugin.getMeta().name, slot: VibeyPlugin.getMeta().slot },
 					ref: VibeyPlugin.getMeta().showReference, guide: !!document.querySelector('.vibey_guide .vg_step'), errors: c.errors, json: c.json,
+					highlighted: css.includes(back.uuid + '"] > .outliner_object { background: rgba(139'), selected: Group.first_selected ? Group.first_selected.name : null,
 				};
 			});
 			assert.deepEqual(r.groups, [
-				{ name: 'wings', parent: null, attach: 'body', origin: [0, 21, 2] },
-				{ name: 'wing_right', parent: 'wings', attach: '', origin: [1.5, 21, 2.5] },
-				{ name: 'wing_left', parent: 'wings', attach: '', origin: [-1.5, 21, 2.5] },
+				{ name: 'wings', parent: '◆back', origin: [0, 21, 2] },
+				{ name: 'wing_right', parent: 'wings', origin: [1.5, 21, 2.5] },
+				{ name: 'wing_left', parent: 'wings', origin: [-1.5, 21, 2.5] },
 			]);
+			assert.equal(r.highlighted, true, 'wings: ◆ Back is highlighted');
+			assert.equal(r.selected, 'wings', 'the item\'s own group is selected for the first cube');
 			assert.deepEqual(r.anims, ['idle:loop', 'walk:loop', 'fly:loop', 'sneak:loop', 'glide:loop']);
 			assert.deepEqual(r.tex, [['main', 64, 64]]);
 			assert.deepEqual(r.meta, { id: 'creator:frost_wings', name: { en: 'Frost Wings', de: 'Frostflügel' }, slot: 'wings' });
@@ -734,6 +908,7 @@ async function main() {
 			let s = await state();
 			assert.deepEqual(s.map((x) => x.split(':').slice(0, 2).join(':')), ['model:todo', 'texture:todo', 'animate:todo', 'effects:optional', 'live:todo', 'export:todo']);
 			assert.ok(s[0].endsWith(T('chk_model_empty', 'wings')), s[0]);
+			assert.match(await cdp.eval(`document.querySelector('.vibey_guide .vg_current .vg_text').textContent`), new RegExp(label('back')), 'the guide says where the wings sit');
 			assert.ok(s[1].endsWith(T('chk_tex_template')), s[1]);
 			assert.ok(s[2].endsWith(T('chk_anim_empty', 'idle')), s[2]);
 			assert.ok(s[4].endsWith(T('chk_live_off')) || s[4].endsWith(T('chk_live_connecting')), s[4]);
@@ -874,7 +1049,8 @@ async function main() {
 					const c = VibeyPlugin.compileProjectJSON();
 					res[slot] = {
 						format: Format.id, errors: c.errors, json: c.json,
-						groups: Group.all.map((g) => g.name + (g.vibey_preview ? '*' : '')),
+						groups: Group.all.filter((g) => !g.vibey_ref).map((g) => g.name + (g.vibey_preview ? '*' : '') + (VibeyPlugin.refOfNode(g) ? '@' + VibeyPlugin.refOfNode(g) : '')),
+						refs: Group.all.filter((g) => g.vibey_ref).map((g) => g.vibey_ref),
 						locked: Cube.all.filter((x) => x.vibey_preview).every((x) => x.locked && x.export === false),
 						anims: Animator.animations.map((a) => a.name),
 					};
@@ -891,7 +1067,8 @@ async function main() {
 				assert.equal(b.id, 'creator:e2e_' + slot);
 				if (slot === 'emote') {
 					assert.equal(r.format, 'vibey_emote');
-					assert.deepEqual(r.groups, Core.PLAYER_BONES);
+					assert.deepEqual(r.groups, []);
+					assert.deepEqual(r.refs.sort(), Core.refGroupsFor('emote').map((d) => d.id).sort());
 					assert.deepEqual(b.emote.loop, true);
 					assert.equal(b.animations.main.length, 1.5);
 					continue;
@@ -905,10 +1082,12 @@ async function main() {
 					assert.equal(b.model, undefined);
 					assert.equal(b.cosmetic[slot].texture, slot);
 				} else {
-					assert.equal(r.groups[0], p.root);
+					assert.equal(r.groups[0], p.root + '@' + p.ref, slot + ' builds on ' + p.ref);
 					assert.equal(b.model.bones[0].attach, p.attach);
+					assert.deepEqual(b.model.bones[0].pivot, p.pivot, slot + ' exported pivot');
 					assert.deepEqual(r.anims, p.tracks);
 				}
+				assert.deepEqual(r.refs.sort(), Core.refGroupsFor('cosmetic', slot).map((d) => d.id).sort(), slot + ' player groups');
 			}
 		});
 		await check('templates: a starter item becomes an editable copy with the creator\'s id', async () => {
@@ -958,6 +1137,110 @@ async function main() {
 		await check('remove dev items + disconnect', async () => {
 			await cdp.eval('VibeyPlugin.Link.remove("creator:frost_wings"), VibeyPlugin.Link.disconnect(), true');
 			assert.equal(await cdp.eval('VibeyPlugin.Link.state'), 'off');
+		});
+		// ================================================================ STARTER SET + OLD PROJECTS
+		console.log('\nStarter set and old projects');
+		await check('every starter .vibey imports onto the player groups and re-exports byte for byte', async () => {
+			const files = starterFiles();
+			assert.ok(files.length >= 30, 'starter set found: ' + files.length);
+			const bad = [];
+			for (const f of files) {
+				const raw = fs.readFileSync(f, 'utf8');
+				const b = JSON.parse(raw);
+				const expected = Core.stringify(Core.compileBundle(Core.decompileBundle(b)).bundle);
+				const r = await cdp.run(async (json, p) => {
+					VibeyPlugin.importBundle(json, p);
+					for (let i = 0; i < 100 && !Texture.all.every((t) => t.width); i++) await new Promise((res) => setTimeout(res, 40));
+					const c = VibeyPlugin.compileProjectJSON();
+					const top = Outliner.root.filter((n) => !n.vibey_ref && !n.vibey_preview).map((n) => n.name);
+					const parts = Group.all.filter((g) => !g.vibey_ref && g.parent && g.parent.vibey_ref).map((g) => g.name + '@' + g.parent.vibey_ref);
+					if (Dialog.open) Dialog.open.close();
+					await Project.close(true);
+					return { json: c.json, errors: c.errors, top, parts };
+				}, raw, f);
+				if (r.errors.length || r.json !== expected || r.top.length) bad.push(path.basename(f) + ': ' + (r.errors.join('; ') || (r.top.length ? 'outside the player groups: ' + r.top : 'bytes differ')));
+				if (/crystal_wings|seal_buddy|seal_beanie|clap/.test(f)) console.log('    ' + path.basename(f) + ' -> ' + r.parts.join(', '));
+			}
+			assert.deepEqual(bad, []);
+		});
+		const oldPlugin = oldPluginFile();
+		await check('old projects (attach per root group, 0.2.4 .bbmodel) open in the new structure and export the same bytes as 0.2.4', async () => {
+			if (!oldPlugin) return console.log('    (skipped: tag blockbench-v0.2.4 not available)');
+			const pick = ['crystal_wings', 'seal_buddy', 'ice_crown', 'ember_sparks', 'clap', 'guitar'].map((n) => starterFiles().find((f) => path.basename(f) === n + '.vibey'))
+				.concat(starterFiles().filter((f) => /polar_igloo_backpack|polar_penguin/.test(f)));
+			const bundles = pick.map((f) => fs.readFileSync(f, 'utf8'));
+			// 1) the released 0.2.4 plugin makes .bbmodel projects (imported starter items + one built by hand)
+			const old = await cdp.run(async (file, bundles) => {
+				await new Plugin().loadFromFile({ path: file, name: 'vibey.js', content: '' }, false);
+				for (let i = 0; i < 50 && !(window.VibeyPlugin && VibeyPlugin.VERSION === '0.2.4'); i++) await new Promise((r) => setTimeout(r, 100));
+				const out = [];
+				const save = async (name) => {
+					for (let i = 0; i < 100 && !Texture.all.every((t) => t.width); i++) await new Promise((r) => setTimeout(r, 40));
+					let bb = Codecs.project.compile();
+					if (typeof bb !== 'string') bb = JSON.stringify(bb);
+					await Project.close(true);
+					// baseline = what 0.2.4 itself exports after re-opening its .bbmodel
+					loadModelFile({ path: 'old.bbmodel', name: 'old.bbmodel', content: bb });
+					for (let i = 0; i < 100 && !Texture.all.every((t) => t.width); i++) await new Promise((r) => setTimeout(r, 40));
+					await new Promise((r) => setTimeout(r, 200));
+					const c = VibeyPlugin.compileProjectJSON();
+					out.push({ name, json: c.json, errors: c.errors, bbmodel: bb });
+					await Project.close(true);
+				};
+				for (const json of bundles) {
+					VibeyPlugin.importBundle(json, 'x.vibey');
+					await save(JSON.parse(json).id);
+				}
+				newProject(Formats.vibey_cosmetic);
+				Object.assign(VibeyPlugin.getMeta(), { id: 'e2e:old_hat', name: { en: 'Old Hat', de: '' }, slot: 'hat' });
+				const cv = document.createElement('canvas');
+				cv.width = cv.height = 16;
+				cv.getContext('2d').fillStyle = '#8b6cff';
+				cv.getContext('2d').fillRect(0, 0, 16, 16);
+				new Texture({ name: 'main', uv_width: 16, uv_height: 16 }).fromDataURL(cv.toDataURL('image/png')).add(false);
+				const hat = new Group({ name: 'hat', origin: [0, 24, 0], vibey_attach: 'head' }).addTo().init();
+				new Cube({ name: 'top', from: [-4, 32, -4], to: [4, 35, 4], box_uv: true }).addTo(hat).init();
+				const band = new Group({ name: 'band', origin: [5, 22, 0], vibey_attach: 'right_arm' }).addTo().init();
+				new Cube({ name: 'cuff', from: [4, 13, -2], to: [8, 15, 2], box_uv: true, inflate: 0.25 }).addTo(band).init();
+				const free = new Group({ name: 'free', origin: [0, 24, 0] }).addTo().init(); // "Auto" = slot default (hat -> head)
+				new Cube({ name: 'feather', from: [3, 32, 0], to: [4, 38, 1], box_uv: true }).addTo(free).init();
+				await save('e2e:old_hat');
+				return { version: VibeyPlugin.VERSION, out };
+			}, oldPlugin, bundles);
+			assert.equal(old.version, '0.2.4');
+			old.out.forEach((o) => assert.deepEqual(o.errors, [], o.name));
+			// 2) back to this plugin: the projects open converted, the export is unchanged
+			const r = await cdp.run(async (file, projects) => {
+				await new Plugin().loadFromFile({ path: file, name: 'vibey.js', content: '' }, false);
+				for (let i = 0; i < 50 && !(window.VibeyPlugin && VibeyPlugin.VERSION !== '0.2.4'); i++) await new Promise((r) => setTimeout(r, 100));
+				const res = [];
+				for (const p of projects) {
+					loadModelFile({ path: p.name.split(':').pop() + '.bbmodel', name: p.name.split(':').pop() + '.bbmodel', content: p.bbmodel });
+					for (let i = 0; i < 100 && !Texture.all.every((t) => t.width); i++) await new Promise((r) => setTimeout(r, 40));
+					await new Promise((r) => setTimeout(r, 300));
+					const c = VibeyPlugin.compileProjectJSON();
+					res.push({
+						name: p.name, same: c.json === p.json, errors: c.errors,
+						top: Outliner.root.filter((n) => !n.vibey_ref && !n.vibey_preview).map((n) => n.name),
+						parts: Group.all.filter((g) => !g.vibey_ref && g.parent && g.parent.vibey_ref).map((g) => g.name + '@' + g.parent.vibey_ref),
+						labels: Group.all.filter((g) => g.vibey_ref).length,
+					});
+					await Project.close(true);
+				}
+				return { version: VibeyPlugin.VERSION, res };
+			}, PLUGIN, old.out);
+			assert.equal(r.version, Core.VERSION);
+			for (const x of r.res) {
+				assert.deepEqual(x.errors, [], x.name);
+				assert.equal(x.same, true, x.name + ': export must stay byte-identical');
+				assert.deepEqual(x.top, [], x.name + ': nothing left outside the player groups');
+				assert.ok(x.labels >= 12, x.name);
+				console.log('    ' + x.name + ' -> ' + x.parts.join(', '));
+			}
+			const hat = r.res.find((x) => x.name === 'e2e:old_hat');
+			assert.deepEqual(hat.parts.sort(), ['band@right_arm', 'free@head', 'hat@head']);
+			assert.ok(r.res.find((x) => /seal_buddy/.test(x.name)).parts.includes('seal@beside'), 'pets move onto Beside player');
+			assert.ok(r.res.find((x) => /crystal_wings/.test(x.name)).parts.includes('wing_left@back'), 'wings sit on the Back');
 		});
 		await check('plugin unloads cleanly', async () => {
 			const r = await cdp.eval(`(() => { Plugins.registered.vibey.unload(); return { formats: !!Formats.vibey_cosmetic, menu: !!MenuBar.menus.vibey, api: !!window.VibeyPlugin, status: !!document.getElementById('vibey_status'), guide: !!Panels.vibey_guide, wizard: !!document.querySelector('#vibey_wizard') && !!Dialog.open }; })()`);

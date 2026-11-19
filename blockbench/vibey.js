@@ -60,6 +60,53 @@ const Core = (function () {
 	const SLOTS = ['cape', 'wings', 'aura', 'pet', 'shield', 'hat', 'back'];
 	const ATTACH = ['head', 'body', 'right_arm', 'left_arm', 'right_leg', 'left_leg', 'root', 'world'];
 	const SLOT_DEFAULT_ATTACH = { cape: 'body', wings: 'body', aura: 'world', pet: 'world', shield: 'left_arm', hat: 'head', back: 'body' };
+	/**
+	 * "Build on the player": prefab groups of the reference player (Blockbench space, like PLAYER_PIVOTS). They are
+	 * editor-only: never exported themselves. Every user group placed inside one becomes a root bone with the group's
+	 * `attach`; cubes placed directly inside one become a generated bone `<id>_cubes` (pivot = the group's pivot).
+	 * `zone` = [from, to] box used to find the most plausible group for a part (auto-assign, import); `floating`
+	 * zones only take parts that are completely inside them vertically (see bestRef).
+	 *   - emoteOnly: `root` (the whole player, attach "root") – in emotes the real root bone.
+	 *   - pet: "beside" = where the game draws a pet (its follow point, PET_ANCHORS); pet bones are exported relative to
+	 *     it (the game positions the pet's own origin there). "around" = world at the player's feet (auras).
+	 */
+	const REF_GROUPS = [
+		{ id: 'root', attach: 'root', pivot: [0, 0, 0], emoteOnly: true },
+		{ id: 'head', attach: 'head', pivot: [0, 24, 0], parentEmote: 'root', zone: [[-4, 24, -4], [4, 32, 4]] },
+		{ id: 'above_head', parent: 'head', attach: 'head', pivot: [0, 32, 0], zone: [[-8, 32, -8], [8, 48, 8]], floating: true },
+		{ id: 'body', attach: 'body', pivot: [0, 24, 0], parentEmote: 'root', zone: [[-4, 12, -2], [4, 24, 2]] },
+		{ id: 'back', parent: 'body', attach: 'body', pivot: [0, 24, 2], zone: [[-40, 2, 2], [40, 30, 18]] },
+		{ id: 'shoulder_right', parent: 'body', attach: 'body', pivot: [6, 24, 0], zone: [[4, 24, -3], [9, 28, 3]] },
+		{ id: 'shoulder_left', parent: 'body', attach: 'body', pivot: [-6, 24, 0], zone: [[-9, 24, -3], [-4, 28, 3]] },
+		{ id: 'hips', parent: 'body', attach: 'body', pivot: [0, 12, 0], zone: [[-5, 9, -3], [5, 15, 3]] },
+		{ id: 'right_arm', attach: 'right_arm', pivot: [5, 22, 0], parentEmote: 'root', zone: [[4, 10, -2], [9, 24, 2]] },
+		{ id: 'left_arm', attach: 'left_arm', pivot: [-5, 22, 0], parentEmote: 'root', zone: [[-9, 10, -2], [-4, 24, 2]] },
+		{ id: 'right_leg', attach: 'right_leg', pivot: [1.9, 12, 0], parentEmote: 'root', zone: [[-0.1, 0, -2], [3.9, 12, 2]] },
+		{ id: 'left_leg', attach: 'left_leg', pivot: [-1.9, 12, 0], parentEmote: 'root', zone: [[-3.9, 0, -2], [0.1, 12, 2]] },
+		{ id: 'around', attach: 'world', pivot: [0, 0, 0], notPet: true },
+		{ id: 'beside', attach: 'world', pivot: [15.2, 0, 5.6], petOnly: true },
+	];
+	const REF_BY_ID = {};
+	REF_GROUPS.forEach((r) => (REF_BY_ID[r.id] = r));
+	/**
+	 * Where the game draws a pet's origin relative to the player (Blockbench space, AvatarTicker.pet / AvatarDraw):
+	 * ground = 0.95 blocks to the right and 0.35 behind, float = 0.7 right / 1.55 up / 0.25 behind, shoulder pets on top
+	 * of the shoulder. Bigger ground pets keep a little more distance in game.
+	 */
+	const PET_ANCHORS = { ground: [15.2, 0, 5.6], float: [11.2, 24.8, 4], shoulder_right: [6, 24, 0.5], shoulder_left: [-6, 24, 0.5] };
+	const petAnchor = (follow) => (PET_ANCHORS[follow] || PET_ANCHORS.ground).slice();
+	/** The groups a slot builds on (the wizard highlights them; auto-assign falls back to the first). */
+	const SLOT_REFS = { hat: ['head', 'above_head'], back: ['back'], wings: ['back'], aura: ['around'], pet: ['beside'], cape: ['back'], shield: ['left_arm'], emote: ['right_arm', 'root'] };
+	/** Ref groups of a project: cosmetics have no root group; pets get "beside", everything else "around". */
+	function refGroupsFor(kind, slot) {
+		const emote = kind === 'emote';
+		const pet = !emote && slot === 'pet';
+		return REF_GROUPS.filter((r) => (r.emoteOnly ? emote : true) && (r.petOnly ? pet : true) && (r.notPet ? !pet : true));
+	}
+	/** Parent ref id of a ref group in a project of `kind` (null = top level). */
+	const refParent = (r, kind) => r.parent || (kind === 'emote' && r.parentEmote) || null;
+	/** Pivot of a ref group (the pet anchor follows meta.pet.follow). */
+	const refPivot = (id, meta) => (id === 'beside' ? petAnchor(meta && meta.pet && meta.pet.follow) : REF_BY_ID[id].pivot.slice());
 	const RARITIES = ['common', 'rare', 'epic', 'legendary'];
 	const ARMOR_SLOTS = ['head', 'chest', 'legs', 'feet'];
 	const INTERPOLATIONS = ['linear', 'catmullrom', 'step', 'bezier'];
@@ -243,6 +290,171 @@ const Core = (function () {
 		});
 	}
 
+	// ---------------------------------------------------- build on the player
+	/** Ref id of a snapshot group node, or null for the creator's own groups. Emote player bones are recognised by name too. */
+	function refOf(node, kind) {
+		if (!node || node.type !== 'group') return null;
+		if (node.ref && REF_BY_ID[node.ref]) return node.ref;
+		if (kind === 'emote' && !node.ref && PLAYER_BONES.includes(node.name)) return node.name;
+		return null;
+	}
+	/** [from, to] around every cube (and locator) of a snapshot node, or null when it has none. */
+	function nodeBounds(node) {
+		let lo = null;
+		let hi = null;
+		const add = (p) => {
+			if (!isVec(p)) return;
+			if (!lo) return ((lo = p.slice()), (hi = p.slice()));
+			for (let i = 0; i < 3; i++) ((lo[i] = Math.min(lo[i], p[i])), (hi[i] = Math.max(hi[i], p[i])));
+		};
+		const walk = (n) => {
+			if (!n) return;
+			if (n.type === 'cube') (add(n.from), add(n.to));
+			else if (n.type === 'locator') add(n.position);
+			(n.children || []).forEach(walk);
+		};
+		walk(node);
+		return lo ? [lo, hi] : null;
+	}
+	const boxDist = (p, z) => Math.hypot(...[0, 1, 2].map((i) => Math.max(z[0][i] - p[i], 0, p[i] - z[1][i])));
+	const boxVol = (z) => [0, 1, 2].reduce((v, i) => v * Math.max(0.001, z[1][i] - z[0][i]), 1);
+	/** Zone of a ref group in a project (the pet's zone moves with its anchor). */
+	function refZone(id, meta) {
+		if (id === 'beside') {
+			const a = refPivot('beside', meta);
+			return [[a[0] - 10, a[1] - 2, a[2] - 10], [a[0] + 10, a[1] + 22, a[2] + 10]];
+		}
+		return REF_BY_ID[id] && REF_BY_ID[id].zone;
+	}
+	/**
+	 * The most plausible ref group for a part (auto-assign while building, and import). Simple, predictable rules:
+	 *  - pets and auras always go to their world group ("Beside player" / "Around player") unless `attach` says otherwise;
+	 *  - with `attach` (import) only groups with that attach are candidates (world -> beside/around, root -> root/none);
+	 *  - a part wider than the player in X and Z surrounds the player -> "Around player" (world);
+	 *  - else the group whose zone contains the centre of the part's cubes (the one it is deepest inside), else the
+	 *    nearest zone within 6 px, else the slot's group (SLOT_REFS) or the attach's own group;
+	 *  - "Above head" only takes parts that float above the head – a hat sitting on the head
+	 *    goes to "Head" (nothing below y 33, a brim lying on the head top is a hat).
+	 * opts: { kind, slot, attach, meta }. Returns a ref id, or null (cosmetic `root`: stays at the top level).
+	 */
+	function bestRef(node, opts) {
+		opts = opts || {};
+		const kind = opts.kind === 'emote' ? 'emote' : 'cosmetic';
+		const slot = kind === 'emote' ? 'emote' : opts.slot;
+		const meta = opts.meta || {};
+		const have = refGroupsFor(kind, opts.slot).map((r) => r.id);
+		const worldRef = have.includes('beside') ? 'beside' : 'around';
+		const attach = opts.attach;
+		if (attach === 'world') return worldRef;
+		if (attach === 'root') return kind === 'emote' ? 'root' : null;
+		if (!attach && (slot === 'pet' || slot === 'aura')) return worldRef;
+		let cands = have.filter((id) => id !== 'root' && id !== 'around' && (!attach || REF_BY_ID[id].attach === attach));
+		const fallback = attach ? (have.includes(attach) ? attach : cands[0] || null) : kind === 'emote' ? 'root' : (SLOT_REFS[slot] || ['body'])[0];
+		const b = nodeBounds(node);
+		if (!b) return fallback;
+		const size = [0, 1, 2].map((i) => b[1][i] - b[0][i]);
+		if (!attach && size[0] > 16 && size[2] > 16) return worldRef;
+		const c = [0, 1, 2].map((i) => (b[0][i] + b[1][i]) / 2);
+		cands = cands.filter((id) => refZone(id, meta) && !(REF_BY_ID[id].floating && b[0][1] < refZone(id, meta)[0][1] + 1));
+		// several zones contain the centre: the one it is deepest inside (a belt at the hip line is "Hips", not the
+		// leg it touches), then the smaller one
+		const depth = (z) => Math.min(...[0, 1, 2].map((i) => Math.min(c[i] - z[0][i], z[1][i] - c[i])));
+		const inside = cands.filter((id) => boxDist(c, refZone(id, meta)) === 0)
+			.sort((x, y) => depth(refZone(y, meta)) - depth(refZone(x, meta)) || boxVol(refZone(x, meta)) - boxVol(refZone(y, meta)));
+		if (inside.length) return inside[0];
+		let best = null;
+		let bestD = 6;
+		cands.forEach((id) => {
+			const d = boxDist(c, refZone(id, meta));
+			if (d <= bestD) ((best = id), (bestD = d));
+		});
+		return best || fallback;
+	}
+	/** The `attach` a part inside ref group `id` gets in the bundle. */
+	const refAttach = (id) => REF_BY_ID[id].attach;
+	/** Empty ref group nodes (snapshot form) of a project, nested like the outliner. */
+	function refTree(kind, slot, meta) {
+		const list = refGroupsFor(kind, slot);
+		const nodes = {};
+		const roots = [];
+		list.forEach((r) => {
+			const n = { type: 'group', name: r.id, ref: r.id, origin: refPivot(r.id, meta), rotation: [0, 0, 0], children: [] };
+			if (kind === 'emote' && PLAYER_BONES.includes(r.id)) n.player = true;
+			nodes[r.id] = n;
+			const parent = refParent(r, kind);
+			if (parent && nodes[parent]) nodes[parent].children.push(n);
+			else roots.push(n);
+		});
+		return { roots, byId: nodes };
+	}
+	/** Moves a snapshot node (cubes, pivots, locators) by d – used for the pet anchor. */
+	function shiftNode(node, d, sign) {
+		const s = sign || 1;
+		const mv = (v) => v.map((x, i) => round(x + s * d[i], 6));
+		if (node.type === 'group') {
+			node.origin = mv(node.origin || [0, 0, 0]);
+			(node.children || []).forEach((c) => shiftNode(c, d, s));
+		} else if (node.type === 'cube') {
+			node.from = mv(node.from);
+			node.to = mv(node.to);
+			// a cube's pivot only matters (and is only exported) when it is set or rotated – keep [0,0,0] as "unset"
+			if (!allZero(node.origin) || !allZero(node.rotation)) node.origin = mv(node.origin || [0, 0, 0]);
+		} else if (node.type === 'locator') node.position = mv(node.position);
+		return node;
+	}
+	/**
+	 * Converts an old snapshot (root groups at the top with per-group `attach`, emote props in name-only player
+	 * bones) into the "build on the player" structure: every root group moves into its ref group (bestRef with its
+	 * attach), pets onto the pet anchor. Compiling the result gives the same bundle. Already converted snapshots are
+	 * returned unchanged.
+	 */
+	function upgradeSnapshot(snap, opts) {
+		opts = opts || {};
+		const kind = snap.kind === 'emote' ? 'emote' : 'cosmetic';
+		const meta = snap.meta || {};
+		const nodes = snap.nodes || [];
+		if (nodes.some((n) => n.ref && REF_BY_ID[n.ref])) return snap;
+		const tree = refTree(kind, meta.slot, meta);
+		const out = [];
+		const defAttach = kind === 'emote' ? 'root' : SLOT_DEFAULT_ATTACH[meta.slot] || 'body';
+		const have = refGroupsFor(kind, meta.slot).map((r) => r.id);
+		const place = (node, attach) => {
+			// a generated "<ref>_cubes" bone: its cubes go back into that ref group as loose cubes
+			const gm = node.generated && /^(.+?)_cubes(?:_\d+)?$/.exec(node.name || '');
+			const gref = gm && have.includes(gm[1]) && refAttach(gm[1]) === attach ? gm[1] : null;
+			if (gref && !(node.children || []).some((c) => c.type === 'group') && vecEq(node.origin, gref === 'beside' ? [0, 0, 0] : refPivot(gref, meta))) {
+				(node.children || []).forEach((c) => tree.byId[gref].children.push(gref === 'beside' ? shiftNode(c, refPivot('beside', meta)) : c));
+				return;
+			}
+			delete node.generated;
+			let id = bestRef(node, { kind, slot: meta.slot, attach, meta });
+			if (opts.mainOnly && id && have.includes(attach)) id = attach;
+			if (!id) {
+				node.attach = attach;
+				return out.push(node);
+			}
+			delete node.attach;
+			if (id === 'beside') shiftNode(node, refPivot('beside', meta));
+			tree.byId[id].children.push(node);
+		};
+		// emote player bones of an old snapshot: move their content into the new rig
+		const legacyRig = (g) => {
+			(g.children || []).forEach((c) => {
+				if (refOf(c, kind)) return legacyRig(c);
+				if (c.type === 'group') return place(c, g.name);
+				tree.byId[g.name].children.push(c);
+			});
+		};
+		tree.roots.forEach((r) => out.push(r));
+		nodes.forEach((n) => {
+			if (n.preview || n.export === false) return out.push(n);
+			if (kind === 'emote' && refOf(n, kind)) return legacyRig(n);
+			if (n.type === 'group') return place(n, n.attach || defAttach);
+			out.push(n); // loose cubes / locators stay where they are (validation explains them)
+		});
+		return Object.assign({}, snap, { nodes: out });
+	}
+
 	// ---------------------------------------------------------------- compile
 	/**
 	 * Builds a `.vibey` bundle from a plain project snapshot.
@@ -375,69 +587,113 @@ const Core = (function () {
 			return cube;
 		}
 
+		// `shift` = the pet anchor: pets are built beside the reference player but exported relative to their own origin
+		let shift = null;
+		const sh = (v) => (shift ? v.map((x, i) => x - shift[i]) : v);
+		// root bones keep the order they had in an imported bundle / old project (node.order, an editor-only hint):
+		// moving parts between player groups never reorders an existing item's bones
+		const rootStarts = [];
 		function addBone(node, parent, attach, isRoot) {
 			if (boneNames.has(node.name)) errors.push(`Two groups are both called "${node.name}". Bone names must be unique.`);
 			boneNames.add(node.name);
+			if (isRoot) rootStarts.push({ index: bones.length, order: isNum(node.order) ? node.order : Infinity });
 			const bone = { name: node.name, parent: parent || null };
 			if (isRoot) bone.attach = attach;
-			bone.pivot = roundVec(node.origin || [0, 0, 0]);
+			bone.pivot = roundVec(sh(node.origin || [0, 0, 0]));
 			bone.rotation = roundVec(node.rotation || [0, 0, 0]);
 			bone.cubes = [];
 			bone.emissive = !!node.emissive;
 			bone.translucent = !!node.translucent;
 			bones.push(bone);
 			for (const child of node.children || []) {
-				if (child.type === 'cube') bone.cubes.push(compileCube(child));
-				else if (child.type === 'group') addBone(child, node.name, null, false);
-				else if (child.type === 'locator') addLocator(child, node.name);
+				if (child.type === 'cube') bone.cubes.push(cubeOut(child));
+				else if (child.type === 'group') {
+					if (refOf(child, kind)) errors.push(`Player group "${child.name}" was moved into "${node.name}". The player's groups must keep their place (Vibey > Advanced > Repair player groups).`);
+					addBone(child, node.name, null, false);
+				} else if (child.type === 'locator') addLocator(child, node.name);
 			}
 			return bone;
 		}
 		function addLocator(node, boneName) {
 			if (locators[node.name]) errors.push(`Two locators are both called "${node.name}". Locator names must be unique.`);
-			locators[node.name] = { bone: boneName, position: roundVec(node.position || [0, 0, 0]) };
+			locators[node.name] = { bone: boneName, position: roundVec(sh(node.position || [0, 0, 0])) };
 		}
+		const cubeOut = (c) => {
+			if (!shift) return compileCube(c);
+			// pivot only matters when it is set or the cube is rotated (same rule as shiftNode)
+			const moved = Object.assign({}, c, { from: sh(c.from), to: sh(c.to) });
+			if (!allZero(c.origin) || !allZero(c.rotation)) moved.origin = sh(c.origin || [0, 0, 0]);
+			return compileCube(moved);
+		};
 
 		const defaultAttach = isEmote ? 'root' : SLOT_DEFAULT_ATTACH[meta.slot] || 'body';
+		const newStyle = (snap.nodes || []).some((n) => refOf(n, kind));
 		for (const node of snap.nodes || []) {
 			if (node.preview || node.export === false) continue; // editor-only preview geometry (never exported)
-			if (node.type === 'group' && isEmote && PLAYER_BONES.includes(node.name)) {
-				compilePlayerBone(node, null);
-			} else if (node.type === 'group') {
+			const ref = refOf(node, kind);
+			if (ref) compileRef(node, ref, null);
+			else if (node.type === 'group') {
+				// a root group outside the player groups (old projects; "Advanced: turns with the body" = attach root)
+				if (newStyle && !node.attach) warnings.push(`"${node.name}" is not attached to the player – it uses the slot default (${defaultAttach}). Drag it into one of the player groups or right-click > Attach to.`);
 				addBone(node, null, node.attach || defaultAttach, true);
 			} else {
-				errors.push(`"${node.name}" (${node.type}) is not inside a group. Put every cube and locator into a group – root groups decide where the ${kind} is attached.`);
+				errors.push(`"${node.name}" (${node.type}) is not inside a group. Put every cube and locator into one of the player groups (Head, Back, …) – they decide what the ${kind} moves with.`);
 			}
 		}
-		function compilePlayerBone(node, parentPart) {
-			const part = node.name;
-			playerBones.add(part);
-			if (part === 'root' ? parentPart !== null : parentPart !== 'root') {
-				errors.push(part === 'root' ? 'Player bone "root" must stay at the top of the outliner.' : `Player bone "${part}" must be a direct child of "root".`);
+		/** A ref group: its parts become root bones with the group's attach, loose cubes a generated bone. */
+		function compileRef(node, ref, parentRef) {
+			const def = REF_BY_ID[ref];
+			const isPlayerBone = isEmote && PLAYER_BONES.includes(ref);
+			const expectParent = refParent(def, kind);
+			if (isPlayerBone) playerBones.add(ref);
+			if (isPlayerBone && (ref === 'root' ? parentRef !== null : parentRef !== 'root')) {
+				errors.push(ref === 'root' ? 'Player bone "root" must stay at the top of the outliner.' : `Player bone "${ref}" must be a direct child of "root".`);
+			} else if (!isPlayerBone && (expectParent || null) !== (parentRef || null)) {
+				errors.push(`Player group "${node.name}" was moved. The player's groups must keep their place (Vibey > Advanced > Repair player groups).`);
 			}
-			if (!vecEq(node.origin || [0, 0, 0], PLAYER_PIVOTS[part])) {
-				errors.push(`Player bone "${part}" pivot was moved to [${roundVec(node.origin).join(', ')}]; it must stay [${PLAYER_PIVOTS[part].join(', ')}] (Vibey > Repair player rig).`);
+			const pivot = refPivot(ref, meta);
+			if (!vecEq(node.origin || [0, 0, 0], pivot)) {
+				errors.push(isPlayerBone
+					? `Player bone "${ref}" pivot was moved to [${roundVec(node.origin).join(', ')}]; it must stay [${pivot.join(', ')}] (Vibey > Repair player rig).`
+					: `Player group "${node.name}" pivot was moved to [${roundVec(node.origin).join(', ')}]; it must stay [${pivot.join(', ')}] (Vibey > Advanced > Repair player groups).`);
 			}
-			if (!allZero(node.rotation)) errors.push(`Player bone "${part}" has a rest rotation. Rotate it with keyframes in Animate mode instead.`);
+			if (!allZero(node.rotation)) errors.push(isPlayerBone ? `Player bone "${ref}" has a rest rotation. Rotate it with keyframes in Animate mode instead.` : `Player group "${node.name}" is rotated. Rotate your own group inside it instead.`);
+			const attach = refAttach(ref);
+			const prevShift = shift;
+			shift = ref === 'beside' && meta.slot === 'pet' ? pivot : null;
 			const looseCubes = [];
+			const looseLocators = [];
 			for (const child of node.children || []) {
-				if (child.type === 'group' && PLAYER_BONES.includes(child.name)) compilePlayerBone(child, part);
-				else if (child.type === 'group') addBone(child, null, part, true);
+				const cref = refOf(child, kind);
+				if (cref) compileRef(child, cref, ref);
+				else if (child.type === 'group') addBone(child, null, attach, true);
 				else if (child.type === 'cube') looseCubes.push(child);
-				else if (child.type === 'locator') addLocator(child, part);
+				else if (child.type === 'locator') {
+					// emote locators may sit on a player bone; everywhere else they need a bone (the generated one)
+					if (isEmote && attach !== 'world') addLocator(child, attach);
+					else looseLocators.push(child);
+				}
 			}
-			if (looseCubes.length) {
-				let name = part + GENERATED_SUFFIX;
+			if (looseCubes.length || looseLocators.length) {
+				let name = ref + GENERATED_SUFFIX;
 				let n = 2;
-				while (boneNames.has(name) || nodeNameExists(snap.nodes, name)) name = part + GENERATED_SUFFIX + '_' + n++;
+				while (boneNames.has(name) || nodeNameExists(snap.nodes, name)) name = ref + GENERATED_SUFFIX + '_' + n++;
 				boneNames.add(name);
+				rootStarts.push({ index: bones.length, order: Infinity });
 				bones.push({
-					name, parent: null, attach: part, pivot: PLAYER_PIVOTS[part].slice(), rotation: [0, 0, 0],
-					cubes: looseCubes.map(compileCube), emissive: false, translucent: false, generated: true,
+					name, parent: null, attach, pivot: roundVec(sh(pivot)), rotation: [0, 0, 0],
+					cubes: looseCubes.map(cubeOut), emissive: false, translucent: false, generated: true,
 				});
+				looseLocators.forEach((l) => addLocator(l, name));
 			}
+			shift = prevShift;
 		}
 
+		if (rootStarts.some((r) => r.order !== Infinity)) {
+			const blocks = rootStarts.map((r, i) => ({ order: r.order, i, bones: bones.slice(r.index, i + 1 < rootStarts.length ? rootStarts[i + 1].index : bones.length) }));
+			blocks.sort((a, b) => a.order - b.order || a.i - b.i);
+			bones.splice(0, bones.length, ...[].concat(...blocks.map((b) => b.bones)));
+		}
 		const hasModel = bones.length || Object.keys(locators).length;
 		const modelOptional = isEmote || (kind === 'cosmetic' && (meta.slot === 'cape' || meta.slot === 'shield'));
 		if (hasModel || !modelOptional) {
@@ -580,8 +836,29 @@ const Core = (function () {
 	}
 
 	// -------------------------------------------------------------- decompile
-	/** Converts a bundle back into a snapshot (inverse of compileBundle). */
-	function decompileBundle(bundle) {
+	/**
+	 * Converts a bundle back into a snapshot (inverse of compileBundle) in the "build on the player" structure: every
+	 * root bone sits in the ref group of its attach (the most plausible one, e.g. wings -> Back), pets on the pet
+	 * anchor. If that would change the order of the bones, the bones go into the attach's main group instead, so
+	 * compileBundle(decompileBundle(b)) gives b again. opts.legacy: the old structure (root groups with `attach`).
+	 */
+	function decompileBundle(bundle, opts) {
+		const legacy = decompileLegacy(bundle);
+		if (opts && opts.legacy) return legacy;
+		const names = (snap) => {
+			try {
+				return ((compileBundle(snap).bundle.model || {}).bones || []).map((x) => x.name).join('/');
+			} catch (e) {
+				return null;
+			}
+		};
+		const want = ((bundle.model || {}).bones || []).map((x) => x.name).join('/');
+		const up = upgradeSnapshot(clone(legacy));
+		if (names(up) === want) return up;
+		const main = upgradeSnapshot(clone(legacy), { mainOnly: true });
+		return names(main) === want ? main : up;
+	}
+	function decompileLegacy(bundle) {
 		const kind = bundle.kind;
 		const isEmote = kind === 'emote';
 		const c = bundle.cosmetic || {};
@@ -660,8 +937,9 @@ const Core = (function () {
 			}
 			return n;
 		};
+		let rootIndex = 0;
 		(model.bones || []).forEach((b) => {
-			if (isEmote && b.generated && !b.parent && playerGroups[b.attach]) {
+			if (isEmote && b.generated && !b.parent && playerGroups[b.attach] && new RegExp('^' + b.attach + GENERATED_SUFFIX + '(_\\d+)?$').test(b.name)) {
 				(b.cubes || []).forEach((cube) => playerGroups[b.attach].children.push(Object.assign(cubeToNode(cube), { name: cube.name || 'cube' })));
 				return;
 			}
@@ -669,7 +947,8 @@ const Core = (function () {
 				type: 'group', name: b.name, origin: (b.pivot || [0, 0, 0]).slice(), rotation: (b.rotation || [0, 0, 0]).slice(),
 				emissive: !!b.emissive, translucent: !!b.translucent, children: [],
 			};
-			if (!b.parent) g.attach = b.attach;
+			if (!b.parent) ((g.attach = b.attach), (g.order = rootIndex++));
+			if (b.generated) g.generated = true;
 			groupNodes[b.name] = g;
 			(b.cubes || []).forEach((cube) => g.children.push(Object.assign(cubeToNode(cube), { name: cube.name || 'cube' })));
 		});
@@ -1170,14 +1449,15 @@ const Core = (function () {
 	 * walk/fly/sneak blended in.
 	 */
 	const SLOT_PRESETS = {
-		hat: { root: 'hat', attach: 'head', pivot: [0, 24, 0], tracks: ['idle', 'walk'], texture: [64, 64], hideWithArmor: ['head'] },
-		back: { root: 'back', attach: 'body', pivot: [0, 24, 2], tracks: ['idle', 'walk', 'sneak'], texture: [64, 64] },
+		hat: { root: 'hat', ref: 'head', attach: 'head', pivot: [0, 24, 0], tracks: ['idle', 'walk'], texture: [64, 64], hideWithArmor: ['head'] },
+		back: { root: 'back', ref: 'back', attach: 'body', pivot: [0, 24, 2], tracks: ['idle', 'walk', 'sneak'], texture: [64, 64] },
 		wings: {
-			root: 'wings', attach: 'body', pivot: [0, 21, 2], tracks: ['idle', 'walk', 'fly', 'sneak', 'glide'], texture: [64, 64],
+			root: 'wings', ref: 'back', attach: 'body', pivot: [0, 21, 2], tracks: ['idle', 'walk', 'fly', 'sneak', 'glide'], texture: [64, 64],
 			children: [{ name: 'wing_right', pivot: [1.5, 21, 2.5] }, { name: 'wing_left', pivot: [-1.5, 21, 2.5] }],
 		},
-		aura: { root: 'aura', attach: 'world', pivot: [0, 0, 0], tracks: ['idle'], texture: [64, 64], locators: [{ name: 'aura_center', position: [0, 16, 0] }] },
-		pet: { root: 'pet', attach: 'world', pivot: [0, 0, 0], tracks: ['idle', 'walk', 'fly', 'idle_long', 'happy'], texture: [64, 64], pet: { follow: 'ground', scale: 1 }, hideReference: true },
+		aura: { root: 'aura', ref: 'around', attach: 'world', pivot: [0, 0, 0], tracks: ['idle'], texture: [64, 64], locators: [{ name: 'aura_center', position: [0, 16, 0] }] },
+		// pivot relative to the pet's own origin; the wizard places the group on the pet anchor ("Beside player")
+		pet: { root: 'pet', ref: 'beside', attach: 'world', pivot: [0, 0, 0], tracks: ['idle', 'walk', 'fly', 'idle_long', 'happy'], texture: [64, 64], pet: { follow: 'ground', scale: 1 } },
 		cape: { textureOnly: 'cape', texture: [64, 32] },
 		shield: { textureOnly: 'shield', texture: [64, 64] },
 	};
@@ -1359,9 +1639,7 @@ const Core = (function () {
 			textures.push({ id, uvWidth: w, uvHeight: h, png, frameTime: 1, frames: [], frameCount: 1, interpolate: false, isDefault: true, template: true });
 		};
 		if (kind === 'emote') {
-			const root = { type: 'group', name: 'root', origin: [0, 0, 0], rotation: [0, 0, 0], children: [], player: true };
-			PLAYER_PARTS.forEach((p) => root.children.push({ type: 'group', name: p, origin: PLAYER_PIVOTS[p].slice(), rotation: [0, 0, 0], children: [], player: true }));
-			nodes.push(root);
+			refTree('emote', '', meta).roots.forEach((n) => nodes.push(n));
 			const length = isNum(Number(opts.length)) && Number(opts.length) > 0 ? round(Number(opts.length), 3) : 2;
 			animations.push({ name: 'main', length, loop: opts.loop ? 'loop' : 'once', bones: {}, effects: fx() });
 		} else {
@@ -1370,17 +1648,20 @@ const Core = (function () {
 				tex(p.textureOnly, p.texture[0], p.texture[1], p.textureOnly);
 				if (slot === 'cape') meta.capeTexture = 'cape';
 				else meta.shieldTexture = 'shield';
+				refTree('cosmetic', slot, meta).roots.forEach((n) => nodes.push(n));
 				previewNodes(slot).forEach((n) => nodes.push(n));
 			} else {
 				tex('main', p.texture[0], p.texture[1], 'model');
-				const root = { type: 'group', name: p.root, origin: p.pivot.slice(), rotation: [0, 0, 0], attach: p.attach, emissive: false, translucent: false, children: [] };
+				if (p.pet) meta.pet = Object.assign({}, p.pet);
+				const tree = refTree('cosmetic', slot, meta);
+				tree.roots.forEach((n) => nodes.push(n));
+				const root = { type: 'group', name: p.root, origin: p.pivot.slice(), rotation: [0, 0, 0], emissive: false, translucent: false, children: [] };
 				(p.children || []).forEach((c) => root.children.push({ type: 'group', name: c.name, origin: c.pivot.slice(), rotation: [0, 0, 0], emissive: false, translucent: false, children: [] }));
 				(p.locators || []).forEach((l) => root.children.push({ type: 'locator', name: l.name, position: l.position.slice() }));
-				nodes.push(root);
+				if (p.ref === 'beside') shiftNode(root, refPivot('beside', meta));
+				tree.byId[p.ref].children.push(root);
 				p.tracks.forEach((t) => animations.push({ name: t, length: TRACK_LENGTH[t], loop: 'loop', bones: {}, effects: fx() }));
 				if (p.hideWithArmor) meta.hideWithArmor = p.hideWithArmor.slice();
-				if (p.pet) meta.pet = Object.assign({}, p.pet);
-				if (p.hideReference) meta.showReference = false;
 			}
 		}
 		return { kind, meta, textures, nodes, animations };
@@ -1395,7 +1676,7 @@ const Core = (function () {
 		m.author = opts.author || '';
 		m.tags = (m.tags || []).filter((t) => t !== 'starter');
 		m.rarity = opts.rarity || 'common';
-		m.showReference = !(snap.kind === 'cosmetic' && m.slot === 'pet');
+		m.showReference = true;
 		m.wizard = { kind: snap.kind, slot: snap.kind === 'cosmetic' ? m.slot : '', template: opts.template || bundle.id, version: 1 };
 		const p = snap.kind === 'cosmetic' && SLOT_PRESETS[m.slot];
 		// texture-only templates get the same (never exported) preview geometry as empty capes/shields
@@ -1413,6 +1694,18 @@ const Core = (function () {
 	}
 
 	// ---------------------------------------------------------- tutorial
+	/** The creator's own root parts: [{ node, ref }] (ref = the player group it sits in, '' = top level). */
+	function userParts(snap) {
+		const out = [];
+		const walk = (nodes, ref) => (nodes || []).forEach((n) => {
+			if (n.type !== 'group' || n.preview) return;
+			const r = refOf(n, snap.kind);
+			if (r) walk(n.children, r);
+			else out.push({ node: n, ref: ref || '' });
+		});
+		walk(snap.nodes, '');
+		return out;
+	}
 	const TUTORIAL_STEPS = ['model', 'texture', 'animate', 'effects', 'live', 'export'];
 	function countNodes(nodes, pred) {
 		let n = 0;
@@ -1442,12 +1735,17 @@ const Core = (function () {
 		const r = {};
 		// model
 		const loose = nodes.find((n) => n.type !== 'group');
-		const rootName = (nodes.find((n) => n.type === 'group' && !n.player) || {}).name || (preset && preset.root) || '';
+		const parts = userParts(snap);
+		const rootName = (parts[0] && parts[0].node.name) || (preset && preset.root) || '';
+		const newStyle = nodes.some((n) => refOf(n, snap.kind));
+		const outside = newStyle && nodes.find((n) => n.type === 'group' && !refOf(n, snap.kind) && !n.attach);
 		if (loose) r.model = { state: 'error', key: 'chk_model_loose', args: [loose.name] };
+		else if (outside) r.model = { state: 'todo', key: 'chk_model_outside', args: [outside.name] };
 		else if (isEmote) r.model = cubes ? { state: 'ok', key: 'chk_props_ok', args: [cubes] } : { state: 'optional', key: 'chk_props_none', args: [] };
 		else if (textureOnly && !cubes) r.model = { state: 'ok', key: 'chk_model_texture_only', args: [] };
-		else if (!nodes.some((n) => n.type === 'group')) r.model = { state: 'todo', key: 'chk_model_no_group', args: [] };
+		else if (!parts.length && !cubes) r.model = { state: 'todo', key: 'chk_model_no_group', args: [] };
 		else if (!cubes) r.model = { state: 'todo', key: 'chk_model_empty', args: [rootName] };
+		else if (parts.length) r.model = { state: 'ok', key: 'chk_model_ok_on', args: [cubes, parts.map((x) => x.ref || x.node.attach || '').filter((v, i, a) => v && a.indexOf(v) === i)] };
 		else r.model = { state: 'ok', key: 'chk_model_ok', args: [cubes] };
 		// texture
 		const textures = snap.textures || [];
@@ -1512,13 +1810,16 @@ const Core = (function () {
 		[/^A cape needs either/, 'fp_cape'],
 		[/^A shield needs either/, 'fp_shield'],
 		[/^Bone name "(.+)" is reserved/, 'fp_reserved_bone'],
+		[/^"(.+)" is not attached to the player/, 'fp_outside'],
+		[/^Player group "(.+)" (was moved|pivot was moved|is rotated)/, 'fp_ref_moved'],
+		[/^Keyframes on player group "(.+)"/, 'fp_ref_keys'],
 		[/^The model has no cubes yet/, 'fp_no_cubes'],
 	];
 	function friendlyProblem(message) {
 		for (const [re, key] of FRIENDLY_RULES) {
 			const m = re.exec(String(message));
 			if (m) {
-				const args = m.slice(1).filter((x) => x !== undefined && !/^(cube|locator|groups|locators|animations|textures|pivot was moved|has a rest rotation|must)$/.test(x));
+				const args = m.slice(1).filter((x) => x !== undefined && !/^(cube|locator|groups|locators|animations|textures|pivot was moved|has a rest rotation|must|was moved|is rotated)$/.test(x));
 				return { key, args };
 			}
 		}
@@ -1544,7 +1845,9 @@ const Core = (function () {
 		parseDevlink, backoffDelay, devlinkPath, defaultGameDir, submitMessage, SUBMIT_LIMITS, SUBMISSION_STATUS, pushMessage, PUSH_THUMB_LIMITS,
 		OFFSET_LIMITS, CLIENT_FEATURES, NEW_STATES, parseVersion, compareVersions, featureGaps,
 		slugify, creatorNamespace, wizardId, checkWizardId, SLOT_PRESETS, TRACK_LENGTH, previewNodes, templateImage, encodePng,
-		starterSnapshot, templateSnapshot, TUTORIAL_STEPS, tutorialChecks, friendlyProblem, linkErrorKind, FRIENDLY_RULES,
+		starterSnapshot, templateSnapshot, userParts, TUTORIAL_STEPS, tutorialChecks, friendlyProblem, linkErrorKind, FRIENDLY_RULES,
+		REF_GROUPS, REF_BY_ID, PET_ANCHORS, petAnchor, SLOT_REFS, refGroupsFor, refParent, refPivot, refZone, refOf, nodeBounds, bestRef, refAttach,
+		refTree, shiftNode, upgradeSnapshot,
 		ASSETS, VERSION,
 	};
 })();
@@ -1558,12 +1861,12 @@ const STRINGS = {
 	format_cosmetic_desc: ['Cape, wings, aura, pet, shield, hat or back item for Vibey Client.', 'Umhang, Flügel, Aura, Haustier, Schild, Hut oder Rücken-Item für Vibey Client.'],
 	format_emote_desc: ['Player emote with props, particles and sounds for Vibey Client.', 'Spieler-Emote mit Props, Partikeln und Sounds für Vibey Client.'],
 	format_info: [
-		'The grey reference player shows exactly where things end up in game. Root groups choose what they attach to (Element panel > Attach). Export with File > Export > Vibey Bundle or push straight into the running game (Vibey > Push to game).',
-		'Der graue Referenzspieler zeigt genau, wo alles im Spiel landet. Wurzelgruppen bestimmen, woran sie hängen (Element-Panel > Befestigung). Export über Datei > Exportieren > Vibey-Bundle oder direkt ins laufende Spiel (Vibey > An Spiel senden).',
+		'Build right on the grey player: it has ready-made groups (◆ Head, ◆ Back, ◆ Right arm …) – put your part into the group it belongs to and it moves with that part in game. Export with File > Export > Vibey Bundle or test straight in the running game (Vibey > Test live in game).',
+		'Bau direkt am grauen Spieler: Er hat fertige Gruppen (◆ Kopf, ◆ Rücken, ◆ Rechter Arm …) – steck dein Teil in die Gruppe, zu der es gehört, und es bewegt sich im Spiel mit diesem Körperteil. Export über Datei > Exportieren > Vibey-Bundle oder direkt im laufenden Spiel testen (Vibey > Live im Spiel testen).',
 	],
 	format_emote_info: [
-		'Animate the player bones root, head, body, right_arm, left_arm, right_leg and left_leg in Animate mode. Groups inside a player bone are props that move with it. Particles, sounds and visibility are effect keyframes (Timeline > Effects).',
-		'Animiere die Spielerknochen root, head, body, right_arm, left_arm, right_leg und left_leg im Animationsmodus. Gruppen in einem Spielerknochen sind Props, die sich mitbewegen. Partikel, Sounds und Sichtbarkeit sind Effekt-Keyframes (Zeitleiste > Effekte).',
+		'Animate the player groups (◆ Whole player, ◆ Head, ◆ Body, ◆ Right arm …) in Animate mode. Groups inside a player group are props that move with it. Particles, sounds and visibility are effect keyframes (Timeline > Effects).',
+		'Animiere die Spielergruppen (◆ Ganzer Spieler, ◆ Kopf, ◆ Körper, ◆ Rechter Arm …) im Animationsmodus. Gruppen in einer Spielergruppe sind Props, die sich mitbewegen. Partikel, Sounds und Sichtbarkeit sind Effekt-Keyframes (Zeitleiste > Effekte).',
 	],
 	properties: ['Vibey Properties…', 'Vibey-Eigenschaften…'],
 	properties_title: ['Vibey properties', 'Vibey-Eigenschaften'],
@@ -1572,7 +1875,29 @@ const STRINGS = {
 	export_bundle: ['Vibey Bundle (.vibey)', 'Vibey-Bundle (.vibey)'],
 	import_bundle: ['Vibey Bundle (.vibey)', 'Vibey-Bundle (.vibey)'],
 	toggle_reference: ['Show reference player', 'Referenzspieler anzeigen'],
-	repair_rig: ['Repair player rig', 'Spieler-Rig reparieren'],
+	repair_rig: ['Repair player groups', 'Spielergruppen reparieren'],
+	ref_root: ['Whole player', 'Ganzer Spieler'],
+	ref_head: ['Head', 'Kopf'],
+	ref_above_head: ['Above head', 'Über dem Kopf'],
+	ref_body: ['Body', 'Körper'],
+	ref_back: ['Back', 'Rücken'],
+	ref_shoulder_right: ['Right shoulder', 'Rechte Schulter'],
+	ref_shoulder_left: ['Left shoulder', 'Linke Schulter'],
+	ref_hips: ['Hips', 'Hüfte'],
+	ref_right_arm: ['Right arm', 'Rechter Arm'],
+	ref_left_arm: ['Left arm', 'Linker Arm'],
+	ref_right_leg: ['Right leg', 'Rechtes Bein'],
+	ref_left_leg: ['Left leg', 'Linkes Bein'],
+	ref_around: ['Around player', 'Um den Spieler'],
+	ref_beside: ['Beside player', 'Neben dem Spieler'],
+	ref_badge: ['player', 'Spieler'],
+	ref_badge_here: ['build here', 'hier bauen'],
+	attach_to: ['Attach to …', 'An … anheften'],
+	attach_root_adv: ['Advanced: turns with the body only (root)', 'Erweitert: dreht sich nur mit dem Körper (root)'],
+	attached_hint: ['Attached to %0 – change it with right-click › Attach to … (Ctrl+Z undoes it).', 'An %0 angeheftet – ändern per Rechtsklick › An … anheften (Strg+Z macht es rückgängig).'],
+	attached_manual: ['Attached to %0.', 'An %0 angeheftet.'],
+	attached_root: ['"%0" now turns with the body only (root).', '"%0" dreht sich jetzt nur mit dem Körper (root).'],
+	ref_kept: ['Player groups stay in place – move or rotate your own group instead.', 'Spielergruppen bleiben an ihrem Platz – verschiebe oder drehe stattdessen deine eigene Gruppe.'],
 	connect: ['Connect to game', 'Mit Spiel verbinden'],
 	connect_short: ['Connect', 'Verbinden'],
 	disconnect: ['Disconnect', 'Trennen'],
@@ -1617,7 +1942,7 @@ const STRINGS = {
 	f_hide_held: ['Hide held items', 'Gehaltene Items ausblenden'],
 	none: ['(none)', '(keine)'],
 	auto: ['Auto', 'Automatisch'],
-	attach: ['Attach to', 'Befestigen an'],
+	attach: ['Attach to', 'Anheften an'],
 	emissive: ['Glowing (emissive)', 'Leuchtend (emissiv)'],
 	translucent: ['Translucent', 'Durchscheinend'],
 	invalid_id: ['The ID must look like namespace:path (a-z 0-9 _ . -).', 'Die ID muss wie namespace:pfad aussehen (a-z 0-9 _ . -).'],
@@ -1676,7 +2001,7 @@ const STRINGS = {
 	new_id: ['New id', 'Neue ID'],
 	id_taken: ['The id "%0" is already used.', 'Die ID "%0" wird schon verwendet.'],
 	need_texture: ['Add a texture first.', 'Füge zuerst eine Textur hinzu.'],
-	rig_repaired: ['Player rig repaired', 'Spieler-Rig repariert'],
+	rig_repaired: ['Player groups repaired', 'Spielergruppen repariert'],
 	kp_sprite: ['Sprite (instead of particle)', 'Sprite (statt Partikel)'],
 	kp_count: ['Count', 'Anzahl'],
 	kp_spread: ['Spread (x y z)', 'Streuung (x y z)'],
@@ -1773,9 +2098,10 @@ Object.assign(STRINGS, {
 	wz_rarity: ['Rarity', 'Seltenheit'],
 	wz_template_q: ['How do you want to start?', 'Wie möchtest du starten?'],
 	wz_empty: ['Start empty', 'Leer starten'],
-	wz_empty_desc: ['Bones, animations and a texture are prepared – you add the cubes.', 'Knochen, Animationen und Textur sind vorbereitet – du fügst die Würfel hinzu.'],
+	wz_empty_desc: ['Your group on the right ◆ player group, animations and a texture are prepared – you add the cubes.', 'Deine Gruppe an der passenden ◆ Spielergruppe, Animationen und Textur sind vorbereitet – du fügst die Würfel hinzu.'],
+	wz_builds_on: ['on %0', 'an %0'],
 	wz_empty_desc_texture: ['A texture in the vanilla layout with a colour guide is prepared.', 'Eine Textur im Vanilla-Layout mit Farb-Hilfe ist vorbereitet.'],
-	wz_empty_desc_emote: ['The player rig and an empty animation are prepared.', 'Spieler-Rig und eine leere Animation sind vorbereitet.'],
+	wz_empty_desc_emote: ['The player with its ◆ groups and an empty animation are prepared.', 'Der Spieler mit seinen ◆ Gruppen und eine leere Animation sind vorbereitet.'],
 	wz_template_desc: ['Copy of the starter item – change it as you like.', 'Kopie des Starter-Items – ändere es, wie du magst.'],
 	wz_back: ['Back', 'Zurück'],
 	wz_next: ['Next', 'Weiter'],
@@ -1807,13 +2133,13 @@ Object.assign(STRINGS, {
 	g_effects: ['Particles & sounds', 'Partikel & Sounds'],
 	g_live: ['Test live in game', 'Live im Spiel testen'],
 	g_export: ['Export or submit', 'Exportieren oder einreichen'],
-	g_model_text: ['Your group <b>%0</b> is already attached to <b>%1</b>. Select it in the outliner and add cubes – everything inside it moves with %1.', 'Deine Gruppe <b>%0</b> hängt schon an <b>%1</b>. Wähle sie in der Gliederung und füge Würfel hinzu – alles darin bewegt sich mit %1.'],
-	g_model_text_wings: ['The group <b>wings</b> is attached to the body at the shoulder blades. Build the right wing in <b>wing_right</b> and the left one in <b>wing_left</b> – their pivots are the joints the wings flap around.', 'Die Gruppe <b>wings</b> hängt am Körper bei den Schulterblättern. Baue den rechten Flügel in <b>wing_right</b> und den linken in <b>wing_left</b> – ihre Drehpunkte sind die Gelenke, um die die Flügel schlagen.'],
-	g_model_text_pet: ['Build your pet in the group <b>pet</b>, standing on the grid at 0,0,0 (the reference player is hidden so it does not get in the way). In game it walks or hops next to you.', 'Baue dein Haustier in der Gruppe <b>pet</b>, stehend auf dem Raster bei 0,0,0 (der Referenzspieler ist ausgeblendet, damit er nicht stört). Im Spiel läuft oder hüpft es neben dir.'],
-	g_model_text_aura: ['The group <b>aura</b> follows the player\'s position but not the arms or head. Place things around the reference player; the locator <b>aura_center</b> is a handy spot for particles.', 'Die Gruppe <b>aura</b> folgt der Position des Spielers, aber nicht Armen oder Kopf. Platziere Dinge um den Referenzspieler; der Locator <b>aura_center</b> ist ein guter Punkt für Partikel.'],
+	g_model_text: ['Build your part right on the grey player, where it belongs. Your group <b>%0</b> sits in <b>%1</b>, so everything in it moves with that part of the player. Building something somewhere else? Drag it into the matching ◆ group in the outliner (or right-click › Attach to …).', 'Bau dein Teil direkt am grauen Spieler, dort wo es hingehört. Deine Gruppe <b>%0</b> steckt in <b>%1</b> – alles darin bewegt sich mit diesem Körperteil. Baust du woanders etwas? Zieh es in der Gliederung in die passende ◆ Gruppe (oder Rechtsklick › An … anheften).'],
+	g_model_text_wings: ['The group <b>wings</b> sits in <b>◆ Back</b> at the shoulder blades, so it moves with the body. Build the right wing in <b>wing_right</b> and the left one in <b>wing_left</b> – their pivots are the joints the wings flap around.', 'Die Gruppe <b>wings</b> steckt in <b>◆ Rücken</b> bei den Schulterblättern und bewegt sich mit dem Körper. Baue den rechten Flügel in <b>wing_right</b> und den linken in <b>wing_left</b> – ihre Drehpunkte sind die Gelenke, um die die Flügel schlagen.'],
+	g_model_text_pet: ['Build your pet in the group <b>pet</b> inside <b>◆ Beside player</b> – right where it walks next to you in game (it follows you with a little lag). It is exported relative to that spot, so only its shape matters.', 'Baue dein Haustier in der Gruppe <b>pet</b> in <b>◆ Neben dem Spieler</b> – genau dort, wo es im Spiel neben dir läuft (es folgt dir mit etwas Verzögerung). Es wird relativ zu diesem Punkt exportiert, es zählt also nur seine Form.'],
+	g_model_text_aura: ['The group <b>aura</b> sits in <b>◆ Around player</b>: it follows your position but not your arms or head. Place things around the grey player; the locator <b>aura_center</b> is a handy spot for particles.', 'Die Gruppe <b>aura</b> steckt in <b>◆ Um den Spieler</b>: Sie folgt deiner Position, aber nicht Armen oder Kopf. Platziere Dinge um den grauen Spieler; der Locator <b>aura_center</b> ist ein guter Punkt für Partikel.'],
 	g_model_text_tex: ['Capes and shields are just a texture in the vanilla layout – nothing to model. The <b>preview</b> group on the reference player only shows your texture; it is locked and never exported.', 'Umhänge und Schilde sind nur eine Textur im Vanilla-Layout – nichts zu modellieren. Die <b>Vorschau</b>-Gruppe am Referenzspieler zeigt nur deine Textur; sie ist gesperrt und wird nie exportiert.'],
-	g_model_text_emote: ['Want to hold something? Add a group inside a player bone (e.g. a flag in <b>right_arm</b>) – it moves with that body part. Skip this step for a pure body move.', 'Willst du etwas halten? Füge eine Gruppe in einen Spielerknochen ein (z. B. eine Fahne in <b>right_arm</b>) – sie bewegt sich mit diesem Körperteil. Für eine reine Bewegung überspring den Schritt.'],
-	g_model_tip: ['Place things exactly where they belong on the grey player – the game shows them in the same spot.', 'Setze alles genau dorthin, wo es am grauen Spieler hingehört – das Spiel zeigt es an derselben Stelle.'],
+	g_model_text_emote: ['Want to hold something? Build it on the player and put it into the ◆ group it belongs to (e.g. a flag in <b>◆ Right arm</b>) – it moves with that body part. Skip this step for a pure body move.', 'Willst du etwas halten? Bau es am Spieler und steck es in die ◆ Gruppe, zu der es gehört (z. B. eine Fahne in <b>◆ Rechter Arm</b>) – es bewegt sich mit diesem Körperteil. Für eine reine Bewegung überspring den Schritt.'],
+	g_model_tip: ['New parts snap to the nearest ◆ group by themselves. To change what a part moves with, drag it into another ◆ group or right-click it › Attach to …', 'Neue Teile hängen sich selbst an die nächste ◆ Gruppe. Um zu ändern, womit sich ein Teil bewegt, zieh es in eine andere ◆ Gruppe oder Rechtsklick › An … anheften.'],
 	g_model_tip_tex: ['Want it in 3D instead? Add a group with cubes – then it is exported as a model.', 'Lieber in 3D? Füge eine Gruppe mit Würfeln hinzu – dann wird sie als Modell exportiert.'],
 	g_texture_text: ['The texture <b>%0</b> (%1 px) is ready – a soft checker pattern so you can see every face. Switch to Paint mode and paint right on the model.', 'Die Textur <b>%0</b> (%1 px) ist bereit – ein Schachbrettmuster, damit du jede Fläche siehst. Wechsle in den Malmodus und male direkt aufs Modell.'],
 	g_texture_text_cape: ['The cape texture uses the vanilla 64×32 layout: <b>purple</b> = the side everyone sees, <b>dark</b> = the inside, <b>teal</b> = the edges, grey = elytra. Paint over it – the preview cape updates live.', 'Die Umhang-Textur nutzt das Vanilla-Layout 64×32: <b>Lila</b> = die Seite, die alle sehen, <b>dunkel</b> = innen, <b>türkis</b> = Kanten, grau = Elytren. Male darüber – die Vorschau aktualisiert sich live.'],
@@ -1850,11 +2176,14 @@ Object.assign(STRINGS, {
 	ga_use_as_cape: ['Use as cape texture', 'Als Umhang-Textur nutzen'],
 	ga_use_as_shield: ['Use as shield texture', 'Als Schild-Textur nutzen'],
 	// ---- checks
-	chk_model_loose: ['"%0" is outside the groups – drag it into a group.', '"%0" liegt außerhalb der Gruppen – zieh es in eine Gruppe.'],
+	chk_model_loose: ['"%0" is not in a player group – drag it into a ◆ group.', '"%0" ist in keiner Spielergruppe – zieh es in eine ◆ Gruppe.'],
 	chk_model_no_group: ['There is no group yet – add one first.', 'Es gibt noch keine Gruppe – füge zuerst eine hinzu.'],
 	chk_model_empty: ['No cubes in "%0" yet.', 'Noch keine Würfel in "%0".'],
 	chk_model_ok: ['%0 cubes – looks good.', '%0 Würfel – sieht gut aus.'],
 	chk_model_ok_one: ['1 cube – looks good.', '1 Würfel – sieht gut aus.'],
+	chk_model_ok_on: ['%0 cubes on %1 – looks good.', '%0 Würfel an %1 – sieht gut aus.'],
+	chk_model_ok_on_one: ['1 cube on %1 – looks good.', '1 Würfel an %1 – sieht gut aus.'],
+	chk_model_outside: ['"%0" is not attached to the player yet – drag it into a ◆ group.', '"%0" hängt noch nicht am Spieler – zieh es in eine ◆ Gruppe.'],
 	chk_model_texture_only: ['Nothing to model – texture only.', 'Nichts zu modellieren – nur Textur.'],
 	chk_props_none: ['No props – fine for a pure body move.', 'Keine Props – passt für eine reine Bewegung.'],
 	chk_props_ok: ['%0 prop cubes.', '%0 Prop-Würfel.'],
@@ -1948,11 +2277,11 @@ Object.assign(STRINGS, {
 	fe_problems_warn: ['Good to know', 'Gut zu wissen'],
 	fp_id: ['The item id is not valid. Use something like yourname:cool_hat (lowercase, no spaces) – Vibey > Advanced > Properties.', 'Die Item-ID ist ungültig. Nimm etwas wie deinname:cooler_hut (klein, ohne Leerzeichen) – Vibey > Erweitert > Eigenschaften.'],
 	fp_name: ['Your item needs an English name – Vibey > Advanced > Properties.', 'Dein Item braucht einen englischen Namen – Vibey > Erweitert > Eigenschaften.'],
-	fp_loose: ['"%0" is not inside a group. Drag it into your item\'s group in the outliner.', '"%0" ist in keiner Gruppe. Zieh es in der Gliederung in die Gruppe deines Items.'],
+	fp_loose: ['"%0" is not in a player group. Drag it onto ◆ Head, ◆ Back … in the outliner (or right-click › Attach to …).', '"%0" ist in keiner Spielergruppe. Zieh es in der Gliederung auf ◆ Kopf, ◆ Rücken … (oder Rechtsklick › An … anheften).'],
 	fp_no_model: ['There is nothing to show yet. Add a group with at least one cube.', 'Es gibt noch nichts zu zeigen. Füge eine Gruppe mit mindestens einem Würfel hinzu.'],
 	fp_no_texture: ['Your cubes have no texture. Create one in the Textures panel ("+").', 'Deine Würfel haben keine Textur. Erstelle eine im Texturen-Panel ("+").'],
 	fp_molang: ['A keyframe uses a formula. Vibey only understands plain numbers – type a number instead.', 'Ein Keyframe nutzt eine Formel. Vibey versteht nur Zahlen – trag stattdessen eine Zahl ein.'],
-	fp_rig: ['The player bone "%0" was moved or rotated. Use Vibey > Advanced > Repair player rig.', 'Der Spielerknochen "%0" wurde verschoben oder gedreht. Nutze Vibey > Erweitert > Spieler-Rig reparieren.'],
+	fp_rig: ['The player group "%0" was moved or rotated. Use Vibey > Advanced > Repair player groups.', 'Die Spielergruppe "%0" wurde verschoben oder gedreht. Nutze Vibey > Erweitert > Spielergruppen reparieren.'],
 	fp_emote_anim: ['The emote has no animation. Create one in Animate mode.', 'Das Emote hat keine Animation. Erstelle eine im Animationsmodus.'],
 	fp_too_big: ['The item is over 2 MB. Use smaller textures or shorter sounds.', 'Das Item ist größer als 2 MB. Nutze kleinere Texturen oder kürzere Sounds.'],
 	fp_texture_size: ['The texture "%0" is bigger than 512×512 pixels. Make it smaller.', 'Die Textur "%0" ist größer als 512×512 Pixel. Mach sie kleiner.'],
@@ -1963,6 +2292,9 @@ Object.assign(STRINGS, {
 	fp_cape: ['A cape needs a cape texture – Vibey > Advanced > Properties > Cape texture.', 'Ein Umhang braucht eine Umhang-Textur – Vibey > Erweitert > Eigenschaften > Umhang-Textur.'],
 	fp_shield: ['A shield needs a shield texture – Vibey > Advanced > Properties > Shield texture.', 'Ein Schild braucht eine Schild-Textur – Vibey > Erweitert > Eigenschaften > Schild-Textur.'],
 	fp_reserved_bone: ['"%0" is the name of a player bone. Rename your group.', '"%0" ist der Name eines Spielerknochens. Benenne deine Gruppe um.'],
+	fp_outside: ['"%0" is not attached to the player and uses the slot default. Drag it into a ◆ group or right-click › Attach to …', '"%0" hängt nicht am Spieler und nutzt die Vorgabe des Slots. Zieh es in eine ◆ Gruppe oder Rechtsklick › An … anheften.'],
+	fp_ref_moved: ['The player group "%0" was moved. Use Vibey > Advanced > Repair player groups.', 'Die Spielergruppe "%0" wurde verschoben. Nutze Vibey > Erweitert > Spielergruppen reparieren.'],
+	fp_ref_keys: ['Keyframes on "%0" only preview the player in Blockbench – the game animates the player itself, they are not exported.', 'Keyframes an "%0" sind nur eine Vorschau in Blockbench – das Spiel bewegt den Spieler selbst, sie werden nicht exportiert.'],
 	fp_no_cubes: ['Your model has no cubes yet – add some to its group.', 'Dein Modell hat noch keine Würfel – füge welche in seine Gruppe ein.'],
 	attach_head: ['the head', 'den Kopf'],
 	attach_body: ['the body', 'den Körper'],
@@ -2106,31 +2438,320 @@ function markChanged() {
 	scheduleAutoPush();
 }
 
-// --------------------------------------------------------------- rig
+// ------------------------------------------- player groups ("build on the player")
 const findGroup = (name) => Group.all.find((g) => g.name === name);
-const isPlayerBone = (g) => isEmoteFormat() && g && Core.PLAYER_BONES.includes(g.name);
-function createPlayerRig(withUndo) {
-	if (withUndo) Undo.initEdit({ outliner: true, elements: [] });
-	let root = findGroup('root');
-	if (!root) root = new Group({ name: 'root', origin: [0, 0, 0] }).addTo().init();
-	else {
-		if (root.parent !== 'root') root.addTo();
-		root.origin.V3_set(0, 0, 0);
-		root.rotation.V3_set(0, 0, 0);
+const isRefGroup = (g) => !!(g && typeof Group !== 'undefined' && g instanceof Group && g.vibey_ref && Core.REF_BY_ID[g.vibey_ref]);
+const isPlayerBone = (g) => isVibey() && isRefGroup(g);
+/** One of the creator's groups by name (a pet may have its own "body"), else a player group by ref id (head, back …). */
+const findBone = (name) => Group.all.find((g) => g.name === name && !g.vibey_ref) || Group.all.find((g) => g.vibey_ref === name);
+const refName = (id) => T('ref_' + id);
+const refLabel = (id) => '◆ ' + refName(id);
+/** Ref id of the player group a node sits in ('' = none). */
+function refOfNode(node) {
+	let p = node && node.parent;
+	while (p && p !== 'root' && p instanceof Group) {
+		if (isRefGroup(p)) return p.vibey_ref;
+		p = p.parent;
 	}
-	root.isOpen = true;
-	Core.PLAYER_PARTS.forEach((part) => {
-		let g = findGroup(part);
-		if (!g) g = new Group({ name: part, origin: Core.PLAYER_PIVOTS[part].slice() }).addTo(root).init();
-		else {
-			if (g.parent !== root) g.addTo(root);
-			g.origin.V3_set(Core.PLAYER_PIVOTS[part]);
-			g.rotation.V3_set(0, 0, 0);
+	return '';
+}
+/** The creator's root part a node belongs to: its topmost ancestor below a player group (or the top level). */
+function partOf(node) {
+	if (!node || isRefGroup(node)) return null;
+	let n = node;
+	while (n.parent && n.parent !== 'root' && !isRefGroup(n.parent)) n = n.parent;
+	return n;
+}
+const forEachIn = (node, fn) => {
+	fn(node);
+	if (node.children) node.children.slice().forEach((c) => forEachIn(c, fn));
+};
+/** Moves everything inside a group (not the group's own pivot) by d (Blockbench px). */
+function shiftContent(group, d) {
+	if (!d || d.every((v) => Math.abs(v) < 1e-9)) return;
+	group.children.forEach((c) => forEachIn(c, (n) => {
+		const add = (v) => v.V3_set ? v.V3_set(v[0] + d[0], v[1] + d[1], v[2] + d[2]) : v.forEach((x, i) => (v[i] = x + d[i]));
+		if (n instanceof Group) add(n.origin);
+		else if (n instanceof Cube) {
+			add(n.from);
+			add(n.to);
+			if (!n.origin.every((v) => v === 0) || !n.rotation.every((v) => v === 0)) add(n.origin);
+		} else if (n instanceof Locator) add(n.position);
+	}));
+}
+/** Plain snapshot of an outliner node for the pure helpers (bestRef). */
+function nodeSnapLite(node) {
+	if (node instanceof Group) return { type: 'group', name: node.name, origin: node.origin.slice(), children: node.children.map(nodeSnapLite).filter(Boolean) };
+	if (node instanceof Cube) return { type: 'cube', name: node.name, from: node.from.slice(), to: node.to.slice() };
+	if (node instanceof Locator) return { type: 'locator', name: node.name, position: node.position.slice() };
+	return null;
+}
+const AUTO_EDIT = 'Vibey: attach to player group';
+const Refs = {
+	busy: false,
+	/** uuids whose automatic attaching was undone (they stay where the creator left them) */
+	declined: new Set(),
+	lastAuto: null,
+	map() {
+		const m = {};
+		Group.all.forEach((g) => isRefGroup(g) && !m[g.vibey_ref] && (m[g.vibey_ref] = g));
+		return m;
+	},
+	defs() {
+		return Core.refGroupsFor(kindOf(), getMeta().slot);
+	},
+	/** The groups the open item builds on (highlighted in the outliner). */
+	highlight() {
+		const meta = getMeta();
+		return Core.SLOT_REFS[kindOf() === 'emote' ? 'emote' : meta.slot] || [];
+	},
+	/**
+	 * Creates missing player groups, puts moved / rotated ones back (their content moves back too, so a stray gizmo
+	 * drag changes nothing), labels them in the UI language and converts old projects (root groups with an attach
+	 * setting, emote rigs named root/head/…) into the new structure. No undo of its own: callers wrap it.
+	 * Returns true when the outliner changed.
+	 */
+	ensure(opts) {
+		opts = opts || {};
+		if (!isVibey() || typeof Project === 'undefined' || !Project) return false;
+		const kind = kindOf();
+		const meta = getMeta();
+		let changed = false;
+		// old emote projects: the player bones were plain groups named root/head/…
+		if (kind === 'emote') Group.all.forEach((g) => !g.vibey_ref && Core.PLAYER_BONES.includes(g.name) && !Group.all.some((o) => o.vibey_ref === g.name) && (g.vibey_ref = g.name));
+		const defs = this.defs();
+		const want = new Set(defs.map((d) => d.id));
+		let m = this.map();
+		const legacy = !Object.keys(m).length;
+		// the slot changed between pet and the rest: "Beside player" <-> "Around player" (the export stays the same)
+		['beside', 'around'].forEach((id) => {
+			const g = m[id];
+			if (!g || want.has(id)) return;
+			const other = id === 'beside' ? 'around' : 'beside';
+			if (want.has(other) && !m[other]) {
+				const anchor = Core.refPivot('beside', meta);
+				shiftContent(g, id === 'beside' ? anchor.map((v) => -v) : anchor);
+				g.vibey_ref = other;
+			} else if (!g.children.length) g.remove(false);
+			else g.vibey_ref = '';
+			changed = true;
+		});
+		m = this.map();
+		defs.forEach((d, i) => {
+			const parentId = Core.refParent(d, kind);
+			const parent = parentId ? m[parentId] : null;
+			const pivot = Core.refPivot(d.id, meta);
+			let g = m[d.id];
+			if (!g) {
+				g = new Group({ name: refLabel(d.id), origin: pivot, vibey_ref: d.id }).addTo(parent || undefined, parent ? -1 : Math.min(i, Outliner.root.length)).init();
+				if (!parent) g.addTo(undefined, Outliner.root.filter((n) => isRefGroup(n) && n !== g).length);
+				changed = true;
+			} else {
+				if (g.parent !== (parent || 'root')) {
+					g.addTo(parent || undefined);
+					changed = true;
+				}
+				const d3 = pivot.map((v, k) => v - g.origin[k]);
+				if (d3.some((v) => Math.abs(v) > 1e-6)) {
+					shiftContent(g, d3);
+					g.origin.V3_set(pivot);
+					changed = true;
+				}
+				if (g.rotation.some((v) => v !== 0)) {
+					g.rotation.V3_set(0, 0, 0);
+					changed = true;
+				}
+			}
+			if (g.name !== refLabel(d.id)) g.name = refLabel(d.id);
+			if (g.export === false) g.export = true;
+			m[d.id] = g;
+		});
+		if (legacy || opts.convert) changed = this.convertLegacy(m) || changed;
+		if (changed) {
+			Canvas.updateAllBones && Canvas.updateAllBones();
+			Canvas.updateAll();
 		}
-	});
-	Canvas.updateAllBones && Canvas.updateAllBones();
-	Canvas.updateAll();
-	if (withUndo) Undo.finishEdit('Repair Vibey player rig');
+		this.styles();
+		return changed;
+	},
+	/** Old projects: root groups with an attach setting move into their player group (pets onto the pet anchor). */
+	convertLegacy(m) {
+		const kind = kindOf();
+		const meta = getMeta();
+		let changed = false;
+		const defAttach = kind === 'emote' ? 'root' : Core.SLOT_DEFAULT_ATTACH[meta.slot] || 'body';
+		let order = 0;
+		Outliner.root.slice().forEach((n) => {
+			if (!(n instanceof Group) || isRefGroup(n) || n.vibey_preview || n.export === false) return;
+			if (!(n.vibey_order >= 0)) n.vibey_order = order;
+			order++;
+			const attach = n.vibey_attach || defAttach;
+			const id = Core.bestRef(nodeSnapLite(n), { kind, slot: meta.slot, attach, meta });
+			if (!id || !m[id]) return;
+			n.addTo(m[id]);
+			n.vibey_attach = '';
+			if (id === 'beside') shiftContent({ children: [n] }, Core.refPivot('beside', meta));
+			changed = true;
+		});
+		return changed;
+	},
+	/** True when a player group is missing, moved, rotated or of the wrong kind (pet vs. the rest). */
+	broken() {
+		if (!isVibey()) return false;
+		const kind = kindOf();
+		const meta = getMeta();
+		const m = this.map();
+		const defs = this.defs();
+		if (Object.keys(m).some((id) => !defs.some((d) => d.id === id) && (id === 'beside' || id === 'around'))) return true;
+		return defs.some((d) => {
+			const g = m[d.id];
+			if (!g) return true;
+			const parentId = Core.refParent(d, kind);
+			if (g.parent !== (parentId ? m[parentId] : 'root')) return true;
+			const pivot = Core.refPivot(d.id, meta);
+			return pivot.some((v, k) => Math.abs(v - g.origin[k]) > 1e-6) || g.rotation.some((v) => v !== 0);
+		});
+	},
+	/** Repairs the player groups as an undoable step (after an edit, or Vibey > Advanced > Repair player groups). */
+	repair(message, force) {
+		if (!isVibey() || (!force && !this.broken())) return false;
+		this.busy = true;
+		try {
+			Undo.initEdit({ outliner: true, elements: Outliner.elements.slice() });
+			const changed = this.ensure();
+			Undo.finishEdit(message || 'Vibey: keep player groups in place');
+			return changed;
+		} finally {
+			this.busy = false;
+		}
+	},
+	/** After every edit: put player groups back (with a note) and attach new parts. */
+	afterEdit() {
+		if (!isVibey() || this.busy) return;
+		if (this.broken()) {
+			this.repair();
+			hint(T('ref_kept'));
+		}
+		this.autoAssign();
+		this.styles();
+	},
+	/** Moves the creator's parts into player group `id` (undoable). how: 'manual' | 'auto'; id null = top level, attach root. */
+	attach(parts, id, how) {
+		parts = parts.filter((n, i) => n && !isRefGroup(n) && parts.indexOf(n) === i);
+		if (!parts.length) return false;
+		const target = id ? this.map()[id] : null;
+		if (id && !target) return false;
+		this.busy = true;
+		try {
+			Undo.initEdit({ outliner: true, elements: Outliner.elements.slice(), selection: true });
+			parts.forEach((n) => {
+				const from = refOfNode(n);
+				if (target) {
+					if (n.parent !== target) n.addTo(target);
+				} else n.addTo();
+				if (n instanceof Group) n.vibey_attach = id ? '' : 'root';
+				n.vibey_auto = how === 'auto';
+				// pets: moving into / out of "Beside player" keeps the part where it is on screen; the export shifts
+				if (from !== (id || '')) this.declined.delete(n.uuid);
+			});
+			Undo.finishEdit(how === 'auto' ? AUTO_EDIT : 'Vibey: attach to ' + (id || 'root'));
+			if (how === 'auto') this.lastAuto = { index: Undo.index, uuids: parts.map((n) => n.uuid) };
+		} finally {
+			this.busy = false;
+		}
+		Canvas.updateAll();
+		this.styles();
+		const name = id ? refLabel(id) : '';
+		const text = !id ? T('attached_root', parts[0].name) : how === 'auto' ? T('attached_hint', name) : T('attached_manual', name);
+		hint(text);
+		return true;
+	},
+	/** Context menu: the creator's parts of the selection. */
+	selectedParts() {
+		const sel = [].concat(typeof Outliner !== 'undefined' ? Outliner.selected : [], Group.multi_selected || (Group.selected ? [].concat(Group.selected) : []));
+		return sel.map(partOf).filter((n, i, a) => n && a.indexOf(n) === i);
+	},
+	/**
+	 * Auto-assign after an edit: a part at the top level (outside the player groups) goes into the most plausible
+	 * player group (Core.bestRef); a part that was attached automatically follows when it is moved to another
+	 * body part. Parts attached by hand (drag in the outliner, right-click › Attach to …) are never moved.
+	 */
+	autoAssign() {
+		if (!isVibey() || this.busy) return;
+		const kind = kindOf();
+		const meta = getMeta();
+		const m = this.map();
+		const moves = {};
+		const consider = (n, current) => {
+			if (this.declined.has(n.uuid)) return;
+			const snap = nodeSnapLite(n);
+			if (!Core.nodeBounds(snap)) return; // an empty group: wait until it has something in it
+			const id = Core.bestRef(snap, { kind, slot: meta.slot, meta });
+			if (!id || id === current || !m[id]) return;
+			(moves[id] = moves[id] || []).push(n);
+		};
+		Outliner.root.forEach((n) => {
+			if (isRefGroup(n) || n.vibey_preview || n.export === false) return;
+			if (n instanceof Group && n.vibey_attach) return; // "Advanced: turns with the body only"
+			consider(n, '');
+		});
+		Object.values(m).forEach((g) => g.children.forEach((n) => !isRefGroup(n) && n.vibey_auto && consider(n, g.vibey_ref)));
+		Object.keys(moves).forEach((id) => this.attach(moves[id], id, 'auto'));
+	},
+	/** An undo of an automatic attach: leave those parts where they are from now on. */
+	onUndo() {
+		const a = this.lastAuto;
+		if (!a || Undo.index >= a.index) return;
+		a.uuids.forEach((u) => {
+			this.declined.add(u);
+			const n = OutlinerNode.uuids[u];
+			if (n) n.vibey_auto = false;
+		});
+		this.lastAuto = null;
+	},
+	styleEl: null,
+	/** Colours the player groups in the outliner (teal, "player" badge; the slot's groups purple, "build here"). */
+	styles() {
+		if (typeof document === 'undefined') return;
+		if (!this.styleEl) {
+			this.styleEl = document.createElement('style');
+			this.styleEl.id = 'vibey_ref_styles';
+			document.head.appendChild(this.styleEl);
+		}
+		if (!isVibey()) return (this.styleEl.textContent = '');
+		const hl = this.highlight();
+		const css = [];
+		Group.all.forEach((g) => {
+			if (!isRefGroup(g)) return;
+			const sel = '#cubes_list li[id="' + g.uuid + '"] > .outliner_object';
+			const here = hl.includes(g.vibey_ref);
+			css.push(sel + ' { background: ' + (here ? 'rgba(139,108,255,.20)' : 'rgba(63,224,197,.07)') + '; box-shadow: inset 3px 0 0 ' + (here ? '#8b6cff' : '#3fe0c5') + '; }');
+			css.push(sel + ' input.cube_name { color: ' + (here ? '#c9bbff' : '#7debd8') + '; font-weight: 600; }');
+			css.push(sel + ' > i.icon:not(.outliner_toggle) { color: ' + (here ? '#8b6cff' : '#3fe0c5') + ' !important; }');
+			css.push(sel + '::after { content: "' + (here ? T('ref_badge_here') : T('ref_badge')) + '"; margin: 0 4px 0 auto; padding: 0 5px; font-size: 10px; line-height: 15px; text-transform: uppercase; letter-spacing: .04em; color: ' + (here ? '#fff' : '#10151a') + '; background: ' + (here ? '#8b6cff' : '#3fe0c5') + '; align-self: center; flex-shrink: 0; }');
+		});
+		this.styleEl.textContent = css.join('\n');
+	},
+	remove() {
+		if (this.styleEl) this.styleEl.remove();
+		this.styleEl = null;
+	},
+};
+/** Short, non-blocking note at the bottom (falls back to Blockbench's quick message). */
+function hint(text) {
+	try {
+		if (Blockbench.showToastNotification) {
+			const n = Blockbench.showToastNotification({ text, icon: 'push_pin', expire: 4500, click: () => (n && n.delete && n.delete(), true) });
+			return n;
+		}
+	} catch (e) {}
+	Blockbench.showQuickMessage(text, 3000);
+}
+function createPlayerRig(withUndo) {
+	if (withUndo) Refs.repair('Repair Vibey player groups', true);
+	else Refs.ensure();
+	const root = Refs.map().root;
+	if (root) root.isOpen = true;
 	Reference.ensure();
 }
 
@@ -2242,35 +2863,38 @@ const Reference = {
 		mesh.userData.vibeyReference = true;
 		return mesh;
 	},
+	markerMaterial: null,
+	/** Small teal diamond marking a sub-point (Back, shoulders, hips, above head, around/beside the player). */
+	buildMarker(id) {
+		if (!this.markerMaterial) this.markerMaterial = new THREE.MeshBasicMaterial({ color: 0x3fe0c5, transparent: true, opacity: 0.85, depthTest: false });
+		const mesh = new THREE.Mesh(new THREE.OctahedronGeometry(id === 'beside' || id === 'around' ? 1.6 : 0.9), this.markerMaterial);
+		mesh.name = 'vibey_ref_marker';
+		mesh.renderOrder = 10;
+		mesh.userData.vibeyReference = true;
+		return mesh;
+	},
 	ensure() {
 		if (typeof Project === 'undefined' || !Project || !isVibey() || !Project.model_3d) return;
 		const meta = getMeta();
 		const visible = meta.showReference !== false;
-		if (isEmoteFormat()) {
-			// Reference cubes live inside the real player bone groups, so they follow the animation.
-			Core.PLAYER_PARTS.forEach((part) => {
-				const g = findGroup(part);
-				const bone = g && g.mesh;
-				if (!bone) return;
-				let m = bone.children.find((c) => c.name === 'vibey_ref_' + part);
-				if (!m) bone.add((m = this.buildPartMesh(part)));
+		// old versions drew the cosmetic reference as a separate object
+		const old = Project.model_3d.children.find((c) => c.name === 'vibey_reference');
+		if (old) Project.model_3d.remove(old);
+		// The reference cubes live inside the player groups, so they move with them (emote animation, preview keyframes).
+		Group.all.forEach((g) => {
+			if (!isRefGroup(g) || !g.mesh) return;
+			const id = g.vibey_ref;
+			const bone = g.mesh;
+			if (Core.PLAYER_PARTS.includes(id)) {
+				let m = bone.children.find((c) => c.name === 'vibey_ref_' + id);
+				if (!m) bone.add((m = this.buildPartMesh(id)));
 				m.visible = visible && g.visibility !== false;
-			});
-		} else {
-			let obj = Project.model_3d.children.find((c) => c.name === 'vibey_reference');
-			if (!obj) {
-				obj = new THREE.Object3D();
-				obj.name = 'vibey_reference';
-				Core.PLAYER_PARTS.forEach((part) => {
-					const pivotObj = new THREE.Object3D();
-					pivotObj.position.fromArray(Core.PLAYER_PIVOTS[part]);
-					pivotObj.add(this.buildPartMesh(part));
-					obj.add(pivotObj);
-				});
-				Project.model_3d.add(obj);
+			} else if (id !== 'root') {
+				let m = bone.children.find((c) => c.name === 'vibey_ref_marker');
+				if (!m) bone.add((m = this.buildMarker(id)));
+				m.visible = visible && g.visibility !== false;
 			}
-			obj.visible = visible;
-		}
+		});
 	},
 	removeAll() {
 		(typeof ModelProject !== 'undefined' ? ModelProject.all : []).forEach((p) => {
@@ -2413,9 +3037,13 @@ function snapshotProject(opts) {
 	const nodeSnap = (node) => {
 		if (node.export === false || node.vibey_preview) return null;
 		if (node instanceof Group) {
+			if (isRefGroup(node)) {
+				return { type: 'group', name: node.name, ref: node.vibey_ref, origin: node.origin.slice(), rotation: node.rotation.slice(), children: node.children.map(nodeSnap).filter(Boolean) };
+			}
 			return {
 				type: 'group', name: node.name, origin: node.origin.slice(), rotation: node.rotation.slice(),
 				attach: node.vibey_attach || '', emissive: !!node.vibey_emissive, translucent: !!node.vibey_translucent,
+				order: typeof node.vibey_order === 'number' && node.vibey_order >= 0 ? node.vibey_order : undefined,
 				children: node.children.map(nodeSnap).filter(Boolean),
 			};
 		}
@@ -2431,6 +3059,7 @@ function snapshotProject(opts) {
 		if (node instanceof Locator) return { type: 'locator', name: node.name, position: node.position.slice() };
 		return null;
 	};
+	const refKeys = [];
 	const animations = (Animator.animations || []).map((anim) => {
 		const a = { name: anim.name, length: anim.length, loop: anim.loop, bones: {}, effects: { particle: [], sound: [], timeline: [] } };
 		for (const uuid in anim.animators) {
@@ -2447,7 +3076,14 @@ function snapshotProject(opts) {
 			['rotation', 'position', 'scale'].forEach((ch) => {
 				if (an[ch] && an[ch].length) chans[ch] = an[ch].map(keyframeSnap);
 			});
-			if (Object.keys(chans).length) a.bones[node.name] = chans;
+			if (!Object.keys(chans).length) continue;
+			if (isRefGroup(node)) {
+				// emote player bones are animated by their vanilla name; other player groups only preview in Blockbench
+				if (kindOf() === 'emote' && Core.PLAYER_BONES.includes(node.vibey_ref)) a.bones[node.vibey_ref] = chans;
+				else if (refKeys.indexOf(node.name) < 0) refKeys.push(node.name);
+				continue;
+			}
+			a.bones[node.name] = chans;
 		}
 		return a;
 	});
@@ -2457,6 +3093,7 @@ function snapshotProject(opts) {
 		textures,
 		nodes: Outliner.root.map(nodeSnap).filter(Boolean),
 		animations,
+		refKeys,
 	};
 }
 /** Compiles + validates the current project. */
@@ -2467,6 +3104,7 @@ function buildBundle(opts) {
 	const v = Core.validateBundle(res.bundle, { skipBinary: !!opts.skipBinary });
 	const errors = res.errors.concat(v.errors);
 	const warnings = res.warnings.concat(v.warnings);
+	(snap.refKeys || []).forEach((name) => warnings.push(`Keyframes on player group "${name}" only preview the player in Blockbench and are not exported.`));
 	if (opts.skipBinary) {
 		snap.textures.forEach((t) => {
 			const maxH = t.frameCount > 1 ? Core.LIMITS.stripHeight : Core.LIMITS.textureSize;
@@ -2508,12 +3146,18 @@ function applySnapshot(snap) {
 	}
 	const build = (node, parent) => {
 		if (node.type === 'group') {
+			const ref = Core.refOf(node, snap.kind);
 			const g = new Group({
-				name: node.name, origin: node.origin, rotation: node.rotation,
-				vibey_attach: node.attach || '', vibey_emissive: !!node.emissive, vibey_translucent: !!node.translucent,
-				vibey_preview: !!(node.preview || (parent && parent.vibey_preview)),
+				name: ref ? refLabel(ref) : node.name, origin: node.origin, rotation: node.rotation,
+				vibey_attach: ref ? '' : node.attach || '', vibey_emissive: !!node.emissive, vibey_translucent: !!node.translucent,
+				vibey_preview: !!(node.preview || (parent && parent.vibey_preview)), vibey_ref: ref || '',
+				vibey_order: !ref && typeof node.order === 'number' ? node.order : -1,
 			}).addTo(parent).init();
-			g.isOpen = (!!node.player && node.name === 'root') || (!!snap.meta && !!snap.meta.wizard && !parent && !node.preview);
+			if (ref) g.name = refLabel(ref); // labels are not sanitised (see the name_regex override)
+			// open the player groups that hold something, and the creator's own group the wizard made
+			const holds = ref && (node.children || []).some((c) => !Core.refOf(c, snap.kind));
+			const nested = ref && (node.children || []).some((c) => (c.children || []).some((x) => !Core.refOf(x, snap.kind)) && Core.refOf(c, snap.kind));
+			g.isOpen = ref === 'root' || !!holds || !!nested || (!ref && !!snap.meta && !!snap.meta.wizard && !node.preview && !!parent && !parent.vibey_preview && isRefGroup(parent));
 			(node.children || []).forEach((c) => build(c, g));
 		} else if (node.type === 'cube') {
 			const faces = {};
@@ -2532,6 +3176,7 @@ function applySnapshot(snap) {
 		}
 	};
 	snap.nodes.forEach((n) => build(n, undefined));
+	Refs.ensure();
 	snap.animations.forEach((a) => {
 		const data = { name: a.name, loop: a.loop, length: a.length, animators: {} };
 		const kfData = (ch, kf) => {
@@ -2546,7 +3191,7 @@ function applySnapshot(snap) {
 			return d;
 		};
 		for (const boneName of Object.keys(a.bones)) {
-			const g = findGroup(boneName);
+			const g = snap.kind === 'emote' && Core.PLAYER_BONES.includes(boneName) ? Group.all.find((x) => x.vibey_ref === boneName) : findBone(boneName);
 			if (!g) continue;
 			const keyframes = [];
 			for (const ch of Object.keys(a.bones[boneName])) a.bones[boneName][ch].forEach((kf) => keyframes.push(kfData(ch, kf)));
@@ -2752,6 +3397,8 @@ function applyProperties(r) {
 	if (!Project.name || Project.name === prevPath || Project.name.startsWith('new_')) Project.name = meta.id.split(':').pop().replace(/[\/]/g, '_');
 	if (typeof setProjectTitle === 'function') setProjectTitle();
 	savePrefs({ namespace: meta.id.split(':')[0], author: meta.author });
+	// slot / pet follow point changed: the player groups follow (Beside <-> Around player, the pet anchor moves)
+	if (Refs.ensure()) Reference.ensure();
 	markChanged();
 }
 
@@ -3422,6 +4069,16 @@ function createItem(opts) {
 		capture(100);
 	}
 	if (kind === 'emote' && Animator.animations[0]) Animator.animations[0].select && Animator.animations[0].select();
+	else {
+		const part = Core.userParts(snap)[0];
+		const g = part && findBone(part.node.name);
+		if (g) {
+			g.select();
+			g.openUp && g.openUp();
+			if (typeof updateSelection === 'function') updateSelection();
+		}
+	}
+	Refs.styles();
 	savePrefs({ namespace: id.split(':')[0], author: opts.author || prefs().author || '' });
 	if (prefs().guide !== false) Guide.show(false);
 	const view = CAMERA[kind === 'emote' ? 'emote' : snap.meta.slot] || CAMERA.emote;
@@ -3477,7 +4134,10 @@ const Wizard = {
 					stepLabels() {
 						return [T('wz_step_type'), this.s.kind === 'emote' ? T('wz_step_options') : T('wz_step_slot'), T('wz_step_name'), T('wz_step_template')];
 					},
-					slots: () => Core.SLOTS.map((slot) => ({ id: slot, label: T('slot_' + slot), desc: T('slot_' + slot + '_desc'), thumb: thumbSrc(Core.ASSETS.cards && Core.ASSETS.cards[slot]) })),
+					slots: () => Core.SLOTS.map((slot) => ({
+						id: slot, label: T('slot_' + slot), desc: T('slot_' + slot + '_desc'), thumb: thumbSrc(Core.ASSETS.cards && Core.ASSETS.cards[slot]),
+						on: Core.SLOT_PRESETS[slot].textureOnly ? '' : T('wz_builds_on', (Core.SLOT_REFS[slot] || []).map(refLabel).join(' / ')),
+					})),
 					types: () => ['cosmetic', 'emote'].map((k) => ({ id: k, label: T('wz_' + k), desc: T('wz_' + k + '_desc'), thumb: thumbSrc(Core.ASSETS.cards && Core.ASSETS.cards[k]) })),
 					templates() {
 						return wizardTemplates(this.s.kind, this.s.slot);
@@ -3569,7 +4229,7 @@ const Wizard = {
 		<h2 class="vw_q">{{ t('wz_slot_q') }}</h2>
 		<div class="vw_cards vw_four">
 			<div v-for="c in slots" class="vw_card" :class="{ selected: s.slot === c.id }" :data-value="c.id" @click="pick('slot', c.id)">
-				<img :src="c.thumb" alt=""><div class="vw_label">{{ c.label }}</div><div class="vw_desc">{{ c.desc }}</div>
+				<img :src="c.thumb" alt=""><div class="vw_label">{{ c.label }}</div><div class="vw_desc">{{ c.desc }}</div><div class="vw_on" v-if="c.on">{{ c.on }}</div>
 			</div>
 			<div class="vw_hint_tile"><i class="material-icons">lightbulb</i><span>{{ t('wz_not_sure') }}</span></div>
 		</div>
@@ -3700,21 +4360,27 @@ const Guide = {
 		const preset = kind === 'cosmetic' ? Core.SLOT_PRESETS[slot] : null;
 		const texOnly = !!(preset && preset.textureOnly) && checks.model.key === 'chk_model_texture_only';
 		const tut = meta.tutorial || (meta.tutorial = { step: 0, done: {} });
-		const rootGroup = (snap.nodes.find((n) => n.type === 'group' && !n.player) || {});
-		const attach = rootGroup.attach || (preset && preset.attach) || Core.SLOT_DEFAULT_ATTACH[slot] || 'body';
+		const attach = (preset && preset.attach) || Core.SLOT_DEFAULT_ATTACH[slot] || 'body';
 		const tex = snap.textures.find((t) => t.isDefault) || snap.textures[0];
 		const anims = snap.animations.map((a) => a.name);
 		const steps = [];
+		// check args may be lists of player group ids -> "◆ Back, ◆ Head"
+		const argText = (a) => (Array.isArray(a) ? a.map((x) => (Core.REF_BY_ID[x] ? refLabel(x) : x)).join(', ') : a);
 		const add = (id, title, text, tip, actions, optional) => {
 			const c = checks[id];
-			steps.push({ id, title, text, tip, actions: actions || [], optional: !!optional, state: c.state, check: T(c.key, ...c.args), done: !!tut.done[id], complete: !!tut.done[id] || c.state === 'ok' });
+			steps.push({ id, title, text, tip, actions: actions || [], optional: !!optional, state: c.state, check: T(c.key, ...c.args.map(argText)), done: !!tut.done[id], complete: !!tut.done[id] || c.state === 'ok' });
 		};
-		// 1 model
-		if (kind === 'emote') add('model', T('g_model_emote'), T('g_model_text_emote'), T('g_model_tip'), [{ id: 'select:right_arm', label: T('ga_select_group', 'right_arm') }], true);
+		// 1 model: build on the player
+		const parts = Core.userParts(snap);
+		const part = parts[0];
+		const partRef = (part && part.ref) || Refs.highlight()[0] || '';
+		if (kind === 'emote') add('model', T('g_model_emote'), T('g_model_text_emote'), T('g_model_tip'), [{ id: 'select:right_arm', label: T('ga_select_group', refLabel('right_arm')) }, { id: 'add_cube', label: T('ga_add_cube') }], true);
 		else if (texOnly) add('model', T('g_model_tex'), T('g_model_text_tex'), T('g_model_tip_tex'), []);
 		else {
-			const text = slot === 'wings' ? T('g_model_text_wings') : slot === 'pet' ? T('g_model_text_pet') : slot === 'aura' ? T('g_model_text_aura') : T('g_model_text', esc(rootGroup.name || slot), esc(T('attach_' + attach)));
-			add('model', T('g_model'), text, T('g_model_tip'), rootGroup.name ? [{ id: 'select:' + rootGroup.name, label: T('ga_select_group', rootGroup.name) }, { id: 'add_cube', label: T('ga_add_cube') }] : []);
+			const text = slot === 'wings' ? T('g_model_text_wings') : slot === 'pet' ? T('g_model_text_pet') : slot === 'aura' ? T('g_model_text_aura')
+				: T('g_model_text', esc(part ? part.node.name : slot), esc(partRef ? refLabel(partRef) : T('attach_' + attach)));
+			const acts = part ? [{ id: 'select:' + part.node.name, label: T('ga_select_group', part.node.name) }] : partRef ? [{ id: 'select:' + partRef, label: T('ga_select_group', refLabel(partRef)) }] : [];
+			add('model', T('g_model'), text, T('g_model_tip'), acts.concat([{ id: 'add_cube', label: T('ga_add_cube') }]));
 		}
 		// 2 texture
 		const texActions = [{ id: 'paint', label: T('ga_paint') }];
@@ -3748,6 +4414,44 @@ const Guide = {
 		meta.tutorial.step = meta.tutorial.step === i ? -1 : i;
 		refreshUI();
 	},
+	lastScroll: '',
+	/**
+	 * The guide never runs off the bottom of the window: its height is capped to the space left in its sidebar
+	 * (or the window, when the panel floats) and it scrolls inside. Called on every refresh and window resize
+	 * (also when Blockbench's interface scale / the display scaling changes).
+	 */
+	fit() {
+		const box = typeof document !== 'undefined' && document.querySelector('.vibey_guide');
+		if (!box || !box.offsetParent) return false;
+		const top = box.getBoundingClientRect().top;
+		const bar = box.closest('#left_bar, #right_bar');
+		const floating = box.closest('.panel.floating, .panel.float') || !bar;
+		let bottom = floating ? window.innerHeight : bar.getBoundingClientRect().bottom;
+		bottom = Math.min(bottom, window.innerHeight);
+		// leave the header of the next panel in the same sidebar visible
+		const container = box.closest('.panel_container');
+		const next = !floating && container && container.nextElementSibling;
+		const reserve = next && next.offsetHeight ? 32 : 6;
+		const max = Math.max(140, Math.floor(bottom - top - reserve));
+		if (box.style.maxHeight !== max + 'px') box.style.maxHeight = max + 'px';
+		return max;
+	},
+	/** Keeps the open step visible: the guide panel scrolls (it never runs off the bottom of the window). */
+	scrollToCurrent() {
+		this.fit();
+		const box = document.querySelector('.vibey_guide');
+		const cur = box && box.querySelector('.vg_step.vg_current');
+		const scroller = box;
+		if (!cur || !scroller) return false;
+		const sr = scroller.getBoundingClientRect();
+		const cr = cur.getBoundingClientRect();
+		if (cr.top < sr.top || cr.bottom > sr.bottom) {
+			// show the step's head; if the step is taller than the panel, its top stays at the top
+			const offset = cr.top - sr.top - Math.max(0, Math.min(24, sr.height - cr.height));
+			scroller.scrollTop += cr.height > sr.height ? cr.top - sr.top - 4 : offset > 0 ? cr.bottom - sr.bottom + 8 : offset;
+		}
+		return true;
+	},
 	tick(i, value) {
 		const meta = getMeta();
 		const step = UI.guide.steps[i];
@@ -3767,7 +4471,7 @@ const Guide = {
 		const [what, arg] = String(id).split(':');
 		if (what === 'select') {
 			Modes.options.edit.select();
-			const g = findGroup(arg);
+			const g = findBone(arg);
 			if (g) {
 				g.select();
 				g.openUp && g.openUp();
@@ -3775,6 +4479,12 @@ const Guide = {
 			}
 		} else if (what === 'add_cube') {
 			Modes.options.edit.select();
+			// the new cube goes into the selected group – pick the item's own group (or its player group) first
+			if (!Group.first_selected) {
+				const part = Core.userParts(snapshotProject({ skipBinary: true }))[0];
+				const g = part ? findBone(part.node.name) : Refs.map()[Refs.highlight()[0]];
+				if (g) g.select();
+			}
 			if (BarItems.add_cube) BarItems.add_cube.click();
 		} else if (what === 'paint') Modes.options.paint.select();
 		else if (what === 'animate') {
@@ -3918,6 +4628,11 @@ function refreshUI() {
 		if (meta && Guide.visible) {
 			try {
 				Guide.compute();
+				const key = (Project && Project.uuid) + ':' + UI.guide.current;
+				if (key !== Guide.lastScroll) {
+					Guide.lastScroll = key;
+					setTimeout(() => Guide.scrollToCurrent(), 30);
+				} else setTimeout(() => Guide.fit(), 30);
 			} catch (e) {
 				console.warn('[Vibey] guide', e);
 			}
@@ -4044,7 +4759,9 @@ const CSS = `
 .vibey_about p { margin: 0 0 8px; }
 
 /* ---- guide panel */
-.vibey_guide { padding: 8px 10px 10px; }
+.vibey_guide { padding: 8px 10px 10px; overflow-y: auto; overscroll-behavior: contain; scroll-behavior: smooth; box-sizing: border-box; }
+.vibey_guide::-webkit-scrollbar { width: 8px; }
+.vibey_guide::-webkit-scrollbar-thumb { background: rgba(139, 108, 255, .55); }
 .vg_progress { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: var(--color-subtle_text); font-size: .88em; white-space: nowrap; }
 .vg_bar { flex: 1; height: 6px; background: var(--color-back); }
 .vg_fill { height: 100%; background: linear-gradient(90deg, var(--vibe), var(--teal)); transition: width .2s; }
@@ -4116,6 +4833,8 @@ const CSS = `
 .vibey_friendly ol, .vg_howto ol { counter-reset: vstep; list-style: none; padding-left: 0; }
 .vibey_friendly ol li, .vg_howto ol li { counter-increment: vstep; position: relative; padding-left: 28px; }
 .vibey_friendly ol li::before, .vg_howto ol li::before { content: counter(vstep); position: absolute; left: 0; top: 1px; width: 19px; height: 19px; line-height: 19px; text-align: center; font-size: .8em; font-weight: 700; background: var(--vibe); color: #fff; }
+.vw_on { margin-top: auto; padding: 1px 6px; font-size: .8em; color: #7debd8; border: 1px solid rgba(63, 224, 197, .45); }
+.vw_card.selected .vw_on { color: #fff; border-color: var(--vibe); background: var(--vibe); }
 .vw_hint_tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px; text-align: center; color: var(--color-subtle_text); border: 2px dashed var(--color-border); font-size: .9em; }
 .vw_hint_tile i { color: var(--amber); font-size: 26px; }
 `;
@@ -4133,6 +4852,7 @@ const SEAL_ICON = 'data:image/svg+xml;base64,' + btoa(SEAL_SVG);
 const disposables = [];
 const listeners = [];
 let restoreScriptCondition = null;
+let restoreNameRegex = null;
 let intervalId = null;
 function on(event, fn) {
 	Blockbench.on(event, fn);
@@ -4153,17 +4873,27 @@ function setup() {
 
 	// ---- properties
 	disposables.push(new Property(ModelProject, 'object', 'vibey', { exposed: false, condition: { formats: [COSMETIC, EMOTE] } }));
-	const attachOptions = { '': T('auto') };
-	Core.ATTACH.forEach((a) => (attachOptions[a] = a));
 	const groupSelectedOk = (needRoot) => {
 		const g = Group.first_selected;
 		if (!g || isPlayerBone(g)) return false;
 		return needRoot ? g.parent === 'root' : true;
 	};
-	disposables.push(new Property(Group, 'string', 'vibey_attach', {
-		condition: (g) => isVibey() && (g ? true : groupSelectedOk(true)),
-		inputs: { element_panel: { input: { label: T('attach'), type: 'select', options: attachOptions } } },
-	}));
+	// What a part moves with comes from the player group it sits in ("build on the player"). vibey_attach is only
+	// kept for old projects (converted on load) and the "Advanced: turns with the body only" (root) override.
+	disposables.push(new Property(Group, 'string', 'vibey_attach', { exposed: false, condition: { formats: [COSMETIC, EMOTE] } }));
+	disposables.push(new Property(Group, 'string', 'vibey_ref', { exposed: false, condition: { formats: [COSMETIC, EMOTE] } }));
+	disposables.push(new Property(Group, 'boolean', 'vibey_auto', { exposed: false, condition: { formats: [COSMETIC, EMOTE] } }));
+	// order of the root bones in an imported bundle / old project (keeps re-exports byte-identical); -1 = none
+	disposables.push(new Property(Group, 'number', 'vibey_order', { default: -1, exposed: false, condition: { formats: [COSMETIC, EMOTE] } }));
+	disposables.push(new Property(Cube, 'boolean', 'vibey_auto', { exposed: false, condition: { formats: [COSMETIC, EMOTE] } }));
+	disposables.push(new Property(Locator, 'boolean', 'vibey_auto', { exposed: false, condition: { formats: [COSMETIC, EMOTE] } }));
+	// player group labels ("◆ Right arm") keep their spaces and symbols; everything else is sanitised as before
+	const origNameRegex = Group.prototype.name_regex;
+	Group.prototype.name_regex = function (node) {
+		if (node && node.vibey_ref && isVibey()) return false;
+		return typeof origNameRegex === 'function' ? origNameRegex.call(this, node) : origNameRegex;
+	};
+	restoreNameRegex = () => (Group.prototype.name_regex = origNameRegex);
 	disposables.push(new Property(Group, 'boolean', 'vibey_emissive', {
 		condition: (g) => isVibey() && (g ? true : groupSelectedOk(false)),
 		inputs: { element_panel: { input: { label: T('emissive'), type: 'checkbox' } } },
@@ -4257,9 +4987,9 @@ function setup() {
 			format_page: { content: [{ type: 'h3', text: T('format_' + kind) }, { text: T('format_info') }].concat(kind === 'emote' ? [{ text: T('format_emote_info') }] : []) },
 			onSetup(project, newModel) {
 				getMeta(project);
-				if (newModel && kind === 'emote') {
+				if (newModel) {
 					createPlayerRig(false);
-					if (!Animator.animations.length) new Animation({ name: 'main', loop: 'once', length: 2 }).add(false);
+					if (kind === 'emote' && !Animator.animations.length) new Animation({ name: 'main', loop: 'once', length: 2 }).add(false);
 				}
 				setTimeout(() => Reference.ensure(), 0);
 			},
@@ -4297,7 +5027,7 @@ function setup() {
 	A('vibey_properties', { name: T('properties'), icon: 'tune', condition: isVibey, click: () => openPropertiesDialog(false) });
 	A('vibey_validate', { name: T('menu_validation'), icon: 'checklist', condition: isVibey, click: validateNow });
 	A('vibey_toggle_reference', { name: T('toggle_reference'), icon: 'check_box', category: 'view', condition: isVibey, click: () => setReferenceVisible(!(getMeta().showReference !== false)) });
-	A('vibey_repair_rig', { name: T('repair_rig'), icon: 'accessibility_new', condition: isEmoteFormat, click: () => (createPlayerRig(true), Blockbench.showQuickMessage(T('rig_repaired'), 1500)) });
+	A('vibey_repair_rig', { name: T('repair_rig'), icon: 'accessibility_new', condition: isVibey, click: () => (createPlayerRig(true), Blockbench.showQuickMessage(T('rig_repaired'), 1500)) });
 	A('vibey_connect', { name: T('connect'), icon: 'link', click: () => (Link.state === 'off' || Link.state === 'error' ? Link.connect() : Link.disconnect()) });
 	A('vibey_push', { name: T('push'), icon: 'send', condition: isVibey, click: () => Link.push(defaultPushAction()) });
 	A('vibey_play', { name: T('play'), icon: 'play_circle', condition: isEmoteFormat, click: () => Link.push('play') });
@@ -4317,6 +5047,37 @@ function setup() {
 	A('vibey_add_sprite', { name: T('add_sprite'), icon: 'auto_awesome', condition: isVibey, click: () => spriteDialog() });
 	MenuBar.addAction(exportAction, 'file.export');
 	MenuBar.addAction(importAction, 'file.import');
+
+	// right-click a part › Attach to … › ◆ Back
+	const attachMenu = {
+		id: 'vibey_attach_to',
+		name: T('attach_to'),
+		icon: 'push_pin',
+		condition: () => isVibey() && Refs.selectedParts().length > 0,
+		children() {
+			const parts = Refs.selectedParts();
+			const here = parts.length === 1 ? refOfNode(parts[0]) || (parts[0].vibey_attach === 'root' ? 'root!' : '') : null;
+			const kind = kindOf();
+			const list = Refs.defs().map((d) => ({
+				id: 'vibey_attach_' + d.id,
+				name: (Core.refParent(d, kind) && Core.refParent(d, kind) !== 'root' ? '   ' : '') + refName(d.id),
+				icon: here === d.id ? 'radio_button_checked' : 'radio_button_unchecked',
+				click: () => Refs.attach(Refs.selectedParts(), d.id, 'manual'),
+			}));
+			if (kind === 'cosmetic') {
+				list.push('_');
+				list.push({ id: 'vibey_attach_root', name: T('attach_root_adv'), icon: here === 'root!' ? 'radio_button_checked' : 'tune', click: () => Refs.attach(Refs.selectedParts().filter((n) => n instanceof Group), null, 'manual') });
+			}
+			return list;
+		},
+	};
+	[Group, Cube, Locator].forEach((type) => {
+		const menu = type && type.prototype && type.prototype.menu;
+		if (!menu || !menu.addAction) return;
+		const at = menu.structure.findIndex((x) => x === 'move_to_group' || (x && x.id === 'move_to_group'));
+		menu.addAction(attachMenu, String(at >= 0 ? at + 1 : 0));
+		disposables.push({ delete: () => menu.removeAction(attachMenu) });
+	});
 
 	// One clear main menu; everything for power users lives under "Advanced".
 	const ADVANCED = [
@@ -4493,16 +5254,31 @@ function setup() {
 
 	// ---- events
 	['finished_edit', 'undo', 'redo'].forEach((ev) => on(ev, () => isVibey() && (Reference.ensure(), scheduleAutoPush())));
-	on('select_project', () => setTimeout(() => (Reference.ensure(), refreshUI()), 0));
+	on('finished_edit', (e) => {
+		if (!isVibey() || Refs.busy || (e && e.remote)) return;
+		setTimeout(() => {
+			Refs.afterEdit();
+			Reference.ensure();
+		}, 0);
+	});
+	on('undo', () => isVibey() && (Refs.onUndo(), setTimeout(() => (Refs.styles(), Reference.ensure()), 0)));
+	on('redo', () => isVibey() && setTimeout(() => (Refs.styles(), Reference.ensure()), 0));
+	// old projects (attach per root group / emote rigs named root, head …) become the new structure silently
+	on('load_project', () => setTimeout(() => isVibey() && (Refs.ensure({ convert: true }), Reference.ensure(), refreshUI()), 0));
+	on('select_project', () => setTimeout(() => (isVibey() && Refs.ensure(), Refs.styles(), Reference.ensure(), refreshUI()), 0));
 	on('unselect_project', () => clearVisibilityPreview());
 	on('select_mode', () => clearVisibilityPreview());
 	on('add_texture', () => setTimeout(() => isVibey() && (ensureDefaultTexture(), markChanged()), 0));
 	on('display_animation_frame', applyVisibilityPreview);
 	on('close_project', () => setTimeout(refreshUI, 0));
 	on('select_mode', () => setTimeout(refreshUI, 0));
+	const onResize = () => setTimeout(() => Guide.fit(), 50);
+	window.addEventListener('resize', onResize);
+	disposables.push({ delete: () => window.removeEventListener('resize', onResize) });
 	intervalId = setInterval(() => {
 		try {
 			Reference.ensure();
+			Refs.styles();
 			updateStatusBar();
 		} catch (e) {}
 	}, 1000);
@@ -4510,7 +5286,7 @@ function setup() {
 	window.VibeyPlugin = {
 		VERSION, Core, Link, LinkSettings, UI, Reference,
 		buildBundle, compileProjectJSON, snapshotProject, applySnapshot, importBundle, exportBundle,
-		getMeta, applyProperties, createPlayerRig, setReferenceVisible, addSoundFiles, openPropertiesDialog,
+		getMeta, applyProperties, createPlayerRig, setReferenceVisible, addSoundFiles, openPropertiesDialog, Refs, refLabel, refOfNode, partOf, findBone, hint,
 		openLinkSettings, validateNow, saveLinkSettings, refreshUI, T, teardown,
 		Wizard, openWizard, createItem, Guide, testLive, exportSubmitDialog, showFriendly, showProblems, showLinkProblem, aboutDialog,
 		prefs, savePrefs, textureUntouched, sessionOf, STRINGS, isGerman,
@@ -4538,6 +5314,8 @@ function teardown() {
 	listeners.forEach(([ev, fn]) => Blockbench.removeListener(ev, fn));
 	listeners.length = 0;
 	if (restoreScriptCondition) restoreScriptCondition();
+	if (restoreNameRegex) restoreNameRegex();
+	Refs.remove();
 	if (statusMenu && statusMenu.delete) statusMenu.delete();
 	if (Wizard.dialog) {
 		try {

@@ -9,7 +9,7 @@
     "minClient": "0.2.0"
   },
   "scripts": {
-    "test": "node --test test/unit.test.js test/wizard.test.js test/server.test.js test/release-json.test.mjs",
+    "test": "node --test test/unit.test.js test/wizard.test.js test/player-groups.test.js test/server.test.js test/release-json.test.mjs",
     "test:blockbench": "node test/blockbench-e2e.js",
     "shots": "node test/wizard-shots.js",
     "embed-assets": "node tools/embed-assets.js",
