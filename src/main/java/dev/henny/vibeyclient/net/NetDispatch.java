@@ -20,7 +20,8 @@ public final class NetDispatch {
 
     /** Called on the server thread. */
     public static void toServer(ServerPlayer from, CustomPacketPayload payload) {
-        ServerRelay.handle(from, payload);
+        if (payload instanceof RulesPayloads.Hello hello) ServerRulesHost.onHello(from, hello);
+        else ServerRelay.handle(from, payload);
     }
 
     /** Called on the client (render) thread. */

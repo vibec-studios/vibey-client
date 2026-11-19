@@ -40,7 +40,7 @@ public final class Effects {
     /** Per tick for every avatar in the world (not previews). */
     public static void tick(AvatarState st, double now) {
         EmotePlay e = st.emote;
-        if (e != null && AvatarConfig.emotes && !e.stopping()) {
+        if (e != null && AvatarConfig.emotes && !AvatarConfig.emotesServerOff && !e.stopping()) {
             float t = e.localTime;
             run(st, e.bundle, e.anim, e.eventTime, t, e.anim.loop);
             e.eventTime = t;

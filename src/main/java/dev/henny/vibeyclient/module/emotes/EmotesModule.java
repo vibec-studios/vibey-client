@@ -31,10 +31,13 @@ import java.util.UUID;
  */
 public final class EmotesModule extends VibeyModule {
 
-    public final KeybindSetting wheel = keybind("wheel", Keys.B).onPress(this::openWheel);
+    public final KeybindSetting wheel = keybind("wheel", Keys.B).onPress(this::openWheel).serverRule(RULE);
     public final BoolSetting thirdPerson = bool("thirdPerson", true);
     public final FloatSetting volume = floatRange("volume", 1f, 0f, 1f, 0.05f);
-    public final BoolSetting showOthers = bool("showOthers", true);
+    public final BoolSetting showOthers = bool("showOthers", true).serverRule(RULE);
+
+    /** Server rule (PLAY-LINKS.md §5): no emote wheel, no own emotes, others' emotes are not shown. */
+    public static final String RULE = "emotes";
 
     /** Camera before the emote switched it (restored afterwards), null if we did not switch. */
     private CameraType cameraBefore;
@@ -52,7 +55,18 @@ public final class EmotesModule extends VibeyModule {
     }
 
     @Override
+    public java.util.List<String> serverRuleKeys() {
+        return java.util.List.of(RULE);
+    }
+
+    @Override
     public void onLoad() {
+        dev.henny.vibeyclient.api.ServerRules.supports(RULE);
+        dev.henny.vibeyclient.api.ServerRules.listen(() -> {
+            boolean off = dev.henny.vibeyclient.api.ServerRules.isDisabled(RULE);
+            AvatarConfig.emotesServerOff = off;
+            if (off && isEnabled()) stop();
+        });
         volume.onChange(v -> Effects.volume = v);
         showOthers.onChange(v -> AvatarConfig.showOthersEmotes = v);
         on(VibeyEvents.RemoteEmote.class, e -> {
@@ -96,6 +110,7 @@ public final class EmotesModule extends VibeyModule {
     private void openWheel() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || ClientCompat.screen() != null) return;
+        if (blockedByServer()) return;
         WardrobeUi.openWheel(() -> EngineCompat.isPhysicallyDown(wheel.mapping()));
     }
 
@@ -104,6 +119,7 @@ public final class EmotesModule extends VibeyModule {
     public void play(String emoteId) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || emoteId == null) return;
+        if (blockedByServer()) return;
         AvatarState st = AvatarStates.get(mc.player.getUUID());
         if (!AvatarStates.play(st, emoteId)) {
             log.info("Emote {} is not loaded", emoteId);
@@ -132,6 +148,20 @@ public final class EmotesModule extends VibeyModule {
         AvatarStates.stop(st);
         CosmeticsModule c = CosmeticsModule.get();
         if (c != null) c.broadcastEmote(id, false);
+    }
+
+    private long blockedToastAt;
+
+    /** True (with a short toast, at most every 5 s) while the server disables emotes. */
+    private boolean blockedByServer() {
+        if (!dev.henny.vibeyclient.api.ServerRules.isDisabled(RULE)) return false;
+        long now = System.currentTimeMillis();
+        if (now - blockedToastAt > 5_000) {
+            blockedToastAt = now;
+            dev.henny.vibeyclient.api.service.Notify.info(dev.henny.vibeyclient.api.Lang.tr("serverrules.emotesOff"),
+                    dev.henny.vibeyclient.ui.ServerBadge.label());
+        }
+        return true;
     }
 
     private void restoreCamera() {

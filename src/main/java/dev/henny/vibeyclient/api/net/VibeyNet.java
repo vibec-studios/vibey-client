@@ -160,7 +160,9 @@ public final class VibeyNet {
 
     /** Core: a payload from the server (client thread). */
     public static void handle(CustomPacketPayload payload) {
-        if (payload instanceof HelloPayload p) {
+        if (payload instanceof dev.henny.vibeyclient.net.RulesPayloads.Rules p) {
+            dev.henny.vibeyclient.client.ServerRulesClient.handle(p);
+        } else if (payload instanceof HelloPayload p) {
             serverProtocol = p.protocol();
             Vibey.LOG.info("Server has Vibey Client (protocol {})", p.protocol());
             Events.post(new VibeyEvents.ServerHello(p.protocol()));

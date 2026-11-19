@@ -4,6 +4,15 @@ All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.pr
 
 ## Unreleased – Media module
 
+### Server rules
+
+- Servers can switch off Vibey features for their players (zoom, freelook, HUD parts, emotes, pets, the server name
+  in the Discord status, …) over the open `vibey:rules` channel. The client shows the server's message once per
+  join, marks the settings "Disabled by this server" and restores everything when you leave. It announces its
+  version and supported keys with `vibey:hello`. For server owners: the **VibeyRules** Paper/Spigot plugin
+  (`VibeyRules-<version>.jar` on the release) or `config/vibeyclient-server.json` on Fabric/NeoForge servers
+  (`/vibeyrules reload|status`). See [docs/SERVER-RULES.md](docs/SERVER-RULES.md).
+
 ### Media (was "Lyrics", Fabric)
 
 - The lyrics module is now **Media** (`media`, de: *Medien*): music, lyrics and skies, with room for more media

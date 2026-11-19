@@ -15,6 +15,7 @@ import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.client.Keys;
 import dev.henny.vibeyclient.ui.Gfx;
 import dev.henny.vibeyclient.ui.Icons;
+import dev.henny.vibeyclient.ui.ServerBadge;
 import dev.henny.vibeyclient.ui.Theme;
 import dev.henny.vibeyclient.ui.Ui;
 import dev.henny.vibeyclient.ui.VibeyScreen;
@@ -164,7 +165,7 @@ public final class SettingsView {
         boolean rowBadge = !(allBlocked && title != null);
         if (title != null) {
             Widgets.caption(g, title, x + 1, y);
-            if (allBlocked) serverBadge(ui, list.get(0), x + w, y - 2);
+            if (allBlocked) ServerBadge.drawRight(ui, list.get(0), x + w, y - 2);
             y += 12;
         }
         int h = measure(g, list, w);
@@ -308,24 +309,11 @@ public final class SettingsView {
     private static void blockedRow(Ui ui, Setting<?, ?> s, int x, int y, int w, int h, boolean badge) {
         Gfx g = ui.g;
         int right = x + w - ROW_PAD;
-        int chipW = badge ? g.width(Lang.tr("core.settings.serverDisabled")) + 8 : 0;
+        int chipW = badge ? ServerBadge.width(g) : 0;
         int labelW = right - (x + ROW_PAD) - chipW - 8;
         g.text(g.clip(Lang.tr(s.nameKey()), labelW), x + ROW_PAD, y + (h - 8) / 2, Theme.DIM);
-        if (badge) serverBadge(ui, s, right, y + (h - 12) / 2);
+        if (badge) ServerBadge.drawRight(ui, s, right, y + (h - ServerBadge.H) / 2);
     }
-
-    /** The amber "Disabled by this server" chip, right-aligned at {@code right}; the server's message as tooltip. */
-    private static void serverBadge(Ui ui, Setting<?, ?> s, int right, int y) {
-        Gfx g = ui.g;
-        String text = Lang.tr("core.settings.serverDisabled");
-        int cw = g.width(text) + 8;
-        Widgets.chip(g, text, right - cw, y, Theme.WARN);
-        String msg = dev.henny.vibeyclient.api.ServerRules.message();
-        ui.tooltip(BADGE_KEYS.computeIfAbsent(s, k -> new Object()), right - cw, y, cw, 12,
-                msg == null ? Lang.tr("core.settings.serverDisabledHelp") : Lang.tr("core.settings.serverDisabledHelp") + "\n" + msg);
-    }
-
-    private static final Map<Setting<?, ?>, Object> BADGE_KEYS = new IdentityHashMap<>();
 
     private static int controlWidth(Gfx g, Setting<?, ?> s, int rowW) {
         if (s instanceof BoolSetting) return Widgets.TOGGLE_W;

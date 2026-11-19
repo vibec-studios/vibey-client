@@ -1,0 +1,3 @@
+// Standalone build of the VibeyRules Paper/Spigot plugin (not part of the Stonecutter mod build).
+// From the repo root: ./gradlew -p server-plugins/vibey-rules build   ->  build/libs/VibeyRules-<version>.jar
+rootProject.name = 'vibey-rules'

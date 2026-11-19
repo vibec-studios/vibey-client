@@ -1,0 +1,8 @@
+{
+  "toast": {
+    "title": "Server rules",
+    "generic": "This server switched off {0} Vibey feature(s) while you play here."
+  },
+  "notice": "Disabled by this server: {0}",
+  "emotesOff": "Emotes are off on this server"
+}

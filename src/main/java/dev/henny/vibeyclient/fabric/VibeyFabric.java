@@ -7,10 +7,15 @@ import dev.henny.vibeyclient.net.HelloPayload;
 import dev.henny.vibeyclient.net.LoadoutPayload;
 import dev.henny.vibeyclient.net.MessagePayload;
 import dev.henny.vibeyclient.net.NetDispatch;
+import dev.henny.vibeyclient.net.RulesCommand;
+import dev.henny.vibeyclient.net.RulesPayloads;
 import dev.henny.vibeyclient.net.ServerRelay;
+import dev.henny.vibeyclient.net.ServerRulesHost;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -36,9 +41,38 @@ public final class VibeyFabric implements ModInitializer, Platform {
         register(LoadoutPayload.TYPE, LoadoutPayload.CODEC);
         register(EmotePayload.TYPE, EmotePayload.CODEC);
         register(MessagePayload.TYPE, MessagePayload.CODEC);
-        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> ServerRelay.onLeave(handler.getPlayer()));
-        ServerLifecycleEvents.SERVER_STOPPED.register(server -> ServerRelay.onServerStopped());
-        ServerLifecycleEvents.SERVER_STARTED.register(dev.henny.vibeyclient.Smoke::serverStarted);
+        registerRules();
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> ServerRulesHost.onJoin(handler.getPlayer()));
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+            ServerRelay.onLeave(handler.getPlayer());
+            ServerRulesHost.onLeave(handler.getPlayer());
+        });
+        ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+            ServerRelay.onServerStopped();
+            ServerRulesHost.serverStopped();
+        });
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            ServerRulesHost.serverStarted(server);
+            dev.henny.vibeyclient.Smoke.serverStarted(server);
+        });
+        ServerTickEvents.END_SERVER_TICK.register(ServerRulesHost::tick);
+        CommandRegistrationCallback.EVENT.register((dispatcher, registries, environment) -> RulesCommand.register(dispatcher));
+    }
+
+    /** The open {@code vibey:rules} (S→C) and {@code vibey:hello} (C→S) channels, see {@link RulesPayloads}. */
+    private static void registerRules() {
+        try {
+            //? if >=26.1 {
+            /*PayloadTypeRegistry.clientboundPlay().register(RulesPayloads.Rules.TYPE, RulesPayloads.Rules.CODEC);
+            PayloadTypeRegistry.serverboundPlay().register(RulesPayloads.Hello.TYPE, RulesPayloads.Hello.CODEC);
+            *///?} else {
+            PayloadTypeRegistry.playS2C().register(RulesPayloads.Rules.TYPE, RulesPayloads.Rules.CODEC);
+            PayloadTypeRegistry.playC2S().register(RulesPayloads.Hello.TYPE, RulesPayloads.Hello.CODEC);
+            //?}
+            ServerPlayNetworking.registerGlobalReceiver(RulesPayloads.Hello.TYPE, (payload, context) -> NetDispatch.toServer(context.player(), payload));
+        } catch (RuntimeException e) {
+            RulesPayloads.disable(e);
+        }
     }
 
     private static <T extends CustomPacketPayload> void register(CustomPacketPayload.Type<T> type, StreamCodec<FriendlyByteBuf, T> codec) {
@@ -102,6 +136,11 @@ public final class VibeyFabric implements ModInitializer, Platform {
             mods = List.copyOf(list);
         }
         return mods;
+    }
+
+    @Override
+    public boolean canSendToPlayer(ServerPlayer player, CustomPacketPayload.Type<?> type) {
+        return ServerPlayNetworking.canSend(player, type);
     }
 
     @Override

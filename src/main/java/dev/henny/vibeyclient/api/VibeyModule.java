@@ -118,6 +118,16 @@ public abstract class VibeyModule {
         return List.of();
     }
 
+    /**
+     * Server-rule keys of this module's features (PLAY-LINKS.md §5), e.g. {@code List.of("emotes")}. While the current
+     * server disables one, the module tile and page say "Disabled by this server" ({@link
+     * dev.henny.vibeyclient.ui.ServerBadge}). UI only: declare the keys with {@code ServerRules.supports} in
+     * {@link #onLoad()} and check {@code ServerRules.isDisabled} in the feature itself.
+     */
+    public List<String> serverRuleKeys() {
+        return List.of();
+    }
+
     /** Can the player switch it off? */
     public boolean canToggle() {
         return true;

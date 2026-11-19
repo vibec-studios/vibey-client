@@ -44,13 +44,13 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
     public final BoolSetting showOthers = bool("showOthers", true).section("show");
     public final BoolSetting hideWithArmor = bool("hideWithArmor", true).section("show");
     public final BoolSetting notifyNew = bool("notifyNew", true).section("show");
-    public final BoolSetting showCapes = bool("show_cape", true).section("types");
-    public final BoolSetting showWings = bool("show_wings", true).section("types");
-    public final BoolSetting showAuras = bool("show_aura", true).section("types");
-    public final BoolSetting showPets = bool("show_pet", true).section("types");
-    public final BoolSetting showShields = bool("show_shield", true).section("types");
-    public final BoolSetting showHats = bool("show_hat", true).section("types");
-    public final BoolSetting showBacks = bool("show_back", true).section("types");
+    public final BoolSetting showCapes = bool("show_cape", true).section("types").serverRule(Slot.CAPE.ruleKey());
+    public final BoolSetting showWings = bool("show_wings", true).section("types").serverRule(Slot.WINGS.ruleKey());
+    public final BoolSetting showAuras = bool("show_aura", true).section("types").serverRule(Slot.AURA.ruleKey());
+    public final BoolSetting showPets = bool("show_pet", true).section("types").serverRule(Slot.PET.ruleKey());
+    public final BoolSetting showShields = bool("show_shield", true).section("types").serverRule(Slot.SHIELD.ruleKey());
+    public final BoolSetting showHats = bool("show_hat", true).section("types").serverRule(Slot.HAT.ruleKey());
+    public final BoolSetting showBacks = bool("show_back", true).section("types").serverRule(Slot.BACK.ruleKey());
     public final KeybindSetting wardrobeKey = keybind("wardrobe", Keys.UNBOUND).onPress(this::openWardrobe);
 
     private final LoadoutSync sync = new LoadoutSync(this);
@@ -99,6 +99,10 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
         }
         AvatarItems.addListener(this::applySelf);
         ItemLoader.onNewItems = this::newItems;
+        // server rules (PLAY-LINKS.md §5): cosmetics.pets etc. hide that slot for everyone while on the server
+        for (Slot s : Slot.all()) dev.henny.vibeyclient.api.ServerRules.supports(s.ruleKey());
+        dev.henny.vibeyclient.api.ServerRules.listen(CosmeticsModule::applyServerRules);
+        applyServerRules();
         dev.henny.vibeyclient.module.cosmetics.ui.WardrobeUi.register();
     }
 
@@ -160,6 +164,17 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
                     dev.henny.vibeyclient.api.service.Notify.Kind.SUCCESS, null, this::openWardrobe));
         }));
     }
+
+    private static void applyServerRules() {
+        for (Slot s : Slot.all()) AvatarConfig.slotServerOff[s.ordinal()] = dev.henny.vibeyclient.api.ServerRules.isDisabled(s.ruleKey());
+    }
+
+    @Override
+    public java.util.List<String> serverRuleKeys() {
+        return SERVER_RULE_KEYS;
+    }
+
+    private static final java.util.List<String> SERVER_RULE_KEYS = java.util.Arrays.stream(Slot.all()).map(Slot::ruleKey).toList();
 
     private void applyConfig() {
         AvatarConfig.cosmetics = isEnabled();

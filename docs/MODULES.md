@@ -165,6 +165,24 @@ per player (loadout 2/s, emote 2/s, messages 20/s, with bursts) and sends the cu
 player who just said hello. It never forwards asset bytes. Payloads are registered for every version on both loaders
 (Fabric `playC2S/playS2C`, 26.x `serverboundPlay/clientboundPlay`; NeoForge `playBidirectional`, optional).
 
+## Server rules (features a server switched off)
+
+Servers can disable features with the open `vibey:rules` channel (admin docs and keys: `docs/SERVER-RULES.md`,
+contract: vibe-launcher `docs/PLAY-LINKS.md` §5). The core (`client/ServerRulesClient`) receives and validates the
+packet and feeds `api/ServerRules`; a module only has to:
+
+```java
+ServerRules.supports("zoom");                      // onLoad: the key goes into vibey:hello
+if (ServerRules.isDisabled("zoom")) return;        // in the feature, every time it would act (cheap, any frame)
+ServerRules.listen(() -> ...);                     // optional: react when rules arrive/clear (client thread)
+public final BoolSetting enabled = bool("zoom", true).serverRule("zoom");   // row dimmed + badge (see Settings)
+@Override public List<String> serverRuleKeys() { return List.of("zoom"); } // tile line + notice on the page
+```
+
+`ui/ServerBadge` is the one badge component: the settings page uses it for blocked rows (and once in a card's title
+when every row of the card is blocked), custom panels call `ServerBadge.draw/drawRight` themselves (owner = any
+stable object for the tooltip). Rules are cleared when the player leaves; the stored values are untouched.
+
 ## Events
 
 ```java
