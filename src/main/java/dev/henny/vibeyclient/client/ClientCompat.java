@@ -55,6 +55,9 @@ public final class ClientCompat {
     public static int layoutLetter(int glfwKey) {
         if (glfwKey < 'A' || glfwKey > 'Z') return glfwKey;
         try {
+            //? if >=26.3 {
+            /*String n = InputConstants.Type.KEYBOARD.getOrCreate(dev.henny.vibeyclient.client.Keys.toNative(glfwKey)).getDisplayName().getString();
+            *///?} else
             String n = InputConstants.Type.KEYSYM.getOrCreate(dev.henny.vibeyclient.client.Keys.toNative(glfwKey)).getDisplayName().getString();
             if (n.length() == 1) {
                 char c = Character.toUpperCase(n.charAt(0));

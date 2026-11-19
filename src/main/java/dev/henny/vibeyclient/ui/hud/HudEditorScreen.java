@@ -447,7 +447,7 @@ public final class HudEditorScreen extends BaseScreen {
     private String countCacheLang;
 
     private String count(int n) {
-        String lang = Lang.tr("core.hud.selected", "{0}");
+        String lang = Lang.tr("core.hud.selected");
         if (n != countCacheN || lang != countCacheLang) {
             countCacheN = n;
             countCacheLang = lang;

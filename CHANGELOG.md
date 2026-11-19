@@ -2,6 +2,34 @@
 
 All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.properties`.
 
+## Unreleased – HUD editor and widgets (Fabric 1.21.11 first)
+
+### HUD (new module, de: *HUD*)
+
+- **14 widgets:** FPS, CPS, keystrokes (animated, with CPS), coordinates (facing, biome), armour durability (percent,
+  bar, uses left), potion effects (replace the game's icons while shown), clock, ping, server (address can be hidden),
+  speed, in-game time, item counter (arrows, totems, any held item; add as many as you like), memory, compass. Each
+  has a compact and a detailed look and its own options.
+- **Templates:** PvP, Minimal (the default on a fresh install), Building (*Bauen*), Streamer.
+- Open the editor with **H**, the *HUD* entry in the pause menu, the HUD tile in the Vibey menu or Media → *Edit HUD
+  layout*.
+
+### HUD editor (every module, `ui/hud`)
+
+- The game keeps running behind it. Drag anything; it snaps to the screen edges, the centre and other widgets with
+  guide lines and distance readouts. **Eight handles** resize (proportional; Shift = free), the whole edge works on
+  thin widgets. Marquee or Ctrl-click to select several and move them together; arrow keys nudge (Shift = 10 px).
+  **Undo/redo** (Ctrl+Z, Ctrl+Y, Ctrl+Shift+Z – the letters of your keyboard layout).
+- **Right-click:** Style…, Duplicate, Hide, Reset. **Style popover:** background, colour (swatches + colour picker),
+  opacity, square or bevelled corners, border, text colour incl. accent and animated rainbow, shadow, alignment, size,
+  detail, anchor and widget options – for one widget or for all (widgets inherit, can override).
+- **Widget library** to add and remove widgets; **share codes** (`VHUD1.…`) and `.vhud` files (also drag & drop) to
+  pass layouts around; a short **intro** the first time.
+- Layouts are stored as anchor + offset + scale, so they look the same at any window size and GUI scale
+  (`config/vibeyclient/hud-layout.json`, the old `hud.json` placements are taken over).
+- Widgets a server switched off (`vibey:rules`, keys `hud.fps` … `hud.compass`) are hidden in game and shown greyed
+  with *Disabled by server* in the editor. Modules add their own widgets through the widget API (docs/HUD.md).
+
 ## Unreleased – Media module
 
 ### Media (was "Lyrics", Fabric)

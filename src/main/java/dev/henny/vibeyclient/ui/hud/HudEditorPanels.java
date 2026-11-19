@@ -313,7 +313,7 @@ final class HudEditorPanels {
         int w = LIB_W;
         int x = Math.round(-w + w * t);
         int h = s.height;
-        g.rect(x, 0, w, h, 0xF40B0B0E);
+        g.rect(x, 0, w, h, 0xFF0B0B0E);
         g.rect(x + w - 1, 0, 1, h, Theme.LINE2);
         int cx = x + 10;
         g.bold(Lang.tr("core.hud.library.title"), cx, 10, Theme.TEXT);
@@ -544,7 +544,7 @@ final class HudEditorPanels {
     private void frame(Gfx g, float a) {
         int off = Math.round((1f - a) * 4);
         g.rect(menuX + 2, menuY + 2 + off, menuW, menuH, 0x60000000);
-        g.rect(menuX, menuY + off, menuW, menuH, 0xFA0B0B0E);
+        g.rect(menuX, menuY + off, menuW, menuH, 0xFF0B0B0E);
         g.outline(menuX, menuY + off, menuW, menuH, Theme.LINE2);
     }
 
@@ -820,7 +820,7 @@ final class HudEditorPanels {
         popX = x;
         popY = y;
         g.rect(x + 3, y + 3, w, h, 0x60000000);
-        g.rect(x, y, w, h, 0xFA0B0B0E);
+        g.rect(x, y, w, h, 0xFF0B0B0E);
         g.outline(x, y, w, h, Theme.LINE2);
         g.rect(x, y, w, 1, Theme.BRAND);
         int cx = x + 8, cw = w - 16;
