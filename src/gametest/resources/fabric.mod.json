@@ -10,12 +10,14 @@
       "dev.henny.vibeyclient.gametest.BackendStatusGameTest",
       "dev.henny.vibeyclient.gametest.MultiplayerLyricsGameTest",
       "dev.henny.vibeyclient.gametest.MediaGameTest",
+      "dev.henny.vibeyclient.gametest.PvpGameTest",
       "dev.henny.vibeyclient.gametest.VibeyUiGameTest",
       "dev.henny.vibeyclient.gametest.SocialGameTest",
       "dev.henny.vibeyclient.gametest.WardrobeUiGameTest",
       "dev.henny.vibeyclient.gametest.CosmeticsGameTest",
       "dev.henny.vibeyclient.gametest.AuditBundlesGameTest",
-      "dev.henny.vibeyclient.gametest.ShowcaseGameTest"
+      "dev.henny.vibeyclient.gametest.ShowcaseGameTest",
+      "dev.henny.vibeyclient.gametest.PlayLinksGameTest"
     ]
   },
   "depends": {

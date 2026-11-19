@@ -31,6 +31,18 @@ All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.pr
   (`ui/hud`).
 - *Media* entry in the title screen and pause menu (replaces the optional *♪ Lyrics* pause button).
 
+### Invite links and Discord status (multiplayer)
+
+- **Invite link** while you host (needs a Vibe login): *Copy invite link* in the host window (with the link and how
+  long it is valid) and in the pause menu; toast "Link copied". Friends with the Vibe Launcher open it and land in
+  your world with the right modpack. The link is renewed when your address changes and deleted when you stop
+  hosting or quit. Hidden while online features are off or when the Vibe server has no invite links yet.
+- The host window tells you how many mods you **added by hand** (friends need them too), read from the launcher's
+  `.vibe/instance.json`.
+- `.vibe/session.json` for the Vibe Launcher's Discord status (menu, singleplayer, hosting with link and players,
+  multiplayer server – hidden when a server asks for it or you hide server addresses). New setting *Show what I'm
+  playing to the launcher* (General → Online).
+
 ## 0.2.1 – open source, signed loadouts, status fix
 
 ### Fixes

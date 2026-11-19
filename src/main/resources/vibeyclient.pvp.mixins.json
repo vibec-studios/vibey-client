@@ -1,0 +1,22 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.henny.vibeyclient.module.pvp.mixin",
+  "plugin": "dev.henny.vibeyclient.mixin.VibeyMixinPlugin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [],
+  "client": [
+    "GameRendererMixin",
+    "GuiMixin",
+    "ItemInHandRendererMixin",
+    "KeyboardInputMixin",
+    "LevelRendererMixin",
+    "MouseHandlerMixin",
+    "OverlayTextureAccessor",
+    "ScreenEffectRendererMixin"
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

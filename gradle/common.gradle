@@ -54,6 +54,15 @@ if (project.name != 'fabric-1.21.11') {
     sourceSets.main.java { exclude 'dev/henny/vibeyclient/module/media/video/**' }
     processResources { exclude 'assets/vibeyclient/i18n/*/media.video.json' }
 }
+// The PvP module (module/pvp) is also Fabric 1.21.11 only for now: its package, mixin config, strings and its line in
+// fabric.mod.json are left out everywhere else (BuiltinModules registers it by reflection when present).
+if (project.name != 'fabric-1.21.11') {
+    sourceSets.main.java { exclude 'dev/henny/vibeyclient/module/pvp/**' }
+    processResources {
+        exclude 'vibeyclient.pvp.mixins.json', 'assets/vibeyclient/i18n/*/pvp.json'
+        filesMatching('fabric.mod.json') { filter { String line -> line.contains('vibeyclient.pvp.mixins.json') ? null : line } }
+    }
+}
 tasks.named('compileJava') { dependsOn genTask }
 afterEvaluate {
     tasks.matching { it.name == 'sourcesJar' }.configureEach { dependsOn genTask }

@@ -114,12 +114,12 @@ public abstract class Setting<T, S extends Setting<T, S>> {
     }
 
     /**
-     * The server-rule key this setting belongs to (PLAY-LINKS.md §5, e.g. {@code "zoom"} or {@code "hud.cps"}): while
-     * the current server disables it, the settings page shows "Disabled by this server" in the row. Only the badge –
-     * the feature itself must still check {@link dev.henny.vibeyclient.api.ServerRules#isDisabled}.
+     * The {@link dev.henny.vibeyclient.api.ServerRules} key of the feature this setting belongs to (e.g. {@code zoom}).
+     * While the current server disables that key the settings page shows the row dimmed, without its control, and with
+     * a "Disabled by this server" badge. The feature itself still has to check {@code ServerRules.isDisabled}.
      */
-    public final S serverRule(String key) {
-        serverRule = key;
+    public final S serverRule(String ruleKey) {
+        serverRule = ruleKey;
         return self();
     }
 
@@ -128,8 +128,8 @@ public abstract class Setting<T, S extends Setting<T, S>> {
         return serverRule;
     }
 
-    /** True while the current server disables this setting's {@link #serverRule(String) feature}. */
-    public final boolean serverDisabled() {
+    /** True while the current server disables this setting's feature ({@link #serverRule(String)}). */
+    public final boolean blockedByServer() {
         return serverRule != null && dev.henny.vibeyclient.api.ServerRules.isDisabled(serverRule);
     }
 

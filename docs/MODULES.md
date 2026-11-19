@@ -22,7 +22,8 @@ src/main/resources/
 
 Existing stubs: `social`, `cosmetics`, `emotes`, `multiplayer` (conflicts with mod id `vibey`), `media` (Fabric
 only: the package is excluded from the NeoForge build and not registered there; its parts are *media features*, the
-`lyrics` part conflicts with `vibeylyrics` – see [MEDIA.md](MEDIA.md)), `devlink`, `nametags` (seal + badge glyphs before player names; data in `client/VibeyPlayers`).
+`lyrics` part conflicts with `vibeylyrics` – see [MEDIA.md](MEDIA.md)), `devlink`, `nametags` (seal + badge glyphs before player names; data in `client/VibeyPlayers`), `pvp` (zoom, crosshair,
+toggle sprint, outlines; Fabric 1.21.11 only for now, see [PVP.md](PVP.md)).
 
 ## Client only
 
@@ -91,7 +92,8 @@ thread) and rendered automatically in the Vibey menu.
 | `action(key, runnable)` | `ActionSetting` | button at the top of the module page (advanced: a row) |
 
 Every setting: `get()`, `set(v)` (clamped, listeners fire, save scheduled), `reset()`, `.onChange(v -> ...)`,
-`.section("key")` (titled card), `.advanced()`, `.visibleWhen(() -> ...)`, `.labelKey("full.i18n.key")` (label from
+`.section("key")` (titled card), `.advanced()`, `.serverRule("zoom")` (row shows *Disabled by this server* while
+`ServerRules.isDisabled(key)`; the feature still has to check it itself), `.visibleWhen(() -> ...)`, `.labelKey("full.i18n.key")` (label from
 another file, used by media features). Settings added after the file was read still get their stored value; keys the
 current run doesn't declare are kept in the file. Keybinds: `.skipRegistration()` keeps one out of the controls
 screen (a part that is off because a standalone mod provides it).
@@ -173,12 +175,13 @@ packet and feeds `api/ServerRules`; a module only has to:
 ServerRules.supports("zoom");                      // onLoad: the key goes into vibey:hello
 if (ServerRules.isDisabled("zoom")) return;        // in the feature, every time it would act (cheap, any frame)
 ServerRules.listen(() -> ...);                     // optional: react when rules arrive/clear (client thread)
-public final BoolSetting enabled = bool("zoom", true).serverRule("zoom");   // badge in the settings row
+public final BoolSetting enabled = bool("zoom", true).serverRule("zoom");   // row dimmed + badge (see Settings)
 @Override public List<String> serverRuleKeys() { return List.of("zoom"); } // tile line + notice on the page
 ```
 
-Custom panels draw the badge themselves with `ui/ServerBadge.draw/drawRight` (owner = any stable object for the
-tooltip). Rules are cleared when the player leaves; settings stay editable (they are the player's preferences).
+`ui/ServerBadge` is the one badge component: the settings page uses it for blocked rows (and once in a card's title
+when every row of the card is blocked), custom panels call `ServerBadge.draw/drawRight` themselves (owner = any
+stable object for the tooltip). Rules are cleared when the player leaves; the stored values are untouched.
 
 ## Events
 

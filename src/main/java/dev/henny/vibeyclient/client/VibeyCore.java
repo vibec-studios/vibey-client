@@ -40,6 +40,7 @@ public final class VibeyCore {
         ServerRulesClient.init();
         NetDispatch.setClientHandler(VibeyNet::handle);
         dev.henny.vibeyclient.dev.DevDriver.startIfRequested();
+        dev.henny.vibeyclient.launcher.LauncherStatus.init(Vibey.platform().gameDir());
         Vibey.LOG.info("Vibey Client core ready, {} modules", ModuleManager.get().all().size());
     }
 
@@ -63,6 +64,7 @@ public final class VibeyCore {
         Keybinds.tick();
         ServerRulesClient.tick();
         mm.tick();
+        dev.henny.vibeyclient.launcher.LauncherStatus.tick();
         dev.henny.vibeyclient.ui.title.UiShot.tick();
         dev.henny.vibeyclient.dev.DevTour.tick();
         dev.henny.vibeyclient.dev.ClickTest.tick();

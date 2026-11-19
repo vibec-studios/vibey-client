@@ -31,8 +31,6 @@ public final class ServerRulesClient {
 
     public static void init() {
         Lang.addFile("serverrules");
-        // built-in keys of the core (the modules declare theirs in onLoad)
-        ServerRules.supports("discord.server");
     }
 
     public static void onJoin() {

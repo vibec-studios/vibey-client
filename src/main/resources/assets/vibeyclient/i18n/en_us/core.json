@@ -47,7 +47,9 @@
     "keyHelp": "Click, then press a key. Backspace unbinds, Esc cancels.",
     "advancedHint": "Technical settings",
     "advancedHide": "Hide",
-    "keys": "Keys"
+    "keys": "Keys",
+    "serverDisabled": "Disabled by this server",
+    "serverDisabledHelp": "This server switched the feature off for everyone. It works again when you leave."
   },
   "setting": {
     "language": "Language",
@@ -57,6 +59,8 @@
     "language.english": "English",
     "onlineFeatures": "Online features",
     "onlineFeatures.desc": "Friends, chat and cosmetics that others can see. Off: Vibey connects to nothing.",
+    "launcherStatus": "Show what I'm playing to the launcher",
+    "launcherStatus.desc": "For the Discord status of the Vibe Launcher: your world, server and invite link. Stays on this PC.",
     "animations": "Animations",
     "animations.desc": "Smooth transitions in the Vibey menus.",
     "open_menu": "Open the Vibey menu",

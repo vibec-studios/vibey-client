@@ -31,6 +31,7 @@ ignored, so you can list keys that only newer clients know.
 | `hitcolor` | Custom hit colour |
 | `lowfire` | Low fire overlay |
 | `lowshield` | Lowered shield |
+| `hud.togglestate` | The toggle sprint/sneak state shown on the HUD |
 | `hud.*` | Every HUD element below |
 | `hud.fps` | FPS counter |
 | `hud.cps` | Clicks per second |
@@ -53,7 +54,10 @@ ignored, so you can list keys that only newer clients know.
 | `discord.server` | The server name in the Discord / launcher status ("Playing on …") |
 
 The authoritative list for a given client is what it announces in `vibey:hello` (the plugin logs it, see below);
-the in-game keys come from `ServerRules.supports(...)` calls in the modules.
+the keys come from `ServerRules.supports(...)` calls in the modules. The current Vibey Client declares `zoom`,
+`togglesprint`, `togglesneak`, `crosshair`, `blockoutline`, `hitcolor`, `lowfire`, `lowshield`, `hud.togglestate`
+(PvP module), `emotes`, `cosmetics.*` slots and `discord.server`; `freelook` and the other `hud.*` keys arrive with
+the HUD editor. Listing a key an older client does not know is harmless.
 
 ## Paper / Spigot: the VibeyRules plugin
 
@@ -157,8 +161,8 @@ vanilla clients never see a packet.
 **Does it work with BungeeCord / Velocity?** The plugin runs on the backend servers; the proxy forwards plugin
 messages. Put the plugin on every backend that should have rules (each can have its own config).
 
-**Why does the player still see the feature in the settings?** The settings stay editable (they are the player's
-own preferences), they are just marked "Disabled by this server" and have no effect until they leave.
+**Why does the player still see the feature in the settings?** The rows stay visible but dimmed, with "Disabled by
+this server" instead of the control. The player's own values are kept and apply again when they leave.
 
 **Is a key from the list not doing anything?** The player's client may be older; the plugin's hello log line says
 which of your keys the client does not know.

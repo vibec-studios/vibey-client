@@ -41,6 +41,12 @@ public final class GlobalSettings {
     public static final BoolSetting onlineFeatures = GROUP.add(new BoolSetting("onlineFeatures", true)).section("online")
             .onChange(on -> Events.post(new VibeyEvents.OnlineFeaturesChanged(on)));
 
+    /**
+     * {@code <instance>/.vibe/session.json} for the Vibe Launcher (Discord status: world, server, invite link). Local
+     * only; off deletes the file. Contract: vibe-launcher docs/PLAY-LINKS.md §2.
+     */
+    public static final BoolSetting launcherStatus = GROUP.add(new BoolSetting("launcherStatus", true)).section("online");
+
     public static final KeybindSetting openMenu = GROUP.add(new KeybindSetting("core", "open_menu", Keys.RIGHT_SHIFT));
 
     /** Default = BuildInfo.DEFAULT_BACKEND: our backend, official builds only (forks: own default_backend, https://github.com/vibec-studios/.github/blob/main/SERVICES.md). */
