@@ -60,6 +60,8 @@ tasks.register('checkI18n') {
             def rel = javaDir.toPath().relativize(f.toPath()).toString().replace('\\', '/')
             def module = (rel =~ /dev\/henny\/vibeyclient\/module\/(\w+)\//)
             def moduleId = module.find() ? module.group(1) : null
+            // Screens that hand a key prefix to their base class, e.g. super(title, parent, "clips.gallery.")
+            def prefixes = (src =~ /super\([^;]*?"([A-Za-z0-9_.]+\.)"\s*\)/).collect { it[1] }
             def m = call.matcher(src)
             while (m.find()) {
                 String fn = m.group(1), key = m.group(2)
@@ -67,7 +69,8 @@ tasks.register('checkI18n') {
                 boolean ok
                 if (fn.startsWith('Lang.')) ok = all.containsKey(key)
                 else ok = all.containsKey(key) || (moduleId && all.containsKey("${moduleId}.${key}".toString())) ||
-                        files.any { all.containsKey("${it}.${key}".toString()) }
+                        files.any { all.containsKey("${it}.${key}".toString()) } ||
+                        prefixes.any { all.containsKey("${it}${key}".toString()) }
                 if (!ok) problems << "${rel}: ${fn}(\"${key}\") is not in en_us"
             }
             // .section("x") → <module or core>.section.x
