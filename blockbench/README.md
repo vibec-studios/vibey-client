@@ -6,7 +6,10 @@
 - **New item wizard** (type → slot → name → start empty or from a starter item) and the **Vibey guide**, a checklist
   with automatic checks that walks you from the first cube to *Test live in game* and *Export / Submit*
 - Model formats **Vibey Cosmetic** and **Vibey Emote** (box UV + per-face UV, bone rig, locators, animation mode)
-- Grey reference player (original texture, vanilla proportions and pivots) – toggleable, never exported
+- **Build on the player**: the grey reference player (original texture, vanilla proportions and pivots) has
+  ready-made groups – ◆ Head, ◆ Above head, ◆ Body, ◆ Back, shoulders, ◆ Hips, arms, legs, ◆ Around / Beside
+  player. Put your part into the group it belongs to (drag, right-click › *Attach to …*, or let it snap by itself)
+  and it moves with that part in game; the groups are never exported
 - Import / export of `.vibey` bundles (`docs/SPEC.md` §5) with embedded PNG textures (incl. animated strips),
   OGG sounds and particle sprites
 - Particle, sound and visibility events as Blockbench effect keyframes, edited in the Keyframe panel
@@ -37,12 +40,14 @@ ignores (it reads the version from the live link's `welcome`).
 1. After installing, the **New Vibey item** wizard opens by itself (once). Later: **Vibey > New item…**
    (German: *Vibey > Neues Item…*) or *File > New > Vibey Cosmetic / Vibey Emote*.
 2. Pick *Cosmetic* or *Emote*, the slot (cape, wings, aura, pet, shield, hat, back) or the emote options, a name, and
-   *Start empty* or a starter item as template. The plugin creates the right groups and attach points, empty
-   animations (`idle`/`walk`/`fly`/`sneak` per slot, `main` for emotes) and a texture (vanilla cape/shield layout with a
-   colour guide for texture-only slots).
+   *Start empty* or a starter item as template. The plugin puts your group into the right player group (wings →
+   ◆ Back, hat → ◆ Head, pet → ◆ Beside player), creates empty animations (`idle`/`walk`/`fly`/`sneak` per slot,
+   `main` for emotes) and a texture (vanilla cape/shield layout with a colour guide for texture-only slots).
+   Build on the player – see [docs/BLOCKBENCH.md → Build on the player](../docs/BLOCKBENCH.md#build-on-the-player).
 3. The **Vibey guide** in the left sidebar takes over: model → texture → animate → particles & sounds (optional) →
    **Test live in game** → export / submit. Each step checks your project ("No keyframes in idle yet", "Not connected to
-   the game") and can be ticked off. Reopen it with **Vibey > Tutorial** (*Anleitung*).
+   the game") and can be ticked off; it scrolls inside its panel on small screens. Reopen it with **Vibey > Tutorial**
+   (*Anleitung*).
 4. **Vibey > Test live in game** (*Live im Spiel testen*) finds the running game by itself. If it can't: start
    Minecraft with Vibey Client, open the Vibey menu (Right Shift) → **Modules → Blockbench link** (from Vibey Client
    0.3.0 under **For creators**) → turn on **Creator mode**, and click again.
@@ -56,7 +61,7 @@ Full guide: [`docs/BLOCKBENCH.md`](../docs/BLOCKBENCH.md).
 ```sh
 cd blockbench
 npm install
-npm test                 # unit tests (core, wizard, guide, strings) + mock game server tests (Node ≥ 22, node:test)
+npm test                 # unit tests (core, wizard, guide, strings, player groups) + mock game server tests (Node ≥ 22, node:test)
 npm run test:blockbench  # drives the installed Blockbench over CDP (isolated profile), see below
 npm run shots            # review screenshots of wizard, guide, menu and errors (EN + DE) -> review/wizard.html
 npm run embed-assets     # re-embeds the wizard thumbnails + starter templates from content/dist into vibey.js
@@ -67,7 +72,10 @@ override with `--blockbench <exe>`) with a **temporary, isolated profile** (`--u
 `--remote-debugging-port`, loads the plugin, checks that the wizard opens on the first start, builds a cosmetic and an
 emote project through the real APIs and dialogs, exports and validates both bundles, connects the live link to the mock
 game server (`test/mock-game-server.js`), checks push / auto-push / reconnect / token errors, re-imports the files and
-compares them byte for byte. It then runs the wizard through the real dialog, creates every slot and an emote (and
+compares them byte for byte. It checks the player groups (labels, right-click *Attach to …*, auto-assign and its
+undo, outliner drag, groups snapping back), imports every starter `.vibey` and compares the re-export byte for byte,
+and opens `.bbmodel` projects made by the released 0.2.4 plugin (from the `blockbench-v0.2.4` tag) to check that they
+convert and export the same bytes. It then runs the wizard through the real dialog, creates every slot and an emote (and
 items from templates) and validates their exports, checks the menu, the guide's automatic checks, *Test live in game*
 with and without a game, the friendly error dialogs and *Submit to Vibe*. Screenshots go to `test/out/screenshots/`
 (`--docs-screenshots` writes them to `docs/screenshots/`). Only the Blockbench process it started is closed
@@ -106,6 +114,12 @@ node test/mock-game-server.js --port 47821 --game-dir C:\temp\fakegame   # write
 
 Then set *Vibey > Live link settings… > Game directory* to `C:\temp\fakegame`.
 
+**In-game check** of the player groups against a dev client (`-Dvibeyclient.devDriver=<port>`, a creative world
+with cheats): `node test/ingame-check.js --game-dir <repo>/versions/fabric-1.21.11/run --driver <port>` builds test
+items on ◆ Back, ◆ Right arm, ◆ Head, ◆ Above head, ◆ Left leg and a pet on ◆ Beside player in the real Blockbench,
+pushes them over the live link and photographs standing, head turned, sneaking (forced crouch under a slab), walking
+(pushed by a water current) and the pet (screenshots in `test/out/ingame/`).
+
 ### Code layout
 
 `vibey.js` is one file with two parts:
@@ -113,6 +127,10 @@ Then set *Vibey > Live link settings… > Game directory* to `C:\temp\fakegame`.
 - **Core** (top): pure functions without Blockbench – snapshot → bundle compiler, bundle → snapshot decompiler,
   SPEC validator, keyframe conversion, box UV, devlink helpers. Exported as `module.exports` under Node and as
   `window.VibeyCore` in Blockbench.
+- **Player groups** ("build on the player") are pure core as well: `REF_GROUPS` (ids, attach, vanilla pivots, zones),
+  `refTree`, `bestRef` (auto-assign / import placement), `upgradeSnapshot` (old projects) and the export rules in
+  `compileBundle`; the Blockbench side (`Refs`) keeps the groups in place, colours them and handles right-click /
+  auto-assign.
 - The **wizard / guide core** is pure too: `starterSnapshot` (what the wizard creates per slot), `templateSnapshot`,
   `tutorialChecks`, `friendlyProblem`, the EN/DE `STRINGS` and the embedded `ASSETS` (64×64 thumbnails and a few
   starter bundles, generated by `tools/embed-assets.js` between the `vibey-assets` markers – do not edit by hand).

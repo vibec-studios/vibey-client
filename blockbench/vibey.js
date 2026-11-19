@@ -1,5 +1,5 @@
 /**
- * Vibey Client – Blockbench plugin (v0.2.4) by Vibe Craft Studios.
+ * Vibey Client – Blockbench plugin (v0.2.5) by Vibe Craft Studios.
  *
  * Model formats "Vibey Cosmetic" and "Vibey Emote", a "New item" wizard and a step-by-step guide, import/export of
  * `.vibey` bundles (docs/SPEC.md §5), a reference player, validation in plain words and the live link into the
@@ -16,7 +16,7 @@
  */
 (function () {
 'use strict';
-const VERSION = '0.2.4';
+const VERSION = '0.2.5';
 
 /* ===========================================================================
  * Vibey core – pure helpers, no Blockbench dependency.
@@ -5060,13 +5060,13 @@ function setup() {
 			const kind = kindOf();
 			const list = Refs.defs().map((d) => ({
 				id: 'vibey_attach_' + d.id,
-				name: (Core.refParent(d, kind) && Core.refParent(d, kind) !== 'root' ? '   ' : '') + refName(d.id),
-				icon: here === d.id ? 'radio_button_checked' : 'radio_button_unchecked',
+				name: (Core.refParent(d, kind) && Core.refParent(d, kind) !== 'root' ? '↳ ' : '') + refName(d.id),
+				icon: here === d.id ? 'check' : 'push_pin',
 				click: () => Refs.attach(Refs.selectedParts(), d.id, 'manual'),
 			}));
 			if (kind === 'cosmetic') {
 				list.push('_');
-				list.push({ id: 'vibey_attach_root', name: T('attach_root_adv'), icon: here === 'root!' ? 'radio_button_checked' : 'tune', click: () => Refs.attach(Refs.selectedParts().filter((n) => n instanceof Group), null, 'manual') });
+				list.push({ id: 'vibey_attach_root', name: T('attach_root_adv'), icon: here === 'root!' ? 'check' : 'tune', click: () => Refs.attach(Refs.selectedParts().filter((n) => n instanceof Group), null, 'manual') });
 			}
 			return list;
 		},

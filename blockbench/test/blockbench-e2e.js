@@ -313,6 +313,22 @@ async function main() {
 			assert.equal(r.styled, true, 'every player group is coloured in the outliner');
 			assert.equal(r.outliner[0], label('head'));
 			assert.deepEqual(r.bones.sort(), ['hat', 'sleeve', 'top']);
+			await cdp.run(async () => {
+				const g = VibeyPlugin.Refs.map();
+				['head', 'body', 'right_arm'].forEach((id) => (g[id].isOpen = true));
+				const sleeve = Group.all.find((x) => x.name === 'sleeve');
+				sleeve.select();
+				updateSelection();
+				const li = document.getElementById(sleeve.uuid).querySelector('.outliner_object').getBoundingClientRect();
+				sleeve.showContextMenu(new MouseEvent('contextmenu', { clientX: li.left + 30, clientY: li.top + 8 }));
+				await new Promise((res) => setTimeout(res, 300));
+				const item = [...document.querySelectorAll('.contextMenu li')].find((x) => x.textContent.includes(VibeyPlugin.T('attach_to')));
+				if (item) ['mouseenter', 'mouseover'].forEach((t) => item.dispatchEvent(new MouseEvent(t, { bubbles: true })));
+				await new Promise((res) => setTimeout(res, 300));
+				return true;
+			});
+			await screenshot(cdp, 'blockbench-player-groups.png');
+			await cdp.eval('(window.open_menu && open_menu.hide && open_menu.hide(), document.querySelectorAll(".contextMenu").forEach((m) => m.remove()), true)');
 		});
 		await check('right-click › Attach to … moves a part to another player group (undoable)', async () => {
 			const r = await cdp.run(async () => {
@@ -335,7 +351,8 @@ async function main() {
 				return { name: entry.name, items: items.filter((i) => typeof i === 'object').map((i) => i.id), shown, moved, back: s2.parent.vibey_ref, attachBack: VibeyPlugin.buildBundle().bundle.model.bones.find((b) => b.name === 'sleeve').attach };
 			});
 			assert.equal(r.name, TT('attach_to'));
-			assert.ok(r.shown.some((t) => t.endsWith(TT('attach_to')) || t.includes(TT('attach_to') + 'radio')), 'context menu shows "' + TT('attach_to') + '": ' + r.shown.slice(-30).join(' | '));
+			assert.ok(r.shown.some((t) => t.includes(TT('attach_to'))), 'context menu shows "' + TT('attach_to') + '": ' + r.shown.slice(-30).join(' | '));
+			assert.ok(r.shown.some((t) => t.includes('↳ ' + TT('ref_back'))), 'sub-points are indented in the submenu');
 			assert.ok(r.items.includes('vibey_attach_back') && r.items.includes('vibey_attach_root'), r.items.join());
 			assert.deepEqual(r.moved.parent, 'left_arm');
 			assert.equal(r.moved.attach, 'left_arm');

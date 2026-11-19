@@ -230,8 +230,9 @@ positioned relative to the player's feet with the body yaw, and the client may s
   looping does not interpolate across the loop end. `bezier` keyframes may carry a `bezier` handle object (optional).
 - Animations may set `"hold": true` (with `loop: false`): keep the last frame until stopped (emotes).
 - `model` is optional for capes, shields and emotes without props. Emote bones must not use the player bone names.
-  In emotes, cubes placed directly in a player bone are exported as a root bone `<part>_cubes` with `attach: <part>`,
-  pivot = the part pivot and `"generated": true` (editor hint). Cubes may carry an optional `name` (editor only).
+  Cubes the Blockbench plugin finds directly in a player group are exported as a root bone `<group>_cubes` with that
+  group's `attach`, pivot = the group's pivot and `"generated": true` (editor hint, ignored by the game; emotes:
+  `<part>_cubes` with `attach: <part>`). Cubes may carry an optional `name` (editor only).
 - Events: `particle` must be a namespaced particle id (`minecraft:heart`) unless `sprite` is set. `sound` is a
   namespaced sound event id or the id of an embedded sound; sound events may have an optional `locator`.
   `visibility` events target model bones (not player bones); the state at `t` holds until the next event.
@@ -440,11 +441,14 @@ startup as `availability: default` (upsert by id when the hash changed; admin ed
 ## 9. Blockbench plugin
 
 `blockbench/` in this repo. One plugin file `vibey.js` (plus README) with two model formats: **Vibey Cosmetic** and
-**Vibey Emote**. Both show the vanilla player reference (toggleable), let the user pick slot/attach per root group,
+**Vibey Emote**. Both show the vanilla player reference (toggleable) with prefab player groups (head, back,
+arms … – the creator builds on the player and the group a part sits in becomes its root bone's `attach`), let the user pick the slot,
 edit metadata (id, names en/de, rarity, tags, emote options), keyframe animations with Blockbench's animator,
 particle/sound events via Blockbench effect keyframes (or a custom panel), embed textures/sounds, import and export
-`.vibey`, and do the live link from §8. Emote format: the player bones are real groups named `head`, `body`,
-`right_arm`, `left_arm`, `right_leg`, `left_leg`, `root` so they can be animated directly.
+`.vibey`, and do the live link from §8. Emote format: the player bones are real groups (shown as ◆ Head, ◆ Body …)
+that export under their vanilla names `head`, `body`, `right_arm`, `left_arm`, `right_leg`, `left_leg`, `root` so
+they can be animated directly. The player groups are editor-only; the format is the same as before
+(docs/BLOCKBENCH.md, "Build on the player").
 
 ## 10. Quality bar
 

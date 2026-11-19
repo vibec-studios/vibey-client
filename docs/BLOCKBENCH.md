@@ -1,13 +1,13 @@
 # Making cosmetics and emotes in Blockbench
 
-The Vibey Blockbench plugin (`blockbench/vibey.js`, version 0.2.4) turns Blockbench into the editor for Vibey Client
+The Vibey Blockbench plugin (`blockbench/vibey.js`, version 0.2.5) turns Blockbench into the editor for Vibey Client
 cosmetics and emotes. It writes `.vibey` bundles (see [SPEC §5](SPEC.md#5-the-vibey-asset-format-v1)) and can push
 them straight into the running game over the live link ([SPEC §8](SPEC.md#8-blockbench-live-link-devlink)).
 
 > See also: [FORMAT.md](FORMAT.md) (what the plugin writes, explained) · [CONTENT.md](CONTENT.md) (the starter set
 > to learn from) · [blockbench/README.md](../blockbench/README.md) (plugin development) · [docs index](README.md)
 
-![Cosmetic project with reference player, Vibey panel and Attach setting](screenshots/blockbench-cosmetic-edit.png)
+![Cosmetic project built on the player: the player groups in the outliner, the hat in ◆ Head](screenshots/blockbench-cosmetic-edit.png)
 
 ## Install
 
@@ -41,8 +41,8 @@ game ignores, e.g. *"Wardrobe thumbnails and offsetWhen need Vibey Client 0.3.0 
 
 1. **Vibey > New item…** (German UI: *Vibey > Neues Item…*) opens a short wizard with four steps:
    - **Type** – *Cosmetic* (something your character wears) or *Emote* (a move it plays).
-   - **Slot** – cape, wings, aura, pet, shield, hat or back (cosmetics) · **Options** – plays once or loops, length
-     (emotes).
+   - **Slot** – cape, wings, aura, pet, shield, hat or back (cosmetics; each card says which player group it builds
+     on, e.g. *on ◆ Back* for wings) · **Options** – plays once or loops, length (emotes).
    - **Name** – English name, German name optional. The id is made from the name (`creator:frost_wings`; your own
      namespace once you set one) and can be changed under *Advanced*, together with author and rarity. The reserved
      `vibey:` namespace is refused. When Vibe approves a submission the catalog id becomes `community:<name>`.
@@ -51,17 +51,18 @@ game ignores, e.g. *"Wardrobe thumbnails and offsetWhen need Vibey Client 0.3.0 
 
    | Slot | What you get |
    |---|---|
-   | Hat | group `hat` attached to the head, animations `idle`, `walk`, hidden under a helmet, 64×64 texture |
-   | Back | group `back` attached to the body at the back, `idle`, `walk`, `sneak`, 64×64 texture |
-   | Wings | group `wings` on the body at the shoulder blades with `wing_right` / `wing_left` (their pivots are the joints), `idle`, `walk`, `fly`, `sneak`, `glide`, 64×64 texture |
-   | Aura | group `aura` attached to `world` (follows the player's position) with locator `aura_center`, `idle`, 64×64 texture |
-   | Pet | group `pet` attached to `world` at the origin (reference player hidden so it does not overlap), pet follow `ground`, `idle`, `walk`, `fly`, `idle_long`, `happy`, 64×64 texture |
+   | Hat | group `hat` in **◆ Head**, animations `idle`, `walk`, hidden under a helmet, 64×64 texture |
+   | Back | group `back` in **◆ Back**, `idle`, `walk`, `sneak`, 64×64 texture |
+   | Wings | group `wings` in **◆ Back** at the shoulder blades with `wing_right` / `wing_left` (their pivots are the joints), `idle`, `walk`, `fly`, `sneak`, `glide`, 64×64 texture |
+   | Aura | group `aura` in **◆ Around player** (follows the player's position) with locator `aura_center`, `idle`, 64×64 texture |
+   | Pet | group `pet` in **◆ Beside player** – where the game draws the pet next to you –, pet follow `ground`, `idle`, `walk`, `fly`, `idle_long`, `happy`, 64×64 texture |
    | Cape | texture only: a 64×32 texture in the vanilla cape layout with a colour guide (purple = the side others see, dark = inside, teal = edges, grey = elytra) and a locked **preview** cape on the reference player that is never exported |
    | Shield | texture only: a 64×64 texture in the vanilla shield layout (purple = front, dark = back, teal = edges, grey = handle) and a locked, never exported **preview** shield |
-   | Emote | the player rig `root > head, body, arms, legs` and an empty animation `main` (loop and length from the wizard) |
+   | Emote | the player groups (◆ Whole player > ◆ Head, ◆ Body, arms, legs) and an empty animation `main` (loop and length from the wizard) |
 
-   All animations are created empty, the reference player is shown and the camera looks at the right side (wings,
-   capes and back items from behind).
+   All animations are created empty, the reference player is shown with its player groups (the slot's groups are
+   highlighted), your own group is selected so the first cube lands in it, and the camera looks at the right side
+   (wings, capes and back items from behind).
 3. The **Vibey guide** (left sidebar, next to the *Vibey* tab) walks through the rest. *File > New > Vibey Cosmetic /
    Vibey Emote* opens the same wizard.
 
@@ -72,7 +73,7 @@ Animate mode …) and an **automatic check**:
 
 | Step | Check examples |
 |---|---|
-| 1 Build the model (props for emotes, nothing for capes/shields) | "No cubes in "wings" yet." · ""stray" is outside the groups" |
+| 1 Build the model (props for emotes, nothing for capes/shields) | "No cubes in "wings" yet." · "12 cubes on ◆ Back – looks good." · ""stray" is not attached to the player yet – drag it into a ◆ group." |
 | 2 Paint the texture | "The texture is still the template – paint over it." · "Your item has no texture yet." |
 | 3 Animate | "No keyframes in "idle" yet." · "4 keyframes in idle." |
 | 4 Particles & sounds (optional) | "No particles or sounds – that is fine." |
@@ -80,7 +81,8 @@ Animate mode …) and an **automatic check**:
 | 6 Export or submit | "2 things to fix before exporting." · "Exported – well done!" |
 
 Steps can be ticked off (*Done*) and *Next* moves on; the progress bar counts finished steps (a passing check counts
-too). The guide is saved with the project (`.bbmodel`). *Hide guide* closes it; **Vibey > Tutorial** (*Anleitung*)
+too). The guide never runs off the bottom of the window: it scrolls inside its panel and keeps the open step in view
+(also on small screens and with 125 / 150 % display scaling). The guide is saved with the project (`.bbmodel`). *Hide guide* closes it; **Vibey > Tutorial** (*Anleitung*)
 opens it again – the choice is remembered in Blockbench's local storage, like the first-start wizard.
 
 ### Test live in game
@@ -107,7 +109,7 @@ Playing from a launcher instance? Pick its game folder once in *Vibey > Advanced
 | Tutorial / Anleitung | shows the Vibey guide |
 | Test live in game / Live im Spiel testen | connect + push (see above) |
 | Export / Submit… / Exportieren / Einreichen… | save a `.vibey` file, *Submit to Vibe*, *My submissions* |
-| Advanced ▸ / Erweitert ▸ | Vibey properties, validation details, reference player, repair player rig, import `.vibey`, connect/disconnect, push, play emote, auto-push, live link settings, add sound, add particle sprite, submit to Vibe, my submissions, about |
+| Advanced ▸ / Erweitert ▸ | Vibey properties, validation details, reference player, repair player groups, import `.vibey`, connect/disconnect, push, play emote, auto-push, live link settings, add sound, add particle sprite, submit to Vibe, my submissions, about |
 
 Menu texts follow Blockbench's language setting (English or German).
 
@@ -139,22 +141,66 @@ later:
 | Pet follow point / scale | Only for pets. |
 | Cape / shield texture | Capes and shields can be just a texture in the vanilla 64×32 cape / 64×64 shield layout; the model is then optional. |
 
-### Modelling on the reference player
+### Build on the player
 
-The grey mannequin is a reference of the vanilla player (wide arms, 64×64 skin layout). It is never exported.
-Toggle it with the checkbox in the *Vibey* tab or *Vibey > Advanced > Show reference player*. The teal wrist band marks the
-**right** arm.
+The grey mannequin is a reference of the vanilla player (wide arms, 64×64 skin layout); the teal wrist band marks
+the **right** arm. Toggle it with the checkbox in the *Vibey* tab or *Vibey > Advanced > Show reference player*.
+It comes with **ready-made player groups**, like the real player – teal in the outliner, labelled with ◆ and the
+word *player*; the groups your slot builds on are purple (*build here*):
+
+![Player groups in the outliner: ◆ Head, ◆ Body with ◆ Back, shoulders and hips, arms, legs; right-click › Attach to …](screenshots/blockbench-player-groups.png)
+
+**Build your part on the player, where it belongs, and keep it in the matching group.** Everything inside a group
+moves with that part of the player in game (walking, sneaking, looking around, emotes):
+
+| Player group (German) | Moves with (`attach` in the `.vibey`) | Pivot (Blockbench) | Typical parts |
+|---|---|---|---|
+| ◆ Head (Kopf) | `head` | `[0, 24, 0]` | hats, glasses, masks |
+| └ ◆ Above head (Über dem Kopf) | `head` | `[0, 32, 0]` | halos, things floating above the head |
+| ◆ Body (Körper) | `body` | `[0, 24, 0]` | scarves, chest items |
+| └ ◆ Back (Rücken) | `body` | `[0, 24, 2]` | wings, backpacks, quivers, capes made of cubes |
+| └ ◆ Right shoulder / ◆ Left shoulder (Rechte / Linke Schulter) | `body` | `[±6, 24, 0]` | pauldrons, a parrot-like buddy |
+| └ ◆ Hips (Hüfte) | `body` | `[0, 12, 0]` | belts, tails |
+| ◆ Right arm / ◆ Left arm (Rechter / Linker Arm) | `right_arm` / `left_arm` | `[5, 22, 0]` / `[-5, 22, 0]` | cuffs, gloves, held props |
+| ◆ Right leg / ◆ Left leg (Rechtes / Linkes Bein) | `right_leg` / `left_leg` | `[1.9, 12, 0]` / `[-1.9, 12, 0]` | shoes, leg bands |
+| ◆ Around player (Um den Spieler) – not for pets | `world` | `[0, 0, 0]` | auras, rings around the feet |
+| ◆ Beside player (Neben dem Spieler) – pets only | `world` (relative to the pet's follow point) | follow point | the pet |
+
+Emotes have the same groups inside **◆ Whole player** (`root`, the player bone that moves the whole body).
+
+How a part gets into a group – all three can be undone with Ctrl+Z:
+
+1. **Drag** it onto the group in the outliner.
+2. **Right-click › Attach to …** (German *An … anheften*) › the group. Under *Advanced: turns with the body only
+   (root)* a cosmetic part can follow only the body rotation (`attach: root`), outside the player groups.
+3. **Just build**: a part you add outside the groups snaps to the most plausible group by itself, with a short note
+   at the bottom (*"Attached to ◆ Back – change it with right-click › Attach to …"*). The rules are simple: pets go
+   to ◆ Beside player, auras to ◆ Around player; a part wider than the player in X and Z surrounds it (◆ Around
+   player); otherwise the group whose zone holds the centre of the part's cubes, else the nearest one, else your
+   slot's group. ◆ Above head only takes parts that float above the head – a hat sitting on the head goes to
+   ◆ Head. A part attached this way follows when you move it to another body part; Ctrl+Z right after the note keeps
+   it where it was, and parts you placed by hand (drag, right-click) are never moved for you.
+
+More details:
 
 - Space: pixels, origin at the feet, +Y up, the player faces **north (-Z)**. As in Blockbench's own player model,
-  the right arm is at **+X** (pivot `[5, 22, 0]`), the left arm at -X.
-- Every cube and locator must be inside a group. **Root groups** decide what the cosmetic follows. Select a root
-  group and open the **Element** tab next to *Transform*:
-  - **Attach to**: `head`, `body`, `right_arm`, `left_arm`, `right_leg`, `left_leg`, `root` (body yaw only),
-    `world` (feet position + body yaw, smoothed – pets, auras) or *Auto* (slot default: hat → head, cape/wings/back
-    → body, shield → left_arm, pet/aura → world).
-  - **Glowing (emissive)** and **Translucent** per group.
-- Place things exactly where they should be on the reference player – the game renders them in the same spot,
-  moving with the part they are attached to.
+  the right arm is at **+X** (pivot `[5, 22, 0]`), the left arm at -X. Coordinates stay **absolute** – what you see
+  on the reference player is what the game renders.
+- Each group of yours directly in a player group becomes a root bone with that group's `attach`; its sub-groups
+  stay its children. Cubes placed straight into a player group are exported as a bone `<group>_cubes` (e.g.
+  `back_cubes`), pivot = the player group's pivot.
+- **Pets** are built beside the player, where the game draws them (◆ Beside player sits on the pet's follow point:
+  1 block to the right and a bit behind for `ground`, by the shoulder for `float`, on the shoulder for
+  `shoulder_left` / `shoulder_right`). The plugin exports the pet relative to that point, exactly as the game expects.
+  Changing the follow point in the properties moves the group and the pet with it.
+- The player groups stay in place: if one is moved or rotated by accident it snaps back (with a note); *Vibey >
+  Advanced > Repair player groups* restores missing ones. Their mannequin cubes are only a reference and are never
+  exported; keyframes on a player group of a cosmetic only preview in Blockbench.
+- **Glowing (emissive)** and **Translucent** per group: select your group and open the **Element** tab next to
+  *Transform*.
+- **Old projects** (0.2.4 and older, where each root group had an *Attach to* setting) and imported `.vibey` files
+  open in the new structure by themselves – every part lands in the group of its `attach`, pets on the pet anchor –
+  and export exactly the same bytes as before.
 - Box UV is the default (per-cube toggle for per-face UV). Faces you disable are not drawn.
 - Multiple textures are allowed. The starred texture (*use as default*) is the model default; faces can use others.
   Animated textures: a vertical strip with frames, set *frame time* / order in the texture properties.
@@ -178,14 +224,17 @@ person, stop when moving, hide held items).
 
 ![Emote in animate mode with a prop on the right arm and the particle keyframe editor](screenshots/blockbench-emote-animate.png)
 
-- The project starts with the player rig `root > head, body, right_arm, left_arm, right_leg, left_leg` (vanilla
-  pivots) and an animation `main`. These groups are real bones: select them and keyframe them in Animate mode. Their
-  grey cubes are only a reference and follow the animation.
-- `root` moves/rotates the whole player; keyframe values are offsets relative to the standing pose.
-- **Props**: groups inside a player bone move with that part (a flag in `right_arm`). Groups directly under `root`
-  follow the whole player. Cubes placed directly in a player bone are exported as an extra bone `<part>_cubes`
-  automatically.
-- Do not move or rotate the player bones in Edit mode – *Vibey > Advanced > Repair player rig* restores them.
+- The project starts with the same player groups as cosmetics: **◆ Whole player** (`root`) holding ◆ Head (with
+  ◆ Above head), ◆ Body (with ◆ Back, shoulders, ◆ Hips), the arms and legs, plus ◆ Around player – vanilla pivots –
+  and an animation `main`. ◆ Whole player, ◆ Head, ◆ Body and the arms and legs are real bones: select them and
+  keyframe them in Animate mode (they are exported under their vanilla names `root`, `head`, `body`, `right_arm` …).
+  Their grey cubes are only a reference and follow the animation.
+- ◆ Whole player moves/rotates the whole player; keyframe values are offsets relative to the standing pose.
+- **Props** work like cosmetic parts: build them on the player and put them into the group they belong to (a flag in
+  ◆ Right arm) – drag, right-click › Attach to … or let them snap. Groups directly in ◆ Whole player follow the whole
+  player. Cubes placed directly in a player group are exported as an extra bone `<part>_cubes` automatically.
+- Do not move or rotate the player groups in Edit mode – they snap back; *Vibey > Advanced > Repair player groups*
+  restores missing ones. Old emote projects (player bones named `root`, `head` …) are converted when opened.
 
 ## Effects: particles, sounds, visibility
 
