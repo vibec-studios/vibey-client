@@ -138,7 +138,7 @@ tile in the Vibey menu, or Media → *Edit HUD layout*.
 - 8 handles: proportional by default, Shift = free; the moving edge snaps too. Mouse wheel scales.
 - Marquee drag or Ctrl/Shift-click for several; they move, scale, hide and style together.
 - Arrow keys nudge 1 px (Shift 10). Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z undo/redo (100 steps), Ctrl+A select all,
-  Ctrl+D duplicate, Delete/H hide, R reset, Esc closes the topmost thing (then saves and leaves).
+  Ctrl+D duplicate, Delete/H hide, R reset. Esc closes the open panel or menu, otherwise it saves and leaves.
   Letters follow the keyboard layout (Ctrl+Z is the key labelled Z on a German keyboard too).
 - Right-click: *Style…*, *Duplicate*, *Hide* / *Remove copy*, *Reset*; on empty space: add widgets, select all,
   global style, undo.

@@ -43,8 +43,11 @@ public final class HudGameTest implements FabricClientGameTest {
                 if (!ServerRules.supportedKeys().contains(k)) throw new AssertionError("rules key not declared: " + k);
                 if (HudLayout.get(k) == null) throw new AssertionError("widget missing: " + k);
             }
-            // the first start applied the default template: not an empty HUD
-            if (HudLayout.hidden(HudLayout.get("hud.fps"))) throw new AssertionError("default template not applied");
+            // the first start (fresh run dir) applied the default template: not an empty HUD
+            if (!dev.henny.vibeyclient.module.hud.HudModule.instance().defaultsApplied()) throw new AssertionError("default template not applied");
+            // earlier tests may have reset the layout: start from the default again
+            HudTemplates.apply(dev.henny.vibeyclient.module.hud.HudModule.DEFAULT_TEMPLATE);
+            if (HudLayout.hidden(HudLayout.get("hud.fps"))) throw new AssertionError("default template has no FPS");
         });
         shareCodes(context);
 

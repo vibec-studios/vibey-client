@@ -111,6 +111,11 @@ public final class HudModule extends VibeyModule {
         Motion.reset();
     }
 
+    /** The default template was applied on this start (fresh install). */
+    public boolean defaultsApplied() {
+        return defaultsApplied;
+    }
+
     private void resetToDefault() {
         HudLayout.resetAll();
         HudTemplates.apply(DEFAULT_TEMPLATE);

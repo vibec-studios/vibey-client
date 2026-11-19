@@ -914,12 +914,8 @@ public final class HudEditorScreen extends BaseScreen {
             return false;
         }
         if (keyCode == Keys.ESCAPE) {
+            // Esc closes the topmost panel or menu; otherwise it saves and leaves (like every Minecraft screen)
             if (panels.escape()) return true;
-            if (!selection.isEmpty()) {
-                selection.clear();
-                panels.selectionChanged();
-                return true;
-            }
             done();
             return true;
         }
