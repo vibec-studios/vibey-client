@@ -21,6 +21,7 @@ Start with the [main README](../README.md) for what Vibey Client is, installatio
 | [AVATAR.md](AVATAR.md) | The cosmetics and emotes engine: packages, services, render path per Minecraft version, coordinates, tests. |
 | [VIDEO.md](VIDEO.md) | Video screens (Fabric 1.21.11): placing, players (FFmpeg / MCEF Modern), setup prompts, sharing, wiring into the Media module. Research and licences: [VIDEO-RESEARCH.md](VIDEO-RESEARCH.md). |
 | [PVP.md](PVP.md) | PvP & View module (Fabric 1.21.11): zoom, toggle sprint/sneak, crosshair editor, block outline, hit colour, low fire, lower shield, server-rule keys. |
+| [CLIPS.md](CLIPS.md) | **Proposal** for the Clips module (replay buffer, auto clips, gallery): capture/encoder research with measurements, and the clip folder + JSON contract for the Vibe Launcher. |
 | [../blockbench/README.md](../blockbench/README.md) | Developing the Blockbench plugin: tests, mock game server, code layout. |
 
 How they fit together:
