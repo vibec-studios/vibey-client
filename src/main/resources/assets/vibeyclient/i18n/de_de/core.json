@@ -329,5 +329,13 @@
       "reset": "Zurück auf Standard",
       "duplicated": "Dupliziert"
     }
+  },
+  "notice": {
+    "open": "Link öffnen",
+    "dismiss": "Ausblenden",
+    "domainMove": {
+      "title": "Vibe zieht um",
+      "body": "Neue Adressen: vibe.axolite.app und *.axolite.cc. Alte Adressen funktionieren vorerst weiter. Bitte Launcher und Vibey Client aktuell halten und gespeicherte Server-Adressen auf .axolite.cc umstellen."
+    }
   }
 }

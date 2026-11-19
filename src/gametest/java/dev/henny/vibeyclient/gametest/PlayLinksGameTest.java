@@ -35,7 +35,7 @@ import java.util.function.Predicate;
  * Play links + {@code .vibe/session.json} (vibe-launcher docs/PLAY-LINKS.md §2/§3) against LOCAL services only, either
  * <ul>
  *   <li>a local <b>vibe-backend</b> (AUTH_DEV_BYPASS) with the play-link routes and a local relay started with
- *       {@code ALLOW_OFFLINE=1 DOMAIN=vibey.henny.dev} (the backend only accepts relay hosts under its relay domain; the
+ *       {@code ALLOW_OFFLINE=1 DOMAIN=axolite.cc} (the backend only accepts relay hosts under its relay domains; the
  *       client still connects through {@code 127.0.0.1:<port>}), or</li>
  *   <li>{@code scripts/mock-play-links.mjs} (play-link routes, proxies login/gateway to a local vibe-backend), which
  *       also simulates a backend without the routes. Detected by its {@code /__mock/links} route.</li>
@@ -421,7 +421,7 @@ public final class PlayLinksGameTest implements FabricClientGameTest {
         JsonObject tokens = JsonParser.parseString(post("/api/v1/auth/verify", verify.toString(), null)).getAsJsonObject();
         String token = str(tokens, "accessToken");
         if (token == null) throw new AssertionError("dev login: " + tokens);
-        String body = "{\"relay_host\":\"ratelimit-test.vibey.henny.dev\",\"mc_version\":\"1.21.11\",\"loader\":{\"kind\":\"fabric\"}}";
+        String body = "{\"relay_host\":\"ratelimit-test.axolite.cc\",\"mc_version\":\"1.21.11\",\"loader\":{\"kind\":\"fabric\"}}";
         String last = null;
         for (int i = 0; i < 12; i++) {
             String res = post("/api/v1/play-links", body, token);

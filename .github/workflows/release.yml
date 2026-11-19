@@ -2,7 +2,7 @@ name: Release
 
 # Builds every jar for a version tag and attaches them to the GitHub release together with `vibey-manifest.json`
 # (VIBE-API-2 §2 manifest plus sha256 and size of every file, "blockbench": null). The Vibe backend imports releases
-# from GitHub itself; this workflow never talks to vibe.henny.dev (Cloudflare blocks GitHub runners there).
+# from GitHub itself; this workflow never talks to the backend (vibe.axolite.app; Cloudflare blocked GitHub runners).
 # Manual fallback without GitHub: `node tools/release-manifest.mjs --publish …` from your machine (README "Releases").
 # The Blockbench plugin is NOT part of client releases: it has its own releases (tag blockbench-v<version>,
 # blockbench-release.yml), which this workflow skips.

@@ -14,7 +14,7 @@
 //   node tools/release-manifest.mjs                       # check + print the manifest for the current mod_version
 //   node tools/release-manifest.mjs --tag v0.2.0 --changelog-file notes.md --hashes --out build/release/vibey-manifest.json
 //   node tools/release-manifest.mjs --tag v0.3.0 --prerelease …   # GitHub pre-release → channel "beta"
-//   CLIENT_PUBLISH_TOKEN=… node tools/release-manifest.mjs --tag v0.2.0 --publish https://vibe.henny.dev/internal/client/v1/releases
+//   CLIENT_PUBLISH_TOKEN=… node tools/release-manifest.mjs --tag v0.2.0 --publish https://vibe.axolite.app/internal/client/v1/releases
 //
 // Sources of truth: gradle.properties (mod_version, archives_base_name), versions/<loader>-<line>/gradle.properties
 // (minecraft_label → jar name), gradle/mc-versions.json (exact Minecraft versions per line), CHANGELOG.md

@@ -24,7 +24,8 @@ Not covered by that license – see https://github.com/vibec-studios/.github/blo
         content/dist),
       docs/screenshots/**,
       cosmetics loaded from the Vibe services
-  - access to the Vibe online services (vibe.henny.dev, vibey.henny.dev) – SERVICES.md. The addresses in this
+  - access to the Vibe online services (vibe.axolite.app, axolite.cc, relay.axolite.cc; formerly vibe.henny.dev,
+    vibey.henny.dev) – SERVICES.md. The addresses in this
     repository are for the official builds only: default_backend / default_relay in gradle.properties (baked into
     the generated BuildInfo class by gradle/common.gradle) and the website link in ui/screen/AboutPanel.java.
 

@@ -29,7 +29,7 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * "Play with me" links (vibe-launcher {@code docs/PLAY-LINKS.md} §1/§3): while the world is online on the relay, the
- * backend holds one link {@code https://vibe.henny.dev/j/<code>} that opens the Vibe Launcher on a friend's PC, installs
+ * backend holds one link {@code https://axolite.cc/j/<code>} (its {@code url}, never built here) that opens the Vibe Launcher on a friend's PC, installs
  * the same pack and joins. Created when hosting goes online (again on a new relay address, and shortly before it
  * expires), deleted when hosting ends and on quit (best effort, short timeout).
  *

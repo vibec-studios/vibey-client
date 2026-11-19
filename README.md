@@ -123,7 +123,12 @@ the pause menu, a *Manage* menu with players, whitelist and ban list (enforced b
 *Force mods*. Friends join with a normal Minecraft through *Multiplayer → Direct Connection*, or with one click from
 your invite.
 
-<<<<<<< HEAD
+While you host, Vibey also makes an **invite link** (`https://axolite.cc/j/<code>`, needs a Vibe login): *Copy
+invite link* in the host window and in the pause menu. Friends with the Vibe Launcher open it, the launcher installs
+your modpack/mods and joins your world. The host window also tells you when mods were added by hand (friends need
+those too). With the Vibe Launcher the client writes `.vibe/session.json` for the launcher's Discord status (world,
+server, invite link); switch it off under *General → Online* ("Show what I'm playing to the launcher").
+
 ### HUD module (Fabric 1.21.11 for now)
 
 FPS, CPS, keystrokes, coordinates, armour, potion effects, clock, ping, server, speed, in-game time, item counters,
@@ -131,13 +136,6 @@ memory and a compass – placed with the **HUD editor** (**H** or *HUD* in the p
 guides, eight resize handles, multi-select, undo/redo, a style popover (colours, background, corners, rainbow text,
 size, detail), a widget library, templates (PvP, Minimal, Building, Streamer) and share codes. Layouts keep their
 place at every window size and GUI scale. Details: [docs/HUD.md](docs/HUD.md).
-=======
-While you host, Vibey also makes an **invite link** (`https://vibe.henny.dev/j/<code>`, needs a Vibe login): *Copy
-invite link* in the host window and in the pause menu. Friends with the Vibe Launcher open it, the launcher installs
-your modpack/mods and joins your world. The host window also tells you when mods were added by hand (friends need
-those too). With the Vibe Launcher the client writes `.vibe/session.json` for the launcher's Discord status (world,
-server, invite link); switch it off under *General → Online* ("Show what I'm playing to the launcher").
->>>>>>> main
 
 ### Media module (Fabric)
 
@@ -221,8 +219,8 @@ multiplayer module, Vibey Lyrics only the lyrics & skies part of Media (the rest
   Online features*. When they are off, Vibey Client does not connect to anything: no social module, cosmetics only
   for you and through the server channel.
 - **Login with Mojang's own check.** When online features are on, the client logs in to the Vibe backend
-  (`vibe.henny.dev`) the same way a Minecraft server checks you: the game tells Mojang's session server "I am
-  joining", the backend asks Mojang "has this player joined?" (`hasJoined`). **Your Minecraft access token never
+  (`vibe.axolite.app`, formerly `vibe.henny.dev`, which keeps working for now) the same way a Minecraft server checks
+  you: the game tells Mojang's session server "I am joining", the backend asks Mojang "has this player joined?" (`hasJoined`). **Your Minecraft access token never
   leaves the game**; it only goes to Mojang, as on every server join.
 - **What the backend stores:** your UUID and name, your friends, requests and blocks, your chats, your privacy
   settings, your status and what you play (if *Show what I am playing* is on), your cosmetic loadout and emote wheel,
@@ -233,7 +231,10 @@ multiplayer module, Vibey Lyrics only the lyrics & skies part of Media (the rest
   token) in `vibeyclient/auth.json`, downloaded cosmetics in `vibeyclient/cache/`, and with *Creator mode* on the
   live link port and token in `vibeyclient/devlink.json` (the live link only accepts connections from this
   computer).
-- **Other online parts:** the multiplayer module talks to the Vibey relay only while you host. The lyrics module only
+- **Notices:** with online features on, the client asks the backend for announcements at start and every 6 hours
+  (`/api/v1/announcements`, no login; it only sends the client version and your language). Dismissed notices are
+  remembered in `config/vibeyclient/core.json`.
+- **Other online parts:** the multiplayer module talks to the Vibey relay (`relay.axolite.cc`) only while you host. The lyrics module only
   sends artist, title, album and length to [LRCLIB](https://lrclib.net) to find lyrics, and *Advanced → Online lyrics*
   turns that off.
 
@@ -296,8 +297,10 @@ Multi-client tests (dev workspace only): `-Dvibeyclient.devDriver=<port>` starts
 a hosted world accept dev accounts without a Mojang session (for invite tests through a local relay started with
 `ALLOW_OFFLINE=1 DOMAIN=127-0-0-1.nip.io`). None of these exist in release builds.
 
-Default backend (`https://vibe.henny.dev`) and relay are set in `gradle.properties` and baked into the generated
-`BuildInfo` class. They are our services, for official builds only: forks must set their own (see
+Default backend (`https://vibe.axolite.app`) and relay (`relay.axolite.cc:25565`) are set in `gradle.properties` and
+baked into the generated `BuildInfo` class. Since 0.3.0 (domain move, vibe-launcher `docs/DOMAINS.md`) a stored old
+default (`https://vibe.henny.dev`, `relay.vibey.henny.dev`) is switched to the new one once (`backend/DomainMove`,
+recorded in `_data.migrations`), logins in `auth.json` move along; the old addresses keep working in parallel. They are our services, for official builds only: forks must set their own (see
 [SERVICES.md](https://github.com/vibec-studios/.github/blob/main/SERVICES.md)), and local development uses a local backend/relay.
 
 ### Releases
@@ -323,7 +326,7 @@ releases (tag `v<version>`):
    `file` is the GitHub asset name. It is uploaded last, so it only appears when all files are there.
 4. **Fallback** (GitHub import not available): publish from your machine, outside Cloudflare's bot protection for CI:
    `CLIENT_PUBLISH_TOKEN=… node tools/release-manifest.mjs --tag v<version> --publish
-   https://vibe.henny.dev/internal/client/v1/releases` (files staged in batches below the 100 MB proxy limit, then
+   https://vibe.axolite.app/internal/client/v1/releases` (files staged in batches below the 100 MB proxy limit, then
    the release by sha256; exit code 3 = already published). Test against a local backend first
    (`--publish http://127.0.0.1:<port>/internal/client/v1/releases`). Never commit or print the token.
 
@@ -359,8 +362,8 @@ VIBEY_TEST_RELAY=127.0.0.1:26400 ./gradlew :fabric-1.21.11:test --tests '*RelayH
 **Play links** (contract: vibe-launcher `docs/PLAY-LINKS.md` §2/§3; code: `launcher/` for `instance.json` /
 `session.json`, `module/multiplayer/host/PlayLinks`). `PlayLinksGameTest` runs against a **local** vibe-backend
 (main has the routes; `AUTH_DEV_BYPASS=1`, own port and pglite dir) and a local relay. The backend only accepts relay
-addresses under its relay domain (`PLAY_LINK_RELAY_DOMAINS`, default `vibey.henny.dev`), so start the relay with
-`DOMAIN=vibey.henny.dev`: the address is just a string for backend and client, which still connect through
+addresses under its relay domains (`PLAY_LINK_RELAY_DOMAINS`, e.g. `axolite.cc` and the old `vibey.henny.dev`), so
+start the relay with `DOMAIN=axolite.cc`: the address is just a string for backend and client, which still connect through
 `127.0.0.1:<port>`. The test checks the link through the public `GET /api/v1/play-links/<code>`, saves the landing
 page `/j/<code>` and uses up the real rate limit (10 new links per hour, kept in memory: restart the backend or use
 another `-Dvibeyclient.username` to run it again within the hour). Never point the dev login or test links at
@@ -368,7 +371,7 @@ production.
 
 ```sh
 # vibe-backend/apps/api: NODE_ENV=development AUTH_DEV_BYPASS=1 PORT=3470 PUBLIC_URL=http://127.0.0.1:3470 DATABASE_URL=pglite://./data/pglite-links …
-# vibey-multiplayer/relay: ALLOW_OFFLINE=1 DOMAIN=vibey.henny.dev PORT=26470 DATA_DIR=<tmp> node src/main.ts
+# vibey-multiplayer/relay: ALLOW_OFFLINE=1 DOMAIN=axolite.cc PORT=26470 DATA_DIR=<tmp> node src/main.ts
 ./gradlew :fabric-1.21.11:runClientGameTest -Dvibeyclient.test.only=PlayLinksGameTest -Dvibeyclient.playLinkTest=$PWD/build/review/playlinks   -Dvibeyclient.api=http://127.0.0.1:3470 -Dvibeyclient.devAuth=true -Dvibeyclient.test.relay=127.0.0.1:26470 -Dvibeyclient.devOfflineHost=true -Dvibeyclient.username=LinkHost
 ```
 
@@ -413,8 +416,9 @@ Not an official Minecraft product. Not approved by or associated with Mojang or 
 - **Grafiken und Modelle** (Logo, Icons, Robbe, Starter-Cosmetics und -Emotes, Texturen, Sounds, Screenshots, der
   Referenzspieler des Blockbench-Plugins): alle Rechte vorbehalten –
   [ASSETS-POLICY.md](https://github.com/vibec-studios/.github/blob/main/ASSETS-POLICY.md); Pfade in [NOTICE](NOTICE).
-- **Vibe-Dienste** (Backend `vibe.henny.dev` mit Cosmetics-Katalog, Loadouts und Downloads, Relay
-  `vibey.henny.dev`): nur für offizielle Builds –
+- **Vibe-Dienste** (Backend `vibe.axolite.app` mit Cosmetics-Katalog, Loadouts und Downloads, Relay
+  `relay.axolite.cc` mit den Adressen `*.axolite.cc`; die alten Adressen unter `henny.dev` laufen vorerst parallel
+  weiter): nur für offizielle Builds –
   [SERVICES.md](https://github.com/vibec-studios/.github/blob/main/SERVICES.md).
 
 Code aus *Vibey Multiplayer* und *Vibey Lyrics*, der dort vor dem 18.11.2026 unter MIT veröffentlicht wurde, bleibt

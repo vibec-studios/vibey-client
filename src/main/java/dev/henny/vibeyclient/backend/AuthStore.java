@@ -64,6 +64,9 @@ public final class AuthStore {
             }
             root.addProperty("version", 1);
             if (!root.has("accounts") || !root.get("accounts").isJsonObject()) root.add("accounts", new JsonObject());
+            // 0.3.0: logins of https://vibe.henny.dev belong to https://vibe.axolite.app now (same server and database)
+            boolean had = root.getAsJsonObject("accounts").size() > 0;
+            if (DomainMove.migrateAuthFile(root) && had) save();
         }
         return root.getAsJsonObject("accounts");
     }

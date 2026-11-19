@@ -11,11 +11,21 @@ class PlayLinkAnswerTest {
     @Test
     void isoExpiry() {
         PlayLinks.Link l = PlayLinks.parse(JsonParser.parseString(
-                "{\"code\":\"k3x9q2\",\"url\":\"https://vibe.henny.dev/j/k3x9q2\",\"expires_at\":\"2026-11-19T10:00:00.000Z\"}"), "a.vibey.henny.dev");
+                "{\"code\":\"k3x9q2\",\"url\":\"https://axolite.cc/j/k3x9q2\",\"expires_at\":\"2026-11-19T10:00:00.000Z\"}"), "a.axolite.cc");
         assertNotNull(l);
         assertEquals("k3x9q2", l.code());
-        assertEquals("https://vibe.henny.dev/j/k3x9q2", l.url());
+        assertEquals("https://axolite.cc/j/k3x9q2", l.url());
         assertEquals(java.time.Instant.parse("2026-11-19T10:00:00Z").toEpochMilli(), l.expiresAt());
+        assertEquals("a.axolite.cc", l.relayHost());
+    }
+
+    /** A backend still on the old domain (or an old link): the url is taken as it comes, nothing is rebuilt. */
+    @Test
+    void oldDomainUrlKept() {
+        PlayLinks.Link l = PlayLinks.parse(JsonParser.parseString(
+                "{\"code\":\"k3x9q2\",\"url\":\"https://vibe.henny.dev/j/k3x9q2\"}"), "a.vibey.henny.dev");
+        assertNotNull(l);
+        assertEquals("https://vibe.henny.dev/j/k3x9q2", l.url());
         assertEquals("a.vibey.henny.dev", l.relayHost());
     }
 

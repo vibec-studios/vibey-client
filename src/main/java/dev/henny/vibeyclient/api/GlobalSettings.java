@@ -72,6 +72,8 @@ public final class GlobalSettings {
     }
 
     public static void load() {
+        // 0.3.0: the old default backend (vibe.henny.dev) moves to vibe.axolite.app, own addresses stay
+        GROUP.migration(dev.henny.vibeyclient.backend.DomainMove.ID, dev.henny.vibeyclient.backend.DomainMove::migrateCore);
         GROUP.load();
     }
 

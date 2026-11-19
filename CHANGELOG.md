@@ -2,6 +2,25 @@
 
 All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.properties`.
 
+## Unreleased (0.3.0) – Domain move to axolite
+
+Vibe moves from `henny.dev` to new addresses (vibe-launcher `docs/DOMAINS.md`). The old addresses keep working in
+parallel for now, with the same server and database.
+
+- **New defaults:** backend `https://vibe.axolite.app` (also the website link under *About*), relay
+  `relay.axolite.cc:25565`. Invite links are now `https://axolite.cc/j/<code>` and hosted worlds get addresses like
+  `mossy-otter-27.axolite.cc` (both come from the backend/relay as before).
+- **Your settings move along once:** a stored old default backend (`https://vibe.henny.dev`, with or without a
+  trailing slash) and relay (`relay.vibey.henny.dev` / `vibey.henny.dev`) switch to the new ones; your own addresses
+  stay. Logins in `vibeyclient/auth.json` move to the new backend address, so nobody has to log in again; the cached
+  loadout signing key counts for the new address too.
+- **Old addresses keep working:** old invite links and `*.vibey.henny.dev` world addresses work as before; the dev
+  login refuses both production names.
+- **Notices:** the domain move is shown once as a toast and as a card at the top of *General* until you dismiss it
+  (DE/EN). The client also shows the backend's announcements (`GET /api/v1/announcements`, public, at start and every
+  6 hours, only with online features on), each once, respecting `until`, `apps` and `max_version`.
+- README: resolved a leftover merge conflict in the multiplayer/HUD sections.
+
 ## Unreleased – Blockbench plugin released on its own
 
 - Client releases no longer carry `vibey.js`; `vibey-manifest.json` says `"blockbench": null`. The plugin has its own

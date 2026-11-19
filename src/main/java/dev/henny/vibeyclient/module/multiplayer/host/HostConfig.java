@@ -73,6 +73,8 @@ public final class HostConfig {
                 try {
                     HostConfig c = GSON.fromJson(Files.readString(legacy, StandardCharsets.UTF_8), HostConfig.class);
                     if (c != null) {
+                        String moved = dev.henny.vibeyclient.backend.DomainMove.migrateRelay(c.relay);
+                        if (moved != null) c.relay = moved;
                         current = c;
                         imported = true;
                         MultiplayerModule.LOG.info("Imported the host settings of Vibey Multiplayer from {}", legacy);

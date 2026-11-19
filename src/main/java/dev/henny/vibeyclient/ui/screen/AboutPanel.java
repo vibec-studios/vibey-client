@@ -24,7 +24,7 @@ import dev.henny.vibeyclient.ui.title.OnboardingScreen;
  */
 public final class AboutPanel implements Panel {
     /** Our website (official builds; forks link their own, see https://github.com/vibec-studios/.github/blob/main/SERVICES.md). */
-    private static final String WEBSITE = "https://vibe.henny.dev";
+    private static final String WEBSITE = "https://vibe.axolite.app";
     private static final String SOURCE = "https://github.com/vibec-studios/vibey-client";
     private static final String ISSUES = "https://github.com/vibec-studios/vibey-client/issues";
 

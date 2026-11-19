@@ -13,7 +13,7 @@ import java.util.function.Consumer;
  * Look it up with {@code Services.get(VibeBackend.class)}; absent when online features or social are off.
  */
 public interface VibeBackend {
-    /** Base URL, e.g. {@code https://vibe.henny.dev}. */
+    /** Base URL, e.g. {@code https://vibe.axolite.app}. */
     String baseUrl();
 
     /** Logged in and the gateway is ready (after {@code ready}/{@code resumed}). */
