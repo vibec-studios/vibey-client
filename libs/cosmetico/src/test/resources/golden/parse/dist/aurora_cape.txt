@@ -1,0 +1,14 @@
+id vibey:aurora_cape
+kind COSMETIC
+name Aurora Cape | Polarlicht-Umhang
+description Northern lights that slowly ripple across your back. | Nordlichter, die langsam über deinen Rücken wogen.
+author Vibe Craft Studios
+tags [aurora, animated, night, starter]
+rarity EPIC
+slot CAPE
+hideWithArmor []
+pet GROUND 1.0
+cape 0 shield -1
+emote null
+sha256 262470d2dd150aedc4300b7e456132b34e24ffdabac58240f06a6505179f0215 size 12394
+texture 0 cape 64 32 64 256 8 4 [0 1 2 3 4 5 6 7] false true 32 33d5df320844dafddef91481396bd587cd8c52cd0d61065f495c15278bd4f731

@@ -1,0 +1,39 @@
+id vibey:seal_beanie
+kind COSMETIC
+name Seal Beanie | Robbenmütze
+description Cosy knitted beanie with a teal stripe – and a tiny seal as the pom-pom. | Kuschelige Strickmütze mit türkisem Streifen – und einer kleinen Robbe als Bommel.
+author Vibe Craft Studios
+tags [seal, knitted, winter, cute, starter]
+rarity RARE
+slot HAT
+hideWithArmor [HEAD]
+pet GROUND 1.0
+cape -1 shield -1
+emote null
+sha256 9cb173714d28e26eac9944c1f5d09c5f91e0d3fadf07ee0ea15708a124494385 size 4414
+texture 0 main 64 32 64 32 1 1 [0] false false 1 40566238fcdd16556e63fa3e7782a87280ca5073fe2b4f0734bed23822bf7a2a
+model 0 cubes 6 bones 2 locators 0
+bone 0 beanie -1 HEAD [0.0 24.0 0.0] [0.0 0.0 0.0] false false false false 3
+cube [-4.0 28.0 -4.0] [4.0 33.0 4.0] 0.6 false null null [0.0 0.0] 0
+cube [-4.0 28.0 -4.0] [4.0 30.0 4.0] 0.95 false null null [32.0 0.0] 0
+cube [-3.0 33.0 -3.0] [3.0 34.0 3.0] 0.6 false null null [22.0 13.0] 0
+bone 1 pompom 0 null [0.0 34.6 0.0] [0.0 0.0 0.0] false false false false 3
+cube [-3.0 34.6 -2.5] [3.0 39.6 2.5] 0.0 false null null [0.0 13.0] 0
+cube [3.0 35.0 -1.0] [4.0 36.0 1.0] 0.0 false null null [46.0 13.0] 0
+cube [-4.0 35.0 -1.0] [-3.0 36.0 1.0] 0.0 false null null [52.0 13.0] 0
+animation idle 3.0 true false false tracks 1 events 0
+track 1 null
+channel rotation 5
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.75 [4.0 0.0 5.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.25 [-3.0 0.0 -5.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+animation walk 0.8 true false false tracks 1 events 0
+track 1 null
+channel rotation 5
+key 0.0 [6.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.2 [-4.0 0.0 7.0] [NaN NaN NaN] CATMULLROM
+key 0.4 [6.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.6 [-4.0 0.0 -7.0] [NaN NaN NaN] CATMULLROM
+key 0.8 [6.0 0.0 0.0] [NaN NaN NaN] CATMULLROM

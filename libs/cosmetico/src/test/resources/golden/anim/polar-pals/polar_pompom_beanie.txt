@@ -1,0 +1,90 @@
+animation idle 3.0 true
+time 0.3 0.3
+time 7.77 1.77
+time 123.456 0.456
+local -0.5 0.0 2.5
+local 0.2 0.2 0.2
+local 4.5 3.0 1.5
+local 9.75 3.0 0.75
+sample 0 rotation -0.05 0.0 0.0 0.0
+sample 0 rotation 0.26 -1.7454991 0.0 -3.1074982
+sample 0 rotation 0.57 2.7702801 0.0 3.6794605
+sample 0 rotation 0.87999994 -0.7795205 0.0 -1.374337
+sample 0 rotation 1.19 0.21924107 0.0 0.28157058
+sample 0 rotation 1.5 0.625 0.0 0.6875
+sample 0 rotation 1.81 0.93465894 0.0 0.9492794
+sample 0 rotation 2.12 0.9285761 0.0 0.90323216
+sample 0 rotation 2.43 0.34083128 0.0 0.1300453
+sample 0 rotation 2.74 -0.18829215 0.0 -0.47304416
+sample 0 rotation 3.05 0.0 0.0 0.0
+sample 1 scale -0.05 1.0 1.0 1.0
+sample 1 scale 0.26 0.93881536 1.1013719 0.93881536
+sample 1 scale 0.57 1.0059723 0.99356484 1.0059723
+sample 1 scale 0.87999994 0.997458 1.0026623 0.997458
+sample 1 scale 1.19 0.9944689 1.0059868 0.9944689
+sample 1 scale 1.5 0.99179685 1.0090821 0.99179685
+sample 1 scale 1.81 0.98995906 1.0113013 0.98995906
+sample 1 scale 2.12 0.98947257 1.0119982 0.98947257
+sample 1 scale 2.43 0.99085474 1.0105261 0.99085474
+sample 1 scale 2.74 0.99462277 1.0062386 0.99462277
+sample 1 scale 3.05 1.0 1.0 1.0
+animation walk 0.6 true
+time 0.3 0.3
+time 7.77 0.5699997
+time 123.456 0.4559951
+local -0.5 0.0 0.100000024
+local 0.2 0.2 0.2
+local 0.90000004 0.6 0.3
+local 1.95 0.6 0.14999998
+sample 0 rotation -0.05 10.0 0.0 6.0
+sample 0 rotation 0.020000007 9.319703 0.0 5.503407
+sample 0 rotation 0.09000002 0.9279976 0.0 1.487999
+sample 0 rotation 0.16000001 -3.8216295 0.0 -2.4077039
+sample 0 rotation 0.23000003 3.698966 0.0 -5.1620746
+sample 0 rotation 0.3 10.0 0.0 -6.0
+sample 0 rotation 0.37 3.6989627 0.0 -2.8308146
+sample 0 rotation 0.44000006 -3.8216324 0.0 1.557929
+sample 0 rotation 0.51000005 0.9280062 0.0 4.4640017
+sample 0 rotation 0.58 9.3197 0.0 6.0983706
+sample 0 rotation 0.65000004 10.0 0.0 6.0
+sample 1 scale -0.05 1.08 0.9 1.08
+sample 1 scale 0.020000007 1.0741689 0.9077748 1.0741689
+sample 1 scale 0.09000002 1.00224 1.00368 1.00224
+sample 1 scale 0.16000001 0.9615289 1.0579615 0.9615289
+sample 1 scale 0.23000003 1.0259912 0.97201174 1.0259912
+sample 1 scale 0.3 1.08 0.9 1.08
+sample 1 scale 0.37 1.0259911 0.97201186 1.0259911
+sample 1 scale 0.44000006 0.96152866 1.0579616 0.96152866
+sample 1 scale 0.51000005 1.0022401 1.0036799 1.0022401
+sample 1 scale 0.58 1.074169 0.9077747 1.074169
+sample 1 scale 0.65000004 1.08 0.9 1.08
+animation fly 0.4 true
+time 0.3 0.3
+time 7.77 0.16999988
+time 123.456 0.25599816
+local -0.5 0.0 0.3
+local 0.2 0.2 0.2
+local 0.6 0.4 0.20000002
+local 1.3000001 0.4 0.10000005
+sample 0 rotation -0.05 42.0 0.0 4.0
+sample 0 rotation 0.0 42.0 0.0 4.0
+sample 0 rotation 0.05 42.9375 0.0 2.75
+sample 0 rotation 0.10000001 45.0 0.0 -9.536743E-7
+sample 0 rotation 0.15 47.0625 0.0 -2.75
+sample 0 rotation 0.2 48.0 0.0 -4.0
+sample 0 rotation 0.25 47.0625 0.0 -2.7500002
+sample 0 rotation 0.29999998 45.0 0.0 -1.4305115E-6
+sample 0 rotation 0.35 42.9375 0.0 2.7499995
+sample 0 rotation 0.39999998 42.0 0.0 4.0
+sample 0 rotation 0.45 42.0 0.0 4.0
+sample 1 scale -0.05 0.95 1.08 0.95
+sample 1 scale 0.0 0.95 1.08 0.95
+sample 1 scale 0.05 0.95 1.08 0.95
+sample 1 scale 0.10000001 0.95 1.08 0.95
+sample 1 scale 0.15 0.95 1.08 0.95
+sample 1 scale 0.2 0.95 1.08 0.95
+sample 1 scale 0.25 0.95 1.08 0.95
+sample 1 scale 0.29999998 0.95 1.08 0.95
+sample 1 scale 0.35 0.95 1.08 0.95
+sample 1 scale 0.39999998 0.95 1.08 0.95
+sample 1 scale 0.45 0.95 1.08 0.95

@@ -1,0 +1,170 @@
+animation idle 3.0 true
+time 0.3 0.3
+time 7.77 1.77
+time 123.456 0.456
+local -0.5 0.0 2.5
+local 0.2 0.2 0.2
+local 4.5 3.0 1.5
+local 9.75 3.0 0.75
+sample 0 rotation -0.05 0.0 0.0 0.0
+sample 0 rotation 0.26 0.0 -0.5580255 0.15943585
+sample 0 rotation 0.57 0.0 -2.264192 0.646912
+sample 0 rotation 0.87999994 0.0 -4.4008865 1.2573962
+sample 0 rotation 1.19 0.0 -6.226644 1.779041
+sample 0 rotation 1.5 0.0 -7.0 2.0
+sample 0 rotation 1.81 0.0 -6.2266445 1.7790413
+sample 0 rotation 2.12 0.0 -4.400887 1.2573963
+sample 0 rotation 2.43 0.0 -2.2641916 0.646912
+sample 0 rotation 2.74 0.0 -0.55802536 0.15943599
+sample 0 rotation 3.05 0.0 0.0 0.0
+sample 1 rotation -0.05 0.0 0.0 0.0
+sample 1 rotation 0.26 0.0 0.5580255 -0.15943585
+sample 1 rotation 0.57 0.0 2.264192 -0.646912
+sample 1 rotation 0.87999994 0.0 4.4008865 -1.2573962
+sample 1 rotation 1.19 0.0 6.226644 -1.779041
+sample 1 rotation 1.5 0.0 7.0 -2.0
+sample 1 rotation 1.81 0.0 6.2266445 -1.7790413
+sample 1 rotation 2.12 0.0 4.400887 -1.2573963
+sample 1 rotation 2.43 0.0 2.2641916 -0.646912
+sample 1 rotation 2.74 0.0 0.55802536 -0.15943599
+sample 1 rotation 3.05 0.0 0.0 0.0
+animation fly 0.8 true
+time 0.3 0.3
+time 7.77 0.5699999
+time 123.456 0.25599816
+local -0.5 0.0 0.3
+local 0.2 0.2 0.2
+local 1.2 0.8 0.40000004
+local 2.6000001 0.8 0.2000001
+sample 0 rotation -0.05 0.0 10.0 0.0
+sample 0 rotation 0.040000003 0.0 8.46 0.22400004
+sample 0 rotation 0.13000001 0.0 -3.6520329 1.9857502
+sample 0 rotation 0.22000001 0.0 -21.611252 4.598
+sample 0 rotation 0.31 0.0 -37.89984 6.9672494
+sample 0 rotation 0.39999998 0.0 -45.000008 7.999999
+sample 0 rotation 0.49 0.0 -37.89984 6.96725
+sample 0 rotation 0.58 0.0 -21.611256 4.5980005
+sample 0 rotation 0.67 0.0 -3.652031 1.9857502
+sample 0 rotation 0.76000005 0.0 8.459999 0.22399902
+sample 0 rotation 0.84999996 0.0 10.0 0.0
+sample 1 rotation -0.05 0.0 -10.0 0.0
+sample 1 rotation 0.040000003 0.0 -8.46 -0.22400004
+sample 1 rotation 0.13000001 0.0 3.6520329 -1.9857502
+sample 1 rotation 0.22000001 0.0 21.611252 -4.598
+sample 1 rotation 0.31 0.0 37.89984 -6.9672494
+sample 1 rotation 0.39999998 0.0 45.000008 -7.999999
+sample 1 rotation 0.49 0.0 37.89984 -6.96725
+sample 1 rotation 0.58 0.0 21.611256 -4.5980005
+sample 1 rotation 0.67 0.0 3.652031 -1.9857502
+sample 1 rotation 0.76000005 0.0 -8.459999 -0.22399902
+sample 1 rotation 0.84999996 0.0 -10.0 0.0
+sample 2 rotation -0.05 0.0 0.0 0.0
+sample 2 rotation 0.040000003 0.0 0.0 0.11200002
+sample 2 rotation 0.13000001 0.0 0.0 0.9928751
+sample 2 rotation 0.22000001 0.0 0.0 2.299
+sample 2 rotation 0.31 0.0 0.0 3.4836247
+sample 2 rotation 0.39999998 0.0 0.0 3.9999995
+sample 2 rotation 0.49 0.0 0.0 3.483625
+sample 2 rotation 0.58 0.0 0.0 2.2990003
+sample 2 rotation 0.67 0.0 0.0 0.9928751
+sample 2 rotation 0.76000005 0.0 0.0 0.11199951
+sample 2 rotation 0.84999996 0.0 0.0 0.0
+sample 3 rotation -0.05 0.0 0.0 0.0
+sample 3 rotation 0.040000003 0.0 0.0 -0.11200002
+sample 3 rotation 0.13000001 0.0 0.0 -0.9928751
+sample 3 rotation 0.22000001 0.0 0.0 -2.299
+sample 3 rotation 0.31 0.0 0.0 -3.4836247
+sample 3 rotation 0.39999998 0.0 0.0 -3.9999995
+sample 3 rotation 0.49 0.0 0.0 -3.483625
+sample 3 rotation 0.58 0.0 0.0 -2.2990003
+sample 3 rotation 0.67 0.0 0.0 -0.9928751
+sample 3 rotation 0.76000005 0.0 0.0 -0.11199951
+sample 3 rotation 0.84999996 0.0 0.0 0.0
+sample 4 rotation -0.05 0.0 0.0 0.0
+sample 4 rotation 0.040000003 0.0 0.0 0.14000002
+sample 4 rotation 0.13000001 0.0 0.0 1.2410939
+sample 4 rotation 0.22000001 0.0 0.0 2.8737502
+sample 4 rotation 0.31 0.0 0.0 4.3545313
+sample 4 rotation 0.39999998 0.0 0.0 5.0
+sample 4 rotation 0.49 0.0 0.0 4.3545313
+sample 4 rotation 0.58 0.0 0.0 2.8737504
+sample 4 rotation 0.67 0.0 0.0 1.2410936
+sample 4 rotation 0.76000005 0.0 0.0 0.13999939
+sample 4 rotation 0.84999996 0.0 0.0 0.0
+sample 5 rotation -0.05 0.0 0.0 0.0
+sample 5 rotation 0.040000003 0.0 0.0 -0.14000002
+sample 5 rotation 0.13000001 0.0 0.0 -1.2410939
+sample 5 rotation 0.22000001 0.0 0.0 -2.8737502
+sample 5 rotation 0.31 0.0 0.0 -4.3545313
+sample 5 rotation 0.39999998 0.0 0.0 -5.0
+sample 5 rotation 0.49 0.0 0.0 -4.3545313
+sample 5 rotation 0.58 0.0 0.0 -2.8737504
+sample 5 rotation 0.67 0.0 0.0 -1.2410936
+sample 5 rotation 0.76000005 0.0 0.0 -0.13999939
+sample 5 rotation 0.84999996 0.0 0.0 0.0
+sample 6 rotation -0.05 0.0 0.0 0.0
+sample 6 rotation 0.040000003 0.0 0.0 0.16800003
+sample 6 rotation 0.13000001 0.0 0.0 1.4893126
+sample 6 rotation 0.22000001 0.0 0.0 3.4485002
+sample 6 rotation 0.31 0.0 0.0 5.2254376
+sample 6 rotation 0.39999998 0.0 0.0 6.0
+sample 6 rotation 0.49 0.0 0.0 5.2254376
+sample 6 rotation 0.58 0.0 0.0 3.4485006
+sample 6 rotation 0.67 0.0 0.0 1.4893131
+sample 6 rotation 0.76000005 0.0 0.0 0.16799927
+sample 6 rotation 0.84999996 0.0 0.0 0.0
+sample 7 rotation -0.05 0.0 0.0 0.0
+sample 7 rotation 0.040000003 0.0 0.0 -0.16800003
+sample 7 rotation 0.13000001 0.0 0.0 -1.4893126
+sample 7 rotation 0.22000001 0.0 0.0 -3.4485002
+sample 7 rotation 0.31 0.0 0.0 -5.2254376
+sample 7 rotation 0.39999998 0.0 0.0 -6.0
+sample 7 rotation 0.49 0.0 0.0 -5.2254376
+sample 7 rotation 0.58 0.0 0.0 -3.4485006
+sample 7 rotation 0.67 0.0 0.0 -1.4893131
+sample 7 rotation 0.76000005 0.0 0.0 -0.16799927
+sample 7 rotation 0.84999996 0.0 0.0 0.0
+sample 8 rotation -0.05 0.0 0.0 0.0
+sample 8 rotation 0.040000003 0.0 0.0 0.19600004
+sample 8 rotation 0.13000001 0.0 0.0 1.7375315
+sample 8 rotation 0.22000001 0.0 0.0 4.0232496
+sample 8 rotation 0.31 0.0 0.0 6.096344
+sample 8 rotation 0.39999998 0.0 0.0 7.000001
+sample 8 rotation 0.49 0.0 0.0 6.0963435
+sample 8 rotation 0.58 0.0 0.0 4.0232506
+sample 8 rotation 0.67 0.0 0.0 1.7375312
+sample 8 rotation 0.76000005 0.0 0.0 0.19599915
+sample 8 rotation 0.84999996 0.0 0.0 0.0
+sample 9 rotation -0.05 0.0 0.0 0.0
+sample 9 rotation 0.040000003 0.0 0.0 -0.19600004
+sample 9 rotation 0.13000001 0.0 0.0 -1.7375315
+sample 9 rotation 0.22000001 0.0 0.0 -4.0232496
+sample 9 rotation 0.31 0.0 0.0 -6.096344
+sample 9 rotation 0.39999998 0.0 0.0 -7.000001
+sample 9 rotation 0.49 0.0 0.0 -6.0963435
+sample 9 rotation 0.58 0.0 0.0 -4.0232506
+sample 9 rotation 0.67 0.0 0.0 -1.7375312
+sample 9 rotation 0.76000005 0.0 0.0 -0.19599915
+sample 9 rotation 0.84999996 0.0 0.0 0.0
+sample 10 rotation -0.05 0.0 0.0 0.0
+sample 10 rotation 0.040000003 0.0 0.0 0.22400004
+sample 10 rotation 0.13000001 0.0 0.0 1.9857502
+sample 10 rotation 0.22000001 0.0 0.0 4.598
+sample 10 rotation 0.31 0.0 0.0 6.9672494
+sample 10 rotation 0.39999998 0.0 0.0 7.999999
+sample 10 rotation 0.49 0.0 0.0 6.96725
+sample 10 rotation 0.58 0.0 0.0 4.5980005
+sample 10 rotation 0.67 0.0 0.0 1.9857502
+sample 10 rotation 0.76000005 0.0 0.0 0.22399902
+sample 10 rotation 0.84999996 0.0 0.0 0.0
+sample 11 rotation -0.05 0.0 0.0 0.0
+sample 11 rotation 0.040000003 0.0 0.0 -0.22400004
+sample 11 rotation 0.13000001 0.0 0.0 -1.9857502
+sample 11 rotation 0.22000001 0.0 0.0 -4.598
+sample 11 rotation 0.31 0.0 0.0 -6.9672494
+sample 11 rotation 0.39999998 0.0 0.0 -7.999999
+sample 11 rotation 0.49 0.0 0.0 -6.96725
+sample 11 rotation 0.58 0.0 0.0 -4.5980005
+sample 11 rotation 0.67 0.0 0.0 -1.9857502
+sample 11 rotation 0.76000005 0.0 0.0 -0.22399902
+sample 11 rotation 0.84999996 0.0 0.0 0.0

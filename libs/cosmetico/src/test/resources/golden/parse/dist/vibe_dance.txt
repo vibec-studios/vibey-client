@@ -1,0 +1,74 @@
+id vibey:vibe_dance
+kind EMOTE
+name Vibe Dance | Vibe-Tanz
+description A looping groove at 120 bpm. Move to stop. | Ein Groove in Dauerschleife mit 120 bpm. Bewegen zum Beenden.
+author Vibe Craft Studios
+tags [dance, loop, music, starter]
+rarity COMMON
+slot null
+hideWithArmor []
+pet null
+cape -1 shield -1
+emote main true true true true
+sha256 51e694abb72199bb2eb70dee53b999de72db67ee5bbaa8d9fcbadab8c530156b size 3538
+animation main 2.0 true false false tracks 6 events 0
+track -1 ROOT
+channel rotation 5
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.5 [0.0 12.0 -4.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 -12.0 4.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+channel position 9
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.25 [-0.6 1.1 0.0] [NaN NaN NaN] CATMULLROM
+key 0.5 [-1.2 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.75 [-0.6 1.1 0.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.25 [0.6 1.1 0.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [1.2 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.75 [0.6 1.1 0.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track -1 RIGHT_ARM
+channel rotation 5
+key 0.0 [0.0 0.0 18.0] [NaN NaN NaN] CATMULLROM
+key 0.5 [10.0 0.0 155.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 18.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [70.0 20.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 18.0] [NaN NaN NaN] CATMULLROM
+track -1 LEFT_ARM
+channel rotation 5
+key 0.0 [70.0 -20.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.5 [0.0 0.0 -18.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [10.0 0.0 -155.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 -18.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [70.0 -20.0 0.0] [NaN NaN NaN] CATMULLROM
+track -1 HEAD
+channel rotation 9
+key 0.0 [-6.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.25 [5.0 0.0 3.0] [NaN NaN NaN] CATMULLROM
+key 0.5 [-6.0 8.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.75 [5.0 0.0 -3.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [-6.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.25 [5.0 0.0 3.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [-6.0 -8.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.75 [5.0 0.0 -3.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [-6.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track -1 RIGHT_LEG
+channel rotation 7
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.25 [22.0 0.0 4.0] [NaN NaN NaN] CATMULLROM
+key 0.5 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.25 [-8.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track -1 LEFT_LEG
+channel rotation 7
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.25 [-8.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.5 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.25 [22.0 0.0 -4.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM

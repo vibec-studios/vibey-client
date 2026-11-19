@@ -1,0 +1,89 @@
+id vibey:cheer
+kind EMOTE
+name Cheer | Jubeln
+description Jump for joy with a burst of confetti! | Spring vor Freude – mit einer Ladung Konfetti!
+author Vibe Craft Studios
+tags [celebrate, confetti, particles, starter]
+rarity COMMON
+slot null
+hideWithArmor []
+pet null
+cape -1 shield -1
+emote main false true true true
+sha256 f35944764f22a5b6b6cc59e60e94167164b9787294c1ff1ff3f46c3c971119c2 size 6739
+texture 0 main 16 16 16 16 1 1 [0] false false 1 8a24e0c23ff0acf6c10cf99c348c69123e4b9dbcdda7a3d3a3d2f239f0b8c8ca
+sprite 0 confetti_purple 0 0.0 0.0 2.0 2.0
+sprite 1 confetti_teal 0 2.0 0.0 4.0 2.0
+sprite 2 confetti_pink 0 4.0 0.0 6.0 2.0
+sprite 3 confetti_gold 0 6.0 0.0 8.0 2.0
+model 0 cubes 0 bones 1 locators 1
+bone 0 burst -1 ROOT [0.0 34.0 0.0] [0.0 0.0 0.0] false false false false 0
+locator above 0 null [0.0 35.0 -1.0]
+animation main 2.4 false false false tracks 6 events 9
+track -1 ROOT
+channel rotation 5
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [-6.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.6 [3.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.4 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+channel position 8
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.55 [0.0 4.5 0.0] [NaN NaN NaN] CATMULLROM
+key 0.7 [0.0 5.5 0.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.15 [0.0 1.6 0.0] [NaN NaN NaN] CATMULLROM
+key 1.35 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.4 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track -1 RIGHT_ARM
+channel rotation 8
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [-35.0 0.0 8.0] [NaN NaN NaN] CATMULLROM
+key 0.6 [12.0 0.0 150.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [10.0 0.0 145.0] [NaN NaN NaN] CATMULLROM
+key 1.15 [10.0 0.0 160.0] [NaN NaN NaN] CATMULLROM
+key 1.35 [10.0 0.0 140.0] [NaN NaN NaN] CATMULLROM
+key 1.85 [8.0 0.0 135.0] [NaN NaN NaN] CATMULLROM
+key 2.4 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track -1 LEFT_ARM
+channel rotation 8
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [-35.0 0.0 -8.0] [NaN NaN NaN] CATMULLROM
+key 0.6 [12.0 0.0 -150.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [10.0 0.0 -145.0] [NaN NaN NaN] CATMULLROM
+key 1.15 [10.0 0.0 -160.0] [NaN NaN NaN] CATMULLROM
+key 1.35 [10.0 0.0 -140.0] [NaN NaN NaN] CATMULLROM
+key 1.85 [8.0 0.0 -135.0] [NaN NaN NaN] CATMULLROM
+key 2.4 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track -1 HEAD
+channel rotation 6
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [-12.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.65 [16.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [10.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.6 [8.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.4 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track -1 RIGHT_LEG
+channel rotation 5
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.7 [-14.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.4 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track -1 LEFT_LEG
+channel rotation 5
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.7 [10.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.4 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+event 0.6 SOUND minecraft:entity.firework_rocket.blast -1 -1 null 1 null null 0.0 0.0 0.0 false 0.5 1.3 -1 true
+event 0.62 PARTICLE null 0 -1 above 4 [0.2 0.08 0.2] [-0.045 0.06 0.0] 1.5 0.09 0.005 false 1.0 1.0 -1 true
+event 0.62 PARTICLE null 2 -1 above 4 [0.2 0.08 0.2] [0.0 0.065 0.045] 1.5 0.09 0.005 false 1.0 1.0 -1 true
+event 0.62 PARTICLE null 0 -1 above 4 [0.2 0.08 0.2] [-0.032 0.07 0.032] 1.5 0.09 0.005 false 1.0 1.0 -1 true
+event 0.65 PARTICLE null 1 -1 above 4 [0.2 0.08 0.2] [0.045 0.06 0.0] 1.5 0.09 0.005 false 1.0 1.0 -1 true
+event 0.65 PARTICLE null 3 -1 above 4 [0.2 0.08 0.2] [0.0 0.065 -0.045] 1.5 0.09 0.005 false 1.0 1.0 -1 true
+event 0.65 PARTICLE null 1 -1 above 4 [0.2 0.08 0.2] [0.032 0.07 -0.032] 1.5 0.09 0.005 false 1.0 1.0 -1 true
+event 0.75 SOUND minecraft:entity.firework_rocket.twinkle -1 -1 null 1 null null 0.0 0.0 0.0 false 0.6 1.2 -1 true
+event 1.15 PARTICLE null 1 -1 above 5 [0.4 0.1 0.4] [0.0 0.04 0.0] 1.1 0.08 0.005 false 1.0 1.0 -1 true

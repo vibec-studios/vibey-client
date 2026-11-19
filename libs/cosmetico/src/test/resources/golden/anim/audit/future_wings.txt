@@ -1,0 +1,30 @@
+animation idle 1.5 true
+time 0.3 0.3
+time 7.77 0.27
+time 123.456 0.456
+local -0.5 0.0 1.0
+local 0.2 0.2 0.2
+local 2.25 1.5 0.75
+local 4.875 1.5 0.375
+sample 0 rotation -0.05 0.0 20.0 0.0
+sample 0 rotation 0.11 0.0 20.87335 0.0
+sample 0 rotation 0.26999998 0.0 24.43232 0.0
+sample 0 rotation 0.43 0.0 29.138168 0.0
+sample 0 rotation 0.59 0.0 33.24327 0.0
+sample 0 rotation 0.75 0.0 35.0 0.0
+sample 0 rotation 0.91 0.0 33.24327 0.0
+sample 0 rotation 1.07 0.0 29.138166 0.0
+sample 0 rotation 1.23 0.0 24.43232 0.0
+sample 0 rotation 1.3900001 0.0 20.873346 0.0
+sample 0 rotation 1.5500001 0.0 20.0 0.0
+sample 1 rotation -0.05 0.0 -20.0 0.0
+sample 1 rotation 0.11 0.0 -22.2 0.0
+sample 1 rotation 0.26999998 0.0 -25.4 0.0
+sample 1 rotation 0.43 0.0 -28.599998 0.0
+sample 1 rotation 0.59 0.0 -31.8 0.0
+sample 1 rotation 0.75 0.0 -35.0 0.0
+sample 1 rotation 0.91 0.0 -31.8 0.0
+sample 1 rotation 1.07 0.0 -28.599998 0.0
+sample 1 rotation 1.23 0.0 -25.4 0.0
+sample 1 rotation 1.3900001 0.0 -22.199997 0.0
+sample 1 rotation 1.5500001 0.0 -20.0 0.0

@@ -1,0 +1,79 @@
+id vibey:guitar
+kind EMOTE
+name Guitar Jam | Gitarrensolo
+description Jam a little riff on the Vibe guitar. Move to stop. | Spiel ein kleines Riff auf der Vibe-Gitarre. Bewegen zum Beenden.
+author Vibe Craft Studios
+tags [music, props, loop, sound, starter]
+rarity RARE
+slot null
+hideWithArmor []
+pet null
+cape -1 shield -1
+emote main true true true true
+sha256 a609c4c75fc0e71e53df84446fd0e271dfb6e2b1c816f9a5a67cad3027331122 size 6542
+texture 0 main 32 32 32 32 1 1 [0] false false 1 5d4759f40d94bfd11f03705390a9508b4e54b1ca2e4c2a8b3e64686bfa422728
+model 0 cubes 4 bones 1 locators 1
+bone 0 guitar -1 BODY [0.0 15.0 -3.5] [0.0 0.0 48.0] false false false false 4
+cube [-4.0 8.0 -5.5] [4.0 14.0 -3.5] 0.0 false null null [6.0 0.0] 0
+cube [-3.0 14.0 -5.5] [3.0 18.0 -3.5] 0.0 false null null [0.0 12.0] 0
+cube [-1.0 18.0 -5.2] [1.0 29.0 -4.2] 0.0 false null null [0.0 0.0] 0
+cube [-1.5 29.0 -5.2] [1.5 32.0 -4.2] 0.0 false null null [16.0 12.0] 0
+locator sound_hole 0 null [0.0 14.0 -7.0]
+animation main 2.0 true false false tracks 5 events 12
+track -1 RIGHT_ARM
+channel rotation 9
+key 0.0 [53.9 31.3 0.0] [NaN NaN NaN] CATMULLROM
+key 0.25 [37.9 35.3 0.0] [NaN NaN NaN] CATMULLROM
+key 0.5 [53.9 31.3 0.0] [NaN NaN NaN] CATMULLROM
+key 0.75 [37.9 35.3 0.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [53.9 31.3 0.0] [NaN NaN NaN] CATMULLROM
+key 1.25 [37.9 35.3 0.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [53.9 31.3 0.0] [NaN NaN NaN] CATMULLROM
+key 1.75 [37.9 35.3 0.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [53.9 31.3 0.0] [NaN NaN NaN] CATMULLROM
+track -1 LEFT_ARM
+channel rotation 5
+key 0.0 [87.3 22.1 0.0] [NaN NaN NaN] CATMULLROM
+key 0.5 [90.3 19.1 0.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [87.3 22.1 0.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [90.3 25.1 0.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [87.3 22.1 0.0] [NaN NaN NaN] CATMULLROM
+track -1 HEAD
+channel rotation 9
+key 0.0 [-10.0 8.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.25 [0.0 8.0 4.0] [NaN NaN NaN] CATMULLROM
+key 0.5 [-10.0 8.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.75 [0.0 8.0 -4.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [-10.0 8.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.25 [0.0 8.0 4.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [-10.0 8.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.75 [0.0 8.0 -4.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [-10.0 8.0 0.0] [NaN NaN NaN] CATMULLROM
+track -1 ROOT
+channel rotation 5
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.5 [0.0 0.0 3.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 -3.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track -1 RIGHT_LEG
+channel rotation 7
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.25 [12.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.5 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.25 [12.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+event 0.0 SOUND minecraft:block.note_block.guitar -1 -1 null 1 null null 0.0 0.0 0.0 false 0.7 0.749 -1 true
+event 0.05 PARTICLE minecraft:note -1 -1 sound_hole 1 [0.2 0.1 0.1] [0.0 0.05 0.0] 1.0 0.15 0.0 false 1.0 1.0 -1 true
+event 0.25 SOUND minecraft:block.note_block.guitar -1 -1 null 1 null null 0.0 0.0 0.0 false 0.7 0.944 -1 true
+event 0.5 SOUND minecraft:block.note_block.guitar -1 -1 null 1 null null 0.0 0.0 0.0 false 0.7 1.122 -1 true
+event 0.55 PARTICLE minecraft:note -1 -1 sound_hole 1 [0.2 0.1 0.1] [0.0 0.05 0.0] 1.0 0.15 0.0 false 1.0 1.0 -1 true
+event 0.75 SOUND minecraft:block.note_block.guitar -1 -1 null 1 null null 0.0 0.0 0.0 false 0.7 0.944 -1 true
+event 1.0 SOUND minecraft:block.note_block.guitar -1 -1 null 1 null null 0.0 0.0 0.0 false 0.7 0.841 -1 true
+event 1.05 PARTICLE minecraft:note -1 -1 sound_hole 1 [0.2 0.1 0.1] [0.0 0.05 0.0] 1.0 0.15 0.0 false 1.0 1.0 -1 true
+event 1.25 SOUND minecraft:block.note_block.guitar -1 -1 null 1 null null 0.0 0.0 0.0 false 0.7 1.0 -1 true
+event 1.5 SOUND minecraft:block.note_block.guitar -1 -1 null 1 null null 0.0 0.0 0.0 false 0.7 1.26 -1 true
+event 1.55 PARTICLE minecraft:note -1 -1 sound_hole 1 [0.2 0.1 0.1] [0.0 0.05 0.0] 1.0 0.15 0.0 false 1.0 1.0 -1 true
+event 1.75 SOUND minecraft:block.note_block.guitar -1 -1 null 1 null null 0.0 0.0 0.0 false 0.7 1.122 -1 true

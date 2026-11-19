@@ -1,0 +1,14 @@
+id vibey:ice_floe_cape
+kind COSMETIC
+name Ice Floe Cape | Eisscholle-Umhang
+description A tiny seal napping on its ice floe under the polar night. | Eine kleine Robbe döst auf ihrer Eisscholle unter der Polarnacht.
+author Vibe Craft Studios
+tags [seal, ice, winter, starter]
+rarity RARE
+slot CAPE
+hideWithArmor []
+pet GROUND 1.0
+cape 0 shield -1
+emote null
+sha256 e8c0da51fb2a6668e585770ea237b164935e58f088f7083ef6eed4cf67345c7c size 3005
+texture 0 cape 64 32 64 32 1 1 [0] false false 1 e49717322f686d137152343a7c0a3bcd8c179a2e9eee01b0f487f2ba2d5fdb97

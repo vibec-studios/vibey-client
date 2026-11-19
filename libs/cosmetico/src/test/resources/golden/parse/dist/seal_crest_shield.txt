@@ -1,0 +1,14 @@
+id vibey:seal_crest_shield
+kind COSMETIC
+name Seal Crest Shield | Robbenwappen-Schild
+description Carry the seal into battle – Vibe purple with a teal chevron. | Trag die Robbe in den Kampf – Vibe-Lila mit türkisem Sparren.
+author Vibe Craft Studios
+tags [seal, vibe, crest, starter]
+rarity RARE
+slot SHIELD
+hideWithArmor []
+pet GROUND 1.0
+cape -1 shield 0
+emote null
+sha256 393b03017df65b5394fee85bf0017a8a4de61012bb6e3a6a41a470ced6c47dfb size 2366
+texture 0 shield 64 64 64 64 1 1 [0] false false 1 e9a961bf8f2a0c4932d5d11883622998ed02ef7d8ffe914bab69f6b58a6c2e37
