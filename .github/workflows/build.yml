@@ -23,6 +23,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # A merge must never leave conflict markers behind (once happened in README.md).
+      - name: No merge conflict markers
+        run: |
+          if git grep -n -I -E '^(<<<<<<< |>>>>>>> )' -- . ; then
+            echo "::error::merge conflict markers found"; exit 1
+          fi
+
       # 1.21.x builds with Java 21, 26.x needs Java 25. The last one listed becomes JAVA_HOME.
       - uses: actions/setup-java@v4
         with:
