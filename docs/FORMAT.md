@@ -188,7 +188,9 @@ player forward. Root position `+x` is to the player's right, `+y` up, `−z` for
 | `root` | the player's position and body rotation, but not part animations |
 | `world` | the feet position and body rotation, smoothed (pets, auras) |
 
-Place the bone where it should be on the standing player; the game moves it with the part.
+Place the bone where it should be on the standing player; the game moves it with the part. In Blockbench you do
+not type these: the reference player has a group per part (◆ Head, ◆ Back, ◆ Right arm …) and the group you build in
+decides `attach` (docs/BLOCKBENCH.md, "Build on the player").
 
 **Bones:** names are unique; a child bone (`parent` set) follows its parent and ignores `attach`. Pivots, cube
 `from`/`to` and locator positions are all **absolute** model coordinates (not relative to the parent), like in

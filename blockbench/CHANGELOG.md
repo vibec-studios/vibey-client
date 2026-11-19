@@ -7,6 +7,30 @@ with the assets `vibey.js` and `vibey-blockbench.json` (docs/BLOCKBENCH.md, "Rel
 Every version section starts with a `Kurz:` line: one short German sentence that becomes `notes` in
 `vibey-blockbench.json` (shown by the Vibe Launcher). The rest of the section is the GitHub release text.
 
+## 0.2.5
+
+Kurz: Direkt am Spieler bauen: fertige Spielergruppen (Kopf, Rücken, Arme …) statt Ankerpunkten, und die Anleitung lässt sich jetzt scrollen.
+
+Works with **Vibey Client 0.2.0 and newer** – the `.vibey` format is unchanged.
+
+- **Build directly on the player.** The reference player now has ready-made groups like the real player:
+  ◆ Head, ◆ Above head, ◆ Body, ◆ Back, ◆ Right/Left shoulder, ◆ Hips, ◆ Right/Left arm, ◆ Right/Left leg and
+  ◆ Around player (◆ Beside player for pets). Build your part where it belongs and put it into the matching group –
+  it moves with that part of the player in game. The per-group *Attach to* setting is gone.
+- Three ways to attach: drag the part into a group in the outliner, **right-click › Attach to …** (German *An …
+  anheften*), or just build – a new part outside the groups snaps to the most plausible group by itself, with a short
+  hint ("Attached to ◆ Back – change it with right-click"); Ctrl+Z undoes only that step.
+- Player groups are coloured in the outliner (the groups of your slot are highlighted, e.g. ◆ Back for wings) and
+  never exported. A stray drag of a player group snaps back.
+- Pets are built **beside the player**, where the game draws them, and exported relative to their follow point as
+  before.
+- The wizard shows which group each slot builds on, prepares your group there and selects it; starter templates open
+  in the new structure. Emotes use the same groups (◆ Whole player, ◆ Head, ◆ Right arm …).
+- **Old projects and `.vibey` files convert silently** into the new structure; re-exports stay byte-identical (the
+  whole starter set and 0.2.4 projects are checked in the tests).
+- The **Vibey guide scrolls** instead of running off the bottom of the window, and keeps the current step in view
+  (checked at 1280×720 and 1366×768 with 100 / 125 / 150 % scaling).
+
 ## 0.2.4
 
 Kurz: Neuer Item-Assistent, Schritt-für-Schritt-Anleitung und verständliche Fehlermeldungen; läuft ab Vibey Client 0.2.0 (Vorschaubilder, neue Animationen und offsetWhen ab 0.3.0).

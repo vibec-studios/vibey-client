@@ -52,7 +52,7 @@ test('wizard: every slot and the emote create a structure that exports and valid
 			assert.deepEqual(b.emote, { animation: 'main', loop: true, thirdPerson: true, stopOnMove: true, hideHeldItems: true });
 			assert.deepEqual(Object.keys(b.animations), ['main']);
 			assert.equal(b.animations.main.length, 1.5);
-			assert.equal(findNode(snap.nodes, 'root').children.map((c) => c.name).join(), Core.PLAYER_PARTS.join());
+			assert.equal(findNode(snap.nodes, 'root').children.map((c) => c.ref).join(), Core.PLAYER_PARTS.join());
 			continue;
 		}
 		const p = Core.SLOT_PRESETS[slot];
@@ -64,11 +64,13 @@ test('wizard: every slot and the emote create a structure that exports and valid
 			// texture-only: no model in the bundle, the preview geometry is editor-only
 			assert.equal(b.model, undefined, slot + ' exports no model');
 			assert.equal(b.cosmetic[slot].texture, slot);
-			assert.ok(snap.nodes.every((n) => n.preview), 'only preview nodes');
+			assert.ok(snap.nodes.every((n) => n.preview || n.ref), 'only preview nodes and the (empty) player groups');
+			assert.equal(Core.userParts(snap).length, 0);
 			assert.equal(b.animations, undefined);
 		} else {
 			const root = b.model.bones.find((x) => !x.parent);
 			assert.equal(root.name, p.root);
+			assert.deepEqual(Core.userParts(snap).map((x) => x.node.name + '@' + x.ref), [p.root + '@' + p.ref], slot + ' builds on ' + p.ref);
 			assert.equal(root.attach, p.attach);
 			assert.deepEqual(root.pivot, p.pivot);
 			assert.deepEqual(Object.keys(b.animations), p.tracks, slot + ' animation tracks');
@@ -82,7 +84,8 @@ test('wizard: every slot and the emote create a structure that exports and valid
 	assert.ok(wings.model.bones[0].pivot[2] >= 2, 'wings sit at the back (+Z)');
 	assert.deepEqual(compileValid(starter('hat')).cosmetic.hideWithArmor, ['head']);
 	assert.deepEqual(compileValid(starter('pet')).cosmetic.pet, { follow: 'ground' });
-	assert.equal(starter('pet').meta.showReference, false, 'the reference player would hide the pet at the origin');
+	assert.equal(starter('pet').meta.showReference, true, 'the pet stands beside the reference player now');
+	assert.deepEqual(findNode(starter('pet').nodes, 'pet').origin, Core.PET_ANCHORS.ground, 'built where the game draws it');
 	assert.deepEqual(compileValid(starter('aura')).model.locators, { aura_center: { bone: 'aura', position: [0, 16, 0] } });
 	assert.equal(compileValid(starter('emote', { loop: false })).emote.loop, false);
 });
@@ -161,7 +164,7 @@ test('guide: automatic checks follow the project', () => {
 	snap.animations[0].bones.wing_right = { rotation: [{ time: 0, points: [{ x: 0, y: 0, z: 0 }] }, { time: 1, points: [{ x: 0, y: 20, z: 0 }] }] };
 	snap.animations[0].effects.particle.push({ time: 0.5, points: [{ effect: 'minecraft:heart' }] });
 	c = Core.tutorialChecks(snap, { textureUntouched: false, linkState: 'connected' });
-	assert.deepEqual([c.model.state, c.model.args], ['ok', [1]]);
+	assert.deepEqual([c.model.state, c.model.key, c.model.args], ['ok', 'chk_model_ok_on', [1, ['back']]]);
 	assert.deepEqual([c.texture.state, c.texture.key], ['ok', 'chk_tex_ok']);
 	assert.deepEqual([c.animate.state, c.animate.args], ['ok', [2, 'idle']]);
 	assert.deepEqual([c.effects.state, c.effects.args], ['ok', [1]]);
@@ -171,7 +174,10 @@ test('guide: automatic checks follow the project', () => {
 	assert.deepEqual([c.export.state, c.export.args], ['error', [2]]);
 	assert.equal(Core.tutorialChecks(snap, { exported: true }).export.key, 'chk_export_done');
 	assert.equal(Core.tutorialChecks(snap, { submitted: true }).export.key, 'chk_export_submitted');
-	// a loose cube is an error in the model step
+	// a part outside the player groups is a todo, a loose cube an error
+	snap.nodes.push({ type: 'group', name: 'stray_group', origin: [0, 0, 0], rotation: [0, 0, 0], children: [] });
+	assert.deepEqual(Core.tutorialChecks(snap, {}).model, { state: 'todo', key: 'chk_model_outside', args: ['stray_group'] });
+	snap.nodes.pop();
 	snap.nodes.push({ type: 'cube', name: 'stray', from: [0, 0, 0], to: [1, 1, 1] });
 	assert.deepEqual(Core.tutorialChecks(snap, {}).model, { state: 'error', key: 'chk_model_loose', args: ['stray'] });
 	// cape: nothing to model / animate, texture must be set as cape texture
