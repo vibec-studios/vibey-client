@@ -336,7 +336,7 @@ client release), not a pre-release. Assets, exactly:
 - `vibey-blockbench.json` – what the Vibe Launcher reads:
 
   ```json
-  { "version": "0.2.4", "file": "vibey.js", "sha256": "<hex of vibey.js>", "size": 380619,
+  { "version": "0.2.5", "file": "vibey.js", "sha256": "<hex of vibey.js>", "size": 424214,
     "min_client": "0.2.0", "notes": "<short German text>" }
   ```
 
