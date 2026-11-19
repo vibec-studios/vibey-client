@@ -134,7 +134,7 @@ class InstanceInfoTest {
     @Test
     void manualModsByFileName(@TempDir Path dir) throws IOException {
         Path mods = Files.createDirectories(dir.resolve("mods"));
-        for (String f : new String[]{"sodium-0.6.jar", "JEI.jar", "handmade-a.jar", "handmade-b.jar", "vibeyclient-fabric-1.21.11-0.3.0.jar",
+        for (String f : new String[]{"sodium-0.6.jar", "JEI.jar", "handmade-a.jar", "handmade-b.jar", "vibeyclient-fabric-1.21.11-0.3.0.jar", "vibey-client-fabric-1.21.11-0.2.1.jar",
                 "old.jar.disabled", "notes.txt"}) {
             Files.writeString(mods.resolve(f), "x");
         }

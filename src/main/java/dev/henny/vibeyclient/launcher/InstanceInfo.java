@@ -208,7 +208,7 @@ public final class InstanceInfo {
      * How many jars in {@code mods/} the launcher does not know (added by hand), or -1 when that cannot be told
      * (no {@code instance.json}, or a modpack without file names). Uses the file names when the launcher sends
      * them ({@code mods[].file} / {@code known_files}), otherwise compares counts (instances without a modpack).
-     * Our own jar ({@code vibeyclient*}) never counts: the launcher installs it as the client pack.
+     * Our own jar ({@code vibey-client-*} / {@code vibeyclient*}) never counts: the launcher installs it as the client pack.
      */
     public int manualMods(Path modsDir) {
         if (!present) return -1;
@@ -232,7 +232,7 @@ public final class InstanceInfo {
             for (Path p : ds) {
                 if (!Files.isRegularFile(p)) continue;
                 String n = p.getFileName().toString().toLowerCase(Locale.ROOT);
-                if (n.startsWith("vibeyclient")) continue;
+                if (n.startsWith("vibeyclient") || n.startsWith("vibey-client")) continue; // our own jar (both names)
                 out.add(n);
             }
         } catch (IOException ignored) {
