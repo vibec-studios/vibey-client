@@ -10,7 +10,18 @@ version = findProperty('plugin_version') ?: rootProps.getProperty('mod_version')
 
 repositories {
     mavenCentral()
-    maven { name = 'PaperMC'; url = 'https://repo.papermc.io/repository/maven-public/' }
+    // Only Paper's own artifacts come from its repository; everything else (gson, slf4j, adventure …) from Maven
+    // Central. Without this filter a short Central hiccup made Gradle fall back to Paper's proxy, which lacks some
+    // parent POMs (gson-parent, slf4j-parent) – that broke the 0.3.0 release build once.
+    maven {
+        name = 'PaperMC'
+        url = 'https://repo.papermc.io/repository/maven-public/'
+        content {
+            includeGroupAndSubgroups 'io.papermc'
+            includeGroup 'com.mojang'
+            includeGroup 'net.md-5'
+        }
+    }
 }
 
 dependencies {
