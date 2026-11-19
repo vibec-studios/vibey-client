@@ -1,0 +1,7 @@
+// The source version also runs the checks that cover all targets, including the lib cores (JUnit + purity).
+if (project.name == gradle.vibeyVcs) {
+    tasks.named('check') {
+        dependsOn ':checkModuleBoundaries'
+        gradle.vibeyLibs.each { dependsOn ":${it}:check" }
+    }
+}

@@ -1,0 +1,31 @@
+// checkModuleBoundaries: module.<a> must not use module.<b> (imports or qualified names), see gradle/modules.gradle.
+apply from: rootProject.file('gradle/modules.gradle')
+
+tasks.register('checkModuleBoundaries') {
+    group = 'verification'
+    description = 'Fails when a client module uses another module.'
+    def moduleDir = rootProject.file('src/main/java/dev/henny/vibeyclient/module')
+    def known = knownModuleImports as Set
+    inputs.dir(moduleDir)
+    def stamp = layout.buildDirectory.file('checkModuleBoundaries.ok')
+    outputs.file(stamp)
+    doLast {
+        def ref = ~/dev\.henny\.vibeyclient\.module\.([a-z][a-z0-9_]*)\./
+        def found = [:].withDefault { [] }
+        moduleDir.eachDir { File dir ->
+            def a = dir.name
+            dir.eachFileRecurse { File f ->
+                if (!f.name.endsWith('.java')) return
+                f.readLines('UTF-8').eachWithIndex { String line, int i ->
+                    line.findAll(ref) { m, String b -> b }.findAll { it != a }.unique().each { b ->
+                        found["${a} -> ${b}".toString()] << "${moduleDir.toPath().relativize(f.toPath())}:${i + 1}"
+                    }
+                }
+            }
+        }
+        def bad = found.findAll { k, v -> !known.contains(k) }
+        found.findAll { k, v -> known.contains(k) }.each { k, v -> logger.lifecycle("known module import ${k} (${v.size()} lines)") }
+        if (bad) throw new GradleException('Modules must not use each other:\n' + bad.collect { k, v -> "  ${k}: ${v.join(', ')}" }.join('\n'))
+        stamp.get().asFile.text = 'ok'
+    }
+}

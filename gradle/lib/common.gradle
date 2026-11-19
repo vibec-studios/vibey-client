@@ -1,0 +1,44 @@
+// Shared part of every lib target :<id>:<target>: MC backend (src/main) + the core classes of :<id>.
+if (!project.hasProperty('minecraft_version')) apply from: rootProject.file('gradle/lib/props.gradle')
+
+def core = project.parent
+ext.libId = core.name
+version = core.version
+group = "${project.maven_group}.${libId}"
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(project.ext.javaVersion)
+    withSourcesJar()
+}
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release.set(project.ext.javaVersion)
+}
+
+sourceSets.test {
+    java.srcDirs = []
+    resources.srcDirs = []
+}
+
+dependencies {
+    compileOnly core
+    core.libDeps.each { implementation project.ext.libDep(it) }
+}
+
+ext.libResourceProps = [
+        version          : project.version.toString(),
+        mod_id           : libId,
+        minecraft_version: project.minecraft_version,
+        java             : project.ext.javaVersion,
+] + gradle.vibeyLibs.collectEntries { [("${it}_version".toString()): project.property("${it}_version")] }
+
+jar {
+    from(core.sourceSets.main.output)
+    from(rootProject.file('LICENSE')) { rename { "LICENSE_${libId}" } }
+    from(rootProject.file('libs/NOTICE')) { rename { "NOTICE_${libId}" } }
+}
+tasks.named('sourcesJar') { from(core.sourceSets.main.allSource) }
+
+if (project.name == gradle.vibeyVcs) {
+    tasks.named('check') { dependsOn core.tasks.named('check') }
+}

@@ -9,7 +9,7 @@ shared with other Vibey Client players on the same server. Research and licences
 Part of the **Media** module as the feature `video` (`VideoFeature extends MediaFeature`, see [MEDIA.md](MEDIA.md)):
 own on/off switch on Media's settings page, settings stored in `media.json` as `video.*`, strings in
 `i18n/*/media.video.json`, data under `_data.video`. Only in the **Fabric 1.21.11** jar for now:
-`gradle/common.gradle` excludes `module/media/video/**` and `i18n/*/media.video.json` from every other target, and
+`gradle/modules.gradle` excludes `module/media/video/**` and `i18n/*/media.video.json` from every other target, and
 `MediaFeatures` adds the feature by reflection (`addIfPresent`).
 
 ## Using it
@@ -111,7 +111,7 @@ random 0.3–1 s delay). Owners resend `STATE` every 10 s while playing; receive
 
 Porting to more versions: the version-specific parts are `render/ScreenRenderer` (submit API), `FrameTexture`
 (blaze3d `GpuTexture` upload), the Fabric world render events in `Video.onLoad`, `Placement` (hotbar slot API) and
-MCEF Modern's per-version API; then drop the exclusion in `gradle/common.gradle`.
+MCEF Modern's per-version API; then drop the exclusion in `gradle/modules.gradle`.
 
 ## Dev testing
 

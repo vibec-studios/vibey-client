@@ -1,0 +1,8 @@
+// The client depends on every lib in libs/ and ships it inside its jar (libDep / libNest come from the loader script).
+gradle.vibeyLibs.each { id ->
+    dependencies {
+        implementation project.ext.libDep(id)
+        add(project.ext.libNest, project(":${id}:${project.name}"))
+    }
+}
+ext.libVersionProps = gradle.vibeyLibs.collectEntries { [("${it}_version".toString()): project.property("${it}_version")] }

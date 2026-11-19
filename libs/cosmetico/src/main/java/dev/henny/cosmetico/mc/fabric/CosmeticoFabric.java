@@ -1,0 +1,15 @@
+package dev.henny.cosmetico.mc.fabric;
+
+import dev.henny.cosmetico.mc.CosmeticoMod;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
+
+public final class CosmeticoFabric implements ClientModInitializer {
+    @Override
+    public void onInitializeClient() {
+        String version = FabricLoader.getInstance().getModContainer(CosmeticoMod.ID)
+                .map(c -> c.getMetadata().getVersion().getFriendlyString())
+                .orElse("?");
+        CosmeticoMod.init(version);
+    }
+}

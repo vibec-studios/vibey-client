@@ -1,0 +1,13 @@
+// ./gradlew :<id>:<target>:publishAllPublicationsToLibsRepository -> build/libs-repo (Maven layout), see libs/README.md.
+apply plugin: 'maven-publish'
+
+publishing {
+    publications {
+        create('lib', MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven { name = 'libs'; url = rootProject.layout.buildDirectory.dir('libs-repo') }
+    }
+}
