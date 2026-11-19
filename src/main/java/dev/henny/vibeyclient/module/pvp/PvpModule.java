@@ -132,6 +132,12 @@ public final class PvpModule extends VibeyModule {
         return 0xFFFF5470;
     }
 
+    /** Tile line and page notice "Disabled by this server: …" (ui/ServerBadge). */
+    @Override
+    public java.util.List<String> serverRuleKeys() {
+        return java.util.List.of(RULES);
+    }
+
     @Override
     public void onLoad() {
         for (String key : RULES) ServerRules.supports(key);

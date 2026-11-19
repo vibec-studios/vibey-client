@@ -30,6 +30,9 @@ public interface Platform {
     /** Sends a payload to one player. Only call it for players that registered our channel (they sent hello). */
     void sendToPlayer(ServerPlayer player, CustomPacketPayload payload);
 
+    /** Whether the player's connection accepts this payload (the client registered the channel). */
+    boolean canSendToPlayer(ServerPlayer player, CustomPacketPayload.Type<?> type);
+
     /** Whether the class has been loaded already, or null if the loader cannot tell (dev smoke checks). */
     default Boolean isClassLoaded(String className) {
         return null;

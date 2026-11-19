@@ -1,0 +1,20 @@
+name: VibeyRules
+version: '${version}'
+main: dev.henny.vibeyrules.VibeyRulesPlugin
+api-version: '1.20'
+description: Switches off Vibey Client features (zoom, freelook, HUD parts, emotes, ...) for players on this server.
+author: Vibe Craft Studios
+website: https://github.com/vibec-studios/vibey-client/blob/main/docs/SERVER-RULES.md
+folia-supported: false
+commands:
+  vibeyrules:
+    description: Reload or show the Vibey server rules.
+    usage: /vibeyrules <reload|status>
+    permission: vibeyrules.admin
+permissions:
+  vibeyrules.admin:
+    description: Use /vibeyrules reload and status.
+    default: op
+  vibeyrules.bypass:
+    description: Rules do not apply to this player (staff). Not even operators have it by default.
+    default: false

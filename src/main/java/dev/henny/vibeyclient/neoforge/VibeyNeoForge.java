@@ -7,7 +7,10 @@ import dev.henny.vibeyclient.net.HelloPayload;
 import dev.henny.vibeyclient.net.LoadoutPayload;
 import dev.henny.vibeyclient.net.MessagePayload;
 import dev.henny.vibeyclient.net.NetDispatch;
+import dev.henny.vibeyclient.net.RulesCommand;
+import dev.henny.vibeyclient.net.RulesPayloads;
 import dev.henny.vibeyclient.net.ServerRelay;
+import dev.henny.vibeyclient.net.ServerRulesHost;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -36,11 +39,25 @@ public final class VibeyNeoForge {
     public VibeyNeoForge(IEventBus modBus) {
         Vibey.initCommon(NeoForgePlatform.INSTANCE);
         modBus.addListener(this::registerPayloads);
-        NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedOutEvent e) -> {
-            if (e.getEntity() instanceof ServerPlayer p) ServerRelay.onLeave(p);
+        NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedInEvent e) -> {
+            if (e.getEntity() instanceof ServerPlayer p) ServerRulesHost.onJoin(p);
         });
-        NeoForge.EVENT_BUS.addListener((ServerStoppedEvent e) -> ServerRelay.onServerStopped());
-        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.server.ServerStartedEvent e) -> dev.henny.vibeyclient.Smoke.serverStarted(e.getServer()));
+        NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedOutEvent e) -> {
+            if (e.getEntity() instanceof ServerPlayer p) {
+                ServerRelay.onLeave(p);
+                ServerRulesHost.onLeave(p);
+            }
+        });
+        NeoForge.EVENT_BUS.addListener((ServerStoppedEvent e) -> {
+            ServerRelay.onServerStopped();
+            ServerRulesHost.serverStopped();
+        });
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.server.ServerStartedEvent e) -> {
+            ServerRulesHost.serverStarted(e.getServer());
+            dev.henny.vibeyclient.Smoke.serverStarted(e.getServer());
+        });
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.tick.ServerTickEvent.Post e) -> ServerRulesHost.tick(e.getServer()));
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.RegisterCommandsEvent e) -> RulesCommand.register(e.getDispatcher()));
     }
 
     private void registerPayloads(RegisterPayloadHandlersEvent event) {
@@ -50,6 +67,15 @@ public final class VibeyNeoForge {
         register(r, LoadoutPayload.TYPE, LoadoutPayload.CODEC);
         register(r, EmotePayload.TYPE, EmotePayload.CODEC);
         register(r, MessagePayload.TYPE, MessagePayload.CODEC);
+        // the open server-rules channels (RulesPayloads): rules S->C, hello C->S
+        try {
+            r.playToClient(RulesPayloads.Rules.TYPE, RulesPayloads.Rules.CODEC, (payload, context) -> context.enqueueWork(() -> NetDispatch.toClient(payload)));
+            r.playToServer(RulesPayloads.Hello.TYPE, RulesPayloads.Hello.CODEC, (payload, context) -> {
+                if (context.player() instanceof ServerPlayer sp) context.enqueueWork(() -> NetDispatch.toServer(sp, payload));
+            });
+        } catch (RuntimeException e) {
+            RulesPayloads.disable(e);
+        }
     }
 
     private static <T extends CustomPacketPayload> void register(PayloadRegistrar r, CustomPacketPayload.Type<T> type, StreamCodec<FriendlyByteBuf, T> codec) {

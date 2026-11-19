@@ -13,6 +13,11 @@ public enum Slot {
         return name().toLowerCase(Locale.ROOT);
     }
 
+    /** Server-rule key (PLAY-LINKS.md §5): {@code cosmetics.capes}, {@code cosmetics.pets}, ... */
+    public String ruleKey() {
+        return "cosmetics." + id() + (this == WINGS ? "" : "s");
+    }
+
     /** Null for unknown ids. */
     public static Slot of(String id) {
         if (id == null) return null;

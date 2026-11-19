@@ -70,6 +70,14 @@ jobs:
           -Porg.gradle.java.installations.auto-download=false
           -Porg.gradle.java.installations.fromEnv=JAVA_HOME_21_X64,JAVA_HOME_25_X64
 
+      # Paper/Spigot plugin (docs/SERVER-RULES.md): its own small build, attached as VibeyRules-<version>.jar.
+      # Kept out of build/dist on purpose: the manifest only lists the mod jars.
+      - name: VibeyRules server plugin
+        run: >
+          ./gradlew -p server-plugins/vibey-rules build --stacktrace
+          -Porg.gradle.java.installations.auto-download=false
+          -Porg.gradle.java.installations.fromEnv=JAVA_HOME_21_X64,JAVA_HOME_25_X64
+
       - name: Blockbench plugin tests
         working-directory: blockbench
         run: |
@@ -107,7 +115,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          files=(build/dist/*.jar blockbench/vibey.js)
+          files=(build/dist/*.jar blockbench/vibey.js server-plugins/vibey-rules/build/libs/VibeyRules-*.jar)
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" "${files[@]}" --clobber
           else

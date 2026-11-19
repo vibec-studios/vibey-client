@@ -13,6 +13,7 @@ import dev.henny.vibeyclient.ui.Gfx;
 import dev.henny.vibeyclient.ui.Icons;
 import dev.henny.vibeyclient.ui.Panel;
 import dev.henny.vibeyclient.ui.ScrollArea;
+import dev.henny.vibeyclient.ui.ServerBadge;
 import dev.henny.vibeyclient.ui.Theme;
 import dev.henny.vibeyclient.ui.Ui;
 import dev.henny.vibeyclient.ui.VibeyScreen;
@@ -55,6 +56,14 @@ public final class ModulesPanel implements Panel {
     /** Id of the module page that is open (or opens next), null = the grid (tests). */
     public static String openPage() {
         return lastPage == null ? null : lastPage.id();
+    }
+
+    /** Scroll offset the open module page jumps to on its next frame (dev tests, DevDriver {@code scroll}); -1 = none. */
+    private static int testScroll = -1;
+
+    /** Dev tests: scrolls the open module page to {@code offset} px. */
+    public static void scrollPageTo(int offset) {
+        testScroll = offset;
     }
 
     /** Which module page the next opened menu shows: a module id, or null for the grid. */
@@ -221,6 +230,9 @@ public final class ModulesPanel implements Panel {
             ui.tooltip(m, x, y, w, TILE_H, m.statusReason());
         } else if (settingHit != null) {
             g.text(g.clip("› " + settingHit, dw), tx, y + 25, Theme.BRAND2);
+        } else if (!ServerBadge.disabledKeys(m).isEmpty()) {
+            g.text(g.clip(ServerBadge.label(), dw), tx, y + 25, Theme.WARN);
+            ui.tooltip(m, x, y, w, TILE_H, ServerBadge.hint());
         } else {
             String summaryKey = m.id() + ".summary";
             String summary = Lang.has(summaryKey) ? Lang.tr(summaryKey) : Lang.tr(m.descriptionKey());
@@ -312,6 +324,10 @@ public final class ModulesPanel implements Panel {
             return;
         }
         int cx = x + pad, cw = w - pad * 2;
+        if (testScroll >= 0) {
+            pageScroll.scrollTo(testScroll);
+            testScroll = -1;
+        }
         int cy = pageScroll.begin(ui, x, top, w, bodyH) + 12;
         cy = intro(ui, m, cx, cy, cw);
         cy = SettingsView.draw(ui, m.settings(), cx, cy, cw, runnable && m.isEnabled());
@@ -367,6 +383,7 @@ public final class ModulesPanel implements Panel {
             }
             y += rh + 10;
         }
+        y = ServerBadge.notice(ui, m, x, y, w);
         // e.g. "Lyrics: provided by the installed Vibey Lyrics" (parts of a module that are off)
         for (String notice : m.notices()) {
             List<String> nl = Ui.wrap(g, notice, w - 16);

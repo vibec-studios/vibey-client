@@ -166,7 +166,7 @@ public final class AvatarDraw {
     }
 
     public static Bundle bundle(AvatarState st, Slot slot) {
-        if (!st.preview && !dev.henny.vibeyclient.avatar.AvatarConfig.slotShown[slot.ordinal()]) return null;
+        if (!st.preview && !dev.henny.vibeyclient.avatar.AvatarConfig.slotVisible(slot)) return null;
         String id = st.shown(slot);
         if (id == null) return null;
         AvatarItem item = AvatarItems.get(id);

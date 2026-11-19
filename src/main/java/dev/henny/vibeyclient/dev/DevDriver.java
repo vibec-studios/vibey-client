@@ -42,6 +42,7 @@ import java.util.concurrent.TimeUnit;
  * status | players | avatar &lt;name|uuid&gt; | equip &lt;id&gt; | unequip &lt;slot&gt; | emote &lt;id&gt; | stopemote
  * wardrobe | close | connect &lt;host[:port]&gt; | disconnect | look &lt;name&gt; | approach &lt;name&gt; &lt;blocks&gt; | camera &lt;first|back|front&gt; | cmd &lt;command&gt;
  * online &lt;on|off&gt; | host | invite &lt;friend name&gt; | toastclick &lt;key prefix&gt; &lt;button&gt; | shot &lt;name&gt; | quit
+ * rules | page &lt;module id&gt; | scroll &lt;px&gt; | respawn
  * </pre>
  */
 public final class DevDriver {
@@ -248,6 +249,26 @@ public final class DevDriver {
             }
             case "toasts":
                 return "ok " + dev.henny.vibeyclient.ui.toast.ToastStack.debugKeys();
+            case "rules": // server rules (PLAY-LINKS.md §5): what the server disabled, what we announced
+                return "ok active=" + dev.henny.vibeyclient.api.ServerRules.active()
+                        + " message=" + dev.henny.vibeyclient.api.ServerRules.message()
+                        + " supported=" + dev.henny.vibeyclient.api.ServerRules.supportedKeys();
+            case "respawn":
+                if (mc.player == null) return "err no player";
+                mc.player.respawn();
+                ClientCompat.openScreen(null);
+                return "ok";
+            case "scroll": { // scroll <px>: scrolls the open module page (the wheel only works under the real cursor)
+                dev.henny.vibeyclient.ui.screen.ModulesPanel.scrollPageTo(Integer.parseInt(arg));
+                return "ok";
+            }
+            case "page": { // page <module id>: open the Vibey menu on that module's settings page
+                dev.henny.vibeyclient.ui.screen.ModulesPanel.preselect(arg.isEmpty() ? null : arg);
+                ClientCompat.openScreen(null);
+                dev.henny.vibeyclient.client.VibeyCore.openMenu();
+                if (ClientCompat.screen() instanceof dev.henny.vibeyclient.ui.VibeyScreen vs) vs.showTab(dev.henny.vibeyclient.ui.VibeyTabs.MODULES);
+                return "ok " + dev.henny.vibeyclient.ui.screen.ModulesPanel.openPage();
+            }
             case "shot":
                 shot(mc);
                 return "ok";

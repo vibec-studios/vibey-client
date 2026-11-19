@@ -53,6 +53,7 @@ public final class AvatarHooks {
     /** Emote of this avatar (null = none or emotes hidden for it). */
     public static EmotePlay emote(AvatarState st) {
         if (st == null || st.emote == null || !AvatarConfig.emotes) return null;
+        if (!st.preview && AvatarConfig.emotesServerOff) return null;
         if (!st.preview && !AvatarConfig.showOthersEmotes && st.uuid != null && !st.uuid.equals(AvatarConfig.self)) return null;
         return st.emote;
     }
@@ -134,7 +135,7 @@ public final class AvatarHooks {
 
     /** The texture of the equipped cape (vanilla cape model and elytra), or null. */
     public static Tex capeTexture(AvatarState st) {
-        if (st == null || st.hidden || !AvatarConfig.slotShown[Slot.CAPE.ordinal()]) return null;
+        if (st == null || st.hidden || !AvatarConfig.slotVisible(Slot.CAPE)) return null;
         Bundle b = AvatarDraw.bundle(st, Slot.CAPE);
         if (b == null || b.capeTexture < 0 || AvatarDraw.hiddenByArmor(st, b)) return null;
         GpuBundle gb = GpuBundles.get(b);
@@ -143,7 +144,7 @@ public final class AvatarHooks {
 
     /** The texture of the equipped shield (64×64 vanilla shield layout), or null. */
     public static Tex shieldTexture(AvatarState st) {
-        if (st == null || st.hidden || !AvatarConfig.slotShown[Slot.SHIELD.ordinal()]) return null;
+        if (st == null || st.hidden || !AvatarConfig.slotVisible(Slot.SHIELD)) return null;
         Bundle b = AvatarDraw.bundle(st, Slot.SHIELD);
         if (b == null || b.shieldTexture < 0) return null;
         GpuBundle gb = GpuBundles.get(b);

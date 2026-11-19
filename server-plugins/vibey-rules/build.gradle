@@ -1,0 +1,51 @@
+plugins {
+    id 'java'
+}
+
+// Same version as the mod (root gradle.properties), so releases attach VibeyRules-<version>.jar.
+def rootProps = new Properties()
+file('../../gradle.properties').withInputStream { rootProps.load(it) }
+group = 'dev.henny'
+version = findProperty('plugin_version') ?: rootProps.getProperty('mod_version')
+
+repositories {
+    mavenCentral()
+    maven { name = 'PaperMC'; url = 'https://repo.papermc.io/repository/maven-public/' }
+}
+
+dependencies {
+    // Only the Bukkit API surface that exists since 1.20 is used (plugin.yml api-version 1.20), Gson comes with the server.
+    compileOnly 'io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT'
+    testImplementation platform('org.junit:junit-bom:5.11.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'com.google.code.gson:gson:2.11.0'
+    testImplementation 'org.yaml:snakeyaml:2.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+}
+
+processResources {
+    inputs.property 'version', version
+    filesMatching('plugin.yml') { expand(version: version) }
+}
+
+jar {
+    archiveBaseName = 'VibeyRules'
+    archiveVersion = version
+    from(rootProject.file('../../LICENSE')) { into 'META-INF' }
+    from(rootProject.file('../../NOTICE')) { into 'META-INF' }
+}
+
+test {
+    useJUnitPlatform()
+    maxHeapSize = '256m'
+    testLogging { events 'failed'; exceptionFormat 'full' }
+}

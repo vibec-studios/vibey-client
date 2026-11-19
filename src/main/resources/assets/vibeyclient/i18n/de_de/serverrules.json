@@ -1,0 +1,8 @@
+{
+  "toast": {
+    "title": "Server-Regeln",
+    "generic": "Dieser Server hat {0} Vibey-Funktion(en) ausgeschaltet, solange du hier spielst."
+  },
+  "notice": "Vom Server deaktiviert: {0}",
+  "emotesOff": "Emotes sind auf diesem Server aus"
+}
