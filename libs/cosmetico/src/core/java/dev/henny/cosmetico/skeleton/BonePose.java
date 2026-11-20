@@ -31,6 +31,7 @@ public final class BonePose {
             drawn[i] = true;
             boolean vis = visible[i];
             if (vis && mix.visibility != null && mix.visibility.hasVisibility) vis = Visibility.at(mix.visibility, i, mix.visibilityTime);
+            if (vis && mix.hidden != null && i < mix.hidden.length && mix.hidden[i]) vis = false;
             visible[i] = vis;
             if (locators != null) boneLocators(rig, i, locators);
         }

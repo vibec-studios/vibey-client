@@ -1,0 +1,27 @@
+<template>
+  <stack class="pe-layer">
+    <column v-if="len(lines) > 0" class="pe-card">
+      <row class="pe-head">
+        <icon glyph="⚠" class="pe-icon"/>
+        <text class="pe-title">{{ title }}</text>
+      </row>
+      <text v-for="l in lines" :key="l.key" class="pe-line" :class="{ warn: !l.error }">{{ l.text }}</text>
+      <text class="pe-hint">{{ t('companio.errors.hint') }}</text>
+    </column>
+    <column v-if="debug != ''" class="pe-debug">
+      <text v-for="d in debugLines" :key="d" class="pe-dbg">{{ d }}</text>
+    </column>
+  </stack>
+</template>
+<style>
+.pe-layer { width: 100%; height: 100%; pointer-events: none; }
+.pe-card { position: absolute; left: 4; top: 40; width: 300; padding: 5; gap: 2; background: #e0180a0e; border: 1 $danger; }
+.pe-head { gap: 4; }
+.pe-icon { color: $danger; }
+.pe-title { color: $text; font-weight: bold; text-wrap: nowrap; text-overflow: ellipsis; }
+.pe-line { color: #ffb3b3; font-scale: 0.75; }
+.pe-line.warn { color: $warn; }
+.pe-hint { color: $dim; font-scale: 0.75; }
+.pe-debug { position: absolute; right: 4; top: 4; width: 170; padding: 4; gap: 1; background: #c0000000; border: 1 $line; }
+.pe-dbg { color: $text; font-scale: 0.75; text-wrap: nowrap; text-overflow: ellipsis; }
+</style>

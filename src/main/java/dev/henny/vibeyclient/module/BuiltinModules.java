@@ -35,6 +35,7 @@ public final class BuiltinModules {
         registerIfPresent(mm, "dev.henny.vibeyclient.module.visuals.VisualsModule");
         registerIfPresent(mm, "dev.henny.vibeyclient.module.chat.ChatModule");
         registerIfPresent(mm, "dev.henny.vibeyclient.module.cinematic.CinematicModule");
+        registerIfPresent(mm, "dev.henny.vibeyclient.module.companion.CompanionModule");
     }
 
     /** Registers a module whose package is only part of some builds. */

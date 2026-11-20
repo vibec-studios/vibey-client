@@ -79,12 +79,13 @@ ignored, so you can list keys that only newer clients know.
 | `visuals.pumpkin` | See-through carved pumpkin mask |
 | `visuals.totem` | Smaller totem animation (bigger stays allowed) |
 | `visuals.particles` | Hidden, fewer or smaller particles per type and hidden own potion particles (tint, more and bigger stay) |
+| `companion.show` | Companions: the own companion and other players' companions are hidden (e.g. minigames). They come back when the player leaves |
 
 The authoritative list for a given client is what it announces in `vibey:hello` (the plugin logs it, see below);
 the keys come from `ServerRules.supports(...)` calls in the modules. The current Vibey Client declares `zoom`,
 `togglesprint`, `togglesneak`, `crosshair`, `blockoutline`, `hitcolor`, `lowfire`, `lowshield`, `hud.togglestate`
 (PvP module), `clips`, `clips.auto` (Clips module), `nametags.seal`, `nametags.ranks`, `nametags.styles` (Names and ranks), `waypoints.minimap` (Waypoints), `info.light`, `info.chunks`, `info.card`, `info.food`, `info.saturation`, `info.toolwarn`, `info.tnt` (Info module), `camera.freelook`, `freelook`, `camera.orbit` (Camera module), `cinematic.afk` (Cinematic), `inventory.tweaks`, `inventory.presets` (Inventory), `visuals.helditem`, `visuals.fire`, `visuals.pumpkin`, `visuals.totem`,
-`visuals.particles` (Visuals), `emotes`, `cosmetics.*` slots, `discord.server` and every `hud.*` key
+`visuals.particles` (Visuals), `companion.show` (Companion), `emotes`, `cosmetics.*` slots, `discord.server` and every `hud.*` key
 above (HUD module). Listing a key an older client does not know is harmless.
 
 ## Paper / Spigot: the VibeyRules plugin

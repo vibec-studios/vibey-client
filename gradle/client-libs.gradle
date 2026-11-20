@@ -1,5 +1,7 @@
-// The client depends on every lib in libs/ and ships it inside its jar (libDep / libNest come from the loader script).
+// The client depends on every lib in libs/ that has this target and ships it inside its jar (libDep / libNest come
+// from the loader script; gradle.vibeyLibTargets in settings.gradle limits a lib to some targets).
 gradle.vibeyLibs.each { id ->
+    if (rootProject.findProject(":${id}:${project.name}") == null) return
     dependencies {
         implementation project.ext.libDep(id)
         compileOnly project(":${id}")

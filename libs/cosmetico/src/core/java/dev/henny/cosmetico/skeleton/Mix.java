@@ -14,10 +14,17 @@ public final class Mix {
     public float visibilityTime;
     public final float[] rootOffset = new float[3], rootRotation = new float[3];
     public boolean hasRootOffset;
+    public boolean[] hidden;
+    public static final int MAX_EXTRA = 4;
+    public final int[] extraBones = new int[MAX_EXTRA];
+    public final float[] extraRotations = new float[MAX_EXTRA * 3];
+    public int extraCount;
 
     public Mix clear() {
         count = 0;
         visibility = null;
+        hidden = null;
+        extraCount = 0;
         if (hasRootOffset) {
             Arrays.fill(rootOffset, 0f);
             Arrays.fill(rootRotation, 0f);
@@ -32,6 +39,16 @@ public final class Mix {
         times[count] = t;
         weights[count] = w;
         count++;
+        return this;
+    }
+
+    public Mix rotate(int bone, float x, float y, float z) {
+        if (bone < 0 || extraCount == MAX_EXTRA) return this;
+        extraBones[extraCount] = bone;
+        extraRotations[extraCount * 3] = x;
+        extraRotations[extraCount * 3 + 1] = y;
+        extraRotations[extraCount * 3 + 2] = z;
+        extraCount++;
         return this;
     }
 

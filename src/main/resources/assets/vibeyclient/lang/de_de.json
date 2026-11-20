@@ -36,5 +36,7 @@
   "key.vibeyclient.inventory.presetKey": "Hotbar-Set (tippen/halten)",
   "key.vibeyclient.inventory.presetSaveKey": "Hotbar-Set speichern",
   "key.vibeyclient.visuals.itemEditor": "Item-Editor (Optik)",
-  "key.vibeyclient.screens.editKey": "Menü bearbeiten"
+  "key.vibeyclient.screens.editKey": "Menü bearbeiten",
+  "key.vibeyclient.companion.menuKey": "Begleiter-Menü",
+  "key.vibeyclient.companion.packsKey": "Begleiter-Pakete"
 }

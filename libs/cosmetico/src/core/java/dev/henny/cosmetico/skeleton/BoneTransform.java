@@ -19,6 +19,12 @@ final class BoneTransform {
             Track t = tracks == null ? null : tracks[bone];
             if (t != null) blend(t, mix.weights[k], mix.times[k], mix.anims[k].loop);
         }
+        for (int k = 0; k < mix.extraCount; k++) {
+            if (mix.extraBones[k] != bone) continue;
+            rx += mix.extraRotations[k * 3];
+            ry += mix.extraRotations[k * 3 + 1];
+            rz += mix.extraRotations[k * 3 + 2];
+        }
         float[] rest = rig.mesh.restRotM[bone];
         final float d = ModelSpace.DEG;
         m.translate((lx - px) / 16f, (ly - py) / 16f, (lz + pz) / 16f);

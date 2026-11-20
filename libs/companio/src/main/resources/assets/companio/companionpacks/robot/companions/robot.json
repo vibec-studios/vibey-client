@@ -1,0 +1,34 @@
+{
+  "id": "robot",
+  "name": "@robot.name",
+  "model": "models/robot.vibey",
+  "scale": 0.8,
+  "size": { "default": 1.0, "min": 0.5, "max": 1.5 },
+  "box": { "width": 0.5, "height": 1.0 },
+  "look": { "bone": "head", "maxYaw": 80, "maxPitch": 30 },
+  "movement": { "walkSpeed": 3.4, "runSpeed": 6.5, "canSwim": false, "shoulder": [0.45, 1.4, 0.1] },
+  "props": { "lamp": { "bones": ["lamp"] } },
+  "sounds": {
+    "beep": { "sound": "minecraft:block.note_block.bit", "volume": 0.5, "pitch": [1.2, 1.6] },
+    "boop": { "sound": "minecraft:block.note_block.bit", "volume": 0.5, "pitch": 0.8 }
+  },
+  "particles": {
+    "hearts": { "particle": "minecraft:heart", "count": 2, "locator": "heart", "spread": [0.2, 0.1, 0.2] },
+    "spark": { "particle": "minecraft:electric_spark", "count": 6, "locator": "lamp", "spread": [0.1, 0.1, 0.1] }
+  },
+  "tricks": [ { "id": "spin", "name": "Spin", "icon": "↻", "behavior": "spin" } ],
+  "behaviors": [
+    {
+      "id": "petted", "priority": 90, "on": "pet", "cooldown": 0.4, "anim": "wave",
+      "start": [ { "do": "sound", "name": "beep" }, { "do": "sound", "name": "boop", "at": 0.15 }, { "do": "particle", "name": "hearts" }, { "do": "say", "text": "@say.pet" } ]
+    },
+    {
+      "id": "night_lamp", "priority": 30, "when": "time.night || world.light < 7", "minDuration": 3, "props": { "lamp": true },
+      "start": [ { "do": "particle", "name": "spark" }, { "do": "say", "text": "@say.night", "chance": 0.5 } ]
+    },
+    {
+      "id": "spin", "priority": 66, "obeys": false, "move": "stay", "anim": { "name": "spin", "blend": "replace" },
+      "start": [ { "do": "sound", "name": "beep" } ]
+    }
+  ]
+}

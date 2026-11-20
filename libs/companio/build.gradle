@@ -1,0 +1,2 @@
+ext.libDeps = ['vui', 'r3', 'cosmetico']
+apply from: rootProject.file('gradle/lib/core.gradle')

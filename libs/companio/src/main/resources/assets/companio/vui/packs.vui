@@ -1,0 +1,99 @@
+<template>
+  <stack class="cp-scrim">
+    <column class="cp-card">
+      <row class="cp-bar">
+        <icon glyph="♥" class="cp-accent"/>
+        <text class="cp-title">{{ t('companio.ui.packs') }}</text>
+        <text v-if="loading" class="cp-dim">{{ t('companio.ui.loading') }}</text>
+        <spacer/>
+        <button id="folder" class="ghost cp-btn" :tooltip="t('companio.ui.folderTip')" @click="openFolder()">{{ t('companio.ui.folder') }}</button>
+        <button id="reload" class="ghost cp-btn" :tooltip="t('companio.ui.reloadTip')" @click="reload()">{{ t('companio.ui.reload') }}</button>
+        <button id="done" class="primary cp-btn" @click="done()">{{ t('companio.ui.done') }}</button>
+      </row>
+      <row class="cp-body">
+        <column class="cp-list">
+          <text class="cp-head">{{ t('companio.ui.available') }}</text>
+          <scroll class="cp-rows">
+            <row v-for="r in available" :key="r.key" class="cp-row" :class="{ sel: r.key == selKey, bad: r.errors > 0 }" @click="select(r)">
+              <image v-if="r.icon != ''" :src="r.icon" class="cp-icon"/>
+              <icon v-if="r.icon == ''" glyph="?" class="cp-icon cp-noicon"/>
+              <column class="cp-texts">
+                <text class="cp-name">{{ r.name }}</text>
+                <text class="cp-desc">{{ r.desc }}</text>
+              </column>
+              <text v-if="r.errors > 0" class="cp-err">{{ r.errors }}</text>
+              <button :id="'on-' + r.key" class="cp-arrow" :disabled="!r.loaded" :tooltip="t('companio.ui.activate')" @click="toggle(r)">▶</button>
+            </row>
+            <text v-if="len(available) == 0" class="cp-dim cp-empty">{{ t('companio.ui.noneAvailable') }}</text>
+          </scroll>
+        </column>
+        <column class="cp-list">
+          <text class="cp-head">{{ t('companio.ui.active') }}</text>
+          <scroll class="cp-rows">
+            <row v-for="r in active" :key="r.key" class="cp-row" :class="{ sel: r.key == selKey, bad: r.errors > 0 }" @click="select(r)">
+              <button :id="'off-' + r.key" class="cp-arrow" :tooltip="t('companio.ui.deactivate')" @click="toggle(r)">◀</button>
+              <image v-if="r.icon != ''" :src="r.icon" class="cp-icon"/>
+              <icon v-if="r.icon == ''" glyph="?" class="cp-icon cp-noicon"/>
+              <column class="cp-texts">
+                <text class="cp-name">{{ r.name }}</text>
+                <text class="cp-desc">{{ r.desc }}</text>
+              </column>
+              <text v-if="r.errors > 0" class="cp-err">{{ r.errors }}</text>
+              <column class="cp-order">
+                <button class="cp-mini" :tooltip="t('companio.ui.up')" @click="up(r)">▲</button>
+                <button class="cp-mini" :tooltip="t('companio.ui.down')" @click="down(r)">▼</button>
+              </column>
+            </row>
+          </scroll>
+        </column>
+        <column class="cp-detail">
+          <text class="cp-head">{{ sel ? sel.name : t('companio.ui.details') }}</text>
+          <text v-if="sel" class="cp-dim">{{ sel.meta }}</text>
+          <row v-if="sel" class="cp-chips">
+            <button v-for="c in sel.companions" :key="c.key" class="cp-chip" :class="{ on: c.key == selected }"
+                    :disabled="!sel.isActive" :tooltip="t('companio.ui.pickTip')" @click="pick(c)">{{ c.name }}</button>
+          </row>
+          <scroll class="cp-problems">
+            <text v-for="p in problems" :key="p.key" class="cp-problem" :class="{ err: p.error }">{{ p.text }}</text>
+            <text v-if="sel && len(problems) == 0" class="cp-ok">{{ t('companio.ui.noProblems') }}</text>
+          </scroll>
+        </column>
+      </row>
+    </column>
+  </stack>
+</template>
+<style>
+.cp-scrim { background: #a0000000; align-items: center; }
+.cp-card { width: 470; height: 260; background: $panel; border: 1 $line; }
+.cp-bar { height: 22; gap: 4; padding: 0 4 0 6; border-bottom: 1 $line; flex-shrink: 0; }
+.cp-accent { color: $brand2; }
+.cp-title { font-weight: bold; color: $text; text-wrap: nowrap; }
+.cp-btn { height: 14; padding: 0 6; }
+.cp-body { grow: 1; min-height: 0; align-items: stretch; }
+.cp-list { width: 160; padding: 4; gap: 3; border-right: 1 $line; flex-shrink: 0; align-items: stretch; }
+.cp-head { color: $muted; font-scale: 0.75; text-transform: uppercase; text-wrap: nowrap; text-overflow: ellipsis; }
+.cp-rows { grow: 1; gap: 2; min-height: 0; justify: start; }
+.cp-row { height: 30; gap: 4; padding: 0 3; border: 1 transparent; background: $surface; cursor: pointer; flex-shrink: 0; }
+.cp-row:hover { background: $surface2; }
+.cp-row.sel { border-color: $brand; }
+.cp-row.bad { border-color: $danger; }
+.cp-icon { size: 24; flex-shrink: 0; }
+.cp-noicon { color: $dim; }
+.cp-texts { grow: 1; min-width: 0; gap: 1; align-items: stretch; }
+.cp-name { color: $text; text-wrap: nowrap; text-overflow: ellipsis; }
+.cp-desc { color: $dim; font-scale: 0.75; text-wrap: nowrap; text-overflow: ellipsis; }
+.cp-err { color: #ffffff; background: $danger; padding: 0 2; flex-shrink: 0; }
+.cp-arrow { width: 14; height: 22; padding: 0; flex-shrink: 0; }
+.cp-order { gap: 1; flex-shrink: 0; }
+.cp-mini { width: 11; height: 10; padding: 0; font-scale: 0.75; }
+.cp-detail { grow: 1; min-width: 0; padding: 4 6; gap: 4; align-items: stretch; }
+.cp-dim { color: $dim; text-wrap: nowrap; text-overflow: ellipsis; }
+.cp-empty { padding: 6; }
+.cp-chips { gap: 3; flex-wrap: wrap; }
+.cp-chip { height: 14; padding: 0 6; }
+.cp-chip.on { border-color: $brand; color: $brand2; }
+.cp-problems { grow: 1; min-height: 0; gap: 2; justify: start; }
+.cp-problem { color: $warn; font-scale: 0.75; }
+.cp-problem.err { color: $danger; }
+.cp-ok { color: $ok; }
+</style>

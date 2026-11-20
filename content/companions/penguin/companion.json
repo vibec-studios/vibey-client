@@ -1,0 +1,10 @@
+{
+  "format": "companio-pack",
+  "formatVersion": 1,
+  "id": "penguin",
+  "version": "0.1.0",
+  "name": "@pack.name",
+  "description": "@pack.description",
+  "author": "Vibe Craft Studios",
+  "companions": ["companions/penguin.json"]
+}

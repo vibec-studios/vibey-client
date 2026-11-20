@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${version}",
+  "name": "companio",
+  "description": "Living companions from companion packs: models, animations, props, sounds and data-only behavior.",
+  "authors": [
+    "Vibe Craft Studios"
+  ],
+  "contact": {
+    "sources": "https://github.com/vibec-studios/vibey-client",
+    "issues": "https://github.com/vibec-studios/vibey-client/issues"
+  },
+  "license": "Apache-2.0",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.henny.companio.mc.fabric.CompanioFabric"
+    ]
+  },
+  "mixins": [
+    "companio.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.5",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_range}",
+    "java": ">=${java}",
+    "cosmetico": ">=${cosmetico_version}",
+    "r3": ">=${r3_version}",
+    "vui": ">=${vui_version}"
+  }
+}

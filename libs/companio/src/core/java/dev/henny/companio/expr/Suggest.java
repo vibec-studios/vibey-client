@@ -1,0 +1,41 @@
+package dev.henny.companio.expr;
+
+import java.util.Collection;
+
+public final class Suggest {
+    private Suggest() {}
+
+    public static String closest(String word, Collection<String> options) {
+        String best = null;
+        int bestD = Integer.MAX_VALUE;
+        for (String o : options) {
+            int d = distance(word, o);
+            if (d < bestD) {
+                bestD = d;
+                best = o;
+            }
+        }
+        return best != null && bestD <= Math.max(2, word.length() / 3) ? best : null;
+    }
+
+    public static String hint(String word, Collection<String> options) {
+        String c = closest(word, options);
+        return c == null ? "" : ", did you mean \"" + c + "\"?";
+    }
+
+    static int distance(String a, String b) {
+        int[][] d = new int[a.length() + 1][b.length() + 1];
+        for (int i = 0; i <= a.length(); i++) d[i][0] = i;
+        for (int j = 0; j <= b.length(); j++) d[0][j] = j;
+        for (int i = 1; i <= a.length(); i++) {
+            for (int j = 1; j <= b.length(); j++) {
+                int cost = a.charAt(i - 1) == b.charAt(j - 1) ? 0 : 1;
+                d[i][j] = Math.min(Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1), d[i - 1][j - 1] + cost);
+                if (i > 1 && j > 1 && a.charAt(i - 1) == b.charAt(j - 2) && a.charAt(i - 2) == b.charAt(j - 1)) {
+                    d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+                }
+            }
+        }
+        return d[a.length()][b.length()];
+    }
+}

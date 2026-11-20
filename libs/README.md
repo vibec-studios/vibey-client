@@ -8,6 +8,7 @@ by any mod; the client depends on all three and ships them inside its jar, so pl
 | [vui](vui/) | `vui` | `dev.henny.vui` | – | `:vui` |
 | [r3](r3/) | `r3` | `dev.henny.r3` | vui | `:r3` |
 | [cosmetico](cosmetico/) | `cosmetico` | `dev.henny.cosmetico` | r3 | `:cosmetico` |
+| [companio](companio/) | `companio` | `dev.henny.companio` | cosmetico | `:companio` (Fabric 1.21.11 only for now) |
 
 What each one does: [docs/REBUILD.md](../docs/REBUILD.md) and each lib's own README/docs.
 
@@ -67,6 +68,10 @@ classpath, so `runClient` / `runClientGameTest` load all four mods) and `include
 The client jar then carries `META-INF/jars/vui-<target>-<version>.jar` etc., and its `fabric.mod.json` /
 `neoforge.mods.toml` require `vui`, `r3`, `cosmetico` at least at their current versions. Loaders pick the newest
 copy if another mod ships a lib too.
+
+A lib whose Minecraft backend exists only for some targets is listed in `libTargets` in `settings.gradle`
+(`companio: ['fabric-1.21.11']`): Stonecutter creates only those `:<id>:<target>` projects and
+`gradle/client-libs.gradle` ships the lib only in the client jars of those targets.
 
 ## Add a lib
 
