@@ -3,7 +3,7 @@
   {
    "id": "1",
    "kind": "invite",
-   "icon": "vibeyclient:ui/icons/host",
+   "icon": "vibeyclient:host",
    "title": "PolarPia",
    "text": "Invites you",
    "action": "Join"
@@ -11,7 +11,7 @@
   {
    "id": "2",
    "kind": "info",
-   "icon": "vibeyclient:ui/icons/friends",
+   "icon": "vibeyclient:friends",
    "title": "Klexi",
    "text": "Online",
    "action": ""
@@ -19,7 +19,7 @@
   {
    "id": "3",
    "kind": "ok",
-   "icon": "vibeyclient:ui/icons/shirt",
+   "icon": "vibeyclient:shirt",
    "title": "New cosmetics",
    "text": "3 items",
    "action": "Open"
@@ -27,7 +27,7 @@
   {
    "id": "4",
    "kind": "info",
-   "icon": "vibeyclient:ui/icons/undo",
+   "icon": "vibeyclient:undo",
    "title": "Preset applied",
    "text": "",
    "action": "Undo"

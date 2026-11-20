@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 public final class Whitespace {
-    private static final Set<String> RAW_TEXT_TAGS = Set.of("style", "script", "props");
+    public static final Set<String> RAW_TEXT_TAGS = Set.of("style", "script", "props", "contract");
 
     private Whitespace() {
     }

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -68,9 +69,13 @@ public final class HotReloader implements AutoCloseable {
 
     public Set<String> poll() {
         if (watcher == null) return Set.of();
+        return changed(watcher.drain());
+    }
+
+    public Set<String> changed(Collection<Path> files) {
         Set<String> ids = new LinkedHashSet<>();
         boolean rebuild = false;
-        for (Path p : watcher.drain()) {
+        for (Path p : files) {
             DocumentId id = idOf(p);
             if (id != null) ids.add(id.toString());
             else rebuild |= resource(p);
@@ -99,11 +104,12 @@ public final class HotReloader implements AutoCloseable {
     }
 
     private boolean resource(Path p) {
+        boolean rebuild = false;
         for (ResourceRoot root : registry.allRoots()) {
             String rel = root.relativePath(p);
-            if (rel != null) return resourceChanged(rel);
+            if (rel != null) rebuild |= resourceChanged(rel);
         }
-        return false;
+        return rebuild;
     }
 
     private DocumentId idOf(Path p) {
