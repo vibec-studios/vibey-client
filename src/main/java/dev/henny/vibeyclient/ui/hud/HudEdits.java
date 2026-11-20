@@ -31,7 +31,7 @@ final class HudEdits {
         boolean wasHidden = p.hidden;
         Placements.reset(p, e);
         p.hidden = wasHidden;
-        p.custom = p.hidden != e.startHidden() || e.isCopy();
+        p.custom = p.hidden != HudProfiles.active().hiddenByDefault(e) || e.isCopy();
         if (e.isWidget()) e.widget().invalidate();
     }
 

@@ -19,11 +19,12 @@ final class ChoiceRows {
         boolean compact = s.values().length <= COMPACT_OPTIONS;
         for (E e : s.values()) {
             String label = Lang.tr(s.valueKey(e));
-            options.add(new Option(e.name(), label));
+            options.add(new Option(e.name(), label, s.icon(e)));
             if (label.length() > COMPACT_CHARS) compact = false;
         }
         r.options = List.copyOf(options);
         r.compact = compact;
+        r.icons = s.hasIcons();
         r.format = o -> labelOf(r.options, String.valueOf(o));
         return r;
     }

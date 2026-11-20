@@ -130,6 +130,7 @@ public final class Settings {
     /** Enum choice. Value labels: {@code <nameKey>.<value in lower case>}. */
     public static final class EnumSetting<E extends Enum<E>> extends Setting<E, EnumSetting<E>> {
         private final Class<E> type;
+        private java.util.function.Function<E, String> icons;
 
         public EnumSetting(String key, E def) {
             super(key, def);
@@ -138,6 +139,19 @@ public final class Settings {
 
         public E[] values() {
             return type.getEnumConstants();
+        }
+
+        public EnumSetting<E> icons(java.util.function.Function<E, String> iconOf) {
+            icons = iconOf;
+            return this;
+        }
+
+        public boolean hasIcons() {
+            return icons != null;
+        }
+
+        public String icon(E v) {
+            return icons == null ? null : icons.apply(v);
         }
 
         public String valueKey(E v) {

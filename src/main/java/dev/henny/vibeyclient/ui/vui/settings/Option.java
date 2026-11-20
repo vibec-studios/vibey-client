@@ -5,11 +5,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public record Option(String value, String label) {
+public record Option(String value, String label, String icon) {
+    public Option(String value, String label) {
+        this(value, label, null);
+    }
+
     public Map<String, Object> map() {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("value", value);
         m.put("label", label);
+        if (icon != null) m.put("icon", icon);
         return m;
     }
 

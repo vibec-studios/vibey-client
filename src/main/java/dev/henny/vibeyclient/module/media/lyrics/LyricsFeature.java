@@ -99,7 +99,7 @@ public final class LyricsFeature extends MediaFeature {
     /** HUD lyrics (position "HUD"), movable in the HUD editor. */
     public final HudElement hudText = hudElement(HudElement.builder("text")
             .size(HudLyrics.BOX_W, HudLyrics.BOX_H).defaults(Anchor.CENTER, 0, -18).scale(1f, 0.5f, 2.5f)
-            .visibleWhen(() -> LyricsConfig.get().position == LyricsConfig.Position.HUD)
+            .visibleWhen(LyricsFeature::hudLyrics)
             .render(HudLyrics::render));
     /** The now playing bar (top centre by default). */
     public final HudElement hudBar = hudElement(HudElement.builder("bar")
@@ -229,7 +229,11 @@ public final class LyricsFeature extends MediaFeature {
     @Override
     public void renderHud(Gfx g) {
         HudLayout.draw(g, hudBar);
-        if (LyricsConfig.get().position == LyricsConfig.Position.HUD) HudLayout.draw(g, hudText);
+        if (hudLyrics()) HudLayout.draw(g, hudText);
+    }
+
+    private static boolean hudLyrics() {
+        return LyricsConfig.get().position == LyricsConfig.Position.HUD || !HudLayout.profile().equals(dev.henny.vibeyclient.ui.hud.HudProfile.MAIN);
     }
 
     public void open(net.minecraft.client.gui.screens.Screen parent) {

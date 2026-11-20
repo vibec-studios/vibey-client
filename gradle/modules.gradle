@@ -23,6 +23,7 @@ ext.clientModules = [
         'social.streamer': ['fabric-1.21.11'],
         inventory    : ['fabric-1.21.11'],
         servers      : ['fabric-1.21.11'],
+        cinematic    : ['fabric-1.21.11'],
 ]
 
 // Resources a module owns besides its i18n files (i18n/*/<id>[.*].json) and mixin configs (vibeyclient.<id>[.*].mixins.json).
@@ -37,6 +38,7 @@ ext.clientModuleResources = [
         servers: ['assets/vibeyclient/vui/servers/**'],
         'visuals.items': ['assets/vibeyclient/vui/items/**'],
         'visuals.effects': ['assets/vibeyclient/vui/effects/**'],
+        cinematic: ['assets/vibeyclient/textures/cinematic/**'],
 ]
 
 // Shared packages (dev.henny.vibeyclient.<path>) that several modules use instead of each other, with their targets

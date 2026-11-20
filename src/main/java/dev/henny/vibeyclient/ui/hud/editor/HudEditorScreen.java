@@ -24,6 +24,7 @@ public final class HudEditorScreen extends InputScreen implements EditorHost {
     public static boolean drawPointer;
 
     private final Screen parent;
+    private Runnable onClosed;
     private final EditSession session = new EditSession();
     private final PointerTool tool = new PointerTool(session);
     private final EditorController controller = new EditorController(session, this);
@@ -34,6 +35,11 @@ public final class HudEditorScreen extends InputScreen implements EditorHost {
     private boolean closed;
     private double mouseX;
     private double mouseY;
+
+    public HudEditorScreen(Screen parent, Runnable onClosed) {
+        this(parent);
+        this.onClosed = onClosed;
+    }
 
     public HudEditorScreen(Screen parent) {
         super(Component.literal(Lang.tr("ui.hud.title")));
@@ -59,6 +65,9 @@ public final class HudEditorScreen extends InputScreen implements EditorHost {
         closed = true;
         if (view != null) VuiMc.vui().close(view.document());
         view = null;
+        Runnable done = onClosed;
+        onClosed = null;
+        if (done != null) done.run();
     }
 
     @Override

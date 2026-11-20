@@ -1,0 +1,67 @@
+{
+  "name": "Cinematic",
+  "description": "AFK camera flights and an AFK screen.",
+  "summary": "AFK camera + screen",
+  "section": {
+    "look": "Look"
+  },
+  "setting": {
+    "start": "Start now",
+    "start.desc": "Any input brings you back.",
+    "mode": "Mode",
+    "mode.desc": "What the camera shows.",
+    "mode.builds": "Builds & world",
+    "mode.players": "Players",
+    "mode.self": "Showcase",
+    "mode.panorama": "Panorama",
+    "mode.waypoints": "Waypoints",
+    "mode.sky": "Sky & stars",
+    "mode.dronie": "Dronie",
+    "mode.mix": "Mix",
+    "auto": "Start when AFK",
+    "auto.desc": "Starts after a while without input.",
+    "afkMinutes": "AFK after",
+    "speed": "Speed",
+    "radius": "Radius",
+    "radius.desc": "How far the camera may fly.",
+    "mixSeconds": "Switch every",
+    "editAfk": "Edit AFK screen",
+    "editAfk.button": "Edit",
+    "letterbox": "Letterbox",
+    "vignette": "Vignette",
+    "grain": "Film grain",
+    "title": "Title",
+    "title.desc": "Big text on the AFK screen.",
+    "startKey": "Start key"
+  },
+  "afk": {
+    "title": "Be right back",
+    "away": "AFK",
+    "friends": "Friends",
+    "hint": "Move to return"
+  },
+  "hud": {
+    "title": "AFK title",
+    "title.desc": "Big title text.",
+    "afktime": "AFK time",
+    "afktime.desc": "How long you are away.",
+    "mode": "Camera mode",
+    "mode.desc": "Current mode and subject.",
+    "friends": "Friends online",
+    "friends.desc": "Friends online right now.",
+    "hint": "Return hint",
+    "hint.desc": "How to get back.",
+    "content": "Shows",
+    "content.text": "Title",
+    "content.name": "Your name",
+    "content.world": "World"
+  },
+  "preset": {
+    "cinema": "Cinema",
+    "cinema.desc": "Title in the bars, lyrics low.",
+    "music": "Music",
+    "music.desc": "Big lyrics in the middle.",
+    "minimal": "Minimal",
+    "minimal.desc": "Clock and AFK time."
+  }
+}

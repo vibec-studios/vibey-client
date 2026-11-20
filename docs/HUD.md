@@ -213,6 +213,23 @@ Widgets declare their key with `.rules(key)`. The built-in keys: `hud.fps`, `hud
 `hud.items`, `hud.memory`, `hud.compass`, `hud.timer` (`hud.*` disables all of them). A disabled widget is not drawn in game and
 shows greyed with a *Disabled by server* badge (and the server's message as tooltip in the library) in the editor.
 
+## Layout profiles
+
+A module can add a second layout with its own file, presets and defaults, edited with the same editor (the AFK
+screen of [CINEMATIC.md](CINEMATIC.md) is profile `afk`):
+
+```java
+HudLayout.registerProfile("afk", Set.of("cinematic.title", "hud.clock"));   // shown by default, all else hidden
+HudTemplates.register(new HudTemplates.Template(id, label, desc, state, "afk"));
+HudTemplates.setDefault("afk", id);                                         // applied on first use and Reset all
+HudLayout.useProfile("afk");  /  HudLayout.useProfile(HudProfile.MAIN);     // swaps placements, copies, style
+HudLayout.openEditor(parent, "afk", onClose);                              // switches back when it closes
+```
+
+The file is `config/vibeyclient/hud-layout-<id>.json` (same format). In a non-main profile applying a preset hides
+every element it does not list; `HudTemplates.all()` lists only the presets of the active profile. Widgets meant for
+one profile use `.visibleWhen(() -> HudLayout.profile().equals("afk"))`.
+
 ## Layout file
 
 `config/vibeyclient/hud-layout.json`, unchanged by the vui move (no migration needed): one entry per element the
