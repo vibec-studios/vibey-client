@@ -105,7 +105,7 @@ Ids are `vibeyclient:<path>`. Screens are opened with `vui.open(id, controller)`
 | `hud/toolbar` · `hint` · `widget-bar` · `widget-library` · `preset-list` | part | dock, key hint, selection bar, widgets popover, presets popover |
 | `wardrobe/wardrobe` | screen | bar + rail + grid + preview |
 | `wardrobe/slot-rail` · `item-grid` · `preview-pane` | part | slot icons, item cards, player stage + primary |
-| `components/ico` | component | `name` → `vibeyclient:ui/icons/<name>` (the one place that maps icon names to textures) |
+| `components/ico` | component | `name` → pixel icon `vibeyclient:<name>` from `vui/icons.json` (the one place that maps icon names) |
 | `components/icon-button` | component | 18 × 18 icon button: `icon`, `tip`, `badge`, `dot`, `active`, slot for a popover |
 | `components/tile` | component | module tile: `m` |
 | `components/section` | component | caption + slot |
@@ -237,9 +237,9 @@ Use as `new ToastStack(vui, vui.registry().template("vibeyclient:toast/stack"))`
 
 | Field / action | |
 |---|---|
-| `toasts` | `[{ id, kind: info ok warn error invite, icon (texture id), title, text, action }]` |
+| `toasts` | `[{ id, kind: info ok warn error invite, icon (pixel icon name, e.g. `vibeyclient:host`), title, text, action }]` |
 | `dismiss(t)` | click on the toast |
-| `act(t)` | its one button (*Join*, *Open*, *Undo*) – needs the ToastStack extension below |
+| `act(t)` | its one button (*Join*, *Open*, *Undo*): `Toast.action(label, id, run)`; `ToastStack.onAction` sees every action; hover pauses the countdown |
 
 Rule: `title` = the subject (a player name, *New cosmetics*), `text` ≤ 2 words (*Invites you*, *Online*,
 *3 items*). Keys `ui.toast.*`.
@@ -290,10 +290,11 @@ The 3D player is drawn by the host into `doc.ref("stage").box()` after `doc.rend
 
 ## Icons
 
-`components/ico` maps `name` → texture `vibeyclient:ui/icons/<name>` (tinted with `color`). Until vui can draw
-pixel maps, the 9 × 9 maps of `ui/Icons` must be exported once to `assets/vibeyclient/textures/ui/icons/<name>.png`
-(white on transparent). Used from `Icons`: `seal shirt friends gear search close back check info warn chat star
-note crosshair cube wave host globe power person server`. New ones (rows top to bottom, `#` = on):
+`components/ico` draws `<icon set="vibeyclient" :name="name">`: a vui pixel icon from
+`assets/vibeyclient/vui/icons.json` (see [vui icons](../libs/vui/docs/icons.md)), drawn with fills in `color`, crisp at
+every scale, no textures. The file holds every map of `ui/Icons` (converted 1:1, `user` = alias of `person`) plus the
+new ones below (rows top to bottom, `#` = on). Toast icons are pixel icon names too (`vibeyclient:host`); a toast
+icon containing `/` is still a texture id.
 
 | Name | Rows |
 |---|---|
@@ -349,8 +350,8 @@ Each step lands on Fabric 1.21.11 behind a dev flag, gets gametest screenshots (
 640 × 360) and replaces the old code only after parity.
 
 1. **Plumbing** (Java): client `Vui` instance with the MC backend, `Lang.addFile("ui")` + `vui.functions().translator`,
-   load `vui/theme.json`, export icon textures, a small adapter Setting → descriptor (table above), toast action
-   support.
+   `vui.loadTheme("assets/vibeyclient/vui/theme.json")` (hot reloads), icons come from `vui/icons.json` by
+   themselves, a small adapter Setting → descriptor (table above).
 2. **Toasts** – `toast/stack` replaces the current toast drawing (lowest risk, used everywhere).
 3. **Title corner + pause row** – replace `TitleButtons` / `PauseMenu` drawing; `MenuEntries` stays the API.
 4. **Confirm dialog + empty states** – shared by everything after this.
@@ -386,34 +387,43 @@ widgets, menu behind the dialog) – fixtures only, not shipped.
 | Wardrobe / empty search | `wardrobe*.png`, `wardrobe-empty*.png` |
 | Confirm dialog | `confirm*.png` |
 
-They were rendered with the vui core and a small preview wrapper (not in the repo) that adds what the stock
-`Preview` lacks: the `ui.json` translator, `theme.json`, icon textures from the `Icons` pixel maps, icon tint,
-sample heads/thumbnails, hover/scroll before the shot. The stock command works on every document too (exit 0 with a
-matching state file) but shows i18n keys and white icons:
+They are rendered with the stock vui `Preview` (no wrapper): translator, theme, pixel icons, sample heads and
+thumbnails (`docs/ui-preview/textures/`, fixtures only) and the hover before the shot are command-line options.
+Example (module page, hover on the locked row):
 
 ```
-java -cp "out/core;gson.jar" dev.henny.vui.dev.Preview src/main/resources/assets/vibeyclient/vui/menu/shell.vui 427 240 out.png docs/ui-preview/state/menu-page.json --scale 3 --root src/main/resources
+java -cp "out/core;gson.jar" dev.henny.vui.dev.Preview src/main/resources/assets/vibeyclient/vui/menu/shell.vui 427 240 docs/ui-preview/menu-page.png docs/ui-preview/state/menu-page.json --scale 3 --root src/main/resources --lang src/main/resources/assets/vibeyclient/i18n/en_us/ui.json --theme src/main/resources/assets/vibeyclient/vui/theme.json --textures docs/ui-preview/textures --hover 40,89 --quiet
 ```
 
-The headless 5 × 7 font is wider than Minecraft's and draws umlauts without dots; real text is a bit narrower, so
-what fits in the previews fits in game.
+German: add `--lang src/main/resources/assets/vibeyclient/i18n/de_de/ui.json` after the English one and use the
+`-de` state. Hover points used: grid 60,104 (640: 380,77), page 40,89, friends 300,96 (640: 520,96).
+Re-rendered with it: `menu-grid*`, `menu-page*`, `menu-friends*`, `hud-editor*`, `wardrobe*`; the other previews
+are still from the wrapper and look the same.
+
+The headless 5 × 7 font is wider than Minecraft's (umlauts, `ß` and `·` have their own glyphs since the re-render);
+real text is a bit narrower, so what fits in the previews fits in game.
 
 ## vui gaps found
 
-| Gap | Effect here | Wish |
-|---|---|---|
-| `Preview` has no translator and no theme option | previews show keys | `--lang <ui.json>` (or `--i18n dir`), `--theme <file>` |
-| Headless `ImageCanvas.texture` ignores `tint` | monochrome icons render white | tint like the MC backend |
-| No icon source besides one texture per icon | 9 × 9 `Icons` maps must be exported to PNGs | `IconProvider` / pixel-map icons (`<icon set="vibeyclient" name="gear">`) |
-| Object props of a component are `null` on their first evaluation | "cannot read 'on' of null" errors unless the default is `{}` | evaluate bound props before the first child binding |
-| A document rule did not override an imported component's rule of equal specificity (`.pause-btn` vs `.icon-btn`) | needed `.pause-row .pause-btn` | check cascade order for fallthrough classes vs the docs |
-| `ToastStack` has no action button / `act(t)` and `Toast` no `action` | toast template calls `act(t)` | `Toast.action(label, Runnable)` |
-| `disabled` swallows hover, so a disabled control cannot explain itself | tooltip moved to the row label | tooltips on disabled elements |
-| One `border-color` for all sides | tile accent = extra 2 px box | per-side border colours |
-| No `aspect-ratio`, no grid spans | fixed thumbnail heights | `aspect-ratio`, `grid-column: span n` |
-| `colorpicker` has no swatches/presets | Setting `.presets()` cannot show | `presets` prop |
-| `slider` shows no value | controller formats `display` | optional value label with format |
-| `segmented` vs `select` can't be chosen by fit | controller passes `compact` | auto mode that falls back to `select` when too wide |
-| No way to declare a document's controller fields | contracts live in this file | a `<controller>` block (names + types) checked by `Preview`/tests |
-| `keybind` stores keyboard keys only | zoom on mouse 4/5 not possible | mouse buttons |
-| Headless font: no `·`, no umlaut dots | approximate German previews | a few more glyphs |
+Closed in vui (see `libs/vui/docs`):
+
+| Gap | Now |
+|---|---|
+| `Preview` has no translator and no theme option | `--lang`, `--theme`, `--icons`, `--textures`, `--hover/--click/--scroll/--wait` |
+| Headless `ImageCanvas.texture` ignores `tint` | multiplies like the MC backend |
+| No icon source besides one texture per icon | pixel icons: `assets/<ns>/vui/icons.json`, `<icon name="ns:gear">`, `Canvas.icon` (fills or `IconAtlas`) |
+| Object props of a component are `null` on their first evaluation | bound props are evaluated before the component's children |
+| A document rule did not override an imported component's rule of equal specificity | importer sheets come after imported sheets (`.pause-btn` alone works now) |
+| `ToastStack` has no action button / `act(t)` | `Toast.action(label, id, run)`, `act(t)`, `onAction`, hover pauses |
+| `disabled` swallows hover | hover + tooltips work on disabled elements (no `:active`, no activation) |
+| One `border-color` for all sides | `border-left: 2 $brand`, `border-*-color`, `border-color: a b c d` |
+| No `aspect-ratio`, no grid spans | `aspect-ratio: 16/9`, `grid-column: span 2`, `grid-row: span 2`, `margin: auto`, `+`/`~` selectors |
+| `colorpicker` has no swatches/presets | `presets` prop + hex field |
+| `slider` shows no value | `show-value`, `format="{0}×"` / `"percent"`, `value-label` |
+| `segmented` vs `select` can't be chosen by fit | `<select mode="auto">` |
+| No way to declare a document's controller fields | `<contract>` block, dev-mode warnings, `Preview` checks fields |
+| `keybind` stores keyboard keys only | mouse buttons (`-100 + button`) |
+| Headless font: no `·`, no umlaut dots | `ä ö ü Ä Ö Ü ß ·` added |
+
+The documents keep their old workarounds (`.pause-row .pause-btn`, `{}` defaults, accent boxes, `compact`,
+`display`); they still work and can be simplified when the screens move over.

@@ -34,7 +34,7 @@ Every control with a value uses `v-model` (prop `value`, event `update:value`). 
 | `divider` | 1 px `$line` |
 | `spacer` | `flex-grow: 1` |
 | `text` | text; `:text="x"` or children. Rich text with `span`, `b` (bold), `i` |
-| `icon` | `src` = texture id (tinted with `color`) or `glyph="★"` (one character); 9×9 by default |
+| `icon` | `name="ns:gear"` (or `set="ns" name="gear"`) = pixel icon from `assets/ns/vui/icons.json`, see [icons](icons.md); `src` = texture id; `glyph="★"` (one character). Drawn in `color`; 9×9 by default |
 | `image` | `src` texture id; `fit` = `fill` (default) / `contain` / `cover`; `slice="4"` nine-slice; `tinted` tints with `color`; sizes itself to the texture |
 
 ## Controls
@@ -44,27 +44,30 @@ Every control with a value uses `v-model` (prop `value`, event `update:value`). 
 | `button` | `label` (or children), `disabled`; classes `primary` `ghost` `danger` | Enter/Space = click |
 | `toggle` | `value` (bool) | Enter/Space flips; knob animates 150 ms |
 | `checkbox` | `value` (bool), `label` (or children) | Enter/Space flips |
-| `slider` | `value`, `min` (0), `max` (1), `step` (default range/100) | ←/↓ −step, →/↑ +step, PgUp/PgDn ±10 %, Home/End; wheel when focused; drag; `input` while dragging, `change` on release |
+| `slider` | `value`, `min` (0), `max` (1), `step` (default range/100); value label: `show-value`, `format` (`"{0} px"`, `"percent"`), `decimals` (default from `step`), `value-label` (ready text) | ←/↓ −step, →/↑ +step, PgUp/PgDn ±10 %, Home/End; wheel when focused; drag; `input` while dragging, `change` on release |
 | `textfield` | `value`, `placeholder`, `max-length`, `password`, `readonly`, `invalid` | ←/→ (Ctrl: word), Shift selects, Home/End, Backspace/Delete (Ctrl: word), Ctrl+A/C/X/V (clipboard via backend), Enter = `submit` + `change`; double click selects all; caret blinks |
-| `select` | `value`, `options`, `placeholder` | Enter/Space/click opens the menu, ↑/↓ change the value |
+| `select` | `value`, `options`, `placeholder`, `mode` = `menu` (default) / `auto` (segments when they fit, else the menu) / `segmented` | Enter/Space/click opens the menu, ↑/↓ change the value (segments: ←/→ too) |
 | `segmented` | `value`, `options` or `<segment value="…">` children | ←/→/↑/↓ |
 | `tabs` | `value`, `options` or `<tab value="…">` children | ←/→/↑/↓ (content: use `v-if="tab == 'General'"`) |
-| `keybind` | `value` (GLFW key code, −1 = none) | click/Enter → waiting (`:open`), next key is stored; Esc cancels; Backspace/Delete clears. Label from `Input.keyName` |
-| `colorpicker` | `value` (`"#rrggbb"` string or ARGB number – the type is kept) | click opens a panel with saturation/value square and hue bar (drag) |
+| `keybind` | `value` (GLFW key code, −1 = none; mouse button b = `-100 + b`, `Keys.mouse(b)`), `mouse` (default true) | click/Enter → waiting (`:open`), next key **or mouse button pressed on the field** is stored; Esc cancels; Backspace/Delete clears. Label from `Input.keyName` / `Input.mouseButtonName` (fallback "Mouse 4") |
+| `colorpicker` | `value` (`"#rrggbb"` string or ARGB number – the type is kept), `presets` (alias `swatches`: list or comma string of colours), `hex` (default true) | click opens a panel: saturation/value square + hue bar (drag), swatches (click), hex field (Enter/blur commits, `:invalid` on bad input) |
 | `progress` | `value`, `max` (1); no `value` = indeterminate | – |
 | `spinner` | – | – |
 
 **Options** (`select`, `segmented`, `tabs`): a list of strings, a list of maps `{ value, label, icon }` (`id`
 works as value), a map `value → label`, or a comma string `"a,b,c"`.
 
-`disabled` on any element blocks pointer/key events for it and its children, removes it from Tab order and sets
-`:disabled`. `checked`, `selected`, `invalid` props set the matching pseudo classes.
+`disabled` on any element blocks activation (click, keys, `v-model` writes) for it and its children, removes it from Tab
+order and sets `:disabled`. Hover and tooltips still work, so a disabled control can explain itself
+(`<toggle disabled="true" tooltip="This server turned it off."/>`); `:active` is not set inside a disabled subtree. `checked`, `selected`, `invalid` props set the matching pseudo classes.
 
 ### Internal elements
 
-Some controls create children you can style: `select` → `text` + `select-menu` (overlay) → `select-option`;
-`segmented` → `segment`; `tabs` → `tab`; `colorpicker` → `colorpicker-panel`; labels are `text`. They show up in the
-tree dump and dev bridge like any element.
+Some controls create children you can style: `select` → `text` + `select-menu` (overlay) → `select-option`, plus
+`segment` children in `mode="auto"`/`"segmented"` (drawn inside the select's border when they fit); `segmented` →
+`segment`; `tabs` → `tab`; `slider` → `text.slider-value` (only with a value label); `colorpicker` →
+`colorpicker-panel` → `colorpicker-area`, `colorpicker-swatches` → `colorpicker-swatch` (`:selected`),
+`textfield.colorpicker-hex`; labels are `text`. They show up in the tree dump and dev bridge like any element.
 
 ## Lists
 
@@ -109,11 +112,21 @@ Overlays are painted after the main tree, hit-tested first and stay inside the d
 ```java
 ToastStack toasts = new ToastStack(vui);
 toasts.push("Saved", "Settings written", "mymod:icons/ok", "ok", 4f);   // kind: info | ok | warn | error
+toasts.push(new Toast("PolarPia", "Invites you", "vibeyclient:host", "info", 8f)
+        .action("Join", "join", () -> joinWorld()));                    // one button: label, id, what it does
+toasts.onAction((toast, id) -> log(id));                                  // optional: every action in one place
 // every frame: toasts.resize(w, h); toasts.frame(dt); toasts.render(canvas);
 ```
 
 Toasts stack bottom-right, slide/fade in and out (`toast:enter`/`toast:leave`, defined in the ToastStack's own
-template), click dismisses, at most 5. The `<toast>` tag can also be used in your own markup; it gets the default
+template), click dismisses, at most 5. The action button (`.toast-action`) calls `act(t)` on the stack's controller:
+runs the toast's action, tells the `onAction` listener and dismisses the toast. While the pointer is over any toast
+the countdown pauses (`toasts.paused()`), so players can read and click.
+
+`icon` is a texture id when it contains a `/` (`mymod:textures/gui/ok`) and a pixel icon name otherwise
+(`vibeyclient:host`); the template binds `:src="t.iconTexture" :name="t.iconName"`. Own templates
+(`new ToastStack(vui, template)`) get the same controller: `toasts`, `dismiss(t)`, `act(t)` and the toast fields
+`id title text icon iconTexture iconName kind action actionId`. The `<toast>` tag can also be used in your own markup; it gets the default
 look, add your own `toast:enter`/`toast:leave` rules if it should animate.
 
 Overlays: a click outside an open `popover`, `select` menu or `colorpicker` panel closes it (clicks on its anchor
@@ -187,4 +200,7 @@ child elements. Register before compiling documents that use the tag.
 ## Limits
 
 - No multi-line text area, date/number spinner or drag-and-drop between lists.
-- `keybind` stores keyboard keys only (no mouse buttons).
+- `keybind` captures a mouse button only while the pointer is on the field (a press elsewhere blurs it); no key
+  combinations.
+- `select mode="auto"` decides on the select's final width; a parent that sizes the select from its content gives it
+  the segmented width whenever that fits the parent.

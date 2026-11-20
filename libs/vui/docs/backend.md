@@ -22,7 +22,8 @@ All coordinates are GUI pixels in the **current transform**. Colors are ARGB int
 | `line(x1, y1, x2, y2, width, argb)` | straight line |
 | `text(chars, start, end, x, y, argb, shadow, bold)` | draw `chars[start, end)` on one line; `(x, y)` is the top-left of the line box (Minecraft `drawString` position). Must not allocate per call if possible (cache strings). |
 | `glyph(codepoint, x, y, argb, shadow, bold)` | draw one character at the same baseline rules – used for per-glyph text effects |
-| `texture(id, x, y, w, h, u0, v0, u1, v1, tint)` | draw a texture region (UVs 0..1) stretched to the rectangle, multiplied by `tint` |
+| `texture(id, x, y, w, h, u0, v0, u1, v1, tint)` | draw a texture region (UVs 0..1) stretched to the rectangle, multiplied by `tint` per channel (white texture × tint = tint; alpha multiplies too). `<icon src>` passes `color`, `<image tinted>` passes `color`, everything else `0xFFFFFFFF` |
+| `icon(pixelIcon, x, y, w, h, argb)` | *default method*: draws the icon's on-cells with `fill`s (`IconFills`). Override to draw from an `IconAtlas` texture; see [icons](icons.md) |
 | `nineSlice(id, x, y, w, h, slice, textureWidth, textureHeight, tint)` | corners keep `slice` texture px, edges/center stretch (`headless.NineSlice` shows the split) |
 | `pushScissor(x, y, w, h)` / `popScissor()` | clip to a rectangle given in **local** coordinates; transform it to screen space and **intersect** with the outer scissor (`ScissorStack` does the intersection) |
 | `push()` / `pop()` | save/restore the transform |
@@ -46,7 +47,8 @@ Layout and text wrapping only use these numbers, so they must match what `Canvas
 |---|---|
 | `clipboard()` / `setClipboard(text)` | system clipboard (text field copy/paste) |
 | `isKeyDown(key)` | GLFW key state |
-| `keyName(key, scancode)` | **layout-correct** display name (`Z` on QWERTZ for GLFW `Y`), or `null` to use `Keys.fallbackName` |
+| `keyName(key, scancode)` | **layout-correct** display name (`Z` on QWERTZ for GLFW `Y`), or `null` to use `Keys.fallbackName`. Never called for mouse codes |
+| `mouseButtonName(button)` | *default `null`*: localized name of mouse button `button` (0 = left) for `keybind`; `null` → "Left Click" / "Mouse 4". Keybind values for mouse buttons are `Keys.mouse(b)` = `-100 + b` (the old Minecraft convention), test with `Keys.isMouse` |
 | `setCursor(cursor)` | `Cursor` enum (`DEFAULT POINTER TEXT MOVE GRAB RESIZE_NS RESIZE_EW RESIZE_NWSE RESIZE_NESW NOT_ALLOWED`); called only on change |
 
 ## Textures
@@ -97,6 +99,8 @@ canvas implementation and feed ray-hit `(u, v)` coordinates as pointer events.
 - [ ] `text`/`glyph` positions match `TextMetrics` (compare with a `TreeDump` of the same document).
 - [ ] Nested scissors intersect; scissors respect `translate`/`scale`.
 - [ ] `pushAlpha` affects text and textures, not only fills.
+- [ ] `texture` multiplies by `tint` (a white icon texture with tint `$brand` comes out purple).
+- [ ] Pixel icons look crisp (default fills are fine; an `IconAtlas` saves draw calls).
 - [ ] `layer()` implemented on versions with deferred text.
 - [ ] No allocation per `fill`/`text` call in steady state.
 

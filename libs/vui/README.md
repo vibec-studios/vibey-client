@@ -82,6 +82,27 @@ Renders the file with a built-in 5×7 pixel font to a PNG, prints the element tr
 lists errors (exit code 1 if there are any). `state.json` is a JSON object used as the controller. `--serve` keeps
 running, reloads on save and serves the [dev bridge](docs/hot-reload.md#dev-bridge).
 
+Reproducible previews of a real mod (translations, theme, icons, sample textures, a pointer script):
+
+```
+java -cp vui-core.jar;gson.jar dev.henny.vui.dev.Preview src/main/resources/assets/mymod/vui/menu.vui 427 240 menu.png state.json      --scale 3 --root src/main/resources --lang src/main/resources/assets/mymod/i18n/en_us      --theme src/main/resources/assets/mymod/vui/theme.json --textures docs/preview-textures      --click open-friends --hover 300,96 --quiet
+```
+
+| Option | |
+|---|---|
+| `--lang PATH` | language JSON file or folder; file name = key prefix (`ui.json` → `ui.*`), nested objects join with `.`; repeat for fallbacks (later wins) |
+| `--theme FILE` | theme file over the default theme (hot reloads with `--serve`) |
+| `--icons PATH` | extra `icons.json` file or folder (sets under `--root` load by themselves) |
+| `--textures DIR` | extra texture root `DIR/assets/<ns>/textures/…`, repeatable |
+| `--hover AT` | pointer to `x,y`, an element id or a selector; tooltips and `:hover` show in the shot |
+| `--click AT` | click at `x,y`, an element id or a selector |
+| `--scroll N` | wheel N lines down (negative = up) at the pointer |
+| `--wait S` | run S seconds of frames |
+| `--quiet` | no tree dump |
+
+Steps run in the order given, then 1.2 s of frames let transitions and tooltips settle. Unknown targets are warnings.
+Contract fields (`<contract>`) are checked against the state file.
+
 ## Testing a UI in JUnit
 
 ```java
@@ -126,7 +147,9 @@ settings page does `frame` + `render` with no per-frame allocation (~20 µs per 
 | `render` | backend interfaces: `Canvas`, `TextMetrics`, `Input`, `Textures`, `Backend` |
 | `geom` | `Rect`, `Placement` (popover/tooltip placement that stays on screen) |
 | `hud` | HUD layer: anchored widgets, edit mode (drag, wheel resize, snap), JSON layouts |
-| `host` | ready-made hosts: `ToastStack` |
+| `icon` | pixel icon sets (`icons.json`), registry, fill drawing, atlas builder |
+| `contract` | `<contract>` blocks: what a document needs from its controller, dev-mode check |
+| `host` | ready-made hosts: `ToastStack` (actions, hover pause) |
 | `reload` | `DocumentRegistry`, resource roots, file watcher, `HotReloader` |
 | `dev` | dev bridge (localhost HTTP), `Preview` CLI |
 | `headless` | PNG canvas + pixel font backend, `TreeDump` – for tests and tools |
@@ -134,7 +157,7 @@ settings page does `frame` + `render` with no per-frame allocation (~20 µs per 
 ## Docs
 
 [markup](docs/markup.md) · [styles](docs/styles.md) · [layout](docs/layout.md) · [binding](docs/binding.md) ·
-[components](docs/components.md) · [animation](docs/animation.md) · [hud](docs/hud.md) ·
+[components](docs/components.md) · [icons](docs/icons.md) · [animation](docs/animation.md) · [hud](docs/hud.md) ·
 [hot reload + dev bridge](docs/hot-reload.md) · [backend](docs/backend.md)
 
 License: Apache-2.0.

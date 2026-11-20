@@ -43,6 +43,14 @@ public final class PixelFont {
         EXTRA.put((int) '×', rows("00110A040A1100"));
         EXTRA.put((int) '›', rows("00080402040800"));
         EXTRA.put((int) '‹', rows("00020408040200"));
+        EXTRA.put((int) '·', rows("00000004000000"));
+        EXTRA.put((int) 'ä', rows("0A000E010F110F"));
+        EXTRA.put((int) 'ö', rows("0A000E1111110E"));
+        EXTRA.put((int) 'ü', rows("0A00111111130D"));
+        EXTRA.put((int) 'Ä', rows("0A0E11111F1111"));
+        EXTRA.put((int) 'Ö', rows("0A0E111111110E"));
+        EXTRA.put((int) 'Ü', rows("0A11111111110E"));
+        EXTRA.put((int) 'ß', rows("0C12121C121216"));
     }
 
     private PixelFont() {
