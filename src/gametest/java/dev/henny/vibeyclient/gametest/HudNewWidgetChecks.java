@@ -98,5 +98,6 @@ final class HudNewWidgetChecks {
         t.shot("hud_26_moved_ingame");
         world.getServer().runCommand("bossbar remove vibey:test");
         world.getServer().runCommand("title @a clear");
+        world.getServer().runCommand("scoreboard objectives remove kills");
     }
 }

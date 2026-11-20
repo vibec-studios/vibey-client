@@ -29,6 +29,7 @@ final class HudVideo {
 
     private void record() {
         t.context.runOnClient(mc -> {
+            for (var e : HudLayout.elements()) if (!e.id().startsWith("hud.") || !e.isWidget()) HudLayout.setHidden(e, true);
             HudTemplates.apply("pvp");
             HudEditorScreen.drawPointer = true;
         });
