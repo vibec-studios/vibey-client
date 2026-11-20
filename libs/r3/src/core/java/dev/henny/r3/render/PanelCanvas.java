@@ -15,6 +15,10 @@ public interface PanelCanvas {
 
     void text(String text, float x, float y, int argb);
 
+    default void text(String text, float x, float y, int argb, boolean shadow, boolean bold) {
+        text(text, x, y, argb);
+    }
+
     void texture(TextureHandle texture, float x, float y, float w, float h, float u0, float v0, float u1, float v1, int tint);
 
     void pushScissor(float x, float y, float w, float h);
@@ -28,6 +32,8 @@ public interface PanelCanvas {
     void translate(float x, float y);
 
     void scale(float x, float y);
+
+    default void rotate(float radians) {}
 
     void alpha(float alpha);
 }
