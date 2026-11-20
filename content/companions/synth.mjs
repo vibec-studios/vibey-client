@@ -1,98 +1,24 @@
-import { writeFileSync, mkdirSync, rmSync } from "node:fs";
+import { writeFileSync, mkdirSync, rmSync, readdirSync, existsSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { tmpdir } from "node:os";
+import { wav } from "./_synth.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const RATE = 44100;
-
-function wav(samples) {
-  const n = samples.length;
-  const buf = Buffer.alloc(44 + n * 2);
-  buf.write("RIFF", 0); buf.writeUInt32LE(36 + n * 2, 4); buf.write("WAVE", 8);
-  buf.write("fmt ", 12); buf.writeUInt32LE(16, 16); buf.writeUInt16LE(1, 20); buf.writeUInt16LE(1, 22);
-  buf.writeUInt32LE(RATE, 24); buf.writeUInt32LE(RATE * 2, 28); buf.writeUInt16LE(2, 32); buf.writeUInt16LE(16, 34);
-  buf.write("data", 36); buf.writeUInt32LE(n * 2, 40);
-  for (let i = 0; i < n; i++) buf.writeInt16LE(Math.round(Math.max(-1, Math.min(1, samples[i])) * 32000), 44 + i * 2);
-  return buf;
-}
-
-function render(seconds, fn, gain = 0.89) {
-  const out = new Float32Array(Math.round(seconds * RATE));
-  for (let i = 0; i < out.length; i++) out[i] = fn(i / RATE);
-  let peak = 0;
-  for (const v of out) peak = Math.max(peak, Math.abs(v));
-  const g = peak ? gain / peak : 1;
-  const fade = Math.round(0.006 * RATE);
-  for (let i = 0; i < out.length; i++) out[i] *= g * Math.min(1, (out.length - i) / fade);
-  return out;
-}
-
-function osc() {
-  let phase = 0, last = 0;
-  return (t, f) => {
-    phase += 2 * Math.PI * f * (t - last);
-    last = t;
-    return Math.sin(phase);
-  };
-}
-
-function noise(seed) {
-  let s = seed >>> 0;
-  return () => {
-    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
-    return s / 2147483648 - 1;
-  };
-}
-
-function lowpass(alpha) {
-  let y = 0;
-  return (x) => (y += alpha * (x - y));
-}
-
-function honk(t, t0, len, f0, f1, o) {
-  const u = t - t0;
-  if (u < 0 || u > len) return 0;
-  const env = Math.min(1, u * 90) * Math.exp(-Math.max(0, u - len * 0.35) * 14);
-  const f = f0 + (f1 - f0) * (u / len) + 6 * Math.sin(2 * Math.PI * 30 * u);
-  let s = 0;
-  for (let h = 1; h <= 6; h++) s += o[h - 1](t, f * h) * [1, 0.7, 0.5, 0.35, 0.22, 0.12][h - 1];
-  return Math.tanh(s * 1.6) * env;
-}
-
-const SOUNDS = {
-  "seal/sounds/bark": () => {
-    const a = [...Array(6)].map(() => osc()), b = [...Array(6)].map(() => osc());
-    const n = noise(3), lp = lowpass(0.25);
-    return render(0.62, (t) => honk(t, 0.0, 0.2, 330, 250, a) + honk(t, 0.27, 0.24, 360, 240, b) + lp(n()) * 0.08 * (t < 0.55 ? 1 : 0));
-  },
-  "seal/sounds/snore": () => {
-    const n = noise(7), lp = lowpass(0.02), o = osc();
-    return render(1.8, (t) => {
-      const breath = Math.sin(Math.PI * Math.min(1, t / 1.7)) ** 2;
-      return (lp(n()) * 3 + 0.15 * o(t, 70 + 8 * Math.sin(t * 9))) * breath;
-    }, 0.6);
-  },
-  "seal/sounds/chirp": () => {
-    const o1 = osc(), o2 = osc();
-    return render(0.34, (t) => {
-      const a = t < 0.14 ? Math.sin(o1(t, 900 + 700 * (t / 0.14))) * Math.min(1, t * 200) * Math.exp(-t * 6) : 0;
-      const u = t - 0.16;
-      const b = u > 0 ? Math.sin(o2(t, 1200 + 900 * (u / 0.16))) * Math.min(1, u * 200) * Math.exp(-u * 10) : 0;
-      return a + b;
-    });
-  },
-};
-
+const only = process.argv.slice(2);
+const packs = readdirSync(HERE).filter((d) => existsSync(join(HERE, d, "model", "_sounds.mjs")) && (!only.length || only.includes(d)));
 const tmp = join(tmpdir(), `companio-synth-${process.pid}`);
 mkdirSync(tmp, { recursive: true });
-for (const [name, make] of Object.entries(SOUNDS)) {
-  const w = join(tmp, `${name.replaceAll("/", "_")}.wav`);
-  writeFileSync(w, wav(make()));
-  const out = join(HERE, `${name}.ogg`);
-  mkdirSync(dirname(out), { recursive: true });
-  execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", w, "-ac", "1", "-c:a", "libvorbis", "-q:a", "3", "-map_metadata", "-1", "-fflags", "+bitexact", "-flags:a", "+bitexact", out]);
-  console.log(`wrote ${out}`);
+for (const pack of packs) {
+  const { SOUNDS } = await import(pathToFileURL(join(HERE, pack, "model", "_sounds.mjs")).href);
+  for (const [name, make] of Object.entries(SOUNDS)) {
+    const w = join(tmp, `${pack}_${name.replaceAll("/", "_")}.wav`);
+    writeFileSync(w, wav(make()));
+    const out = join(HERE, pack, `${name}.ogg`);
+    mkdirSync(dirname(out), { recursive: true });
+    execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", w, "-ac", "1", "-c:a", "libvorbis", "-q:a", "3", "-map_metadata", "-1", "-fflags", "+bitexact", "-flags:a", "+bitexact", out]);
+    console.log(`wrote ${out}`);
+  }
 }
 rmSync(tmp, { recursive: true, force: true });

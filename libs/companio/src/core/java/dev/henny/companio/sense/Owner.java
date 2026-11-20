@@ -10,6 +10,10 @@ public final class Owner {
     public float health = 1f;
     public double idle, speed;
     public String held = "minecraft:air", offhand = "minecraft:air";
+    public String target = "minecraft:air";
+    public double targetX, targetY, targetZ;
+    public int level;
+    public boolean advancement;
 
     public void copyFrom(Owner o) {
         present = o.present;
@@ -20,5 +24,7 @@ public final class Owner {
         sleeping = o.sleeping; eating = o.eating; onGround = o.onGround; inWater = o.inWater; riding = o.riding;
         hurt = o.hurt; jumped = o.jumped; looking = o.looking;
         health = o.health; idle = o.idle; speed = o.speed; held = o.held; offhand = o.offhand;
+        target = o.target; targetX = o.targetX; targetY = o.targetY; targetZ = o.targetZ;
+        level = o.level; advancement = o.advancement;
     }
 }

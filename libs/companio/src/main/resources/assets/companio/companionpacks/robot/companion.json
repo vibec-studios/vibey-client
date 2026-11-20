@@ -2,7 +2,7 @@
   "format": "companio-pack",
   "formatVersion": 1,
   "id": "robot",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "name": "@pack.name",
   "description": "@pack.description",
   "author": "Vibe Craft Studios",

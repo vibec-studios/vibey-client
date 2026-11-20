@@ -5,7 +5,9 @@ import java.util.function.Consumer;
 public final class EventDetector {
     private boolean first = true;
     private boolean rain, thunder, night, hurt, low, eating, sleeping, looking, inWater, nearCompanion, onGround = true;
-    private String held = "";
+    private boolean advancement, music;
+    private int level;
+    private String held = "", target = "minecraft:air";
     private double fallFrom;
 
     public void detect(Senses s, boolean selfInWater, boolean selfOnGround, double selfY, Consumer<String> fire) {
@@ -22,6 +24,10 @@ public final class EventDetector {
             edge(looking, o.looking, "owner_look", null, fire);
             edge(inWater, selfInWater, "enter_water", "leave_water", fire);
             edge(nearCompanion, near, "companion_near", null, fire);
+            edge(advancement, o.advancement, "owner_advancement", null, fire);
+            edge(music, s.music, "music_start", "music_stop", fire);
+            if (o.level > level) fire.accept("owner_level_up");
+            if (!target.equals(o.target) && !"minecraft:air".equals(o.target)) fire.accept("target_change");
             if (o.jumped) fire.accept("owner_jump");
             if (!held.equals(o.held)) fire.accept("item_change");
             if (!onGround && selfOnGround && fallFrom - selfY > 1.0) fire.accept("land");
@@ -40,6 +46,10 @@ public final class EventDetector {
         inWater = selfInWater;
         nearCompanion = near;
         held = o.held;
+        target = o.target;
+        level = o.level;
+        advancement = o.advancement;
+        music = s.music;
         onGround = selfOnGround;
     }
 

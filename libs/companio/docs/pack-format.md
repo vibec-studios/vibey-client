@@ -180,11 +180,16 @@ Props are bones of the model that behaviors show and hide: an umbrella, a sou'we
 "props": {
   "umbrella": { "bones": ["umbrella"] },
   "rain_hat": { "bones": ["hat_brim", "hat_top"], "shown": false },
-  "scarf":    { "bones": ["scarf"], "shown": true }
+  "scarf":    { "bones": ["scarf"], "when": "world.cold" },
+  "shades":   { "bones": ["shades"], "when": "world.hot && !self.inWater" }
 }
 ```
 
 - `bones`: one or more model bones (their children follow). `shown` (default `false`): the state at spawn.
+- `when` (optional): an [expression](#expressions); the prop is shown exactly while it holds (checked every tick),
+  e.g. a scarf in the cold, sunglasses in the desert, a headlamp in the dark, a mood light per need level. A running
+  behavior's `props` still wins; the `prop` action does not change a prop that has `when`. `prop("x")` inside a
+  `when` sees the state of the previous tick.
 - Hidden bones are not drawn at all. Show/hide with the behavior field `props` (only while the behavior runs) or the
   `prop` action (stays until changed). Animate props like any bone (open the umbrella in the layer that shows it).
 - Expressions read the state with `prop("umbrella")`.
@@ -279,7 +284,8 @@ behavior with `"obeys": false` ignores commands (tricks, fleeing).
 The `bone` (usually the head) turns towards what the companion looks at, added on top of every animation. Beyond
 `maxYaw` the whole body turns. `speed` in degrees per second. Without `look` only the body turns. Behavior field
 `look`: `player` (default while standing within 8 blocks), `move` (where it goes), `sky` (up, e.g. at the rain),
-`around` (random glances), `none`.
+`around` (random glances), `target` (the block under the player's crosshair, see `player.target`; like `player`
+when there is none), `none`.
 
 ## Needs and variables
 
@@ -371,6 +377,10 @@ Up to 4 repeat entries per behavior.
 | `land` | it landed after falling more than 1 block |
 | `teleport` | it teleported to the player |
 | `companion_near` | another companion came within 4 blocks |
+| `owner_level_up` | the player's XP level went up |
+| `owner_advancement` | the player got an advancement (its toast appears) |
+| `target_change` | the block under the player's crosshair changed to another (non-air) block |
+| `music_start` / `music_stop` | a music disc started / stopped playing within 20 blocks |
 
 Every event also stamps `since("<event>")`.
 
@@ -438,6 +448,7 @@ self.inWater ? need.happiness > 0.2 : false
 | `world.cold`, `world.hot` | bool | biome temperature < 0.15 (snow) / > 1.0 (desert, nether) |
 | `world.light` | number | 0–15 at the companion |
 | `world.sky` | bool | open sky above the companion |
+| `world.music` | bool | a music disc (jukebox) plays within 20 blocks |
 | `player.sneaking` `.sprinting` `.swimming` `.elytra` `.flying` `.sleeping` `.eating` `.onGround` `.inWater` `.riding` | bool | the player's state (`flying` = creative flight) |
 | `player.hurt` | bool | hurt within the last second |
 | `player.health` | number | 0–1 |
@@ -446,7 +457,10 @@ self.inWater ? need.happiness > 0.2 : false
 | `player.distance` | number | distance to the companion |
 | `player.looking` | bool | the crosshair is on the companion |
 | `player.held`, `player.offhand` | string | item ids in the hands (`minecraft:air` when empty) |
+| `player.target` | string | id of the block under the player's crosshair (within reach), `minecraft:air` if none |
+| `player.level` | number | the player's XP level |
 | `self.speed` | number | blocks per second |
+| `self.climb` | number | vertical speed, smoothed (blocks per second, negative = going down a slope or falling) |
 | `self.moving`, `self.onGround`, `self.inWater`, `self.onIce`, `self.onSnow` | bool | its own state |
 | `self.held` | bool | the player carries it |
 | `self.riding` | bool | on the shoulder or head |
@@ -464,7 +478,9 @@ self.inWater ? need.happiness > 0.2 : false
 | `var.<name>` | number | a declared var |
 
 Fair play: `near.*` only counts blocks and mobs your player can see (a clear line from your eyes) – a companion never
-tells you about lava behind a wall or a creeper in a cave.
+tells you about lava behind a wall or a creeper in a cave. `player.target` is the block the player's own crosshair
+is on (Minecraft's normal hit test within reach), so a companion can comment on what you look at, never find ores for
+you.
 
 **Functions**
 
@@ -476,6 +492,7 @@ tells you about lava behind a wall or a creeper in a cave.
 | `cooldown("name")` | true when the named cooldown (action `cooldown`) is over or was never started |
 | `since("event")` | seconds since that [event](#events) (or since behavior `<id>` started: `since("behavior:nap")`), 1000000 if never |
 | `holding("id", …)` | the player holds one of these items (main or off hand); `*` is a wildcard: `"minecraft:*_fish"` |
+| `target("id", …)` | the block under the player's crosshair is one of these; `*` is a wildcard: `target("*_ore")` |
 | `biome("part", …)` | `world.biome` contains one of the parts |
 | `is(x, a, b, …)` | `x` equals one of the values |
 | `prop("name")` | that prop is shown |

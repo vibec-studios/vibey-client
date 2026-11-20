@@ -42,6 +42,9 @@ public final class Companion implements CompanionView {
     final Map<String, Boolean> props = new HashMap<>();
     private final EventDetector events = new EventDetector();
     private final MoveIntent intent = new MoveIntent();
+    private final AutoProps autoProps = new AutoProps();
+    private double lastY = Double.NaN;
+    private float dtSeconds;
     Output output = Output.NONE;
     double now, born = Double.NaN;
     float hopRequest;
@@ -76,9 +79,11 @@ public final class Companion implements CompanionView {
     public void tick(BlockView view, double now, float dt) {
         this.now = now;
         if (Double.isNaN(born)) born = now;
+        dtSeconds = dt;
         fillSelf();
         events.detect(senses, body.inWater, body.onGround, body.y, brain::fire);
         brain.tick(now, dt);
+        autoProps.update(def, brain.scope());
         BehaviorRun run = brain.current();
         mode = run == null || run.move() == null ? Modes.idle(command) : Modes.resolve(run.move(), command, run.def.obeys());
         body.beginTick();
@@ -111,10 +116,14 @@ public final class Companion implements CompanionView {
         else if (mover.riding() != null) body.yaw = o.bodyYaw;
         LookMode lm = run != null && run.look() != null ? run.look() : !moving && o.present && body.distance(o.x, o.y, o.z) < 8 ? LookMode.PLAYER : LookMode.MOVE;
         if (held || mover.riding() != null) lm = lm == LookMode.PLAYER ? LookMode.AROUND : lm;
+        boolean block = lm == LookMode.TARGET && !"minecraft:air".equals(o.target);
+        if (lm == LookMode.TARGET && !block) lm = LookMode.PLAYER;
+        double tx = block ? o.targetX : o.x, ty = block ? o.targetY : o.eyeY, tz = block ? o.targetZ : o.z;
         float eye = def.box().height() * size * 0.8f;
-        float turnBody = look.tick(lm, body.yaw, body.x, body.y + eye, body.z, o.x, o.eyeY, o.z, o.present, now, dt);
-        if (!moving && !held && mover.riding() == null && (turnBody != 0 || (lm == LookMode.PLAYER && def.look().bone() == null))) {
-            float target = Angles.yawTo(o.x - body.x, o.z - body.z);
+        float turnBody = look.tick(lm, body.yaw, body.x, body.y + eye, body.z, tx, ty, tz, o.present, now, dt);
+        boolean facing = (lm == LookMode.PLAYER || lm == LookMode.TARGET) && def.look().bone() == null;
+        if (!moving && !held && mover.riding() == null && (turnBody != 0 || facing)) {
+            float target = Angles.yawTo(tx - body.x, tz - body.z);
             body.yaw = Angles.approach(body.yaw, target, def.movement().turnSpeed() * 0.6f * dt);
         }
     }
@@ -133,6 +142,9 @@ public final class Companion implements CompanionView {
         s.size = size;
         s.variant = variant;
         s.age = now - born;
+        double climb = Double.isNaN(lastY) || dtSeconds <= 0 ? 0 : (body.y - lastY) / dtSeconds;
+        s.climb += (Math.max(-20, Math.min(20, climb)) - s.climb) * 0.15;
+        lastY = body.y;
         s.x = body.x;
         s.y = body.y;
         s.z = body.z;
@@ -142,7 +154,8 @@ public final class Companion implements CompanionView {
     public boolean propShown(String id) {
         BehaviorRun run = brain.current();
         if (run != null && run.def.props().containsKey(id)) return run.def.props().get(id);
-        return props.getOrDefault(id, false);
+        Boolean auto = autoProps.shown(id);
+        return auto != null ? auto : props.getOrDefault(id, false);
     }
 
     void setProp(String id, boolean show) {

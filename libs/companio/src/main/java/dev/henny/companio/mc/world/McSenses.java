@@ -12,11 +12,14 @@ import net.minecraft.world.level.biome.Biome;
 public final class McSenses {
     private final OwnerTracker owner = new OwnerTracker();
     private final NearScan near = new NearScan();
+    private final MusicWatch music = new MusicWatch();
     private int ticks;
 
     public void fill(ClientLevel level, Player p, BlockView view, double cx, double cy, double cz, boolean looking,
                      double nearCompanion, Senses s) {
         owner.fill(p, s.owner, looking);
+        OwnerExtras.fill(p, s.owner);
+        s.music = music.near(cx, cy, cz);
         BlockPos at = BlockPos.containing(cx, cy + 0.3, cz);
         s.dayTime = level.getDayTime();
         s.dimension = level.dimension().identifier().toString();

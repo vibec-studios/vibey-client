@@ -3,7 +3,7 @@
 companio puts a **living companion** next to the player: a seal that waddles after you, belly-slides on snow, swims,
 naps next to you at night and claps when you pet it. Everything a companion is and does comes from a **companion
 pack** – a folder or `.zip` like a resource pack, with model, textures, animations, props, sounds, particles, texts and
-**behavior as data** (no code, safe from strangers). Built-in packs: seal, penguin, robot.
+**behavior as data** (no code, safe from strangers). Built-in packs: seal, penguin, robot (a little robot that scans the ores you look at).
 
 - Mod id `companio`, package `dev.henny.companio`, Apache-2.0. Needs `cosmetico` (models, animation, rendering, sounds),
   `r3` (pointer interaction, speech bubbles) and `vui` (screens). Usable without Vibey Client.

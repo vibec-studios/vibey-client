@@ -6,6 +6,7 @@ import dev.henny.companio.def.ParticleDef;
 import dev.henny.companio.def.PropDef;
 import dev.henny.companio.def.Range;
 import dev.henny.companio.def.SoundDef;
+import dev.henny.companio.expr.Names;
 import dev.henny.companio.pack.PackLimits;
 import dev.henny.companio.pack.Problems;
 import dev.henny.cosmetico.model.Bone;
@@ -22,7 +23,7 @@ final class AssetReader {
 
     private AssetReader() {}
 
-    static Map<String, PropDef> props(JsonObject root, Bundle model, Problems p) {
+    static Map<String, PropDef> props(JsonObject root, Bundle model, Names names, Problems p) {
         Map<String, PropDef> out = new LinkedHashMap<>();
         JsonObject o = Json.obj(root, "props", "", p);
         if (o == null) return out;
@@ -37,14 +38,14 @@ final class AssetReader {
                 break;
             }
             JsonObject po = e.getValue().getAsJsonObject();
-            Json.known(po, at, p, "bones", "shown");
+            Json.known(po, at, p, "bones", "shown", "when");
             List<String> bones = new ArrayList<>();
             List<Integer> idx = new ArrayList<>();
             var arr = Json.arr(po, "bones", at, p);
             if (arr == null || arr.isEmpty()) p.error(Json.at(at, "bones"), "needs at least one bone");
             else for (int i = 0; i < arr.size(); i++) bone(arr.get(i), Json.at(Json.at(at, "bones"), i), model, p, bones, idx);
             out.put(e.getKey(), new PropDef(e.getKey(), List.copyOf(bones), idx.stream().mapToInt(Integer::intValue).toArray(),
-                    Json.bool(po, "shown", at, p, false)));
+                    Json.bool(po, "shown", at, p, false), ExprReader.read(po, "when", at, names, p, null)));
         }
         return out;
     }

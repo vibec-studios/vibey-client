@@ -11,6 +11,7 @@ public final class Senses {
     public double nearWater = FAR, nearLava = FAR, nearFire = FAR, nearMob = FAR, nearPlayer = FAR, nearCompanion = FAR;
     public double dangerX, dangerZ;
     public boolean danger;
+    public boolean music;
 
     public long timeOfDay() {
         return Math.floorMod(dayTime, 24000L);
@@ -32,5 +33,6 @@ public final class Senses {
         nearWater = s.nearWater; nearLava = s.nearLava; nearFire = s.nearFire; nearMob = s.nearMob;
         nearPlayer = s.nearPlayer; nearCompanion = s.nearCompanion;
         dangerX = s.dangerX; dangerZ = s.dangerZ; danger = s.danger;
+        music = s.music;
     }
 }

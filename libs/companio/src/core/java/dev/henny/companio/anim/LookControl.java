@@ -24,7 +24,7 @@ public final class LookControl {
         prevPitch = pitch;
         float wantYaw = 0f, wantPitch = 0f, turnBody = 0f;
         switch (mode) {
-            case PLAYER -> {
+            case PLAYER, TARGET -> {
                 if (hasTarget) {
                     double dx = tx - fromX, dy = ty - fromY, dz = tz - fromZ;
                     float rel = Angles.wrap(Angles.yawTo(dx, dz) - bodyYaw);

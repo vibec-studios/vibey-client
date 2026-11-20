@@ -47,11 +47,12 @@ public final class CompanionReader {
         else models = ModelReader.read(files, modelPath, variants, soundFiles, gate, p, file);
         Bundle model = models.isEmpty() ? null : models.values().iterator().next();
         if (modelPath != null && model == null) return null;
-        Map<String, PropDef> props = AssetReader.props(o, model, p);
+        CompanionNames names = new CompanionNames(needs.keySet(), vars.keySet());
+        Map<String, PropDef> props = AssetReader.props(o, model, names, p);
         Map<String, SoundDef> sounds = AssetReader.sounds(o, soundFiles.keySet(), p);
         JsonArray behaviorsJson = Json.arr(o, "behaviors", "", p);
         Set<String> behaviorIds = BehaviorReader.ids(behaviorsJson);
-        ReadContext c = new ReadContext(p, lang, new CompanionNames(needs.keySet(), vars.keySet()), model, props, sounds,
+        ReadContext c = new ReadContext(p, lang, names, model, props, sounds,
                 Map.of(), needs.keySet(), vars.keySet(), behaviorIds);
         Map<String, ParticleDef> particles = AssetReader.particles(o, c);
         c = new ReadContext(p, lang, c.names(), model, props, sounds, particles, needs.keySet(), vars.keySet(), behaviorIds);

@@ -101,7 +101,7 @@ final class BehaviorReader {
         String m = Json.str(o, "look", at, p, null);
         if (m == null) return null;
         LookMode mode = LookMode.of(m);
-        if (mode == null) p.error(Json.at(at, "look"), "must be player, move, sky, around or none");
+        if (mode == null) p.error(Json.at(at, "look"), "must be player, move, sky, around, target or none");
         return mode;
     }
 

@@ -17,6 +17,7 @@ public final class Functions {
             Map.entry("cooldown", new int[] {1, 1}),
             Map.entry("since", new int[] {1, 1}),
             Map.entry("holding", new int[] {1, 8}),
+            Map.entry("target", new int[] {1, 8}),
             Map.entry("biome", new int[] {1, 8}),
             Map.entry("is", new int[] {2, 9}),
             Map.entry("prop", new int[] {1, 1}),
