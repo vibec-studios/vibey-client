@@ -50,7 +50,7 @@
 .fx-det-name { color: $text; font-weight: bold; min-width: 0; text-wrap: nowrap; text-overflow: ellipsis; }
 .fx-det-body { padding: 6; gap: 4; align-items: stretch; }
 .fx-field { height: 16; gap: 4; }
-.fx-label { width: 62; color: $text; text-wrap: nowrap; text-overflow: ellipsis; }
+.fx-label { width: 62; flex-shrink: 0; color: $text; text-wrap: nowrap; text-overflow: ellipsis; }
 .fx-slider { grow: 1; }
 .fx-slider-s { grow: 1; }
 .fx-num { width: 28; color: $muted; text-align: end; text-wrap: nowrap; }
