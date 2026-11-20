@@ -36,6 +36,7 @@ final class WorldOrderChecks {
         });
         open();
         check(ours().equals(List.of(A, B, C)), "new worlds start by last played: " + ours());
+        scrollTo(A);
         double[] from = grip(C), to = grip(A);
         ServerListsKit.drag(ctx, from[0], from[1], to[0], to[2], () -> SHOTS.shot(ctx, "worlds_dragging"));
         check(ours().equals(List.of(C, A, B)), "world C dragged to the top: " + ours());
@@ -74,6 +75,19 @@ final class WorldOrderChecks {
             return new double[] {r.centerX(), r.centerY()};
         });
         ServerListsKit.click(ctx, c[0], c[1]);
+        ctx.waitTicks(3);
+    }
+
+    private void scrollTo(String id) {
+        ctx.runOnClient(mc -> {
+            WorldSelectionList list = list(mc);
+            for (WorldSelectionList.Entry e : list.children()) {
+                if (e.getLevelSummary() != null && e.getLevelSummary().getLevelId().equals(id)) {
+                    list.setScrollAmount(list.scrollAmount() + e.getY() - list.getY());
+                    return;
+                }
+            }
+        });
         ctx.waitTicks(3);
     }
 
