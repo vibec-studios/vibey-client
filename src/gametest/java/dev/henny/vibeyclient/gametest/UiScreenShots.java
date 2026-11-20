@@ -83,12 +83,13 @@ final class UiScreenShots {
     private void search(String tag) {
         t.ctx().runOnClient(mc -> Menus.open(null));
         t.ctx().waitTicks(4);
-        t.ctx().getInput().typeChars("show");
+        String word = tag.endsWith("_de") ? "zeig" : "show";
+        t.ctx().getInput().typeChars(word);
         t.ctx().waitTicks(6);
         String q = t.ctx().computeOnClient(mc -> controller(mc).query.peek());
-        UiTest.check("show".equals(q), "typing anywhere should search, query=" + q);
+        UiTest.check(word.equals(q), "typing anywhere should search, query=" + q);
         int hits = t.ctx().computeOnClient(mc -> controller(mc).modules.size());
-        UiTest.check(hits > 0, "search 'show' found nothing");
+        UiTest.check(hits > 0, "search '" + word + "' found nothing");
         t.shot("ui_menu_search_" + tag);
         t.ctx().getInput().typeChars("zzqq");
         t.ctx().waitTicks(4);

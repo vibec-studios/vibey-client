@@ -471,6 +471,20 @@ others compile); the old screens stay in the jar behind `-Dvibeyclient.classicUi
 | Labels with more than 3 words | 42 EN / 36 DE | 0 / 0 |
 | First screen (menu grid) | 60 words for 6 modules | 16 words for 9 modules (wordmark, *Search*, 9 names, *Creator tools 1*) |
 
+### In game vs the previews
+
+`VibeyUiGameTest` writes every screen EN + DE at 427 × 240 and 640 × 360 to `build/review/ui-new/`;
+`python scripts/ui-compare.py` puts each next to its preview in `build/review/ui-new/compare/` (47 pairs).
+
+- Same layout, tokens, icons and texts; Minecraft's font is narrower than the preview font, so labels have more room.
+- The panel keeps an 8 px scrim margin like the preview; on the title screen the vanilla panorama is blurred behind it.
+- Module names/order come from the real modules (no waypoints/info/camera/visuals yet); tiles of modules a server
+  blocked show the lock only while connected to such a server.
+- Title corner and pause row show every real `MenuEntries` entry (title: wardrobe, friends, media, Vibey; pause:
+  Vibey, wardrobe, friends, HUD, media), the preview shows fewer.
+- Toasts sit at the bottom right over the menu panel (the preview has no screen behind them).
+- Wardrobe test items without thumbnails show an empty card (the old screen drew a monogram).
+
 ## Deleting the classic UI
 
 After the new look is approved, these classes are only used by the classic path and can be deleted together with
