@@ -41,7 +41,7 @@ public final class LivePinger {
         if (!m.liveActive()) return;
         schedule.configure(m.pingParallel.get(), m.pingEvery.get() * 1000L);
         long now = System.nanoTime();
-        for (ServerData d : schedule.expired(now)) finish(d, false);
+        for (ServerData d : schedule.expired(now)) finish(d, probes.get(d), false);
         List<PingSchedule.Candidate<ServerData>> visible = new ArrayList<>();
         for (ServerSelectionList.Entry e : list.children()) {
             if (!(e instanceof ServerSelectionList.OnlineServerEntry o)) continue;
@@ -67,15 +67,16 @@ public final class LivePinger {
         EventLoopGroupHolder group = EventLoopGroupHolder.remote(mc.options.useNativeTransport());
         PingThreads.run(() -> {
             try {
-                screen.getPinger().pingServer(probe, () -> {}, () -> mc.execute(() -> finish(d, true)), group);
+                screen.getPinger().pingServer(probe, () -> {}, () -> mc.execute(() -> finish(d, probe, true)), group);
             } catch (Exception e) {
-                mc.execute(() -> finish(d, false));
+                mc.execute(() -> finish(d, probe, false));
             }
         });
     }
 
-    private void finish(ServerData d, boolean ok) {
-        ServerData probe = probes.remove(d);
+    private void finish(ServerData d, ServerData probe, boolean ok) {
+        if (probes.get(d) != probe) return;
+        probes.remove(d);
         schedule.done(d, System.nanoTime());
         if (probe == null) return;
         if (ok) {
