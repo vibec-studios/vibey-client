@@ -1,0 +1,7 @@
+{
+  "pack.name": "Robot",
+  "pack.description": "A little robot with a lamp (first version).",
+  "robot.name": "Robot",
+  "say.pet": ["♥ beep", "Boop! ♥"],
+  "say.night": ["Lamp on!", "☀ → ☾"]
+}

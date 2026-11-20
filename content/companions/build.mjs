@@ -46,7 +46,7 @@ async function buildPack(id) {
     if (!v.ok) errors++;
     if (!noPreview) {
       const B = loadBundle(json);
-      if (bundle.preview?.panels) writeFileSync(join(DIST, `${id}-${name}-preview.png`), sheet(B, json.name.en, bundle.preview.panels(), bundle.preview.sheet ?? {}).toPNG());
+      if (bundle.preview?.panels) writeFileSync(join(DIST, `${id}-${name}-preview.png`), sheet(B, json.name.en, bundle.preview.panels(null, B), bundle.preview.sheet ?? {}).toPNG());
       hero ??= { B, thumb: bundle.preview?.thumb ?? { cam: { yaw: 35, pitch: 14 }, player: false, petScale: 1, time: 0.6, anims: [{ name: "idle", t: 0.6 }] } };
     }
   }

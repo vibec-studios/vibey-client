@@ -33,5 +33,7 @@
   "key.vibeyclient.chat.searchKey": "Search chat",
   "key.vibeyclient.social.streamerKey": "Streamer mode",
   "key.vibeyclient.inventory.presetKey": "Hotbar preset (tap/hold)",
-  "key.vibeyclient.inventory.presetSaveKey": "Save hotbar preset"
+  "key.vibeyclient.inventory.presetSaveKey": "Save hotbar preset",
+  "key.vibeyclient.companion.menuKey": "Companion menu",
+  "key.vibeyclient.companion.packsKey": "Companion packs"
 }

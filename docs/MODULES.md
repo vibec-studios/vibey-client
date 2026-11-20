@@ -32,7 +32,8 @@ toasts, movable chat window; Fabric 1.21.11 only, see [CHAT.md](CHAT.md)). Socia
 streamer mode (part `social.streamer`, Fabric 1.21.11), see [SOCIAL.md](SOCIAL.md); `api/privacy/Privacy` is the shared
 streamer state any module can read. `inventory` (durability %, shulker preview, quick moves, search, hotbar presets; Fabric
 1.21.11 only, see [INVENTORY.md](INVENTORY.md)), `servers` (live pings, search, favourites, MOTD preview in the
-multiplayer screen; Fabric 1.21.11 only, see [SERVERS.md](SERVERS.md)).
+multiplayer screen; Fabric 1.21.11 only, see [SERVERS.md](SERVERS.md)). `companion` (a living companion from companion
+packs, built on the `companio` lib; Fabric 1.21.11 only, see [COMPANION.md](COMPANION.md)).
 
 ## Targets and boundaries
 

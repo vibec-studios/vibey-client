@@ -1,0 +1,37 @@
+{
+  "id": "penguin",
+  "name": "@penguin.name",
+  "model": "models/penguin.vibey",
+  "scale": 0.75,
+  "size": { "default": 1.0, "min": 0.6, "max": 1.4 },
+  "box": { "width": 0.5, "height": 0.85 },
+  "animations": { "run": "sprint", "fall": "glide", "sleep": "idle_long", "swim": "glide" },
+  "look": { "bone": "head", "maxYaw": 60, "maxPitch": 30 },
+  "movement": { "walkSpeed": 2.6, "runSpeed": 5.5, "swimSpeed": 5, "canSwim": true },
+  "props": { "umbrella": { "bones": ["umbrella"] } },
+  "sounds": {
+    "honk": { "sound": "minecraft:entity.chicken.ambient", "volume": 0.6, "pitch": [0.55, 0.7] },
+    "pop": { "sound": "minecraft:entity.chicken.egg", "volume": 0.5, "pitch": 1.6 }
+  },
+  "particles": { "hearts": { "particle": "minecraft:heart", "count": 3, "locator": "heart", "spread": [0.2, 0.1, 0.2] } },
+  "needs": { "energy": { "start": 1, "perMinute": -0.05 } },
+  "behaviors": [
+    {
+      "id": "petted", "priority": 90, "on": "pet", "cooldown": 0.4, "anim": { "name": "flap", "blend": "add" },
+      "start": [ { "do": "sound", "name": "honk" }, { "do": "particle", "name": "hearts" }, { "do": "say", "text": "@say.pet" } ]
+    },
+    {
+      "id": "umbrella", "priority": 60, "when": "weather.rain && world.sky", "minDuration": 4,
+      "props": { "umbrella": true }, "anim": "umbrella_hold",
+      "start": [ { "do": "sound", "name": "pop", "at": 0.2 }, { "do": "say", "text": "@say.rain", "chance": 0.7 } ]
+    },
+    {
+      "id": "nap", "priority": 40, "when": "time.night && need.energy < 0.7", "while": "time.night && need.energy < 0.98",
+      "move": "near", "baseAnim": "idle_long", "look": "none", "needs": { "energy": 0.8 },
+      "repeat": [ { "every": [6, 10], "actions": [ { "do": "say", "text": "@say.sleep", "if": "!self.moving" } ] } ]
+    },
+    {
+      "id": "swim", "priority": 30, "when": "self.inWater && player.distance < 7", "move": "swim", "look": "around"
+    }
+  ]
+}

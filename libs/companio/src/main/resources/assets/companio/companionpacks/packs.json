@@ -15,6 +15,28 @@
         "textures/seal_arctic.png",
         "textures/seal_harbor.png"
       ]
+    },
+    {
+      "id": "penguin",
+      "files": [
+        "companion.json",
+        "companions/penguin.json",
+        "lang/de_de.json",
+        "lang/en_us.json",
+        "models/penguin.vibey",
+        "pack.png"
+      ]
+    },
+    {
+      "id": "robot",
+      "files": [
+        "companion.json",
+        "companions/robot.json",
+        "lang/de_de.json",
+        "lang/en_us.json",
+        "models/robot.vibey",
+        "pack.png"
+      ]
     }
   ]
 }

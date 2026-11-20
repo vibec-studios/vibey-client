@@ -1,0 +1,38 @@
+{
+  "name": "Companion",
+  "description": "A living companion from companion packs: seal, penguin, robot and more.",
+  "summary": "Living companion, packs",
+  "none": "None",
+  "mode": {
+    "follow": "Follow",
+    "stay": "Stay",
+    "sit": "Sit"
+  },
+  "section": {
+    "feel": "Sound & sharing"
+  },
+  "setting": {
+    "packs": "Packs",
+    "packs.action": "Packs",
+    "packs.desc": "Activate companion packs, see errors, open the folder.",
+    "recall": "Call back",
+    "recall.button": "Call",
+    "recall.desc": "Your companion pops up next to you.",
+    "companion": "Companion",
+    "companion.desc": "Look at it and click to pet. Hold middle mouse to carry it, wheel = size, right click = menu.",
+    "variant": "Look",
+    "name": "Name",
+    "name.desc": "Or right click it with a named name tag.",
+    "size": "Size",
+    "mode": "Mode",
+    "mode.desc": "Stay keeps it at its spot; it wanders around a little.",
+    "volume": "Sounds",
+    "bubbles": "Speech bubbles",
+    "others": "Others' companions",
+    "others.desc": "Shows companions of players with Vibey and the same pack.",
+    "share": "Show mine to others",
+    "share.desc": "Only pack, position and animation are sent, through the server's Vibey relay.",
+    "menuKey": "Companion menu",
+    "packsKey": "Companion packs"
+  }
+}

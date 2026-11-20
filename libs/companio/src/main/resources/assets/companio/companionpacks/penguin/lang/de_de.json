@@ -1,0 +1,8 @@
+{
+  "pack.name": "Pinguin",
+  "pack.description": "Ein Pinguin mit Regenschirm (erste Version).",
+  "penguin.name": "Pinguin",
+  "say.rain": ["☂ Regen!", "Schirm auf!"],
+  "say.pet": ["♥", "Tröt! ♥"],
+  "say.sleep": ["Zzz…"]
+}

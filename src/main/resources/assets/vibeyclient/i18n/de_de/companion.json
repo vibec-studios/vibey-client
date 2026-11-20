@@ -1,0 +1,38 @@
+{
+  "name": "Begleiter",
+  "description": "Ein lebendiger Begleiter aus Begleiter-Paketen: Robbe, Pinguin, Roboter und mehr.",
+  "summary": "Lebendiger Begleiter, Pakete",
+  "none": "Keiner",
+  "mode": {
+    "follow": "Folgen",
+    "stay": "Bleiben",
+    "sit": "Sitzen"
+  },
+  "section": {
+    "feel": "Ton & Teilen"
+  },
+  "setting": {
+    "packs": "Pakete",
+    "packs.action": "Pakete",
+    "packs.desc": "Begleiter-Pakete aktivieren, Fehler sehen, Ordner öffnen.",
+    "recall": "Zurückrufen",
+    "recall.button": "Rufen",
+    "recall.desc": "Dein Begleiter taucht neben dir auf.",
+    "companion": "Begleiter",
+    "companion.desc": "Anschauen und klicken zum Streicheln. Mittlere Maustaste halten zum Tragen, Mausrad = Größe, Rechtsklick = Menü.",
+    "variant": "Aussehen",
+    "name": "Name",
+    "name.desc": "Oder mit einem benannten Namensschild rechtsklicken.",
+    "size": "Größe",
+    "mode": "Modus",
+    "mode.desc": "Bleiben hält ihn an seinem Platz; er läuft dort ein wenig herum.",
+    "volume": "Geräusche",
+    "bubbles": "Sprechblasen",
+    "others": "Begleiter anderer",
+    "others.desc": "Zeigt Begleiter von Spielern mit Vibey und demselben Paket.",
+    "share": "Meinen zeigen",
+    "share.desc": "Nur Paket, Position und Animation werden gesendet, über das Vibey-Relay des Servers.",
+    "menuKey": "Begleiter-Menü",
+    "packsKey": "Begleiter-Pakete"
+  }
+}

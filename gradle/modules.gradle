@@ -21,6 +21,7 @@ ext.clientModules = [
         'social.streamer': ['fabric-1.21.11'],
         inventory    : ['fabric-1.21.11'],
         servers      : ['fabric-1.21.11'],
+        companion    : ['fabric-1.21.11'],
 ]
 
 // Resources a module owns besides its i18n files (i18n/*/<id>[.*].json) and mixin configs (vibeyclient.<id>[.*].mixins.json).

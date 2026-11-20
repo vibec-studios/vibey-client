@@ -72,11 +72,12 @@ ignored, so you can list keys that only newer clients know.
 | `info.tnt` | TNT fuse timer |
 | `inventory.tweaks` | Quick moves in inventories (Shift-drag and mouse-wheel moves; off by default in the client too) |
 | `inventory.presets` | Hotbar presets (switch key, preset bar) |
+| `companion.show` | Companions: the own companion and other players' companions are hidden (e.g. minigames). They come back when the player leaves |
 
 The authoritative list for a given client is what it announces in `vibey:hello` (the plugin logs it, see below);
 the keys come from `ServerRules.supports(...)` calls in the modules. The current Vibey Client declares `zoom`,
 `togglesprint`, `togglesneak`, `crosshair`, `blockoutline`, `hitcolor`, `lowfire`, `lowshield`, `hud.togglestate`
-(PvP module), `clips`, `clips.auto` (Clips module), `nametags.seal`, `nametags.ranks`, `nametags.styles` (Names and ranks), `waypoints.minimap` (Waypoints), `info.light`, `info.chunks`, `info.card`, `info.food`, `info.saturation`, `info.toolwarn`, `info.tnt` (Info module), `camera.freelook`, `freelook`, `camera.orbit` (Camera module), `inventory.tweaks`, `inventory.presets` (Inventory), `emotes`, `cosmetics.*` slots, `discord.server` and every `hud.*` key
+(PvP module), `clips`, `clips.auto` (Clips module), `nametags.seal`, `nametags.ranks`, `nametags.styles` (Names and ranks), `waypoints.minimap` (Waypoints), `info.light`, `info.chunks`, `info.card`, `info.food`, `info.saturation`, `info.toolwarn`, `info.tnt` (Info module), `camera.freelook`, `freelook`, `camera.orbit` (Camera module), `inventory.tweaks`, `inventory.presets` (Inventory), `companion.show` (Companion), `emotes`, `cosmetics.*` slots, `discord.server` and every `hud.*` key
 above (HUD module). Listing a key an older client does not know is harmless.
 
 ## Paper / Spigot: the VibeyRules plugin
