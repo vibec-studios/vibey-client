@@ -102,5 +102,28 @@ class PresetPlannerTest {
         PresetJson.read(JsonParser.parseString("{\"active\":9,\"presets\":[[{\"id\":\"Not Valid\"}]]}").getAsJsonObject(), bad);
         assertTrue(bad.get(0).blank());
         assertEquals(1, bad.active());
+        PresetJson.read(JsonParser.parseString("{\"active\":\"x\",\"presets\":[]}").getAsJsonObject(), bad);
+        assertEquals(0, bad.active());
+    }
+
+    @Test
+    void shrinkingTheCountKeepsTheHiddenPresets() {
+        PresetSet set = new PresetSet(6);
+        set.put(5, new HotbarPreset(List.of(r("bow"))));
+        set.resize(2);
+        PresetSet back = new PresetSet(2);
+        PresetJson.read(PresetJson.write(set), back);
+        back.resize(6);
+        assertEquals(set.get(5), back.get(5));
+    }
+
+    @Test
+    void longNamesMatchAfterAReload() {
+        ItemRef live = new ItemRef("minecraft:stick", "x".repeat(100));
+        PresetSet set = new PresetSet(2);
+        set.put(0, new HotbarPreset(List.of(live)));
+        PresetSet back = new PresetSet(2);
+        PresetJson.read(PresetJson.write(set), back);
+        assertTrue(back.get(0).slots().get(0).exact(new ItemRef("minecraft:stick", "x".repeat(100))));
     }
 }

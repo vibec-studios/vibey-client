@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class PresetJson {
-    private static final int MAX_ID = 128, MAX_NAME = 64;
+    private static final int MAX_ID = 128, MAX_NAME = ItemRef.MAX_NAME;
 
     private PresetJson() {}
 
@@ -16,7 +16,7 @@ public final class PresetJson {
         JsonObject root = new JsonObject();
         root.addProperty("active", set.active());
         JsonArray list = new JsonArray();
-        for (HotbarPreset p : set.all()) list.add(write(p));
+        for (HotbarPreset p : set.stored()) list.add(write(p));
         root.add("presets", list);
         return root;
     }
@@ -24,8 +24,9 @@ public final class PresetJson {
     public static void read(JsonObject root, PresetSet into) {
         if (root == null) return;
         JsonArray list = root.has("presets") && root.get("presets").isJsonArray() ? root.getAsJsonArray("presets") : new JsonArray();
-        for (int i = 0; i < into.size(); i++) into.put(i, i < list.size() ? read(list.get(i)) : HotbarPreset.BLANK);
-        int active = root.has("active") && root.get("active").isJsonPrimitive() ? root.get("active").getAsInt() : 0;
+        for (int i = 0; i < PresetSet.MAX; i++) into.put(i, i < list.size() ? read(list.get(i)) : HotbarPreset.BLANK);
+        JsonElement a = root.get("active");
+        int active = a != null && a.isJsonPrimitive() && a.getAsJsonPrimitive().isNumber() ? a.getAsInt() : 0;
         into.select(Math.max(0, Math.min(into.size() - 1, active)));
     }
 
