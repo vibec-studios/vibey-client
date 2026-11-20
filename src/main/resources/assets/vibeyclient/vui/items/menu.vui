@@ -1,0 +1,22 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<template>
+  <box class="im-anchor" :style="{ left: menu.x, top: menu.y }">
+    <popover :open="panel == 'menu'" @update:open="panel = ''" placement="bottom" align="start">
+      <column class="im">
+        <row v-for="m in menu.items" :key="m.id" :id="'menu-' + m.id" class="im-row" :class="{ on: m.on }" tabindex="0" @click="menuPick(m)">
+          <ico :name="m.icon"/><text class="im-label">{{ m.label }}</text>
+        </row>
+      </column>
+    </popover>
+  </box>
+</template>
+<style>
+.im-anchor { position: absolute; size: 1; }
+.im { gap: 1; padding: 1; min-width: 96; }
+.im-row { height: 16; gap: 6; padding: 0 6 0 5; cursor: pointer; color: $muted; }
+.im-row:hover, .im-row:focus { background: $surface2; color: $text; }
+.im-row .ico { color: $brand2; }
+.im-row.on { color: $text; }
+.im-row.on .ico { color: $brand; }
+.im-label { grow: 1; text-wrap: nowrap; }
+</style>
