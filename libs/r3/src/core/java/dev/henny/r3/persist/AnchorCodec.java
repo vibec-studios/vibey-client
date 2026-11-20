@@ -39,7 +39,7 @@ public final class AnchorCodec {
             }
             case CameraAnchor c -> {
                 r.distance = c.distance();
-                r.yawOffset = c.yawOffset();
+                r.yawOffset = Float.isFinite(c.yawOffset()) ? c.yawOffset() : null;
                 r.pitchOffset = c.pitchOffset();
                 r.smoothing = c.smoothing();
             }
@@ -47,7 +47,7 @@ public final class AnchorCodec {
             case SoftFollowAnchor f -> {
                 r.distance = f.distance();
                 r.pitchOffset = f.elevation();
-                r.yawOffset = f.startYaw();
+                r.yawOffset = Float.isFinite(f.startYaw()) ? f.startYaw() : null;
                 r.smoothing = f.rate();
                 r.recenter = f.recenterDegrees();
             }
@@ -74,9 +74,9 @@ public final class AnchorCodec {
         return switch (kind) {
             case BLOCK_FACE -> blockFace(r);
             case ENTITY -> entity(r);
-            case CAMERA -> new CameraAnchor(finiteDistance(r.distance), r.yawOffset, r.pitchOffset, r.smoothing);
+            case CAMERA -> new CameraAnchor(finiteDistance(r.distance), r.yawOffset == null ? 0f : r.yawOffset, r.pitchOffset, r.smoothing);
             case VIEW_FOLLOW -> new ViewFollowAnchor(finiteDistance(r.distance));
-            case SOFT_FOLLOW -> new SoftFollowAnchor(finiteDistance(r.distance), r.pitchOffset, r.recenter, r.smoothing, r.yawOffset);
+            case SOFT_FOLLOW -> new SoftFollowAnchor(finiteDistance(r.distance), r.pitchOffset, r.recenter, r.smoothing, r.yawOffset == null ? Float.NaN : r.yawOffset);
             case FREE -> FreeAnchor.INSTANCE;
         };
     }

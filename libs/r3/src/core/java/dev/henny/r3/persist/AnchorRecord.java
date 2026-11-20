@@ -14,7 +14,7 @@ public final class AnchorRecord {
     public boolean aboveHead;
     public String facing;
     public double distance;
-    public float yawOffset;
+    public Float yawOffset;
     public float pitchOffset;
     public float smoothing;
     public float recenter;

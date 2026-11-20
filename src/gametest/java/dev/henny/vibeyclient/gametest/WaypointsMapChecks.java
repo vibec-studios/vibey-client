@@ -89,10 +89,10 @@ final class WaypointsMapChecks {
         cmd(world, "fill %d %d %d %d %d %d minecraft:obsidian", x, y, z, x, y + 4, z + 3);
         cmd(world, "fill %d %d %d %d %d %d minecraft:nether_portal[axis=z]", x, y + 1, z + 1, x, y + 3, z + 2);
         ctx.waitTicks(10);
-        lookAt(ctx, new Vector3d(x + 0.5, y + 2, z + 2));
+        lookAt(ctx, new Vector3d(x + 0.5, y + 2.5, z + 1.5));
         String text = ctx.computeOnClient(mc -> PortalLook.text());
         log("portal: %s", text);
-        String expected = Math.floorDiv(x, 8) + " " + Math.floorDiv(z + 2, 8);
+        String expected = Math.floorDiv(x, 8) + " " + Math.floorDiv(z + 1, 8);
         check(text.endsWith(expected), "looking at the portal should show nether " + expected + ", got '" + text + "'");
         shot(ctx, "11_portal_coords");
     }

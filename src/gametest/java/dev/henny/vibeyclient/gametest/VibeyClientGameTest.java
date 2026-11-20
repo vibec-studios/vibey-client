@@ -6,8 +6,6 @@ import dev.henny.vibeyclient.api.VibeyModule;
 import dev.henny.vibeyclient.api.net.VibeyNet;
 import dev.henny.vibeyclient.client.VibeyCore;
 import dev.henny.vibeyclient.net.ServerRelay;
-import dev.henny.vibeyclient.ui.VibeyScreen;
-import dev.henny.vibeyclient.ui.screen.ModulesPanel;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
@@ -39,8 +37,7 @@ public final class VibeyClientGameTest implements FabricClientGameTest {
             GlobalSettings.language.set(GlobalSettings.Language.ENGLISH);
         });
 
-        ModulesPanel.preselect(null);
-        context.setScreen(() -> new VibeyScreen(null));
+        context.runOnClient(mc -> dev.henny.vibeyclient.ui.vui.menu.MenuScreen.open(null, null, null));
         context.waitTicks(10);
         context.takeScreenshot("1_menu_title_global");
 
@@ -60,19 +57,17 @@ public final class VibeyClientGameTest implements FabricClientGameTest {
             // Right Shift opens the menu
             context.getInput().pressKey(Keys.RIGHT_SHIFT);
             context.waitTicks(10);
-            boolean open = context.computeOnClient(mc -> mc.screen instanceof VibeyScreen);
+            boolean open = context.computeOnClient(mc -> mc.screen instanceof dev.henny.vibeyclient.ui.vui.menu.MenuScreen);
             if (!open) throw new AssertionError("Right Shift did not open the Vibey menu");
             context.takeScreenshot("3_menu_world_global");
 
             context.setScreen(() -> null);
-            ModulesPanel.preselect("emotes");
-            context.setScreen(() -> new VibeyScreen(null));
+            context.runOnClient(mc -> dev.henny.vibeyclient.ui.vui.menu.MenuScreen.open(null, "emotes", null));
             context.waitTicks(10);
             context.takeScreenshot("4_menu_world_emotes");
 
             context.runOnClient(mc -> GlobalSettings.language.set(GlobalSettings.Language.GERMAN));
-            ModulesPanel.preselect("devlink");
-            context.setScreen(() -> new VibeyScreen(null));
+            context.runOnClient(mc -> dev.henny.vibeyclient.ui.vui.menu.MenuScreen.open(null, "devlink", null));
             context.waitTicks(10);
             context.takeScreenshot("5_menu_world_devlink_de");
             context.runOnClient(mc -> GlobalSettings.language.set(GlobalSettings.Language.AUTO));
