@@ -18,6 +18,9 @@
       "dev.henny.r3.mc.fabric.R3Fabric"
     ]
   },
+  "mixins": [
+    "r3.mixins.json"
+  ],
   "depends": {
     "fabricloader": ">=0.16.5",
     "fabric-api": "*",

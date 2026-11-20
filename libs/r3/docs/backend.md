@@ -3,6 +3,26 @@
 The core never touches Minecraft. A backend (one per Minecraft version family, `libs/r3/src/main/java`, Stonecutter
 `//?` where versions differ) implements a handful of interfaces and calls the scene at the right moments.
 
+## Status
+
+Done for every target (`dev.henny.r3.mc`, see [minecraft.md](minecraft.md) for the package map), written and run on
+Fabric 1.21.11, compiled for Fabric 1.21.1 / 1.21.5 / 1.21.8 / 26.1 / 26.3 and NeoForge 1.21.11 / 26.3:
+
+| Item | Where |
+|---|---|
+| `WorldQuery` (dimension, block ray, entity pose, light) | `world.McWorldQuery` |
+| camera → `CameraState`, `ViewFrustum` | `view.CameraReader` + core `view.CameraFrustum` (camera cone, not the game's frustum) |
+| `WorldCanvas`, `PanelCanvas`, `TextMetrics` | `render.McWorldCanvas`, `McPanelCanvas`, `McFontMetrics` |
+| `TextureHandle` wrappers | `texture.McTextures` (resources), `DynamicTextureHandle` (pixels) |
+| render hook | Fabric `AFTER_ENTITIES` below 1.21.9, mixin at the end of `LevelRenderer.submitEntities` from 1.21.9 |
+| input + vanilla suppression, `HeldKeys` | `mixin.*HandlerMixin` → `R3Hooks` → `input.InputRouter`, `HeldInput`, `VanillaGuard` |
+| hint line | `hud.HintOverlay` (Fabric HUD element / NeoForge GUI layer) |
+| hints, bindings, placements on disk | `store.R3Storage` + core `persist.ConfigStore` (`config/r3/`) |
+| `SyncChannel` | interface for the host mod; core `sync.LoopbackChannel` for single player and tests |
+| vui panels | core `vui.VuiPanelContent` + `mc.vui.WorldVui` |
+
+Not done: MCEF textures, keyboard input to panels, the game's own frustum, video screens / lyrics moved over.
+
 ## Interfaces to implement
 
 | Interface | Backend job |

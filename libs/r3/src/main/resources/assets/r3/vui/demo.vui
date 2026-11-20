@@ -1,0 +1,20 @@
+<template>
+  <column class="demo" gap="5">
+    <text class="title">{{ title }}</text>
+    <row class="buttons" gap="5">
+      <button id="play" class="key" @click="play()">▶</button>
+      <button id="next" class="key" @click="next()">⏭</button>
+      <button id="stop" class="key" @click="stop()">■</button>
+    </row>
+    <text class="status">{{ status }}</text>
+  </column>
+</template>
+<style>
+.demo { padding: 8; background: 0xE0141420; border: 1 #5a4bff; }
+.title { color: #ffffff; }
+.buttons { justify: center; }
+.key { padding: 4; background: 0xFF2A2A3A; border: 1 #3c3c55; color: #ffffff; }
+.key:hover { background: 0xFF5A4BFF; transition: background 120ms out; }
+.key:active { background: 0xFF8B7CFF; }
+.status { color: 0xFFB8B8C8; }
+</style>

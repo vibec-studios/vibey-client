@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.henny.r3.mc.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [],
+  "client": ["KeyboardHandlerMixin", "LevelRendererMixin", "MouseHandlerMixin"],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

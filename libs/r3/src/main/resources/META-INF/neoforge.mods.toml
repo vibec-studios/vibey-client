@@ -11,6 +11,9 @@ authors = "Vibe Craft Studios"
 displayURL = "https://github.com/vibec-studios/vibey-client"
 description = """3D library: world panels, 3D text, effects and interaction in the Minecraft world."""
 
+[[mixins]]
+config = "r3.mixins.json"
+
 [[dependencies.${mod_id}]]
 modId = "neoforge"
 type = "required"
