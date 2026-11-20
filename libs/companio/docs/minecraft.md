@@ -11,7 +11,7 @@
 | `mc.fabric` | `CompanioFabric`: starts the client, tick event, `/companio` command, finds built-in packs in every mod's `assets/*/companionpacks/packs.json` |
 | `mc.client` | `CompanioClient` (the runtime: config, packs, own companion, puppets, sync), `OwnCompanion`, `Riding`, `SyncSender`, `ConfigStore` |
 | `mc.packs` | `PackRepository` (loads on a worker thread, swaps on the client thread, watches the folder every second), `UserPacks`, `BuiltinPacks` |
-| `mc.world` | `McBlockView` (collision tops, fluids, ice/snow, hazards, loaded chunks), `McSenses`, `OwnerTracker`, `NearScan` |
+| `mc.world` | `McBlockView` (collision tops, fluids, ice/snow, hazards, loaded chunks), `McSenses`, `OwnerTracker`, `OwnerExtras` (crosshair block, XP level, advancement toast), `MusicWatch` (record sounds via a `SoundEventListener`), `NearScan` |
 | `mc.render` | `CompanionRenderer` (mixin at the end of `LevelRenderer.submitEntities`), `ViewLocators` |
 | `mc.fx` | `McOutput` (pack sounds and particles), `AnimEvents` (model animation events) – both through cosmetico's `VanillaFx` |
 | `mc.interact` | `CompanionTarget` (an invisible r3 world object on the companion), `Interactions` (r3 events), `Bubbles` (r3 3D text) |
@@ -51,6 +51,8 @@ Speech bubbles and the name (shown while you look at it) are r3 `Text3D` objects
 
 - Only client-known blocks and entities are read; `near.*` counts only blocks and mobs the player can see (ray from the
   eyes, at most 48 rays per scan, every 10 ticks); paths stay within 32 blocks of the companion.
+- `player.target` is Minecraft's own crosshair hit (`Minecraft.hitResult`, within reach): only a block the player
+  already sees and points at.
 - The companion never touches the world, sends no gameplay packets and can be hidden by the host
   (`CompanioMc.serverHidden`, Vibey Client's server rule `companion.show`).
 

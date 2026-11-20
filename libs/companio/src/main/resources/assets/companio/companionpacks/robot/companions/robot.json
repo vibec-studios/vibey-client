@@ -1,34 +1,446 @@
 {
   "id": "robot",
   "name": "@robot.name",
+  "description": "@robot.description",
   "model": "models/robot.vibey",
-  "scale": 0.8,
+  "scale": 0.72,
   "size": { "default": 1.0, "min": 0.5, "max": 1.5 },
-  "box": { "width": 0.5, "height": 1.0 },
-  "look": { "bone": "head", "maxYaw": 80, "maxPitch": 30 },
-  "movement": { "walkSpeed": 3.4, "runSpeed": 6.5, "canSwim": false, "shoulder": [0.45, 1.4, 0.1] },
-  "props": { "lamp": { "bones": ["lamp"] } },
+  "box": { "width": 0.55, "height": 0.95 },
+  "variants": [
+    { "id": "copper", "name": "@variant.copper" },
+    { "id": "iron", "name": "@variant.iron", "textures": { "main": "textures/robot_iron.png" } },
+    { "id": "retro", "name": "@variant.retro", "textures": { "main": "textures/robot_retro.png" } }
+  ],
+  "animations": {
+    "idle": "idle", "walk": "walk", "run": "sprint", "swim": "glitch", "swim_idle": "glitch",
+    "fall": "hover", "sit": "sit", "sleep": "power_down", "held": "held", "ride": "sit"
+  },
+  "look": { "bone": "head", "maxYaw": 70, "maxPitch": 35, "speed": 260 },
+  "movement": {
+    "walkSpeed": 3.0, "runSpeed": 6.0, "canSwim": false, "jump": 1.1, "step": 0.6, "turnSpeed": 320,
+    "follow": { "near": 1.7, "far": 4.2, "run": 8.0, "teleport": 24 },
+    "wander": 5,
+    "shoulder": [0.48, 1.38, 0.12],
+    "head": [0, 1.95, 0]
+  },
+  "props": {
+    "face_happy": { "bones": ["face_happy"] },
+    "face_heart": { "bones": ["face_heart"] },
+    "face_error": { "bones": ["face_error"] },
+    "face_sleep": { "bones": ["face_sleep"] },
+    "face_scan": { "bones": ["face_scan"] },
+    "face_wow": { "bones": ["face_wow"] },
+    "face_sad": { "bones": ["face_sad"] },
+    "face_cool": { "bones": ["face_cool"] },
+    "bulb_happy": { "bones": ["bulb_happy"], "when": "need.happiness > 0.75" },
+    "bulb_low": { "bones": ["bulb_low"], "when": "need.energy < 0.25" },
+    "bulb_alert": { "bones": ["bulb_alert"] },
+    "lamp": { "bones": ["lamp", "lamp_glow", "lamp_pool"], "when": "world.light < 7 && !self.held && !self.riding" },
+    "beam": { "bones": ["beam"] },
+    "umbrella": { "bones": ["umbrella"], "when": "weather.rain && world.sky && !self.inWater" },
+    "torch": { "bones": ["torch"] },
+    "flag": { "bones": ["flag"] }
+  },
   "sounds": {
-    "beep": { "sound": "minecraft:block.note_block.bit", "volume": 0.5, "pitch": [1.2, 1.6] },
-    "boop": { "sound": "minecraft:block.note_block.bit", "volume": 0.5, "pitch": 0.8 }
+    "beep": { "file": "sounds/beep.ogg", "volume": 0.45, "pitch": [0.95, 1.15] },
+    "boop": { "file": "sounds/boop.ogg", "volume": 0.45, "pitch": [0.9, 1.1] },
+    "chirp": { "file": "sounds/chirp.ogg", "volume": 0.5, "pitch": [0.95, 1.1] },
+    "startup": { "file": "sounds/startup.ogg", "volume": 0.5 },
+    "error": { "file": "sounds/error.ogg", "volume": 0.45, "pitch": [0.9, 1.1] },
+    "whirr": { "file": "sounds/whirr.ogg", "volume": 0.35, "pitch": [0.9, 1.2] },
+    "charge": { "file": "sounds/charge.ogg", "volume": 0.4 },
+    "powerdown": { "file": "sounds/powerdown.ogg", "volume": 0.4 },
+    "scan": { "file": "sounds/scan.ogg", "volume": 0.45 },
+    "snore": { "file": "sounds/snore.ogg", "volume": 0.25, "pitch": [0.9, 1.05] },
+    "step": { "sound": "minecraft:block.copper.step", "volume": 0.3, "pitch": 1.4 },
+    "clank": { "sound": "minecraft:block.iron_trapdoor.close", "volume": 0.3, "pitch": 1.8 },
+    "open": { "sound": "minecraft:block.iron_trapdoor.open", "volume": 0.3, "pitch": 1.8 },
+    "click": { "sound": "minecraft:block.lever.click", "volume": 0.3, "pitch": 1.7 },
+    "hiss": { "sound": "minecraft:block.fire.extinguish", "volume": 0.35, "pitch": 1.5 },
+    "splash": { "sound": "minecraft:entity.generic.splash", "volume": 0.4, "pitch": [1.1, 1.3] },
+    "launch": { "sound": "minecraft:entity.firework_rocket.launch", "volume": 0.4, "pitch": 1.4 },
+    "twinkle": { "sound": "minecraft:entity.firework_rocket.twinkle", "volume": 0.35, "pitch": 1.2 },
+    "ding": { "sound": "minecraft:entity.experience_orb.pickup", "volume": 0.4, "pitch": 1.5 },
+    "chime": { "sound": "minecraft:block.amethyst_block.chime", "volume": 0.6, "pitch": [1.2, 1.6] },
+    "warp": { "sound": "minecraft:entity.enderman.teleport", "volume": 0.25, "pitch": 1.7 },
+    "pop": { "sound": "minecraft:entity.chicken.egg", "volume": 0.4, "pitch": 1.7 }
   },
   "particles": {
-    "hearts": { "particle": "minecraft:heart", "count": 2, "locator": "heart", "spread": [0.2, 0.1, 0.2] },
-    "spark": { "particle": "minecraft:electric_spark", "count": 6, "locator": "lamp", "spread": [0.1, 0.1, 0.1] }
+    "hearts": { "particle": "minecraft:heart", "count": 3, "locator": "heart", "spread": [0.25, 0.1, 0.25], "velocity": [0, 0.04, 0] },
+    "sparks": { "particle": "minecraft:electric_spark", "count": 8, "locator": "antenna", "spread": [0.2, 0.15, 0.2], "velocity": [0, 0.05, 0] },
+    "body_sparks": { "particle": "minecraft:electric_spark", "count": 10, "locator": "chest", "spread": [0.3, 0.3, 0.3], "velocity": [0, 0.04, 0] },
+    "jet": { "particle": "minecraft:flame", "count": 4, "locator": "jet", "spread": [0.05, 0.02, 0.05], "velocity": [0, -0.08, 0] },
+    "poof": { "particle": "minecraft:poof", "count": 8, "locator": "feet", "spread": [0.3, 0.1, 0.3], "velocity": [0, 0.02, 0] },
+    "sparkle": { "particle": "minecraft:happy_villager", "count": 6, "locator": "heart", "spread": [0.4, 0.2, 0.4] },
+    "notes": { "particle": "minecraft:note", "count": 2, "locator": "heart", "spread": [0.3, 0.1, 0.3] },
+    "splash": { "particle": "minecraft:splash", "count": 14, "locator": "chest", "spread": [0.4, 0.2, 0.4], "velocity": [0, 0.12, 0] },
+    "drip": { "particle": "minecraft:dripping_water", "count": 2, "locator": "umbrella", "spread": [0.35, 0.02, 0.35] },
+    "steam": { "particle": "minecraft:white_smoke", "count": 3, "locator": "antenna", "spread": [0.15, 0.05, 0.15], "velocity": [0, 0.04, 0] },
+    "snow": { "particle": "minecraft:snowflake", "count": 3, "locator": "chest", "spread": [0.3, 0.2, 0.3], "velocity": [0, 0.02, 0] },
+    "firework": { "particle": "minecraft:firework", "count": 12, "locator": "heart", "spread": [0.5, 0.3, 0.5], "velocity": [0, 0.08, 0] },
+    "scanfx": { "particle": "minecraft:end_rod", "count": 3, "locator": "eye", "spread": [0.1, 0.1, 0.1], "velocity": [0, 0.02, -0.05] },
+    "glow": { "particle": "minecraft:glow", "count": 4, "locator": "antenna", "spread": [0.15, 0.1, 0.15], "velocity": [0, 0.02, 0] },
+    "wax": { "particle": "minecraft:wax_on", "count": 5, "locator": "chest", "spread": [0.35, 0.3, 0.35] }
   },
-  "tricks": [ { "id": "spin", "name": "Spin", "icon": "↻", "behavior": "spin" } ],
+  "needs": {
+    "energy": { "start": 0.9, "perMinute": -0.035 },
+    "happiness": { "start": 0.7, "perMinute": -0.03 },
+    "curiosity": { "start": 0.5, "perMinute": 0.06 }
+  },
+  "vars": { "pets": 0, "scans": 0, "tricks": 0 },
+  "tricks": [
+    { "id": "spin", "name": "@trick.spin", "icon": "↻", "behavior": "trick_spin" },
+    { "id": "jump", "name": "@trick.jump", "icon": "▲", "behavior": "trick_jump" },
+    { "id": "salute", "name": "@trick.salute", "icon": "✓", "behavior": "trick_salute" },
+    { "id": "blink", "name": "@trick.blink", "icon": "◉", "behavior": "trick_blink" },
+    { "id": "fold", "name": "@trick.fold", "icon": "■", "behavior": "trick_fold" },
+    { "id": "wave", "name": "@trick.wave", "icon": "☺", "behavior": "trick_wave" },
+    { "id": "dance", "name": "@trick.dance", "icon": "♪", "behavior": "trick_dance" },
+    { "id": "up", "name": "@trick.up", "icon": "↑", "behavior": "trick_up" }
+  ],
   "behaviors": [
     {
-      "id": "petted", "priority": 90, "on": "pet", "cooldown": 0.4, "anim": "wave",
-      "start": [ { "do": "sound", "name": "beep" }, { "do": "sound", "name": "boop", "at": 0.15 }, { "do": "particle", "name": "hearts" }, { "do": "say", "text": "@say.pet" } ]
+      "id": "picked_up", "priority": 100, "on": "pick_up", "duration": 1.2, "obeys": false, "props": { "face_wow": true },
+      "start": [ { "do": "sound", "name": "chirp", "pitch": 1.3 }, { "do": "say", "text": "@say.wheee", "seconds": 1.5 } ]
     },
     {
-      "id": "night_lamp", "priority": 30, "when": "time.night || world.light < 7", "minDuration": 3, "props": { "lamp": true },
-      "start": [ { "do": "particle", "name": "spark" }, { "do": "say", "text": "@say.night", "chance": 0.5 } ]
+      "id": "put_down", "priority": 98, "on": "place", "duration": 1.2, "obeys": false, "move": "stay", "anim": "beep",
+      "start": [ { "do": "particle", "name": "poof" }, { "do": "sound", "name": "clank" }, { "do": "say", "text": "@say.down", "seconds": 1.5, "at": 0.4 } ]
     },
     {
-      "id": "spin", "priority": 66, "obeys": false, "move": "stay", "anim": { "name": "spin", "blend": "replace" },
-      "start": [ { "do": "sound", "name": "beep" } ]
+      "id": "renamed", "priority": 96, "on": "rename", "obeys": false, "anim": "joy", "props": { "face_happy": true },
+      "start": [ { "do": "particle", "name": "hearts" }, { "do": "say", "text": "@say.renamed" }, { "do": "sound", "name": "chirp" } ]
+    },
+    {
+      "id": "petted", "priority": 92, "on": "pet", "cooldown": 0.4, "obeys": false, "look": "player", "anim": "joy",
+      "props": { "face_heart": true },
+      "start": [
+        { "do": "sound", "name": "chirp" },
+        { "do": "sound", "name": "beep", "at": 0.35 },
+        { "do": "particle", "name": "hearts" },
+        { "do": "say", "text": "@say.pet", "seconds": 2 },
+        { "do": "need", "happiness": 0.15 },
+        { "do": "var", "name": "pets", "value": "var.pets + 1" },
+        { "do": "particle", "name": "sparkle", "if": "var.pets % 5 == 0" }
+      ]
+    },
+    {
+      "id": "hello", "priority": 90, "on": "spawn", "obeys": false, "anim": "wave", "props": { "face_happy": true },
+      "start": [ { "do": "particle", "name": "poof" }, { "do": "sound", "name": "startup" }, { "do": "say", "text": "@say.hello", "at": 0.3 } ]
+    },
+    {
+      "id": "flee_danger", "priority": 88, "obeys": false,
+      "when": "near.lava < 3.5 || near.fire < 2.5 || near.mob < 4",
+      "while": "near.lava < 6 || near.fire < 4 || near.mob < 6",
+      "minDuration": 2, "cooldown": 1, "move": "flee", "look": "move", "props": { "face_wow": true, "bulb_alert": true },
+      "start": [ { "do": "say", "text": "@say.scared", "seconds": 1.5 }, { "do": "sound", "name": "error", "pitch": 1.4 } ]
+    },
+    {
+      "id": "thunder_glitch", "priority": 86, "on": "thunder_start", "duration": 3, "move": "near", "anim": "glitch",
+      "props": { "face_error": true, "bulb_alert": true },
+      "start": [ { "do": "sound", "name": "error" }, { "do": "particle", "name": "sparks" }, { "do": "say", "text": "@say.thunder" } ]
+    },
+    {
+      "id": "short_circuit", "priority": 84, "on": "enter_water", "duration": 2, "cooldown": 4, "obeys": false, "anim": "glitch",
+      "props": { "face_error": true, "bulb_alert": true },
+      "start": [ { "do": "sound", "name": "hiss" }, { "do": "sound", "name": "error", "at": 0.2 }, { "do": "particle", "name": "body_sparks" }, { "do": "particle", "name": "splash" }, { "do": "say", "text": "@say.water" } ]
+    },
+    {
+      "id": "very_worried", "priority": 81, "on": "owner_low_health", "duration": 6, "move": "near", "look": "player", "anim": "fret",
+      "props": { "face_sad": true, "bulb_alert": true },
+      "start": [ { "do": "say", "text": "@say.low_hp", "seconds": 3 }, { "do": "sound", "name": "error", "pitch": 1.5 } ],
+      "repeat": [ { "every": 2, "actions": [ { "do": "particle", "name": "hearts" }, { "do": "sound", "name": "beep", "pitch": 0.8 } ] } ]
+    },
+    {
+      "id": "worried", "priority": 80, "on": "owner_hurt", "cooldown": 6, "duration": 2.5, "move": "near", "look": "player", "anim": "tilt",
+      "props": { "face_wow": true },
+      "start": [ { "do": "say", "text": "@say.hurt", "seconds": 2 }, { "do": "sound", "name": "boop", "pitch": 0.8 } ]
+    },
+    {
+      "id": "level_up", "priority": 79, "on": "owner_level_up", "cooldown": 2, "duration": 3.5, "move": "near", "look": "player",
+      "anim": "flag_wave", "props": { "flag": true, "face_happy": true },
+      "start": [ { "do": "sound", "name": "ding" }, { "do": "particle", "name": "firework" }, { "do": "say", "text": "@say.level" }, { "do": "sound", "name": "chirp", "at": 0.4 } ],
+      "end": [ { "do": "need", "happiness": 0.1 } ]
+    },
+    {
+      "id": "advancement", "priority": 79, "on": "owner_advancement", "cooldown": 2, "duration": 4, "move": "near", "look": "player",
+      "anim": "flag_wave", "props": { "flag": true, "face_heart": true },
+      "start": [ { "do": "sound", "name": "launch" }, { "do": "particle", "name": "firework", "at": 0.5 }, { "do": "sound", "name": "twinkle", "at": 0.6 }, { "do": "say", "text": "@say.advancement" } ],
+      "end": [ { "do": "need", "happiness": 0.15 } ]
+    },
+    {
+      "id": "music_hello", "priority": 77, "on": "music_start", "duration": 1.5, "anim": "beep", "props": { "face_wow": true },
+      "start": [ { "do": "sound", "name": "chirp" }, { "do": "say", "text": "@say.music" } ]
+    },
+    {
+      "id": "dry_off", "priority": 76, "on": "leave_water", "cooldown": 6, "move": "stay", "obeys": false, "anim": "shake",
+      "start": [ { "do": "sound", "name": "whirr" }, { "do": "say", "text": "@say.dry", "chance": 0.6, "at": 0.5 } ]
+    },
+    {
+      "id": "ok_sit", "priority": 72, "on": "command_sit", "anim": "beep",
+      "start": [ { "do": "sound", "name": "beep" }, { "do": "say", "text": "@say.ok", "seconds": 1.5 } ]
+    },
+    {
+      "id": "ok_follow", "priority": 72, "on": "command_follow", "anim": "salute",
+      "start": [ { "do": "sound", "name": "chirp" }, { "do": "say", "text": "@say.ok", "seconds": 1.5 } ]
+    },
+    {
+      "id": "ok_stay", "priority": 72, "on": "command_stay", "anim": "beep",
+      "start": [ { "do": "sound", "name": "boop" }, { "do": "say", "text": "@say.stay", "seconds": 1.5 } ]
+    },
+    {
+      "id": "landed", "priority": 70, "on": "land", "cooldown": 3, "duration": 0.8, "anim": "beep",
+      "start": [ { "do": "particle", "name": "poof" }, { "do": "sound", "name": "clank" }, { "do": "say", "text": "@say.down", "if": "random() < 0.4", "seconds": 1.5 } ]
+    },
+    {
+      "id": "warp", "priority": 70, "on": "teleport", "duration": 1,
+      "start": [ { "do": "particle", "name": "sparks" }, { "do": "sound", "name": "warp" } ]
+    },
+    {
+      "id": "trick_spin", "priority": 66, "obeys": false, "move": "stay", "cooldown": 1, "anim": { "name": "spin", "blend": "replace" },
+      "props": { "face_happy": true },
+      "start": [ { "do": "sound", "name": "whirr" } ],
+      "end": [ { "do": "say", "text": "@say.tada", "chance": 0.6 }, { "do": "var", "name": "tricks", "value": "var.tricks + 1" }, { "do": "need", "happiness": 0.05 } ]
+    },
+    {
+      "id": "trick_jump", "priority": 66, "obeys": false, "move": "stay", "cooldown": 2, "anim": { "name": "jump_boost", "blend": "replace" },
+      "props": { "face_wow": true },
+      "start": [ { "do": "sound", "name": "charge", "pitch": 1.6 }, { "do": "sound", "name": "launch", "at": 0.45 }, { "do": "particle", "name": "jet", "at": 0.6 }, { "do": "sound", "name": "clank", "at": 1.9 } ],
+      "end": [ { "do": "particle", "name": "sparkle" }, { "do": "say", "text": "@say.tada" }, { "do": "need", "happiness": 0.08, "energy": -0.05 } ]
+    },
+    {
+      "id": "trick_salute", "priority": 66, "obeys": false, "move": "stay", "look": "player", "anim": "salute",
+      "start": [ { "do": "sound", "name": "beep", "at": 0.3 }, { "do": "say", "text": "@say.ok", "at": 0.3 } ]
+    },
+    {
+      "id": "trick_blink", "priority": 66, "obeys": false, "move": "stay", "look": "player", "anim": "blink_pattern",
+      "start": [ { "do": "sound", "name": "beep", "at": 0.2 }, { "do": "sound", "name": "beep", "at": 0.4 }, { "do": "sound", "name": "boop", "at": 0.6 }, { "do": "sound", "name": "boop", "at": 1.1 }, { "do": "sound", "name": "beep", "at": 1.6 }, { "do": "sound", "name": "beep", "at": 1.8 } ],
+      "end": [ { "do": "say", "text": "@say.beep", "chance": 0.7 } ]
+    },
+    {
+      "id": "trick_fold", "priority": 66, "obeys": false, "move": "stay", "cooldown": 2, "anim": { "name": "fold", "blend": "replace" },
+      "start": [ { "do": "sound", "name": "whirr" }, { "do": "sound", "name": "clank", "at": 0.8 }, { "do": "sound", "name": "open", "at": 2.4 }, { "do": "sound", "name": "startup", "at": 3.0 } ],
+      "end": [ { "do": "say", "text": "@say.tada", "chance": 0.6 }, { "do": "need", "happiness": 0.05 } ]
+    },
+    {
+      "id": "trick_wave", "priority": 66, "obeys": false, "look": "player", "anim": "wave", "props": { "face_happy": true },
+      "start": [ { "do": "say", "text": "@say.hello" }, { "do": "sound", "name": "chirp" } ]
+    },
+    {
+      "id": "trick_dance", "priority": 66, "obeys": false, "move": "stay", "duration": 4.8, "cooldown": 1, "anim": { "name": "dance", "blend": "replace" },
+      "props": { "face_happy": true },
+      "repeat": [ { "every": 0.4, "actions": [ { "do": "sound", "name": "beep", "if": "random() < 0.5" }, { "do": "sound", "name": "boop", "if": "random() < 0.3" } ] }, { "every": 0.8, "actions": [ { "do": "particle", "name": "notes" } ] } ],
+      "end": [ { "do": "say", "text": "@say.tada", "chance": 0.5 }, { "do": "need", "happiness": 0.08 } ]
+    },
+    {
+      "id": "trick_up", "priority": 66, "obeys": false, "move": "shoulder", "duration": [12, 20], "look": "around", "props": { "face_happy": true },
+      "start": [ { "do": "say", "text": "@say.wheee" }, { "do": "sound", "name": "chirp" } ],
+      "end": [ { "do": "say", "text": "@say.down", "chance": 0.5 } ]
+    },
+    {
+      "id": "scan", "priority": 64, "on": "target_change", "cooldown": 2.5, "move": "stay", "look": "target", "anim": "scan",
+      "when": "target('*_ore', 'minecraft:ancient_debris', '*amethyst_cluster', 'minecraft:budding_amethyst') && player.distance < 12 && !self.held",
+      "props": { "beam": true, "face_scan": true },
+      "start": [
+        { "do": "sound", "name": "scan" },
+        { "do": "particle", "name": "scanfx", "at": 0.4 },
+        { "do": "var", "name": "scans", "value": "var.scans + 1" },
+        { "do": "need", "curiosity": -0.1 },
+        { "do": "say", "text": "@say.ore_diamond", "at": 0.9, "if": "target('*diamond_ore')" },
+        { "do": "say", "text": "@say.ore_emerald", "at": 0.9, "if": "target('*emerald_ore')" },
+        { "do": "say", "text": "@say.ore_iron", "at": 0.9, "if": "target('*iron_ore')" },
+        { "do": "say", "text": "@say.ore_gold", "at": 0.9, "if": "target('*gold_ore')" },
+        { "do": "say", "text": "@say.ore_copper", "at": 0.9, "if": "target('*copper_ore')" },
+        { "do": "say", "text": "@say.ore_coal", "at": 0.9, "if": "target('*coal_ore')" },
+        { "do": "say", "text": "@say.ore_redstone", "at": 0.9, "if": "target('*redstone_ore')" },
+        { "do": "say", "text": "@say.ore_lapis", "at": 0.9, "if": "target('*lapis_ore')" },
+        { "do": "say", "text": "@say.ore_quartz", "at": 0.9, "if": "target('*quartz_ore')" },
+        { "do": "say", "text": "@say.ore_debris", "at": 0.9, "if": "target('minecraft:ancient_debris')" },
+        { "do": "say", "text": "@say.ore_amethyst", "at": 0.9, "if": "target('*amethyst*')" },
+        { "do": "sound", "name": "chime", "at": 0.9, "if": "target('*diamond_ore', '*emerald_ore', 'minecraft:ancient_debris', '*amethyst*')" },
+        { "do": "particle", "name": "sparkle", "at": 1.0, "if": "target('*diamond_ore', '*emerald_ore', 'minecraft:ancient_debris')" },
+        { "do": "sound", "name": "beep", "at": 0.9, "pitch": 1.4 }
+      ]
+    },
+    {
+      "id": "inspect", "priority": 63, "on": "target_change", "cooldown": 8, "move": "stay", "look": "target", "anim": "tilt",
+      "when": "(target('minecraft:chest', 'minecraft:trapped_chest', 'minecraft:barrel', '*shulker_box', 'minecraft:ender_chest') || target('minecraft:spawner', 'minecraft:trial_spawner', 'minecraft:vault', 'minecraft:beacon', 'minecraft:enchanting_table', 'minecraft:jukebox', 'minecraft:bell', 'minecraft:conduit')) && player.distance < 10 && !self.held",
+      "props": { "face_scan": true },
+      "start": [
+        { "do": "sound", "name": "beep", "pitch": 1.2 },
+        { "do": "say", "text": "@say.chest", "at": 0.5, "if": "target('*chest', 'minecraft:barrel', '*shulker_box')" },
+        { "do": "say", "text": "@say.spawner", "at": 0.5, "if": "target('*spawner')" },
+        { "do": "say", "text": "@say.thing", "at": 0.5, "if": "!target('*chest', 'minecraft:barrel', '*shulker_box', '*spawner')" }
+      ]
+    },
+    {
+      "id": "storm", "priority": 62, "when": "weather.thunder && world.sky && !self.inWater", "minDuration": 5, "move": "near",
+      "props": { "face_wow": true, "bulb_alert": true },
+      "start": [ { "do": "anim", "name": "umbrella_pop" }, { "do": "say", "text": "@say.storm", "chance": 0.6, "at": 1 } ],
+      "repeat": [ { "every": [4, 8], "actions": [
+        { "do": "anim", "name": "glitch" }, { "do": "stop_anim", "name": "glitch", "at": 0.8 },
+        { "do": "particle", "name": "sparks" }, { "do": "sound", "name": "error", "volume": 0.25 },
+        { "do": "say", "text": "@say.storm", "chance": 0.3 }
+      ] } ]
+    },
+    {
+      "id": "rain_umbrella", "priority": 60, "when": "weather.rain && world.sky && !self.inWater", "minDuration": 5, "anim": "umbrella_pop",
+      "start": [
+        { "do": "sound", "name": "open", "at": 0.1 }, { "do": "sound", "name": "pop", "at": 0.6 }, { "do": "anim", "name": "umbrella_hold", "at": 0.9 },
+        { "do": "say", "text": "@say.rain", "chance": 0.7, "at": 1, "if": "!weather.snow" },
+        { "do": "say", "text": "@say.snow", "chance": 0.7, "at": 1, "if": "weather.snow" }
+      ],
+      "repeat": [
+        { "every": [1.5, 3], "actions": [ { "do": "particle", "name": "drip", "if": "!weather.snow" } ] },
+        { "every": [8, 14], "actions": [ { "do": "random", "of": [
+          [ { "do": "anim", "name": "tilt" } ],
+          [ { "do": "anim", "name": "beep" }, { "do": "sound", "name": "beep" } ],
+          [ { "do": "say", "text": "@say.rain", "if": "!weather.snow" } ]
+        ] } ] }
+      ],
+      "end": [ { "do": "anim", "name": "shake" }, { "do": "sound", "name": "whirr" } ]
+    },
+    {
+      "id": "dance", "priority": 58, "when": "world.music && player.distance < 16 && !self.held", "while": "world.music && player.distance < 20",
+      "minDuration": 2, "move": "near", "look": "around", "anim": { "name": "dance", "blend": "replace" }, "props": { "face_happy": true },
+      "needs": { "happiness": 0.5, "energy": -0.05 },
+      "repeat": [ { "every": [0.8, 1.6], "actions": [ { "do": "particle", "name": "notes" } ] }, { "every": [3, 6], "actions": [ { "do": "sound", "name": "beep", "if": "random() < 0.5" }, { "do": "say", "text": "@say.music", "chance": 0.15 } ] } ]
+    },
+    {
+      "id": "cold", "priority": 56, "when": "world.cold && !weather.rain && !self.inWater", "minDuration": 4,
+      "repeat": [ { "every": [5, 10], "actions": [
+        { "do": "anim", "name": "shiver" }, { "do": "stop_anim", "name": "shiver", "at": 1.2 },
+        { "do": "particle", "name": "snow" }, { "do": "sound", "name": "whirr", "pitch": 0.7 },
+        { "do": "say", "text": "@say.cold", "chance": 0.35 }
+      ] } ]
+    },
+    {
+      "id": "hot", "priority": 55, "when": "world.hot && !self.inWater", "minDuration": 4, "props": { "face_cool": true },
+      "start": [ { "do": "say", "text": "@say.hot", "chance": 0.7, "at": 0.5 } ],
+      "repeat": [ { "every": [6, 12], "actions": [
+        { "do": "anim", "name": "vent" }, { "do": "stop_anim", "name": "vent", "at": 2.4 },
+        { "do": "particle", "name": "steam" }, { "do": "sound", "name": "whirr", "pitch": 1.4 },
+        { "do": "say", "text": "@say.hot", "chance": 0.25 }
+      ] } ]
+    },
+    {
+      "id": "solar", "priority": 50,
+      "when": "time.day && world.sky && weather.clear && need.energy < 0.8 && !player.sprinting && player.distance < 10",
+      "while": "time.day && world.sky && weather.clear && need.energy < 0.99 && player.distance < 12",
+      "minDuration": 4, "move": "near", "look": "sky", "anim": "solar_open", "props": { "face_cool": true },
+      "needs": { "energy": 0.9, "happiness": 0.1 },
+      "start": [ { "do": "sound", "name": "charge", "at": 0.9 }, { "do": "say", "text": "@say.charging", "chance": 0.6, "at": 1.2 } ],
+      "repeat": [ { "every": [6, 10], "actions": [ { "do": "particle", "name": "glow" }, { "do": "say", "text": "@say.charging", "chance": 0.3 } ] } ],
+      "end": [ { "do": "say", "text": "@say.charged", "if": "need.energy > 0.95" }, { "do": "sound", "name": "chirp", "if": "need.energy > 0.95" } ]
+    },
+    {
+      "id": "low_battery", "priority": 48, "when": "need.energy < 0.2 && world.light < 10", "while": "need.energy < 0.35 && world.light < 12",
+      "minDuration": 4, "move": "near", "baseAnim": "low_power", "props": { "face_sleep": true, "lamp": false },
+      "needs": { "energy": 0.05 },
+      "start": [ { "do": "sound", "name": "powerdown" }, { "do": "say", "text": "@say.battery", "at": 0.8 } ],
+      "repeat": [ { "every": [8, 14], "actions": [ { "do": "say", "text": "@say.battery", "chance": 0.5 }, { "do": "sound", "name": "boop", "pitch": 0.6 } ] } ]
+    },
+    {
+      "id": "lamp_charge", "priority": 47, "when": "need.energy < 0.5 && world.light >= 12 && !world.sky", "while": "need.energy < 0.9 && world.light >= 10",
+      "minDuration": 4, "move": "stay", "look": "sky", "anim": "beep", "props": { "face_happy": true },
+      "needs": { "energy": 0.6 },
+      "start": [ { "do": "sound", "name": "charge" }, { "do": "say", "text": "@say.lamp_charge", "at": 0.5 } ],
+      "repeat": [ { "every": [3, 5], "actions": [ { "do": "particle", "name": "glow" } ] } ]
+    },
+    {
+      "id": "sleep_night", "priority": 45,
+      "when": "(time.night && need.energy < 0.6 || player.sleeping) && !self.inWater && player.distance < 12",
+      "while": "(time.night && need.energy < 0.97 || player.sleeping) && player.distance < 12",
+      "minDuration": 6, "move": "near", "look": "none", "baseAnim": "power_down", "props": { "face_sleep": true, "lamp": false },
+      "needs": { "energy": 0.7 },
+      "start": [ { "do": "sound", "name": "powerdown" } ],
+      "repeat": [
+        { "every": [3, 5], "actions": [ { "do": "sound", "name": "snore", "if": "!self.moving" } ] },
+        { "every": [7, 12], "actions": [ { "do": "say", "text": "@say.sleep", "seconds": 2, "if": "!self.moving", "chance": 0.6 } ] }
+      ],
+      "end": [ { "do": "anim", "name": "beep" }, { "do": "sound", "name": "startup" } ]
+    },
+    {
+      "id": "torch_light", "priority": 44, "when": "world.light < 5 && !world.sky && player.distance < 10 && !self.held",
+      "while": "world.light < 8 && !world.sky", "minDuration": 6, "cooldown": 20, "anim": "carry_torch", "props": { "torch": true },
+      "start": [ { "do": "sound", "name": "click" }, { "do": "say", "text": "@say.torch", "chance": 0.6, "at": 0.5 } ]
+    },
+    {
+      "id": "nap_afk", "priority": 40, "when": "player.idle > 40 && need.energy < 0.85 && !self.inWater", "while": "player.idle > 5",
+      "move": "near", "look": "none", "baseAnim": "power_down", "props": { "face_sleep": true },
+      "needs": { "energy": 0.5 },
+      "repeat": [ { "every": [4, 6], "actions": [ { "do": "sound", "name": "snore", "if": "!self.moving" } ] } ],
+      "end": [ { "do": "anim", "name": "beep" }, { "do": "sound", "name": "beep" } ]
+    },
+    {
+      "id": "morning", "priority": 34, "on": "day_start", "anim": "joy", "props": { "face_happy": true },
+      "start": [ { "do": "sound", "name": "startup" }, { "do": "say", "text": "@say.morning" } ]
+    },
+    {
+      "id": "night_mode", "priority": 33, "on": "night_start", "anim": "beep",
+      "start": [ { "do": "sound", "name": "click" }, { "do": "say", "text": "@say.night" } ]
+    },
+    {
+      "id": "watch_eat", "priority": 32, "on": "owner_eat", "duration": 3, "move": "near", "look": "player", "cooldown": 10, "anim": "tilt",
+      "start": [ { "do": "say", "text": "@say.eat", "chance": 0.6 } ]
+    },
+    {
+      "id": "item_pickaxe", "priority": 30, "on": "item_change", "cooldown": 30, "anim": "salute", "when": "holding('*_pickaxe')",
+      "start": [ { "do": "sound", "name": "beep" }, { "do": "say", "text": "@say.pickaxe" } ]
+    },
+    {
+      "id": "item_redstone", "priority": 30, "on": "item_change", "cooldown": 30, "anim": "joy", "props": { "face_heart": true },
+      "when": "holding('minecraft:redstone', 'minecraft:redstone_torch', 'minecraft:redstone_block')",
+      "start": [ { "do": "sound", "name": "chirp" }, { "do": "say", "text": "@say.redstone" }, { "do": "particle", "name": "sparks" } ]
+    },
+    {
+      "id": "noticed", "priority": 29, "on": "owner_look", "cooldown": 12, "look": "player", "anim": "beep", "props": { "face_happy": true },
+      "start": [ { "do": "sound", "name": "beep", "chance": 0.6 } ]
+    },
+    {
+      "id": "jump_copy", "priority": 27, "on": "owner_jump", "cooldown": 15, "when": "random() < 0.3 && player.distance < 6", "duration": 1,
+      "start": [ { "do": "hop", "height": 0.5 }, { "do": "particle", "name": "jet" }, { "do": "sound", "name": "boop", "pitch": 1.3 } ]
+    },
+    {
+      "id": "companion_hi", "priority": 26, "on": "companion_near", "cooldown": 30, "look": "move", "anim": "wave", "props": { "face_happy": true },
+      "start": [ { "do": "say", "text": "@say.unit" }, { "do": "sound", "name": "chirp" } ]
+    },
+    {
+      "id": "turbo", "priority": 25, "when": "need.energy > 0.7 && need.happiness > 0.75 && !time.night && chance(0.012)",
+      "duration": [4, 6], "cooldown": 120, "move": "circle", "props": { "face_happy": true },
+      "start": [ { "do": "say", "text": "@say.turbo" }, { "do": "sound", "name": "whirr", "pitch": 1.5 } ],
+      "repeat": [ { "every": 0.5, "actions": [ { "do": "particle", "name": "jet" } ] } ],
+      "needs": { "energy": -0.5 }
+    },
+    {
+      "id": "polish", "priority": 24, "when": "!self.moving && player.distance < 8 && chance(0.02)", "cooldown": 40, "move": "stay", "anim": "polish",
+      "start": [ { "do": "sound", "name": "whirr", "at": 0.4 } ],
+      "end": [ { "do": "say", "text": "@say.polish", "chance": 0.5 }, { "do": "particle", "name": "wax", "if": "self.variant == 'copper'" } ]
+    },
+    {
+      "id": "gauge_check", "priority": 24, "when": "!self.moving && player.distance < 8 && chance(0.02)", "cooldown": 50, "move": "stay", "anim": "gauge",
+      "end": [ { "do": "say", "text": "@say.systems", "chance": 0.6 }, { "do": "sound", "name": "beep" } ]
+    },
+    {
+      "id": "beep_boop", "priority": 22, "when": "player.distance < 8 && chance(0.03)", "cooldown": 25, "anim": "beep",
+      "start": [ { "do": "sound", "name": "beep" }, { "do": "sound", "name": "boop", "at": 0.2 }, { "do": "say", "text": "@say.beep", "chance": 0.4 } ]
+    },
+    {
+      "id": "bored", "priority": 20, "when": "need.happiness < 0.35 && chance(0.03)", "cooldown": 20, "anim": "tilt", "props": { "face_sad": true },
+      "start": [ { "do": "sound", "name": "boop", "pitch": 0.7 }, { "do": "say", "text": "@say.bored" } ]
+    },
+    {
+      "id": "survey", "priority": 18, "when": "need.curiosity > 0.6 && chance(0.06)", "duration": [3, 6], "look": "around",
+      "start": [ { "do": "anim", "name": "tilt" }, { "do": "sound", "name": "scan", "volume": 0.2, "chance": 0.5 } ],
+      "end": [ { "do": "need", "curiosity": -0.3 } ]
+    },
+    {
+      "id": "wander_home", "priority": 14, "when": "self.command == 'stay' && chance(0.08)", "duration": [6, 12], "move": "wander",
+      "needs": { "curiosity": -0.2 }
+    },
+    {
+      "id": "rest", "priority": 12, "when": "need.energy < 0.4 && !self.moving && chance(0.05)", "duration": [6, 12], "move": "sit",
+      "needs": { "energy": 0.2 }
     }
   ]
 }

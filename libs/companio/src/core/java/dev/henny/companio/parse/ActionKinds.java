@@ -77,7 +77,7 @@ final class ActionKinds {
             case "look" -> {
                 known(o, at, p, "at");
                 LookMode m = LookMode.of(Json.str(o, "at", at, p, ""));
-                if (m == null) p.error(Json.at(at, "at"), "must be player, move, sky, around or none");
+                if (m == null) p.error(Json.at(at, "at"), "must be player, move, sky, around, target or none");
                 yield m == null ? null : new LookAction(m);
             }
             case "hop" -> {

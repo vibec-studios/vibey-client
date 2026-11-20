@@ -54,6 +54,7 @@ public final class BrainScope implements Scope {
             case "world.hot" -> s.hot;
             case "world.light" -> (double) s.light;
             case "world.sky" -> s.sky;
+            case "world.music" -> s.music;
             case "near.water" -> s.nearWater;
             case "near.lava" -> s.nearLava;
             case "near.fire" -> s.nearFire;
@@ -84,6 +85,8 @@ public final class BrainScope implements Scope {
             case "looking" -> o.looking;
             case "held" -> o.held;
             case "offhand" -> o.offhand;
+            case "target" -> o.target;
+            case "level" -> (double) o.level;
             default -> Boolean.FALSE;
         };
     }
@@ -112,6 +115,7 @@ public final class BrainScope implements Scope {
             case "age" -> s.age;
             case "size" -> s.size;
             case "variant" -> s.variant;
+            case "climb" -> s.climb;
             default -> Boolean.FALSE;
         };
     }
@@ -125,6 +129,7 @@ public final class BrainScope implements Scope {
             case "cooldown" -> memory.ready("named:" + Values.text(a[0]), now);
             case "since" -> memory.since(Values.text(a[0]), now);
             case "holding" -> holding(a);
+            case "target" -> targeting(a);
             case "biome" -> contains(senses.biome, a);
             case "prop" -> props.test(Values.text(a[0]));
             case "hour" -> hour(Values.number(a[0]), Values.number(a[1]));
@@ -137,6 +142,11 @@ public final class BrainScope implements Scope {
             String pat = Values.text(o);
             if (Glob.matches(pat, senses.owner.held) || Glob.matches(pat, senses.owner.offhand)) return true;
         }
+        return false;
+    }
+
+    private boolean targeting(Object[] a) {
+        for (Object o : a) if (Glob.matches(Values.text(o), senses.owner.target)) return true;
         return false;
     }
 

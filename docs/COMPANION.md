@@ -23,6 +23,21 @@ sleeps next to you at night (and when you sleep or go AFK), begs when you hold f
 you can see, worries when you get hurt, greets you in the morning, gets bored, zooms around when happy and does tricks
 (beach ball, roll, dance, wave, hop on your shoulder).
 
+The **penguin** (variants classic, emperor, rockhopper) waddles with little flipper flaps, belly-slides on snow, ice and
+down slopes, dives and swims fast with bubbles, goes fishing and holds up its catch, opens a striped umbrella in the
+rain (and closes and shakes it dry when the rain stops), throws snowballs in the snow, wears a scarf in the cold,
+sunglasses and a fan in hot biomes, sleeps standing with its head tucked in at night, slips on ice now and then, rides
+on your head in a boat, dances when a music disc plays, throws a party when you level up or get an advancement, worries
+when you are hurt, stargazes, preens and chatters. Tricks: pirouette, belly slide, wave, bow, fish juggling, dance, hop on.
+
+The **robot** (variants copper, iron, retro) stomps after you with servo whirrs; its screen face changes with its mood
+(happy, hearts, scanning, sleepy, error, cool, worried) and the antenna bulb shows how it feels. When you look at an ore
+it scans it with a beam and names it ("Diamond! ◆") – only the block under your own crosshair, never hidden ones. It
+pops a tiny umbrella in the rain, glitches with sparks in thunderstorms, unfolds a solar panel to charge in the sun,
+gets a low battery at night until it finds light, switches on its headlamp in the dark (emissive glow, no real light),
+holds a torch in caves, waves a flag when you level up, dances to music discs, polishes itself and checks its gauge.
+Tricks: spin, jet jump, salute, blink, fold into a cube, wave, dance, hop on.
+
 ## Settings page
 
 | Setting | Notes |

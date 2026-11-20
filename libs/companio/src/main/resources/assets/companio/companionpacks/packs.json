@@ -24,7 +24,13 @@
         "lang/de_de.json",
         "lang/en_us.json",
         "models/penguin.vibey",
-        "pack.png"
+        "pack.png",
+        "sounds/bray.ogg",
+        "sounds/coo.ogg",
+        "sounds/peep.ogg",
+        "sounds/squeak.ogg",
+        "textures/penguin_emperor.png",
+        "textures/penguin_rockhopper.png"
       ]
     },
     {
@@ -35,7 +41,19 @@
         "lang/de_de.json",
         "lang/en_us.json",
         "models/robot.vibey",
-        "pack.png"
+        "pack.png",
+        "sounds/beep.ogg",
+        "sounds/boop.ogg",
+        "sounds/charge.ogg",
+        "sounds/chirp.ogg",
+        "sounds/error.ogg",
+        "sounds/powerdown.ogg",
+        "sounds/scan.ogg",
+        "sounds/snore.ogg",
+        "sounds/startup.ogg",
+        "sounds/whirr.ogg",
+        "textures/robot_iron.png",
+        "textures/robot_retro.png"
       ]
     }
   ]

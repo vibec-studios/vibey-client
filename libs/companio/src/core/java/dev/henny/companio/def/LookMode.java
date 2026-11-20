@@ -3,7 +3,7 @@ package dev.henny.companio.def;
 import java.util.Locale;
 
 public enum LookMode {
-    PLAYER, MOVE, SKY, AROUND, NONE;
+    PLAYER, MOVE, SKY, AROUND, NONE, TARGET;
 
     public String id() {
         return name().toLowerCase(Locale.ROOT);
