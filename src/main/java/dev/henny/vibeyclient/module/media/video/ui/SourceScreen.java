@@ -115,8 +115,8 @@ public final class SourceScreen extends CardScreen {
         }
         MediaScreen s = v.create(src, ASPECTS[aspect], inWorld);
         if (!inWorld) {
-            SetupScreen.Need need = v.missing(s);
-            Minecraft.getInstance().setScreen(need != null ? new SetupScreen(null, need) : null);
+            SetupNeed need = v.missing(s);
+            Minecraft.getInstance().setScreen(need != null ? SetupScreens.of(null, need) : null);
         }
     }
 

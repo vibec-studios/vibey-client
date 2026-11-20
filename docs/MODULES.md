@@ -36,7 +36,14 @@ resources listed in `clientModuleResources`. Modules present only in some jars a
 
 Modules must not use each other: `checkModuleBoundaries` (part of `:fabric-1.21.11:check` and `buildAll`) fails when
 a file in `module/<a>/` names `dev.henny.vibeyclient.module.<b>.…`. Shared code goes to `api`, `client`, `ui` or a
-lib. Existing exceptions still to remove are listed in `knownModuleImports`.
+lib. Code that only some targets build and several modules need goes into a shared package outside `module/`
+(`sharedPackages` in `gradle/modules.gradle`, same target syntax as modules; it must not import a module, also
+checked). Today: `media` (`media/ffmpeg`, `media/player`: FFmpeg lookup/download/setup screen and the file player
+used by the video screens and Clips, see [VIDEO.md](VIDEO.md#shared-ffmpeg-and-player-code)). Existing exceptions
+still to remove are listed in `knownModuleImports`.
+
+`checkI18n` (every string in en_us and de_de, every literal key exists) runs in the same places, so a missing
+translation fails `:fabric-1.21.11:build`.
 
 ## Client only
 

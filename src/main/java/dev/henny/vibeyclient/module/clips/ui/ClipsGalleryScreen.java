@@ -119,11 +119,11 @@ public final class ClipsGalleryScreen extends CardScreen {
     @Override
     protected void drawHeader(Gfx g, int x, int y, int w) {
         if (System.currentTimeMillis() - lastScan > 3000) rescan();
-        title(g, tr("title"), x + PAD, y + 13);
+        title(g, Lang.tr("clips.gallery.title"), x + PAD, y + 13);
         List<ClipStore.Clip> all = clips;
-        if (all != null) g.text(tr("count", all.size()), x + PAD + g.boldWidth(tr("title")) + 8, y + 13, DIM);
+        if (all != null) g.text(Lang.tr("clips.gallery.count", all.size()), x + PAD + g.boldWidth(Lang.tr("clips.gallery.title")) + 8, y + 13, DIM);
         closeButton(g, x, y, w);
-        String[] labels = {tr("filter.all"), tr("filter.kept"), tr("filter.auto"), tr("filter.hotkey")};
+        String[] labels = {Lang.tr("clips.gallery.filter.all"), Lang.tr("clips.gallery.filter.kept"), Lang.tr("clips.gallery.filter.auto"), Lang.tr("clips.gallery.filter.hotkey")};
         segmented(g, x + PAD, y + 30, Math.min(300, w - PAD * 2), labels, filter.ordinal(), i -> filter(Filter.values()[i]));
     }
 
@@ -131,21 +131,21 @@ public final class ClipsGalleryScreen extends CardScreen {
     protected int drawBody(Gfx g, int x, int y, int w) {
         List<ClipStore.Clip> list = shown();
         if (clips == null) {
-            g.text(tr("loading") + dots(), x, y + 8, MUTED);
+            g.text(Lang.tr("clips.gallery.loading") + dots(), x, y + 8, MUTED);
             return y + 30;
         }
         if (list.isEmpty()) {
             ClipsModule m = ClipsModule.get();
             String key = m == null ? "?" : ClientCompat.keyName(m.saveKey.mapping()).getString();
-            String text = filter == Filter.ALL ? tr("empty", key) : tr("emptyFilter");
+            String text = filter == Filter.ALL ? Lang.tr("clips.gallery.empty", key) : Lang.tr("clips.gallery.emptyFilter");
             int yy = y + 10;
             for (String line : wrap(g, text, w)) {
                 g.textCenter(line, x + w / 2, yy, MUTED);
                 yy += 11;
             }
             if (m != null && !m.buffer.on() && filter == Filter.ALL) {
-                int bw = g.width(tr("turnOn")) + 14;
-                button(g, x + (w - bw) / 2, yy + 6, bw, 18, tr("turnOn"), Style.PRIMARY, () -> {
+                int bw = g.width(Lang.tr("clips.gallery.turnOn")) + 14;
+                button(g, x + (w - bw) / 2, yy + 6, bw, 18, Lang.tr("clips.gallery.turnOn"), Style.PRIMARY, () -> {
                     m.buffer.set(true);
                 });
                 yy += 30;
@@ -215,13 +215,13 @@ public final class ClipsGalleryScreen extends CardScreen {
         long used = total;
         int barW = Math.min(180, w / 3);
         if (used >= 0) {
-            String txt = tr("storage", gb(used), gb(limit));
+            String txt = Lang.tr("clips.gallery.storage", gb(used), gb(limit));
             g.text(txt, x + PAD, by - 1, MUTED);
             bar(g, x + PAD, by + 11, barW, 3, limit <= 0 ? 0 : (float) used / limit, null);
         }
         int right = x + w - PAD;
-        int left = buttonRight(g, right, by, 18, tr("folder"), Style.SECONDARY, ClipsFiles::openFolder);
-        buttonRight(g, left - 6, by, 18, tr("settings"), Style.SECONDARY, ClipsPages::openSettings);
+        int left = buttonRight(g, right, by, 18, Lang.tr("clips.gallery.folder"), Style.SECONDARY, ClipsFiles::openFolder);
+        buttonRight(g, left - 6, by, 18, Lang.tr("clips.gallery.settings"), Style.SECONDARY, ClipsPages::openSettings);
     }
 
     static String gb(long bytes) {

@@ -2,8 +2,8 @@ package dev.henny.vibeyclient.module.media.video.web;
 
 import com.mojang.blaze3d.textures.GpuTextureView;
 import dev.henny.vibeyclient.module.media.video.MediaSource;
-import dev.henny.vibeyclient.module.media.video.player.FrameTexture;
-import dev.henny.vibeyclient.module.media.video.player.MediaPlayer;
+import dev.henny.vibeyclient.media.player.ExternalTexture;
+import dev.henny.vibeyclient.media.player.MediaPlayer;
 import net.dimaskama.mcef.api.MCEFBrowser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
@@ -31,7 +31,7 @@ public final class WebPlayer implements MediaPlayer {
     private final int w;
     private final int h;
     private final Identifier texId;
-    private final FrameTexture.External tex = new FrameTexture.External();
+    private final ExternalTexture tex = new ExternalTexture();
     private boolean registered;
     private boolean playing;
     private long baseMs;

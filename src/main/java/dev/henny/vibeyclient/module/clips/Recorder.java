@@ -10,8 +10,9 @@ import dev.henny.vibeyclient.module.clips.encode.EncodeSession;
 import dev.henny.vibeyclient.module.clips.encode.Encoder;
 import dev.henny.vibeyclient.module.clips.encode.EncoderProbe;
 import dev.henny.vibeyclient.module.clips.ring.ClipRing;
-import dev.henny.vibeyclient.module.media.video.player.Ffmpeg;
-import dev.henny.vibeyclient.module.media.video.ui.SetupScreen;
+import dev.henny.vibeyclient.media.ffmpeg.Ffmpeg;
+import dev.henny.vibeyclient.media.ffmpeg.FfmpegPurpose;
+import dev.henny.vibeyclient.media.ffmpeg.FfmpegSetupScreen;
 import dev.henny.vibeyclient.ui.toast.ToastStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
@@ -158,7 +159,7 @@ public final class Recorder {
 
     /** Opens the download prompt (nothing is downloaded before the player agrees there). */
     public void setupFfmpeg() {
-        ClientCompat.openScreen(new SetupScreen(ClientCompat.screen(), SetupScreen.Need.FFMPEG, true));
+        ClientCompat.openScreen(new FfmpegSetupScreen(ClientCompat.screen(), FfmpegPurpose.RECORDING));
     }
 
     void settingsChanged(boolean needsRestart) {

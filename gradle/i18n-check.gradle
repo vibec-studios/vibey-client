@@ -1,4 +1,4 @@
-// ./gradlew checkI18n – fails when a string is missing in en_us or de_de (part of buildAll).
+// ./gradlew checkI18n – fails when a string is missing in en_us or de_de (part of buildAll and :fabric-1.21.11:check).
 // Checks: same flattened key set (and the same {n} placeholders) per i18n file in both languages, the vanilla lang
 // files (keybind names) in both languages, every literal key passed to Lang.tr/Lang.text/Lang.has/tr in the Java
 // sources exists, every module setting has its "setting.<key>" label and every keybind its vanilla name.

@@ -13,7 +13,7 @@ import dev.henny.vibeyclient.module.clips.ring.ClipRing;
 import dev.henny.vibeyclient.module.clips.store.ClipMeta;
 import dev.henny.vibeyclient.module.clips.store.ClipStore;
 import dev.henny.vibeyclient.module.clips.ui.ClipsGalleryScreen;
-import dev.henny.vibeyclient.module.media.video.player.Ffmpeg;
+import dev.henny.vibeyclient.media.ffmpeg.Ffmpeg;
 import dev.henny.vibeyclient.ui.toast.ToastStack;
 import net.minecraft.client.Minecraft;
 

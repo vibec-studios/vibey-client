@@ -2,6 +2,7 @@
 if (project.name == gradle.vibeyVcs) {
     tasks.named('check') {
         dependsOn ':checkModuleBoundaries'
+        dependsOn ':checkI18n'
         gradle.vibeyLibs.each { dependsOn ":${it}:check" }
     }
 }

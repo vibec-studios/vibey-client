@@ -2,7 +2,7 @@ package dev.henny.vibeyclient.module.media.video.ui;
 
 import dev.henny.vibeyclient.module.media.video.MediaScreen;
 import dev.henny.vibeyclient.module.media.video.Video;
-import dev.henny.vibeyclient.module.media.video.player.MediaPlayer;
+import dev.henny.vibeyclient.media.player.MediaPlayer;
 import dev.henny.vibeyclient.module.media.video.web.Web;
 import dev.henny.vibeyclient.ui.CardScreen;
 import dev.henny.vibeyclient.ui.Gfx;
@@ -79,9 +79,9 @@ public final class ControlsScreen extends CardScreen {
         }
         y += ph + 8;
 
-        SetupScreen.Need need = v.missing(s);
+        SetupNeed need = v.missing(s);
         if (need != null && !s.remote) {
-            button(g, x, y, w, 18, tr("controls.setup"), Style.PRIMARY, () -> minecraft.setScreen(new SetupScreen(this, need)));
+            button(g, x, y, w, 18, tr("controls.setup"), Style.PRIMARY, () -> minecraft.setScreen(SetupScreens.of(this, need)));
             y += 26;
         }
 

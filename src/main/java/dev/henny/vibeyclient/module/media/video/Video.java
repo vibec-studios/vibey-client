@@ -6,13 +6,14 @@ import com.google.gson.JsonObject;
 import dev.henny.vibeyclient.Vibey;
 import dev.henny.vibeyclient.api.Lang;
 import dev.henny.vibeyclient.client.ClientCompat;
-import dev.henny.vibeyclient.module.media.video.player.FfmpegPlayer;
-import dev.henny.vibeyclient.module.media.video.player.Ffmpeg;
-import dev.henny.vibeyclient.module.media.video.player.MediaPlayer;
+import dev.henny.vibeyclient.media.player.FfmpegPlayer;
+import dev.henny.vibeyclient.media.ffmpeg.Ffmpeg;
+import dev.henny.vibeyclient.media.player.MediaPlayer;
 import dev.henny.vibeyclient.module.media.video.render.ScreenRenderer;
 import dev.henny.vibeyclient.module.media.video.ui.AcceptScreen;
 import dev.henny.vibeyclient.module.media.video.ui.ControlsScreen;
-import dev.henny.vibeyclient.module.media.video.ui.SetupScreen;
+import dev.henny.vibeyclient.module.media.video.ui.SetupNeed;
+import dev.henny.vibeyclient.module.media.video.ui.SetupScreens;
 import dev.henny.vibeyclient.module.media.video.ui.SourceScreen;
 import dev.henny.vibeyclient.module.media.video.web.Web;
 import dev.henny.vibeyclient.ui.Gfx;
@@ -320,7 +321,7 @@ public final class Video {
             if (ff == null) return null;
             int[] px = pixelSize(s, false);
             appliedPlaying.put(s.id, s.playing);
-            return new FfmpegPlayer(ff, s.source, px[0], px[1], cfg.fps.get(), s.expectedMs(), s.playing);
+            return new FfmpegPlayer(ff, s.source.uri(), px[0], px[1], cfg.fps.get(), s.expectedMs(), s.playing);
         } catch (RuntimeException | LinkageError e) {
             Vibey.LOG.warn("Could not start a player for {}: {}", s.source.label(), e.toString());
             return null;
@@ -384,17 +385,17 @@ public final class Video {
     }
 
     /** What the setup prompt is about for this screen, or null when nothing is missing. */
-    public SetupScreen.Need missing(MediaScreen s) {
+    public SetupNeed missing(MediaScreen s) {
         if (s.source == null) return null;
         if (s.source.kind().web()) {
             Web.State st = Web.state(browserConsent());
             if (st == Web.State.NOT_INSTALLED) {
-                return dev.henny.vibeyclient.module.media.video.web.McefInstaller.installedThisSession ? null : SetupScreen.Need.BROWSER_MOD;
+                return dev.henny.vibeyclient.module.media.video.web.McefInstaller.installedThisSession ? null : SetupNeed.BROWSER_MOD;
             }
-            if (st == Web.State.NEEDS_SETUP) return SetupScreen.Need.BROWSER_NATIVES;
+            if (st == Web.State.NEEDS_SETUP) return SetupNeed.BROWSER_NATIVES;
             return null;
         }
-        return Ffmpeg.available() ? null : SetupScreen.Need.FFMPEG;
+        return Ffmpeg.available() ? null : SetupNeed.FFMPEG;
     }
 
     // ============================================================================================ actions
@@ -420,9 +421,9 @@ public final class Video {
             ClientCompat.openScreen(new AcceptScreen(null, s));
             return;
         }
-        SetupScreen.Need need = missing(s);
+        SetupNeed need = missing(s);
         if (need != null && !s.remote) {
-            ClientCompat.openScreen(new SetupScreen(new ControlsScreen(null, s), need));
+            ClientCompat.openScreen(SetupScreens.of(new ControlsScreen(null, s), need));
             return;
         }
         ClientCompat.openScreen(new ControlsScreen(null, s));
@@ -482,8 +483,8 @@ public final class Video {
         if (moved) closePlayer(s);
         net.sendScreen(s);
         if (!moved && prompt) {
-            SetupScreen.Need need = missing(s);
-            if (need != null) dev.henny.vibeyclient.api.Tasks.onMain(() -> ClientCompat.openScreen(new SetupScreen(null, need)));
+            SetupNeed need = missing(s);
+            if (need != null) dev.henny.vibeyclient.api.Tasks.onMain(() -> ClientCompat.openScreen(SetupScreens.of(null, need)));
         }
     }
 
