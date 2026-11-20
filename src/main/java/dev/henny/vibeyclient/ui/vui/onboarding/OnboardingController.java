@@ -43,12 +43,13 @@ public final class OnboardingController {
     }
 
     public List<Feature> getFeatures() {
-        return List.of(feature("friends", "friends", "social"), feature("cosmetics", "shirt", "cosmetics"),
-                feature("emotes", "wave", "emotes"), feature("hud", "hud", "hud"));
+        return List.of(feature("friends", "social"), feature("cosmetics", "cosmetics"),
+                feature("emotes", "emotes"), feature("hud", "hud"));
     }
 
-    private static Feature feature(String id, String icon, String module) {
+    private static Feature feature(String id, String module) {
         VibeyModule m = ModuleManager.get().get(module);
+        String icon = "module_" + module;
         String tip = m == null ? "" : dev.henny.vibeyclient.ui.vui.menu.ModuleLook.summary(m);
         return new Feature(id, icon, Lang.tr("ui.onboarding.feature." + id), tip);
     }

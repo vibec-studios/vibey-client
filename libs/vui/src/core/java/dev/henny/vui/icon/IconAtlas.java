@@ -46,7 +46,7 @@ public final class IconAtlas {
     private static void paint(PixelIcon icon, int[] at, int[] pixels, int width) {
         for (int py = 0; py < icon.height(); py++) {
             for (int px = 0; px < icon.width(); px++) {
-                if (icon.on(px, py)) pixels[(at[1] + py) * width + at[0] + px] = 0xFFFFFFFF;
+                pixels[(at[1] + py) * width + at[0] + px] = icon.pixel(px, py);
             }
         }
     }

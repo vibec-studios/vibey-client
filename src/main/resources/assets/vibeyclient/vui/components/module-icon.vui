@@ -1,0 +1,11 @@
+<props>{ "name": "", "accent": "", "on": true }</props>
+<template>
+  <stack class="mod-icon" :class="{ off: !on }">
+    <icon class="mod-glyph" set="vibeyclient" :name="name" :style="{ color: on ? accent : '$dim' }"/>
+  </stack>
+</template>
+<style>
+.mod-icon { size: 18; align-items: center; background: $panel; border: 1 $line; flex-shrink: 0; }
+.mod-glyph { size: 16; }
+.mod-icon.off .mod-glyph { opacity: 0.45; }
+</style>
