@@ -9,7 +9,7 @@ public final class WorldKeyResolver {
     private WorldKeyResolver() {}
 
     public static String current() {
-        String level = Game.singleplayerLevelName();
+        String level = Game.singleplayerFolder();
         if (level != null) return WorldKeys.singleplayer(level);
         String address = Game.serverAddress();
         return address != null ? WorldKeys.server(address) : UNKNOWN;

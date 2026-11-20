@@ -5,6 +5,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.world.level.storage.LevelResource;
 
 public final class Game {
     private Game() {}
@@ -57,9 +58,11 @@ public final class Game {
         /*return level.dimension().location().toString();*/
     }
 
-    public static String singleplayerLevelName() {
+    public static String singleplayerFolder() {
         IntegratedServer server = mc().getSingleplayerServer();
-        return server == null ? null : server.getWorldData().getLevelName();
+        if (server == null) return null;
+        java.nio.file.Path name = server.getWorldPath(LevelResource.ROOT).toAbsolutePath().normalize().getFileName();
+        return name == null ? server.getWorldData().getLevelName() : name.toString();
     }
 
     public static String serverAddress() {

@@ -59,6 +59,8 @@ public final class ScreenStore {
 
     private void migrate(PlacementStore store, String key) {
         List<PlacementRecord> old = LegacyScreens.take(video.cfg.data(), key);
+        var server = Minecraft.getInstance().getSingleplayerServer();
+        if (old.isEmpty() && server != null) old = LegacyScreens.take(video.cfg.data(), "sp:" + server.getWorldData().getLevelName());
         if (old.isEmpty()) return;
         for (PlacementRecord r : old) store.put(key, r);
         video.cfg.markDirty();
