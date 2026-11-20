@@ -33,7 +33,10 @@ public final class CinematicGameTest implements FabricClientGameTest {
             m.settings().all().forEach(s -> s.reset());
             m.auto.set(false);
             m.grain.set(true);
-            KIT.log("start key conflicts: '%s'", dev.henny.vibeyclient.client.MappingKeys.conflicts(m.startKey.mapping()));
+            m.startKey.mapping().setKey(m.startKey.mapping().getDefaultKey());
+            net.minecraft.client.KeyMapping.resetMapping();
+            String clash = dev.henny.vibeyclient.client.MappingKeys.conflicts(m.startKey.mapping());
+            check(clash.isEmpty(), "start key clashes with " + clash);
         });
         page(ctx, GlobalSettings.Language.ENGLISH, "page_en");
         page(ctx, GlobalSettings.Language.GERMAN, "page_de");
