@@ -74,15 +74,17 @@ function build() {
   b.locator("ball", "ball", [0, 14.5, -16]);
   b.locator("hat", "rain_hat", [0, 21, -10]);
   for (const make of [idle, sit, swim, swimIdle, held, yawn, clap, bark, shiver, shake, lookUp, wave, slide, trickBall, roll, beg]) make(b);
+  const PROPS = ["rain_hat", "hat_top", "ball", "scarf", "z1", "z2", "z3"];
+  const shows = { trick_ball: ["ball"], look_up: ["rain_hat"], shiver: ["scarf"], idle_long: ["z1", "z2", "z3"] };
+  const layers = ["clap", "bark", "shiver", "wave", "look_up", "yawn"];
   b.preview = {
-    panels: () => [
-      ...["idle", "sit", "swim", "swim_idle", "held", "clap", "bark", "shiver", "shake", "slide", "trick_ball", "roll", "beg", "wave", "look_up", "yawn"].map((n) => ({
-        label: n, ownFit: true, player: false, cam: { yaw: 35, pitch: 14 }, petScale: 0.85,
-        anims: [{ name: n === "clap" || n === "bark" || n === "shiver" || n === "wave" || n === "look_up" || n === "yawn" ? "idle" : n, t: 0.6 }, ...(["clap", "bark", "shiver", "wave", "look_up", "yawn"].includes(n) ? [{ name: n, t: 0.45 }] : [])],
-        time: 0.6,
-      })),
-    ],
+    panels: () => ["idle", "sit", "swim", "swim_idle", "held", "clap", "bark", "shiver", "shake", "slide", "trick_ball", "roll", "beg", "wave", "look_up", "idle_long"].map((n) => ({
+      label: n, ownFit: true, player: false, cam: { yaw: 35, pitch: 14 }, petScale: 0.85, time: 0.6,
+      hideBones: PROPS.filter((p) => !(shows[n] ?? []).includes(p)),
+      anims: layers.includes(n) ? [{ name: "idle", t: 0.6 }, { name: n, t: 0.45 }] : [{ name: n, t: n === "idle_long" ? 2.2 : 0.6 }],
+    })),
     sheet: { cols: 4 },
+    thumb: { cam: { yaw: 30, pitch: 12 }, player: false, petScale: 1, time: 0.6, anims: [{ name: "idle", t: 0.6 }], hideBones: PROPS },
   };
   return b;
 }

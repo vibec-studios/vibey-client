@@ -50,7 +50,7 @@ public final class CompanionGameTest implements FabricClientGameTest {
         cmd(world, "fill %d %d %d %d %d %d minecraft:air", x - 14, y, z - 14, x + 14, y + 10, z + 14);
         cmd(world, "fill %d %d %d %d %d %d minecraft:grass_block", x - 14, y - 3, z - 14, x + 14, y - 1, z + 14);
         cmd(world, "fill %d %d %d %d %d %d minecraft:water", x + 5, y - 2, z - 3, x + 10, y - 1, z + 3);
-        cmd(world, "fill %d %d %d %d %d %d minecraft:snow_block", x - 12, y - 1, z - 4, x - 5, y - 1, z + 4);
+        cmd(world, "fill %d %d %d %d %d %d minecraft:snow_block", x - 14, y - 1, z - 4, x - 2, y - 1, z + 4);
         cmd(world, "fill %d %d %d %d %d %d minecraft:oak_leaves", x - 3, y, z + 8, x + 1, y + 1, z + 9);
         cmd(world, "setworldspawn %d %d %d", x, y, z);
         tp(world, ctx, x + 0.5, y, z + 0.5, 180, 10);
@@ -74,7 +74,7 @@ public final class CompanionGameTest implements FabricClientGameTest {
 
     private static void follow(ClientGameTestContext ctx, TestSingleplayerContext world, int[] o) {
         tp(world, ctx, o[0] + 0.5, o[1], o[2] - 7.5, 180, 15);
-        ctx.runOnClient(mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_BACK));
+        ctx.runOnClient(mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
         waitFor(ctx, "seal follows", 200, () -> {
             Companion c = CompanioMc.own();
             return c.body.distance(o[0] + 0.5, o[1], o[2] - 7.5) < 4.6;
@@ -171,12 +171,12 @@ public final class CompanionGameTest implements FabricClientGameTest {
         lookAt(ctx, center(ctx).add(0, 0.4, 0));
         shot(ctx, "trick_ball");
         ctx.waitTicks(40);
-        tp(world, ctx, o[0] - 4.5, o[1], o[2] + 0.5, 90, 20);
-        ctx.runOnClient(mc -> CompanioMc.own().place(o[0] - 9.5, o[1], o[2] + 0.5));
+        tp(world, ctx, o[0] - 9.5, o[1], o[2] + 0.5, 90, 20);
+        ctx.runOnClient(mc -> CompanioMc.own().place(o[0] - 12.5, o[1], o[2] + 0.5));
         ctx.waitTicks(20);
         ctx.runOnClient(mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_BACK));
-        tp(world, ctx, o[0] + 2.5, o[1], o[2] + 0.5, 90, 20);
-        ctx.waitTicks(14);
+        tp(world, ctx, o[0] + 3.5, o[1], o[2] + 0.5, 90, 20);
+        ctx.waitTicks(16);
         shot(ctx, "snow_slide");
         ctx.runOnClient(mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
         ctx.waitTicks(60);

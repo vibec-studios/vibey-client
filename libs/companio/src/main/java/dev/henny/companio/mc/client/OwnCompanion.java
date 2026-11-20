@@ -37,6 +37,7 @@ final class OwnCompanion {
             return false;
         }
         save(c);
+        Companion old = companion != null && want != null && companion.def.key().equals(want.key()) ? companion : null;
         def = want;
         companion = null;
         if (want == null || p == null) return true;
@@ -47,8 +48,12 @@ final class OwnCompanion {
             n.brain().needs().restore(saved.needs);
             n.brain().memory().restoreVars(saved.vars);
         }
-        double side = Math.toRadians(p.getYRot() + 90);
-        n.spawn(p.getX() + Math.cos(side) * 1.2, p.getY(), p.getZ() + Math.sin(side) * 1.2, p.getYRot());
+        if (old != null) {
+            n.spawn(old.body.x, old.body.y, old.body.z, old.body.yaw);
+        } else {
+            double side = Math.toRadians(p.getYRot() + 90);
+            n.spawn(p.getX() + Math.cos(side) * 1.2, p.getY(), p.getZ() + Math.sin(side) * 1.2, p.getYRot());
+        }
         n.name(c.name);
         n.command(Command.of(c.command), false);
         companion = n;

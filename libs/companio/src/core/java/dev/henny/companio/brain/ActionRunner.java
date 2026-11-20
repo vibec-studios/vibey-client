@@ -30,6 +30,11 @@ final class ActionRunner {
         }
     }
 
+    void behaviorAnim(BehaviorRun owner) {
+        fx.get().anim(owner.def.anim(), true);
+        owner.layers.add(owner.def.anim().name());
+    }
+
     void execute(Step s, BehaviorRun owner) {
         if (s.chance() < 1f && scope.random.nextFloat() >= s.chance()) return;
         try {
@@ -44,7 +49,7 @@ final class ActionRunner {
         Effects e = fx.get();
         switch (a) {
             case AnimAction x -> {
-                e.anim(x.anim(), owner != null);
+                e.anim(x.anim(), false);
                 if (owner != null) owner.layers.add(x.anim().name());
             }
             case StopAnimAction x -> e.stopAnim(x.name());

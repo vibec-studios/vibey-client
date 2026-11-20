@@ -21,7 +21,7 @@ public final class Interactions {
     }
 
     public void ensureListening() {
-        if (listening) return;
+        if (listening || !dev.henny.r3.mc.client.R3Client.started()) return;
         listening = true;
         R3Mc.scene().interaction().listen(this::event);
     }

@@ -3,7 +3,6 @@ package dev.henny.companio.brain;
 import dev.henny.companio.def.BehaviorDef;
 import dev.henny.companio.def.CompanionDef;
 import dev.henny.companio.def.Step;
-import dev.henny.companio.def.action.AnimAction;
 import dev.henny.companio.def.action.StopAnimAction;
 import dev.henny.companio.expr.Expr;
 import dev.henny.companio.sense.Senses;
@@ -150,7 +149,7 @@ public final class Brain {
         for (int i = 0; i < run.nextRepeat.length; i++) run.nextRepeat[i] = scope.now + b.repeat().get(i).every().pick(scope.random);
         memory.stamp("behavior:" + b.id(), scope.now);
         remember("behavior:" + b.id());
-        if (b.anim() != null) actions.execute(new Step(new AnimAction(b.anim()), Expr.TRUE, 1f, 0f), run);
+        if (b.anim() != null) actions.behaviorAnim(run);
         actions.run(b.start(), run, true);
     }
 

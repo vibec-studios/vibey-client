@@ -166,8 +166,10 @@ keys are used automatically (a model with `idle`, `walk`, `swim` needs no `anima
 | `add` (default for layers) | the layer's keyframes are added to the base (a clap that only keys the flippers keeps the body breathing) |
 | `replace` | the base fades out while the layer plays (a full-body trick) |
 
-Layers fade in/out over `fade` seconds (default 0.15). A non-looping layer plays once and fades out at its end; a
-looping layer plays until its behavior ends or `stop_anim`. Up to 4 layers at once. Animation events in the model
+Layers fade in/out over `fade` seconds (default 0.15). A layer started by the `anim` **action** plays once and fades
+out at its end (looping ones until the behavior ends or `stop_anim`). A behavior's own `anim` field lasts for the
+whole behavior: a looping animation loops, a non-looping one plays once and **holds its last frame** until the
+behavior ends (open the umbrella, then keep it up). Up to 4 layers at once. Animation events in the model
 (particles, sounds, visibility) fire for the base and every layer with weight ≥ 50 %.
 
 ## Props
@@ -550,8 +552,9 @@ Unknown fields are ignored with a warning (`unknown field "prioirty"`), so newer
    `/companio reload` do it at once. Errors show at the top left, the companion keeps running with the last good
    version until the pack loads again.
 5. `/companio debug` shows the running behavior, needs and the last events above the companion.
-6. Check without the game: `java -cp <companio core jar>;gson.jar dev.henny.companio.tool.CheckPack <folder or zip>`
-   prints every error and warning (exit code 1 on errors). The built-in packs are checked by companio's JUnit tests.
+6. Check without the game: `java -cp "<companio, cosmetico, r3, vui core jars>;gson.jar;joml.jar"
+   dev.henny.companio.tool.CheckPack <folder or zip>` prints every error and warning (exit code 1 on errors). The
+   built-in packs are checked by companio's JUnit tests.
 
 ## Full example
 
