@@ -1,0 +1,36 @@
+<template>
+  <stack class="rd-layer">
+    <box class="rd-ring" :style="{ left: cx - 70, top: cy - 70 }"/>
+    <column class="rd-center" :style="{ left: cx - 40, top: cy - 16 }">
+      <text class="rd-name">{{ title }}</text>
+      <text class="rd-sub">{{ subtitle }}</text>
+    </column>
+    <button v-for="it in items" :key="it.id" :id="'rd-' + it.id" class="rd-item" :class="{ on: it.on }"
+            :style="{ left: it.x - 26, top: it.y - 13 }" @click="choose(it)">
+      <column class="rd-inner">
+        <icon :glyph="it.icon" class="rd-icon"/>
+        <text class="rd-label">{{ it.label }}</text>
+      </column>
+    </button>
+    <row v-if="naming" class="rd-namebox" :style="{ left: cx - 70, top: cy + 78 }">
+      <textfield id="rd-namefield" class="rd-field" v-model="name" max-length="24" :placeholder="t('companio.menu.namePlaceholder')" @submit="saveName()"/>
+      <button id="rd-ok" class="primary rd-ok" @click="saveName()">✔</button>
+    </row>
+  </stack>
+</template>
+<style>
+.rd-layer { width: 100%; height: 100%; background: #50000000; }
+.rd-ring { position: absolute; width: 140; height: 140; border: 1 #40ffffff; background: #30101018; }
+.rd-center { position: absolute; width: 80; align-items: center; gap: 1; pointer-events: none; }
+.rd-name { color: $text; font-weight: bold; text-wrap: nowrap; text-overflow: ellipsis; }
+.rd-sub { color: $dim; font-scale: 0.75; text-wrap: nowrap; }
+.rd-item { position: absolute; width: 52; height: 26; padding: 0; background: $panel; border: 1 $line2; }
+.rd-item:hover { border-color: $brand; background: $surface2; }
+.rd-item.on { border-color: $brand2; }
+.rd-inner { align-items: center; gap: 1; }
+.rd-icon { color: $brand2; }
+.rd-label { color: $text; font-scale: 0.75; text-wrap: nowrap; }
+.rd-namebox { position: absolute; width: 140; gap: 3; }
+.rd-field { grow: 1; width: 0; height: 16; }
+.rd-ok { width: 16; height: 16; padding: 0; }
+</style>

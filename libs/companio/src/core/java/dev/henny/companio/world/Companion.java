@@ -163,10 +163,14 @@ public final class Companion implements CompanionView {
     }
 
     public void command(Command c) {
+        command(c, true);
+    }
+
+    public void command(Command c, boolean announce) {
         command = c;
         if (c == Command.STAY) mover.home.set(body.x, body.y, body.z);
         else mover.home.clear();
-        brain.fire("command_" + c.id());
+        if (announce) brain.fire("command_" + c.id());
     }
 
     public void pet() {
