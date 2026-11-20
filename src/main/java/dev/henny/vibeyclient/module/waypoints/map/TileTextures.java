@@ -8,7 +8,9 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
 import org.lwjgl.system.MemoryUtil;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class TileTextures {
@@ -31,6 +33,7 @@ public final class TileTextures {
     private final TileStore store;
     private final Map<TileKey, Tex> textures = new HashMap<>();
     private final LruSet<TileKey> lru = new LruSet<>(MAX_TEXTURES);
+    private final List<Identifier> retired = new ArrayList<>();
     private int uploadsLeft;
     private long uploads;
 
@@ -40,6 +43,8 @@ public final class TileTextures {
 
     public void beginFrame() {
         uploadsLeft = UPLOADS_PER_FRAME;
+        for (Identifier id : retired) Minecraft.getInstance().getTextureManager().release(id);
+        retired.clear();
     }
 
     public Identifier get(TileKey key) {
@@ -50,7 +55,7 @@ public final class TileTextures {
             tex = upload(key, data, tex);
         }
         if (tex == null) return null;
-        for (TileKey old : lru.touch(key)) release(old);
+        for (TileKey old : lru.touch(key)) retire(old);
         return tex.id;
     }
 
@@ -77,6 +82,11 @@ public final class TileTextures {
         return tex;
     }
 
+    private void retire(TileKey key) {
+        Tex tex = textures.remove(key);
+        if (tex != null) retired.add(tex.id);
+    }
+
     private void release(TileKey key) {
         Tex tex = textures.remove(key);
         if (tex != null) Minecraft.getInstance().getTextureManager().release(tex.id);
@@ -84,6 +94,8 @@ public final class TileTextures {
 
     public void clear() {
         for (TileKey k : textures.keySet().toArray(new TileKey[0])) release(k);
+        for (Identifier id : retired) Minecraft.getInstance().getTextureManager().release(id);
+        retired.clear();
         lru.clear();
     }
 }
