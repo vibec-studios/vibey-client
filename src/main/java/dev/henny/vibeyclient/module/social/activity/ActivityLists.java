@@ -6,6 +6,7 @@ import dev.henny.vibeyclient.api.service.FriendsActivity.OnServer;
 import dev.henny.vibeyclient.module.social.SocialState;
 import dev.henny.vibeyclient.module.social.model.Destination;
 import dev.henny.vibeyclient.module.social.model.Model;
+import dev.henny.vibeyclient.module.social.presence.ServerKind;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -21,7 +22,8 @@ final class ActivityLists {
             Model.Presence p = f.presence();
             Model.Activity a = p == null || !p.online() ? null : p.activity();
             if (a == null || "hosting".equals(a.type()) || !SharedAddress.onServer(a)) continue;
-            out.add(new OnServer(ActivityPlayers.of(f.user(), p), SharedAddress.title(a), SharedAddress.of(a), a.startedAt()));
+            out.add(new OnServer(ActivityPlayers.of(f.user(), p), SharedAddress.title(a), SharedAddress.of(a), a.startedAt(),
+                    ServerKind.lan(a.serverKind())));
         }
         return out;
     }

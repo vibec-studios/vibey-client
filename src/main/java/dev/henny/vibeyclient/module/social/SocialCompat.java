@@ -32,6 +32,11 @@ public final class SocialCompat {
         }
     }
 
+    public static boolean worldOpened() {
+        IntegratedServer s = Minecraft.getInstance().getSingleplayerServer();
+        return s != null && s.isPublished();
+    }
+
     /** Address of the multiplayer server we are on, or null (singleplayer / menus). */
     public static String serverAddress() {
         Minecraft mc = Minecraft.getInstance();

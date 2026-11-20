@@ -11,11 +11,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SharedAddressTest {
     static Activity server(String server, boolean joinable, Join join) {
-        return new Activity("playing", null, "1.21.11", "fabric", server, null, joinable, join, 0, null, null, 0, null);
+        return new Activity("playing", null, "1.21.11", "fabric", server, null, joinable, join, 0, null, null, 0, null, null);
     }
 
     static Activity details(String server, String name, String address, int port, Boolean shared) {
-        return new Activity("playing", null, "1.21.11", "fabric", server, null, false, null, 0, name, address, port, shared);
+        return new Activity("playing", null, "1.21.11", "fabric", server, null, false, null, 0, name, address, port, shared, null);
     }
 
     @Test

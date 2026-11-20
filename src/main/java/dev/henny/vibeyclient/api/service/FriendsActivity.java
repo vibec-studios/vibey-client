@@ -7,9 +7,13 @@ public interface FriendsActivity {
 
     record Player(String id, String name, String skinUrl, String status, String rank) {}
 
-    record OnServer(Player friend, String server, String address, long since) {
+    record OnServer(Player friend, String server, String address, long since, boolean lan) {
+        public OnServer(Player friend, String server, String address, long since) {
+            this(friend, server, address, since, false);
+        }
+
         public boolean shared() {
-            return address != null && !address.isBlank();
+            return !lan && address != null && !address.isBlank();
         }
     }
 

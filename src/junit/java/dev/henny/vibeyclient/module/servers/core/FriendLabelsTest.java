@@ -31,6 +31,18 @@ class FriendLabelsTest {
     }
 
     @Test
+    void lanServerHasNoAddress() {
+        OnServer unnamed = new OnServer(P, null, "192.168.0.2", 0, true);
+        assertTrue(!unnamed.shared());
+        FriendLabels.Label none = FriendLabels.server(unnamed);
+        assertTrue(none.hiddenTitle());
+        assertEquals("", none.detail());
+        FriendLabels.Label named = FriendLabels.server(new OnServer(P, "Basement", null, 0, true));
+        assertEquals("Basement", named.title());
+        assertTrue(named.hiddenDetail());
+    }
+
+    @Test
     void worldAndInvite() {
         assertEquals("Inselwelt", FriendLabels.world(new HostedWorld(P, " Inselwelt ", "x.axolite.cc", 25565, 1, 0)).title());
         assertTrue(FriendLabels.world(new HostedWorld(P, null, "x.axolite.cc", 25565, 1, 0)).hiddenTitle());

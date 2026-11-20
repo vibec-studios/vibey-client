@@ -86,6 +86,7 @@
     "already": "Already in your list",
     "added": "Server added",
     "hidden": "Hidden server",
-    "hiddenAddress": "Address hidden"
+    "hiddenAddress": "Address hidden",
+    "lan": "LAN world"
   }
 }

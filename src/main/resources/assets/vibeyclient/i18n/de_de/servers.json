@@ -86,6 +86,7 @@
     "already": "Schon in deiner Liste",
     "added": "Server hinzugefügt",
     "hidden": "Server verborgen",
-    "hiddenAddress": "Adresse verborgen"
+    "hiddenAddress": "Adresse verborgen",
+    "lan": "LAN-Welt"
   }
 }

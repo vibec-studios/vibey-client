@@ -19,6 +19,7 @@ public final class FriendLabels {
 
     public static Label server(OnServer s) {
         String name = clean(s.server());
+        if (s.lan()) return new Label(name, name == null ? "" : null);
         if (s.shared()) {
             String address = s.address().trim();
             if (name == null || name.equalsIgnoreCase(address)) return new Label(address, "");

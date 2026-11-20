@@ -74,13 +74,14 @@ public final class Model {
 
     public record Activity(String type, String instanceName, String mcVersion, String loader, String server, String world,
                            boolean joinable, Join join, long startedAt, String serverName, String serverAddress,
-                           int serverPort, Boolean addressShared) {
+                           int serverPort, Boolean addressShared, String serverKind) {
         public static Activity from(JsonObject o) {
             if (o == null) return null;
             return new Activity(J.str(o, "type", "playing"), J.str(o, "instanceName"), J.str(o, "mcVersion"),
                     J.str(o, "loader"), J.str(o, "server"), J.str(o, "world"), J.bool(o, "joinable", false),
                     Join.from(J.obj(o, "join")), time(J.str(o, "startedAt")), J.str(o, "serverName"),
-                    J.str(o, "serverAddress"), J.num(o, "serverPort", 0), flag(o, "addressShared"));
+                    J.str(o, "serverAddress"), J.num(o, "serverPort", 0), flag(o, "addressShared"),
+                    J.str(o, "serverKind"));
         }
     }
 

@@ -13,7 +13,7 @@ class HostedJoinTest {
     }
 
     static Activity hosting(String world) {
-        return new Activity("hosting", null, null, null, null, world, true, null, 0, null, null, 0, null);
+        return new Activity("hosting", null, null, null, null, world, true, null, 0, null, null, 0, null, null);
     }
 
     @Test
