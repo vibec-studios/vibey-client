@@ -15,6 +15,7 @@ public final class VisualsModule extends VibeyModule {
             .section("particles");
     public final BoolSetting keepImportant = bool("keepImportant", true).section("particles");
     public final BoolSetting ambientOff = bool("ambientOff", false).section("particles");
+    public final dev.henny.vibeyclient.module.visuals.effects.EffectsPart effects = new dev.henny.vibeyclient.module.visuals.effects.EffectsPart(this);
 
     public VisualsModule() {
         super("visuals", ModuleCategory.MISC);

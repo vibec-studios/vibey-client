@@ -17,6 +17,7 @@ ext.clientModules = [
         info         : ['fabric-1.21.11'],
         camera       : ['fabric-1.21.11'],
         visuals      : ['fabric-1.21.11'],
+        'visuals.effects': ['fabric-1.21.11'],
         chat         : ['fabric-1.21.11'],
         'social.streamer': ['fabric-1.21.11'],
         inventory    : ['fabric-1.21.11'],
@@ -33,6 +34,7 @@ ext.clientModuleResources = [
         chat: ['assets/vibeyclient/vui/chat/**'],
         inventory: ['assets/vibeyclient/vui/inventory/**'],
         servers: ['assets/vibeyclient/vui/servers/**'],
+        'visuals.effects': ['assets/vibeyclient/vui/effects/**'],
 ]
 
 // Shared packages (dev.henny.vibeyclient.<path>) that several modules use instead of each other, with their targets

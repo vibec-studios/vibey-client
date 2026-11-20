@@ -1,14 +1,16 @@
 # Visuals module (`visuals`)
 
-Item physics for dropped items and a particle amount control (features #26, #27 of [FEATURES.md](FEATURES.md)).
+Item physics for dropped items and a particle amount control (features #26, #27 of [FEATURES.md](FEATURES.md)),
+plus effects and a per-type particle editor ([below](#effects-and-particles-part-visualseffects)).
 **Fabric 1.21.11 only for now** (`gradle/modules.gradle`: `visuals: ['fabric-1.21.11']`, registered by reflection in
 `BuiltinModules`). Code: `src/main/java/dev/henny/vibeyclient/module/visuals`.
 
 > See also: [MODULES.md](MODULES.md) · [CAMERA.md](CAMERA.md)
 
 Both features are purely visual and client side: entity positions, hitboxes, pickup and the particles' gameplay
-meaning are untouched. No server rule (hiding particles is what vanilla's *Particles: Minimal* does already, and
-the important ones stay unless the player turns that off too).
+meaning are untouched. No server rule for these two (hiding particles is what vanilla's *Particles: Minimal* does
+already, and the important ones stay unless the player turns that off too). Per-type particle styles and the
+effects that hide more than vanilla can have rules (`visuals.*`, see below).
 
 ## Item physics
 
@@ -46,6 +48,91 @@ Settings (section `particles`): `particles` 0–300 % (100, steps of 25), `keepI
   extra copies with a small position/speed jitter (re-entry guarded). Block-break crumbs that vanilla adds directly
   (`add(TerrainParticle)`) follow the block budget (they can be hidden or thinned, not multiplied). The category is
   cached per `ParticleType` (identity map), so a spawn costs one map lookup.
+
+## Effects and particles (part `visuals.effects`)
+
+Idea from the "particles & effects" menus of other clients, own code. Part `visuals.effects` in
+`gradle/modules.gradle` (`['fabric-1.21.11']`, like the module). `VisualsModule` has one line
+(`effects = new EffectsPart(this)`); `effects/EffectsPart` adds its settings to the visuals settings group (section
+*Effects*, labels in `i18n/*/visuals.effects.json`), declares the server rules and attaches the particle style store.
+Mixins: `vibeyclient.visuals.effects.mixins.json` (package `visuals.mixin.effects`, every injector `require = 0`).
+
+### Effects
+
+| Setting | Range (default) | How | Server rule |
+|---|---|---|---|
+| `fireOpacity` | 0–100 % (100) | `ScreenEffectRendererFxMixin`: alpha of the four `setColor` calls in `renderFire` (vanilla 0.9). Fire height is the PvP module's `lowFire`/`fireHeight` (linked rows in the editor, not duplicated) | `visuals.fire` |
+| `pumpkinOpacity` | 0–100 % (100) | `GuiFxMixin`: alpha of the first `renderTextureOverlay` in `renderCameraOverlays` (equippable camera overlays: the carved pumpkin) | `visuals.pumpkin` |
+| `vignette` | 0–100 % (100) | `GuiFxMixin`: scales the read of `vignetteBrightness` in `renderVignette`; the red world border warning uses another branch and stays | – (vanilla has a vignette switch) |
+| `totemSize` | 0–150 % (100) | `ScreenEffectRendererFxMixin`: one extra `scale` after vanilla's 0.8 in `renderItemActivationAnimation` | `visuals.totem` (only below 100 %) |
+| `distortion` | 0–100 % (100) | `GameRendererFxMixin` + `GuiFxMixin`: scale `getEffectBlendFactor` (nausea) and both portal intensity fields in `renderLevel`, `tick` and `renderCameraOverlays` | – (vanilla *Distortion Effects*) |
+| `hurtShake` | 0–100 % (100) | `GameRendererFxMixin`: multiplies the `damageTiltStrength` read in `bobHurt` | – (vanilla *Damage Tilt*) |
+| `explosionShake` | 0–100 % (0) | new effect: `ExplosionShake` kicks `core/Shake` when an `explosion`/`explosion_emitter` particle is created near the camera (power falls off over 4 × radius, at least 8 blocks), applied at every return of `bobHurt` (≤ 3.5° roll, 1.8° pitch, fades in about a second) | – (adds, never hides) |
+| `ownPotionParticles` | on | `LivingEntityFxMixin`: `@WrapWithCondition` on `addParticle` in `tickEffects`, local player only | `visuals.particles` |
+
+Everything is vanilla when the module is off or a value is at its default. Rules use `EffectMath.fair`: while a rule
+is active, a reducing value counts as 100 % (a bigger totem stays allowed).
+
+PvP rows: block outline (colour, width, opacity, fill), hit colour (tint, strength), lower shield and low fire are the
+PvP module's settings; the editor shows them in *Overlays*/*Combat* through `PvpLink` (settings looked up by key, no
+import of the PvP package; *Turn on* enables the PvP module while it is off).
+
+### Particles per type
+
+`particles/StyleStore` keeps a `core/ParticleStyles` map (id → `ParticleStyle(amount 0–400 %, size 25–300 %, tint
+RGB + strength 0–100 %, hidden)`), stored as JSON under `_data.particleStyles` in `visuals.json` (`core/StyleCodec`,
+only changed fields). Each `ParticleType` gets one `StyleSlot` (identity map: category, own `ParticleBudget`, the
+effective style – `fair()` while `visuals.particles` is active: amount and size at least 100 %, not hidden).
+
+- Amount: `ParticleGate.plan` → `core/StylePlan.count`: hidden → 0; *No ambient* → 0 for ambient/weather; the global
+  slider × the type's amount (max 6×). *Keep hit particles* raises only the global part to 1×, so an explicit 0 % on
+  `crit` still hides crits. Default styles + 100 % global = the vanilla path (one map lookup).
+- Size and colour: every created particle carries its slot (`ParticleMixin` field, set at the return of
+  `createParticle` and for direct `TerrainParticle`s); `SingleQuadParticleMixin` changes the size and colour
+  arguments of `QuadParticleRenderState.add` every frame, so edits apply to living particles at once.
+  `core/TintMath` mixes the colour towards tint × luminance by the strength (white textures take the exact tint).
+- Presets (`effects/core/Preset` + `particles/core/ParticlePresets`, `effects/core/EffectPresets`): *Vanilla*
+  (everything default), *Clean* (fewer ambient/weather/block/potion particles, softer vignette, hurt shake and
+  distortion), *PvP* (bigger and more crits, less noise, fire 60 %, totem 60 %, pumpkin 60 %, no own potion swirls),
+  *Fancy* (more crits, flames, sparkles and totem particles, totem 120 %, blast shake 60 %). The bar shows the preset
+  that matches the current values (none after own edits).
+
+### Editor (direct manipulation)
+
+`effects/screen/EffectsScreen` (vui `effects/editor` + `effects-tab`, `particles-tab`, `particle-detail`) opens with
+the page button *Effects & particles*. It does not pause and has no background: a 192 px panel on the right over the
+live world; dragging on the free area turns the view (e.g. to look at a block for the outline). Every change applies
+at once.
+
+- Tabs *Effects* / *Particles*, preset bar on top.
+- Effects: the normal `setting-row`s (so server badges work) with a ▶ test button: fire overlay 3 s, pumpkin mask
+  3 s, nausea ramp 3.5 s (`EffectsPreview`, cleared when the screen closes), hurt tilt (`animateHurt`), totem pop
+  (+ totem particles), explosion 7 blocks left of the view (shake + sound).
+- Particles: global rows (amount, keep hit particles, no ambient), search, category filter (incl. *Changed*), a
+  virtual list grouped by category; each row has a live swatch (the type's sprite from `particles/<id>.json`,
+  animated through its frames, tinted and sized), the amount and an eye to hide it. Click → detail: amount, size,
+  colour + strength, hide, reset, *Test*. Selecting and every edit spawn 24 preview particles 3 blocks ahead
+  (`ParticleBurst`; `PreviewOptions` builds options for block/item/dust/colour/spell types, vibration and trail have
+  no preview).
+
+### Code map (effects part)
+
+| Package | Job |
+|---|---|
+| `visuals.effects` | `EffectsPart` (settings), `EffectRules`, `Effects` (values for the mixins), `EffectsPreview`, `ExplosionShake`, `PreviewSpot`, `PvpLink` |
+| `visuals.effects.core` | pure: `EffectKeys`, `EffectMath`, `EffectPresets`, `Preset`, `PreviewCurve`, `Shake` |
+| `visuals.effects.screen` | `EffectsScreen`, `EffectsController`, `EffectsTab`, `EffectGroup`, `EffectItem`, `PresetBar`, `ParticlesTab`, `ParticleItem`, `ParticleDetail` |
+| `visuals.particles` | `ParticleGate`, `StyleStore`, `StyleSlot`, `StyledParticle`, `ParticleIds`, `ParticleSprites`, `ParticleBurst`, `PreviewOptions` |
+| `visuals.particles.core` | pure: `ParticleStyle`, `ParticleStyles`, `StyleCodec`, `StylePlan`, `TintMath`, `ParticlePresets`, `ParticleNames` |
+| `visuals.mixin.effects` | `GameRendererFxMixin`, `GuiFxMixin`, `LivingEntityFxMixin`, `ParticleEngineFxMixin`, `ParticleMixin`, `ScreenEffectRendererFxMixin`, `SingleQuadParticleMixin` |
+
+Tests: JUnit `src/junit/java/.../visuals/{particles,effects}/core`; gametest `EffectsGameTest` (+ `EffectsEditorChecks`,
+`EffectsOverlayChecks`, `EffectsWorldChecks`, `EffectsParticleChecks`, `EffectsRuleChecks`), shots in
+`build/review/effects/`:
+
+```
+./gradlew :fabric-1.21.11:runClientGameTest -Dvibeyclient.test.only=EffectsGameTest -Dvibeyclient.test.relay=off
+```
 
 ## Code map
 

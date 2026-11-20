@@ -1,0 +1,32 @@
+<import name="icon-button" src="vibeyclient:components/icon-button"/>
+<import name="setting-row" src="vibeyclient:components/setting-row"/>
+<template>
+  <scroll id="fx-effects" class="fx-scroll">
+    <column v-for="g in groups" :key="g.id" class="fx-group">
+      <row class="fx-group-head">
+        <text class="fx-group-title">{{ g.title }}</text>
+        <spacer/>
+        <button v-if="g.note" id="fx-pvp-on" class="ghost fx-note" :tooltip="g.note" @click="enablePvp()">{{ t('visuals.effects.ui.turnOn') }}</button>
+      </row>
+      <row v-for="i in g.items" :key="i.id" class="fx-item">
+        <setting-row class="fx-setting" :row="i.row"/>
+        <icon-button v-if="i.test" :id="'test-' + i.test + '-' + i.id" class="fx-test" icon="play"
+                     :tip="t('visuals.effects.ui.test')" @click="test(i.test)"/>
+        <box v-else class="fx-test-gap"/>
+      </row>
+    </column>
+  </scroll>
+</template>
+<style>
+.fx-scroll { grow: 1; padding: 4 4 4 6; gap: 5; min-height: 0; }
+.fx-group { gap: 1; align-items: stretch; flex-shrink: 0; }
+.fx-group-head { height: 12; gap: 3; }
+.fx-group-title { color: $brand2; text-transform: uppercase; font-scale: 0.75; text-wrap: nowrap; }
+.fx-note { height: 11; padding: 0 3; font-scale: 0.75; color: $warn; }
+.fx-item { gap: 1; align-items: center; }
+.fx-setting { grow: 1; min-width: 0; }
+.fx-test { width: 14; height: 14; flex-shrink: 0; }
+.fx-test-gap { width: 14; height: 14; flex-shrink: 0; }
+.fx-item .setting-slider { width: 52; }
+.fx-item .setting-value { width: 22; }
+</style>

@@ -1,0 +1,51 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<import name="icon-button" src="vibeyclient:components/icon-button"/>
+<import name="setting-row" src="vibeyclient:components/setting-row"/>
+<template>
+  <column id="fx-particles" class="fx-pt">
+    <column class="fx-globals">
+      <setting-row v-for="r in globals" :key="r.id" :row="r"/>
+    </column>
+    <row class="fx-filter">
+      <ico name="search" class="fx-dim"/>
+      <textfield id="fx-search" class="fx-search" v-model="query" :placeholder="t('visuals.effects.ui.search')"/>
+      <select id="fx-cat" class="fx-cat" v-model="filter" :options="filters"/>
+    </row>
+    <scroll id="fx-list" class="fx-list">
+      <template v-for="item in rows" :key="item.key">
+        <row v-if="item.header" class="fx-head"><text class="fx-head-text">{{ item.name }}</text></row>
+        <row v-else :id="'p-' + item.key" class="fx-prow" :class="{ hidden: item.hidden, changed: item.changed }" @click="select(item)">
+          <stack class="fx-swatch">
+            <image v-if="sprite(item.id, frame)" :src="sprite(item.id, frame)" tinted
+                   :style="{ color: item.color, width: item.px, height: item.px }"/>
+            <box v-else class="fx-dot" :style="{ background: item.color, width: item.px / 2 + 2, height: item.px / 2 + 2 }"/>
+          </stack>
+          <text class="fx-pname" :tooltip="item.id">{{ item.name }}</text>
+          <text class="fx-pval">{{ item.value }}</text>
+          <icon-button :id="'hide-' + item.key" class="fx-eye" :icon="item.hidden ? 'hud_eye_off' : 'eye'"
+                       :tip="t('visuals.effects.ui.hide')" @click.stop="hide(item)"/>
+        </row>
+      </template>
+    </scroll>
+  </column>
+</template>
+<style>
+.fx-pt { grow: 1; min-height: 0; align-items: stretch; }
+.fx-globals { padding: 3 6; gap: 0; border-bottom: 1 $line; flex-shrink: 0; align-items: stretch; }
+.fx-globals .setting-slider { width: 56; }
+.fx-filter { height: 20; gap: 3; padding: 0 4 0 6; flex-shrink: 0; }
+.fx-search { grow: 1; min-width: 0; height: 14; }
+.fx-cat { width: 62; height: 14; }
+.fx-list { grow: 1; min-height: 0; padding: 0 3 3 4; gap: 0; align-items: stretch; }
+.fx-head { height: 14; padding: 0 2; flex-shrink: 0; }
+.fx-head-text { color: $brand2; text-transform: uppercase; font-scale: 0.75; }
+.fx-prow { height: 14; gap: 4; padding: 0 1 0 2; cursor: pointer; flex-shrink: 0; }
+.fx-prow:hover { background: $surface2; }
+.fx-swatch { size: 14; align-items: center; justify: center; flex-shrink: 0; background: $surface; }
+.fx-dot { background: $muted; }
+.fx-pname { grow: 1; min-width: 0; color: $text; text-wrap: nowrap; text-overflow: ellipsis; }
+.fx-prow.hidden .fx-pname { color: $dim; }
+.fx-pval { color: $muted; text-wrap: nowrap; }
+.fx-prow.changed .fx-pval { color: $brand2; }
+.fx-eye { width: 14; height: 14; flex-shrink: 0; }
+</style>

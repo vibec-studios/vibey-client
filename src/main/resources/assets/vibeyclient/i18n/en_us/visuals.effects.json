@@ -1,0 +1,71 @@
+{
+  "name": "Effects",
+  "section": {
+    "effects": "Effects",
+    "overlays": "Overlays",
+    "camera": "Camera",
+    "combat": "Combat",
+    "self": "Yourself"
+  },
+  "setting": {
+    "editEffects": "Effects editor",
+    "editEffects.desc": "Live over the world.",
+    "fireOpacity": "Fire opacity",
+    "fireOpacity.desc": "Fire overlay while you burn.",
+    "pumpkinOpacity": "Pumpkin view",
+    "pumpkinOpacity.desc": "The carved pumpkin mask.",
+    "vignette": "Vignette",
+    "vignette.desc": "Dark edges. Border warning stays.",
+    "totemSize": "Totem pop",
+    "totemSize.desc": "Totem animation on screen.",
+    "distortion": "Distortion",
+    "distortion.desc": "Nausea and portal wobble.",
+    "hurtShake": "Hurt shake",
+    "hurtShake.desc": "Camera tilt when you get hurt.",
+    "explosionShake": "Blast shake",
+    "explosionShake.desc": "Camera shake near explosions.",
+    "ownPotionParticles": "Own potion swirls",
+    "ownPotionParticles.desc": "Potion particles around you.",
+    "editEffects.button": "Open",
+    "editEffects.action": "Effects & particles"
+  },
+  "ui": {
+    "title": "Effects",
+    "close": "Close",
+    "look": "Drag to look around",
+    "presetTip": "Presets change effects and particles at once",
+    "preset": {
+      "vanilla": "Vanilla",
+      "clean": "Clean",
+      "pvp": "PvP",
+      "fancy": "Fancy"
+    },
+    "tab": {
+      "effects": "Effects",
+      "particles": "Particles"
+    },
+    "test": "Test",
+    "pvpOff": "From the PvP module, which is off.",
+    "turnOn": "Turn on",
+    "search": "Search",
+    "hide": "Hide",
+    "hidden": "hidden",
+    "back": "Back",
+    "reset": "Reset",
+    "amount": "Amount",
+    "size": "Size",
+    "color": "Tint",
+    "strength": "Tint strength",
+    "noTest": "No preview for this one",
+    "cat": {
+      "all": "All",
+      "important": "Important",
+      "ambient": "Ambient",
+      "weather": "Weather",
+      "block": "Blocks",
+      "effect": "Potions",
+      "other": "Other",
+      "changed": "Changed"
+    }
+  }
+}
