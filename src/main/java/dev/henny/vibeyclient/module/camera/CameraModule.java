@@ -46,7 +46,7 @@ public final class CameraModule extends VibeyModule {
 
     @Override
     public List<String> serverRuleKeys() {
-        return CameraRules.ALL;
+        return List.of(CameraRules.FREELOOK, CameraRules.LEGACY_FREELOOK, CameraRules.ORBIT);
     }
 
     @Override

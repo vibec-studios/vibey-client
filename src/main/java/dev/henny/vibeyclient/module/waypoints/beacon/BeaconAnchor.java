@@ -48,6 +48,7 @@ final class BeaconAnchor implements Anchor {
         double dx = x - cam.x(), dy = y - cam.y(), dz = z - cam.z();
         double d = Math.sqrt(dx * dx + dy * dy + dz * dz);
         clamped = d > NEAR;
+        beacon.reachable(!clamped);
         double k = clamped ? NEAR / d : 1;
         target.position(cam.x() + dx * k, cam.y() + dy * k, cam.z() + dz * k);
         factor = Math.max(1, Math.min(d, NEAR) / GROW_FROM);

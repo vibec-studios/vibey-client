@@ -45,6 +45,19 @@ class ConfigStoreTest {
     }
 
     @Test
+    void aBrokenWorldFileIsKeptAsideNotOverwritten() throws Exception {
+        ConfigStore store = new ConfigStore(dir);
+        Path file = store.worldFile("sp:w");
+        Files.createDirectories(file.getParent());
+        Files.writeString(file, "{\"format\":1,\"worlds\":{\"sp:w\":[{\"id\":");
+        assertEquals(0, store.loadWorld("sp:w").worldKeys().size());
+        assertTrue(store.saveWorld("sp:w", new PlacementStore()));
+        try (var files = Files.list(file.getParent())) {
+            assertEquals(1, files.filter(f -> f.getFileName().toString().contains(".broken-")).count());
+        }
+    }
+
+    @Test
     void brokenFilesFallBackToDefaults() throws Exception {
         Files.createDirectories(dir);
         Files.writeString(dir.resolve(ConfigStore.BINDINGS), "{nope");

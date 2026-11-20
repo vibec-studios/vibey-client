@@ -32,7 +32,7 @@ R3Mod.whenReady(() -> R3Mc.onWorld(new WorldListener() {
 | `R3Mc.texture(id, handle)` | lets vui `src="id"` (and `TextureHandle.resource(id)`) draw a texture you own, e.g. a cover art you update |
 | `R3Mc.dynamicTexture(name, w, h)` | a `TextureHandle` you upload ARGB pixels to (video frames) |
 | `R3Mc.placements()` / `storage()` | `PlacementStore` of the current world, file storage |
-| `R3Mc.worldKey()` / `onWorld(listener)` | `sp:<level>` / `mp:<address>`; join/leave callbacks |
+| `R3Mc.worldKey()` / `onWorld(listener)` | `sp:<save folder>` / `mp:<address>`; join/leave callbacks |
 | `R3Mc.vui()` | the `Vui` instance used for world panels |
 
 ## A vui panel with buttons

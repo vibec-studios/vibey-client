@@ -23,6 +23,7 @@ public final class Tasks {
     private Tasks() {}
 
     private static final ExecutorService WORKERS = Executors.newFixedThreadPool(3, factory("VibeyClient-Worker"));
+    private static final ExecutorService IN_ORDER = Executors.newSingleThreadExecutor(factory("VibeyClient-Files"));
     private static final ScheduledExecutorService TIMER = Executors.newSingleThreadScheduledExecutor(factory("VibeyClient-Timer"));
     private static final Map<Object, Pending> DEBOUNCED = new ConcurrentHashMap<>();
 
@@ -35,6 +36,10 @@ public final class Tasks {
     /** Runs {@code task} on a worker thread. */
     public static CompletableFuture<Void> run(Runnable task) {
         return CompletableFuture.runAsync(logged(task), WORKERS);
+    }
+
+    public static CompletableFuture<Void> inOrder(Runnable task) {
+        return CompletableFuture.runAsync(logged(task), IN_ORDER);
     }
 
     /** Computes a value on a worker thread. */

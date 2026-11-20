@@ -13,8 +13,7 @@ final class PressGestures {
     boolean handle(InputCode code) {
         return switch (interaction.state()) {
             case HOLDING -> whileHolding(code);
-            case RESIZING -> whileResizing(code);
-            case CONTENT_DRAG -> true;
+            case RESIZING, CONTENT_DRAG -> whileDragging(code);
             case IDLE -> idle(code);
         };
     }
@@ -50,8 +49,11 @@ final class PressGestures {
         return code.device() == InputCode.Device.MOUSE;
     }
 
-    private boolean whileResizing(InputCode code) {
-        if (interaction.pressed(Gesture.CANCEL, code) || interaction.pressed(Gesture.MENU, code)) interaction.cancel();
-        return true;
+    private boolean whileDragging(InputCode code) {
+        if (interaction.pressed(Gesture.CANCEL, code) || interaction.pressed(Gesture.MENU, code)) {
+            interaction.cancel();
+            return true;
+        }
+        return code.device() == InputCode.Device.MOUSE;
     }
 }

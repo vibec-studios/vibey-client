@@ -2,6 +2,7 @@ package dev.henny.vibeyclient.module.waypoints.data;
 
 import dev.henny.vibeyclient.Vibey;
 import dev.henny.vibeyclient.api.Tasks;
+import dev.henny.vibeyclient.module.waypoints.core.Waypoint;
 import dev.henny.vibeyclient.module.waypoints.core.WaypointJson;
 import dev.henny.vibeyclient.module.waypoints.core.WaypointList;
 
@@ -10,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.SecureRandom;
+import java.util.List;
 
 public final class WaypointStore {
     private static final SecureRandom RANDOM = new SecureRandom();
@@ -30,14 +32,20 @@ public final class WaypointStore {
 
     public void load(String worldKey) {
         file = StoreFiles.waypoints(worldKey);
-        String json = null;
+        List<Waypoint> read = Files.isRegularFile(file) ? read(file) : List.of();
+        list.replaceAll(read != null ? read : List.of());
+        dirty = false;
+    }
+
+    private static List<Waypoint> read(Path file) {
+        List<Waypoint> read = null;
         try {
-            if (Files.isRegularFile(file)) json = Files.readString(file, StandardCharsets.UTF_8);
+            read = WaypointJson.parse(Files.readString(file, StandardCharsets.UTF_8));
         } catch (IOException e) {
             Vibey.LOG.warn("Waypoints: could not read {}: {}", file, e.toString());
         }
-        list.replaceAll(json == null ? java.util.List.of() : WaypointJson.read(json));
-        dirty = false;
+        if (read == null) StoreFiles.keepBroken(file);
+        return read;
     }
 
     public void changed() {
@@ -54,7 +62,7 @@ public final class WaypointStore {
     public void unload() {
         if (dirty) writeNow();
         file = null;
-        list.replaceAll(java.util.List.of());
+        list.replaceAll(List.of());
     }
 
     private void writeNow() {
@@ -62,7 +70,7 @@ public final class WaypointStore {
         dirty = false;
         Path target = file;
         byte[] data = WaypointJson.write(list.all()).getBytes(StandardCharsets.UTF_8);
-        Tasks.run(() -> {
+        Tasks.inOrder(() -> {
             try {
                 StoreFiles.writeAtomically(target, data);
             } catch (IOException e) {

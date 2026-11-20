@@ -120,6 +120,15 @@ class ResizeTest {
     }
 
     @Test
+    void anEdgeDragLeavesOtherKeysToTheGame() {
+        rig.lookAt(-0.5, 65, 4.98).frame();
+        rig.press(InputCode.MOUSE_MIDDLE);
+        rig.lookAt(-1.5, 65, 4.98).frame();
+        assertFalse(rig.press(InputCode.KEY_Z));
+        assertTrue(rig.press(InputCode.MOUSE_RIGHT));
+    }
+
+    @Test
     void lockedObjectsIgnoreTheWheel() {
         screen.locked(true);
         rig.lookAt(0.5, 65, 4.98).frame();

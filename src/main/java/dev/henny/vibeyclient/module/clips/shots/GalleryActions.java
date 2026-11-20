@@ -15,7 +15,7 @@ public final class GalleryActions {
 
     static void copy(Shot s) {
         Path file = ShotFiles.file(s).toAbsolutePath();
-        Tasks.run(() -> {
+        ShotClipboard.THREAD.execute(() -> {
             boolean image = ShotClipboard.copyImage(file);
             Tasks.onMain(() -> {
                 if (!image) ClientCompat.setClipboard(file.toString());

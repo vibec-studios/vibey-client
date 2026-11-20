@@ -36,15 +36,15 @@ final class HudNewWidgetChecks {
         t.context.waitTicks(25);
         String text = t.context.computeOnClient(mc -> HudLayout.get("hud.timer").widget().naturalWidth() + "");
         check(t.context.computeOnClient(mc -> dev.henny.vibeyclient.module.hud.timer.Timers.running()), "U did not start the timer (" + text + ")");
-        t.key(Keys.N);
+        t.key(Keys.Y);
         t.context.waitTicks(10);
-        t.key(Keys.N);
+        t.key(Keys.Y);
         t.context.runOnClient(mc -> HudLayout.setOption(HudLayout.get("hud.timer"), "mode", "splits"));
         t.context.waitTicks(6);
         t.shot("hud_21_timer_splits");
         t.key(Keys.U);
         t.context.runOnClient(mc -> HudLayout.setOption(HudLayout.get("hud.timer"), "mode", "countdown"));
-        t.key(Keys.N);
+        t.key(Keys.Y);
     }
 
     private static void tabList(HudTestKit t) {

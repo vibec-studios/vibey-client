@@ -23,6 +23,16 @@ public final class StoreFiles {
         return mapsRoot().resolve(WorldContext.safe(worldKey));
     }
 
+    public static void keepBroken(Path file) {
+        Path aside = file.resolveSibling(file.getFileName() + ".broken-" + System.currentTimeMillis());
+        try {
+            Files.move(file, aside);
+            Vibey.LOG.warn("Waypoints: {} was unreadable, kept as {}", file, aside.getFileName());
+        } catch (IOException e) {
+            Vibey.LOG.warn("Waypoints: could not move unreadable {}: {}", file, e.toString());
+        }
+    }
+
     public static void writeAtomically(Path file, byte[] data) throws IOException {
         Files.createDirectories(file.getParent());
         Path tmp = file.resolveSibling(file.getFileName() + ".tmp");

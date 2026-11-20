@@ -5,8 +5,11 @@ import java.util.Objects;
 public record ItemRef(String id, String name) {
     public static final ItemRef EMPTY = new ItemRef("", null);
 
+    public static final int MAX_NAME = 64;
+
     public ItemRef {
         id = id == null ? "" : id;
+        if (name != null && name.length() > MAX_NAME) name = name.substring(0, MAX_NAME);
     }
 
     public boolean empty() {

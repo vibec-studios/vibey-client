@@ -77,7 +77,7 @@ public final class InventoryModule extends VibeyModule {
     @Override
     public void onLoad() {
         for (String key : InventoryRules.ALL) ServerRules.supports(key);
-        ServerRules.listen(ClickSender::clear);
+        ServerRules.listen(ClickSender::cancelQueued);
         clickRate.onChange(ClickSender::rate);
         ClickSender.rate(clickRate.get());
         presetCount.onChange(n -> Presets.resize(n));

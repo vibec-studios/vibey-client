@@ -10,7 +10,7 @@ enabled: true
 #     - zoom
 #     - freelook
 #     - hud.coords
-#     - minimap
+#     - waypoints.minimap
 disable: []
 
 # Shown to the player once per join (one toast). Leave empty for a generic text.

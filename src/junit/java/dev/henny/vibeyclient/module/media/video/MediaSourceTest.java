@@ -51,9 +51,13 @@ class MediaSourceTest {
     void remotePolicy() {
         assertTrue(UrlPolicy.acceptRemote(MediaSource.parse("https://www.youtube.com/watch?v=aqz-KE-bpKQ")));
         assertTrue(UrlPolicy.acceptRemote(MediaSource.parse("https://8.8.8.8/a.mp4")));
+        assertTrue(UrlPolicy.acceptRemote(MediaSource.parse("https://example.org./a.mp4")));
+        assertTrue(UrlPolicy.acceptRemote(MediaSource.parse("https://cdn1.example.org/a.mp4")));
         for (String bad : new String[] {"http://localhost/a.mp4", "http://127.0.0.1/", "http://192.168.1.10/cam.m3u8", "http://10.0.0.1/",
                 "http://[::1]/", "http://169.254.169.254/latest", "http://printer.local/", "http://nas/", "https://user:pw@example.org/",
-                "http://100.64.1.1/", "http://[fd00::1]/"}) {
+                "http://100.64.1.1/", "http://[fd00::1]/", "http://localhost.:8080/", "http://0x7f000001./", "http://0x7f000001/",
+                "http://127.1/", "http://2130706433/", "http://0177.0.0.1/", "http://127.0.0.1./", "http://nas./", "http://[::ffff:127.0.0.1]/",
+                "http://printer.local./"}) {
             MediaSource m = MediaSource.parse(bad);
             assertFalse(m != null && UrlPolicy.acceptRemote(m), bad);
         }

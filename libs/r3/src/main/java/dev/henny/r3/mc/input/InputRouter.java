@@ -44,7 +44,7 @@ public final class InputRouter {
         if (glfwKey < 0) return false;
         boolean down = action != NativeInput.RELEASE;
         held.key(glfwKey, down);
-        boolean ours = down || consumedKeys.get(glfwKey);
+        boolean ours = action == NativeInput.PRESS || consumedKeys.get(glfwKey);
         if (ours && focus.key(glfwKey, action)) {
             if (down) consumedKeys.set(glfwKey);
             else consumedKeys.clear(glfwKey);

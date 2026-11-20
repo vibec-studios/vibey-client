@@ -7,21 +7,21 @@ public final class PresetSet {
     public static final int MIN = 2, MAX = 6;
 
     private final List<HotbarPreset> presets = new ArrayList<>();
+    private int count;
     private int active;
 
     public PresetSet(int count) {
+        while (presets.size() < MAX) presets.add(HotbarPreset.BLANK);
         resize(count);
     }
 
     public void resize(int count) {
-        int n = Math.max(MIN, Math.min(MAX, count));
-        while (presets.size() < n) presets.add(HotbarPreset.BLANK);
-        while (presets.size() > n) presets.remove(presets.size() - 1);
-        active = Math.min(active, n - 1);
+        this.count = Math.max(MIN, Math.min(MAX, count));
+        active = Math.min(active, this.count - 1);
     }
 
     public int size() {
-        return presets.size();
+        return count;
     }
 
     public int active() {
@@ -33,6 +33,10 @@ public final class PresetSet {
     }
 
     public List<HotbarPreset> all() {
+        return List.copyOf(presets.subList(0, count));
+    }
+
+    public List<HotbarPreset> stored() {
         return List.copyOf(presets);
     }
 
@@ -41,14 +45,14 @@ public final class PresetSet {
     }
 
     public void select(int i) {
-        active = Math.floorMod(i, presets.size());
+        active = Math.floorMod(i, count);
     }
 
     public int next() {
-        return Math.floorMod(active + 1, presets.size());
+        return Math.floorMod(active + 1, count);
     }
 
     public int step(int from, int delta) {
-        return Math.floorMod(from + delta, presets.size());
+        return Math.floorMod(from + delta, count);
     }
 }
