@@ -4,10 +4,13 @@ import com.google.gson.JsonElement;
 import dev.henny.vibeyclient.api.ModuleCategory;
 import dev.henny.vibeyclient.api.VibeyModule;
 import dev.henny.vibeyclient.api.setting.Settings.BoolSetting;
+import dev.henny.vibeyclient.api.setting.Settings.EnumSetting;
 import dev.henny.vibeyclient.api.setting.Settings.IntSetting;
 import dev.henny.vibeyclient.module.servers.core.Favourites;
+import dev.henny.vibeyclient.module.servers.core.WorldSort;
 import dev.henny.vibeyclient.module.servers.ping.PingStore;
 import dev.henny.vibeyclient.module.servers.screen.ServerScreenHooks;
+import dev.henny.vibeyclient.module.servers.worlds.WorldScreenHooks;
 
 public final class ServersModule extends VibeyModule {
     private static final String FAVOURITES = "favourites";
@@ -17,6 +20,11 @@ public final class ServersModule extends VibeyModule {
     public final BoolSetting favourites = bool("favourites", true).section("list");
     public final BoolSetting favouritesFirst = bool("favouritesFirst", true).section("list").visibleWhen(this::favOn);
     public final BoolSetting motdPreview = bool("motdPreview", true).section("list");
+    public final BoolSetting dragReorder = bool("dragReorder", true).section("list");
+    public final BoolSetting friendsTab = bool("friendsTab", true).section("list");
+
+    public final EnumSetting<WorldSort> worldSort = choice("worldSort", WorldSort.CUSTOM).section("worlds");
+    public final BoolSetting worldDrag = bool("worldDrag", true).section("worlds");
 
     public final BoolSetting livePing = bool("livePing", true).section("ping");
     public final IntSetting pingEvery = intRange("pingEvery", 30, 10, 120, 5).unit("s").section("ping").visibleWhen(this::liveOn);
@@ -45,6 +53,7 @@ public final class ServersModule extends VibeyModule {
         pingEvery.onChange(s -> PingStore.ttl(s));
         PingStore.ttl(pingEvery.get());
         ServerScreenHooks.register(this);
+        WorldScreenHooks.register(this);
     }
 
     public Favourites favs() {
@@ -84,5 +93,21 @@ public final class ServersModule extends VibeyModule {
 
     public boolean liveActive() {
         return isEnabled() && livePing.on();
+    }
+
+    public boolean dragActive() {
+        return isEnabled() && dragReorder.on();
+    }
+
+    public boolean friendsActive() {
+        return isEnabled() && friendsTab.on();
+    }
+
+    public boolean worldOrderActive() {
+        return isEnabled();
+    }
+
+    public boolean worldDragActive() {
+        return isEnabled() && worldDrag.on();
     }
 }

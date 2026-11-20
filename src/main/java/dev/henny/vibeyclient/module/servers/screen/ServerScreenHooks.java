@@ -18,11 +18,12 @@ public final class ServerScreenHooks {
         ScreenEvents.AFTER_INIT.register((mc, screen, w, h) -> {
             if (!(screen instanceof JoinMultiplayerScreen s) || !m.isEnabled()) return;
             ServerSession session = ServerSessions.open(m, s);
-            ScreenEvents.afterRender(screen).register((sc, g, mx, my, d) -> session.render(g, mx, my));
+            ScreenEvents.afterRender(screen).register((sc, g, mx, my, d) -> session.render(g, mx, my, d));
             ScreenEvents.afterTick(screen).register(sc -> session.tick());
             ScreenEvents.remove(screen).register(sc -> ServerSessions.close(s));
             ScreenMouseEvents.allowMouseClick(screen).register((sc, e) -> session.click(e.x(), e.y(), e.button()));
             ScreenMouseEvents.allowMouseRelease(screen).register((sc, e) -> session.release(e.x(), e.y(), e.button()));
+            ScreenMouseEvents.allowMouseScroll(screen).register((sc, x, y, hx, vy) -> session.scroll(x, y, hx, vy));
             ScreenKeyboardEvents.allowKeyPress(screen).register((sc, e) -> session.key(e.key(), e.scancode(), e.hasControlDown() || ClientCompat.controlDown()));
         });
     }

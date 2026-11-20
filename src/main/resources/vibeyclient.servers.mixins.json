@@ -12,7 +12,11 @@
     "ServerSelectionListInvoker",
     "OnlineServerEntryMixin",
     "OnlineServerEntryInvoker",
-    "ServerCharMixin"
+    "ServerCharMixin",
+    "SelectionListDragMixin",
+    "WorldSelectionListMixin",
+    "WorldSelectionListAccess",
+    "SelectWorldAccess"
   ],
   "server": [],
   "injectors": {

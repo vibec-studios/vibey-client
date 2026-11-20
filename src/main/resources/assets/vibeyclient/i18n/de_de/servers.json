@@ -1,10 +1,11 @@
 {
   "name": "Server",
-  "description": "Live-Ping, Suche, Favoriten und MOTD-Vorschau in der Serverliste.",
+  "description": "Live-Ping, Suche, Favoriten, Drag & Drop und ein Freunde-Tab in der Serverliste; eigene Weltenreihenfolge.",
   "summary": "Ping, Suche, Favoriten",
   "section": {
     "list": "Serverliste",
-    "ping": "Live-Ping"
+    "ping": "Live-Ping",
+    "worlds": "Weltenliste"
   },
   "setting": {
     "search": "Suchfeld",
@@ -18,7 +19,17 @@
     "livePing.desc": "Pingt erneut, solange die Liste offen ist.",
     "pingEvery": "Ping alle",
     "pingParallel": "Gleichzeitige Pings",
-    "pingParallel.desc": "Wie viele Server auf einmal."
+    "pingParallel.desc": "Wie viele Server auf einmal.",
+    "dragReorder": "Ziehen zum Sortieren",
+    "dragReorder.desc": "Zeile nach oben oder unten ziehen.",
+    "friendsTab": "Freunde-Tab",
+    "friendsTab.desc": "Wo deine Freunde spielen.",
+    "worldSort": "Welten sortieren",
+    "worldSort.custom": "Eigene",
+    "worldSort.last_played": "Zuletzt gespielt",
+    "worldSort.name": "Name",
+    "worldDrag": "Ziehen zum Sortieren",
+    "worldDrag.desc": "Welt nach oben oder unten ziehen."
   },
   "ui": {
     "search": "Suchen",
@@ -28,5 +39,52 @@
     "ping": "{0} ms",
     "offline": "Offline",
     "players": "{0}/{1}"
+  },
+  "tab": {
+    "servers": "Server",
+    "friends": "Freunde"
+  },
+  "worlds": {
+    "sort": {
+      "custom": "Eigene",
+      "last_played": "Zuletzt gespielt",
+      "name": "Name"
+    },
+    "sortTip": "Reihenfolge"
+  },
+  "friends": {
+    "section": {
+      "invites": "Einladungen",
+      "servers": "Spielen auf Servern",
+      "worlds": "Gehostete Welten"
+    },
+    "world": "Welt",
+    "players": "{0} spielen",
+    "card": {
+      "server": "Auf {0}",
+      "world": "Hostet {0}",
+      "invite": "Lädt dich ein: {0}"
+    },
+    "since": "seit {0}",
+    "expires": "noch {0}",
+    "unit": {
+      "minutes": "{0} Min.",
+      "hours": "{0} Std.",
+      "days": "{0} T."
+    },
+    "add": "Zu meinen Servern",
+    "decline": "Ablehnen",
+    "join": "Beitreten",
+    "none": "Keine Freunde online",
+    "open": "Freunde öffnen",
+    "signedOut": "Nicht angemeldet",
+    "signIn": "Anmelden",
+    "off": "Freunde sind aus",
+    "error": "Vibey nicht erreichbar",
+    "retry": "Erneut",
+    "connecting": "Verbinde…",
+    "already": "Schon in deiner Liste",
+    "added": "Server hinzugefügt",
+    "hidden": "Server verborgen"
   }
 }
