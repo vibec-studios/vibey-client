@@ -8,11 +8,14 @@
   "client": [
     "ContainerAccess",
     "GameRendererScreenMixin",
+    "GuiSubtitlesMixin",
     "MouseScreenMixin",
     "OptionsBlurMixin",
+    "PictureInPictureMixin",
     "ScreenAccess",
     "ScreenLifecycleMixin",
     "TitleTextMixin",
+    "VuiLayersMixin",
     "WidgetStateMixin"
   ],
   "server": [],

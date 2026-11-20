@@ -25,6 +25,14 @@ public final class EditSession {
         this.screen = screen;
     }
 
+    double realX() {
+        return mouseX + screen.offsetX();
+    }
+
+    double realY() {
+        return mouseY + screen.offsetY();
+    }
+
     public ScreenSession screen() {
         return screen;
     }

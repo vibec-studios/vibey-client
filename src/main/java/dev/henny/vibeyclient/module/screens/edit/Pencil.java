@@ -10,13 +10,22 @@ import dev.henny.vibeyclient.module.screens.core.Spots;
 import dev.henny.vibeyclient.ui.Theme;
 import net.minecraft.client.gui.GuiGraphics;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public final class Pencil {
     static final int SIZE = 12;
 
     private Pencil() {}
 
     public static Box box(ScreenSession s) {
-        return Spots.pick(s.width(), s.height(), SIZE, WidgetScan.taken(s));
+        List<Box> taken = new ArrayList<>();
+        for (Box b : WidgetScan.taken(s)) taken.add(b.shifted(s.offsetX(), s.offsetY()));
+        return Spots.pick(s.width(), s.height(), SIZE, taken);
+    }
+
+    public static boolean hit(ScreenSession s, double x, double y) {
+        return box(s).contains(x + s.offsetX(), y + s.offsetY());
     }
 
     public static boolean shown(ScreensModule m) {
@@ -24,6 +33,16 @@ public final class Pencil {
     }
 
     public static void draw(ScreenSession s, GuiGraphics g, int mx, int my) {
+        g.pose().pushMatrix();
+        g.pose().translate(-s.offsetX(), -s.offsetY());
+        try {
+            paint(s, g, mx + s.offsetX(), my + s.offsetY());
+        } finally {
+            g.pose().popMatrix();
+        }
+    }
+
+    private static void paint(ScreenSession s, GuiGraphics g, float mx, float my) {
         Box b = box(s);
         boolean hot = b.contains(mx, my);
         g.nextStratum();

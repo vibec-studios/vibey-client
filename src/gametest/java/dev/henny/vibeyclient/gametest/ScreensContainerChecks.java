@@ -67,13 +67,13 @@ final class ScreensContainerChecks {
         check(editing(ctx), "F9 did not start edit mode in a container");
         float[] p = box(ctx, Item.PANEL);
         check(p != null, "no panel item");
-        int[] before = leftTop(ctx);
-        drag(ctx, p[0] + p[2] - 6, p[1] + 4, p[0] + p[2] - 6 + dx, p[1] + 4 + dy);
-        int[] after = leftTop(ctx);
+        int[] before = offset(ctx);
+        dragFixed(ctx, p[0] + p[2] - 6, p[1] + 4, dx, dy);
+        int[] after = offset(ctx);
         log("panel %d,%d -> %d,%d", before[0], before[1], after[0], after[1]);
         check(Math.abs(after[0] - before[0] - dx) <= 5 && Math.abs(after[1] - before[1] - dy) <= 5,
                 "panel did not move by " + dx + "," + dy);
-        hover(ctx, p[0] + p[2] + dx - 6, p[1] + 4 + dy);
+        hover(ctx, p[0] + p[2] - 6, p[1] + 4);
         shot(ctx, "panel_edit");
         ctx.getInput().pressKey(Keys.ESCAPE);
         ctx.waitTicks(3);
@@ -81,11 +81,8 @@ final class ScreensContainerChecks {
         check(ctx.computeOnClient(mc -> mc.screen instanceof AbstractContainerScreen<?>), "Esc in edit mode closed the container");
     }
 
-    private static int[] leftTop(ClientGameTestContext ctx) {
-        return ctx.computeOnClient(mc -> {
-            ContainerAccess a = (ContainerAccess) mc.screen;
-            return new int[] {a.vibey$leftPos(), a.vibey$topPos()};
-        });
+    private static int[] offset(ClientGameTestContext ctx) {
+        return ctx.computeOnClient(mc -> new int[] {Math.round(session(mc).offsetX()), Math.round(session(mc).offsetY())});
     }
 
     private static void pickAndReturn(ClientGameTestContext ctx, int slot, String item) {

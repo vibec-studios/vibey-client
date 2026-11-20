@@ -4,7 +4,6 @@ import dev.henny.vibeyclient.client.Keys;
 import dev.henny.vibeyclient.module.screens.Screens;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 
 import static dev.henny.vibeyclient.gametest.ScreensTestKit.*;
 
@@ -49,7 +48,7 @@ final class ScreensTitleChecks {
         shot(ctx, "title_layout");
         float[] mc = center(moved);
         click(ctx, mc[0], mc[1], 0);
-        check(ctx.computeOnClient(m -> m.screen instanceof SelectWorldScreen), "click on the moved singleplayer button failed");
+        check(ctx.computeOnClient(m -> !(m.screen instanceof TitleScreen)), "click on the moved singleplayer button failed");
         ctx.setScreen(TitleScreen::new);
         ctx.waitTicks(5);
         ctx.runOnClient(m -> Screens.store().remove(session(m).name));

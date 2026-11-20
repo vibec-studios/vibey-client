@@ -12,10 +12,11 @@ public final class ScreenSession {
     public final Screen screen;
     public final String name;
     final List<Item> items = new ArrayList<>();
-    final WidgetState panelState = new WidgetState();
     Item panel;
     boolean broken;
     float scale = 1f;
+    float offsetX;
+    float offsetY;
 
     ScreenSession(Screen screen) {
         this.screen = screen;
@@ -58,6 +59,14 @@ public final class ScreenSession {
 
     public void scale(float k) {
         scale = k;
+    }
+
+    public float offsetX() {
+        return offsetX;
+    }
+
+    public float offsetY() {
+        return offsetY;
     }
 
     public int width() {

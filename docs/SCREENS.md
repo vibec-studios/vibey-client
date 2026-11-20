@@ -13,7 +13,8 @@ vanilla screens and, best effort, on screens of other mods. Ideas only from othe
   (default **F9**, rebindable in the module page and the vanilla controls) toggles edit mode. The key only works while
   a screen is open.
 - In edit mode every widget has an outline; the container panel of inventory/chest/furnace/… screens is one dashed
-  block (*Panel*) that carries its slots and the buttons inside it.
+  block (*Panel*): moving it moves the whole container screen (slots, labels, its buttons, recipe book, other mods'
+  additions) as one.
 - **Drag** moves (snaps to other widgets, the screen centre and the edges with teal guides; Ctrl = free).
 - **Wheel** over a widget scales it in steps (50 … 300 %); over the panel it changes the screen size.
 - **Border drag** (left/right edge, white handles) changes the width. Lists and text widgets are never scaled, only
@@ -24,16 +25,17 @@ vanilla screens and, best effort, on screens of other mods. Ideas only from othe
 - **Toolbar** (top, moves to the bottom when the selection is near the top): *Size* (screen scale 50–200 %), *Dim*
   (0–100 %, *auto* = vanilla), *Blur* (0–10, *auto* = video setting), *Title* (on/off), *Reset*, *Done*. Click the
   `-`/`+` ends or use the wheel.
-- **Module page**: *Try it* (opens Options in edit mode), *Pencil button*, *Edit key*, *Edited screens* (pick one,
-  *Reset*; *Reset all*), *Skip screens* under *More* (class names, `Name*` = prefix).
+- **Module page**: *Try it* (opens Options in edit mode), *Reset all*, *Pencil button*, *Edit key*, a status card
+  listing the edited screens (one screen is reset from its own edit mode: *Reset*), *Skip screens* under *More*
+  (class names, `Name*` = prefix).
 
 ## How it works
 
 | Part | Where | What |
 |---|---|---|
 | Pure core | `core/` | `Box`, `Pos` (anchor thirds + offset, survives window resizes), `Placement`, `ScreenLayout`, `LayoutStore`, `LayoutCodec` (JSON), `WidgetIds` + `IdMatcher` (identity), `Geometry` (place/move/scale/resize), `Snap`, `Hit`, `ScaleSteps`, `History`, `Spots` (pencil corner), `Blocklist`, `ScreenNames`. No Minecraft imports, JUnit in `src/junit/.../screens/core`. |
-| Apply | `apply/` | `Sessions` (one `ScreenSession` per open screen object), `LayoutApplier` (scan → ids → match → place), `PanelApplier` (`leftPos`/`topPos`), `WidgetScan`, `WidgetKeys`, `WidgetTypes`, `WidgetState` (per widget, on the widget through the `StateHolder` duck), `WidgetPaint`, `Guard`. |
-| Hooks | `hook/`, `mixin/` | `ScreenLifecycleMixin` (virtual size on `init`/`resize`, restore before, apply after; `rebuildWidgets`; dim), `GameRendererScreenMixin` (pose scale + mouse around `renderWithTooltipAndSubtitles`), `MouseScreenMixin` (click/release/scroll/move/drag coordinates), `WidgetStateMixin` (render wrap), `OptionsBlurMixin`, `TitleTextMixin`, `ScreenHooks` (Fabric screen events → editor). |
+| Apply | `apply/` | `Sessions` (one `ScreenSession` per open screen object), `LayoutApplier` (scan → ids → match → place), `PanelApplier` (panel offset), `WidgetScan`, `WidgetKeys`, `WidgetTypes`, `WidgetState` (per widget, on the widget through the `StateHolder` duck), `WidgetPaint`, `Guard`. |
+| Hooks | `hook/`, `mixin/` | `ScreenLifecycleMixin` (virtual size on `init`/`resize`, restore before, apply after; `rebuildWidgets`; dim), `GameRendererScreenMixin` (pose scale + panel offset + mouse around `renderWithTooltipAndSubtitles`), `MouseScreenMixin` (click/release/scroll/move/drag coordinates), `WidgetStateMixin` (render wrap), `OptionsBlurMixin`, `TitleTextMixin`, `ScreenHooks` (Fabric screen events → editor). |
 | Editor | `edit/` | `EditMode`, `EditSession`, `PointerInput`, `KeyInput`, `EditActions`, `EditOverlay`, `Toolbar`, `ContextMenu`, `Pencil`, `Picking`, `Draw`. |
 
 **Identity.** Each widget gets `type:key` where `key` is the translation key of its message (for
@@ -47,8 +49,13 @@ the settings is the screen title then.
 `renderables`, + tab buttons of a `TabNavigationBar`), reads each widget's vanilla rect (its *base*; a widget that
 still sits where we put it keeps its old base), computes the visual rect (`Geometry.place`) and sets it. Before vanilla
 lays out again (`init`/`resize` HEAD) every widget is put back to its base, so layouts never measure our sizes.
-Widgets inside the panel move with it. Container panels are re-applied when the screen changes `leftPos` itself (the
-recipe book toggle).
+
+**Moving the panel** never touches `leftPos`/`topPos`: many vanilla container screens (chest, hopper, anvil,
+enchanting, …) centre their background on `width` instead of `leftPos`, and some hit-test the same way. The panel
+offset is a translation of the whole container screen instead, exactly like the screen size: pose translated while it
+renders, every mouse event shifted back. Slots, labels, buttons, the recipe book and other mods' additions stay
+consistent; the dim background is drawn compensated so it still covers the window. The editor's toolbar, menu, hint and
+the pencil are drawn and hit-tested in unshifted coordinates.
 
 **Scaling a widget** keeps hit-testing vanilla: the widget's real rect is the scaled one (x, y, w·s, h·s), so every
 click, hover and other mod sees the right area. Only while it renders, `WidgetPaint` puts the logical size back, scales
@@ -56,7 +63,8 @@ the pose around (x, y) and passes the inverse-transformed mouse. Sliders and edi
 differently inside a scaled widget (good enough, see gaps).
 
 **Screen size** is a virtual GUI scale: the screen is initialised with `width / k`, `height / k`, rendered with the
-pose scaled by `k` (Fabric's before/after render overlays included) and every mouse event is divided by `k`.
+pose scaled by `k` (Fabric's before/after render overlays included) and every mouse event is divided by `k` (then the
+panel offset is subtracted; drag deltas are only divided). Over the panel, the wheel changes this size.
 
 **Safety.** Every hook runs inside `Guard`: on any exception the layout of that screen is restored, the screen class
 is skipped until *Reset all*, one toast says so. Never applied to the blocklist: every `dev.henny.*` screen (Vibey's
@@ -91,4 +99,5 @@ Vibey's title/pause corner proxies (`ui/vui/corner`) are never touched.
 - Screens that move their own widgets every frame or call `repositionElements()` outside `init`/`resize` lose the
   layout until the next resize.
 - Tooltips of a scaled screen clamp to the real window size.
-- The recipe book stays where vanilla draws it when the panel moves.
+- Moving a container panel moves everything the container screen draws (also widgets outside the panel, e.g. the
+  recipe book).

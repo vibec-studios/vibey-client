@@ -30,7 +30,17 @@ final class Picking {
             resizable.add(i.resizable && !i.hidden);
         }
         Hit.Result r = Hit.find(boxes, resizable, x, y);
-        return r.index() < 0 ? null : new Picked(items.get(r.index()), r.zone());
+        if (r.index() < 0) return null;
+        Item sel = e.selectedItem();
+        if (sel != null && !sel.panel() && sel != items.get(r.index()) && sel.visual.contains(x, y)) {
+            int i = items.indexOf(sel);
+            if (i < 0) for (int k = 0; k < items.size(); k++) if (items.get(k).id.equals(sel.id)) i = k;
+            if (i >= 0) {
+                Hit.Result own = Hit.find(List.of(boxes.get(i)), List.of(resizable.get(i)), x, y);
+                return new Picked(items.get(i), own.zone());
+            }
+        }
+        return new Picked(items.get(r.index()), r.zone());
     }
 
     static List<Box> others(EditSession e, Item moving) {

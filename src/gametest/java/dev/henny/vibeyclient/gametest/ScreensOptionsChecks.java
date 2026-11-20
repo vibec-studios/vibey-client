@@ -44,12 +44,12 @@ final class ScreensOptionsChecks {
         String video = find(ctx, "options.video");
         float[] b = box(ctx, video);
         float[] c = center(b);
-        drag(ctx, c[0], c[1], c[0] - 60, c[1] + 46);
+        drag(ctx, c[0], c[1], c[0] - 60, c[1] - 55);
         float[] moved = box(ctx, video);
         log("video %s -> %s", fmt(b), fmt(moved));
-        check(Math.abs(moved[1] - b[1] - 46) <= 5, "video button did not move down: " + fmt(moved));
-        float[] mc = center(moved);
-        hover(ctx, mc[0], mc[1]);
+        check(Math.abs(moved[1] - b[1] + 55) <= 5, "video button did not move up: " + fmt(moved));
+        float[] mid = center(moved);
+        hover(ctx, mid[0], mid[1]);
         ctx.getInput().scroll(1);
         ctx.waitTicks(2);
         ctx.getInput().scroll(1);
@@ -63,7 +63,10 @@ final class ScreensOptionsChecks {
         ctx.waitTicks(3);
         float undone = placement(ctx, video).scale();
         log("after undo: %.2f", undone);
-        check(undone == 1.1f, "Ctrl+Z did not undo one wheel step: " + undone);
+        check(undone == 1f, "Ctrl+Z did not undo the merged wheel steps: " + undone);
+        check(placement(ctx, video).pos() != null, "Ctrl+Z also undid the move");
+        ctx.getInput().scroll(1);
+        ctx.waitTicks(2);
         ctx.getInput().scroll(1);
         ctx.waitTicks(3);
         check(placement(ctx, video).scale() == 1.25f, "wheel after undo");
@@ -76,7 +79,7 @@ final class ScreensOptionsChecks {
         check(!editing(ctx), "Esc did not leave edit mode");
         check(ctx.computeOnClient(mc -> mc.screen instanceof OptionsScreen), "Esc in edit mode closed the screen");
         float[] v = box(ctx, video);
-        check(Math.round(v[2]) == 250 && Math.round(v[3]) == 25, "scaled size is not 250x25: " + fmt(v));
+        check(Math.round(v[2]) == 188 && Math.round(v[3]) == 25, "scaled size is not 188x25: " + fmt(v));
         hover(ctx, v[0] + v[2] - 6, v[1] + v[3] - 3);
         shot(ctx, "options_scaled_hover");
         ctx.getInput().pressMouse(0);

@@ -41,6 +41,10 @@ public final class EditActions {
         return obfuscated && !title.isBlank() ? title : ScreenNames.readable(s.name);
     }
 
+    static Box real(EditSession e, Item item) {
+        return item.panel() ? item.visual.shifted(e.screen.offsetX(), e.screen.offsetY()) : item.visual;
+    }
+
     static Placement placement(EditSession e, Item item) {
         return e.screen.layout().placement(item.id).withFallback(item.fallback);
     }
@@ -94,7 +98,7 @@ public final class EditActions {
 
     static void nudge(EditSession e, Item item, int dx, int dy) {
         if (item == null) return;
-        Box moved = item.visual.shifted(dx, dy);
+        Box moved = real(e, item).shifted(dx, dy);
         put(e, "nudge:" + item.id, item, Geometry.moved(placement(e, item), moved, e.screen.width(), e.screen.height()));
     }
 

@@ -1,6 +1,7 @@
 package dev.henny.vibeyclient.module.screens.edit;
 
 import dev.henny.vibeyclient.api.Lang;
+import dev.henny.vibeyclient.module.screens.apply.Item;
 import dev.henny.vibeyclient.module.screens.core.Box;
 import dev.henny.vibeyclient.module.screens.core.ScaleSteps;
 import dev.henny.vibeyclient.module.screens.core.ScreenLayout;
@@ -27,6 +28,34 @@ public final class Toolbar {
     public Box box(Kind kind) {
         for (Chip c : chips) if (c.kind == kind) return c.box;
         return null;
+    }
+
+    void place(EditSession e, Item sel) {
+        if (e.gesture != null && !chips.isEmpty()) {
+            Box b = bounds();
+            double my = e.realY();
+            boolean under = my < b.bottom() + 6 && b.y() < e.screen.height() / 2f
+                    || my > b.y() - 6 && b.y() > e.screen.height() / 2f;
+            if (!under) return;
+            layout(e, b.y() < e.screen.height() / 2f);
+            return;
+        }
+        layout(e, false);
+        int top = overlaps(e, sel);
+        layout(e, true);
+        int bottom = overlaps(e, sel);
+        if (top <= bottom) layout(e, false);
+    }
+
+    private int overlaps(EditSession e, Item sel) {
+        Box b = bounds();
+        int n = 0;
+        for (Item i : Picking.editable(e)) {
+            if (i.panel()) continue;
+            Box v = i.visual;
+            if (v.x() < b.right() && b.x() < v.right() && v.y() < b.bottom() && b.y() < v.bottom()) n += i == sel ? 50 : 1;
+        }
+        return n;
     }
 
     void layout(EditSession e, boolean bottom) {

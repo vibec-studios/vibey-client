@@ -35,7 +35,7 @@ final class ScreenInput {
             if (e != null) {
                 PointerInput.press(e, x, y, button);
                 used[0] = true;
-            } else if (button == 0 && Pencil.shown(ScreensModule.get()) && Pencil.box(s).contains(x, y)) {
+            } else if (button == 0 && Pencil.shown(ScreensModule.get()) && Pencil.hit(s, x, y)) {
                 used[0] = EditMode.enter(screen);
             }
         });

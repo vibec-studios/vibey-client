@@ -21,12 +21,12 @@ abstract class GameRendererScreenMixin {
 
     @ModifyArg(method = "render", at = @At(value = "INVOKE", target = RENDER_SCREEN), index = 1, require = 0)
     private int vibey$mouseX(int x) {
-        return ScreenFrame.mouse(x);
+        return ScreenFrame.mouseX(x);
     }
 
     @ModifyArg(method = "render", at = @At(value = "INVOKE", target = RENDER_SCREEN), index = 2, require = 0)
     private int vibey$mouseY(int y) {
-        return ScreenFrame.mouse(y);
+        return ScreenFrame.mouseY(y);
     }
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = RENDER_SCREEN, shift = At.Shift.AFTER), require = 0)

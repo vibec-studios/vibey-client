@@ -2,9 +2,6 @@
   "name": "Screens",
   "description": "Move, scale and hide the buttons of any menu, and style its background.",
   "summary": "Arrange any menu",
-  "section": {
-    "edited": "Edited screens"
-  },
   "setting": {
     "tryIt": "Edit a screen",
     "tryIt.action": "Try it",
@@ -12,9 +9,6 @@
     "pencil": "Pencil button",
     "pencil.desc": "Small edit button in a corner of every menu.",
     "editKey": "Edit key",
-    "screen": "Screen",
-    "resetScreen": "Reset screen",
-    "resetScreen.button": "Reset",
     "resetAll": "Reset all",
     "resetAll.button": "Reset all",
     "blocked": "Skip screens",
@@ -41,5 +35,10 @@
   },
   "toast": {
     "failed": "Screen layout skipped"
+  },
+  "status": {
+    "label": "Edited ({0})",
+    "more": "+{0}",
+    "detail": "Reset one screen: open it, press the edit key, Reset."
   }
 }

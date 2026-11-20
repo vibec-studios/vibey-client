@@ -19,7 +19,6 @@ public final class EditOverlay {
         }
         g.nextStratum();
         int w = e.screen.width(), h = e.screen.height();
-        grid(g, w, h, e.gesture != null);
         Picking.Picked hover = e.gesture == null && e.menu == null ? Picking.at(e, e.mouseX, e.mouseY) : null;
         e.hovered = hover == null ? null : hover.item().id;
         for (Item i : Picking.editable(e)) item(g, e, i, hover);
@@ -27,12 +26,20 @@ public final class EditOverlay {
         Item sel = e.selectedItem();
         if (sel != null) tag(g, e, sel, true);
         else if (hover != null) tag(g, e, hover.item(), false);
-        Box selBox = sel == null ? null : sel.visual;
-        e.toolbar.layout(e, selBox != null && selBox.y() < 24 || e.mouseY < 22 && e.gesture != null);
-        if (e.gesture == null || !e.toolbar.bounds().contains(e.mouseX, e.mouseY)) e.toolbar.draw(g, e.mouseX, e.mouseY);
-        if (sel == null && e.menu == null) hint(g, w, h, e.toolbar.bounds());
-        if (e.menu != null) e.menu.draw(g, e.mouseX, e.mouseY);
-        if (EditMode.drawPointer) Draw.pointer(g, e.mouseX, e.mouseY);
+        float ox = e.screen.offsetX(), oy = e.screen.offsetY();
+        double rx = e.realX(), ry = e.realY();
+        g.pose().pushMatrix();
+        g.pose().translate(-ox, -oy);
+        try {
+            grid(g, w, h, e.gesture != null);
+            e.toolbar.place(e, sel);
+            if (e.gesture == null || !e.toolbar.bounds().contains(rx, ry)) e.toolbar.draw(g, rx, ry);
+            if (sel == null && e.menu == null) hint(g, w, h, e.toolbar.bounds());
+            if (e.menu != null) e.menu.draw(g, rx, ry);
+            if (EditMode.drawPointer) Draw.pointer(g, rx, ry);
+        } finally {
+            g.pose().popMatrix();
+        }
     }
 
     private static void grid(GuiGraphics g, int w, int h, boolean busy) {
@@ -93,7 +100,8 @@ public final class EditOverlay {
     private static void hint(GuiGraphics g, int w, int h, Box toolbar) {
         String s = Lang.tr("screens.ui.hint");
         float tw = Draw.width(s) + 8;
-        float y = toolbar != null && toolbar.y() > h / 2f ? 4 : h - Draw.CHIP_H - 2;
+        if (toolbar == null) return;
+        float y = toolbar.y() > h / 2f ? toolbar.y() - Draw.CHIP_H : toolbar.bottom() + 1;
         Draw.chip(g, s, w / 2f - tw / 2f, y, 0xB4000000, Theme.MUTED);
     }
 }

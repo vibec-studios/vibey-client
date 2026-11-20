@@ -27,23 +27,17 @@ public final class LayoutApplier {
         String[] matched = IdMatcher.match(ids, layout.widgets());
         s.items.clear();
         s.panel = null;
-        Box panelBase = null;
-        float[] delta = {0, 0};
-        if (screen instanceof AbstractContainerScreen<?> c) {
-            delta = PanelApplier.apply(s, c, layout);
-            panelBase = s.panel.base;
-        }
+        if (screen instanceof AbstractContainerScreen<?> c) PanelApplier.apply(s, c, layout);
         for (int i = 0; i < ws.size(); i++) {
             AbstractWidget w = ws.get(i);
             String id = matched[i] != null ? matched[i] : ids.get(i).primary();
             Placement p = matched[i] != null ? layout.placement(id) : Placement.DEFAULT;
             boolean title = layout.hideTitle() && w instanceof AbstractStringWidget && w.getMessage() == screen.getTitle();
-            s.items.add(one(s, w, id, ids.get(i).fallback(), p, title, panelBase, delta));
+            s.items.add(one(s, w, id, ids.get(i).fallback(), p, title));
         }
     }
 
-    private static Item one(ScreenSession s, AbstractWidget w, String id, String fallback, Placement p, boolean title,
-                            Box panelBase, float[] delta) {
+    private static Item one(ScreenSession s, AbstractWidget w, String id, String fallback, Placement p, boolean title) {
         WidgetState st = Rects.state(w, true);
         Box cur = Rects.of(w);
         if (st.applied == null || !cur.same(st.applied)) {
@@ -51,14 +45,12 @@ public final class LayoutApplier {
             if (!st.hiddenByUs) st.visibleBefore = w.visible;
         }
         Box base = st.base;
-        boolean child = panelBase != null && (delta[0] != 0 || delta[1] != 0) && panelBase.containsCenterOf(base);
-        Box eff = child ? base.shifted(delta[0], delta[1]) : base;
         boolean scalable = WidgetTypes.scalable(w);
         boolean hidden = p.hidden() || title;
-        boolean changes = !p.isDefault() || child || title;
-        Box visual = changes ? Geometry.place(eff, p, s.width(), s.height(), scalable) : base;
+        boolean changes = !p.isDefault() || title;
+        Box visual = changes ? Geometry.place(base, p, s.width(), s.height(), scalable) : base;
         if (changes) {
-            int lw = Math.round(Geometry.logicalWidth(eff, p)), lh = Math.round(eff.h());
+            int lw = Math.round(Geometry.logicalWidth(base, p)), lh = Math.round(base.h());
             st.scale = scalable ? p.scale() : 1f;
             st.logicalW = lw;
             st.logicalH = lh;
@@ -69,7 +61,7 @@ public final class LayoutApplier {
             reset(w, st);
         }
         String label = w.getMessage() == null ? "" : w.getMessage().getString();
-        return new Item(id, fallback, w, scalable, WidgetTypes.resizable(w), eff, visual, hidden, label);
+        return new Item(id, fallback, w, scalable, WidgetTypes.resizable(w), base, visual, hidden, label);
     }
 
     static void hide(AbstractWidget w, WidgetState st, boolean hidden) {
@@ -96,10 +88,6 @@ public final class LayoutApplier {
             WidgetState st = Rects.state(i.widget, false);
             if (st != null) reset(i.widget, st);
         }
-        if (s.screen instanceof AbstractContainerScreen<?> c) PanelApplier.restore(s, c);
-    }
-
-    public static boolean panelMoved(ScreenSession s) {
-        return s.screen instanceof AbstractContainerScreen<?> c && PanelApplier.moved(s, c);
+        PanelApplier.restore(s);
     }
 }

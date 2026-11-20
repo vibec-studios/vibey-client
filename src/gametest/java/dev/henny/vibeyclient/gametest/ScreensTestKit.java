@@ -84,8 +84,9 @@ final class ScreensTestKit {
         return ctx.computeOnClient(mc -> {
             ScreenSession s = session(mc);
             double k = s == null ? 1 : s.scale();
+            double ox = s == null ? 0 : s.offsetX(), oy = s == null ? 0 : s.offsetY();
             double gs = mc.getWindow().getGuiScale();
-            return new double[] {vx * k * gs, vy * k * gs};
+            return new double[] {(vx + ox) * k * gs, (vy + oy) * k * gs};
         });
     }
 
@@ -107,6 +108,21 @@ final class ScreensTestKit {
         ctx.waitTicks(2);
         for (int i = 1; i <= 8; i++) {
             hover(ctx, fx + (tx - fx) * i / 8, fy + (ty - fy) * i / 8);
+        }
+        ctx.getInput().releaseMouse(0);
+        ctx.waitTicks(3);
+    }
+
+    static void dragFixed(ClientGameTestContext ctx, double fx, double fy, double dx, double dy) {
+        double[] start = window(ctx, fx, fy);
+        double scale = ctx.computeOnClient(mc -> session(mc).scale() * mc.getWindow().getGuiScale());
+        ctx.getInput().setCursorPos(start[0], start[1]);
+        ctx.waitTicks(2);
+        ctx.getInput().holdMouse(0);
+        ctx.waitTicks(2);
+        for (int i = 1; i <= 8; i++) {
+            ctx.getInput().setCursorPos(start[0] + dx * scale * i / 8, start[1] + dy * scale * i / 8);
+            ctx.waitTicks(2);
         }
         ctx.getInput().releaseMouse(0);
         ctx.waitTicks(3);

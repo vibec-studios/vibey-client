@@ -1,6 +1,7 @@
 package dev.henny.vibeyclient.module.screens;
 
 import dev.henny.vibeyclient.api.ModuleCategory;
+import dev.henny.vibeyclient.api.StatusCard;
 import dev.henny.vibeyclient.api.VibeyModule;
 import dev.henny.vibeyclient.api.setting.Settings.ActionSetting;
 import dev.henny.vibeyclient.api.setting.Settings.BoolSetting;
@@ -17,16 +18,12 @@ public final class ScreensModule extends VibeyModule {
     public final ActionSetting tryIt = action("tryIt", ScreenPages::tryOnOptions);
     public final BoolSetting pencil = bool("pencil", true);
     public final KeybindSetting editKey = keybind("editKey", Keys.F9);
-    public final ActionSetting resetScreen;
-    public final ActionSetting resetAll;
+    public final ActionSetting resetAll = action("resetAll", ScreenPages::resetAll).visibleWhen(ScreenPages::any);
     public final StringSetting blocked = string("blocked", "", 400).advanced();
 
     public ScreensModule() {
         super("screens", ModuleCategory.MISC);
         instance = this;
-        settings().add(ScreenPages.picker());
-        resetScreen = action("resetScreen", ScreenPages::resetPicked).section("edited").visibleWhen(ScreenPages::any);
-        resetAll = action("resetAll", ScreenPages::resetAll).section("edited").visibleWhen(ScreenPages::any);
     }
 
     public static ScreensModule get() {
@@ -36,6 +33,11 @@ public final class ScreensModule extends VibeyModule {
     @Override
     public int accentColor() {
         return 0xFFFFB547;
+    }
+
+    @Override
+    public StatusCard statusCard() {
+        return ScreenPages.status(this);
     }
 
     @Override

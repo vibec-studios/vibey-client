@@ -27,22 +27,22 @@ abstract class MouseScreenMixin {
 
     @ModifyArg(method = "onScroll", at = @At(value = "INVOKE", target = SCROLLED), index = 0, require = 0)
     private double vibey$scrollX(double x) {
-        return ScreenFrame.pos(x);
+        return ScreenFrame.x(x);
     }
 
     @ModifyArg(method = "onScroll", at = @At(value = "INVOKE", target = SCROLLED), index = 1, require = 0)
     private double vibey$scrollY(double y) {
-        return ScreenFrame.pos(y);
+        return ScreenFrame.y(y);
     }
 
     @ModifyArg(method = "handleAccumulatedMovement", at = @At(value = "INVOKE", target = MOVED), index = 0, require = 0)
     private double vibey$moveX(double x) {
-        return ScreenFrame.pos(x);
+        return ScreenFrame.x(x);
     }
 
     @ModifyArg(method = "handleAccumulatedMovement", at = @At(value = "INVOKE", target = MOVED), index = 1, require = 0)
     private double vibey$moveY(double y) {
-        return ScreenFrame.pos(y);
+        return ScreenFrame.y(y);
     }
 
     @ModifyArg(method = "handleAccumulatedMovement", at = @At(value = "INVOKE", target = DRAGGED), index = 0, require = 0)
@@ -52,11 +52,11 @@ abstract class MouseScreenMixin {
 
     @ModifyArg(method = "handleAccumulatedMovement", at = @At(value = "INVOKE", target = DRAGGED), index = 1, require = 0)
     private double vibey$dragX(double dx) {
-        return ScreenFrame.pos(dx);
+        return ScreenFrame.delta(dx);
     }
 
     @ModifyArg(method = "handleAccumulatedMovement", at = @At(value = "INVOKE", target = DRAGGED), index = 2, require = 0)
     private double vibey$dragY(double dy) {
-        return ScreenFrame.pos(dy);
+        return ScreenFrame.delta(dy);
     }
 }
