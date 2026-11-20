@@ -16,6 +16,7 @@ so every other target builds without them.
 | 3 | AFK cinematics + AFK screen | `cinematic` | `module/cinematic/**` |
 | 4 | Screen editor (every vanilla screen) | `screens` | `module/screens/**` |
 | 5 | Server/world list drag & drop, friends tab | `servers` (+ small api in `api/service`) | `module/servers/**` |
+| 6 | Living companions + companion packs | new lib mod `libs/companio` + client module `companion` | `libs/companio/**`, `module/companion/**`, `content/companions/**` |
 
 ## Shared files (append only, keep your lines together, expect merges)
 
