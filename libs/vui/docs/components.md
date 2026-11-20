@@ -112,8 +112,12 @@ toasts.push("Saved", "Settings written", "mymod:icons/ok", "ok", 4f);   // kind:
 // every frame: toasts.resize(w, h); toasts.frame(dt); toasts.render(canvas);
 ```
 
-Toasts stack bottom-right, slide/fade in and out (`toast:enter`/`toast:leave`), click dismisses, at most 5.
-The `<toast>` tag can also be used in your own markup.
+Toasts stack bottom-right, slide/fade in and out (`toast:enter`/`toast:leave`, defined in the ToastStack's own
+template), click dismisses, at most 5. The `<toast>` tag can also be used in your own markup; it gets the default
+look, add your own `toast:enter`/`toast:leave` rules if it should animate.
+
+Overlays: a click outside an open `popover`, `select` menu or `colorpicker` panel closes it (clicks on its anchor
+or inside it don't). Esc closes the topmost popover/menu/modal; tooltips are never "closed" by Esc.
 
 ## Focus and keys
 
@@ -182,6 +186,5 @@ child elements. Register before compiling documents that use the tag.
 
 ## Limits
 
-- Popovers and select menus do not close on clicks outside yet (Esc and re-click do).
 - No multi-line text area, date/number spinner or drag-and-drop between lists.
 - `keybind` stores keyboard keys only (no mouse buttons).

@@ -24,6 +24,7 @@ public final class DocumentStyles {
     private boolean dirty = true;
     private boolean enterRules;
     private boolean leaveRules;
+    private int descendantStates;
     private int restyles;
 
     DocumentStyles(Document document, Theme theme) {
@@ -56,7 +57,7 @@ public final class DocumentStyles {
         invalidate();
     }
 
-    boolean hasEnterRules() {
+    public boolean hasEnterRules() {
         return enterRules;
     }
 
@@ -80,26 +81,33 @@ public final class DocumentStyles {
 
     private void visit(Element e, ComputedStyle parentStyle, boolean force) {
         boolean restyle = force || e.flags().style;
-        if (restyle) restyle(e, parentStyle);
-        if (restyle || e.flags().childStyle) {
-            for (int i = 0; i < e.childCount(); i++) visit(e.child(i), e.style(), restyle);
+        boolean cascade = false;
+        if (restyle) cascade = restyle(e, parentStyle) || e.flags().styleSubtree;
+        if (cascade || e.flags().childStyle) {
+            for (int i = 0; i < e.childCount(); i++) visit(e.child(i), e.style(), cascade);
         }
         e.flags().style = false;
         e.flags().childStyle = false;
         e.flags().styleSubtree = false;
     }
 
-    private void restyle(Element e, ComputedStyle parentStyle) {
+    public boolean statesAffectDescendants(int states) {
+        return (descendantStates & states) != 0;
+    }
+
+    private boolean restyle(Element e, ComputedStyle parentStyle) {
         restyles++;
         resolver.resolve(e, parentStyle, e.inlineStyle(), scratch);
         ComputedStyle computed = e.computed();
         ComputedStyle used = e.style();
         boolean first = !e.flags().styledOnce;
         boolean layout = first;
+        boolean inherited = first;
         Object transitions = scratch.object(Prop.TRANSITION);
         for (Prop p : PROPS) {
             if (!first && computed.sameAs(p, scratch)) continue;
             if (p.affectsLayout()) layout = true;
+            if (p.inherited()) inherited = true;
             computed.copy(p, scratch);
             TransitionSpec spec = first ? null : find(transitions, p);
             if (spec != null && Animations.enabled() && spec.duration() > 0) {
@@ -122,6 +130,7 @@ public final class DocumentStyles {
             if (e.text() != null) e.text().invalidate();
             if (e.parent() != null && e.parent().text() != null) e.parent().text().invalidate();
         }
+        return inherited;
     }
 
     private static TransitionSpec find(Object transitions, Prop p) {
@@ -170,8 +179,10 @@ public final class DocumentStyles {
     private void scanRules() {
         enterRules = false;
         leaveRules = false;
+        descendantStates = 0;
         for (StyleSheet s : resolver.sheets()) {
             for (dev.henny.vui.style.Rule r : s.rules()) {
+                descendantStates |= r.selector().stateMaskOfAncestors();
                 int mask = r.selector().stateMaskOfSubject();
                 if ((mask & StateFlags.ENTER) != 0) enterRules = true;
                 if ((mask & StateFlags.LEAVE) != 0) leaveRules = true;

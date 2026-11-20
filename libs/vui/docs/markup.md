@@ -76,7 +76,8 @@ runs, each with its own style (color, weight, effect).
 | `id`, `class`, `style` | selector id, static classes, inline declarations (`style="gap: 4; color: $brand"`) |
 | `#name="…"` / `v-slot:name` / `v-slot` | slot content (on `<template>` or on the component tag) |
 
-Style attributes are shortcuts for inline style: `gap`, `padding`, `margin`, `width`, `height`, `size`, `grow`,
+Style attributes are shortcuts for inline style (on a custom component whose props declare the same name, e.g.
+a prop `size`, the value goes to the prop instead): `gap`, `padding`, `margin`, `width`, `height`, `size`, `grow`,
 `shrink`, `basis`, `flex`, `align`, `justify`, `wrap`, `anchor`, `columns`, `min-column`, `min-width`,
 `max-width`, `min-height`, `max-height`, `font-scale`, `text-align`, `opacity`. They work static (`gap="4"`) and
 bound (`:gap="spacing"`).
@@ -223,6 +224,4 @@ Runtime errors (missing method, null path, exceptions in your Java code) are rep
 
 - No JavaScript: logic is Java; expressions have no loops, lambdas or `new`.
 - Styles in a document and its components are global, not scoped.
-- A component's prop must not share a name with a style attribute (`gap`, `size`, …) when set statically – the
-  static value becomes style.
 - Overloaded controller methods are picked by argument count only.

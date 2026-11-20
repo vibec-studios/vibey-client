@@ -26,6 +26,12 @@ public final class Selector {
         return parts[parts.length - 1];
     }
 
+    public int stateMaskOfAncestors() {
+        int mask = 0;
+        for (int i = 0; i < parts.length - 1; i++) mask |= parts[i].states() | parts[i].notStates();
+        return mask;
+    }
+
     public int stateMaskOfSubject() {
         return subject().states() | subject().notStates();
     }

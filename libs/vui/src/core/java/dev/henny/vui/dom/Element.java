@@ -17,14 +17,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Element implements StyleTarget {
+public class Element extends TreeNode implements StyleTarget {
     public static final String TEXT_TAG = "#text";
 
     private final String tag;
     private final Behavior behavior;
     private final SourcePos pos;
-    private final ArrayList<Element> children = new ArrayList<>();
-    private final List<ChildSource> sources = new ArrayList<>();
     private final ClassList classes = new ClassList();
     private final Map<String, Object> props = new HashMap<>();
     private final List<Handler> handlers = new ArrayList<>();
@@ -33,8 +31,6 @@ public class Element implements StyleTarget {
     private final ComputedStyle used = ComputedStyle.initial();
     private final LayoutBox box = new LayoutBox();
     private final ElementFlags flags = new ElementFlags();
-    private Document document;
-    private Element parent;
     private String id;
     private int states;
     private Object key;
@@ -44,7 +40,6 @@ public class Element implements StyleTarget {
     private final InlineStyles inline = new InlineStyles();
     private StyleAnimator animator;
     private Object behaviorState;
-    private ChildSource owner;
     private final ScrollOffset scroll = new ScrollOffset();
 
     public Element(String tag, Behavior behavior, SourcePos pos) {
@@ -66,29 +61,11 @@ public class Element implements StyleTarget {
         return pos;
     }
 
-    public Document document() {
-        return document;
-    }
 
-    public Element parent() {
-        return parent;
-    }
 
-    public List<Element> children() {
-        return children;
-    }
 
-    public int childCount() {
-        return children.size();
-    }
 
-    public Element child(int i) {
-        return children.get(i);
-    }
 
-    public List<ChildSource> sources() {
-        return sources;
-    }
 
     public ClassList classes() {
         return classes;
@@ -129,7 +106,7 @@ public class Element implements StyleTarget {
     public void id(String value) {
         if (java.util.Objects.equals(id, value)) return;
         id = value;
-        markStyleDirty();
+        markSubtreeStyleDirty();
     }
 
     public Object key() {
@@ -182,13 +159,7 @@ public class Element implements StyleTarget {
         behaviorState = value;
     }
 
-    public ChildSource owner() {
-        return owner;
-    }
 
-    public void owner(ChildSource value) {
-        owner = value;
-    }
 
     public float scrollX() {
         return scroll.x();
@@ -245,7 +216,7 @@ public class Element implements StyleTarget {
         if (next == states) return;
         states = next;
         markStyleDirty();
-        flags.styleSubtree = true;
+        if (document != null && document.styles().statesAffectDescendants(state)) flags.styleSubtree = true;
     }
 
     public boolean disabled() {
@@ -256,25 +227,21 @@ public class Element implements StyleTarget {
         handlers.add(handler);
     }
 
-    public void attach(Document doc) {
-        document = doc;
-        for (int i = 0; i < children.size(); i++) children.get(i).attach(doc);
-    }
-
-    void parent(Element p) {
-        parent = p;
-    }
 
 
 
-    public void rebuildChildren() {
-        ChildListBuilder.rebuild(this);
-    }
+
 
     public void markStyleDirty() {
         flags.style = true;
-        for (Element e = this; e != null && !e.flags.childStyle; e = e.parent) e.flags.childStyle = true;
+        flags.childStyle = true;
+        for (Element e = parent; e != null && !e.flags.childStyle; e = e.parent) e.flags.childStyle = true;
         if (document != null) document.invalidateStyle();
+    }
+
+    public void markSubtreeStyleDirty() {
+        flags.styleSubtree = true;
+        markStyleDirty();
     }
 
     public void markLayoutDirty() {

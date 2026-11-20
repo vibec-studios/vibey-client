@@ -82,6 +82,25 @@ Renders the file with a built-in 5×7 pixel font to a PNG, prints the element tr
 lists errors (exit code 1 if there are any). `state.json` is a JSON object used as the controller. `--serve` keeps
 running, reloads on save and serves the [dev bridge](docs/hot-reload.md#dev-bridge).
 
+## Testing a UI in JUnit
+
+```java
+Headless headless = Headless.create();
+Vui vui = headless.vui();
+Document doc = vui.fromSource("modules.vui", source, new ModulesController());
+doc.resize(427, 240);
+doc.frame(0);
+assertTrue(doc.diagnostics().isEmpty(), doc.diagnostics().format());
+Element tile = doc.query(".tile").get(0);
+doc.pointerDown(tile.box().x + 2, tile.box().y + 2, 0, 0);
+doc.pointerUp(tile.box().x + 2, tile.box().y + 2, 0, 0);
+System.out.println(TreeDump.dump(doc.root()));            // tags, classes, states, boxes, text, file:line
+headless.screenshot(doc, 427, 240, 2, Path.of("build/modules.png"));
+```
+
+The library's own suite (`src/test/java`) runs in about two seconds and includes an allocation check: a 200+ node
+settings page does `frame` + `render` with no per-frame allocation (~20 µs per frame, ~70 µs for a full relayout).
+
 ## Packages
 
 | Package | Job |

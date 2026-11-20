@@ -36,6 +36,11 @@ elements inserted/removed by `v-if`/`v-for` (see [animation](animation.md#enter-
 3. the document's own `<style>`
 4. inline: `style="…"`, `:style`, style attributes (`gap="4"`)
 
+Restyling is incremental: a changed state (`:hover`, `:focus`, …), class or id restyles that element. Its
+descendants are restyled only when an inherited value changed (`color`, `font-scale`, …), when its class or id
+changed, or when some selector uses that state on an ancestor (`.tile:hover text`). Hovering a tile in a long list
+therefore touches a handful of elements, not the whole document.
+
 Inherited properties (marked below) take the parent's value unless set. `inherit` and `initial` work on every
 property.
 

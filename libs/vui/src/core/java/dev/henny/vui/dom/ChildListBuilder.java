@@ -25,6 +25,7 @@ final class ChildListBuilder {
             Element c = children.get(i);
             c.parent(parent);
             if (c.document() != parent.document()) c.attach(parent.document());
+            if (!c.flags().styledOnce) c.markStyleDirty();
             c.state(StateFlags.FIRST, i == 0);
             c.state(StateFlags.LAST, i == last);
             if (parent.document() != null && !c.flags().mounted) Lifecycle.mount(c);
