@@ -95,7 +95,6 @@ public final class ScreenControls {
     public void setVolume(Object value) {
         if (!(value instanceof Number n)) return;
         screen.volume = Math.max(0f, Math.min(1f, n.floatValue()));
-        video().actions.changed(screen);
     }
 
     public void editSource() {
@@ -132,8 +131,7 @@ public final class ScreenControls {
     }
 
     public void close() {
-        if (screen.remote) video().actions.unload(screen);
-        else video().actions.remove(screen);
+        video().actions.close(screen);
     }
 
     public void toggleGlow() {

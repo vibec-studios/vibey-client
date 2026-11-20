@@ -155,6 +155,20 @@ public final class ScreenActions {
         video.players.close(s);
     }
 
+    public void close(MediaScreen s) {
+        if (s.remote) {
+            unload(s);
+            return;
+        }
+        if (!s.id.equals(video.overlayId)) {
+            remove(s);
+            return;
+        }
+        video.net.sendRemove(s);
+        video.unplace(s);
+        video.store.save();
+    }
+
     public void remove(MediaScreen s) {
         video.players.close(s);
         video.unplace(s);

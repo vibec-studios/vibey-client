@@ -79,6 +79,7 @@ public final class Interaction {
         if (content != null && hover.zone().onContent()) {
             boolean wants = content.pointerDown(hover.pixelX(), hover.pixelY(), PointerButton.PRIMARY);
             if (wants || hover.zone() == HoverZone.CONTROL) {
+                tracker.pressedAt(hover.pixelX(), hover.pixelY());
                 contentTarget = t;
                 state = InteractionState.CONTENT_DRAG;
             }
@@ -186,7 +187,7 @@ public final class Interaction {
 
     private void endContentDrag() {
         PointerContent content = contentTarget == null ? null : contentTarget.pointerContent();
-        if (content != null) content.pointerUp(tracker.lastX(contentTarget), tracker.lastY(contentTarget), PointerButton.PRIMARY);
+        if (content != null) content.pointerUp(tracker.lastX(), tracker.lastY(), PointerButton.PRIMARY);
         contentTarget = null;
         state = InteractionState.IDLE;
     }

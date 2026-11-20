@@ -19,7 +19,7 @@ public final class MediaR3Run {
             mc.resizeDisplay();
         });
         Path first = Room.testVideo("bars.mp4", "testsrc2", 440);
-        Path second = Room.testVideo("rings.mp4", "mandelbrot", 660);
+        Path second = Room.testVideo("rings.mp4", "smptehdbars", 660);
         Check.log("test videos: %s, %s", first, second);
         try (TestSingleplayerContext world = ctx.worldBuilder().setUseConsistentSettings(false)
                 .adjustSettings(s -> s.setSeed("mediar3")).create()) {

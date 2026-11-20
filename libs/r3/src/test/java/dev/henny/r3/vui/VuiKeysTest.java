@@ -1,5 +1,8 @@
 package dev.henny.r3.vui;
 
+import dev.henny.r3.anchor.FaceSnap;
+import dev.henny.r3.input.InputCode;
+import dev.henny.r3.math.Face;
 import dev.henny.r3.panel.PointerButton;
 import dev.henny.r3.support.Rig;
 import dev.henny.r3.object.WorldObject;
@@ -79,5 +82,26 @@ class VuiKeysTest {
         assertSame(o, rig.scene.keyTarget());
         rig.scene.releaseKeys();
         assertNull(rig.scene.keyTarget());
+    }
+
+    @Test
+    void pressAndReleaseInTheSameFrameStillClick() {
+        Rig rig = new Rig();
+        WorldObject o = WorldObject.create("test:form").content(content);
+        o.dimension(rig.world.dimension);
+        o.transform().size(2.5f, 1f).position(0.5, 65, 5 - FaceSnap.DEFAULT_OFFSET);
+        FaceSnap.orientation(Face.NORTH, Face.UP, o.transform().orientation());
+        o.pixelsPerBlock(64f);
+        rig.scene.add(o);
+        Element ok = content.document().find("ok");
+        rig.frame();
+        double u = (ok.box().x + ok.box().width / 2.0) / o.pixelWidth();
+        double v = (ok.box().y + ok.box().height / 2.0) / o.pixelHeight();
+        rig.lookAt(0.5 + (u - 0.5) * 2.5, 65 + (0.5 - v), 5).frames(2);
+        assertEquals("ok", rig.interaction.hover().controlId());
+        rig.press(InputCode.mouse(0));
+        rig.release(InputCode.mouse(0));
+        content.update(0f);
+        assertEquals(1, form.submits);
     }
 }
