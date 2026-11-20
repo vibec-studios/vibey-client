@@ -155,7 +155,8 @@ tile in the Vibey menu, or Media → *Edit HUD layout*.
 `HudTemplates.register(new HudTemplates.Template(id, labelKey, descKey, () -> HudLayout.state()
         .global(style).place("hud.fps", Anchor.TOP_LEFT, 4, 4, 1f).style(s -> s.paint = RAINBOW)...build()))`.
 Applying a template hides every widget it does not mention (plain elements keep their place). Built-in: `pvp`,
-`minimal`, `building`, `streamer` (HUD module).
+`minimal`, `building`, `streamer` (HUD module). New module widgets must be placed in all four (e.g. `info.card`, `info.toolwarn`,
+`inventory.presets`), otherwise the template applied on first start hides them.
 
 Share code: `VHUD1.` + base64url(deflate(JSON)). JSON: `{"v":1,"g":{style},"e":{"<id>":{"a":"top_left","x":4,
 "y":4,"s":1.0,"w":0,"h":0,"hide":true,"fix":true,"st":{style},"o":{options}}},"c":{"<base id>":[2,3]}}`; style

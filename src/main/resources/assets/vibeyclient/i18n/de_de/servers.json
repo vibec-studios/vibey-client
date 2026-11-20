@@ -1,0 +1,32 @@
+{
+  "name": "Server",
+  "description": "Live-Ping, Suche, Favoriten und MOTD-Vorschau in der Serverliste.",
+  "summary": "Ping, Suche, Favoriten",
+  "section": {
+    "list": "Serverliste",
+    "ping": "Live-Ping"
+  },
+  "setting": {
+    "search": "Suchfeld",
+    "search.desc": "Strg+F in der Serverliste.",
+    "favourites": "Favoriten",
+    "favourites.desc": "Stern in einer Zeile klicken.",
+    "favouritesFirst": "Favoriten zuerst",
+    "motdPreview": "MOTD-Vorschau",
+    "motdPreview.desc": "Zeile überfahren für Details.",
+    "livePing": "Live-Ping",
+    "livePing.desc": "Pingt erneut, solange die Liste offen ist.",
+    "pingEvery": "Ping alle",
+    "pingParallel": "Gleichzeitige Pings",
+    "pingParallel.desc": "Wie viele Server auf einmal."
+  },
+  "ui": {
+    "search": "Suchen",
+    "clear": "Leeren",
+    "favourites": "Favoriten",
+    "favouritesTip": "Nur Favoriten",
+    "ping": "{0} ms",
+    "offline": "Offline",
+    "players": "{0}/{1}"
+  }
+}

@@ -25,5 +25,7 @@
   "key.vibeyclient.waypoints.listKey": "Waypoint list",
   "key.vibeyclient.info.pinKey": "Pin card (hold)",
   "key.vibeyclient.info.lightKey": "Light level",
-  "key.vibeyclient.info.chunkKey": "Chunk borders"
+  "key.vibeyclient.info.chunkKey": "Chunk borders",
+  "key.vibeyclient.inventory.presetKey": "Hotbar preset (tap/hold)",
+  "key.vibeyclient.inventory.presetSaveKey": "Save hotbar preset"
 }

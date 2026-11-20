@@ -39,6 +39,7 @@ final class BuiltinTemplates {
                 .place("hud.items.2", Anchor.BOTTOM, 160, -3, 1f).option("item", "minecraft:totem_of_undying")
                 .place("info.card", Anchor.TOP, 0, 4, 1f)
                 .place("info.toolwarn", Anchor.CENTER, 0, 24, 1f)
+                .place("inventory.presets", Anchor.BOTTOM_RIGHT, -4, -4, 1f)
                 .copies("hud.items", 2)
                 .build();
     }
@@ -55,6 +56,7 @@ final class BuiltinTemplates {
                     s.bgOpacity = 0.6f;
                 })
                 .place("info.toolwarn", Anchor.CENTER, 0, 24, 1f)
+                .place("inventory.presets", Anchor.BOTTOM_RIGHT, -4, -4, 1f)
                 .build();
     }
 
@@ -69,6 +71,7 @@ final class BuiltinTemplates {
                 .place("hud.effects", Anchor.TOP_RIGHT, -4, 56, 1f)
                 .place("info.card", Anchor.TOP, 0, 22, 1f)
                 .place("info.toolwarn", Anchor.CENTER, 0, 24, 1f)
+                .place("inventory.presets", Anchor.BOTTOM_RIGHT, -4, -4, 1f)
                 .build();
     }
 
@@ -82,6 +85,7 @@ final class BuiltinTemplates {
                 .place("hud.keystrokes", Anchor.BOTTOM_RIGHT, -4, -4, 1f).style(s -> s.variant = HudStyle.Variant.DETAILED)
                 .place("info.card", Anchor.TOP, 0, 4, 1f)
                 .place("info.toolwarn", Anchor.CENTER, 0, 24, 1f)
+                .place("inventory.presets", Anchor.BOTTOM_RIGHT, -4, -60, 1f)
                 .build();
     }
 }
