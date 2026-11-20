@@ -36,7 +36,7 @@ final class DemoObjects {
                 .withMode(RenderMode.ADDITIVE), 7).emitter(emitter);
         WorldObject fx = WorldObject.create("r3:demo-ring").content(ring).rules(new InteractionRules().interactive(false));
         fx.dimension(R3Mc.scene().query().dimension());
-        Vector3d at = above(panel, -0.25 - panel.worldHeight());
+        Vector3d at = above(panel, -0.6 - panel.worldHeight());
         fx.transform().position(at.x, at.y, at.z);
         fx.transform().orientation().set(panel.orientation());
         return fx;

@@ -9,7 +9,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 
 public final class HintOverlay {
-    public static final int BELOW_CROSSHAIR = 14;
+    public static final int BELOW_CROSSHAIR = 22;
     public static final int BACKGROUND = 0xA0101014;
     public static final int TEXT = 0xFFF4F4F5;
 
