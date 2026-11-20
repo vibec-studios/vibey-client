@@ -43,12 +43,15 @@ def targets = [
 
 // Libraries (libs/<id>, project :<id>, see libs/README.md): one Stonecutter branch each, same targets, switched
 // together. Node scripts are resolved from libs/<id>/versions/<target>, hence the extra ../../.
-def libs = ['vui', 'r3', 'cosmetico']
+def libs = ['vui', 'r3', 'cosmetico', 'companio']
+// Libs whose Minecraft backend exists only for some targets (all others: every target).
+def libTargets = [companio: ['fabric-1.21.11']]
 libs.each { id ->
     include id
     project(":$id").projectDir = file("libs/$id")
 }
 gradle.ext.vibeyLibs = libs
+gradle.ext.vibeyLibTargets = libTargets
 gradle.ext.vibeyVcs = 'fabric-1.21.11'
 def libScript = { String script -> '../../' + script.replace('gradle/', 'gradle/lib/') }
 
@@ -59,7 +62,8 @@ stonecutter {
         libs.each { id ->
             branch(id) {
                 branchScript = 'build.gradle'
-                targets.each { t -> version(t.name, t.mc).buildscript(libScript(t.script)) }
+                targets.findAll { t -> libTargets[id] == null || t.name in libTargets[id] }
+                        .each { t -> version(t.name, t.mc).buildscript(libScript(t.script)) }
             }
         }
     }

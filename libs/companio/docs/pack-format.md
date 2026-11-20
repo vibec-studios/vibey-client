@@ -207,14 +207,14 @@ Props are bones of the model that behaviors show and hide: an umbrella, a sou'we
 
 ```json
 "particles": {
-  "hearts": { "particle": "minecraft:heart", "count": 3, "at": "heart", "spread": [0.25, 0.1, 0.25], "velocity": [0, 0.05, 0] },
+  "hearts": { "particle": "minecraft:heart", "count": 3, "locator": "heart", "spread": [0.25, 0.1, 0.25], "velocity": [0, 0.05, 0] },
   "splash": { "particle": "minecraft:splash", "count": 12, "spread": [0.4, 0.1, 0.4], "velocity": [0, 0.15, 0] },
-  "shiver": { "particle": "minecraft:snowflake", "count": 2, "at": "body", "spread": [0.3, 0.2, 0.3] }
+  "shiver": { "particle": "minecraft:snowflake", "count": 2, "locator": "body", "spread": [0.3, 0.2, 0.3] }
 }
 ```
 
 `particle`: a vanilla particle id with no options (`heart`, `happy_villager`, `note`, `splash`, `bubble`, `snowflake`,
-`cloud`, `poof`, `end_rod`, `glow`, …). `at`: a model locator (default: the companion's center). `spread` in blocks,
+`cloud`, `poof`, `end_rod`, `glow`, …). `locator`: a model locator (default: the companion's center). `spread` in blocks,
 `velocity` in blocks/tick (+X = the companion's right, like FORMAT.md), `count` 1–32. Sprite particles from the
 model's `sprites` are fired from animation events (FORMAT.md).
 
@@ -389,7 +389,7 @@ action may also have:
 | `stop_anim` | `name` | fade that layer out |
 | `prop` | `name`, `show` (bool) | show/hide a prop (stays after the behavior) |
 | `sound` | `name` | a sound from `sounds`, or a sound id directly (`"minecraft:entity.cat.purr"`); `volume`, `pitch` override |
-| `particle` | `name` | a burst from `particles`, or a particle id directly; `count`, `at`, `spread`, `velocity` override |
+| `particle` | `name` | a burst from `particles`, or a particle id directly; `count`, `locator`, `spread`, `velocity` override |
 | `say` | `text` (text or list of texts → random), `seconds` (default 2.5) | a speech bubble above it |
 | `need` | need names with deltas, e.g. `"energy": -0.1` | change needs once (clamped to 0–1) |
 | `var` | `name`, `value` (expression or number) | set a variable, e.g. `"value": "var.tricks_done + 1"` |
@@ -592,7 +592,7 @@ pet it. (The real penguin pack does much more.)
     "honk": { "file": "sounds/honk.ogg", "volume": 0.7, "pitch": [0.9, 1.2] },
     "pop": { "sound": "minecraft:entity.chicken.egg", "volume": 0.4, "pitch": 1.6 }
   },
-  "particles": { "hearts": { "particle": "minecraft:heart", "count": 3, "at": "head", "spread": [0.2, 0.1, 0.2] } },
+  "particles": { "hearts": { "particle": "minecraft:heart", "count": 3, "locator": "head", "spread": [0.2, 0.1, 0.2] } },
   "needs": { "energy": { "start": 1, "perMinute": -0.05 } },
   "behaviors": [
     {
