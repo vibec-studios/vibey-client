@@ -10,4 +10,8 @@ public interface Input {
     String keyName(int key, int scancode);
 
     void setCursor(Cursor cursor);
+
+    default String mouseButtonName(int button) {
+        return null;
+    }
 }

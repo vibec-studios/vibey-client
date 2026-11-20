@@ -1,5 +1,8 @@
 package dev.henny.vui.render;
 
+import dev.henny.vui.icon.IconFills;
+import dev.henny.vui.icon.PixelIcon;
+
 public interface Canvas {
     void fill(float x, float y, float w, float h, int argb);
 
@@ -34,5 +37,9 @@ public interface Canvas {
     void popAlpha();
 
     default void layer() {
+    }
+
+    default void icon(PixelIcon icon, float x, float y, float w, float h, int argb) {
+        IconFills.draw(this, icon, x, y, w, h, argb);
     }
 }

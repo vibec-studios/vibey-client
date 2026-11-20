@@ -109,6 +109,7 @@ public final class ImageCanvas implements Canvas {
             Placeholder.draw(g, x, y, w, h);
             return;
         }
+        tex = textures.tinted(tex, effective(tint));
         int sx1 = Math.round(u0 * tex.getWidth());
         int sy1 = Math.round(v0 * tex.getHeight());
         int sx2 = Math.round(u1 * tex.getWidth());
@@ -180,6 +181,12 @@ public final class ImageCanvas implements Canvas {
     @Override
     public void popAlpha() {
         if (!alphas.isEmpty()) alpha = alphas.pop();
+    }
+
+    private int effective(int tint) {
+        if (alpha >= 1f) return tint;
+        int a = Math.round((tint >>> 24) * alpha);
+        return (a << 24) | (tint & 0xFFFFFF);
     }
 
     private Color color(int argb) {

@@ -1,5 +1,7 @@
 package dev.henny.vui.markup;
 
+import dev.henny.vui.contract.Contract;
+import dev.henny.vui.contract.ContractReader;
 import dev.henny.vui.diag.Diagnostics;
 import dev.henny.vui.diag.SourcePos;
 import dev.henny.vui.json.JsonValue;
@@ -19,6 +21,7 @@ public final class SfcReader {
     private final Map<String, Object> props = new LinkedHashMap<>();
     private final Map<String, String> components = new LinkedHashMap<>();
     private SourcePos stylePos;
+    private Contract contract = Contract.EMPTY;
     private boolean sawTemplate;
 
     private SfcReader(String id, String fileName) {
@@ -61,10 +64,11 @@ public final class SfcReader {
                 style.append(content.text());
             }
             case "props" -> readProps(e);
+            case "contract" -> readContract(e);
             case "script" -> readScript(e);
             case "import" -> readImport(e);
             default -> diagnostics.error(e.pos(), "unknown top-level block <" + e.tag() + ">",
-                    "use <template>, <style>, <props>, <script lang=\"json\"> or <import>");
+                    "use <template>, <style>, <props>, <contract>, <script lang=\"json\"> or <import>");
         }
     }
 
@@ -72,6 +76,11 @@ public final class SfcReader {
         JsonValue json = json(e);
         if (json == null) return;
         PropsBlock.readProps(json, props, diagnostics);
+    }
+
+    private void readContract(ElementNode e) {
+        JsonValue json = json(e);
+        if (json != null) contract = ContractReader.read(json, diagnostics);
     }
 
     private void readScript(ElementNode e) {
@@ -82,6 +91,8 @@ public final class SfcReader {
         }
         JsonValue json = json(e);
         if (json == null) return;
+        JsonValue c = json.isObject() ? json.get("contract") : null;
+        if (c != null) contract = ContractReader.read(c, diagnostics);
         PropsBlock.readScript(json, props, components, diagnostics);
     }
 
@@ -111,6 +122,6 @@ public final class SfcReader {
 
     private ComponentFile build() {
         return new ComponentFile(id, fileName, template, style.toString(),
-                stylePos == null ? new SourcePos(fileName, 1, 1) : stylePos, props, components, diagnostics);
+                stylePos == null ? new SourcePos(fileName, 1, 1) : stylePos, props, components, diagnostics, contract);
     }
 }

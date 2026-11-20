@@ -25,7 +25,13 @@ final class Hover {
     }
 
     static void active(Element target, boolean on) {
-        for (Element e = target; e != null; e = e.parent()) e.state(StateFlags.ACTIVE, on);
+        Element blocked = null;
+        if (on) for (Element e = target; e != null; e = e.parent()) if (e.disabled()) blocked = e;
+        boolean skip = blocked != null;
+        for (Element e = target; e != null; e = e.parent()) {
+            if (!skip || !on) e.state(StateFlags.ACTIVE, on);
+            if (e == blocked) skip = false;
+        }
     }
 
     static boolean isAncestorOrSelf(Element ancestor, Element node) {

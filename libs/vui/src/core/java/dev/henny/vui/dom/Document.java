@@ -2,6 +2,7 @@ package dev.henny.vui.dom;
 
 import dev.henny.vui.Vui;
 import dev.henny.vui.bind.Scheduler;
+import dev.henny.vui.contract.ContractCheck;
 import dev.henny.vui.diag.Diagnostics;
 import dev.henny.vui.diag.SourcePos;
 import dev.henny.vui.event.EventSystem;
@@ -36,6 +37,7 @@ public final class Document {
     private boolean mounted;
     private Runnable escapeHandler;
     private Diagnostics reloadErrors = new Diagnostics();
+    private Diagnostics contractWarnings = new Diagnostics();
     private String documentId;
 
     public Document(Vui vui, CompiledTemplate template, Object controller) {
@@ -52,6 +54,7 @@ public final class Document {
     }
 
     private void build() {
+        styles.resolver().theme(vui.theme());
         styles.sheets(vui.defaultStyles(), template.styles());
         root = new Element("root", vui.behaviors().get("root"), new SourcePos(template.fileName(), 1, 1));
         root.attach(this);
@@ -60,6 +63,14 @@ public final class Document {
         Lifecycle.mount(root);
         invalidateStyle();
         invalidateLayout();
+        contractWarnings = vui.devMode() ? checkContracts(true) : new Diagnostics();
+    }
+
+    public Diagnostics checkContracts(boolean actions) {
+        Diagnostics out = new Diagnostics();
+        ContractCheck.check(template.contract(), controller, actions, out);
+        for (CompiledTemplate c : mounts.components()) ContractCheck.check(c.contract(), controller, actions, out);
+        return out;
     }
 
     public void swap(CompiledTemplate next) {
@@ -194,7 +205,7 @@ public final class Document {
     }
 
     public Diagnostics diagnostics() {
-        Diagnostics all = new Diagnostics().addAll(reloadErrors);
+        Diagnostics all = new Diagnostics().addAll(reloadErrors).addAll(contractWarnings);
         all.addAll(template.diagnostics());
         for (CompiledTemplate c : mounts.components()) all.addAll(c.diagnostics());
         all.addAll(errors.diagnostics());

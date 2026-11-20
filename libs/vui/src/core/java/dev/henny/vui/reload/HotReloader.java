@@ -14,6 +14,7 @@ import java.util.Set;
 public final class HotReloader implements AutoCloseable {
     private final DocumentRegistry registry;
     private final List<WeakReference<Document>> documents = new ArrayList<>();
+    private final List<ResourceListener> listeners = new ArrayList<>();
     private SourceWatcher watcher;
     private int reloads;
 
@@ -39,6 +40,17 @@ public final class HotReloader implements AutoCloseable {
         return out;
     }
 
+    public HotReloader onResource(ResourceListener listener) {
+        listeners.add(listener);
+        return this;
+    }
+
+    public boolean resourceChanged(String relativePath) {
+        boolean rebuild = false;
+        for (ResourceListener l : listeners) rebuild |= l.changed(relativePath);
+        return rebuild;
+    }
+
     public boolean watching() {
         return watcher != null;
     }
@@ -57,11 +69,18 @@ public final class HotReloader implements AutoCloseable {
     public Set<String> poll() {
         if (watcher == null) return Set.of();
         Set<String> ids = new LinkedHashSet<>();
+        boolean rebuild = false;
         for (Path p : watcher.drain()) {
             DocumentId id = idOf(p);
             if (id != null) ids.add(id.toString());
+            else rebuild |= resource(p);
         }
-        if (!ids.isEmpty()) apply(ids);
+        if (rebuild) {
+            registry.forgetAll();
+            reloadAll();
+        } else if (!ids.isEmpty()) {
+            apply(ids);
+        }
         return ids;
     }
 
@@ -77,6 +96,14 @@ public final class HotReloader implements AutoCloseable {
             if (next.hasErrors() && !doc.template().hasErrors()) doc.reloadFailed(next.diagnostics());
             else doc.swap(next);
         }
+    }
+
+    private boolean resource(Path p) {
+        for (ResourceRoot root : registry.allRoots()) {
+            String rel = root.relativePath(p);
+            if (rel != null) return resourceChanged(rel);
+        }
+        return false;
     }
 
     private DocumentId idOf(Path p) {

@@ -35,7 +35,9 @@ public final class PropsBlock {
             switch (e.getKey()) {
                 case "props" -> readProps(e.getValue(), props, diagnostics);
                 case "components" -> readComponents(e.getValue(), components, diagnostics);
-                default -> diagnostics.warn(e.getValue().pos(), "unknown script key '" + e.getKey() + "'", "known: props, components");
+                case "contract" -> {
+                }
+                default -> diagnostics.warn(e.getValue().pos(), "unknown script key '" + e.getKey() + "'", "known: props, components, contract");
             }
         }
     }

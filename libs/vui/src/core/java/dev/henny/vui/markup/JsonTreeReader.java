@@ -1,5 +1,7 @@
 package dev.henny.vui.markup;
 
+import dev.henny.vui.contract.Contract;
+import dev.henny.vui.contract.ContractReader;
 import dev.henny.vui.diag.Diagnostics;
 import dev.henny.vui.diag.SourcePos;
 import dev.henny.vui.json.JsonValue;
@@ -24,12 +26,15 @@ public final class JsonTreeReader {
         List<TemplateNode> template = new ArrayList<>();
         String style = "";
         SourcePos stylePos = new SourcePos(fileName, 1, 1);
+        Contract contract = Contract.EMPTY;
         if (root != null && !root.isObject()) r.diagnostics.error(root.pos(), "a .vui.json file must be an object", "e.g. { \"template\": {…} }");
         if (root != null && root.isObject()) {
             JsonValue p = root.get("props");
             if (p != null) PropsBlock.readProps(p, props, r.diagnostics);
             JsonValue c = root.get("components");
             if (c != null) PropsBlock.readComponents(c, components, r.diagnostics);
+            JsonValue k = root.get("contract");
+            if (k != null) contract = ContractReader.read(k, r.diagnostics);
             JsonValue s = root.get("style");
             if (s != null) {
                 style = r.style(s);
@@ -39,7 +44,7 @@ public final class JsonTreeReader {
             if (t == null) r.diagnostics.error(root.pos(), "missing \"template\"", "add \"template\": { \"tag\": \"column\", … }");
             else r.nodes(t, template);
         }
-        return new ComponentFile(id, fileName, template, style, stylePos, props, components, r.diagnostics);
+        return new ComponentFile(id, fileName, template, style, stylePos, props, components, r.diagnostics, contract);
     }
 
     private String style(JsonValue s) {

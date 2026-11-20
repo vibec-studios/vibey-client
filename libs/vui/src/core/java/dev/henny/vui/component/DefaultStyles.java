@@ -45,6 +45,7 @@ public final class DefaultStyles {
             checkbox:focus, checkbox:hover { track-color: $brand; }
             slider { width: 120; height: 10; track-color: $surface3; accent-color: $brand; thumb-color: $text; cursor: pointer; flex-shrink: 0; }
             slider:hover, slider:focus { thumb-color: $brand-hover; }
+            .slider-value { color: $muted; text-wrap: nowrap; text-align: end; }
             textfield { width: 120; height: 18; padding: 0 4; background: $panel; border: 1 $line2; color: $text;
                         accent-color: $brand; cursor: text; flex-shrink: 0; transition: border-color 150ms out; }
             textfield:hover { border-color: $muted; }
@@ -85,7 +86,13 @@ public final class DefaultStyles {
                                       color: $text; pointer-events: none; }
             popover { display: column; gap: 4; padding: 4; background: $surface; border: 1 $line2; }
             modal { display: stack; align-items: center; background: $scrim; }
-            colorpicker-panel { width: 110; height: 80; padding: 4; background: $surface; border: 1 $line2; cursor: pointer; }
+            colorpicker-panel { display: column; gap: 3; width: 110; padding: 4; background: $surface; border: 1 $line2; }
+            colorpicker-area { height: 62; cursor: pointer; flex-shrink: 0; }
+            colorpicker-swatches { display: row; flex-wrap: wrap; gap: 2; }
+            colorpicker-swatch { size: 10; border: 1 $line2; cursor: pointer; flex-shrink: 0; }
+            colorpicker-swatch:hover { border-color: $muted; }
+            colorpicker-swatch:selected { border-color: $text; }
+            .colorpicker-hex { width: auto; height: 14; }
             toast { display: row; align-items: center; gap: 6; padding: 6 8; min-width: 140; background: $surface;
                     border: 1 $line2; transition: opacity 150ms out, translate-y 150ms out; }
             """;

@@ -2,8 +2,10 @@ package dev.henny.vui.component;
 
 import dev.henny.vui.component.builtin.ButtonBehavior;
 import dev.henny.vui.component.builtin.CheckboxBehavior;
+import dev.henny.vui.component.builtin.ColorAreaBehavior;
 import dev.henny.vui.component.builtin.ColorPanelBehavior;
 import dev.henny.vui.component.builtin.ColorPickerBehavior;
+import dev.henny.vui.component.builtin.ColorSwatchBehavior;
 import dev.henny.vui.component.builtin.IconBehavior;
 import dev.henny.vui.component.builtin.ImageBehavior;
 import dev.henny.vui.component.builtin.KeybindBehavior;
@@ -30,7 +32,7 @@ import java.util.Set;
 
 public final class Behaviors implements TagCatalog {
     private static final Set<String> PLAIN_TAGS = Set.of("root", "box", "row", "column", "stack", "grid", "scroll",
-            "text", "span", "b", "i", "divider", "spacer", "toast", "label", "card", "segment", "tab", "select-option",
+            "text", "span", "b", "i", "divider", "spacer", "toast", "label", "card", "segment", "tab", "select-option", "colorpicker-swatches",
             Element.TEXT_TAG);
 
     private final Map<String, Behavior> byTag = new LinkedHashMap<>();
@@ -57,6 +59,8 @@ public final class Behaviors implements TagCatalog {
         b.register("keybind", new KeybindBehavior());
         b.register("colorpicker", new ColorPickerBehavior());
         b.register("colorpicker-panel", new ColorPanelBehavior());
+        b.register("colorpicker-area", new ColorAreaBehavior());
+        b.register("colorpicker-swatch", new ColorSwatchBehavior());
         b.register("progress", new ProgressBehavior());
         b.register("spinner", new SpinnerBehavior());
         return b;
