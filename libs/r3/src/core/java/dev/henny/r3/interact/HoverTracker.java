@@ -12,6 +12,8 @@ public final class HoverTracker {
     private final RectHit hit = new RectHit();
     private Interactable current;
     private String control;
+    private float lastX;
+    private float lastY;
 
     public void update(HoverState hover, boolean frozen) {
         Interactable target = !frozen && hover.zone().onContent() ? hover.target() : null;
@@ -31,16 +33,23 @@ public final class HoverTracker {
     public boolean dragMove(Interactable target, Ray ray) {
         PointerContent content = target.pointerContent();
         if (content == null || !rect.set(target.transform()).planeHit(ray, hit)) return false;
-        content.pointerMove(hit.pixelX(target.pixelWidth()), hit.pixelY(target.pixelHeight()));
+        lastX = hit.pixelX(target.pixelWidth());
+        lastY = hit.pixelY(target.pixelHeight());
+        content.pointerMove(lastX, lastY);
         return true;
     }
 
-    public float lastX(Interactable target) {
-        return hit.pixelX(target.pixelWidth());
+    public void pressedAt(float x, float y) {
+        lastX = x;
+        lastY = y;
     }
 
-    public float lastY(Interactable target) {
-        return hit.pixelY(target.pixelHeight());
+    public float lastX() {
+        return lastX;
+    }
+
+    public float lastY() {
+        return lastY;
     }
 
     public void exit() {

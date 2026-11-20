@@ -62,7 +62,7 @@ final class DocumentBuilder implements BuildHost {
     @Override
     public void useComponentStyles(CompiledTemplate template) {
         document.hooks().useComponent(template);
-        document.styles().addComponentSheet(template.id(), template.styles());
+        document.styles().addComponentSheet(template);
     }
 
     @Override

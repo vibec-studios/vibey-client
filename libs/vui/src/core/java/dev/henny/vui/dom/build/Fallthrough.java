@@ -55,8 +55,9 @@ final class Fallthrough {
         style.removeIf(d -> d.property().equals(property) && d.raw().equals(value.trim()));
     }
 
-    void bindProps(ComponentBuilder builder, Element root, VarScope props, Scope usageScope, List<String> propNames) {
+    List<Effect> bindProps(ComponentBuilder builder, VarScope props, Scope usageScope, List<String> propNames) {
         BuildHost host = builder.tree().host();
+        List<Effect> effects = new ArrayList<>();
         for (Map.Entry<String, String> a : propAttrs.entrySet()) {
             Object current = props.lookup(a.getKey());
             Object parsed = StaticValues.parse(a.getValue());
@@ -64,23 +65,35 @@ final class Fallthrough {
         }
         for (CBinding b : propBindings) {
             Effect effect = host.effect(() -> props.set(b.name(), b.expr().evaluate(usageScope, host.errors())));
-            root.effects().add(effect);
+            effects.add(effect);
             effect.run();
         }
         CModel model = usage.model();
-        if (model == null) return;
-        String prop = model.prop().isEmpty() ? "value" : model.prop();
+        if (model == null) return effects;
+        String prop = modelProp(model);
         if (!propNames.contains(prop)) {
             host.errors().report(usage.pos(), "v-model on <" + usage.tag() + "> needs a prop '" + prop + "'", "declare it in <props>");
-            return;
+            return effects;
         }
         Effect effect = host.effect(() -> props.set(prop, model.target().evaluate(usageScope, host.errors())));
-        root.effects().add(effect);
+        effects.add(effect);
         effect.run();
-        root.addHandler(new Handler("update:" + prop, List.of(), ev -> {
+        return effects;
+    }
+
+    void attach(ComponentBuilder builder, Element root, List<Effect> effects, Scope usageScope, List<String> propNames) {
+        root.effects().addAll(effects);
+        CModel model = usage.model();
+        if (model == null || !propNames.contains(modelProp(model))) return;
+        BuildHost host = builder.tree().host();
+        root.addHandler(new Handler("update:" + modelProp(model), List.of(), ev -> {
             model.target().assign(usageScope, ev.detail(), host.errors());
             host.afterHandler();
         }));
+    }
+
+    private static String modelProp(CModel model) {
+        return model.prop().isEmpty() ? "value" : model.prop();
     }
 
     void apply(TreeBuilder tree, Element root, Scope usageScope) {

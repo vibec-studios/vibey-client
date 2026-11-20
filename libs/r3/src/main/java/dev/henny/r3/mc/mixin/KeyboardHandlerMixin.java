@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 //? if >=1.21.9 {
+import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 //?}
 
@@ -17,10 +18,20 @@ abstract class KeyboardHandlerMixin {
     private void r3$key(long window, int action, KeyEvent event, CallbackInfo ci) {
         if (R3Hooks.key(event.key(), action)) ci.cancel();
     }
+
+    @Inject(method = "charTyped", at = @At("HEAD"), cancellable = true)
+    private void r3$char(long window, CharacterEvent event, CallbackInfo ci) {
+        if (R3Hooks.character(event.codepoint())) ci.cancel();
+    }
     //?} else {
     /*@Inject(method = "keyPress", at = @At("HEAD"), cancellable = true)
     private void r3$key(long window, int key, int scancode, int action, int mods, CallbackInfo ci) {
         if (R3Hooks.key(key, action)) ci.cancel();
+    }
+
+    @Inject(method = "charTyped", at = @At("HEAD"), cancellable = true)
+    private void r3$char(long window, int codepoint, int mods, CallbackInfo ci) {
+        if (R3Hooks.character(codepoint)) ci.cancel();
     }
     *///?}
 }

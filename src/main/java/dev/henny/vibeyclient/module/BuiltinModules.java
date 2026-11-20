@@ -23,9 +23,11 @@ public final class BuiltinModules {
         registerIfPresent(mm, "dev.henny.vibeyclient.module.pvp.PvpModule");
         // Clips (replay buffer, auto clips, gallery): Fabric 1.21.11 only for now, like pvp
         registerIfPresent(mm, "dev.henny.vibeyclient.module.clips.ClipsModule");
+        registerIfPresent(mm, "dev.henny.vibeyclient.module.info.InfoModule");
         mm.register(new DevLinkModule());
         // HUD widgets + templates: Fabric 1.21.11 only for now (gradle/modules.gradle leaves the package out elsewhere)
         registerIfPresent(mm, "dev.henny.vibeyclient.module.hud.HudModule");
+        registerIfPresent(mm, "dev.henny.vibeyclient.module.waypoints.WaypointsModule");
     }
 
     /** Registers a module whose package is only part of some builds. */

@@ -26,9 +26,33 @@ text { color: $muted; }
 |---|---|
 | `<template>` | The tree. Required. Several top-level elements are allowed. |
 | `<style>` | CSS subset, see [styles](styles.md). Several blocks are concatenated. Styles are global to the document (not scoped). |
-| `<props>` | JSON object of prop defaults (`{ "title": "x" }`) or array of names (`["title"]`). Used when the file is a component. |
-| `<script lang="json">` | `{ "props": {…}, "components": { "card": "mymod:widgets/card" } }`. There is no scripting; logic lives in Java. |
+| `<props>` | JSON object of prop defaults (`{ "title": "x" }`) or array of names (`["title"]`). Used when the file is a component. Bound props (`:item="it"`) are evaluated before the component's own bindings, so `null` defaults are fine for object props. |
+| `<contract>` | JSON: the controller fields and actions the document needs, see [Contracts](#contracts). |
+| `<script lang="json">` | `{ "props": {…}, "components": { "card": "mymod:widgets/card" }, "contract": {…} }`. There is no scripting; logic lives in Java. |
 | `<import name="card" src="ns:path"/>` | Makes another `.vui` file usable as `<card>`. `name` defaults to the last path segment. |
+
+### Contracts
+
+A document can say what it expects from its controller, so a missing field shows up as a warning with file:line
+instead of a blank screen:
+
+```html
+<contract>
+{
+  "fields": { "modules": "list", "query": "string", "panel": "string", "hint?": "string" },
+  "actions": ["open(m)", "close", "toggle(m)"]
+}
+</contract>
+```
+
+- `fields`: name → type (`any string number bool list object`) or a list of names (type `any`). `null` values pass
+  any type. A trailing `?` marks the entry optional.
+- `actions`: method names (`open(m)` = `open`; arguments are documentation). Java controllers need a method with that
+  name, a `Model` an `action(name, …)`.
+- Checked when the document is built in dev mode (`vui.devMode(true)`); results are **warnings** in
+  `doc.diagnostics()` (also checked for every used component's contract). Outside dev mode nothing runs; call
+  `doc.checkContracts(actions)` yourself (tests). `Preview` checks fields (state files have no actions).
+- In `.vui.json` the same object goes under `"contract"`.
 
 ### `.vui.json`
 

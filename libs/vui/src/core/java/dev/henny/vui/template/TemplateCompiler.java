@@ -36,7 +36,7 @@ public final class TemplateCompiler {
         TemplateCompiler c = new TemplateCompiler(d, catalog, file.components());
         List<CNode> roots = c.nodes(file.template());
         StyleSheet styles = CssParser.parse(file.style(), file.stylePos(), theme, d);
-        return new CompiledTemplate(file.id(), file.fileName(), roots, styles, file.props(), file.components(), d);
+        return new CompiledTemplate(file.id(), file.fileName(), roots, styles, file.props(), file.components(), d, file.contract());
     }
 
     private List<CNode> nodes(List<TemplateNode> nodes) {

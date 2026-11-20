@@ -1,9 +1,13 @@
 package dev.henny.r3.object;
 
+import dev.henny.r3.panel.KeyContent;
+import dev.henny.r3.panel.PanelContent;
+import dev.henny.r3.panel.PointerButton;
+import dev.henny.r3.panel.PointerContent;
 import dev.henny.r3.render.TextureHandle;
 import dev.henny.r3.text.TextWrap;
 
-public final class VideoSurface implements ObjectContent {
+public final class VideoSurface implements ObjectContent, PointerContent, KeyContent {
     public static final float DEFAULT_BEZEL = 0.04f;
     public static final int DEFAULT_BEZEL_COLOR = 0xFF0E0E12;
     public static final int DEFAULT_PANEL_COLOR = 0xFF16161C;
@@ -21,6 +25,7 @@ public final class VideoSurface implements ObjectContent {
     private final TextWrap statusWrap = new TextWrap();
     private String status;
     private long drawnFrames;
+    private VideoOverlay overlay;
 
     public TextWrap statusWrap() {
         return statusWrap;
@@ -121,5 +126,99 @@ public final class VideoSurface implements ObjectContent {
     @Override
     public boolean translucent() {
         return false;
+    }
+
+    public VideoOverlay overlay() {
+        return overlay;
+    }
+
+    public VideoSurface overlay(PanelContent content) {
+        overlay = content == null ? null : new VideoOverlay(content);
+        return this;
+    }
+
+    public boolean overlayShown() {
+        return overlay != null && overlay.shown();
+    }
+
+    private PanelContent shownOverlay() {
+        return overlayShown() ? overlay.content() : null;
+    }
+
+    @Override
+    public void tick() {
+        if (overlay != null) overlay.content().tick();
+    }
+
+    @Override
+    public void update(float dt) {
+        if (overlay != null) overlay.update(dt);
+    }
+
+    @Override
+    public String controlAt(float x, float y) {
+        PanelContent o = shownOverlay();
+        return o == null ? null : o.controlAt(x, y);
+    }
+
+    @Override
+    public void hoverChanged(String controlId) {
+        if (overlay != null) overlay.content().hoverChanged(controlId);
+    }
+
+    @Override
+    public void pointerMove(float x, float y) {
+        if (overlay == null) return;
+        overlay.entered();
+        overlay.content().pointerMove(x, y);
+    }
+
+    @Override
+    public void pointerExit() {
+        if (overlay == null) return;
+        overlay.exited();
+        overlay.content().pointerExit();
+    }
+
+    @Override
+    public boolean pointerDown(float x, float y, PointerButton button) {
+        PanelContent o = shownOverlay();
+        return o != null && o.pointerDown(x, y, button);
+    }
+
+    @Override
+    public void pointerUp(float x, float y, PointerButton button) {
+        if (overlay != null) overlay.content().pointerUp(x, y, button);
+    }
+
+    @Override
+    public boolean scroll(float x, float y, double amount) {
+        PanelContent o = shownOverlay();
+        return o != null && o.scroll(x, y, amount);
+    }
+
+    @Override
+    public boolean keyFocused() {
+        return overlay != null && overlay.keyFocused();
+    }
+
+    @Override
+    public boolean keyDown(int key, int scancode, int mods, boolean repeat) {
+        return keyFocused() && ((KeyContent) overlay.content()).keyDown(key, scancode, mods, repeat);
+    }
+
+    @Override
+    public void keyUp(int key, int scancode, int mods) {
+        if (keyFocused()) ((KeyContent) overlay.content()).keyUp(key, scancode, mods);
+    }
+
+    @Override
+    public boolean charTyped(int codepoint, int mods) {
+        return keyFocused() && ((KeyContent) overlay.content()).charTyped(codepoint, mods);
+    }
+
+    @Override
+    public void releaseKeyFocus() {
+        if (overlay != null && overlay.content() instanceof KeyContent k) k.releaseKeyFocus();
     }
 }

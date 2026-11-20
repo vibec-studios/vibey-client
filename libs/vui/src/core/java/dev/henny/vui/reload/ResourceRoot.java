@@ -11,6 +11,13 @@ public interface ResourceRoot {
         return null;
     }
 
+    default String relativePath(Path file) {
+        Path dir = directory();
+        if (dir == null) return null;
+        Path abs = file.toAbsolutePath().normalize();
+        return abs.startsWith(dir) ? dir.relativize(abs).toString().replace(java.io.File.separatorChar, '/') : null;
+    }
+
     default DocumentId idFor(Path file) {
         Path dir = directory();
         if (dir == null) return null;

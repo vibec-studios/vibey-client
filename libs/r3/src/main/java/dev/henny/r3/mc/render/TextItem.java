@@ -13,6 +13,7 @@ final class TextItem {
     TextMode mode;
     boolean shadow;
     boolean bold;
+    String font;
 
     TextItem set(Matrix4fc pose, String text, float x, float y, int argb, int light, TextMode mode, boolean shadow, boolean bold) {
         this.pose.set(pose);
@@ -24,6 +25,7 @@ final class TextItem {
         this.mode = mode;
         this.shadow = shadow;
         this.bold = bold;
+        this.font = null;
         return this;
     }
 }

@@ -20,5 +20,12 @@
   "key.vibeyclient.clips.saveKey": "Clip speichern",
   "key.vibeyclient.clips.galleryKey": "Clips-Galerie",
   "key.vibeyclient.hud.timerKey": "Timer Start/Stopp",
-  "key.vibeyclient.hud.timerLap": "Timer Runde/Reset"
+  "key.vibeyclient.hud.timerLap": "Timer Runde/Reset",
+  "key.vibeyclient.waypoints.addKey": "Wegpunkt setzen",
+  "key.vibeyclient.waypoints.mapKey": "Karte öffnen",
+  "key.vibeyclient.waypoints.minimapKey": "Minimap an/aus",
+  "key.vibeyclient.waypoints.listKey": "Wegpunktliste",
+  "key.vibeyclient.info.pinKey": "Karte anheften (halten)",
+  "key.vibeyclient.info.lightKey": "Lichtlevel",
+  "key.vibeyclient.info.chunkKey": "Chunkgrenzen"
 }

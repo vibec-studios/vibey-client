@@ -4,7 +4,7 @@
   "package": "dev.henny.r3.mc.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [],
-  "client": ["KeyboardHandlerMixin", "LevelRendererMixin", "MouseHandlerMixin"],
+  "client": ["BlockOutlineMixin", "KeyboardHandlerMixin", "LevelRendererMixin", "MouseHandlerMixin"],
   "server": [],
   "injectors": {
     "defaultRequire": 0

@@ -1,0 +1,30 @@
+<import name="wp-ico" src="vibeyclient:waypoints/ico"/>
+<import name="wp-btn" src="vibeyclient:waypoints/btn"/>
+<template>
+  <stack class="map-root">
+    <row class="map-bar">
+      <wp-ico name="map" class="map-accent"/>
+      <text class="map-dim">{{ dimName }}</text>
+      <wp-btn id="center" icon="me" :tip="t('waypoints.ui.center')" @click="center()"/>
+      <wp-btn id="zoomIn" icon="plus" :tip="t('waypoints.ui.zoomIn')" @click="zoomIn()"/>
+      <wp-btn id="zoomOut" icon="minus" :tip="t('waypoints.ui.zoomOut')" @click="zoomOut()"/>
+      <wp-btn id="list" icon="list" :tip="t('waypoints.ui.list')" @click="list()"/>
+      <wp-btn id="close" icon="close" :tip="t('waypoints.ui.close')" @click="close()"/>
+    </row>
+    <row class="map-status">
+      <text class="map-cursor">{{ cursor }}</text>
+      <text class="map-zoom">{{ zoomText }}</text>
+    </row>
+  </stack>
+</template>
+<style>
+.map-root { pointer-events: none; }
+.map-bar { position: absolute; anchor: top-right; left: -6; top: 6; height: 20; gap: 2; padding: 0 3 0 6;
+           background: $panel; border: 1 $line; }
+.map-accent { color: $brand2; }
+.map-dim { color: $text; text-wrap: nowrap; margin-left: 2; margin-right: 4; }
+.map-status { position: absolute; anchor: bottom-left; left: 6; top: -6; height: 14; gap: 6; padding: 0 5;
+              background: $panel; border: 1 $line; }
+.map-cursor { color: $text; text-wrap: nowrap; }
+.map-zoom { color: $muted; text-wrap: nowrap; }
+</style>

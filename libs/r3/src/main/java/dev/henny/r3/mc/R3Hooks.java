@@ -43,6 +43,20 @@ public final class R3Hooks {
         }
     }
 
+    public static boolean character(int codepoint) {
+        if (!R3Client.started()) return false;
+        try {
+            return R3Client.get().input().character(codepoint);
+        } catch (RuntimeException e) {
+            errors.report("char", e);
+            return false;
+        }
+    }
+
+    public static boolean hidesBlockOutline() {
+        return R3Client.started() && R3Client.get().hidesBlockOutline();
+    }
+
     //? if >=1.21.9 {
     public static void submitWorld(PoseStack pose, SubmitNodeCollector out) {
         McWorldCanvas canvas = prepare(pose);

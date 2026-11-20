@@ -4,7 +4,7 @@ import net.minecraft.client.renderer.LevelRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 //? if >=1.21.9 <1.21.11 {
 /*import com.mojang.blaze3d.vertex.PoseStack;
-import dev.henny.vibeyclient.module.media.lyrics.render.WorldLyrics;
+import dev.henny.vibeyclient.module.media.lyrics.render.SkyHook;
 import dev.henny.vibeyclient.module.media.lyrics.render.WorldSink;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.state.LevelRenderState;
@@ -23,7 +23,7 @@ public abstract class LevelRendererMixin {
     //? if >=1.21.9 <1.21.11 {
     /*@Inject(method = "submitEntities", at = @At("HEAD"))
     private void vibeyclient$lyrics$submitLyrics(PoseStack poseStack, LevelRenderState state, SubmitNodeCollector collector, CallbackInfo ci) {
-        WorldLyrics.render(poseStack, new WorldSink(collector));
+        SkyHook.render(poseStack, new WorldSink(collector));
     }
     *///?}
 }

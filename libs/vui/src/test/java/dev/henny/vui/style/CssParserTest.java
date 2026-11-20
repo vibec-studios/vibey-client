@@ -64,9 +64,11 @@ class CssParserTest {
     }
 
     @Test
-    void siblingSelectorsAreRejectedClearly() {
-        StyleError e = assertThrows(StyleError.class, () -> SelectorParser.parse("a + b"));
-        assertTrue(e.getMessage().contains("not supported"));
+    void siblingSelectorsParse() {
+        assertEquals(200, SelectorParser.parse(".a + .b").specificity());
+        assertEquals(200, SelectorParser.parse(".a~.b").specificity());
+        assertTrue(SelectorParser.parse("a ~ b").usesSiblings());
+        assertThrows(StyleError.class, () -> SelectorParser.parse("a + "));
     }
 
     @Test

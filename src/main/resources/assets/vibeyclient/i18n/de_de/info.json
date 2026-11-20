@@ -1,0 +1,45 @@
+{
+  "name": "Info",
+  "description": "Lichtlevel, Blockkarte, Nahrungswert, Werkzeugwarnung, TNT-Timer.",
+  "summary": "Licht, Blockkarte, Essen, TNT",
+  "section": {
+    "light": "Licht & Chunks",
+    "card": "Blockkarte",
+    "food": "Essen",
+    "tool": "Werkzeugwarnung",
+    "tnt": "TNT"
+  },
+  "setting": {
+    "editHud": "Karte verschieben",
+    "editHud.action": "HUD bearbeiten",
+    "light": "Lichtlevel",
+    "light.desc": "Sein Licht schwebt über dem Block.",
+    "lightTorch": "Nur mit Fackel",
+    "lightTorch.desc": "Solange du eine Lichtquelle hältst.",
+    "chunks": "Chunkgrenzen",
+    "chunks.desc": "Die Chunk-Taste, wie F3+G.",
+    "card": "Blockkarte",
+    "card.desc": "Schau auf einen Block oder Mob.",
+    "cardMobs": "Auch Mobs",
+    "cardTool": "Richtiges Werkzeug",
+    "cardMod": "Mod-Name",
+    "food": "Nahrungswert",
+    "food.desc": "Wert erscheint auf der Hungerleiste.",
+    "saturation": "Sättigung",
+    "saturation.desc": "Versteckter Wert. Manche Server verbieten das.",
+    "toolWarn": "Werkzeugwarnung",
+    "toolWarn.desc": "Blinkt, wenn dein Werkzeug fast bricht.",
+    "toolWarnAt": "Warnen unter",
+    "tnt": "TNT-Timer",
+    "tnt.desc": "Sekunden bis gezündetes TNT explodiert.",
+    "pinKey": "Karte anheften (halten)",
+    "lightKey": "Lichtlevel",
+    "chunkKey": "Chunkgrenzen"
+  },
+  "hud": {
+    "card": "Blockkarte",
+    "card.desc": "Worauf du schaust",
+    "toolwarn": "Werkzeugwarnung",
+    "toolwarn.desc": "Werkzeug fast kaputt"
+  }
+}

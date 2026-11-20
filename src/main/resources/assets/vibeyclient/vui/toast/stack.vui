@@ -1,7 +1,7 @@
 <template>
   <column id="toasts">
     <toast v-for="t in toasts" :key="t.id" :class="t.kind" @click="dismiss(t)">
-      <stack class="toast-icon"><icon v-if="t.icon" :src="t.icon"/></stack>
+      <stack class="toast-icon"><icon v-if="t.icon" :name="t.icon"/></stack>
       <column class="toast-body">
         <text class="toast-title">{{ t.title }}</text>
         <text v-if="t.text" class="toast-text">{{ t.text }}</text>

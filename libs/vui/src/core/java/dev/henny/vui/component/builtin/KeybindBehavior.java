@@ -8,6 +8,7 @@ import dev.henny.vui.event.Event;
 import dev.henny.vui.event.EventNames;
 import dev.henny.vui.event.KeyEvent;
 import dev.henny.vui.event.Keys;
+import dev.henny.vui.event.PointerEvent;
 import dev.henny.vui.render.Input;
 import dev.henny.vui.style.StateFlags;
 
@@ -38,8 +39,14 @@ public final class KeybindBehavior implements Behavior {
     @Override
     public void handle(Element e, Event event) {
         if (event.currentTarget() != e) return;
+        if (event.type().equals(EventNames.POINTER_DOWN) && e.has(StateFlags.OPEN) && mouseAllowed(e)
+                && event instanceof PointerEvent p) {
+            bindMouse(e, p);
+            return;
+        }
         if (event.type().equals(EventNames.CLICK)) {
-            activate(e);
+            if (e.prop("$justBound") == Boolean.TRUE) e.prop("$justBound", false);
+            else activate(e);
             return;
         }
         if (event.type().equals(EventNames.BLUR)) {
@@ -61,6 +68,21 @@ public final class KeybindBehavior implements Behavior {
         refresh(e);
     }
 
+    private void bindMouse(Element e, PointerEvent p) {
+        p.preventDefault();
+        p.stopPropagation();
+        e.prop("$justBound", p.button() == PointerEvent.LEFT);
+        waiting(e, false);
+        Controls.commit(e, (double) Keys.mouse(p.button()));
+        e.prop("scancode", 0.0);
+        refresh(e);
+    }
+
+    private static boolean mouseAllowed(Element e) {
+        Object v = e.prop("mouse");
+        return v == null || dev.henny.vui.expr.Values.truthy(v);
+    }
+
     private void waiting(Element e, boolean on) {
         e.state(StateFlags.OPEN, on);
         refresh(e);
@@ -76,6 +98,10 @@ public final class KeybindBehavior implements Behavior {
         int key = (int) Controls.number(e, "value", Keys.NONE);
         if (key == Keys.NONE) return Keys.fallbackName(key);
         Input input = e.document() == null ? null : e.document().vui().backend().input();
+        if (Keys.isMouse(key)) {
+            String n = input == null ? null : input.mouseButtonName(Keys.mouseButton(key));
+            return n == null || n.isEmpty() ? Keys.fallbackName(key) : n;
+        }
         String n = input == null ? null : input.keyName(key, (int) Controls.number(e, "scancode", 0));
         return n == null || n.isEmpty() ? Keys.fallbackName(key) : n;
     }

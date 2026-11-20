@@ -7,21 +7,35 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class HeadlessTextures implements Textures {
     private final Map<String, BufferedImage> images = new HashMap<>();
     private final Map<String, TextureInfo> sizes = new HashMap<>();
-    private Path root;
+    private final List<Path> roots = new ArrayList<>();
+    private final TintedImages tinted = new TintedImages();
 
     public HeadlessTextures root(Path assetsRoot) {
-        this.root = assetsRoot;
+        roots.clear();
+        if (assetsRoot != null) roots.add(assetsRoot);
         return this;
     }
 
+    public HeadlessTextures addRoot(Path assetsRoot) {
+        roots.add(assetsRoot);
+        return this;
+    }
+
+    public BufferedImage tinted(BufferedImage image, int argb) {
+        return tinted.get(image, argb);
+    }
+
     public HeadlessTextures put(String id, BufferedImage image) {
-        images.put(id, image);
+        BufferedImage old = images.put(id, image);
+        if (old != null) tinted.clear();
         sizes.put(id, new TextureInfo(image.getWidth(), image.getHeight()));
         return this;
     }
@@ -41,9 +55,16 @@ public final class HeadlessTextures implements Textures {
 
     public BufferedImage image(String id) {
         BufferedImage cached = images.get(id);
-        if (cached != null || root == null) return cached;
-        Path file = file(id);
-        if (file == null || !Files.isRegularFile(file)) return null;
+        if (cached != null || roots.isEmpty()) return cached;
+        Path file = null;
+        for (Path root : roots) {
+            Path candidate = file(root, id);
+            if (Files.isRegularFile(candidate)) {
+                file = candidate;
+                break;
+            }
+        }
+        if (file == null) return null;
         try {
             BufferedImage loaded = javax.imageio.ImageIO.read(file.toFile());
             if (loaded != null) put(id, loaded);
@@ -53,7 +74,7 @@ public final class HeadlessTextures implements Textures {
         }
     }
 
-    private Path file(String id) {
+    private static Path file(Path root, String id) {
         int colon = id.indexOf(':');
         if (colon < 0) return root.resolve(id);
         String path = id.substring(colon + 1);

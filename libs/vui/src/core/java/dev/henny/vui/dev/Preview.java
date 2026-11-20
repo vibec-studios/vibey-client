@@ -5,7 +5,10 @@ import dev.henny.vui.bind.Model;
 import dev.henny.vui.diag.Diagnostics;
 import dev.henny.vui.dom.Document;
 import dev.henny.vui.headless.Headless;
+import dev.henny.vui.headless.ImageCanvas;
 import dev.henny.vui.headless.TreeDump;
+import dev.henny.vui.reload.DirectoryRoot;
+import dev.henny.vui.reload.LooseFileRoot;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -35,14 +38,23 @@ public final class Preview {
         Vui vui = headless.vui().devMode(o.serve());
         PreviewSource source = PreviewSource.of(o.file(), o.root());
         vui.registry().addRoot(source.root());
+        if (o.root() != null && source.root() instanceof LooseFileRoot) vui.registry().addRoot(new DirectoryRoot(o.root()));
         headless.textures().root(source.textureRoot());
+        Diagnostics setup = PreviewSetup.apply(o, headless, vui);
         Diagnostics stateDiagnostics = new Diagnostics();
         Model model = o.state() == null ? new Model()
                 : ModelJson.read(o.state().toString(), Files.readString(o.state(), StandardCharsets.UTF_8), stateDiagnostics);
         Document doc = vui.open(source.id(), model);
-        headless.screenshot(doc, o.width(), o.height(), o.scale(), o.output());
-        System.out.print(TreeDump.dump(doc.root()));
-        Diagnostics all = new Diagnostics().addAll(stateDiagnostics).addAll(doc.diagnostics());
+        doc.resize(o.width(), o.height());
+        doc.frame(0);
+        Diagnostics script = new Diagnostics();
+        new PreviewScript(doc).run(o.steps(), script);
+        ImageCanvas canvas = new ImageCanvas(o.width(), o.height(), o.scale(), headless.textures(), Headless.BACKGROUND);
+        doc.render(canvas);
+        canvas.write(o.output());
+        if (!o.quiet()) System.out.print(TreeDump.dump(doc.root()));
+        Diagnostics all = new Diagnostics().addAll(setup).addAll(stateDiagnostics).addAll(doc.diagnostics()).addAll(script);
+        if (!o.serve()) all.addAll(doc.checkContracts(false));
         if (!all.isEmpty()) System.out.print(all.format());
         System.out.println("wrote " + o.output().toAbsolutePath());
         if (o.serve()) serve(vui, headless, doc, o);

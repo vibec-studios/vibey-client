@@ -3,43 +3,25 @@ package dev.henny.vui.host;
 import dev.henny.vui.Vui;
 import dev.henny.vui.bind.ListState;
 import dev.henny.vui.dom.Document;
+import dev.henny.vui.dom.Element;
 import dev.henny.vui.render.Canvas;
+import dev.henny.vui.template.CompiledTemplate;
+
+import java.util.function.BiConsumer;
 
 public final class ToastStack {
     public static final int MAX_VISIBLE = 5;
 
-    private static final String TEMPLATE = """
-            <template>
-              <column id="toasts">
-                <toast v-for="t in toasts" :key="t.id" :class="t.kind" @click="dismiss(t)">
-                  <icon v-if="t.icon" :src="t.icon"/>
-                  <column class="toast-body">
-                    <text class="toast-title">{{ t.title }}</text>
-                    <text v-if="t.text" class="toast-text">{{ t.text }}</text>
-                  </column>
-                </toast>
-              </column>
-            </template>
-            <style>
-            #toasts { position: absolute; anchor: bottom-right; right: 6; bottom: 6; gap: 4; align-items: end; }
-            .toast-body { gap: 1; }
-            .toast-title { color: $text; }
-            .toast-text { color: $muted; }
-            toast:enter, toast:leave { opacity: 0; translate-y: 8; }
-            toast.ok { border-color: $ok; }
-            toast.warn { border-color: $warn; }
-            toast.error { border-color: $danger; }
-            </style>
-            """;
-
     private final ListState<Toast> toasts = new ListState<>();
     private final Document document;
+    private BiConsumer<Toast, String> actionListener = (t, id) -> {
+    };
 
     public ToastStack(Vui vui) {
-        this(vui, vui.compile("vui:toasts", "<vui:toasts>", TEMPLATE));
+        this(vui, vui.compile("vui:toasts", "<vui:toasts>", ToastTemplate.SOURCE));
     }
 
-    public ToastStack(Vui vui, dev.henny.vui.template.CompiledTemplate template) {
+    public ToastStack(Vui vui, CompiledTemplate template) {
         this.document = vui.create(template, new Controller());
     }
 
@@ -51,11 +33,20 @@ public final class ToastStack {
         return toasts;
     }
 
-    public Toast push(String title, String text, String icon, String kind, float seconds) {
-        Toast t = new Toast(title, text, icon, kind, seconds);
+    public ToastStack onAction(BiConsumer<Toast, String> listener) {
+        actionListener = listener == null ? (t, id) -> {
+        } : listener;
+        return this;
+    }
+
+    public Toast push(Toast t) {
         toasts.add(t);
         while (toasts.size() > MAX_VISIBLE) toasts.remove(0);
         return t;
+    }
+
+    public Toast push(String title, String text, String icon, String kind, float seconds) {
+        return push(new Toast(title, text, icon, kind, seconds));
     }
 
     public Toast push(String title, String text) {
@@ -66,12 +57,23 @@ public final class ToastStack {
         toasts.remove(t);
     }
 
+    public void act(Toast t) {
+        t.run();
+        actionListener.accept(t, t.getActionId());
+        dismiss(t);
+    }
+
+    public boolean paused() {
+        for (Element e = document.events().hovered(); e != null; e = e.parent()) if (e.tag().equals("toast")) return true;
+        return false;
+    }
+
     public void resize(float w, float h) {
         document.resize(w, h);
     }
 
     public void frame(float dt) {
-        for (int i = toasts.size() - 1; i >= 0; i--) if (toasts.get(i).tick(dt)) toasts.remove(i);
+        if (!paused()) for (int i = toasts.size() - 1; i >= 0; i--) if (toasts.get(i).tick(dt)) toasts.remove(i);
         document.frame(dt);
     }
 
@@ -86,6 +88,10 @@ public final class ToastStack {
 
         public void dismiss(Toast t) {
             ToastStack.this.dismiss(t);
+        }
+
+        public void act(Toast t) {
+            ToastStack.this.act(t);
         }
     }
 }

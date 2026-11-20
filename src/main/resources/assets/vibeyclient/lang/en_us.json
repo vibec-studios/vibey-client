@@ -20,5 +20,12 @@
   "key.vibeyclient.clips.saveKey": "Save clip",
   "key.vibeyclient.clips.galleryKey": "Clips gallery",
   "key.vibeyclient.hud.timerKey": "Timer start/stop",
-  "key.vibeyclient.hud.timerLap": "Timer lap/reset"
+  "key.vibeyclient.hud.timerLap": "Timer lap/reset",
+  "key.vibeyclient.waypoints.addKey": "Add waypoint",
+  "key.vibeyclient.waypoints.mapKey": "Open map",
+  "key.vibeyclient.waypoints.minimapKey": "Toggle minimap",
+  "key.vibeyclient.waypoints.listKey": "Waypoint list",
+  "key.vibeyclient.info.pinKey": "Pin card (hold)",
+  "key.vibeyclient.info.lightKey": "Light level",
+  "key.vibeyclient.info.chunkKey": "Chunk borders"
 }

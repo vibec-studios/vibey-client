@@ -7,6 +7,8 @@ import dev.henny.r3.anchor.CameraAnchor;
 import dev.henny.r3.anchor.EntityAnchor;
 import dev.henny.r3.anchor.Facing;
 import dev.henny.r3.anchor.FreeAnchor;
+import dev.henny.r3.anchor.LowersWhenLookingDown;
+import dev.henny.r3.anchor.SoftFollowAnchor;
 import dev.henny.r3.anchor.ViewFollowAnchor;
 import dev.henny.r3.math.Face;
 import org.joml.Vector3d;
@@ -42,6 +44,18 @@ public final class AnchorCodec {
                 r.smoothing = c.smoothing();
             }
             case ViewFollowAnchor v -> r.distance = v.distance();
+            case SoftFollowAnchor f -> {
+                r.distance = f.distance();
+                r.pitchOffset = f.elevation();
+                r.yawOffset = f.startYaw();
+                r.smoothing = f.rate();
+                r.recenter = f.recenterDegrees();
+            }
+            case LowersWhenLookingDown l -> {
+                AnchorRecord inner = encode(l.inner());
+                inner.lowers = true;
+                return inner;
+            }
             default -> {
             }
         }
@@ -52,11 +66,17 @@ public final class AnchorCodec {
         if (r == null || r.type == null) return FreeAnchor.INSTANCE;
         AnchorKind kind = parseKind(r.type);
         if (kind == null) return FreeAnchor.INSTANCE;
+        Anchor plain = plain(kind, r);
+        return r.lowers && plain.followsSomething() ? new LowersWhenLookingDown(plain) : plain;
+    }
+
+    private static Anchor plain(AnchorKind kind, AnchorRecord r) {
         return switch (kind) {
             case BLOCK_FACE -> blockFace(r);
             case ENTITY -> entity(r);
             case CAMERA -> new CameraAnchor(finiteDistance(r.distance), r.yawOffset, r.pitchOffset, r.smoothing);
             case VIEW_FOLLOW -> new ViewFollowAnchor(finiteDistance(r.distance));
+            case SOFT_FOLLOW -> new SoftFollowAnchor(finiteDistance(r.distance), r.pitchOffset, r.recenter, r.smoothing, r.yawOffset);
             case FREE -> FreeAnchor.INSTANCE;
         };
     }

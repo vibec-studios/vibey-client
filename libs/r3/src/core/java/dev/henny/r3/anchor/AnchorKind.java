@@ -5,5 +5,6 @@ public enum AnchorKind {
     BLOCK_FACE,
     ENTITY,
     CAMERA,
-    VIEW_FOLLOW
+    VIEW_FOLLOW,
+    SOFT_FOLLOW
 }

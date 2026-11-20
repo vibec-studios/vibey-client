@@ -2,15 +2,31 @@ package dev.henny.vui.component.builtin;
 
 import dev.henny.vui.component.Behavior;
 import dev.henny.vui.dom.Element;
+import dev.henny.vui.icon.PixelIcon;
 import dev.henny.vui.layout.LayoutBox;
 import dev.henny.vui.paint.PaintContext;
 import dev.henny.vui.style.Prop;
 
 public final class IconBehavior implements Behavior {
     @Override
+    public void mount(Element e) {
+        IconLookup.check(e);
+    }
+
+    @Override
+    public void propChanged(Element e, String name, Object value) {
+        if ((name.equals("name") || name.equals("set")) && e.flags().mounted) IconLookup.check(e);
+    }
+
+    @Override
     public void paint(Element e, PaintContext ctx) {
         LayoutBox b = e.box();
         int color = e.style().color(Prop.COLOR);
+        PixelIcon pixels = IconLookup.icon(e);
+        if (pixels != null) {
+            ctx.canvas().icon(pixels, b.innerX(), b.innerY(), b.innerWidth(), b.innerHeight(), color);
+            return;
+        }
         Object src = e.prop("src");
         if (src instanceof String id && !id.isEmpty()) {
             ctx.canvas().texture(id, b.innerX(), b.innerY(), b.innerWidth(), b.innerHeight(), 0, 0, 1, 1, color);

@@ -15,7 +15,9 @@ import dev.henny.vibeyclient.module.media.lyrics.fx.MusicAnalyzer;
 import dev.henny.vibeyclient.module.media.lyrics.library.SongLibrary;
 import dev.henny.vibeyclient.module.media.lyrics.render.HudLyrics;
 import dev.henny.vibeyclient.module.media.lyrics.render.NowPlayingBar;
-import dev.henny.vibeyclient.module.media.lyrics.render.WorldLyrics;
+import dev.henny.vibeyclient.module.media.lyrics.render.SkyHook;
+import dev.henny.vibeyclient.module.media.lyrics.world.MusicPanel;
+import dev.henny.vibeyclient.module.media.lyrics.world.WorldText;
 import dev.henny.vibeyclient.module.media.lyrics.render.WorldSink;
 import dev.henny.vibeyclient.module.media.lyrics.screen.LyricsScreen;
 import dev.henny.vibeyclient.ui.Gfx;
@@ -58,6 +60,10 @@ public final class LyricsFeature extends MediaFeature {
 
     // shown first: what most people change
     public final ActionSetting openMenu = action("openMenu", () -> open(ClientCompat.screen()));
+    public final ActionSetting panel = action("panel", () -> {
+        ClientCompat.openScreen(null);
+        MusicPanel.open();
+    });
     public final EnumSetting<LyricsConfig.Position> position = choice("position", LyricsConfig.Position.SKY);
     public final EnumSetting<LyricsConfig.Preset> preset = choice("preset", LyricsConfig.Preset.LAVENDER);
     public final BoolSetting skyFx = bool("skyFx", true);
@@ -191,6 +197,8 @@ public final class LyricsFeature extends MediaFeature {
     public void onLoad() {
         LyricsConfig.load(this);
         registerHooks();
+        MusicPanel.hook();
+        WorldText.hook();
     }
 
     @Override
@@ -203,12 +211,15 @@ public final class LyricsFeature extends MediaFeature {
     public void onDisable() {
         Playback.suspend();
         MusicAnalyzer.stopAll();
+        WorldText.tick();
     }
 
     @Override
     public void tick() {
         Playback.tick(Minecraft.getInstance());
         MusicAnalyzer.tick();
+        MusicPanel.tick();
+        WorldText.tick();
     }
 
     @Override
@@ -238,15 +249,15 @@ public final class LyricsFeature extends MediaFeature {
         });
         // 1.21.9/1.21.10 have no Fabric world render event, see mixin/LevelRendererMixin.
         //? if >=26.1 {
-        /*LevelRenderEvents.COLLECT_SUBMITS.register(ctx -> WorldLyrics.render(ctx.poseStack(), new WorldSink(ctx.submitNodeCollector())));
+        /*LevelRenderEvents.COLLECT_SUBMITS.register(ctx -> SkyHook.render(ctx.poseStack(), new WorldSink(ctx.submitNodeCollector())));
         *///?}
         //? if >=1.21.11 <26.1 {
-        WorldRenderEvents.BEFORE_ENTITIES.register(ctx -> WorldLyrics.render(ctx.matrices(), new WorldSink(ctx.commandQueue())));
+        WorldRenderEvents.BEFORE_ENTITIES.register(ctx -> SkyHook.render(ctx.matrices(), new WorldSink(ctx.commandQueue())));
         //?}
         //? if <1.21.9 {
         /*WorldRenderEvents.AFTER_ENTITIES.register(ctx -> {
             PoseStack pose = ctx.matrixStack() != null ? ctx.matrixStack() : new PoseStack();
-            if (ctx.consumers() != null) WorldLyrics.render(pose, new WorldSink(ctx.consumers()));
+            if (ctx.consumers() != null) SkyHook.render(pose, new WorldSink(ctx.consumers()));
         });
         *///?}
     }

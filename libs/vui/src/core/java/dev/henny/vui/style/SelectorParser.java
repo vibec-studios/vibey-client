@@ -24,12 +24,10 @@ public final class SelectorParser {
             boolean space = skipSpaces();
             if (i >= src.length()) break;
             char c = src.charAt(i);
-            if (c == '>') {
+            if (c == '>' || c == '+' || c == '~') {
                 i++;
                 skipSpaces();
-                combinators.add(Selector.CHILD);
-            } else if (c == '+' || c == '~') {
-                throw new StyleError("sibling selectors (" + c + ") are not supported", "use a class on the element instead");
+                combinators.add(c == '>' ? Selector.CHILD : c == '+' ? Selector.ADJACENT : Selector.SIBLING);
             } else if (space) {
                 combinators.add(Selector.DESCENDANT);
             } else {

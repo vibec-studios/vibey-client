@@ -18,6 +18,16 @@ final class ColorValue {
         }
     }
 
+    static boolean valid(String text) {
+        if (!text.matches("#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})")) return false;
+        try {
+            ColorParser.parse(text);
+            return true;
+        } catch (StyleError | NumberFormatException e) {
+            return false;
+        }
+    }
+
     static Object format(int argb, Object like) {
         if (like instanceof Number) return (double) (argb & 0xFFFFFFFFL);
         if ((argb >>> 24) == 0xFF) return String.format("#%06x", argb & 0xFFFFFF);

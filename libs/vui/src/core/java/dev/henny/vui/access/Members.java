@@ -83,6 +83,13 @@ public final class Members {
         }
     }
 
+    public static boolean callable(Object target, String name) {
+        if (target instanceof Model m) return m.entry(name) instanceof Action;
+        if (target == null || target instanceof Map<?, ?>) return false;
+        for (java.lang.reflect.Method method : MemberSearch.methods(target.getClass())) if (method.getName().equals(name)) return true;
+        return false;
+    }
+
     private static boolean isSized(Object target) {
         return target instanceof CharSequence || target instanceof List<?> || target instanceof Object[]
                 || target instanceof java.util.Collection<?>;

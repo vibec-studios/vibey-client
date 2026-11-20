@@ -1,0 +1,19 @@
+<template>
+  <column class="card" gap="2">
+    <text class="title">{{ title }}</text>
+    <text v-if="hasMod" class="mod">{{ mod }}</text>
+    <row v-if="hasStatus" class="status" gap="3">
+      <text class="mark" :class="{ bad: !good }">{{ mark }}</text>
+      <text class="value">{{ status }}</text>
+    </row>
+  </column>
+</template>
+<style>
+.card { padding: 6; background: alpha($bg, .78); border: 1 $line2; width: 100%; height: 100%; }
+.title { color: $text; text-wrap: nowrap; text-overflow: ellipsis; }
+.mod { color: $brand2; text-wrap: nowrap; text-overflow: ellipsis; }
+.status { color: $muted; }
+.mark { color: $ok; }
+.mark.bad { color: $danger; }
+.value { color: $muted; text-wrap: nowrap; text-overflow: ellipsis; }
+</style>

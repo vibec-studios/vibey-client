@@ -17,6 +17,7 @@ final class FontDraw {
     private FontDraw() {}
 
     static FormattedCharSequence sequence(TextItem t) {
+        if (t.font != null) return FormattedCharSequence.forward(t.text, FontStyles.of(t.font, t.bold));
         return FormattedCharSequence.forward(t.text, t.bold ? BOLD : Style.EMPTY);
     }
 

@@ -12,7 +12,7 @@ import dev.henny.vibeyclient.module.media.lyrics.fx.SkyFx;
 import dev.henny.vibeyclient.module.media.lyrics.fx.TestTrack;
 import dev.henny.vibeyclient.module.media.lyrics.library.Song;
 import dev.henny.vibeyclient.module.media.lyrics.library.SongLibrary;
-import dev.henny.vibeyclient.module.media.lyrics.render.WorldLyrics;
+import dev.henny.vibeyclient.module.media.lyrics.world.WorldText;
 import dev.henny.vibeyclient.ui.VibeyScreen;
 import dev.henny.vibeyclient.ui.hud.editor.HudEditorScreen;
 import dev.henny.vibeyclient.ui.hud.HudElement;
@@ -141,7 +141,7 @@ public final class MediaGameTest implements FabricClientGameTest {
             look(context, yaw, pitch);
             context.waitFor(mc -> settled(yaw), 160);
             context.waitTicks(4);
-            float[] v = context.computeOnClient(mc -> WorldLyrics.viewState());
+            float[] v = context.computeOnClient(mc -> WorldText.viewState());
             System.out.printf(Locale.ROOT, "[vibeyclient-media-test] view yaw %.0f pitch %.0f -> text at yaw %.1f elevation %.1f%n", yaw, pitch, v[0], v[1]);
             if (Math.abs(wrap(v[0] - yaw)) > 3) throw new AssertionError("sky lyrics did not follow to yaw " + yaw + ": " + v[0]);
             float wantElev = Math.max(9f, Math.min(58f, -pitch + 9f));
@@ -151,25 +151,25 @@ public final class MediaGameTest implements FabricClientGameTest {
         // a small look-around keeps the text where it is
         look(context, 45, 20);
         context.waitTicks(4);
-        float restYaw = context.computeOnClient(mc -> WorldLyrics.viewState()[0]);
+        float restYaw = context.computeOnClient(mc -> WorldText.viewState()[0]);
         look(context, 52, 15);
         context.waitTicks(20);
-        float[] rest = context.computeOnClient(mc -> WorldLyrics.viewState());
+        float[] rest = context.computeOnClient(mc -> WorldText.viewState());
         if (Math.abs(wrap(rest[0] - restYaw)) > 0.5f || rest[2] != 0f) throw new AssertionError("text moved for a small look-around: " + rest[0] + " vs " + restYaw);
         // a fast turn: the text waits a moment, then glides (screenshot mid-glide), then settles
         look(context, 170, -10);
         context.waitTicks(2);
-        float[] waiting = context.computeOnClient(mc -> WorldLyrics.viewState());
-        context.waitFor(mc -> WorldLyrics.viewState()[2] == 1f && Math.abs(wrap(WorldLyrics.viewState()[0] - 170)) < 70, 60);
+        float[] waiting = context.computeOnClient(mc -> WorldText.viewState());
+        context.waitFor(mc -> WorldText.viewState()[2] == 1f && Math.abs(wrap(WorldText.viewState()[0] - 170)) < 70, 60);
         context.takeScreenshot("media_4_view_5_gliding");
-        float[] gliding = context.computeOnClient(mc -> WorldLyrics.viewState());
+        float[] gliding = context.computeOnClient(mc -> WorldText.viewState());
         context.waitFor(mc -> settled(170), 160);
         System.out.printf(Locale.ROOT, "[vibeyclient-media-test] turn 45->170: after 2 ticks %.1f, mid-glide %.1f (gliding %s)%n", waiting[0], gliding[0], gliding[2] == 1f);
         context.runOnClient(mc -> Playback.stop());
     }
 
     private static boolean settled(float yaw) {
-        float[] v = WorldLyrics.viewState();
+        float[] v = WorldText.viewState();
         return v[2] == 0f && Math.abs(wrap(v[0] - yaw)) < 2f;
     }
 

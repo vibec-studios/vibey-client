@@ -173,7 +173,7 @@ class ControlsTest {
         ui.click("p");
         Element panel = ui.first("colorpicker-panel");
         assertTrue(panel.flags().overlayOpen);
-        dev.henny.vui.layout.LayoutBox b = panel.box();
+        dev.henny.vui.layout.LayoutBox b = ui.first("colorpicker-area").box();
         ui.doc.pointerDown(b.innerX() + 1, b.innerY() + b.innerHeight() - 1, 0, 0);
         ui.doc.pointerUp(b.innerX() + 1, b.innerY() + b.innerHeight() - 1, 0, 0);
         String v = (String) m.get("c");

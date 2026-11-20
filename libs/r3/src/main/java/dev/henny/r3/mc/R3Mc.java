@@ -6,6 +6,8 @@ import dev.henny.r3.mc.client.R3Client;
 import dev.henny.r3.mc.client.WorldListener;
 import dev.henny.r3.mc.store.R3Storage;
 import dev.henny.r3.mc.texture.DynamicTextureHandle;
+import dev.henny.r3.mc.texture.ExternalTextures;
+import dev.henny.r3.render.TextureHandle;
 import dev.henny.r3.object.WorldObject;
 import dev.henny.r3.persist.PlacementStore;
 import dev.henny.r3.scene.R3Scene;
@@ -29,8 +31,12 @@ public final class R3Mc {
         return R3Client.get().vui().vui();
     }
 
+    public static VuiPanelContent vuiContent(String vuiDocumentId, Object controller) {
+        return VuiPanelContent.open(vui(), vuiDocumentId, controller, R3Client.get().vui().textures());
+    }
+
     public static WorldObject panel(String vuiDocumentId, Object controller) {
-        VuiPanelContent content = VuiPanelContent.open(vui(), vuiDocumentId, controller, R3Client.get().vui().textures());
+        VuiPanelContent content = vuiContent(vuiDocumentId, controller);
         WorldObject panel = WorldObject.create(PANEL_KIND).content(content).rules(InteractionRules.screen());
         panel.transform().size(DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT);
         return panel.dimension(scene().query().dimension());
@@ -58,6 +64,10 @@ public final class R3Mc {
 
     public static DynamicTextureHandle dynamicTexture(String name, int width, int height) {
         return new DynamicTextureHandle(name, width, height);
+    }
+
+    public static void texture(String id, TextureHandle handle) {
+        ExternalTextures.register(id, handle);
     }
 
     public static R3Storage storage() {

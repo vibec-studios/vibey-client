@@ -41,6 +41,7 @@ public class Element extends TreeNode implements StyleTarget {
     private StyleAnimator animator;
     private Object behaviorState;
     private final ScrollOffset scroll = new ScrollOffset();
+    int siblingIndex = -1;
 
     public Element(String tag, Behavior behavior, SourcePos pos) {
         this.tag = tag;
@@ -60,12 +61,6 @@ public class Element extends TreeNode implements StyleTarget {
     public SourcePos pos() {
         return pos;
     }
-
-
-
-
-
-
 
     public ClassList classes() {
         return classes;
@@ -159,8 +154,6 @@ public class Element extends TreeNode implements StyleTarget {
         behaviorState = value;
     }
 
-
-
     public float scrollX() {
         return scroll.x();
     }
@@ -195,7 +188,6 @@ public class Element extends TreeNode implements StyleTarget {
         return props.get(name);
     }
 
-
     public void prop(String name, Object value) {
         boolean had = props.containsKey(name);
         Object old = props.put(name, value);
@@ -226,11 +218,6 @@ public class Element extends TreeNode implements StyleTarget {
     public void addHandler(Handler handler) {
         handlers.add(handler);
     }
-
-
-
-
-
 
     public void markStyleDirty() {
         flags.style = true;
@@ -284,6 +271,14 @@ public class Element extends TreeNode implements StyleTarget {
     @Override
     public StyleTarget styleParent() {
         return parent;
+    }
+
+    @Override
+    public StyleTarget stylePreviousSibling() {
+        Element p = parent;
+        int i = siblingIndex - 1;
+        if (p == null || i < 0 || i >= p.childCount() || p.child(siblingIndex) != this) return null;
+        return p.child(i);
     }
 
     @Override

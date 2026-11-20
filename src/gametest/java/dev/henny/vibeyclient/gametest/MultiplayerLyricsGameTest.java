@@ -10,7 +10,7 @@ import dev.henny.vibeyclient.module.media.lyrics.LyricsFeature;
 import dev.henny.vibeyclient.module.media.lyrics.Playback;
 import dev.henny.vibeyclient.module.media.lyrics.library.Song;
 import dev.henny.vibeyclient.module.media.lyrics.library.SongLibrary;
-import dev.henny.vibeyclient.module.media.lyrics.render.WorldLyrics;
+import dev.henny.vibeyclient.module.media.lyrics.world.WorldText;
 import dev.henny.vibeyclient.module.media.lyrics.screen.AdvancedScreen;
 import dev.henny.vibeyclient.module.media.lyrics.screen.LyricsScreen;
 import dev.henny.vibeyclient.module.media.lyrics.screen.SearchScreen;
@@ -333,7 +333,7 @@ public final class MultiplayerLyricsGameTest implements FabricClientGameTest {
             Playback.play(demo());
         });
         scene(context, 25_350, "ly_2_sky_neon");
-        long drawn = context.computeOnClient(mc -> WorldLyrics.drawnFrames);
+        long drawn = context.computeOnClient(mc -> WorldText.drawnFrames());
         if (drawn <= 0) throw new AssertionError("World lyrics were never drawn");
         System.out.println("[vibeyclient-ly-test] world hook drew " + drawn + " frames");
 
@@ -370,10 +370,10 @@ public final class MultiplayerLyricsGameTest implements FabricClientGameTest {
             ModuleManager.get().setEnabled("media", false);
             if (LyricsFeature.running() || Playback.isPlaying()) throw new AssertionError("lyrics still running after disable");
         });
-        long before = context.computeOnClient(mc -> WorldLyrics.drawnFrames);
+        long before = context.computeOnClient(mc -> WorldText.drawnFrames());
         context.waitTicks(10);
         context.takeScreenshot("ly_6_module_off");
-        long after = context.computeOnClient(mc -> WorldLyrics.drawnFrames);
+        long after = context.computeOnClient(mc -> WorldText.drawnFrames());
         if (after != before) throw new AssertionError("World lyrics drawn while the module is off");
         run(context, mc -> {
             ModuleManager.get().setEnabled("media", true);

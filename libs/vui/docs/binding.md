@@ -100,6 +100,9 @@ vui.functions().translator((key, args) -> I18n.get(key, args));   // t('menu.tit
 vui.functions().register("shortName", args -> abbreviate(args[0])); // {{ shortName(user) }}
 ```
 
+`MapTranslator` is a ready translator over a key → text map with `{0}`, `{1}` placeholders
+(`new MapTranslator().put("ui.menu.title", "Modules: {0}")`); `Preview --lang` fills one from language JSON files.
+
 ## Errors
 
 Errors while evaluating (unknown method, `cannot read 'name' of null`, an exception in your getter) are reported

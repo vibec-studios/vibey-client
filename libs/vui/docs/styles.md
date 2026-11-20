@@ -22,6 +22,8 @@ Numbers are GUI pixels (`8` = `8px`). Comments: `/* … */` and `// …` (betwee
 | universal | `*` |
 | descendant | `.card text` |
 | child | `.card > row` |
+| next sibling | `.label + .value` (directly after) |
+| later sibling | `.title ~ .chip` (any earlier sibling matches) |
 | pseudo class | `:hover` `:focus` (`:focus-visible`) `:active` (`:pressed`) `:disabled` `:checked` (`:on`) `:selected` `:open` (`:expanded`) `:enter` `:leave` `:first-child` `:last-child` `:focus-within` `:invalid` `:dragging` |
 | negation | `button:not(:disabled)` (pseudo classes only) |
 
@@ -32,9 +34,17 @@ elements inserted/removed by `v-if`/`v-for` (see [animation](animation.md#enter-
 
 **Cascade order** (later wins at equal specificity, inline always wins):
 1. default component styles (Vibe look, `DefaultStyles`)
-2. styles of imported components
+2. styles of imported components, ordered so that a component's sheet comes **after** the sheets of the components
+   it imports (`pause-row` imports `icon-button` → `.pause-btn` in `pause-row` beats `.icon-btn` in `icon-button`
+   at equal specificity, whatever was instantiated first)
 3. the document's own `<style>`
 4. inline: `style="…"`, `:style`, style attributes (`gap="4"`)
+
+So a class you put on a component from the outside (`<icon-button class="pause-btn">`) wins over the component's own
+class rule of the same specificity – no need for `.pause-row .pause-btn`.
+
+Sibling selectors (`+`, `~`) make a restyle of one child also restyle its later siblings (and their subtrees);
+documents without sibling rules pay nothing.
 
 Restyling is incremental: a changed state (`:hover`, `:focus`, …), class or id restyles that element. Its
 descendants are restyled only when an inherited value changed (`color`, `font-scale`, …), when its class or id
@@ -80,8 +90,11 @@ Keyword aliases: `flex-start`/`left`/`top` → `start`, `flex-end`/`right`/`bott
 | `overflow` | `visible` `hidden` `scroll` | `visible` | |
 | `grid-columns` | number (0 = auto) | `0` | |
 | `grid-min-column` | length | `0` | |
+| `grid-column-span` `grid-row-span` | number (cells a grid child covers) | `1` | |
+| `aspect-ratio` | `16/9`, `1.5`, `auto` (height = width / ratio, see [layout](layout.md#aspect-ratio)) | `auto` | |
 | `border-*-width` (`top` `right` `bottom` `left`) | length | `0` | |
-| `border-color` | color | `transparent` | |
+| `border-*-color` (`top` `right` `bottom` `left`) | color | `transparent` | |
+| `border-color` | color (shorthand for the four side colours, also kept as one value for code) | `transparent` | |
 | `background-color` | color | `transparent` | |
 | `gradient-to` | color (≠ transparent → gradient from background-color) | `transparent` | |
 | `gradient-direction` | `vertical` `horizontal` | `vertical` | |
@@ -112,20 +125,23 @@ Keyword aliases: `flex-start`/`left`/`top` → `start`, `flex-end`/`right`/`bott
 | `pointer-events` | `auto` `none` (element itself is not hit; children still can be) | `auto` | |
 
 **Aliases**: `grow`, `shrink`, `basis`, `wrap`, `align` (align-items), `justify` (justify-content), `bg`
-(background), `columns` (grid-columns), `min-column` (grid-min-column), `font-size` (font-scale), `accent`
+(background), `columns` (grid-columns), `min-column` (grid-min-column), `col-span` (grid-column), `row-span`
+(grid-row), `ratio` (aspect-ratio), `font-size` (font-scale), `accent`
 (accent-color), `text-color` (color), `x` (left), `y` (top), `flex-direction` (display), `white-space` (text-wrap).
 
 **Shorthands**
 
 | Shorthand | Example | Sets |
 |---|---|---|
-| `padding`, `margin`, `inset`, `border-width` | `4`, `4 8`, `4 8 2`, `4 8 2 6` | four sides (CSS order) |
+| `padding`, `margin`, `inset`, `border-width` | `4`, `4 8`, `4 8 2`, `4 8 2 6` | four sides (CSS order); margins may be `auto` |
 | `padding-x` `padding-y` `margin-x` `margin-y` | `6` | two sides |
 | `gap` | `4` or `4 8` | row-gap, column-gap |
 | `size` | `16` or `16 9` | width, height |
 | `translate` | `0 8` | translate-x, translate-y |
-| `border` | `1 $line`, `none` | all border widths + border-color (`solid` is ignored) |
-| `border-top` … `border-left` | `2 $brand` | that side's width + border-color |
+| `border` | `1 $line`, `none` | all border widths + all side colours (`solid` is ignored) |
+| `border-top` … `border-left` | `2 $brand` | that side's width + that side's colour |
+| `border-color` | `$line` or `$brand $line` (1–4 values, CSS order) | the side colours |
+| `grid-column`, `grid-row` | `span 2` (or `2`) | `grid-column-span`, `grid-row-span` |
 | `background`, `gradient` | `$panel`, `#000 #222 horizontal`, `url(mymod:ui/panel)` | background-color, gradient-to, gradient-direction, background-image |
 | `flex` | `1`, `1 0 auto`, `none` | grow, shrink (default 1), basis (default 0) |
 
@@ -174,7 +190,7 @@ active/primary, teal for small labels. Override any of it in your `<style>`:
 
 ## Limits
 
-- No `!important`, attribute selectors, sibling combinators (`+ ~`), `:nth-child`, media queries or nesting.
-- One `border-color` for all sides; no rounded corners, shadows or blur (by design of the Vibe look).
+- No `!important`, attribute selectors, `:nth-child`, media queries or nesting.
+- No rounded corners, shadows or blur (by design of the Vibe look). Border corners belong to the top/bottom sides.
 - `%` resolves against the parent's content box; percent heights of auto-height parents behave like `auto`.
 - Styles are not scoped per component.
