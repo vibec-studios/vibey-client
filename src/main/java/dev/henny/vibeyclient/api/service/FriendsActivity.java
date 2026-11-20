@@ -19,7 +19,13 @@ public interface FriendsActivity {
         }
     }
 
-    record Invite(String id, Player from, String kind, String target, long expiresAt) {}
+    record Invite(String id, Player from, String kind, String target, String host, int port, long expiresAt) {
+        public String address() {
+            if (host == null || host.isBlank()) return null;
+            String h = host.indexOf(':') >= 0 && !host.startsWith("[") ? "[" + host + "]" : host;
+            return port <= 0 || port == 25565 ? h : h + ":" + port;
+        }
+    }
 
     String state();
 

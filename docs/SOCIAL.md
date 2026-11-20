@@ -61,9 +61,22 @@ importing social. The streamer mixins use priority 900 so they run before the na
 The *Hide names* and *Hide skins* rows only show where the `social.streamer` part is built (Fabric 1.21.11);
 *Hide server* works on every target (presence, Discord).
 
+## Server details for friends (presence, hosting, invites)
+
+Backend fields from `feat/presence-server-details`, all optional (old backends send none, the client falls back).
+
+| What | Client side |
+|---|---|
+| Presence we send | `PresenceTracker` still fills `server` (address or *Multiplayer*); unless *Hide server address* / streamer mode hides it, `presence/ServerFields` adds `serverName` (the server list entry name, `SocialCompat.serverListName`, null for direct connects), `serverAddress` (host without port) and `serverPort`. LAN, loopback, private, link-local, CGNAT, multicast, single-label, `*.local`/`.lan`/`.home.arpa`/`.internal` names and `nip.io`-style names of a private IP are never sent (`presence/LocalAddress`, pure, no DNS); invalid hosts neither (the backend would reject the whole presence). |
+| Presence we read | `Model.Activity` parses `serverName`, `serverAddress`, `serverPort`, `addressShared` (tri-state). `activity/SharedAddress` uses `addressShared` when present, the old host-name guess only without it. |
+| Privacy | *Share server address* (`privacy.shareServerAddress`, default off) in the account privacy rows (`vui/PrivacyRows`, classic `ui/AccountPanel`), `GET`/`PATCH /api/v1/me`. Off: friends see only the name. |
+| Hosting | `Model.HostSession` has `worldName`, `joinHost`, `joinPort` (`activity/HostedJoin` falls back to `address`). While we host, `HostWorldName` (from the presence tick) sends `PATCH /api/v1/hosting/sessions/{id} {worldName}` once per session and name; errors (old backend 404) are only logged. |
+| Invites | `Model.Invite.destination` (`model/Destination`), `displayName()` = `destination.name` or `target.name`. Accept joins the response `connection` (`{type:"direct", address, port}` for destination invites), else the invite's own `destination` (`InviteTarget`), else *no connection*. |
+
 ## Tests
 
 - JUnit: `RpcPayloadTest` (payloads, privacy, frames, pipe paths), `FakeIpcServerTest` (a fake Discord on a Unix
   domain socket in a temp folder: handshake, set + clear, ping/pong, error answer, Discord not running, the worker),
-  `NameRedactorTest`.
+  `NameRedactorTest`, `LocalAddressTest`, `ServerFieldsTest` (host/port, LAN filter, sent fields), `NewFieldsParseTest`
+  (old + new payloads), `SharedAddressTest`, `HostedJoinTest`, `InviteTargetTest`.
 - Gametest: `ChatGameTest` covers streamer mode (chat, tab list, skins, F7 on/off, masked address box).

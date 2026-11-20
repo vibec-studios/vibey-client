@@ -47,7 +47,7 @@ public final class AccountPanel implements Panel {
     private String statusText;
     private String statusTextFor;
     private static final Object K_OPEN = new Object(), K_LOGIN = new Object(), K_LOGOUT = new Object(), K_STATUS = new Object(),
-            K_TEXT = new Object(), K_SAVE = new Object(), K_HOSTING = new Object(), K_ONLINE = new Object(), K_RELOAD = new Object();
+            K_TEXT = new Object(), K_SAVE = new Object(), K_HOSTING = new Object(), K_SHARE = new Object(), K_ONLINE = new Object(), K_RELOAD = new Object();
 
     public AccountPanel(SocialModule module) {
         this.module = module;
@@ -216,7 +216,7 @@ public final class AccountPanel implements Panel {
         y += 12;
         Privacy p = st.me == null ? null : st.me.privacy();
         if (p == null) return y;
-        Widgets.card(g, x, y, w, ROW * 4);
+        Widgets.card(g, x, y, w, ROW * 5);
         int cyw = Math.min(150, w / 2 - 10);
         int ry = y;
         for (String field : PRIVACY) {
@@ -238,19 +238,26 @@ public final class AccountPanel implements Panel {
             ry += ROW;
             g.hline(x + 1, ry, w - 2, Theme.LINE);
         }
+        toggleRow(ui, K_HOSTING, "showHosting", p.showHosting(), x, ry, w);
+        g.hline(x + 1, ry + ROW, w - 2, Theme.LINE);
+        toggleRow(ui, K_SHARE, "shareServerAddress", p.shareServerAddress(), x, ry + ROW, w);
+        y += ROW * 5 + 5;
+        g.text(g.clip(module.tr("privacy.hint"), w), x + 1, y, Theme.DIM);
+        return y + 10;
+    }
+
+    private void toggleRow(Ui ui, Object key, String field, boolean on, int x, int ry, int w) {
+        Gfx g = ui.g;
         boolean clicked = ui.clicked(x + 1, ry, w - 2, ROW);
         boolean hot = ui.focusedLast() || ui.hover(x + 1, ry, w - 2, ROW);
         if (hot) g.rect(x + 1, ry + 1, w - 2, ROW - 2, Theme.alpha(Theme.SURFACE3, 1f));
-        g.text(g.clip(module.tr("privacy.showHosting"), w - 60), x + 10, ry + 9, Theme.TEXT);
-        Widgets.drawToggle(ui, K_HOSTING, x + w - 10 - Widgets.TOGGLE_W, ry + 7, p.showHosting(), true, hot);
+        g.text(g.clip(module.tr("privacy." + field), w - 60), x + 10, ry + 9, Theme.TEXT);
+        Widgets.drawToggle(ui, key, x + w - 10 - Widgets.TOGGLE_W, ry + 7, on, true, hot);
         if (clicked) {
             JsonObject priv = new JsonObject();
-            priv.addProperty("showHosting", !p.showHosting());
+            priv.addProperty(field, !on);
             module.service().updateMe(J.of("privacy", priv));
         }
-        y += ROW * 4 + 5;
-        g.text(g.clip(module.tr("privacy.hint"), w), x + 1, y, Theme.DIM);
-        return y + 10;
     }
 
     // ============================================================================================ devices

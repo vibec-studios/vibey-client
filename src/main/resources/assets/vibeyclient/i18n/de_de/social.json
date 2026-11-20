@@ -260,6 +260,7 @@
   "privacy.level.friends": "Freunde",
   "privacy.level.nobody": "Niemand",
   "privacy.showHosting": "Freunde sehen meine gehosteten Welten",
+  "privacy.shareServerAddress": "Freunde sehen die Adresse meines Servers",
   "privacy.hint": "Blockieren wirkt immer in beide Richtungen.",
   "time.now": "gerade eben",
   "time.minutes": "vor {0} Min.",

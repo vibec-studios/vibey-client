@@ -85,6 +85,7 @@
     "connecting": "Connecting…",
     "already": "Already in your list",
     "added": "Server added",
-    "hidden": "Hidden server"
+    "hidden": "Hidden server",
+    "hiddenAddress": "Address hidden"
   }
 }

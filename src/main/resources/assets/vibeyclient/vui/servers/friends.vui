@@ -28,6 +28,7 @@
                 <row class="fr-sub">
                   <ico :name="r.icon" class="fr-sub-ico"/>
                   <text class="fr-where">{{ r.where }}</text>
+                  <text v-if="r.detail" class="fr-detail">{{ r.detail }}</text>
                 </row>
               </column>
               <text v-if="r.ping" class="fr-ping" :class="{ bad: r.bad }">{{ r.ping }}</text>
@@ -86,6 +87,7 @@
 .fr-sub { gap: 3; height: 9; min-width: 0; color: $dim; }
 .fr-sub-ico { flex-shrink: 0; size: 8; }
 .fr-where { color: $muted; text-wrap: nowrap; text-overflow: ellipsis; min-width: 0; shrink: 1; }
+.fr-detail { color: $dim; text-wrap: nowrap; text-overflow: ellipsis; min-width: 0; shrink: 20; }
 .fr-ping { color: $brand2; text-wrap: nowrap; flex-shrink: 0; }
 .fr-ping.bad { color: $danger; }
 .fr-icon { width: 16; height: 16; padding: 0; background: transparent; border: 1 transparent; color: $muted; flex-shrink: 0; }

@@ -622,15 +622,15 @@ public final class SocialService {
             Invite i = Invite.from(J.obj(o, "invite"));
             if (i != null) state.invites.put(i.id(), i);
             state.changed();
-            JsonObject c = J.obj(o, "connection");
-            if (c == null || J.str(c, "address") == null) {
-                Notify.warn(module.tr("invite.noConnection"), i == null ? null : i.targetName());
+            InviteTarget target = InviteTarget.of(J.obj(o, "connection"), i);
+            if (target == null) {
+                Notify.warn(module.tr("invite.noConnection"), i == null ? null : i.displayName());
                 return;
             }
             if (J.str(o, "packCode") != null) {
                 Notify.info(module.tr("invite.needsPack"), J.str(o, "packCode"));
             }
-            module.invites().join(i == null ? null : i.targetName(), J.str(c, "address"), J.num(c, "port", 25565));
+            module.invites().join(target.name(), target.address(), target.port());
         }, MAIN).exceptionally(t -> {
             error(t);
             return null;
@@ -638,7 +638,7 @@ public final class SocialService {
     }
 
     void showInviteToast(Invite i) {
-        String body = i.targetName() + (i.message() != null ? " – " + i.message() : "");
+        String body = i.displayName() + (i.message() != null ? " – " + i.message() : "");
         ToastStack.show(new Notify.Toast(module.tr("toast.invite", i.from().name()), body, Notify.Kind.SOCIAL, i.from().id(),
                         () -> module.openSidebar(SidebarRoute.tab(SidebarRoute.Tab.INBOX))),
                 List.of(new ToastStack.Button(module.tr("action.join"), true, () -> acceptInvite(i.id())),

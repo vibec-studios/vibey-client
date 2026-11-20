@@ -27,6 +27,9 @@ final class PrivacyRows {
         }
         out.add(Rows.toggle("showHosting", Lang.tr("ui.account.hosting"), Lang.tr("ui.account.hostingTip"),
                 () -> privacy(module) == null || privacy(module).showHosting(), v -> write(module, "showHosting", String.valueOf(v))));
+        out.add(Rows.toggle("shareServerAddress", Lang.tr("ui.account.shareAddress"), Lang.tr("ui.account.shareAddressTip"),
+                () -> privacy(module) != null && privacy(module).shareServerAddress(),
+                v -> write(module, "shareServerAddress", String.valueOf(v))));
         return out;
     }
 
@@ -53,7 +56,7 @@ final class PrivacyRows {
 
     private static void write(SocialModule module, String field, String v) {
         JsonObject priv = new JsonObject();
-        if (field.equals("showHosting")) priv.addProperty(field, Boolean.parseBoolean(v));
+        if (field.equals("showHosting") || field.equals("shareServerAddress")) priv.addProperty(field, Boolean.parseBoolean(v));
         else priv.addProperty(field, v);
         JsonObject body = new JsonObject();
         body.add("privacy", priv);

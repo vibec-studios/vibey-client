@@ -40,6 +40,17 @@ public final class SocialCompat {
         return d == null ? null : d.ip;
     }
 
+    public static String serverListName() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null || mc.getSingleplayerServer() != null) return null;
+        ServerData d = mc.getCurrentServer();
+        if (d == null || d.name == null || d.name.isBlank()) return null;
+        String n = d.name.trim();
+        if (n.equalsIgnoreCase(d.ip == null ? "" : d.ip.trim())) return null;
+        if (n.equals(net.minecraft.client.resources.language.I18n.get("selectServer.defaultName"))) return null;
+        return n;
+    }
+
     public static boolean inWorld() {
         return Minecraft.getInstance().level != null;
     }

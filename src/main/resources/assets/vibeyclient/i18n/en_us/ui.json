@@ -255,6 +255,8 @@
     "invites": "Invites",
     "hosting": "Show my worlds",
     "hostingTip": "Friends see the worlds you host.",
+    "shareAddress": "Share server address",
+    "shareAddressTip": "Friends see the address and port of the server you play on and can join you. Off: they only see its name.",
     "devices": "Devices",
     "blocked": "Blocked",
     "unblock": "Unblock",
