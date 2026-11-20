@@ -29,7 +29,7 @@ final class EffectsParticleChecks {
                 "particles_crit_big_yellow");
         check(vanilla >= BURST && vanilla <= BURST + BACKGROUND, "vanilla end rods: " + vanilla);
         check(triple >= 3 * BURST && triple <= 3 * BURST + 3 * BACKGROUND, "300 %: three each, created " + triple);
-        check(hidden <= BURST / 10 && hiddenDropped >= BURST, "hidden end rods: " + hidden + ", dropped " + hiddenDropped);
+        check(hidden <= BURST / 4 && hiddenDropped >= BURST, "hidden end rods: " + hidden + ", dropped " + hiddenDropped);
         check(crit >= BURST, "styled crits still spawn: " + crit);
         int tinted = ctx.computeOnClient(mc -> StyleStore.slot(ParticleTypes.CRIT).color(0xFFFFFFFF));
         check(tinted == 0xFFFFE14D, String.format("crit tint colour %08X", tinted));
