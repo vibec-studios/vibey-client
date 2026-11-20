@@ -58,11 +58,11 @@ public final class Declaration {
         try {
             String value = theme.substitute(raw);
             Prop single = Prop.byName(property);
-            if (single != null) {
+            if (Shorthands.isShorthand(property)) {
+                expand(value);
+            } else if (single != null) {
                 props = new Prop[]{single};
                 values = new StyleValue[]{ValueParser.parse(single, value)};
-            } else if (Shorthands.isShorthand(property)) {
-                expand(value);
             } else {
                 String suggestion = PropertyNames.suggest(property);
                 errors.report(pos, "unknown property '" + property + "'", suggestion == null ? null : "did you mean '" + suggestion + "'?");

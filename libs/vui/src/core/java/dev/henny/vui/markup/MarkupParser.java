@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 public final class MarkupParser {
-    private static final Set<String> RAW_TEXT_TAGS = Set.of("style", "script", "props");
+    private static final Set<String> RAW_TEXT_TAGS = Whitespace.RAW_TEXT_TAGS;
 
     private final SourceCursor in;
     private final Diagnostics diagnostics;

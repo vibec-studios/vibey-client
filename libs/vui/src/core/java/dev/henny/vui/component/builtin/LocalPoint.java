@@ -9,9 +9,12 @@ final class LocalPoint {
     }
 
     static float fractionX(Element e, float screenX) {
+        return fractionX(e, screenX, e.box().innerWidth());
+    }
+
+    static float fractionX(Element e, float screenX, float width) {
         Rect r = ScreenRects.of(e);
         float inset = e.box().borderLeft + e.box().paddingLeft;
-        float width = e.box().innerWidth();
         if (width <= 0) return 0f;
         return Math.max(0f, Math.min(1f, (screenX - r.x() - inset) / width));
     }

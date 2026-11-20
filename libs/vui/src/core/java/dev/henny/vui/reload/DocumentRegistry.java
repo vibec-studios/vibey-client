@@ -39,6 +39,23 @@ public final class DocumentRegistry {
         return all;
     }
 
+    public String readResource(String relativePath) {
+        for (ResourceRoot root : allRoots()) {
+            String text = root.read(relativePath);
+            if (text != null) return text;
+        }
+        return null;
+    }
+
+    public String describe(String relativePath) {
+        for (ResourceRoot root : allRoots()) if (root.read(relativePath) != null) return root.describe(relativePath);
+        return relativePath;
+    }
+
+    public synchronized void forgetAll() {
+        cache.clear();
+    }
+
     public synchronized CompiledTemplate template(String id) {
         CompiledTemplate cached = cache.get(id);
         if (cached != null) return cached;

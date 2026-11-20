@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -14,6 +15,7 @@ import java.util.Set;
 public final class HotReloader implements AutoCloseable {
     private final DocumentRegistry registry;
     private final List<WeakReference<Document>> documents = new ArrayList<>();
+    private final List<ResourceListener> listeners = new ArrayList<>();
     private SourceWatcher watcher;
     private int reloads;
 
@@ -39,6 +41,17 @@ public final class HotReloader implements AutoCloseable {
         return out;
     }
 
+    public HotReloader onResource(ResourceListener listener) {
+        listeners.add(listener);
+        return this;
+    }
+
+    public boolean resourceChanged(String relativePath) {
+        boolean rebuild = false;
+        for (ResourceListener l : listeners) rebuild |= l.changed(relativePath);
+        return rebuild;
+    }
+
     public boolean watching() {
         return watcher != null;
     }
@@ -56,12 +69,23 @@ public final class HotReloader implements AutoCloseable {
 
     public Set<String> poll() {
         if (watcher == null) return Set.of();
+        return changed(watcher.drain());
+    }
+
+    public Set<String> changed(Collection<Path> files) {
         Set<String> ids = new LinkedHashSet<>();
-        for (Path p : watcher.drain()) {
+        boolean rebuild = false;
+        for (Path p : files) {
             DocumentId id = idOf(p);
             if (id != null) ids.add(id.toString());
+            else rebuild |= resource(p);
         }
-        if (!ids.isEmpty()) apply(ids);
+        if (rebuild) {
+            registry.forgetAll();
+            reloadAll();
+        } else if (!ids.isEmpty()) {
+            apply(ids);
+        }
         return ids;
     }
 
@@ -77,6 +101,15 @@ public final class HotReloader implements AutoCloseable {
             if (next.hasErrors() && !doc.template().hasErrors()) doc.reloadFailed(next.diagnostics());
             else doc.swap(next);
         }
+    }
+
+    private boolean resource(Path p) {
+        boolean rebuild = false;
+        for (ResourceRoot root : registry.allRoots()) {
+            String rel = root.relativePath(p);
+            if (rel != null) rebuild |= resourceChanged(rel);
+        }
+        return rebuild;
     }
 
     private DocumentId idOf(Path p) {

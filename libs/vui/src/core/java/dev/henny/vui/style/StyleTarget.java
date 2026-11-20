@@ -10,4 +10,8 @@ public interface StyleTarget {
     int states();
 
     StyleTarget styleParent();
+
+    default StyleTarget stylePreviousSibling() {
+        return null;
+    }
 }

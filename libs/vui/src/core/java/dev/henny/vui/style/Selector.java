@@ -3,6 +3,8 @@ package dev.henny.vui.style;
 public final class Selector {
     public static final char DESCENDANT = ' ';
     public static final char CHILD = '>';
+    public static final char ADJACENT = '+';
+    public static final char SIBLING = '~';
 
     private final CompoundSelector[] parts;
     private final char[] combinators;
@@ -32,6 +34,11 @@ public final class Selector {
         return mask;
     }
 
+    public boolean usesSiblings() {
+        for (char c : combinators) if (c == ADJACENT || c == SIBLING) return true;
+        return false;
+    }
+
     public int stateMaskOfSubject() {
         return subject().states() | subject().notStates();
     }
@@ -45,6 +52,7 @@ public final class Selector {
     private boolean matchFrom(int index, StyleTarget current) {
         if (index < 0) return true;
         char combinator = combinators[index];
+        if (combinator == ADJACENT || combinator == SIBLING) return matchSibling(index, current, combinator == ADJACENT);
         StyleTarget ancestor = current.styleParent();
         if (combinator == CHILD) {
             return ancestor != null && parts[index].matches(ancestor) && matchFrom(index - 1, ancestor);
@@ -52,6 +60,16 @@ public final class Selector {
         while (ancestor != null) {
             if (parts[index].matches(ancestor) && matchFrom(index - 1, ancestor)) return true;
             ancestor = ancestor.styleParent();
+        }
+        return false;
+    }
+
+    private boolean matchSibling(int index, StyleTarget current, boolean adjacent) {
+        StyleTarget sibling = current.stylePreviousSibling();
+        while (sibling != null) {
+            if (parts[index].matches(sibling) && matchFrom(index - 1, sibling)) return true;
+            if (adjacent) return false;
+            sibling = sibling.stylePreviousSibling();
         }
         return false;
     }

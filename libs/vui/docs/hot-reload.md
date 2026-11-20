@@ -47,6 +47,16 @@ the same lookup. A missing file yields an empty document with an error, not an e
 
 `vui.reloader().reloadAll()` rebuilds everything (e.g. from a keybind or `/reload`).
 
+Other watched resources:
+
+- **Theme files** loaded with `vui.loadTheme("assets/mymod/vui/theme.json")` (read through the roots, JSON or
+  `$token` lines, layered over the theme active at the first call; several files stack in call order). Saving one
+  re-applies all theme files, recompiles the default styles and rebuilds every open document.
+  `vui.themeDiagnostics()` lists problems in them.
+- **Icon sets** (`assets/<ns>/vui/icons.json`, see [icons](icons.md)) reload their set; documents repaint with it.
+- Anything else: `vui.reloader().onResource(path -> …)` gets every changed root-relative path; return `true` to
+  rebuild all documents. `vui.reloader().changed(files)` feeds changes by hand (tests, own watchers).
+
 ## Error overlay
 
 When a document has errors (parse, style, unknown component, runtime evaluation), `DiagnosticsOverlay` draws a red
@@ -110,10 +120,12 @@ java -cp vui-core.jar;gson.jar dev.henny.vui.dev.Preview path/to/screen.vui 427 
 `--serve` renders with the headless backend, watches the file's folder and serves the same endpoints
 (`/screenshot` renders a fresh PNG). Without `--serve` it writes one PNG, prints the tree dump and errors and exits
 with code 1 if there are errors – handy in scripts and CI. Files under `…/assets/<ns>/vui/` get their real id and
-imports; other files become `preview:<name>` and can import siblings as `preview:<other>`.
+imports; other files become `preview:<name>` and can import siblings as `preview:<other>` and – with `--root` – any
+document under that root. Options for translations, themes, icons, textures and a pointer script are in the
+[README](../README.md#preview-without-minecraft).
 
 ## Limits
 
-- Theme files and Java code are not reloaded (restart or use your mod's own reload).
+- Java code and themes set in code (`vui.theme(…)`) are not reloaded; theme files loaded with `vui.loadTheme` are.
 - Component-local state does not exist (all state is in controllers), so nothing else needs to survive a swap.
 - `/click` and `/key` go to one document; the host decides which document is "active".

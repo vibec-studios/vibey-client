@@ -110,7 +110,8 @@ final class FlexLayout {
             LayoutBox cb = c.box();
             ComputedStyle cs = c.style();
             float cross = Lengths.resolve(cs, row ? Prop.HEIGHT : Prop.WIDTH, crossSize);
-            boolean stretch = Float.isNaN(cross) && Flow.align(c, e).equals("stretch");
+            boolean stretch = Float.isNaN(cross) && Flow.align(c, e).equals("stretch") && !AutoMargins.anyCross(c, row)
+                    && !(row && AspectRatio.has(c));
             if (Float.isNaN(cross)) {
                 engine.measure(c, row ? cb.flexMain + cb.marginLeft + cb.marginRight : crossSize,
                         row ? crossSize : cb.flexMain + cb.marginTop + cb.marginBottom);
@@ -148,7 +149,9 @@ final class FlexLayout {
         }
         used += gap * Math.max(0, count - 1);
         float free = Float.isFinite(mainSize) ? mainSize - used : 0;
-        Justify j = Justify.of(e.style().keyword(Prop.JUSTIFY), free, count, gap);
+        int autos = free > 0 ? AutoMargins.countMain(e, from, to, row) : 0;
+        float autoShare = autos > 0 ? free / autos : 0;
+        Justify j = Justify.of(autos > 0 ? "start" : e.style().keyword(Prop.JUSTIFY), autos > 0 ? 0 : free, count, gap);
         float pos = j.start();
         for (int i = from; i < to; i++) {
             Element c = e.child(i);
@@ -158,7 +161,9 @@ final class FlexLayout {
             float mEnd = row ? cb.marginRight : cb.marginBottom;
             float cStart = row ? cb.marginTop : cb.marginLeft;
             float cEnd = row ? cb.marginBottom : cb.marginRight;
-            float crossPos = crossOffset + alignOffset(Flow.align(c, e), lineCross, cb.flexCross + cStart + cEnd) + cStart;
+            float crossPos = crossOffset + alignOffset(AutoMargins.crossAlign(c, e, row), lineCross, cb.flexCross + cStart + cEnd) + cStart;
+            if (autos > 0 && AutoMargins.mainStart(c, row)) mStart += autoShare;
+            if (autos > 0 && AutoMargins.mainEnd(c, row)) mEnd += autoShare;
             float mainPos = pos + mStart;
             if (row) cb.set(b.innerX() + mainPos, b.innerY() + crossPos, cb.flexMain, cb.flexCross);
             else cb.set(b.innerX() + crossPos, b.innerY() + mainPos, cb.flexCross, cb.flexMain);

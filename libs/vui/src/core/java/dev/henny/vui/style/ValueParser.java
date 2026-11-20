@@ -46,11 +46,21 @@ public final class ValueParser {
         if (v.endsWith("deg")) return Float.parseFloat(v.substring(0, v.length() - 3));
         if (v.endsWith("%")) return Float.parseFloat(v.substring(0, v.length() - 1)) / 100f;
         if (v.equals("infinite")) return Float.POSITIVE_INFINITY;
+        if (prop == Prop.ASPECT_RATIO) return ratio(v);
         try {
             return Float.parseFloat(v);
         } catch (NumberFormatException e) {
             throw new StyleError("'" + v + "' is not a number for " + prop.cssName(), hintFor(prop));
         }
+    }
+
+    private static float ratio(String v) {
+        if (v.equals("auto") || v.equals("none")) return 0f;
+        int slash = v.indexOf('/');
+        if (slash < 0) return Float.parseFloat(v);
+        float w = Float.parseFloat(v.substring(0, slash).trim());
+        float h = Float.parseFloat(v.substring(slash + 1).trim());
+        return h == 0 ? 0f : w / h;
     }
 
     private static StyleValue keyword(Prop prop, String v) {

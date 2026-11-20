@@ -10,6 +10,8 @@ import dev.henny.vui.event.KeyEvent;
 import dev.henny.vui.event.Keys;
 import dev.henny.vui.expr.Values;
 import dev.henny.vui.layout.LayoutBox;
+import dev.henny.vui.layout.LayoutEngine;
+import dev.henny.vui.layout.Size;
 import dev.henny.vui.paint.PaintContext;
 import dev.henny.vui.style.Prop;
 import dev.henny.vui.style.StateFlags;
@@ -30,14 +32,25 @@ public final class SelectBehavior implements Behavior {
     }
 
     @Override
+    public boolean measure(Element e, LayoutEngine layout, float maxWidth, float maxHeight, Size out) {
+        return SelectSegments.measure(e, layout, maxWidth, maxHeight, out);
+    }
+
+    @Override
+    public boolean arrangeChildren(Element e, LayoutEngine layout) {
+        return SelectSegments.arrange(e, layout);
+    }
+
+    @Override
     public void propChanged(Element e, String name, Object value) {
         if (!e.flags().mounted) return;
-        if (name.equals("options")) rebuildOptions(e);
+        if (name.equals("options") || name.equals("mode")) rebuildOptions(e);
         if (name.equals("value")) refreshSelection(e);
     }
 
     @Override
     public void activate(Element e) {
+        if (SelectSegments.showing(e)) return;
         Element menu = menu(e);
         if (menu != null) OverlayBehavior.open(menu, !menu.flags().overlayOpen);
     }
@@ -47,14 +60,18 @@ public final class SelectBehavior implements Behavior {
         if (event.currentTarget() != e) return;
         if (event.type().equals(EventNames.CLICK)) {
             Element option = optionOf(e, event.target());
-            if (option != null) {
+            Element segment = segmentOf(e, event.target());
+            if (segment != null) {
+                Controls.commit(e, segment.prop("value"));
+            } else if (option != null) {
                 Controls.commit(e, option.prop("value"));
                 OverlayBehavior.open(menu(e), false);
             } else if (!insideMenu(e, event.target())) {
                 activate(e);
             }
         } else if (event.type().equals(EventNames.KEY_DOWN) && event instanceof KeyEvent k) {
-            int dir = k.key() == Keys.UP ? -1 : k.key() == Keys.DOWN ? 1 : 0;
+            boolean seg = SelectSegments.showing(e);
+            int dir = k.key() == Keys.UP || seg && k.key() == Keys.LEFT ? -1 : k.key() == Keys.DOWN || seg && k.key() == Keys.RIGHT ? 1 : 0;
             if (dir == 0) return;
             List<Controls.Option> options = Controls.options(e);
             if (options.isEmpty()) return;
@@ -66,6 +83,7 @@ public final class SelectBehavior implements Behavior {
 
     @Override
     public void paint(Element e, PaintContext ctx) {
+        if (SelectSegments.showing(e)) return;
         LayoutBox b = e.box();
         float x = b.x + b.width - b.borderRight - b.paddingRight - 5;
         float y = b.y + b.height / 2f - 1;
@@ -84,6 +102,7 @@ public final class SelectBehavior implements Behavior {
             item.prop("value", o.value());
             Internal.label(item, o.label());
         }
+        SelectSegments.rebuild(e);
         refreshSelection(e);
     }
 
@@ -93,6 +112,7 @@ public final class SelectBehavior implements Behavior {
         int index = Controls.selectedIndex(e, options);
         String text = index >= 0 ? options.get(index).label() : Controls.string(e, "placeholder", "—");
         if (label != null) label.prop("text", text);
+        SelectSegments.mark(e);
         Element menu = menu(e);
         if (menu == null) return;
         Object value = Controls.value(e);
@@ -108,6 +128,13 @@ public final class SelectBehavior implements Behavior {
 
     private static Element optionOf(Element select, Element target) {
         for (Element p = target; p != null && p != select; p = p.parent()) if (p.tag().equals("select-option")) return p;
+        return null;
+    }
+
+    private static Element segmentOf(Element select, Element target) {
+        for (Element p = target; p != null && p != select; p = p.parent()) {
+            if (p.flags().internal && p.tag().equals(SelectSegments.SEGMENT)) return p;
+        }
         return null;
     }
 

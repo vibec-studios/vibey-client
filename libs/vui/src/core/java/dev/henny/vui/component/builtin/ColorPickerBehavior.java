@@ -17,22 +17,32 @@ public final class ColorPickerBehavior implements Behavior {
 
     @Override
     public void mount(Element e) {
-        Internal.child(e, "colorpicker-panel");
+        ColorPickerParts.build(e);
+    }
+
+    @Override
+    public void propChanged(Element e, String name, Object value) {
+        if (!e.flags().mounted) return;
+        if (name.equals("presets") || name.equals("swatches")) ColorPickerParts.swatches(e);
+        if (name.equals("value") || name.equals("hex") || name.equals("presets") || name.equals("swatches")) ColorPickerParts.sync(e);
     }
 
     @Override
     public void activate(Element e) {
-        Element panel = Internal.find(e, "colorpicker-panel");
+        Element panel = Internal.find(e, ColorPickerParts.PANEL);
         if (panel == null) return;
         boolean open = !panel.flags().overlayOpen;
-        if (open) panel.behaviorState(Hsv.fromRgb(ColorValue.parse(Controls.value(e))));
+        if (open) {
+            ColorPickerParts.resetArea(e);
+            ColorPickerParts.sync(e);
+        }
         OverlayBehavior.open(panel, open);
     }
 
     @Override
     public void handle(Element e, Event event) {
         if (event.currentTarget() != e || !event.type().equals(EventNames.CLICK)) return;
-        for (Element p = event.target(); p != null && p != e; p = p.parent()) if (p.tag().equals("colorpicker-panel")) return;
+        for (Element p = event.target(); p != null && p != e; p = p.parent()) if (p.tag().equals(ColorPickerParts.PANEL)) return;
         activate(e);
     }
 

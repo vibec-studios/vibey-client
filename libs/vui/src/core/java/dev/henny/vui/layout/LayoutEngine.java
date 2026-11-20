@@ -72,6 +72,12 @@ public final class LayoutEngine {
         float maxH = Lengths.max(s, Prop.MAX_HEIGHT, maxHeight);
         float minW = Lengths.orZero(s, Prop.MIN_WIDTH, maxWidth);
         float minH = Lengths.orZero(s, Prop.MIN_HEIGHT, maxHeight);
+        float ratio = AspectRatio.of(e);
+        if (ratio > 0) {
+            float aw = AspectRatio.width(ratio, w, h, Math.min(maxWidth - b.marginLeft - b.marginRight, maxW));
+            h = AspectRatio.height(ratio, aw, h);
+            w = aw;
+        }
         float outerMaxW = Float.isNaN(w) ? Math.min(maxWidth - b.marginLeft - b.marginRight, maxW) : w;
         float outerMaxH = Float.isNaN(h) ? Math.min(maxHeight - b.marginTop - b.marginBottom, maxH) : h;
         Size content = scratch;

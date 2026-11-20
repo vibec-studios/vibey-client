@@ -38,13 +38,16 @@ public final class BoxPainter {
 
     public static void border(Element e, PaintContext ctx) {
         LayoutBox b = e.box();
-        int color = e.style().color(Prop.BORDER_COLOR);
-        if ((color >>> 24) == 0) return;
+        ComputedStyle s = e.style();
         Canvas c = ctx.canvas();
-        if (b.borderTop > 0) c.fill(b.x, b.y, b.width, b.borderTop, color);
-        if (b.borderBottom > 0) c.fill(b.x, b.y + b.height - b.borderBottom, b.width, b.borderBottom, color);
         float innerH = b.height - b.borderTop - b.borderBottom;
-        if (b.borderLeft > 0) c.fill(b.x, b.y + b.borderTop, b.borderLeft, innerH, color);
-        if (b.borderRight > 0) c.fill(b.x + b.width - b.borderRight, b.y + b.borderTop, b.borderRight, innerH, color);
+        side(c, b.borderTop, s.color(Prop.BORDER_TOP_COLOR), b.x, b.y, b.width, b.borderTop);
+        side(c, b.borderBottom, s.color(Prop.BORDER_BOTTOM_COLOR), b.x, b.y + b.height - b.borderBottom, b.width, b.borderBottom);
+        side(c, b.borderLeft, s.color(Prop.BORDER_LEFT_COLOR), b.x, b.y + b.borderTop, b.borderLeft, innerH);
+        side(c, b.borderRight, s.color(Prop.BORDER_RIGHT_COLOR), b.x + b.width - b.borderRight, b.y + b.borderTop, b.borderRight, innerH);
+    }
+
+    private static void side(Canvas c, float width, int color, float x, float y, float w, float h) {
+        if (width > 0 && (color >>> 24) != 0) c.fill(x, y, w, h, color);
     }
 }

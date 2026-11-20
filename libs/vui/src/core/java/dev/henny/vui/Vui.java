@@ -6,6 +6,7 @@ import dev.henny.vui.diag.Diagnostics;
 import dev.henny.vui.diag.SourcePos;
 import dev.henny.vui.dom.Document;
 import dev.henny.vui.expr.Functions;
+import dev.henny.vui.icon.IconRegistry;
 import dev.henny.vui.markup.ComponentFile;
 import dev.henny.vui.markup.ComponentLoader;
 import dev.henny.vui.reload.DocumentRegistry;
@@ -28,6 +29,8 @@ public final class Vui {
     private final DocumentRegistry registry = new DocumentRegistry(this);
     private final HotReloader reloader = new HotReloader(registry);
     private final List<Runnable> tickTasks = new ArrayList<>();
+    private final IconRegistry icons = new IconRegistry().resources(registry::readResource);
+    private final ThemeFiles themeFiles = new ThemeFiles(this);
     private Theme theme = VibeTheme.create();
     private StyleSheet defaultStyles;
     private Diagnostics defaultDiagnostics = new Diagnostics();
@@ -37,6 +40,8 @@ public final class Vui {
     public Vui(Backend backend) {
         this.backend = backend;
         compileDefaults();
+        reloader.onResource(this::iconsChanged);
+        reloader.onResource(themeFiles::changed);
     }
 
     public Backend backend() {
@@ -59,8 +64,21 @@ public final class Vui {
         return reloader;
     }
 
+    public IconRegistry icons() {
+        return icons;
+    }
+
     public Theme theme() {
         return theme;
+    }
+
+    public Vui loadTheme(String resourcePath) {
+        themeFiles.load(resourcePath);
+        return this;
+    }
+
+    public Diagnostics themeDiagnostics() {
+        return themeFiles.diagnostics();
     }
 
     public Vui theme(Theme next) {
@@ -134,6 +152,13 @@ public final class Vui {
     public void tick() {
         if (dev) reloader.poll();
         for (int i = 0; i < tickTasks.size(); i++) tickTasks.get(i).run();
+    }
+
+    private boolean iconsChanged(String relativePath) {
+        if (!relativePath.startsWith("assets/") || !relativePath.endsWith("/vui/" + IconRegistry.FILE)) return false;
+        String namespace = relativePath.substring(7, relativePath.indexOf('/', 7));
+        icons.reload(namespace);
+        return false;
     }
 
     private void compileDefaults() {

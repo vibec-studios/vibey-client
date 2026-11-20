@@ -9,6 +9,7 @@ import dev.henny.vui.event.KeyEvent;
 import dev.henny.vui.event.Keys;
 import dev.henny.vui.event.PointerEvent;
 import dev.henny.vui.layout.LayoutBox;
+import dev.henny.vui.layout.LayoutEngine;
 import dev.henny.vui.paint.PaintContext;
 import dev.henny.vui.render.Canvas;
 import dev.henny.vui.style.Prop;
@@ -23,6 +24,34 @@ public final class SliderBehavior implements Behavior {
 
     @Override
     public void activate(Element e) {
+    }
+
+    @Override
+    public void mount(Element e) {
+        SliderLabel.sync(e);
+    }
+
+    @Override
+    public void propChanged(Element e, String name, Object value) {
+        if (e.flags().mounted && !name.startsWith("$")) SliderLabel.sync(e);
+    }
+
+    @Override
+    public boolean arrangeChildren(Element e, LayoutEngine layout) {
+        float[] reserved = e.behaviorState();
+        boolean label = SliderLabel.arrange(e, layout);
+        if (!label && reserved == null) return false;
+        if (reserved == null) {
+            reserved = new float[1];
+            e.behaviorState(reserved);
+        }
+        reserved[0] = label ? SliderLabel.reserve(e, layout) : 0;
+        return label;
+    }
+
+    private static float track(Element e) {
+        float[] reserved = e.behaviorState();
+        return SliderLabel.trackWidth(e, e.box().innerWidth(), reserved == null ? 0 : reserved[0]);
     }
 
     @Override
@@ -71,7 +100,7 @@ public final class SliderBehavior implements Behavior {
     }
 
     private float valueAt(Element e, float screenX) {
-        return min(e) + LocalPoint.fractionX(e, screenX) * (max(e) - min(e));
+        return min(e) + LocalPoint.fractionX(e, screenX, track(e)) * (max(e) - min(e));
     }
 
     static float snap(Element e, float raw) {
@@ -108,7 +137,7 @@ public final class SliderBehavior implements Behavior {
         float range = max(e) - min(e);
         float t = range == 0 ? 0 : (current(e) - min(e)) / range;
         float x = b.innerX();
-        float w = b.innerWidth();
+        float w = track(e);
         float cy = b.innerY() + b.innerHeight() / 2f;
         c.fill(x, cy - 1, w, 2, e.style().color(Prop.TRACK_COLOR));
         c.fill(x, cy - 1, w * t, 2, e.style().color(Prop.ACCENT));

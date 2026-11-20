@@ -42,12 +42,32 @@ top-level element fills the screen.
 - **Margins** add to the item's outer size; `padding` and `border-*-width` shrink the content box.
 - `min-width`/`min-height` default to `0`, so items can shrink below their text width – use `text-overflow: ellipsis`
   or `flex-shrink: 0` (built-in controls already have it).
+- **Auto margins** take the free space of the line before `justify-content`: `margin-left: auto` pushes an item (and
+  everything after it) to the end, `margin: auto` centres it on both axes. An item with an auto cross margin is not
+  stretched.
 
 ## Grid
 
 `grid-columns: 3` (alias `columns`) fixes the column count; `grid-min-column: 110` (alias `min-column`) picks as
 many columns of at least that width as fit. Without either the grid has one column. `gap` works as usual; cells
 stretch to the row height unless `align-self` says otherwise.
+
+Spans: `grid-column: span 2` / `grid-row: span 2` (aliases `col-span`, `row-span`). Items are placed row by row in
+the first free spot from the current position (CSS "sparse" auto placement); a column span larger than the column
+count is clamped. Row heights come from single-row items first, then row-spanning items share any missing height
+over their rows.
+
+```css
+.thumbs { display: grid; min-column: 60; gap: 4; }
+.thumbs .featured { grid-column: span 2; grid-row: span 2; }
+```
+
+## Aspect ratio
+
+`aspect-ratio: 16/9` (or `1.5`, alias `ratio`) sizes the missing dimension: with a fixed width the height is
+width / ratio, with a fixed height the width is height × ratio, with neither the element takes the available width
+(a column or grid cell, a flex-grown item) and the height follows. Ratio items are not stretched on the cross axis of
+a row or a grid row. In a row, give a ratio item a width, a height or `flex: 1` – otherwise it claims the whole row.
 
 ## Absolute, fixed and anchored
 
@@ -101,6 +121,6 @@ doc.resize(size.width, size.height);
 
 ## Limits
 
-- No `auto` margins, `order`, `align-content`, baseline alignment, grid spans/areas or `aspect-ratio`.
+- No `order`, `align-content`, baseline alignment, named grid areas or explicit grid line placement.
 - Min sizes default to 0 (no CSS min-content).
 - Hit testing undoes `translate`/`scale`/`rotate`; scissor/culling inside rotated elements is approximate.
