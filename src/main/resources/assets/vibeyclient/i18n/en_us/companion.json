@@ -30,7 +30,7 @@
     "bubbles": "Speech bubbles",
     "others": "Others' companions",
     "others.desc": "Shows companions of players with Vibey and the same pack.",
-    "share": "Show mine to others",
+    "share": "Share mine",
     "share.desc": "Only pack, position and animation are sent, through the server's Vibey relay.",
     "menuKey": "Companion menu",
     "packsKey": "Companion packs"

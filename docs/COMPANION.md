@@ -34,7 +34,7 @@ you can see, worries when you get hurt, greets you in the morning, gets bored, z
 | Name, Size | also changed by name tag / wheel; kept in sync both ways |
 | Mode | Follow / Stay / Sit |
 | Sounds, Speech bubbles | volume of companion sounds, bubbles on/off |
-| Others' companions, Show mine to others | sharing (below) |
+| Others' companions, Share mine | sharing (below) |
 | Keybinds | *Companion menu*, *Companion packs* (unbound by default) |
 
 The module writes its values into `config/companio.json` through `CompanioMc` (one source of truth: the lib's config).
