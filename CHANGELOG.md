@@ -2,6 +2,47 @@
 
 All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.properties`.
 
+## 0.4.0-beta.1 – the rebuilt client (beta)
+
+This is a **beta**. It is not the normal release: you only get it if you pick the beta / dev channel in the Vibe
+Launcher or download it from GitHub yourself. 0.3.2 stays the normal version. Please report anything odd.
+
+> **Where are the new modules?** Waypoints, Info, Chat, Inventory, Servers, Camera, Visuals, HUD, Video, Clips, PvP
+> and Streamer mode are **only in the Fabric 1.21.11 jar** for now. Every other jar (Fabric and NeoForge, all other
+> Minecraft versions) has the rebuilt core and the new menus, but without these modules.
+>
+> *Kurz auf Deutsch:* Die neuen Module (Wegpunkte, Info, Chat, Inventar, Server, Kamera, Visuals, HUD, Video, Clips,
+> PvP, Streamer-Modus) gibt es vorerst nur in der Fabric-1.21.11-Version. Alle anderen Versionen haben den neuen Kern
+> und die neuen Menüs, aber ohne diese Module.
+
+**New menus (all versions)**
+- A cleaner, calmer Vibey menu with themes, better contrast, search in the quick settings and toasts you can click
+  through. The old menus are still there under *Advanced* if you need them.
+- The emote wheel and the devlink card for Blockbench use the new look too.
+
+**Ranks and name styles (all versions)**
+- Players can show a rank icon from the Vibe team and an animated name style (gradient, wave, rainbow, pulse, shimmer)
+  next to their name – on nametags, in the tab list, in chat and in the friends list. You can hide your own rank.
+
+**New modules (Fabric 1.21.11 only)**
+- **Waypoints:** waypoints, a fair minimap, a world map, your last death point and nether coordinates.
+- **Info:** light level and chunk info, a card for the block you look at, food info, a tool warning, a TNT timer.
+- **Chat:** timestamps, search, copy, mentions, filters and toasts.
+- **Inventory:** better tooltips, quick moves, search and hotbar presets.
+- **Servers:** search, favourites, pings and a MOTD preview in the server list.
+- **Camera:** freelook, orbit camera and motion blur, plus a screenshot gallery.
+- **Visuals:** item physics and particle options.
+- **HUD:** the HUD editor now selects several widgets at once, snaps and has presets; new timer, scoreboard, tab list,
+  boss bar and title widgets.
+- **Video:** video screens, the music panel and lyrics in the world are rebuilt and smoother.
+- **Clips** and **PvP** as in 0.3.2, now in the new menus.
+- **Streamer mode** (F7) hides names, skins and the server address while you stream.
+
+**Under the hood**
+- The UI, the 3D panels and the cosmetics engine are now their own parts inside the jar. You still install just one
+  file.
+- Cosmetics look exactly like before (checked pixel by pixel against the old engine).
+
 ## 0.3.2 – Clips and faster online features
 
 **Clips** *(Fabric 1.21.11 for now)*

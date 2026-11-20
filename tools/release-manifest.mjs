@@ -146,8 +146,11 @@ export function buildManifest({ root = ROOT, dist, changelogText, tag, version, 
   if (problems.length) throw new Error(`release check failed:\n  ${problems.join('\n  ')}`);
 
   let changelog = (changelogText ?? '').trim();
-  if (!changelog) changelog = changelogSection(readFileSync(join(root, 'CHANGELOG.md'), 'utf8'), core(v));
-  if (!changelog) throw new Error(`no changelog: empty release body and no "## ${core(v)}" section in CHANGELOG.md`);
+  if (!changelog) {
+    const text = readFileSync(join(root, 'CHANGELOG.md'), 'utf8');
+    changelog = changelogSection(text, v) || changelogSection(text, core(v));
+  }
+  if (!changelog) throw new Error(`no changelog: empty release body and no "## ${v}" or "## ${core(v)}" section in CHANGELOG.md`);
   if (changelog.length > MAX_CHANGELOG) changelog = changelog.slice(0, MAX_CHANGELOG - 40).trimEnd() + '\n\n… (see CHANGELOG.md)';
 
   const manifest = {

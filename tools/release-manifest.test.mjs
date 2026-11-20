@@ -111,6 +111,15 @@ test('vibey-manifest.json carries sha256 and size of every asset', () => {
   assert.ok(!('sha256' in manifest.files[0]) && !('size' in manifest.files[0]));
 });
 
+test('beta version uses its own changelog section and jar names', () => {
+  const f = fixture({ version: '0.4.0-beta.1' });
+  const { manifest } = buildManifest({ root: f.root, dist: f.dist, tag: 'v0.4.0-beta.1' });
+  assert.equal(manifest.version, '0.4.0-beta.1');
+  assert.equal(manifest.channel, 'beta');
+  assert.match(manifest.changelog, /Nametag icons/);
+  assert.ok(manifest.files.every((x) => x.file.endsWith('-0.4.0-beta.1.jar')));
+});
+
 test('CLI writes vibey-manifest.json with --hashes and --prerelease', () => {
   const f = fixture();
   const tool = fileURLToPath(new URL('./release-manifest.mjs', import.meta.url));
