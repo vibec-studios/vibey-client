@@ -249,7 +249,8 @@ All optional. Speeds in blocks per second, distances in blocks, angles in degree
 
 The companion is client-side only: it is drawn by your game, has simple physics (gravity, water, steps), finds paths
 over blocks your client knows (never across a drop of more than 3 blocks, never into lava or fire) and teleports next
-to you when it is more than `follow.teleport` blocks away, loses its chunk or gets stuck for 3 s. It never touches the
+to you when it is more than `follow.teleport` blocks away, loses its chunk, gets stuck for 3 s or is cut off
+above or below you for 3 s (e.g. a floor was built over it, or you stand on a ledge it cannot jump up to). It never touches the
 world, pushes nobody and is never seen by the server.
 
 **Movement modes** (behavior field `move`):

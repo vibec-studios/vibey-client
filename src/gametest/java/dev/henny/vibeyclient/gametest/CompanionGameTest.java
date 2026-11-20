@@ -67,6 +67,7 @@ public final class CompanionGameTest implements FabricClientGameTest {
             check(CompanioMc.select("seal:seal"), "seal is a built-in companion");
         });
         waitFor(ctx, "own companion", 100, () -> CompanioMc.own() != null);
+        ctx.runOnClient(mc -> CompanioMc.recall());
         ctx.waitTicks(40);
         check(own(ctx) != null, "the seal is there");
     }
@@ -89,6 +90,7 @@ public final class CompanionGameTest implements FabricClientGameTest {
         Vector3d c = center(ctx);
         tp(world, ctx, c.x + 2.2, o[1], c.z + 0.2, 90, 20);
         ctx.waitTicks(10);
+        waitFor(ctx, "seal stands still", 200, () -> CompanioMc.own().body.speed() < 0.2);
         lookAt(ctx, center(ctx));
         check(ctx.computeOnClient(mc -> CompanioMc.own() != null && dev.henny.companio.mc.client.CompanioClient.get().target().hovered()),
                 "looking at the seal hovers it: " + targetInfo(ctx));

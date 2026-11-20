@@ -14,6 +14,7 @@ public final class Mover {
     private final Goals goals;
     private final Goal goal = new Goal();
     private final Steering steering = new Steering();
+    private final Separation separation = new Separation();
     public final Home home = new Home();
     private MoveMode riding;
     private double stuckSince = -1, lastHop;
@@ -78,6 +79,11 @@ public final class Mover {
     }
 
     private void stuck(MoveMode mode, Body b, Terrain t, Owner o, boolean moving, double now) {
+        if (follows(mode) && separation.cutOff(m, b, o, now)) {
+            teleport(b, t, o);
+            stuckSince = -1;
+            return;
+        }
         boolean progress = b.speed() > 0.25 || !moving;
         if (progress) {
             stuckSince = -1;

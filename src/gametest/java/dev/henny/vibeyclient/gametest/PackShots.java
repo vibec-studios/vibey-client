@@ -23,6 +23,7 @@ final class PackShots {
             check(CompanioMc.select(key), key + " is a built-in companion");
         });
         waitFor(ctx, key, 100, () -> CompanioMc.own() != null && (CompanioMc.own().def.packId() + ":" + CompanioMc.own().def.id()).equals(key));
+        ctx.runOnClient(mc -> CompanioMc.recall());
         ctx.waitTicks(30);
     }
 
@@ -55,6 +56,7 @@ final class PackShots {
 
     static void pet(ClientGameTestContext ctx) {
         for (int i = 0; i < 4; i++) {
+            waitFor(ctx, "companion stands still", 200, () -> CompanioMc.own().body.speed() < 0.2);
             lookAt(ctx, center(ctx));
             waitFor(ctx, "hover", 60, () -> dev.henny.companio.mc.client.CompanioClient.get().target().hovered());
             ctx.getInput().pressMouse(LEFT);
