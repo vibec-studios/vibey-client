@@ -1,0 +1,11 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<props>{ "b": {} }</props>
+<template>
+  <row class="srv" :style="{ left: b.x, top: b.y }" :tooltip="b.tip">
+    <ico name="lock"/><text>{{ t('ui.hud.serverOff') }}</text>
+  </row>
+</template>
+<style>
+.srv { position: absolute; height: 12; gap: 3; padding: 0 4; background: alpha($bg, .9); border: 1 $danger; color: $danger;
+       pointer-events: auto; }
+</style>

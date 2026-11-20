@@ -1,16 +1,19 @@
 <import name="keycap" src="vibeyclient:components/keycap"/>
 <template>
-  <row class="hud-hint">
+  <row class="hud-hint" :class="{ top: dockTop }">
     <keycap :label="t('ui.hud.keyDrag')"/><text class="hint-word">{{ t('ui.hud.drag') }}</text>
     <box class="hint-sep"/>
     <keycap :label="t('ui.hud.keyWheel')"/><text class="hint-word">{{ t('ui.hud.wheel') }}</text>
     <box class="hint-sep"/>
     <keycap :label="t('ui.hud.keyAlt')"/><text class="hint-word">{{ t('ui.hud.alt') }}</text>
+    <box class="hint-sep"/>
+    <keycap :label="t('ui.hud.keyMulti')"/><text class="hint-word">{{ t('ui.hud.multi') }}</text>
   </row>
 </template>
 <style>
 .hud-hint { position: absolute; anchor: bottom; bottom: 34; gap: 3; height: 18; padding: 0 6; background: alpha($bg, .75);
             border: 1 $line2; animation: hint-in 300ms out 1 forwards; }
+.hud-hint.top { anchor: top; top: 34; }
 .hint-word { color: $muted; margin-right: 2; }
 .hint-sep { width: 1; height: 8; background: $line2; margin: 0 3; }
 @keyframes hint-in { from { opacity: 0; translate-y: 6 } to { opacity: 1; translate-y: 0 } }

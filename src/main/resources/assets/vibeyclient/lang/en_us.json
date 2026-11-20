@@ -19,6 +19,8 @@
   "key.vibeyclient.hud.editor": "HUD editor",
   "key.vibeyclient.clips.saveKey": "Save clip",
   "key.vibeyclient.clips.galleryKey": "Clips gallery",
+  "key.vibeyclient.hud.timerKey": "Timer start/stop",
+  "key.vibeyclient.hud.timerLap": "Timer lap/reset",
   "key.vibeyclient.waypoints.addKey": "Add waypoint",
   "key.vibeyclient.waypoints.mapKey": "Open map",
   "key.vibeyclient.waypoints.minimapKey": "Toggle minimap",

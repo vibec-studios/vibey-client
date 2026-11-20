@@ -1,0 +1,17 @@
+<import name="style-box" src="vibeyclient:hud/style-box"/>
+<import name="style-text" src="vibeyclient:hud/style-text"/>
+<import name="style-size" src="vibeyclient:hud/style-size"/>
+<template>
+  <column id="style" class="sp">
+    <segmented v-if="st.styleable" id="style-scope" :value="st.scope" @change="styleScope($event)"
+               :options="[{ value: 'one', label: st.oneLabel }, { value: 'all', label: t('ui.hud.allWidgets') }]"/>
+    <tabs v-if="st.styleable" id="style-tabs" :value="st.tab" @change="styleTab($event)"
+          :options="[{ value: 'box', label: t('ui.hud.tabBox') }, { value: 'text', label: t('ui.hud.tabText') }, { value: 'size', label: t('ui.hud.tabSize') }]"/>
+    <style-box v-if="st.styleable && st.tab == 'box'"/>
+    <style-text v-if="st.styleable && st.tab == 'text'"/>
+    <style-size v-if="!st.styleable || st.tab == 'size'"/>
+  </column>
+</template>
+<style>
+.sp { width: 214; gap: 5; padding: 6; }
+</style>

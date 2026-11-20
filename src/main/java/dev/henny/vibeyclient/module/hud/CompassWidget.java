@@ -7,11 +7,6 @@ import dev.henny.vibeyclient.ui.hud.HudWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 
-/**
- * A compass strip: ticks every 15°, the cardinal and intercardinal letters, a marker in the middle and (detailed)
- * the heading in degrees. Its width can be changed freely (Shift-resize). Heading is read every frame for a smooth
- * strip; all labels are cached strings.
- */
 final class CompassWidget extends HudWidget {
     private static final String[] DEG = new String[360];
     private final String[] letters = new String[8];
@@ -48,7 +43,7 @@ final class CompassWidget extends HudWidget {
         p.background();
         int w = p.w, h = p.h;
         int stripH = detailed ? 14 : h;
-        float range = 150f; // degrees visible across the width
+        float range = 150f;
         float ppd = w / range;
         int cx = w / 2;
         int mid = stripH / 2;
@@ -71,7 +66,6 @@ final class CompassWidget extends HudWidget {
                 p.g.rect(xi, mid - 2, 1, 4, Theme.alpha(p.style.text, 0.45f * a));
             }
         }
-        // centre marker
         int ac = p.style.accent;
         p.g.rect(cx, 0, 1, 3, ac);
         p.g.rect(cx - 1, 0, 3, 1, ac);

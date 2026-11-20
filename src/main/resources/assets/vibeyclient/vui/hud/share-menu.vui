@@ -1,0 +1,15 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<template>
+  <column class="share">
+    <row id="share-copy" class="share-row" tabindex="0" @click="copyCode()"><ico name="copy"/><text>{{ t('ui.hud.copyCode') }}</text></row>
+    <row id="share-import" class="share-row" tabindex="0" @click="openImport()"><ico name="hud_paste"/><text>{{ t('ui.hud.importCode') }}</text></row>
+    <row id="share-file" class="share-row" tabindex="0" @click="saveFile()"><ico name="hud_file"/><text>{{ t('ui.hud.saveFile') }}</text></row>
+    <row id="share-folder" class="share-row" tabindex="0" @click="openFolder()"><ico name="hud_folder"/><text>{{ t('ui.hud.folder') }}</text></row>
+  </column>
+</template>
+<style>
+.share { gap: 1; padding: 1; }
+.share-row { height: 16; gap: 6; padding: 0 6 0 5; cursor: pointer; color: $muted; }
+.share-row:hover, .share-row:focus { background: $surface2; color: $text; }
+.share-row .ico { color: $brand2; }
+</style>

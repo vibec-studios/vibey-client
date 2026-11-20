@@ -5,7 +5,6 @@ import dev.henny.vibeyclient.ui.hud.HudLayout;
 import dev.henny.vibeyclient.ui.hud.HudStyle;
 import dev.henny.vibeyclient.ui.hud.HudTemplates;
 
-/** The built-in layouts: PvP, Minimal, Building, Streamer (de: PvP, Minimal, Bauen, Streamer). */
 final class BuiltinTemplates {
     private BuiltinTemplates() {}
 

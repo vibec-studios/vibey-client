@@ -1,0 +1,46 @@
+<import name="style-row" src="vibeyclient:hud/style-row"/>
+<import name="icon-button" src="vibeyclient:components/icon-button"/>
+<template>
+  <column class="spage">
+    <style-row :label="t('ui.hud.size')" :own="false" prop="">
+      <slider id="style-size" class="sval" :value="st.scale" :min="st.minScale" :max="st.maxScale" :step="0.05" @change="setScale($event)"/>
+      <text class="snum">{{ percent(st.scale) }}</text>
+    </style-row>
+    <style-row v-if="st.hasVariants" :label="t('ui.hud.detail')" :own="st.o_variant" prop="variant">
+      <segmented class="sval" :value="st.variant" @change="set('variant', $event)"
+                 :options="[{ value: 'compact', label: t('ui.hud.compact') }, { value: 'detailed', label: t('ui.hud.detailed') }]"/>
+    </style-row>
+    <style-row :label="t('ui.hud.anchor')" :own="!st.autoAnchor" prop="anchor">
+      <grid class="anchors" columns="3" gap="1">
+        <box v-for="a in anchors" :key="a.id" class="anc" :class="{ on: a.on, auto: st.autoAnchor }" @click="setAnchor(a.id)"/>
+      </grid>
+      <spacer/>
+      <button class="ghost anc-auto" :class="{ on: st.autoAnchor }" @click="setAnchor('auto')">{{ t('ui.hud.auto') }}</button>
+    </style-row>
+    <row v-for="o in opts" :key="o.key" class="srow">
+      <text class="slabel wide">{{ o.label }}</text>
+      <spacer/>
+      <toggle v-if="o.toggle" :value="o.on" @change="optionSet(o, $event)"/>
+      <row v-else class="cyc">
+        <icon-button icon="back" @click="optionStep(o, -1)"/>
+        <text class="cyc-val">{{ o.value }}</text>
+        <icon-button icon="next" @click="optionStep(o, 1)"/>
+        <icon-button v-if="o.capture" icon="hud_paste" :tip="o.capture" @click="optionCapture(o)"/>
+      </row>
+    </row>
+  </column>
+</template>
+<style>
+.spage { gap: 3; }
+.anchors { width: 30; }
+.anc { width: 9; height: 4; background: alpha($text, .25); cursor: pointer; }
+.anc:hover { background: $text; }
+.anc.on { background: $brand; }
+.anc.on.auto { background: $brand2; }
+.anc-auto { height: 14; padding: 0 4; }
+.anc-auto.on { color: $brand2; }
+.slabel.wide { width: 80; }
+.cyc { gap: 1; align-items: center; }
+.cyc .icon-btn { size: 14; }
+.cyc-val { width: 56; text-align: center; color: $text; text-wrap: nowrap; text-overflow: ellipsis; }
+</style>

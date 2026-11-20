@@ -3,10 +3,6 @@ package dev.henny.vibeyclient.module.hud;
 import dev.henny.vibeyclient.client.ClientCompat;
 import net.minecraft.client.Minecraft;
 
-/**
- * Clicks per second of the attack and use keys, sampled every frame (no event hooks needed). Only counts while no
- * screen is open. Ring buffers of press times, no allocation.
- */
 final class Clicks {
     private Clicks() {}
 

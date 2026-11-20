@@ -19,6 +19,10 @@ public final class VibeyVui {
         return VuiMc.vui();
     }
 
+    public static Vui get() {
+        return vui();
+    }
+
     public static synchronized void init() {
         if (ready) return;
         ready = true;

@@ -9,10 +9,6 @@ import dev.henny.vibeyclient.ui.hud.HudWidget;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 
-/**
- * W A S D, jump, and the mouse buttons with their clicks per second. Keys light up in the accent colour with a short
- * eased fade (time based, no allocation); key labels follow the player's bindings.
- */
 final class KeystrokesWidget extends HudWidget {
     private static final int K = 18, GAP = 2;
     private static final int W = 0, A = 1, S = 2, D = 3, JUMP = 4, LMB = 5, RMB = 6;
@@ -68,7 +64,6 @@ final class KeystrokesWidget extends HudWidget {
         last = now;
         boolean inGame = ClientCompat.screen() == null || p.preview;
         boolean demo = p.preview && mc.level == null;
-        // in the editor with nothing pressed, a gentle demo so it does not look dead
         int demoKey = demo ? (int) ((now / 450) % 4) : -1;
         boolean[] down = DOWN;
         down[W] = demoKey == 0 || (inGame && mc.options.keyUp.isDown());
@@ -80,7 +75,6 @@ final class KeystrokesWidget extends HudWidget {
         down[RMB] = inGame && mc.options.keyUse.isDown();
         for (int i = 0; i < 7; i++) {
             float target = down[i] ? 1f : 0f;
-            // ~90 ms in, ~180 ms out
             float speed = down[i] ? 11f : 5.5f;
             glow[i] += (target - glow[i]) * Math.min(1f, dt * speed);
             if (Math.abs(target - glow[i]) < 0.01f) glow[i] = target;
@@ -118,7 +112,6 @@ final class KeystrokesWidget extends HudWidget {
         int base = st.background ? st.bg : 0x40000000;
         int lit = Theme.alpha(st.accent, 0.85f);
         int fill = Theme.mix(base, lit, t);
-        // pressed keys sink by one pixel
         int sink = t > 0.5f ? 1 : 0;
         p.fillShape(x, y + sink, w, h - sink, fill);
         if (st.border) p.outlineShape(x, y + sink, w, h - sink, Theme.alpha(st.accent, 0.7f));
@@ -135,7 +128,6 @@ final class KeystrokesWidget extends HudWidget {
         int tw = p.g.width(s);
         float t = glow[i];
         int sink = t > 0.5f ? 1 : 0;
-        // small second line: the CPS
         p.g.push();
         p.g.translate(x + w / 2f, y + sink + 12);
         p.g.scale(0.75f, 0.75f);

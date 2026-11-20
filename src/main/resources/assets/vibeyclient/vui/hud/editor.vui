@@ -1,17 +1,25 @@
 <import name="hud-hint" src="vibeyclient:hud/hint"/>
 <import name="widget-bar" src="vibeyclient:hud/widget-bar"/>
 <import name="hud-toolbar" src="vibeyclient:hud/toolbar"/>
+<import name="context-menu" src="vibeyclient:hud/context-menu"/>
+<import name="import-dialog" src="vibeyclient:hud/import-dialog"/>
+<import name="reset-dialog" src="vibeyclient:hud/reset-dialog"/>
+<import name="server-badge" src="vibeyclient:hud/server-badge"/>
 <import name="empty" src="vibeyclient:components/empty"/>
 <template>
   <stack class="hud-editor">
-    <hud-hint v-if="firstRun"/>
-    <empty v-if="widgetCount == 0" class="hud-empty" icon="hud" :title="t('ui.hud.empty')"
+    <server-badge v-for="b in badges" :key="b.id" :b="b"/>
+    <hud-hint v-if="firstRun && !busy"/>
+    <empty v-if="widgetCount == 0 && panel != 'widgets'" class="hud-empty" icon="hud" :title="t('ui.hud.empty')"
            :action="t('ui.hud.widgets')" @act="panel = 'widgets'"/>
-    <widget-bar v-if="selected"/>
+    <widget-bar v-if="selected && !busy"/>
+    <context-menu/>
     <hud-toolbar/>
+    <import-dialog/>
+    <reset-dialog/>
   </stack>
 </template>
 <style>
-.hud-editor { align-items: stretch; }
-.hud-empty { position: absolute; anchor: center; }
+.hud-editor { width: 100%; height: 100%; align-items: stretch; pointer-events: none; }
+.hud-empty { position: absolute; anchor: center; pointer-events: auto; }
 </style>
