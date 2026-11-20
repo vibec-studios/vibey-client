@@ -1,0 +1,82 @@
+<import name="wp-ico" src="vibeyclient:waypoints/ico"/>
+<import name="wp-btn" src="vibeyclient:waypoints/btn"/>
+<template>
+  <stack class="wp-scrim">
+    <column class="wp-card">
+      <row class="wp-bar">
+        <wp-ico name="pin" class="wp-accent"/>
+        <text class="wp-title">{{ t('waypoints.ui.title') }}</text>
+        <text class="wp-count">{{ len(rows) }}</text>
+        <spacer/>
+        <wp-btn id="add" icon="plus" :tip="t('waypoints.ui.add')" @click="add()"/>
+        <wp-btn id="import" icon="import" :tip="t('waypoints.ui.import')" @click="importCode()"/>
+        <wp-btn id="shareAll" icon="copy" :tip="t('waypoints.ui.shareAll')" @click="shareAll()"/>
+        <wp-btn id="map" icon="map" :tip="t('waypoints.ui.map')" @click="openMap()"/>
+        <wp-btn id="close" icon="close" :tip="t('waypoints.ui.close')" @click="close()"/>
+      </row>
+      <row class="wp-body">
+        <scroll class="wp-rows">
+          <row v-for="r in rows" :key="r.id" class="wp-row" :class="{ sel: r.id == selId, off: !r.visible }" @click="select(r)">
+            <box class="wp-swatch" :style="{ background: r.color }"/>
+            <wp-ico v-if="r.death" name="skull" class="wp-death"/>
+            <text class="wp-name">{{ r.name }}</text>
+            <text class="wp-dist">{{ r.dist }}</text>
+            <wp-btn :icon="r.nav ? 'navon' : 'nav'" :active="r.nav" :tip="t('waypoints.ui.navigate')" @click="navigate(r)"/>
+            <wp-btn :icon="r.visible ? 'eye' : 'eyeoff'" :tip="t('waypoints.ui.visible')" @click="toggle(r)"/>
+          </row>
+          <column v-if="len(rows) == 0" class="wp-empty">
+            <wp-ico name="pin" class="wp-empty-icon"/>
+            <text class="wp-muted">{{ t('waypoints.ui.empty') }}</text>
+            <button class="primary" @click="add()">{{ t('waypoints.ui.add') }}</button>
+          </column>
+        </scroll>
+        <column v-if="sel" class="wp-editor">
+          <textfield id="name" class="wp-field" v-model="editName" max-length="32" @change="rename()" @submit="rename()"/>
+          <row class="wp-swatches">
+            <box v-for="c in palette" :key="c" class="wp-sw" :class="{ on: c == sel.color }" :style="{ background: c }" @click="pickColor(c)"/>
+          </row>
+          <text class="wp-dim">{{ sel.dimName }}</text>
+          <text class="wp-coords">{{ sel.coords }}</text>
+          <text class="wp-portal">{{ sel.portal }}</text>
+          <spacer/>
+          <row class="wp-tools">
+            <wp-btn id="nav" :icon="sel.nav ? 'navon' : 'nav'" :active="sel.nav" :tip="t('waypoints.ui.navigate')" @click="navigate(sel)"/>
+            <wp-btn id="share" icon="copy" :tip="t('waypoints.ui.share')" @click="share(sel)"/>
+            <spacer/>
+            <wp-btn id="delete" icon="trash" class="danger" :tip="t('waypoints.ui.delete')" @click="remove(sel)"/>
+          </row>
+        </column>
+      </row>
+    </column>
+  </stack>
+</template>
+<style>
+.wp-scrim { background: $scrim; align-items: center; }
+.wp-card { width: 300; height: 196; background: $panel; border: 1 $line; }
+.wp-bar { height: 22; gap: 3; padding: 0 4 0 6; border-bottom: 1 $line; flex-shrink: 0; }
+.wp-accent { color: $brand2; }
+.wp-title { font-weight: bold; color: $text; text-wrap: nowrap; }
+.wp-count { color: $dim; }
+.wp-body { grow: 1; min-height: 0; align-items: stretch; }
+.wp-rows { grow: 1; padding: 3; gap: 1; min-width: 0; justify: start; }
+.wp-row { height: 18; gap: 4; padding: 0 2 0 4; border: 1 transparent; cursor: pointer; flex-shrink: 0; }
+.wp-row:hover { background: $surface2; }
+.wp-row.sel { border-color: $brand; background: $surface2; }
+.wp-row.off .wp-name { color: $dim; }
+.wp-swatch { size: 7; flex-shrink: 0; }
+.wp-death { color: $danger; }
+.wp-name { color: $text; grow: 1; min-width: 0; text-wrap: nowrap; text-overflow: ellipsis; }
+.wp-dist { color: $muted; text-wrap: nowrap; }
+.wp-empty { align-items: center; justify: center; gap: 6; padding: 12; grow: 1; }
+.wp-empty-icon { size: 18; color: $dim; }
+.wp-muted { color: $muted; }
+.wp-editor { width: 116; padding: 6; gap: 5; border-left: 1 $line; flex-shrink: 0; align-items: stretch; }
+.wp-field { width: 104; height: 16; }
+.wp-swatches { gap: 2; flex-wrap: wrap; }
+.wp-sw { size: 10; border: 1 $line2; cursor: pointer; }
+.wp-sw.on { border-color: $text; }
+.wp-dim { color: $brand2; font-scale: 0.75; text-transform: uppercase; }
+.wp-coords { color: $text; }
+.wp-portal { color: $muted; }
+.wp-tools { gap: 2; }
+</style>

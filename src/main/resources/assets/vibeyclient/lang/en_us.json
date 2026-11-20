@@ -18,5 +18,9 @@
   "key.vibeyclient.pvp.zoomKey": "Zoom (hold)",
   "key.vibeyclient.hud.editor": "HUD editor",
   "key.vibeyclient.clips.saveKey": "Save clip",
-  "key.vibeyclient.clips.galleryKey": "Clips gallery"
+  "key.vibeyclient.clips.galleryKey": "Clips gallery",
+  "key.vibeyclient.waypoints.addKey": "Add waypoint",
+  "key.vibeyclient.waypoints.mapKey": "Open map",
+  "key.vibeyclient.waypoints.minimapKey": "Toggle minimap",
+  "key.vibeyclient.waypoints.listKey": "Waypoint list"
 }
