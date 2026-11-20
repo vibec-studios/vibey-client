@@ -1,6 +1,8 @@
 package dev.henny.vibeyclient.gametest;
 
 import dev.henny.vibeyclient.module.clips.shots.ShotFiles;
+import dev.henny.vibeyclient.module.clips.shots.ShotFolder;
+import net.fabricmc.loader.api.FabricLoader;
 
 import javax.imageio.ImageIO;
 import java.awt.Color;
@@ -13,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
+import java.util.Comparator;
 import java.util.Locale;
 
 final class GalleryFixtures {
@@ -23,7 +26,37 @@ final class GalleryFixtures {
 
     private GalleryFixtures() {}
 
-    static void write() {
+    static void isolate() {
+        Path root = FabricLoader.getInstance().getGameDir().resolve("vibeyclient-test").resolve("gallery");
+        wipe(root);
+        ShotFiles.useFolder(ShotFolder.in(root));
+        write();
+    }
+
+    static void release() {
+        ShotFiles.useFolder(null);
+    }
+
+    static void add(Path screenshot, String name) {
+        try {
+            Path f = ShotFiles.dir().resolve(name);
+            Files.copy(screenshot, f);
+            Files.setLastModifiedTime(f, FileTime.fromMillis(BASE + COUNT * 86_400_000L));
+        } catch (IOException e) {
+            throw new AssertionError("fixture " + name, e);
+        }
+    }
+
+    private static void wipe(Path root) {
+        if (!Files.exists(root)) return;
+        try (var walk = Files.walk(root)) {
+            for (Path p : walk.sorted(Comparator.reverseOrder()).toList()) Files.delete(p);
+        } catch (IOException e) {
+            throw new AssertionError("wipe " + root, e);
+        }
+    }
+
+    private static void write() {
         try {
             Path dir = ShotFiles.dir();
             Files.createDirectories(dir);

@@ -44,14 +44,17 @@ public final class GalleryGameTest implements FabricClientGameTest {
             GlobalSettings.language.set(GlobalSettings.Language.ENGLISH);
             check(ModuleManager.get().get(ClipsModule.class).isEnabled(), "clips module should be on");
         });
-        GalleryFixtures.write();
+        GalleryFixtures.isolate();
         try (TestSingleplayerContext world = ctx.worldBuilder().setUseConsistentSettings(false)
                 .adjustSettings(s -> s.setSeed("vibeycamera")).create()) {
             world.getClientWorld().waitForChunksRender();
             int[] o = room(ctx, world);
-            ctx.takeScreenshot("gallery_world_source");
+            GalleryFixtures.add(ctx.takeScreenshot("gallery_world_source"), "2025-10-20_12.00.00.png");
             GalleryScreenChecks.screen(ctx);
             GalleryPanelChecks.panel(ctx, o);
+        } finally {
+            ctx.runOnClient(mc -> Shots.removePanel());
+            GalleryFixtures.release();
         }
         ctx.runOnClient(mc -> GlobalSettings.language.set(GlobalSettings.Language.AUTO));
     }
