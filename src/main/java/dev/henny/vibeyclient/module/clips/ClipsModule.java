@@ -12,6 +12,7 @@ import dev.henny.vibeyclient.api.setting.Settings.KeybindSetting;
 import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.client.Keys;
 import dev.henny.vibeyclient.module.clips.encode.Encoder;
+import dev.henny.vibeyclient.module.clips.shots.Shots;
 import dev.henny.vibeyclient.module.clips.ui.ClipsGalleryScreen;
 import dev.henny.vibeyclient.ui.Gfx;
 
@@ -72,6 +73,9 @@ public final class ClipsModule extends VibeyModule {
     // ---------------------------------------------------------------------------------------- buttons (page header)
     public final ActionSetting openGallery = action("openGallery", () -> ClipsGalleryScreen.open(ClientCompat.screen()));
     public final ActionSetting openFolder = action("openFolder", () -> ClipsFiles.openFolder());
+    public final ActionSetting openShots = action("openShots", Shots::openScreen);
+    public final ActionSetting placeShots = action("placeShots", Shots::placePanel)
+            .visibleWhen(() -> net.minecraft.client.Minecraft.getInstance().level != null);
     public final ActionSetting setupFfmpeg = action("setupFfmpeg", () -> recorder.setupFfmpeg())
             .visibleWhen(() -> this.buffer.on() && recorder.state() == Recorder.State.NEED_FFMPEG);
 
@@ -80,6 +84,7 @@ public final class ClipsModule extends VibeyModule {
     public final KeybindSetting saveKey = keybind("saveKey", Keys.F8).serverRule(RULE_CLIPS);
     public final IntSetting length = intRange("length", 30, 10, 120, 5).unit(" s").section("buffer").visibleWhen(buffer::on);
     public final KeybindSetting galleryKey = keybind("galleryKey", Keys.UNBOUND);
+    public final KeybindSetting shotsKey = keybind("shotsKey", Keys.UNBOUND).onPress(Shots::openScreen);
 
     // ---------------------------------------------------------------------------------------- quality
     public final EnumSetting<Resolution> resolution = choice("resolution", Resolution.P720).section("quality");
@@ -197,6 +202,7 @@ public final class ClipsModule extends VibeyModule {
     public void tick() {
         recorder.tick();
         auto.tick();
+        Shots.tick();
     }
 
     @Override
@@ -215,6 +221,7 @@ public final class ClipsModule extends VibeyModule {
     public void onWorldLeave() {
         recorder.worldLeft();
         auto.reset();
+        Shots.removePanel();
     }
 
     // ============================================================================================ effective values

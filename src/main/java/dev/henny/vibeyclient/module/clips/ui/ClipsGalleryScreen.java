@@ -221,7 +221,8 @@ public final class ClipsGalleryScreen extends CardScreen {
         }
         int right = x + w - PAD;
         int left = buttonRight(g, right, by, 18, Lang.tr("clips.gallery.folder"), Style.SECONDARY, ClipsFiles::openFolder);
-        buttonRight(g, left - 6, by, 18, Lang.tr("clips.gallery.settings"), Style.SECONDARY, ClipsPages::openSettings);
+        int next = buttonRight(g, left - 6, by, 18, Lang.tr("clips.gallery.settings"), Style.SECONDARY, ClipsPages::openSettings);
+        buttonRight(g, next - 6, by, 18, Lang.tr("clips.gallery.shots"), Style.SECONDARY, () -> dev.henny.vibeyclient.module.clips.shots.Shots.openScreen());
     }
 
     static String gb(long bytes) {

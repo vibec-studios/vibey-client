@@ -1,0 +1,43 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<import name="icon-button" src="vibeyclient:components/icon-button"/>
+<import name="empty" src="vibeyclient:components/empty"/>
+<import name="shot-tile" src="vibeyclient:clips/shot-tile"/>
+<template>
+  <column class="sp-card">
+    <row class="sp-bar">
+      <ico name="image" class="sp-accent"/>
+      <text class="sp-title">{{ t('clips.shots.title') }}</text>
+      <text class="sp-pos">{{ position }}</text>
+      <spacer/>
+      <icon-button v-if="sel" id="fav" icon="star" :active="sel.fav" :tip="t('clips.shots.fav')" @click="fav()"/>
+      <icon-button v-if="sel" id="copy" icon="copy" :tip="t('clips.shots.copy')" @click="copy()"/>
+      <icon-button id="close" icon="close" :tip="t('clips.shots.close')" @click="unplace()"/>
+    </row>
+    <stack class="sp-view">
+      <image v-if="sel" class="sp-preview" :src="preview"/>
+      <empty v-if="!sel" icon="image" :title="loading ? t('clips.shots.loading') : t('clips.shots.empty')"/>
+      <box id="prev" class="sp-nav sp-left" @click="prev()"><ico name="back"/></box>
+      <box id="next" class="sp-nav sp-right" @click="next()"><ico name="next"/></box>
+    </stack>
+    <row class="sp-strip">
+      <shot-tile v-for="r in strip" :key="r.id" :row="r" class="sp-thumb" @click="select(r)" @enter="look(r)"
+                 @leave="unlook(r)"/>
+    </row>
+  </column>
+</template>
+<style>
+.sp-card { width: 100%; height: 100%; background: alpha($bg, .86); border: 1 $line2; }
+.sp-bar { height: 22; gap: 3; padding: 0 3 0 6; border-bottom: 1 $line; flex-shrink: 0; }
+.sp-accent { color: $brand2; }
+.sp-title { font-weight: bold; color: $text; text-wrap: nowrap; }
+.sp-pos { color: $dim; text-wrap: nowrap; }
+.sp-view { grow: 1; min-height: 0; align-items: center; justify: center; padding: 4; }
+.sp-preview { height: 100%; aspect-ratio: 16/9; background: $surface2; }
+.sp-nav { position: absolute; width: 22; height: 40; align-items: center; justify: center; color: $muted;
+          background: alpha($bg, .5); border: 1 transparent; cursor: pointer; }
+.sp-nav:hover { color: $text; border-color: $line2; background: $surface2; }
+.sp-left { anchor: left; left: 4; }
+.sp-right { anchor: right; left: -4; }
+.sp-strip { height: 44; gap: 4; padding: 4; justify: center; border-top: 1 $line; flex-shrink: 0; }
+.sp-thumb { height: 100%; }
+</style>
