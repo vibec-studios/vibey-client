@@ -75,7 +75,7 @@ public final class MenuScreen extends SyncedScreen implements MenuHost {
         return view().typed(codepoint);
     }
 
-    private boolean typing() {
+    public boolean typing() {
         Element f = document().events().focus().focused();
         return f != null && (f.tag().equals("textfield") || f.tag().equals("keybind"));
     }

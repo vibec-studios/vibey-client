@@ -289,6 +289,8 @@ public final class SocialModule extends VibeyModule {
         if (!safe) return false;
         GuiEventListener f = screen.getFocused();
         if (f instanceof EditBox eb && eb.isFocused()) return false;
+        if (screen instanceof dev.henny.vibeyclient.ui.vui.menu.MenuScreen m && m.typing()) return false;
+        if (screen instanceof VibeyScreen v && v.typing()) return false;
         openSidebar(null);
         return true;
     }
