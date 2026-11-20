@@ -3,7 +3,7 @@
   "description": "Items in der Hand, Schwung, Glanz, Item-Physik und Partikel.",
   "summary": "Hand-Items, Glanz, Partikel",
   "section": {
-    "held": "Item in der Hand",
+    "held": "In der Hand",
     "swing": "Schwung",
     "items": "Items",
     "glint": "Glanz",
