@@ -42,7 +42,7 @@ jobs:
 
       - name: Build all jars
         run: >
-          ./gradlew buildAll --stacktrace
+          ./gradlew buildAll --continue --stacktrace
           -Porg.gradle.java.installations.auto-download=false
           -Porg.gradle.java.installations.fromEnv=JAVA_HOME_21_X64,JAVA_HOME_25_X64
 
