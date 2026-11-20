@@ -1,0 +1,30 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<import name="chip" src="vibeyclient:components/chip"/>
+<template>
+  <stack class="srv-layer">
+    <row v-if="searchOn" id="search" class="srv-search" :class="{ some: shown != '' }" :style="{ left: left, top: top }">
+      <ico name="search" class="srv-ico"/>
+      <textfield id="q" class="srv-field" v-model="query" max-length="48" :placeholder="tr('servers.ui.search')"/>
+      <text v-if="shown != ''" id="shown" class="srv-count">{{ shown }}</text>
+      <button v-if="query != ''" id="clear" class="srv-clear" :tooltip="tr('servers.ui.clear')" @click="clear()">
+        <ico name="close"/>
+      </button>
+    </row>
+    <chip v-if="favOn" id="favs" class="srv-favs" icon="star" :label="tr('servers.ui.favourites')" :count="favCount"
+          :on="favOnly" :tip="tr('servers.ui.favouritesTip')" :style="{ right: right, top: top }" @click="toggleFavOnly()"/>
+  </stack>
+</template>
+<style>
+.srv-layer { width: 100%; height: 100%; pointer-events: none; }
+.srv-search { position: absolute; width: 108; height: 14; gap: 3; padding: 0 2 0 3; background: $panel;
+              border: 1 $line2; color: $dim; transition: border-color 150ms out; }
+.srv-search:focus-within { border-color: $brand; color: $muted; }
+.srv-search.some { border-color: $brand; }
+.srv-ico { flex-shrink: 0; }
+.srv-field { grow: 1; basis: 0; width: 0; min-width: 0; height: 12; padding: 0; border: none; background: transparent; }
+.srv-count { color: $brand2; text-wrap: nowrap; flex-shrink: 0; }
+.srv-clear { width: 10; height: 10; padding: 0; border: none; background: transparent; color: $dim; flex-shrink: 0; }
+.srv-clear:hover { color: $text; }
+.srv-favs { position: absolute; anchor: top-right; }
+.srv-favs.on { color: #ffd23f; }
+</style>

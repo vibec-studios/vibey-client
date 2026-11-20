@@ -1,0 +1,40 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<template>
+  <stack class="srv-layer">
+    <column v-if="open" id="preview" class="srv-card" :style="{ left: x, top: y }">
+      <row class="srv-head">
+        <ico v-if="fav" name="star" class="srv-star"/>
+        <text id="name" class="srv-name">{{ name }}</text>
+        <spacer/>
+        <text id="ping" class="srv-ping" :class="{ bad: bad }">{{ ping }}</text>
+      </row>
+      <text v-for="l in lines" :key="l.id" class="srv-motd">
+        <span v-for="s in l.segs" :key="s.id" :class="{ b: s.bold, i: s.italic }" :style="{ color: s.color }">{{ s.text }}</span>
+      </text>
+      <row class="srv-meta">
+        <ico name="person" class="srv-meta-ico"/>
+        <text id="players" class="srv-players">{{ players }}</text>
+        <spacer/>
+        <text id="version" class="srv-version" :class="{ bad: bad }">{{ version }}</text>
+      </row>
+      <text v-if="sample != ''" id="sample" class="srv-sample">{{ sample }}</text>
+    </column>
+  </stack>
+</template>
+<style>
+.srv-layer { width: 100%; height: 100%; pointer-events: none; }
+.srv-card { position: absolute; width: 240; padding: 5 6; gap: 2; background: $panel; border: 1 $brand; pointer-events: none; }
+.srv-head { gap: 3; height: 10; }
+.srv-star { color: #ffd23f; flex-shrink: 0; }
+.srv-name { color: $text; font-weight: bold; text-wrap: nowrap; text-overflow: ellipsis; min-width: 0; shrink: 1; }
+.srv-ping { color: $brand2; text-wrap: nowrap; flex-shrink: 0; }
+.srv-ping.bad { color: $danger; }
+.srv-motd { color: $muted; text-wrap: nowrap; text-overflow: ellipsis; }
+.srv-motd .b { font-weight: bold; }
+.srv-meta { gap: 3; height: 10; margin-top: 2; border-top: 1 $line; padding-top: 2; color: $dim; }
+.srv-meta-ico { flex-shrink: 0; }
+.srv-players { color: $text; text-wrap: nowrap; }
+.srv-version { color: $dim; text-wrap: nowrap; text-overflow: ellipsis; min-width: 0; shrink: 1; }
+.srv-version.bad { color: $danger; }
+.srv-sample { color: $dim; text-wrap: nowrap; text-overflow: ellipsis; }
+</style>

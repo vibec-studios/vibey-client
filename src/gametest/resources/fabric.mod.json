@@ -32,7 +32,9 @@
       "dev.henny.vibeyclient.gametest.CameraGameTest",
       "dev.henny.vibeyclient.gametest.VisualsGameTest",
       "dev.henny.vibeyclient.gametest.GalleryGameTest",
-      "dev.henny.vibeyclient.gametest.ChatGameTest"
+      "dev.henny.vibeyclient.gametest.ChatGameTest",
+      "dev.henny.vibeyclient.gametest.InventoryGameTest",
+      "dev.henny.vibeyclient.gametest.ServersGameTest"
     ]
   },
   "mixins": ["vibeyclient-gametest.mixins.json"],

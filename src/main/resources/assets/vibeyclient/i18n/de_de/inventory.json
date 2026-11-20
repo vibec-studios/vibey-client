@@ -1,0 +1,54 @@
+{
+  "name": "Inventar",
+  "description": "Item-Vorschau, schnelles Verschieben, Suche und Hotbar-Sets.",
+  "summary": "Vorschau, Suche, Sets",
+  "section": {
+    "tooltip": "Tooltips",
+    "tweaks": "Schnell verschieben",
+    "search": "Suche",
+    "presets": "Hotbar-Sets"
+  },
+  "setting": {
+    "savePreset": "Hotbar speichern",
+    "savePreset.action": "Hotbar speichern",
+    "editHud": "Set-Leiste verschieben",
+    "editHud.action": "HUD bearbeiten",
+    "durability": "Haltbarkeit %",
+    "durability.desc": "Im Item-Tooltip.",
+    "preview": "Shulker-Vorschau",
+    "preview.desc": "Box überfahren zeigt den Inhalt.",
+    "tweaks": "Schnell verschieben",
+    "tweaks.desc": "Ziehen und Mausrad verschieben Items. Manche Server verbieten es.",
+    "dragMove": "Shift-Ziehen",
+    "dragMove.desc": "Verschiebt jeden überfahrenen Stapel.",
+    "dragMatching": "Nur gleiche Items",
+    "wheelMove": "Mausrad verschiebt",
+    "wheelMove.desc": "Runter schickt eins, Shift einen Stapel.",
+    "wheelInvert": "Mausrad umkehren",
+    "clickRate": "Klick-Limit",
+    "clickRate.desc": "Klicks pro Sekunde, nie mehr.",
+    "search": "Suchfeld",
+    "search.desc": "Strg+F in jedem Behälter.",
+    "searchKeep": "Suche behalten",
+    "presets": "Hotbar-Sets",
+    "presets.desc": "Taste tippen wechselt, halten und scrollen wählt.",
+    "presetCount": "Sets",
+    "presetAlways": "Leiste immer zeigen",
+    "presetKey": "Set wechseln",
+    "presetSaveKey": "Set speichern"
+  },
+  "tooltip": {
+    "durability": "Haltbarkeit {0}% ({1})"
+  },
+  "preset": {
+    "saved": "Set {0} gespeichert"
+  },
+  "search": {
+    "hint": "Suchen",
+    "clear": "Leeren"
+  },
+  "hud": {
+    "presets": "Hotbar-Sets",
+    "presets.desc": "Gespeicherte Hotbars"
+  }
+}

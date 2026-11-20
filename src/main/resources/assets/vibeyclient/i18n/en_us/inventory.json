@@ -1,0 +1,54 @@
+{
+  "name": "Inventory",
+  "description": "Item previews, quick moves, search and hotbar presets.",
+  "summary": "Previews, search, presets",
+  "section": {
+    "tooltip": "Tooltips",
+    "tweaks": "Quick moves",
+    "search": "Search",
+    "presets": "Hotbar presets"
+  },
+  "setting": {
+    "savePreset": "Save hotbar",
+    "savePreset.action": "Save hotbar",
+    "editHud": "Move preset bar",
+    "editHud.action": "Edit HUD",
+    "durability": "Durability %",
+    "durability.desc": "Shown in item tooltips.",
+    "preview": "Shulker preview",
+    "preview.desc": "Hover a box to see inside.",
+    "tweaks": "Quick moves",
+    "tweaks.desc": "Drag and wheel move items. Some servers forbid it.",
+    "dragMove": "Shift-drag moves",
+    "dragMove.desc": "Moves every stack you pass.",
+    "dragMatching": "Same item only",
+    "wheelMove": "Wheel moves",
+    "wheelMove.desc": "Down sends one, Shift a stack.",
+    "wheelInvert": "Invert wheel",
+    "clickRate": "Click limit",
+    "clickRate.desc": "Clicks per second, never more.",
+    "search": "Search field",
+    "search.desc": "Ctrl+F in any container.",
+    "searchKeep": "Keep search",
+    "presets": "Hotbar presets",
+    "presets.desc": "Tap the key to switch, hold and scroll to pick.",
+    "presetCount": "Presets",
+    "presetAlways": "Always show bar",
+    "presetKey": "Switch preset",
+    "presetSaveKey": "Save preset"
+  },
+  "tooltip": {
+    "durability": "Durability {0}% ({1})"
+  },
+  "preset": {
+    "saved": "Preset {0} saved"
+  },
+  "search": {
+    "hint": "Search",
+    "clear": "Clear"
+  },
+  "hud": {
+    "presets": "Hotbar presets",
+    "presets.desc": "Saved hotbars"
+  }
+}

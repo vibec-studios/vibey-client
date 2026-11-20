@@ -30,7 +30,9 @@ block/mob card with world pinning, food gain, tool warning, TNT timer; Fabric 1.
 part of `clips` ([CLIPS.md](CLIPS.md) §14). `chat` (timestamps, search, copy, mentions, filters, DM
 toasts, movable chat window; Fabric 1.21.11 only, see [CHAT.md](CHAT.md)). Social also has Discord Rich Presence and
 streamer mode (part `social.streamer`, Fabric 1.21.11), see [SOCIAL.md](SOCIAL.md); `api/privacy/Privacy` is the shared
-streamer state any module can read.
+streamer state any module can read. `inventory` (durability %, shulker preview, quick moves, search, hotbar presets; Fabric
+1.21.11 only, see [INVENTORY.md](INVENTORY.md)), `servers` (live pings, search, favourites, MOTD preview in the
+multiplayer screen; Fabric 1.21.11 only, see [SERVERS.md](SERVERS.md)).
 
 ## Targets and boundaries
 

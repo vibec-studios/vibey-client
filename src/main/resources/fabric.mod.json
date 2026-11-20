@@ -33,6 +33,8 @@
     "vibeyclient.info.mixins.json",
     "vibeyclient.camera.mixins.json",
     "vibeyclient.visuals.mixins.json",
+    "vibeyclient.inventory.mixins.json",
+    "vibeyclient.servers.mixins.json",
     "vibeyclient.devlink.mixins.json",
     "vibeyclient.nametags.mixins.json",
     "vibeyclient.chat.mixins.json",

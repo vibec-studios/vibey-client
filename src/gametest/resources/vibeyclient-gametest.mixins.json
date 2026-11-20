@@ -3,6 +3,6 @@
   "minVersion": "0.8",
   "package": "dev.henny.vibeyclient.gametest.mixin",
   "compatibilityLevel": "JAVA_21",
-  "client": ["ParityTickMixin", "ParityFrameMixin", "ParityPartialMixin", "FrameClockMixin"],
+  "client": ["ParityTickMixin", "ParityFrameMixin", "ParityPartialMixin", "FrameClockMixin", "TestMouseModifiersMixin"],
   "injectors": { "defaultRequire": 1 }
 }

@@ -1,0 +1,22 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<template>
+  <row id="search" class="inv-search" :class="{ some: some }" :style="{ left: x, top: y }">
+    <ico name="search" class="inv-ico"/>
+    <textfield id="q" class="inv-field" v-model="query" max-length="48" :placeholder="tr('inventory.search.hint')"/>
+    <text v-if="some" id="count" class="inv-count">{{ count }}</text>
+    <button v-if="some" id="clear" class="inv-clear" :tooltip="tr('inventory.search.clear')" @click="clear()">
+      <ico name="close"/>
+    </button>
+  </row>
+</template>
+<style>
+.inv-search { position: absolute; width: 96; height: 14; gap: 3; padding: 0 2 0 3; background: $panel;
+            border: 1 $line2; color: $dim; transition: border-color 150ms out; }
+.inv-search:focus-within { border-color: $brand; color: $muted; }
+.inv-search.some { border-color: $brand; }
+.inv-ico { flex-shrink: 0; }
+.inv-field { grow: 1; basis: 0; width: 0; min-width: 0; height: 12; padding: 0; border: none; background: transparent; }
+.inv-count { color: $brand2; text-wrap: nowrap; flex-shrink: 0; }
+.inv-clear { width: 10; height: 10; padding: 0; border: none; background: transparent; color: $dim; flex-shrink: 0; }
+.inv-clear:hover { color: $text; }
+</style>
