@@ -36,7 +36,7 @@ public final class WaypointsModule extends VibeyModule {
 
     public final KeybindSetting addKey = keybind("addKey", Keys.J).onPress(() -> runtime().actions().addHere());
     public final KeybindSetting mapKey = keybind("mapKey", Keys.M).onPress(Screens::map);
-    public final KeybindSetting minimapKey = keybind("minimapKey", Keys.I).serverRule(RULE_MINIMAP)
+    public final KeybindSetting minimapKey = keybind("minimapKey", Keys.Z).serverRule(RULE_MINIMAP)
             .onPress(() -> minimap.set(!minimap.get()));
     public final KeybindSetting listKey = keybind("listKey", Keys.UNBOUND).onPress(() -> Screens.list(null));
 

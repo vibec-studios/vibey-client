@@ -27,7 +27,7 @@ public final class HudModule extends VibeyModule {
         if (ClientCompat.screen() == null) HudLayout.openEditor(null);
     });
     public final KeybindSetting timerKey = keybind("timerKey", Keys.U).onPress(Timers::toggle);
-    public final KeybindSetting timerLap = keybind("timerLap", Keys.N).onPress(Timers::lap);
+    public final KeybindSetting timerLap = keybind("timerLap", Keys.Y).onPress(Timers::lap);
     public final BoolSetting hideF3 = bool("hideF3", true);
     public final BoolSetting hideVanillaEffects = bool("hideVanillaEffects", true);
     public final ActionSetting resetLayout = action("resetLayout", this::resetToDefault).advanced();

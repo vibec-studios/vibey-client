@@ -14,7 +14,7 @@ full-screen map of explored terrain, a death point marker and Overworld ↔ Neth
 |---|---|
 | Waypoints | `J` adds one at your feet (name *Waypoint n*, next palette colour). The list (module page button, map button or the unbound *Waypoint list* key) renames, recolours, hides, deletes, navigates and copies share codes. |
 | Beacons | Every visible waypoint of the current dimension is an r3 world object: a coloured ◆ (☠ for the death point) floating 1.5 blocks above the point, a light beam and a label *name · distance*. Seen through terrain. |
-| Minimap | HUD widget `waypoints.minimap` (top right, 96 × 96): explored terrain, own waypoints (dots, clamped to the edge when outside), north mark, your arrow. Turns with you or north up, 4 zoom steps. No players, no mobs, ever. Off by default, `I` toggles it. |
+| Minimap | HUD widget `waypoints.minimap` (top right, 96 × 96): explored terrain, own waypoints (dots, clamped to the edge when outside), north mark, your arrow. Turns with you or north up, 4 zoom steps. No players, no mobs, ever. Off by default, `Z` toggles it. |
 | World map | `M`: full screen, explored terrain of this dimension, waypoints with names (zoom ≥ 2 or hover), your arrow. |
 | Death point | Dying adds (or moves) the one *Death* waypoint. It is a normal beacon: look at it for the distance, left click for the arrow. |
 | Nether coordinates | Look at a nether portal: the matching coordinates of the other dimension show under the crosshair. Hovered beacons show their counterpart too. Waypoints of the other dimension are shown at the matching place (⇄, dimmed, locked). HUD widget `waypoints.portal` (hidden by default) shows where you would be. |
@@ -35,7 +35,7 @@ full-screen map of explored terrain, a death point marker and Overworld ↔ Neth
 | Map | left click on a waypoint / right click | open it in the list / navigate |
 | Minimap | HUD editor (`H`) | move, wheel = size, like every widget |
 
-Keys (Vibey Client category, rebindable): `addKey` J, `mapKey` M, `minimapKey` I, `listKey` unbound.
+Keys (Vibey Client category, rebindable): `addKey` J, `mapKey` M, `minimapKey` Z, `listKey` unbound.
 
 ## Data
 
