@@ -7,7 +7,6 @@ import dev.henny.vibeyclient.module.clips.shots.Shots;
 import dev.henny.vibeyclient.module.clips.shots.ShotsScreen;
 import dev.henny.vibeyclient.module.clips.shots.core.Shot;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
-import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,7 +26,7 @@ final class GalleryScreenChecks {
 
     static void screen(ClientGameTestContext ctx) {
         ctx.runOnClient(mc -> Shots.openScreen());
-        waitFor(ctx, "gallery rows", 200, () -> c().rows.size() >= GalleryFixtures.COUNT);
+        waitFor(ctx, "gallery rows", 200, () -> c().rows.size() == GalleryFixtures.COUNT + 1);
         waitFor(ctx, "thumbnails", 400, () -> c().rows.snapshot().stream().allMatch(r -> !r.thumb.peek().isEmpty()));
         ctx.waitTicks(5);
         int n = ctx.computeOnClient(mc -> c().rows.size());
@@ -35,13 +34,13 @@ final class GalleryScreenChecks {
         check(ctx.computeOnClient(mc -> mc.screen instanceof ShotsScreen), "gallery screen should be open");
         check(sorted(ctx, true), "newest first by default");
         KIT.shot(ctx, "screen_newest");
-        clickScreen(ctx, ".shot-tile", 2);
         String third = ctx.computeOnClient(mc -> c().rows.get(2).id);
+        clickScreen(ctx, ".shot-tile", 2);
         check(third.equals(ctx.computeOnClient(mc -> selected())), "clicking a tile selects it");
         waitFor(ctx, "preview", 200, () -> !c().preview.peek().isEmpty());
         KIT.shot(ctx, "screen_selected");
-        clickScreen(ctx, "#next", 0);
         String fourth = ctx.computeOnClient(mc -> c().rows.get(3).id);
+        clickScreen(ctx, "#next", 0);
         check(fourth.equals(ctx.computeOnClient(mc -> selected())), "next steps to the following screenshot");
         clickScreen(ctx, "#sort", 0);
         check("oldest".equals(ctx.computeOnClient(mc -> c().sort.peek())) && sorted(ctx, false), "sort chip: oldest first");
@@ -58,7 +57,7 @@ final class GalleryScreenChecks {
         String sel = ctx.computeOnClient(mc -> selected());
         clickScreen(ctx, "#fav", 0);
         ctx.waitTicks(10);
-        check(favouritesFile().contains(sel), "favourite saved to vibeyclient/screenshots.json");
+        check(favouritesFile().contains(sel), "favourite saved to the favourites file");
         clickScreen(ctx, "#favs", 0);
         check(ctx.computeOnClient(mc -> c().rows.size()) == 1, "favourites filter shows only the favourite");
         KIT.shot(ctx, "screen_favourites_only");
@@ -83,8 +82,9 @@ final class GalleryScreenChecks {
         KIT.shot(ctx, "screen_delete_armed");
         clickScreen(ctx, "#delete", 0);
         waitFor(ctx, "deleted", 200, () -> !Files.exists(file) && c().rows.snapshot().stream().noneMatch(r -> r.id.equals(sel)));
-        KIT.log("delete: %s gone, %d -> %d rows (review shots land in screenshots/ too)", sel, before,
-                ctx.computeOnClient(mc -> c().rows.size()));
+        int after = ctx.computeOnClient(mc -> c().rows.size());
+        KIT.log("delete: %s gone, %d -> %d rows", sel, before, after);
+        check(after == before - 1, "one row less after delete");
         check(ctx.computeOnClient(mc -> selected()) != null, "a neighbour is selected after delete");
         KIT.shot(ctx, "screen_after_delete");
     }
@@ -100,7 +100,7 @@ final class GalleryScreenChecks {
 
     private static String favouritesFile() {
         try {
-            return Files.readString(FabricLoader.getInstance().getGameDir().resolve("vibeyclient/screenshots.json"));
+            return Files.readString(ShotFiles.favouritesFile());
         } catch (IOException e) {
             return "";
         }

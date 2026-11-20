@@ -476,6 +476,10 @@ Favourites file (contract addition for the launcher, schema 1): `<gameDir>/vibey
 `{"schema":1,"favorites":["2026-11-20_12.00.00.png", …]}` – file names relative to `screenshots/`, written atomically
 (temp + rename). Unknown names are ignored; a deleted screenshot is removed from the list.
 
+`ShotFiles.useFolder(ShotFolder)` points the gallery at another folder + favourites file (tests use
+`<gameDir>/vibeyclient-test/gallery/`, so screenshots of other tests and the review shots never mix in). The selection
+follows the file name when the folder changes while the gallery is open (`ShotList.keepOrNear`).
+
 Test: `GalleryGameTest` (+ `GalleryFixtures`, `GalleryScreenChecks`, `GalleryPanelChecks`, `GalleryAim`), shots in
 `build/review/gallery/`: 7 generated screenshots + real ones, grid newest first, tile click, next, sort cycle, favourite
 (file written, filter), copy (toast), delete (armed, then gone), place on the north wall by left click, look at a strip

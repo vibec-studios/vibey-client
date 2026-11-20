@@ -18,14 +18,22 @@ import java.util.List;
 import java.util.Locale;
 
 public final class ShotFiles {
+    private static volatile ShotFolder override;
+
     private ShotFiles() {}
 
-    public static Path dir() {
-        return FabricLoader.getInstance().getGameDir().resolve("screenshots");
+    public static void useFolder(ShotFolder folder) {
+        override = folder;
     }
 
-    static Path favouritesFile() {
-        return FabricLoader.getInstance().getGameDir().resolve("vibeyclient").resolve("screenshots.json");
+    public static Path dir() {
+        ShotFolder o = override;
+        return o != null ? o.screenshots() : FabricLoader.getInstance().getGameDir().resolve("screenshots");
+    }
+
+    public static Path favouritesFile() {
+        ShotFolder o = override;
+        return o != null ? o.favourites() : FabricLoader.getInstance().getGameDir().resolve("vibeyclient").resolve("screenshots.json");
     }
 
     static Path cacheDir() {
