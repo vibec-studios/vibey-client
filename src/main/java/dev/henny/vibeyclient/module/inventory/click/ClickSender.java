@@ -51,6 +51,11 @@ public final class ClickSender {
         return sent;
     }
 
+    public static void cancelQueued() {
+        INTENTS.clear();
+        current = null;
+    }
+
     public static void clear() {
         PENDING.clear();
         INTENTS.clear();
