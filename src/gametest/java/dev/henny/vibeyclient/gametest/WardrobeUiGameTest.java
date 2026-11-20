@@ -1,15 +1,21 @@
 package dev.henny.vibeyclient.gametest;
 
+import dev.henny.cosmetico.preview.MouseAction;
+
 import dev.henny.vibeyclient.api.GlobalSettings;
 import dev.henny.vibeyclient.api.Services;
-import dev.henny.vibeyclient.avatar.AvatarItem;
-import dev.henny.vibeyclient.avatar.AvatarItems;
-import dev.henny.vibeyclient.avatar.ItemSource;
-import dev.henny.vibeyclient.avatar.Rarity;
-import dev.henny.vibeyclient.avatar.Slot;
-import dev.henny.vibeyclient.avatar.Wardrobe;
-import dev.henny.vibeyclient.avatar.bundle.Bundle;
-import dev.henny.vibeyclient.avatar.preview.AvatarPreview;
+import dev.henny.cosmetico.registry.Item;
+import dev.henny.cosmetico.registry.ItemInfo;
+import dev.henny.cosmetico.registry.ItemMeta;
+import dev.henny.cosmetico.model.Kind;
+import dev.henny.cosmetico.model.Text;
+import dev.henny.cosmetico.Cosmetico;
+import dev.henny.cosmetico.registry.ItemSource;
+import dev.henny.cosmetico.model.Rarity;
+import dev.henny.cosmetico.model.Slot;
+import dev.henny.vibeyclient.module.cosmetics.Wardrobe;
+import dev.henny.cosmetico.model.Bundle;
+import dev.henny.vibeyclient.module.cosmetics.preview.AvatarPreview;
 import dev.henny.vibeyclient.module.cosmetics.ui.WardrobeUi;
 import dev.henny.vibeyclient.ui.Gfx;
 import dev.henny.vibeyclient.ui.Theme;
@@ -38,7 +44,7 @@ public final class WardrobeUiGameTest implements FabricClientGameTest {
 
     private final FakeWardrobe wardrobe = new FakeWardrobe();
     private final FakePreview preview = new FakePreview();
-    private final List<AvatarItem> items = new ArrayList<>();
+    private final List<Item> items = new ArrayList<>();
     private Optional<Wardrobe> oldWardrobe = Optional.empty();
     private Optional<AvatarPreview> oldPreview = Optional.empty();
     private int oldScale;
@@ -69,7 +75,7 @@ public final class WardrobeUiGameTest implements FabricClientGameTest {
         } finally {
             context.setScreen(() -> null);
             context.runOnClient(mc -> {
-                for (AvatarItem i : items) AvatarItems.remove(i.id(), i.source());
+                for (Item i : items) Cosmetico.items().remove(i.id(), i.source());
                 Services.unregister(Wardrobe.class, wardrobe);
                 Services.unregister(AvatarPreview.class, preview);
                 oldWardrobe.ifPresent(w -> Services.register(Wardrobe.class, w));
@@ -175,7 +181,7 @@ public final class WardrobeUiGameTest implements FabricClientGameTest {
         context.runOnClient(mc -> {
             Services.unregister(Wardrobe.class, wardrobe);
             Services.unregister(AvatarPreview.class, preview);
-            for (AvatarItem i : items) AvatarItems.remove(i.id(), i.source());
+            for (Item i : items) Cosmetico.items().remove(i.id(), i.source());
         });
         context.waitTicks(4);
         context.takeScreenshot("wardrobe_s3_en_2_empty_no_services");
@@ -190,7 +196,7 @@ public final class WardrobeUiGameTest implements FabricClientGameTest {
         context.runOnClient(mc -> {
             Services.register(Wardrobe.class, wardrobe);
             Services.register(AvatarPreview.class, preview);
-            for (AvatarItem i : items) AvatarItems.put(i);
+            for (Item i : items) Cosmetico.items().put(i);
         });
 
         // big window (4K at scale 4 = 960 x 540) and small (854 x 480 at scale 2)
@@ -335,7 +341,7 @@ public final class WardrobeUiGameTest implements FabricClientGameTest {
         cosmetic("aurora_cape", Slot.CAPE, "Aurora Cape", "Polarlicht-Umhang", Rarity.EPIC, ItemSource.BUILTIN);
         cosmetic("pixel_stars_cape", Slot.CAPE, "Pixel Stars Cape", "Pixelsterne-Umhang", Rarity.RARE, ItemSource.DEV);
         cosmetic("ice_floe_cape", Slot.CAPE, "Ice Floe Cape with a very long name", "Eisscholle-Umhang mit langem Namen", Rarity.RARE, ItemSource.BUILTIN);
-        cosmetic("founder_cape", Slot.CAPE, "Founder Cape", "Gründer-Umhang", Rarity.LEGENDARY, ItemSource.CATALOG);
+        cosmetic("founder_cape", Slot.CAPE, "Founder Cape", "Gründer-Umhang", Rarity.LEGENDARY, ItemSource.REMOTE);
         cosmetic("crystal_wings", Slot.WINGS, "Crystal Ice Wings", "Kristalleisflügel", Rarity.LEGENDARY, ItemSource.BUILTIN);
         cosmetic("neon_wings", Slot.WINGS, "Neon Pixel Wings", "Neon-Pixelflügel", Rarity.EPIC, ItemSource.BUILTIN);
         cosmetic("snowflake_orbit", Slot.AURA, "Snowflake Orbit", "Schneeflocken-Orbit", Rarity.EPIC, ItemSource.BUILTIN);
@@ -355,20 +361,23 @@ public final class WardrobeUiGameTest implements FabricClientGameTest {
                 {"seal_flop", "Seal Flop", "Robben-Plumps"}, {"shrug", "Shrug", "Schulterzucken"}};
         for (int i = 0; i < emotes.length; i++) {
             Rarity r = emotes[i][0].equals("seal_summon") ? Rarity.EPIC : emotes[i][0].startsWith("seal") || emotes[i][0].equals("guitar") ? Rarity.RARE : Rarity.COMMON;
-            add(new AvatarItem(NS + emotes[i][0], Bundle.Kind.EMOTE, null, new Bundle.Text(emotes[i][1], emotes[i][2]), null,
-                    "Vibe Craft Studios", List.of("emote"), r, ItemSource.BUILTIN, i, null, null, "default", null, AvatarItems.nextRevision()));
+            add(item(NS + emotes[i][0], Kind.EMOTE, null, new Text(emotes[i][1], emotes[i][2]), List.of("emote"), r, ItemSource.BUILTIN, i));
         }
         wardrobe.locked.add(NS + "founder_cape");
     }
 
     private void cosmetic(String path, Slot slot, String en, String de, Rarity r, ItemSource src) {
-        add(new AvatarItem(NS + path, Bundle.Kind.COSMETIC, slot, new Bundle.Text(en, de), null, "Vibe Craft Studios",
-                List.of("seal"), r, src, items.size(), null, null, "default", null, AvatarItems.nextRevision()));
+        add(item(NS + path, Kind.COSMETIC, slot, new Text(en, de), List.of("seal"), r, src, items.size()));
     }
 
-    private void add(AvatarItem item) {
+    private static Item item(String id, Kind kind, Slot slot, Text name, List<String> tags, Rarity r, ItemSource src, int sort) {
+        ItemInfo info = new ItemInfo(id, kind, slot, name, Text.EMPTY, "Vibe Craft Studios", tags, r);
+        return new Item(info, src, ItemMeta.of(sort, null, null, "default"), null, Cosmetico.items().nextRevision());
+    }
+
+    private void add(Item item) {
         items.add(item);
-        AvatarItems.put(item);
+        Cosmetico.items().put(item);
     }
 
     // ============================================================================================ fakes
@@ -380,10 +389,10 @@ public final class WardrobeUiGameTest implements FabricClientGameTest {
         volatile String played;
 
         @Override public String equipped(Slot slot) { return equipped.get(slot); }
-        @Override public void equip(AvatarItem item) { if (!item.isEmote() && canUse(item)) equipped.put(item.slot(), item.id()); }
+        @Override public void equip(Item item) { if (!item.isEmote() && canUse(item)) equipped.put(item.slot(), item.id()); }
         @Override public void unequip(Slot slot) { equipped.remove(slot); }
-        @Override public boolean canUse(AvatarItem item) { return !locked.contains(item.id()); }
-        @Override public String lockedReason(AvatarItem item) { return canUse(item) ? null : "Not unlocked"; }
+        @Override public boolean canUse(Item item) { return !locked.contains(item.id()); }
+        @Override public String lockedReason(Item item) { return canUse(item) ? null : "Not unlocked"; }
         @Override public String wheel(int index) { return wheel[index]; }
         @Override public void setWheel(int index, String emoteId) { wheel[index] = emoteId; }
         @Override public void playEmote(String emoteId) { played = emoteId; }
@@ -444,7 +453,7 @@ public final class WardrobeUiGameTest implements FabricClientGameTest {
         @Override public void setAutoRotate(boolean on) {}
 
         @Override
-        public boolean mouse(AvatarPreview.MouseAction action, double x, double y) {
+        public boolean mouse(MouseAction action, double x, double y) {
             switch (action) {
                 case PRESS -> {
                     if (x >= lx && x < lx + lw && y >= ly && y < ly + lh) {

@@ -1,0 +1,23 @@
+{
+  "format": "vibey",
+  "formatVersion": 1,
+  "kind": "cosmetic",
+  "id": "vibey:vibe_cape",
+  "name": {"en":"Vibe Cape","de":"Vibe-Umhang"},
+  "description": {
+    "en": "The classic Vibe purple with our seal emblem and a teal hem.",
+    "de": "Das klassische Vibe-Lila mit unserem Robben-Emblem und türkisem Saum."
+  },
+  "author": "Vibe Craft Studios",
+  "tags": ["vibe","seal","purple","starter"],
+  "rarity": "rare",
+  "cosmetic": {"slot":"cape","cape":{"texture":"cape"}},
+  "textures": [
+    {
+      "id": "cape",
+      "width": 64,
+      "height": 32,
+      "png": "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"
+    }
+  ]
+}

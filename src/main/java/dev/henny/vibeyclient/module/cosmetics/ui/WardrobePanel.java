@@ -1,12 +1,14 @@
 package dev.henny.vibeyclient.module.cosmetics.ui;
 
+import dev.henny.cosmetico.preview.MouseAction;
+
 import dev.henny.vibeyclient.api.Lang;
 import dev.henny.vibeyclient.api.Services;
-import dev.henny.vibeyclient.avatar.AvatarItem;
-import dev.henny.vibeyclient.avatar.AvatarItems;
-import dev.henny.vibeyclient.avatar.Slot;
-import dev.henny.vibeyclient.avatar.Wardrobe;
-import dev.henny.vibeyclient.avatar.preview.AvatarPreview;
+import dev.henny.cosmetico.registry.Item;
+import dev.henny.cosmetico.Cosmetico;
+import dev.henny.cosmetico.model.Slot;
+import dev.henny.vibeyclient.module.cosmetics.Wardrobe;
+import dev.henny.vibeyclient.module.cosmetics.preview.AvatarPreview;
 import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.ui.Gfx;
 import dev.henny.vibeyclient.ui.Panel;
@@ -47,9 +49,9 @@ final class WardrobePanel implements Panel {
         g.outline(vx, vy, vw, vh, Theme.LINE);
         boolean drag = ui.dragging(PREVIEW, vx, vy, vw, vh);
         if (drag) {
-            preview.mouse(dragging ? AvatarPreview.MouseAction.DRAG : AvatarPreview.MouseAction.PRESS, ui.mouseX, ui.mouseY);
+            preview.mouse(dragging ? MouseAction.DRAG : MouseAction.PRESS, ui.mouseX, ui.mouseY);
         } else if (dragging) {
-            preview.mouse(AvatarPreview.MouseAction.RELEASE, ui.mouseX, ui.mouseY);
+            preview.mouse(MouseAction.RELEASE, ui.mouseX, ui.mouseY);
         }
         dragging = drag;
         preview.draw(g, vx + 1, vy + 1, vw - 2, vh - 2, ui.delta);
@@ -88,12 +90,12 @@ final class WardrobePanel implements Panel {
             int lw = Math.min(g.width(label), cw / 2);
             g.text(g.clip(label, cw / 2), cx, cy + 4, Theme.mix(Theme.MUTED, Theme.TEXT, t));
             String id = wd == null ? null : wd.equipped(slot);
-            AvatarItem item = AvatarItems.get(id);
+            Item item = Cosmetico.items().get(id);
             if (item != null) {
                 String name = g.clip(item.name(), cw - lw - 18);
                 int nx = cx + cw - g.width(name);
                 g.text(name, nx, cy + 4, Theme.TEXT);
-                g.rect(nx - 7, cy + 6, 3, 3, item.rarity().color);
+                g.rect(nx - 7, cy + 6, 3, 3, RarityColors.of(item.rarity()));
             } else {
                 g.textRight("—", cx + cw, cy + 4, Theme.DIM);
             }
@@ -133,7 +135,7 @@ final class WardrobePanel implements Panel {
     public void onHide() {
         if (dragging) {
             dragging = false;
-            preview.mouse(AvatarPreview.MouseAction.RELEASE, 0, 0);
+            preview.mouse(MouseAction.RELEASE, 0, 0);
         }
     }
 }

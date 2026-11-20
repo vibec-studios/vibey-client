@@ -19,12 +19,6 @@ config = "vibeyclient.mixins.json"
 config = "vibeyclient.social.mixins.json"
 
 [[mixins]]
-config = "vibeyclient.cosmetics.mixins.json"
-
-[[mixins]]
-config = "vibeyclient.emotes.mixins.json"
-
-[[mixins]]
 config = "vibeyclient.multiplayer.mixins.json"
 
 [[mixins]]

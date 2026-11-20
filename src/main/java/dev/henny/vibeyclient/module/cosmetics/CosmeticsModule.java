@@ -10,22 +10,18 @@ import dev.henny.vibeyclient.api.event.VibeyEvents;
 import dev.henny.vibeyclient.api.setting.Settings.ActionSetting;
 import dev.henny.vibeyclient.api.setting.Settings.BoolSetting;
 import dev.henny.vibeyclient.api.setting.Settings.KeybindSetting;
-import dev.henny.vibeyclient.avatar.AvatarConfig;
-import dev.henny.vibeyclient.avatar.AvatarItem;
-import dev.henny.vibeyclient.avatar.AvatarItems;
-import dev.henny.vibeyclient.avatar.AvatarState;
-import dev.henny.vibeyclient.avatar.AvatarStates;
-import dev.henny.vibeyclient.avatar.AvatarTicker;
-import dev.henny.vibeyclient.avatar.DevItems;
-import dev.henny.vibeyclient.avatar.DevItemsImpl;
-import dev.henny.vibeyclient.avatar.EngineCompat;
-import dev.henny.vibeyclient.avatar.ItemLoader;
-import dev.henny.vibeyclient.avatar.ItemSource;
-import dev.henny.vibeyclient.avatar.Slot;
-import dev.henny.vibeyclient.avatar.Wardrobe;
-import dev.henny.vibeyclient.avatar.preview.AvatarPreview;
-import dev.henny.vibeyclient.avatar.preview.PreviewService;
-import dev.henny.vibeyclient.avatar.render.AvatarDraw;
+import dev.henny.cosmetico.Cosmetico;
+import dev.henny.cosmetico.registry.Item;
+import dev.henny.cosmetico.state.Avatar;
+import dev.henny.cosmetico.dev.DevItems;
+import dev.henny.cosmetico.mc.compat.McSelf;
+import dev.henny.vibeyclient.module.cosmetics.catalog.Catalog;
+import dev.henny.cosmetico.registry.ItemSource;
+import dev.henny.cosmetico.model.Slot;
+import dev.henny.vibeyclient.module.cosmetics.preview.AvatarPreview;
+import dev.henny.vibeyclient.module.cosmetics.preview.CosmeticoPreviews;
+import dev.henny.vibeyclient.module.cosmetics.catalog.BuiltinItems;
+import dev.henny.vibeyclient.module.cosmetics.host.VibeyCosmeticoHost;
 import dev.henny.vibeyclient.client.Keys;
 
 import java.util.LinkedHashMap;
@@ -44,21 +40,20 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
     public final BoolSetting showOthers = bool("showOthers", true).section("show");
     public final BoolSetting hideWithArmor = bool("hideWithArmor", true).section("show");
     public final BoolSetting notifyNew = bool("notifyNew", true).section("show");
-    public final BoolSetting showCapes = bool("show_cape", true).section("types").serverRule(Slot.CAPE.ruleKey());
-    public final BoolSetting showWings = bool("show_wings", true).section("types").serverRule(Slot.WINGS.ruleKey());
-    public final BoolSetting showAuras = bool("show_aura", true).section("types").serverRule(Slot.AURA.ruleKey());
-    public final BoolSetting showPets = bool("show_pet", true).section("types").serverRule(Slot.PET.ruleKey());
-    public final BoolSetting showShields = bool("show_shield", true).section("types").serverRule(Slot.SHIELD.ruleKey());
-    public final BoolSetting showHats = bool("show_hat", true).section("types").serverRule(Slot.HAT.ruleKey());
-    public final BoolSetting showBacks = bool("show_back", true).section("types").serverRule(Slot.BACK.ruleKey());
+    public final BoolSetting showCapes = bool("show_cape", true).section("types").serverRule(SlotRules.key(Slot.CAPE));
+    public final BoolSetting showWings = bool("show_wings", true).section("types").serverRule(SlotRules.key(Slot.WINGS));
+    public final BoolSetting showAuras = bool("show_aura", true).section("types").serverRule(SlotRules.key(Slot.AURA));
+    public final BoolSetting showPets = bool("show_pet", true).section("types").serverRule(SlotRules.key(Slot.PET));
+    public final BoolSetting showShields = bool("show_shield", true).section("types").serverRule(SlotRules.key(Slot.SHIELD));
+    public final BoolSetting showHats = bool("show_hat", true).section("types").serverRule(SlotRules.key(Slot.HAT));
+    public final BoolSetting showBacks = bool("show_back", true).section("types").serverRule(SlotRules.key(Slot.BACK));
     public final KeybindSetting wardrobeKey = keybind("wardrobe", Keys.UNBOUND).onPress(this::openWardrobe);
 
     private final LoadoutSync sync = new LoadoutSync(this);
     private Loadout loadout = new Loadout();
     private boolean localDirty;
     private boolean loaded;
-    private final DevItemsImpl devItems = new DevItemsImpl(this);
-    private final PreviewService preview = new PreviewService();
+    private final CosmeticoPreviews preview = new CosmeticoPreviews();
     private final dev.henny.vibeyclient.module.cosmetics.ui.TitlePreview titlePreview = new dev.henny.vibeyclient.module.cosmetics.ui.TitlePreview();
 
     public CosmeticsModule() {
@@ -78,29 +73,30 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
         loadout = Loadout.fromJson(saved);
         localDirty = settings().data().has("dirty") && settings().data().get("dirty").getAsBoolean();
         loaded = true;
-        ItemLoader.loadBuiltin();
-        Services.register(DevItems.class, devItems);
+        Cosmetico.init(new VibeyCosmeticoHost());
+        BuiltinItems.load();
+        Services.register(DevItems.class, Cosmetico.devItems());
         Services.register(AvatarPreview.class, preview);
         on(VibeyEvents.ServerHello.class, e -> dev.henny.vibeyclient.api.net.VibeyNet.sendLoadout(sharedSlots(), sync.ownToken()));
         on(VibeyEvents.RemoteLoadout.class, e -> sync.serverLoadout(e.player(), e.slots(), e.token()));
         on(VibeyEvents.WorldLeave.class, e -> sync.worldLeft());
         on(VibeyEvents.OnlineFeaturesChanged.class, e -> {
-            if (e.enabled()) ItemLoader.refreshCatalog(true);
-            else ItemLoader.dropCatalog();
+            if (e.enabled()) Catalog.refreshCatalog(true);
+            else Catalog.dropCatalog();
         });
-        on(VibeyEvents.BackendConnected.class, e -> ItemLoader.refreshCatalog(false));
+        on(VibeyEvents.BackendConnected.class, e -> Catalog.refreshCatalog(false));
         // another backend has another catalog
         GlobalSettings.backendUrl.onChange(v -> {
-            ItemLoader.dropCatalog();
-            ItemLoader.refreshCatalog(true);
+            Catalog.dropCatalog();
+            Catalog.refreshCatalog(true);
         });
         for (BoolSetting s : new BoolSetting[]{showOwn, showOthers, hideWithArmor, showCapes, showWings, showAuras, showPets, showShields, showHats, showBacks}) {
             s.onChange(v -> applyConfig());
         }
-        AvatarItems.addListener(this::applySelf);
-        ItemLoader.onNewItems = this::newItems;
+        Cosmetico.items().listen(this::applySelf);
+        Catalog.onNewItems(this::newItems);
         // server rules (PLAY-LINKS.md §5): cosmetics.pets etc. hide that slot for everyone while on the server
-        for (Slot s : Slot.all()) dev.henny.vibeyclient.api.ServerRules.supports(s.ruleKey());
+        for (Slot s : Slot.all()) dev.henny.vibeyclient.api.ServerRules.supports(SlotRules.key(s));
         dev.henny.vibeyclient.api.ServerRules.listen(CosmeticsModule::applyServerRules);
         applyServerRules();
         dev.henny.vibeyclient.module.cosmetics.ui.WardrobeUi.register();
@@ -111,33 +107,30 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
         Services.register(Wardrobe.class, this);
         Services.register(dev.henny.vibeyclient.api.service.MenuPreview.class, titlePreview);
         applyConfig();
-        ItemLoader.refreshCatalog(false);
+        Catalog.refreshCatalog(false);
     }
 
     @Override
     public void onDisable() {
         Services.unregister(Wardrobe.class, this);
         Services.unregister(dev.henny.vibeyclient.api.service.MenuPreview.class, titlePreview);
-        AvatarConfig.cosmetics = false;
+        Cosmetico.config().cosmetics = false;
     }
 
     @Override
     public void tick() {
-        ItemLoader.tick();
-        AvatarConfig.self = EngineCompat.selfId();
+        Cosmetico.config().self = McSelf.id();
         applySelf();
         sync.tick();
-        AvatarTicker.tick();
-        ItemLoader.refreshCatalog(false);
-        dev.henny.vibeyclient.avatar.SelfTest.tick();
+        Catalog.refreshCatalog(false);
     }
 
     @Override
     public void onWorldJoin() {
-        AvatarStates.clear();
+        Cosmetico.engine().avatars.clear();
         applySelf();
         // without a gateway nobody tells us about catalog changes: check on world join (with it: `catalog.updated`)
-        if (!ItemLoader.catalogPushed()) ItemLoader.requestCatalog(3_000);
+        if (!Catalog.catalogPushed()) Catalog.requestCatalog(3_000);
     }
 
     // ============================================================================================ OTA: new items
@@ -147,7 +140,7 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
     /** New catalog items or new grants (client thread): one toast per batch, a few seconds after the last change. */
     void newItems(java.util.Set<String> ids) {
         for (String id : ids) {
-            AvatarItem i = AvatarItems.get(id);
+            Item i = Cosmetico.items().get(id);
             if (i != null && canUse(i)) pendingNew.add(id);
         }
         if (pendingNew.isEmpty() || !notifyNew.get()) {
@@ -157,7 +150,7 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
         dev.henny.vibeyclient.api.Tasks.debounce("vibeyclient:cosmetics:new", 3_000, () -> dev.henny.vibeyclient.api.Tasks.onMain(() -> {
             int n = pendingNew.size();
             if (n == 0) return;
-            AvatarItem first = AvatarItems.get(pendingNew.iterator().next());
+            Item first = Cosmetico.items().get(pendingNew.iterator().next());
             pendingNew.clear();
             if (!isEnabled()) return;
             String body = n == 1 && first != null ? tr("new.one", first.name()) : tr("new.many", n);
@@ -167,7 +160,7 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
     }
 
     private static void applyServerRules() {
-        for (Slot s : Slot.all()) AvatarConfig.slotServerOff[s.ordinal()] = dev.henny.vibeyclient.api.ServerRules.isDisabled(s.ruleKey());
+        for (Slot s : Slot.all()) Cosmetico.config().slotServerOff[s.ordinal()] = dev.henny.vibeyclient.api.ServerRules.isDisabled(SlotRules.key(s));
     }
 
     @Override
@@ -175,21 +168,21 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
         return SERVER_RULE_KEYS;
     }
 
-    private static final java.util.List<String> SERVER_RULE_KEYS = java.util.Arrays.stream(Slot.all()).map(Slot::ruleKey).toList();
+    private static final java.util.List<String> SERVER_RULE_KEYS = SlotRules.KEYS;
 
     private void applyConfig() {
-        AvatarConfig.cosmetics = isEnabled();
-        AvatarConfig.showOwn = showOwn.get();
-        AvatarConfig.showOthers = showOthers.get();
-        AvatarDraw.hideWithArmor = hideWithArmor.get();
+        Cosmetico.config().cosmetics = isEnabled();
+        Cosmetico.config().showOwn = showOwn.get();
+        Cosmetico.config().showOthers = showOthers.get();
+        Cosmetico.config().hideWithArmor = hideWithArmor.get();
         BoolSetting[] per = {showCapes, showWings, showAuras, showPets, showShields, showHats, showBacks};
-        for (Slot s : Slot.all()) AvatarConfig.slotShown[s.ordinal()] = per[s.ordinal()].get();
+        for (Slot s : Slot.all()) Cosmetico.config().slotShown[s.ordinal()] = per[s.ordinal()].get();
     }
 
     // ============================================================================================ loadout
 
     UUID selfId() {
-        return EngineCompat.selfId();
+        return McSelf.id();
     }
 
     Loadout loadout() {
@@ -210,8 +203,8 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
         Loadout l = remote.copy();
         for (Slot s : Slot.all()) {
             String local = loadout.get(s);
-            AvatarItem item = AvatarItems.get(local);
-            if (l.get(s) == null && item != null && item.source() != ItemSource.CATALOG) l.slots[s.ordinal()] = local;
+            Item item = Cosmetico.items().get(local);
+            if (l.get(s) == null && item != null && item.source() != ItemSource.REMOTE) l.slots[s.ordinal()] = local;
         }
         for (int i = 0; i < WHEEL_SLOTS; i++) if (l.wheel[i] == null) l.wheel[i] = loadout.wheel[i];
         loadout = l;
@@ -237,7 +230,7 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
     Map<String, String> sharedSlots() {
         Map<String, String> m = new LinkedHashMap<>();
         for (Slot s : Slot.all()) {
-            AvatarItem item = AvatarItems.get(loadout.get(s));
+            Item item = Cosmetico.items().get(loadout.get(s));
             if (item != null && !item.isDev() && sync.canUse(item)) m.put(s.id(), item.id());
         }
         return m;
@@ -245,13 +238,13 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
 
     /** Our own avatar state follows the local loadout (usable items only). */
     private void applySelf() {
-        UUID self = EngineCompat.selfId();
+        UUID self = McSelf.id();
         if (self == null) return;
-        AvatarState st = AvatarStates.get(self);
+        Avatar st = Cosmetico.engine().avatars.get(self);
         for (Slot s : Slot.all()) {
             String id = loadout.get(s);
-            AvatarItem item = AvatarItems.get(id);
-            st.slots[s.ordinal()] = item != null && sync.canUse(item) ? id : null;
+            Item item = Cosmetico.items().get(id);
+            st.loadout.base[s.ordinal()] = item != null && sync.canUse(item) ? id : null;
         }
     }
 
@@ -267,7 +260,7 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
     }
 
     @Override
-    public void equip(AvatarItem item) {
+    public void equip(Item item) {
         if (item == null || item.isEmote() || item.slot() == null || !canUse(item)) return;
         if (item.id().equals(loadout.get(item.slot()))) return;
         loadout.slots[item.slot().ordinal()] = item.id();
@@ -282,12 +275,12 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
     }
 
     @Override
-    public boolean canUse(AvatarItem item) {
+    public boolean canUse(Item item) {
         return sync.canUse(item);
     }
 
     @Override
-    public String lockedReason(AvatarItem item) {
+    public String lockedReason(Item item) {
         if (canUse(item)) return null;
         if (item.needsUpdate()) return tr("locked.update");
         return GlobalSettings.online() && sync.backendReady() ? tr("locked.notUnlocked") : tr("locked.signIn");
@@ -308,18 +301,17 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
 
     @Override
     public void playEmote(String emoteId) {
-        dev.henny.vibeyclient.avatar.EmoteBridge.play.accept(emoteId);
+        EmoteHook.play.accept(emoteId);
     }
 
     @Override
     public void stopEmote() {
-        dev.henny.vibeyclient.avatar.EmoteBridge.stop.run();
+        EmoteHook.stop.run();
     }
 
     @Override
     public String playingEmote() {
-        AvatarState st = AvatarStates.peek(EngineCompat.selfId());
-        return st == null || st.emote == null || st.emote.stopping() ? null : st.emote.id;
+        return Cosmetico.emotes().playing(McSelf.id());
     }
 
     /** Called by the emotes module for our plays (net + backend). */

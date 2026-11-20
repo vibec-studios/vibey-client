@@ -1,0 +1,87 @@
+{
+  "format": "vibey",
+  "formatVersion": 1,
+  "kind": "cosmetic",
+  "id": "vibey:seal_beanie",
+  "name": {"en":"Seal Beanie","de":"Robbenmütze"},
+  "description": {
+    "en": "Cosy knitted beanie with a teal stripe – and a tiny seal as the pom-pom.",
+    "de": "Kuschelige Strickmütze mit türkisem Streifen – und einer kleinen Robbe als Bommel."
+  },
+  "author": "Vibe Craft Studios",
+  "tags": ["seal","knitted","winter","cute","starter"],
+  "rarity": "rare",
+  "cosmetic": {"slot":"hat","hideWithArmor":["head"]},
+  "textures": [
+    {
+      "id": "main",
+      "width": 64,
+      "height": 32,
+      "png": "iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAYAAACinX6EAAAFl0lEQVR42u1YzWtcVRT/3Y/3ZgSTdpJm0qJiWmJ2unJTLTGoCBXcuBNdiZtS0LZqhVbBjTFVGqoounLTgrtCQYMLP1qNiGL/AGOwFStNZiZJEwWT9969V865771JY5KZdFLGxZzhce+be9+79/zO73zcJ9BAjj/3iyuXhmCsgZIK1lpYZyAgMLf0G76cvAAJDQgJOBqLIGWR+xDAz1eOCbQgBx/4yilZhHErkCKAdTGvDUgen1n8EVKEsHYZUhZg7QpoYeo7l+Dy1Vc2XV822kB/aQiVhSlIoWBMAqUkCkHAyvd27wMcYJHA2GVACN5MLg7bIgSqEqRcxGALEcClQNA9KSqEYsVpTEo/7pxp+O6GAMRJhL6dQ6jemIKUGtYC1+emGBhiAhmDtqFSxMlCZH0H4/stihCat0nvcumPNy7DVe8XDACxgNbNFBeioXrE3c1FqRCJWWEQvvnuEv83/PB+SAkEugABxaYm69AmaGNwztNQBC0DwMxjRV1+EeAOli+vpMtp70GRDEQzDGwIkXMWWhVgbN2agSb0iZq0gmXEyVK0Ic98vyG3DT5gbJQDml3G/sNrankHjIvS/y37P7mFy+OEbZ0BhDApP790BY+PPIKVaBmz81Ps/+QSbq1liP7sk9pboVUGyMCDySBLT3UXpSzwa/rgG6dAZC6hV923xADHypPPk57FsIj+niEOgkohDUqaN5ajLxS3zWygYQC0MVuWACCGcbD1hIdJIz4DQUFQCDYAuSEZoZn1GzKgtvirj/bC29kaIDEReroGMDM3lS4u0xggU0xTujq7DUFQcizJ2OTSgEfKS7aySzNFlgkcK09ANBMExanDsVtYuoqe7r1s6Z7ufZinFLdjEHOL0yh1D4DGd9x5Dxb//iNv+3sGMTtfH7/V54efGEQ7RZfGZjAxV8GzvUV8vqb9LG2z8S/WtD+sGb+V52dfiDFbraK/rw8zlRnsLu9GpVZDedcuXK/8iT3lu1Cp1lDuo/tr2FO+O7+frVbQ31du6Xlx7yfvuHZa4Pfnj4t2ri/GX3SusjCdUzijbt/OQVRvTOdUrVN+LxaWruRtuTSIVp4fO3tfWwGQsTF56sCquOlzPBDFSXqPPPqmicZXii0+325ZdxcnR9+nUAohJbTWSJIEUio8dfAxH4mtRVgsYmV5GUopPHj/UNPanDqcuEApREmcF1qFsIBzF97NK0eu+TnyO1y++vKm737pxChD+97oCdHM/03VAUEQsPKkHJ3+arUarE3qqEkJawzCMIQxWyt2SHnHJa4/VGkVIoqitOiw9VOUoHQnmkiT68+TUvJ1S3UAKS2V4hfHUYRSqcQMIEBIkoROWpKZQWBtRRLyBedwcXLSnyse2o8gCNklLAykE/lBR25SppCFBRc+3reOnHzbZX1SnHQgOfr6mKP+RkzYEACltG+1vumFfOSVipUnQJzbus8lNrqp1JV8ovSA27z2p0o+2vA9jajddB2wUflLNPS+L7miUkr4jyHWstU9SKoOTLMMMBHCoIiRAwf4AwuttBLH6TG6/iEDWXl7uwuh0x+fYyqRMiK1tNtAqUvf/4S1c2uVCt4Y+8D5o7Nm96DA+earh9a1EB2hCd9AK8SJzY+8vtWp4jo94CS3Pwuc/uisU0EAwxsPeHMUmd86cQwnR8d5UtanwLd2brU6y62UggEg9hAwXdcO+XzfNYCFv+qlcJb/s7ogqxfy+qDJ+dtVP2h2SlZA5Zs/qnuB0XE88/ST+cQjqgfjtvqfudRfHTuyIPTah/r/kegbARCGBcRx7NNGmqLOmHlW/tHhEZ709bcXceb8BNab60GQ7BKGAqPW2HJkbCcAVMzoIPC+6yMgD3x6foIVz/ok680lIEjxkFIkBUVjmsq/HelIRzrSkY50pCMdabP8CygNhBXOfdDYAAAAAElFTkSuQmCC"
+    }
+  ],
+  "model": {
+    "texture": "main",
+    "bones": [
+      {
+        "name": "beanie",
+        "parent": null,
+        "attach": "head",
+        "pivot": [0,24,0],
+        "rotation": [0,0,0],
+        "cubes": [
+          {"from":[-4,28,-4],"to":[4,33,4],"inflate":0.6,"uv":{"box":[0,0]}},
+          {"from":[-4,28,-4],"to":[4,30,4],"inflate":0.95,"uv":{"box":[32,0]}},
+          {"from":[-3,33,-3],"to":[3,34,3],"inflate":0.6,"uv":{"box":[22,13]}}
+        ],
+        "emissive": false,
+        "translucent": false
+      },
+      {
+        "name": "pompom",
+        "parent": "beanie",
+        "pivot": [0,34.6,0],
+        "rotation": [0,0,0],
+        "cubes": [
+          {"from":[-3,34.6,-2.5],"to":[3,39.6,2.5],"uv":{"box":[0,13]}},
+          {"from":[3,35,-1],"to":[4,36,1],"uv":{"box":[46,13]}},
+          {"from":[-4,35,-1],"to":[-3,36,1],"uv":{"box":[52,13]}}
+        ],
+        "emissive": false,
+        "translucent": false
+      }
+    ]
+  },
+  "animations": {
+    "idle": {
+      "length": 3,
+      "loop": true,
+      "bones": {
+        "pompom": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.75,"v":[4,0,5],"i":"catmullrom"},
+            {"t":1.5,"v":[0,0,0],"i":"catmullrom"},
+            {"t":2.25,"v":[-3,0,-5],"i":"catmullrom"},
+            {"t":3,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        }
+      }
+    },
+    "walk": {
+      "length": 0.8,
+      "loop": true,
+      "bones": {
+        "pompom": {
+          "rotation": [
+            {"t":0,"v":[6,0,0],"i":"catmullrom"},
+            {"t":0.2,"v":[-4,0,7],"i":"catmullrom"},
+            {"t":0.4,"v":[6,0,0],"i":"catmullrom"},
+            {"t":0.6,"v":[-4,0,-7],"i":"catmullrom"},
+            {"t":0.8,"v":[6,0,0],"i":"catmullrom"}
+          ]
+        }
+      }
+    }
+  }
+}

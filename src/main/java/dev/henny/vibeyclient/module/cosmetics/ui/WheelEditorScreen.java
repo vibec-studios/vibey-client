@@ -4,9 +4,9 @@ import dev.henny.vibeyclient.ui.Ui;
 
 import dev.henny.vibeyclient.api.Lang;
 import dev.henny.vibeyclient.api.Services;
-import dev.henny.vibeyclient.avatar.AvatarItem;
-import dev.henny.vibeyclient.avatar.AvatarItems;
-import dev.henny.vibeyclient.avatar.Wardrobe;
+import dev.henny.cosmetico.registry.Item;
+import dev.henny.cosmetico.Cosmetico;
+import dev.henny.vibeyclient.module.cosmetics.Wardrobe;
 import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.ui.Anim;
 import dev.henny.vibeyclient.ui.BaseScreen;
@@ -83,7 +83,7 @@ final class WheelEditorScreen extends BaseScreen {
         g.vline(leftW, y0, bodyH, Theme.LINE);
         g.rect(leftW + 1, y0, width - leftW - 1, bodyH, Theme.SURFACE);
 
-        AvatarItem hoveredEmote = drawList(g, wd, leftW + 1, y0, width - leftW - 1, bodyH);
+        Item hoveredEmote = drawList(g, wd, leftW + 1, y0, width - leftW - 1, bodyH);
         drawWheel(g, wd, hoveredEmote, 0, y0, leftW, bodyH);
 
         if (o < 1f) g.rect(0, y0, width, height, Theme.alpha(Theme.BG, 1f - o));
@@ -104,7 +104,7 @@ final class WheelEditorScreen extends BaseScreen {
 
     // ============================================================================================ left: the wheel
 
-    private void drawWheel(Gfx g, Wardrobe wd, AvatarItem hoveredEmote, int x, int y, int w, int h) {
+    private void drawWheel(Gfx g, Wardrobe wd, Item hoveredEmote, int x, int y, int w, int h) {
         int pad = Theme.PAD;
         int bottom = 10 + 10 + 8 + 18 + pad; // two hint lines, gap, buttons
         int avail = Math.min(w - pad * 2, h - bottom - pad * 2);
@@ -137,7 +137,7 @@ final class WheelEditorScreen extends BaseScreen {
             String name;
             if (hoveredEmote != null) name = hoveredEmote.name();
             else if (ids[selected] != null) {
-                AvatarItem item = AvatarItems.get(ids[selected]);
+                Item item = Cosmetico.items().get(ids[selected]);
                 name = item != null ? item.name() : ids[selected];
             } else name = Lang.tr("wardrobe.wheel.empty");
             g.textCenter(g.clip(slot, tw), cx + tile / 2, cy + tile / 2 - 9, Theme.BRAND);
@@ -165,7 +165,7 @@ final class WheelEditorScreen extends BaseScreen {
 
     // ============================================================================================ right: emotes
 
-    private AvatarItem drawList(Gfx g, Wardrobe wd, int x, int y, int w, int h) {
+    private Item drawList(Gfx g, Wardrobe wd, int x, int y, int w, int h) {
         int pad = Theme.PAD;
         String caption = Category.EMOTES.label();
         g.bold(g.clip(caption, w - pad * 2), x + pad, y + 10, Theme.TEXT);
@@ -173,7 +173,7 @@ final class WheelEditorScreen extends BaseScreen {
         int lx = x + pad + g.boldWidth(caption) + 6;
         if (lx + g.width(count) < x + w - pad) g.text(count, lx, y + 10, Theme.DIM);
 
-        List<AvatarItem> items = index.items(Category.EMOTES);
+        List<Item> items = index.items(Category.EMOTES);
         int ay = y + 28;
         int ah = y + h - ay;
         int ax = x + pad;
@@ -200,10 +200,10 @@ final class WheelEditorScreen extends BaseScreen {
             cardW = (innerW - GAP * (cols - 1)) / cols;
         }
         int cardH = Cards.height(cardW);
-        AvatarItem hovered = null;
+        Item hovered = null;
         int top = list.begin(ui, ax - 1, ay, aw + 1, ah) + 1;
         for (int i = 0; i < items.size(); i++) {
-            AvatarItem item = items.get(i);
+            Item item = items.get(i);
             int cx = ax + (i % cols) * (cardW + GAP);
             int cy = top + (i / cols) * (cardH + GAP);
             if (!ui.visibleY(cy, cardH)) continue;

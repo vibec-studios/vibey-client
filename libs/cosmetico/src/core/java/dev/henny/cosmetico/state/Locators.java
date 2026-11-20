@@ -2,6 +2,7 @@ package dev.henny.cosmetico.state;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public final class Locators {
     private final Map<String, double[]> positions = new HashMap<>();
@@ -12,6 +13,14 @@ public final class Locators {
 
     public double[] peek(String name) {
         return positions.get(name);
+    }
+
+    public Set<String> names() {
+        return positions.keySet();
+    }
+
+    public void clear() {
+        positions.clear();
     }
 
     public void set(String name, double x, double y, double z) {

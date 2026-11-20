@@ -1,0 +1,26 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.henny.cosmetico.mc.mixin",
+  "plugin": "dev.henny.cosmetico.mc.mixin.CosmeticoMixinPlugin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [],
+  "client": [
+    "AbstractClientPlayerMixin",
+    "EntityRenderDispatcherAccessor",
+    "FirstPersonItemMixin",
+    "GuiEntityMixin",
+    "ItemInHandLayerMixin",
+    "LivingEntityRendererAccessor",
+    "LivingEntityRendererMixin",
+    "PlayerModelMixin",
+    "PlayerRendererMixin",
+    "RenderStateMixin",
+    "RenderTypeInvoker",
+    "ShieldRendererMixin"
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

@@ -25,7 +25,7 @@ final class PreviewLegacy {
         Minecraft mc = Minecraft.getInstance();
         @SuppressWarnings({"rawtypes", "unchecked"})
         java.util.Map<Object, net.minecraft.client.renderer.entity.EntityRenderer> map =
-                ((dev.henny.vibeyclient.module.cosmetics.mixin.EntityRenderDispatcherAccessor) mc.getEntityRenderDispatcher()).vibey$playerRenderers();
+                ((dev.henny.cosmetico.mc.mixin.EntityRenderDispatcherAccessor) mc.getEntityRenderDispatcher()).cosmetico$playerRenderers();
         @SuppressWarnings("rawtypes")
         net.minecraft.client.renderer.entity.EntityRenderer r = map.get(skin.model());
         if (r == null) return;

@@ -2,7 +2,7 @@ package dev.henny.vibeyclient.module.cosmetics.ui;
 
 import dev.henny.vibeyclient.api.Lang;
 import dev.henny.vibeyclient.api.ModuleManager;
-import dev.henny.vibeyclient.avatar.Slot;
+import dev.henny.cosmetico.model.Slot;
 import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.ui.Icons;
 import dev.henny.vibeyclient.ui.MenuEntries;

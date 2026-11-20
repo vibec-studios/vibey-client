@@ -2,13 +2,11 @@ package dev.henny.vibeyclient.gametest;
 
 import com.mojang.authlib.GameProfile;
 import dev.henny.vibeyclient.api.Services;
-import dev.henny.vibeyclient.avatar.AvatarItem;
-import dev.henny.vibeyclient.avatar.AvatarItems;
-import dev.henny.vibeyclient.avatar.AvatarState;
-import dev.henny.vibeyclient.avatar.AvatarStates;
-import dev.henny.vibeyclient.avatar.Slot;
-import dev.henny.vibeyclient.avatar.Wardrobe;
-import dev.henny.vibeyclient.avatar.render.AvatarHooks;
+import dev.henny.cosmetico.registry.Item;
+import dev.henny.cosmetico.Cosmetico;
+import dev.henny.cosmetico.state.Avatar;
+import dev.henny.cosmetico.model.Slot;
+import dev.henny.vibeyclient.module.cosmetics.Wardrobe;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
@@ -34,16 +32,16 @@ public final class CosmeticsGameTest implements FabricClientGameTest {
     @Override
     public void runTest(ClientGameTestContext context) {
         context.getInput().resizeWindow(1280, 720);
-        context.waitFor(mc -> AvatarItems.all().size() >= 20, 600);
-        context.runOnClient(mc -> System.out.println("[vibeyclient-test] items: " + AvatarItems.all().size()));
+        context.waitFor(mc -> Cosmetico.items().all().size() >= 20, 600);
+        context.runOnClient(mc -> System.out.println("[vibeyclient-test] items: " + Cosmetico.items().all().size()));
 
         // ---------------------------------------------------------------- preview on the title screen
         context.runOnClient(mc -> {
             Wardrobe w = Services.get(Wardrobe.class).orElseThrow();
-            w.equip(AvatarItems.get("vibey:vibe_cape"));
-            w.equip(AvatarItems.get("vibey:crystal_wings"));
-            w.equip(AvatarItems.get("vibey:seal_beanie"));
-            w.equip(AvatarItems.get("vibey:seal_buddy"));
+            w.equip(Cosmetico.items().get("vibey:vibe_cape"));
+            w.equip(Cosmetico.items().get("vibey:crystal_wings"));
+            w.equip(Cosmetico.items().get("vibey:seal_beanie"));
+            w.equip(Cosmetico.items().get("vibey:seal_buddy"));
         });
         PreviewTestScreen[] screen = new PreviewTestScreen[1];
         context.setScreen(() -> screen[0] = new PreviewTestScreen());
@@ -98,7 +96,7 @@ public final class CosmeticsGameTest implements FabricClientGameTest {
                 mannequin.setPos(mc.player.getX(), mc.player.getY(), mc.player.getZ() + 3.2);
                 face(mannequin, 180f);
                 mc.level.addEntity(mannequin);
-                AvatarStates.get(MANNEQUIN);
+                Cosmetico.engine().avatars.get(MANNEQUIN);
             });
             context.waitTicks(20);
 
@@ -164,8 +162,8 @@ public final class CosmeticsGameTest implements FabricClientGameTest {
             context.runOnClient(mc -> {
                 mannequin.setPos(mannequin.getX() + 40, mannequin.getY(), mannequin.getZ());
                 Wardrobe w = Services.get(Wardrobe.class).orElseThrow();
-                w.equip(AvatarItems.get("vibey:vibe_cape"));
-                w.equip(AvatarItems.get("vibey:seal_buddy"));
+                w.equip(Cosmetico.items().get("vibey:vibe_cape"));
+                w.equip(Cosmetico.items().get("vibey:seal_buddy"));
                 mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT);
             });
             context.waitTicks(30);
@@ -242,10 +240,10 @@ public final class CosmeticsGameTest implements FabricClientGameTest {
     private void wear(ClientGameTestContext context, Map<String, String> slots) {
         context.runOnClient(mc -> {
             for (String id : slots.values()) {
-                AvatarItem i = AvatarItems.get(id);
+                Item i = Cosmetico.items().get(id);
                 if (i == null || i.bundle() == null) throw new AssertionError("item missing: " + id);
             }
-            AvatarStates.setLoadout(MANNEQUIN, slots);
+            Cosmetico.loadouts().setIds(MANNEQUIN, slots);
         });
         context.waitTicks(8);
     }
@@ -259,13 +257,13 @@ public final class CosmeticsGameTest implements FabricClientGameTest {
     private void emote(ClientGameTestContext context, String id, double at, String name, float yaw) {
         context.runOnClient(mc -> {
             face(mannequin, yaw);
-            AvatarState st = AvatarStates.get(MANNEQUIN);
-            if (!AvatarStates.play(st, id)) throw new AssertionError("emote not playable: " + id);
+            Avatar st = Cosmetico.engine().avatars.get(MANNEQUIN);
+            if (!Cosmetico.engine().emotes.play(st, id)) throw new AssertionError("emote not playable: " + id);
         });
         context.waitTicks((int) Math.round(at * 20));
         context.takeScreenshot(name);
         context.runOnClient(mc -> {
-            AvatarState st = AvatarStates.get(MANNEQUIN);
+            Avatar st = Cosmetico.engine().avatars.get(MANNEQUIN);
             st.emote = null;
         });
         context.waitTicks(2);

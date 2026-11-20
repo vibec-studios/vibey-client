@@ -1,8 +1,8 @@
 package dev.henny.vibeyclient.module.cosmetics.ui;
 
 import dev.henny.vibeyclient.api.Lang;
-import dev.henny.vibeyclient.avatar.AvatarItem;
-import dev.henny.vibeyclient.avatar.AvatarItems;
+import dev.henny.cosmetico.registry.Item;
+import dev.henny.cosmetico.Cosmetico;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.Locale;
  * {@link AvatarItems#version()}, the language (localised names) or the query change, so drawing never allocates lists.
  */
 final class ItemIndex {
-    private final List<AvatarItem>[] lists;
+    private final List<Item>[] lists;
     private final String[] countText = new String[Category.ALL.length];
     private long version = -1;
     private String lang;
@@ -30,7 +30,7 @@ final class ItemIndex {
     /** Call once per frame before reading. */
     void refresh(String q) {
         if (q == null) q = "";
-        long v = AvatarItems.version();
+        long v = Cosmetico.items().version();
         String l = Lang.code();
         if (v == version && l.equals(lang) && q.equals(query)) return;
         version = v;
@@ -40,11 +40,11 @@ final class ItemIndex {
     }
 
     private void rebuild() {
-        for (List<AvatarItem> list : lists) list.clear();
+        for (List<Item> list : lists) list.clear();
         String q = query.trim().toLowerCase(Locale.ROOT);
         total = 0;
         matched = 0;
-        for (AvatarItem item : AvatarItems.all()) {
+        for (Item item : Cosmetico.items().all()) {
             Category c = Category.of(item);
             if (c == null) continue;
             total++;
@@ -55,7 +55,7 @@ final class ItemIndex {
         for (int i = 0; i < lists.length; i++) countText[i] = Integer.toString(lists[i].size());
     }
 
-    private static boolean matches(AvatarItem item, String q) {
+    private static boolean matches(Item item, String q) {
         if (item.name().toLowerCase(Locale.ROOT).contains(q)) return true;
         if (item.id().toLowerCase(Locale.ROOT).contains(q)) return true;
         if (item.author().toLowerCase(Locale.ROOT).contains(q)) return true;
@@ -63,7 +63,7 @@ final class ItemIndex {
         return false;
     }
 
-    List<AvatarItem> items(Category c) {
+    List<Item> items(Category c) {
         return lists[c.ordinal()];
     }
 

@@ -18,6 +18,9 @@
       "dev.henny.cosmetico.mc.fabric.CosmeticoFabric"
     ]
   },
+  "mixins": [
+    "cosmetico.mixins.json"
+  ],
   "depends": {
     "fabricloader": ">=0.16.5",
     "fabric-api": "*",

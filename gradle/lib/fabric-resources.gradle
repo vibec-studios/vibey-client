@@ -11,4 +11,24 @@ processResources {
 
 loom.runConfigs.configureEach { ideConfigGenerated = false }
 
+if (project.name == gradle.vibeyVcs && rootProject.file("libs/${libId}/src/gametest").isDirectory()) {
+    fabricApi {
+        configureTests {
+            createSourceSet = true
+            modId = "${libId}-gametest"
+            enableGameTests = false
+            enableClientGameTests = true
+            eula = true
+        }
+    }
+    sourceSets.named('gametest') {
+        java.srcDirs = [rootProject.file("libs/${libId}/src/gametest/java")]
+        resources.srcDirs = [rootProject.file("libs/${libId}/src/gametest/resources")]
+    }
+    dependencies {
+        gametestImplementation project.parent
+        gradle.vibeyLibs.takeWhile { it != libId }.each { gametestImplementation project.ext.libDep(it) }
+    }
+}
+
 apply from: rootProject.file('gradle/lib/publish.gradle')

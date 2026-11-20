@@ -1,15 +1,17 @@
 package dev.henny.vibeyclient.module.cosmetics.ui;
 
+import dev.henny.cosmetico.preview.MouseAction;
+
 import dev.henny.vibeyclient.ui.Ui;
 
 import dev.henny.vibeyclient.api.GlobalSettings;
 import dev.henny.vibeyclient.api.Lang;
 import dev.henny.vibeyclient.api.Services;
 import dev.henny.vibeyclient.api.service.VibeBackend;
-import dev.henny.vibeyclient.avatar.AvatarItem;
-import dev.henny.vibeyclient.avatar.AvatarItems;
-import dev.henny.vibeyclient.avatar.Wardrobe;
-import dev.henny.vibeyclient.avatar.preview.AvatarPreview;
+import dev.henny.cosmetico.registry.Item;
+import dev.henny.cosmetico.Cosmetico;
+import dev.henny.vibeyclient.module.cosmetics.Wardrobe;
+import dev.henny.vibeyclient.module.cosmetics.preview.AvatarPreview;
 import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.ui.Anim;
 import dev.henny.vibeyclient.ui.BaseScreen;
@@ -110,7 +112,7 @@ final class WardrobeScreen extends BaseScreen {
         Wardrobe wd = Services.get(Wardrobe.class).orElse(null);
         index.refresh(query);
         for (int i = 0; i < wheelIds.length; i++) wheelIds[i] = wd == null ? null : wd.wheel(i);
-        if (selectedEmote != null && AvatarItems.get(selectedEmote) == null) selectedEmote = null;
+        if (selectedEmote != null && Cosmetico.items().get(selectedEmote) == null) selectedEmote = null;
         float o = open.to(1f);
 
         g.rect(0, 0, width, height, Theme.BG);
@@ -129,7 +131,7 @@ final class WardrobeScreen extends BaseScreen {
 
         g.rect(0, y0, width, bodyH, Theme.SURFACE);
         drawCategories(g, 0, y0, listW, bodyH);
-        AvatarItem hovered = drawGrid(g, wd, gridX, y0, gridW, bodyH);
+        Item hovered = drawGrid(g, wd, gridX, y0, gridW, bodyH);
         drawPreviewColumn(g, wd, hovered, width - prevW, y0, prevW, bodyH);
 
         // fade in from black, everything below the header (cheap overlay, input works during it)
@@ -218,7 +220,7 @@ final class WardrobeScreen extends BaseScreen {
     // ============================================================================================ middle: grid
 
     /** Draws the toolbar and the cards; returns the hovered item (or null). */
-    private AvatarItem drawGrid(Gfx g, Wardrobe wd, int x, int y, int w, int h) {
+    private Item drawGrid(Gfx g, Wardrobe wd, int x, int y, int w, int h) {
         int pad = Theme.PAD;
         int ty = y + 10;
         String label = category.label();
@@ -249,7 +251,7 @@ final class WardrobeScreen extends BaseScreen {
         int ax = x + pad;
         int aw = w - pad * 2 + 4; // the scrollbar sits in the right padding
         int ah = y + h - ay;
-        List<AvatarItem> items = index.items(category);
+        List<Item> items = index.items(category);
         if (items.isEmpty()) {
             preview.tryOn(null, null);
             drawEmpty(g, x, ay, w, ah);
@@ -267,11 +269,11 @@ final class WardrobeScreen extends BaseScreen {
         float a = gridIn.to(1f);
         int slide = Math.round((1f - a) * 6f);
 
-        AvatarItem hovered = null;
+        Item hovered = null;
         int top = grid.begin(ui, ax - 1, ay, aw + 1, ah);
         int cy = top + 1 + slide;
         for (int i = 0; i < items.size(); i++) {
-            AvatarItem item = items.get(i);
+            Item item = items.get(i);
             int cx = ax + (i % cols) * (cardW + GAP);
             int ry = cy + (i / cols) * (cardH + GAP);
             if (!ui.visibleY(ry, cardH)) continue;
@@ -312,7 +314,7 @@ final class WardrobeScreen extends BaseScreen {
         return null;
     }
 
-    private void onCard(Wardrobe wd, AvatarItem item) {
+    private void onCard(Wardrobe wd, Item item) {
         if (item.isEmote()) {
             selectedEmote = item.id();
             preview.playEmote(item.id());
@@ -360,23 +362,23 @@ final class WardrobeScreen extends BaseScreen {
 
     // ============================================================================================ right: preview
 
-    private void drawPreviewColumn(Gfx g, Wardrobe wd, AvatarItem hovered, int x, int y, int w, int h) {
+    private void drawPreviewColumn(Gfx g, Wardrobe wd, Item hovered, int x, int y, int w, int h) {
         int pad = Theme.PAD;
         g.rect(x, y, w, h, Theme.PANEL);
         g.vline(x - 1, y, h, Theme.LINE);
 
         // what we are looking at: hovered card, else the selected emote / the item equipped in this category
-        AvatarItem info = hovered;
+        Item info = hovered;
         if (info == null) {
-            if (category.emotes()) info = AvatarItems.get(selectedEmote);
-            else if (wd != null) info = AvatarItems.get(wd.equipped(category.slot));
+            if (category.emotes()) info = Cosmetico.items().get(selectedEmote);
+            else if (wd != null) info = Cosmetico.items().get(wd.equipped(category.slot));
         }
         int iw = w - pad * 2;
         if (info != null) {
             g.bold(g.clip(info.name(), iw), x + pad, y + 8, Theme.TEXT);
             String rarity = Cards.rarityLabel(info.rarity());
             int rx = x + pad;
-            g.text(g.clip(rarity, iw), rx, y + 20, info.rarity().color);
+            g.text(g.clip(rarity, iw), rx, y + 20, RarityColors.of(info.rarity()));
             rx += g.width(rarity) + 6;
             String state = null;
             int stateColor = Theme.DIM;
@@ -394,7 +396,7 @@ final class WardrobeScreen extends BaseScreen {
             if (state != null && rx < x + w - pad - 12) g.text(g.clip(state, x + w - pad - rx), rx, y + 20, stateColor);
             String creator = info.creator();
             if (creator != null) {
-                String who = AvatarItem.DELETED_CREATOR.equals(creator) ? Lang.tr("wardrobe.deletedUser") : creator;
+                String who = Item.DELETED_CREATOR.equals(creator) ? Lang.tr("wardrobe.deletedUser") : creator;
                 g.text(g.clip(Lang.tr("wardrobe.by", who), iw), x + pad, y + 31, Theme.MUTED);
             }
         } else {
@@ -452,7 +454,7 @@ final class WardrobeScreen extends BaseScreen {
             return false; // the text field takes it
         }
         if (search != null) search.setFocused(false);
-        if (button == 0 && preview.mouse(AvatarPreview.MouseAction.PRESS, x, y)) {
+        if (button == 0 && preview.mouse(MouseAction.PRESS, x, y)) {
             dragging = true;
             return true;
         }
@@ -462,7 +464,7 @@ final class WardrobeScreen extends BaseScreen {
     @Override
     protected boolean drag(double x, double y, int button) {
         if (dragging) {
-            preview.mouse(AvatarPreview.MouseAction.DRAG, x, y);
+            preview.mouse(MouseAction.DRAG, x, y);
             return true;
         }
         return false;
@@ -472,7 +474,7 @@ final class WardrobeScreen extends BaseScreen {
     protected boolean release(double x, double y, int button) {
         if (dragging) {
             dragging = false;
-            preview.mouse(AvatarPreview.MouseAction.RELEASE, x, y);
+            preview.mouse(MouseAction.RELEASE, x, y);
             return true;
         }
         return false;
