@@ -9,7 +9,6 @@ import dev.henny.vibeyclient.ui.hud.HudWidget;
 
 import java.util.function.Supplier;
 
-/** Registers the built-in widgets (ids and ServerRules keys "hud.<name>", see docs/HUD.md). */
 final class BuiltinWidgets {
     private BuiltinWidgets() {}
 

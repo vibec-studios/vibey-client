@@ -27,6 +27,7 @@ final class HudEditorChecks {
         multiSelect(t);
         hiddenNoSnap(t);
         HudEditorPanelsCheck.run(t);
+        t.assertNoVuiErrors();
         t.context.runOnClient(mc -> ((HudEditorScreen) mc.screen).select(null));
         t.key(Keys.ESCAPE);
         t.context.waitTicks(8);

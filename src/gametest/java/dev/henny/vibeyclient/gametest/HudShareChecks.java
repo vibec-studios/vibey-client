@@ -21,6 +21,13 @@ final class HudShareChecks {
             boolean hidden = HudLayout.hidden(e);
             HudLayout.unregister("test.visible");
             if (hidden) throw new AssertionError("a preset hid another module's visible widget");
+            HudElement minimap = HudLayout.get("waypoints.minimap");
+            if (minimap != null) {
+                HudLayout.reset(minimap);
+                HudLayout.setHidden(minimap, false);
+                HudTemplates.apply("minimal");
+                if (HudLayout.hidden(minimap)) throw new AssertionError("the minimal preset hid the waypoints minimap");
+            }
         });
         t.context.runOnClient(mc -> {
             HudTemplates.apply("streamer");

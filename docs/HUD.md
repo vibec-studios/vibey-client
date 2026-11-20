@@ -227,7 +227,7 @@ player changed (`a x y s w h hide fix st o`, the same keys as share codes), `_gl
 
 | Id | What | Direct manipulation |
 |---|---|---|
-| `hud.timer` | stopwatch / countdown / splits (options *Mode*, *Length*); duplicable | key **J** start/stop, **K** lap (splits) or reset; click it while the chat is open = start/stop; wheel over it in chat or Shift+wheel in the editor = countdown length (30 s … 60 min); bell + blink at 0 |
+| `hud.timer` | stopwatch / countdown / splits (options *Mode*, *Length*); duplicable | key **U** start/stop, **N** lap (splits) or reset; click it while the chat is open = start/stop; wheel over it in chat or Shift+wheel in the editor = countdown length (30 s … 60 min); bell + blink at 0 |
 | `hud.scoreboard` | the sidebar objective as a widget (team colour slot first, 15 lines, vanilla order and number formats); options *Numbers* (hide the red scores), *Title row* | move, scale; while it is on the HUD the vanilla sidebar is off |
 | `hud.tablist` | the player list while Tab is held: heads, names from `PlayerTabOverlay.getNameForDisplay` (so the nametags module's rank icons and name styles show), signal bars coloured by ping, optional ms; sort *Server* / *Name* / *Ping*; 20 rows per column | move, scale; replaces the vanilla list while on |
 | `hud.bossbar` | plain element around the vanilla boss bars (box = 182 × 19 per bar) | move, scale |

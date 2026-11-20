@@ -11,7 +11,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
-/** How many of one item are in the inventory (arrows, totems, any held item); duplicable, one per item. */
 final class ItemCounterWidget extends HudWidget {
     static final String[] PRESETS = {"minecraft:arrow", "minecraft:totem_of_undying", "minecraft:golden_apple",
             "minecraft:ender_pearl", "minecraft:firework_rocket", "minecraft:experience_bottle", "minecraft:cobweb",
@@ -30,7 +29,6 @@ final class ItemCounterWidget extends HudWidget {
         return 4;
     }
 
-    /** The item id an option value stands for (or arrows). */
     static Item item(String id) {
         try {
             Identifier rl = Identifier.tryParse(id);
@@ -46,7 +44,6 @@ final class ItemCounterWidget extends HudWidget {
         return new ItemStack(item(id)).getHoverName().getString();
     }
 
-    /** The id of the item in the main hand (for "use held item"), or null. */
     static String held() {
         Player p = Minecraft.getInstance().player;
         if (p == null || p.getMainHandItem().isEmpty()) return null;

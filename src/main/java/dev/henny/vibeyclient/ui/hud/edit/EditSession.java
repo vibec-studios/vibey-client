@@ -5,7 +5,7 @@ import dev.henny.vibeyclient.ui.hud.HudLayout;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public final class EditSession {
     public final Selection selection = new Selection();
@@ -16,17 +16,17 @@ public final class EditSession {
     private final List<HudElement> available = new ArrayList<>();
     private final List<HudElement> canvas = new ArrayList<>();
     private final HudLayout.Box tmp = new HudLayout.Box();
-    private Consumer<String> toasts = s -> {};
+    private BiConsumer<String, Boolean> toasts = (s, undo) -> {};
     private boolean snapping = true;
     private int width = 1;
     private int height = 1;
 
-    public void onToast(Consumer<String> sink) {
+    public void onToast(BiConsumer<String, Boolean> sink) {
         toasts = sink;
     }
 
-    void toast(String text) {
-        toasts.accept(text);
+    void toast(String text, boolean undoable) {
+        toasts.accept(text, undoable);
     }
 
     public void refresh(int sw, int sh) {

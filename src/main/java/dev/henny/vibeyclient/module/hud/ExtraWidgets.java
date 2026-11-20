@@ -14,14 +14,14 @@ final class ExtraWidgets {
     private ExtraWidgets() {}
 
     static void registerAll(HudModule m) {
-        HudLayout.register(base(m, "timer", "hud_clock", HudElement.Category.INFO, Anchor.TOP, 0, 22).rules("hud.timer")
+        HudLayout.register(base(m, "timer", "hud_clock", HudElement.Category.INFO, Anchor.LEFT, 4, -40).rules("hud.timer")
                 .options(HudOption.choice("mode", "hud.opt.mode", "stopwatch", "stopwatch", "countdown", "splits"),
                         HudOption.choice("length", "hud.opt.length", "1m", TimerWidget.LENGTHS).display(v -> v))
                 .duplicable().widget(TimerWidget::new).build());
         HudLayout.register(base(m, "scoreboard", "hud_template", HudElement.Category.WORLD, Anchor.RIGHT, -2, 0)
                 .options(HudOption.toggle("numbers", "hud.opt.numbers", true), HudOption.toggle("title", "hud.opt.title", true))
                 .widget(ScoreboardWidget::new).build());
-        HudLayout.register(base(m, "tablist", "friends", HudElement.Category.INFO, Anchor.TOP, 0, 10)
+        HudLayout.register(base(m, "tablist", "friends", HudElement.Category.INFO, Anchor.TOP, 0, 26)
                 .options(HudOption.choice("sort", "hud.opt.sort", "vanilla", "vanilla", "name", "ping"),
                         HudOption.toggle("heads", "hud.opt.heads", true), HudOption.toggle("ms", "hud.opt.ms", false))
                 .widget(TabListWidget::new).build());

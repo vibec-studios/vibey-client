@@ -9,6 +9,7 @@ import dev.henny.vibeyclient.ui.hud.edit.PointerTool;
 import dev.henny.vibeyclient.ui.hud.render.HudRenderer;
 import dev.henny.vibeyclient.ui.vui.VibeyVui;
 import dev.henny.vui.dom.Document;
+import dev.henny.vui.host.Toast;
 import dev.henny.vui.mc.VuiMc;
 import dev.henny.vui.mc.host.DocumentView;
 import dev.henny.vui.mc.host.InputScreen;
@@ -91,7 +92,12 @@ public final class HudEditorScreen extends InputScreen implements EditorHost {
 
     @Override
     public void toast(String text) {
-        VuiMc.toasts().push(text, "", null, "ok", 1.5f);
+        toast(text, false);
+    }
+
+    private void toast(String text, boolean undoable) {
+        Toast t = VuiMc.toasts().push(text, "", null, "ok", undoable ? 3f : 1.5f);
+        if (undoable) t.action(Lang.tr("ui.hud.undo"), controller::undo);
     }
 
     @Override

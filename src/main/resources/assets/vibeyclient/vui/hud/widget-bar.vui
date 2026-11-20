@@ -1,15 +1,15 @@
 <import name="icon-button" src="vibeyclient:components/icon-button"/>
 <import name="style-panel" src="vibeyclient:hud/style-panel"/>
 <template>
-  <row id="wbar" ref="wbar" class="wbar" :style="{ left: selected.barX, top: selected.barY }">
-    <text class="wbar-name">{{ selected.name }}</text>
-    <text id="wbar-scale" class="wbar-scale" :tooltip="t('ui.hud.wheelTip')">{{ selected.pct }}</text>
+  <row id="wbar" ref="wbar" class="wbar" :style="{ left: selected?.barX, top: selected?.barY }">
+    <text class="wbar-name">{{ selected?.name }}</text>
+    <text id="wbar-scale" class="wbar-scale" :tooltip="t('ui.hud.wheelTip')">{{ selected?.pct }}</text>
     <box class="wbar-sep"/>
     <stack class="wbar-slot">
       <icon-button id="wbar-style" icon="sliders" :tip="t('ui.hud.style')" :active="panel == 'style'" @click="styleSelected()"/>
-      <popover :open="panel == 'style'" @update:open="panel = ''" :placement="selected.above ? 'top' : 'bottom'" align="start"><style-panel/></popover>
+      <popover :open="panel == 'style'" @update:open="panel = ''" :placement="selected?.above ? 'top' : 'bottom'" align="start"><style-panel/></popover>
     </stack>
-    <icon-button id="wbar-hide" :icon="selected.copy ? 'hud_trash' : 'eye'" :tip="selected.copy ? t('ui.hud.remove') : t('ui.hud.hide')" @click="hideSelected()"/>
+    <icon-button id="wbar-hide" :icon="selected?.copy ? 'hud_trash' : 'eye'" :tip="selected?.copy ? t('ui.hud.remove') : t('ui.hud.hide')" @click="hideSelected()"/>
     <icon-button id="wbar-reset" icon="reset" :tip="t('ui.hud.reset')" @click="resetSelected()"/>
   </row>
 </template>

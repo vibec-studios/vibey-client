@@ -25,7 +25,7 @@ public final class EditActions {
 
     private void afterRestore(String key) {
         s.refresh(s.width(), s.height());
-        s.toast(Lang.tr(key));
+        s.toast(Lang.tr(key), false);
     }
 
     public void nudge(int dx, int dy) {
@@ -62,7 +62,7 @@ public final class EditActions {
         }
         s.selection.clear();
         s.refresh(s.width(), s.height());
-        s.toast(n == 1 ? Lang.tr("ui.hud.hidden") : Lang.tr("ui.hud.hiddenMany", n));
+        s.toast(n == 1 ? Lang.tr("ui.hud.hidden") : Lang.tr("ui.hud.hiddenMany", n), true);
     }
 
     public void resetSelection() {
@@ -112,7 +112,7 @@ public final class EditActions {
         s.history.breakMerge();
         s.selection.clear();
         s.refresh(s.width(), s.height());
-        if (toastKey != null) s.toast(Lang.tr(toastKey));
+        if (toastKey != null) s.toast(Lang.tr(toastKey), true);
     }
 
     public void resetAll() {

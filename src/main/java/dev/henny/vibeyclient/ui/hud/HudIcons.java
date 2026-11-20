@@ -2,7 +2,6 @@ package dev.henny.vibeyclient.ui.hud;
 
 import dev.henny.vibeyclient.ui.Icons;
 
-/** The HUD editor's and the built-in widgets' 9 × 9 icons (registered into {@link Icons}, names "hud_*"). */
 public final class HudIcons {
     private HudIcons() {}
 
@@ -190,7 +189,6 @@ public final class HudIcons {
                 "#...#...#",
                 "#.......#",
                 "#########");
-        // widgets
         Icons.register(FPS,
                 ".........",
                 "..#####..",

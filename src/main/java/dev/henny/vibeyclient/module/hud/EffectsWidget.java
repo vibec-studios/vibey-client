@@ -17,7 +17,6 @@ import net.minecraft.world.entity.player.Player;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Active potion effects: icon, (detailed) name and level, remaining time; blinks in the last 10 seconds. */
 final class EffectsWidget extends HudWidget {
     private static final int MAX = 12, ROW = 20;
 
@@ -53,7 +52,6 @@ final class EffectsWidget extends HudWidget {
         int maxW = 0;
         for (MobEffectInstance e : sorted) {
             if (count >= MAX) break;
-            // effects without particles/icon (beacons, commands) are listed too: this is an info widget
             Holder<MobEffect> h = e.getEffect();
             icons[count] = Gui.getMobEffectSprite(h);
             int d = e.getDuration();
@@ -87,7 +85,6 @@ final class EffectsWidget extends HudWidget {
             int ix = right ? p.w - 4 - 18 : 4;
             float blink = ending[i] ? 0.45f + 0.55f * (float) Math.abs(Math.sin(p.now / 220.0)) : 1f;
             if (blink < 1f) {
-                // fade the icon by drawing the background over it
                 p.g.g.blitSprite(RenderPipelines.GUI_TEXTURED, icons[i], ix, y, 18, 18, Theme.alpha(0xFFFFFFFF, blink));
             } else {
                 p.g.g.blitSprite(RenderPipelines.GUI_TEXTURED, icons[i], ix, y, 18, 18);

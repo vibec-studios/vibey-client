@@ -16,7 +16,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.Locale;
 
-/** The built-in one-line (or few-line) widgets. Values are rebuilt at each widget's rate, never per frame. */
 final class TextWidgets {
     private TextWidgets() {}
 
@@ -28,7 +27,6 @@ final class TextWidgets {
         return Minecraft.getInstance();
     }
 
-    /** Text widgets with the optional "icon" option. */
     abstract static class Base extends TextWidget {
         private final String icon;
 
@@ -41,8 +39,6 @@ final class TextWidgets {
             return p.flag("icon") ? icon : null;
         }
     }
-
-    // ============================================================================================ FPS
 
     static final class Fps extends Base {
         private final int[] samples = new int[24];
@@ -62,8 +58,6 @@ final class TextWidgets {
             else line(l("hud.label.fps"), Integer.toString(fps));
         }
     }
-
-    // ============================================================================================ CPS
 
     static final class Cps extends Base {
         Cps() {
@@ -89,8 +83,6 @@ final class TextWidgets {
             line(l("hud.label.cps"), p.detailed() && which.equals("both") ? l("hud.label.lmb") + " " + l + "  " + l("hud.label.rmb") + " " + r : v);
         }
     }
-
-    // ============================================================================================ coordinates
 
     static final class Coords extends Base {
         Coords() {
@@ -135,8 +127,6 @@ final class TextWidgets {
         }
     }
 
-    // ============================================================================================ clock
-
     static final class Clock extends Base {
         Clock() {
             super(HudIcons.CLOCK);
@@ -163,8 +153,6 @@ final class TextWidgets {
             }
         }
     }
-
-    // ============================================================================================ ping
 
     static final class Ping extends Base {
         Ping() {
@@ -193,8 +181,6 @@ final class TextWidgets {
             line(l("hud.label.ping"), v);
         }
     }
-
-    // ============================================================================================ server
 
     static final class Server extends Base {
         Server() {
@@ -229,8 +215,6 @@ final class TextWidgets {
         }
     }
 
-    // ============================================================================================ speed
-
     static final class Speed extends Base {
         Speed() {
             super(HudIcons.SPEED);
@@ -251,8 +235,6 @@ final class TextWidgets {
         }
     }
 
-    // ============================================================================================ in-game time
-
     static final class GameTime extends Base {
         GameTime() {
             super(HudIcons.TIME);
@@ -271,15 +253,12 @@ final class TextWidgets {
             else return;
             long day = t / 24000L + 1;
             int ticks = (int) (t % 24000L);
-            // tick 0 = 06:00
             int minutes = (int) ((ticks / 1000.0 * 60 + 6 * 60) % (24 * 60));
             String clock = String.format(Locale.ROOT, "%02d:%02d", minutes / 60, minutes % 60);
             if (p.detailed()) line(l("hud.label.day") + " " + day, clock);
             else line(null, clock);
         }
     }
-
-    // ============================================================================================ memory
 
     static final class Memory extends Base {
         Memory() {
