@@ -16,6 +16,7 @@ import dev.henny.cosmetico.state.Avatar;
 import dev.henny.cosmetico.dev.DevItems;
 import dev.henny.cosmetico.mc.compat.McSelf;
 import dev.henny.vibeyclient.module.cosmetics.catalog.Catalog;
+import dev.henny.vibeyclient.module.cosmetics.selftest.SelfTest;
 import dev.henny.cosmetico.registry.ItemSource;
 import dev.henny.cosmetico.model.Slot;
 import dev.henny.vibeyclient.module.cosmetics.preview.AvatarPreview;
@@ -123,6 +124,7 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
         applySelf();
         sync.tick();
         Catalog.refreshCatalog(false);
+        SelfTest.tick();
     }
 
     @Override
