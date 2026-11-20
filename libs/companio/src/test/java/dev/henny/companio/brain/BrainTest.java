@@ -103,10 +103,12 @@ class BrainTest {
     @Test
     void tricksForceTheirBehavior() {
         Brain b = brain("""
-                [{"id":"base","priority":100},
-                 {"id":"spin","priority":1,"duration":1,"anim":{"name":"spin","blend":"replace"},"props":{"hat":true}}]""");
+                [{"id":"base","priority":1},
+                 {"id":"spin","priority":50,"duration":1,"anim":{"name":"spin","blend":"replace"},"props":{"hat":true}}]""");
         run(b, 0.1);
         assertEquals("base", id(b));
+        run(b, 2);
+        assertEquals("base", id(b), "trick behaviors never start by themselves");
         assertTrue(b.trick("spin"));
         assertEquals("spin", id(b));
         run(b, 0.5);

@@ -1,6 +1,5 @@
 <template>
   <stack class="rd-layer">
-    <box class="rd-ring" :style="{ left: cx - 70, top: cy - 70 }"/>
     <column class="rd-center" :style="{ left: cx - 40, top: cy - 16 }">
       <text class="rd-name">{{ title }}</text>
       <text class="rd-sub">{{ subtitle }}</text>
@@ -20,8 +19,7 @@
 </template>
 <style>
 .rd-layer { width: 100%; height: 100%; background: #50000000; }
-.rd-ring { position: absolute; width: 140; height: 140; border: 1 #40ffffff; background: #30101018; }
-.rd-center { position: absolute; width: 80; align-items: center; gap: 1; pointer-events: none; }
+.rd-center { position: absolute; width: 80; padding: 4 2; align-items: center; gap: 1; pointer-events: none; background: #c0101014; border: 1 $line; }
 .rd-name { color: $text; font-weight: bold; text-wrap: nowrap; text-overflow: ellipsis; }
 .rd-sub { color: $dim; font-scale: 0.75; text-wrap: nowrap; }
 .rd-item { position: absolute; width: 52; height: 26; padding: 0; background: $panel; border: 1 $line2; }

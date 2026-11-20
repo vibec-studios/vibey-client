@@ -100,6 +100,7 @@ public final class Brain {
     }
 
     private boolean eligible(BehaviorDef b) {
+        if (def.trickBehavior(b.id())) return false;
         if (!memory.ready("behavior:" + b.id(), scope.now)) return false;
         if (b.triggered() && !fired.contains(b.on())) return false;
         try {
@@ -143,7 +144,7 @@ public final class Brain {
         if (run != null) end();
         double endsAt = Double.NaN;
         if (b.duration() != null) endsAt = scope.now + b.duration().pick(scope.random);
-        else if (b.triggered() || forced) endsAt = scope.now + triggeredLength(b);
+        else if (b.triggered() || forced || def.trickBehavior(b.id())) endsAt = scope.now + triggeredLength(b);
         run = new BehaviorRun(b, scope.now, endsAt);
         run.forced = forced;
         for (int i = 0; i < run.nextRepeat.length; i++) run.nextRepeat[i] = scope.now + b.repeat().get(i).every().pick(scope.random);

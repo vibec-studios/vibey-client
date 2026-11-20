@@ -490,8 +490,9 @@ tells you about lava behind a wall or a creeper in a cave.
 ]
 ```
 
-Tricks are listed in the companion's right-click menu (and in the settings). Picking one starts its `behavior` right
-away, over any running behavior (its `when` must hold and it must not be on cooldown, else the companion shakes its
+Tricks are listed in the companion's right-click menu (and in the settings). A behavior named by a trick is **never
+chosen by itself** – only the trick (or a `behavior` action) starts it, and without `duration` it lasts as long as its
+`anim` (or 3 s). Picking a trick starts its `behavior` right away, over any running behavior (its `when` must hold and it must not be on cooldown, else the companion shakes its
 head with a `?` bubble). Up to 8.
 
 ## What the player can do

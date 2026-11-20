@@ -31,6 +31,11 @@ public record CompanionDef(String packId, String id, TextRef name, TextRef descr
         return null;
     }
 
+    public boolean trickBehavior(String behaviorId) {
+        for (TrickDef t : tricks) if (t.behavior().equals(behaviorId)) return true;
+        return false;
+    }
+
     public TrickDef trick(String id) {
         for (TrickDef t : tricks) if (t.id().equals(id)) return t;
         return null;
