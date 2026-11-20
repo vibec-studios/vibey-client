@@ -18,5 +18,8 @@
   "key.vibeyclient.pvp.zoomKey": "Zoom (hold)",
   "key.vibeyclient.hud.editor": "HUD editor",
   "key.vibeyclient.clips.saveKey": "Save clip",
-  "key.vibeyclient.clips.galleryKey": "Clips gallery"
+  "key.vibeyclient.clips.galleryKey": "Clips gallery",
+  "key.vibeyclient.info.pinKey": "Pin card (hold)",
+  "key.vibeyclient.info.lightKey": "Light level",
+  "key.vibeyclient.info.chunkKey": "Chunk borders"
 }
