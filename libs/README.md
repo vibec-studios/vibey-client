@@ -1,7 +1,8 @@
 # Libraries
 
-Three Minecraft libraries that live next to Vibey Client. Each is its own mod with its own jar per target, usable
-by any mod; the client depends on all three and ships them inside its jar, so players still install one file.
+Four Minecraft libraries that live next to Vibey Client. Each is its own mod with its own jar per target, usable
+by any mod; the client depends on all four and ships them inside its jar, so players still install one file
+(companio only in the Fabric 1.21.11 jar for now).
 
 | Lib | Mod id | Package | Needs | Gradle project |
 |---|---|---|---|---|
