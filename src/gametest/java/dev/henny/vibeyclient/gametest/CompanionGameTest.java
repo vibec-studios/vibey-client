@@ -197,7 +197,7 @@ public final class CompanionGameTest implements FabricClientGameTest {
         ctx.runOnClient(mc -> CompanioMc.own().place(o[0] - 12.5, o[1], o[2] + 0.5));
         ctx.waitTicks(20);
         tp(world, ctx, o[0] + 3.5, o[1] + 1, o[2] + 0.5, 90, 20);
-        ctx.waitTicks(22);
+        ctx.waitTicks(30);
         lookAt(ctx, center(ctx));
         log("slide: behavior %s", behavior(ctx));
         shot(ctx, "snow_slide");
