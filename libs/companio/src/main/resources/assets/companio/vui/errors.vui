@@ -15,7 +15,7 @@
 </template>
 <style>
 .pe-layer { width: 100%; height: 100%; pointer-events: none; }
-.pe-card { position: absolute; left: 4; top: 4; width: 300; padding: 5; gap: 2; background: #e0180a0e; border: 1 $danger; }
+.pe-card { position: absolute; left: 4; top: 40; width: 300; padding: 5; gap: 2; background: #e0180a0e; border: 1 $danger; }
 .pe-head { gap: 4; }
 .pe-icon { color: $danger; }
 .pe-title { color: $text; font-weight: bold; text-wrap: nowrap; text-overflow: ellipsis; }

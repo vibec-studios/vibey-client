@@ -1344,9 +1344,9 @@
       "bones": {
         "seal": {
           "position": [
-            {"t":0,"v":[0,-2.2,0],"i":"catmullrom"},
-            {"t":0.6,"v":[0,-1.6,0],"i":"catmullrom"},
-            {"t":1.2,"v":[0,-2.2,0],"i":"catmullrom"}
+            {"t":0,"v":[0,-3.4,0],"i":"catmullrom"},
+            {"t":0.6,"v":[0,-2.8,0],"i":"catmullrom"},
+            {"t":1.2,"v":[0,-3.4,0],"i":"catmullrom"}
           ]
         },
         "body": {
@@ -1433,9 +1433,9 @@
       "bones": {
         "seal": {
           "position": [
-            {"t":0,"v":[0,-2.4,0],"i":"catmullrom"},
-            {"t":1.2,"v":[0,-1.6,0],"i":"catmullrom"},
-            {"t":2.4,"v":[0,-2.4,0],"i":"catmullrom"}
+            {"t":0,"v":[0,-3.6,0],"i":"catmullrom"},
+            {"t":1.2,"v":[0,-2.8,0],"i":"catmullrom"},
+            {"t":2.4,"v":[0,-3.6,0],"i":"catmullrom"}
           ]
         },
         "body": {

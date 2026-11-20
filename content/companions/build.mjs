@@ -51,7 +51,7 @@ async function buildPack(id) {
     }
   }
   copyTree(src, out, (p) => !p.startsWith("model/"));
-  if (!existsSync(join(out, "pack.png")) && hero) writeFileSync(join(out, "pack.png"), thumbnail(hero.B, hero.thumb, 64).toPNG());
+  if (!existsSync(join(out, "pack.png")) && hero) writeFileSync(join(out, "pack.png"), thumbnail(hero.B, { margin: 3, ...hero.thumb }, 64).toPNG());
   const dst = join(BUILTIN, id);
   rmSync(dst, { recursive: true, force: true });
   copyTree(out, dst, () => true);

@@ -80,10 +80,11 @@ public final class CompanionGameTest implements FabricClientGameTest {
             return c.body.distance(o[0] + 0.5, o[1], o[2] - 7.5) < 4.6;
         });
         ctx.getInput().holdKey(87);
-        ctx.waitTicks(16);
-        shot(ctx, "follow_walk");
+        ctx.waitTicks(24);
         ctx.getInput().releaseKey(87);
-        ctx.waitTicks(30);
+        ctx.waitTicks(12);
+        shot(ctx, "follow_walk");
+        ctx.waitTicks(20);
         ctx.runOnClient(mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
     }
 
@@ -128,10 +129,10 @@ public final class CompanionGameTest implements FabricClientGameTest {
     }
 
     private static void swim(ClientGameTestContext ctx, TestSingleplayerContext world, int[] o) {
-        tp(world, ctx, o[0] + 4.0, o[1], o[2] + 0.5, -90, 25);
+        tp(world, ctx, o[0] + 2.0, o[1] + 1, o[2] + 0.5, -90, 25);
         place(ctx, o[0] + 7.5, o[1], o[2] + 0.5);
         waitFor(ctx, "seal in water", 100, () -> CompanioMc.own().body.inWater);
-        ctx.waitTicks(50);
+        ctx.waitTicks(30);
         lookAt(ctx, center(ctx));
         shot(ctx, "swimming");
         tp(world, ctx, o[0] - 2.5, o[1], o[2] + 0.5, 90, 10);
@@ -143,15 +144,19 @@ public final class CompanionGameTest implements FabricClientGameTest {
     }
 
     private static void sleep(ClientGameTestContext ctx, TestSingleplayerContext world, int[] o) {
-        cmd(world, "time set 18000");
+        cmd(world, "time set 13600");
         cmd(world, "effect give @a minecraft:night_vision infinite 0 true");
         ctx.runOnClient(mc -> CompanioMc.own().brain().needs().set("energy", 0.3f));
         waitFor(ctx, "sleeping", 300, () -> {
             Companion c = CompanioMc.own();
             return c.brain().current() != null && c.brain().current().def.id().equals("sleep_night") && c.body.speed() < 0.2;
         });
-        ctx.waitTicks(80);
-        lookAt(ctx, center(ctx).add(0, 0.3, 0));
+        ctx.waitTicks(60);
+        Companion s = own(ctx);
+        double fx = -Math.sin(Math.toRadians(s.body.yaw)), fz = Math.cos(Math.toRadians(s.body.yaw));
+        tp(world, ctx, s.body.x + fx * 2.2 + fz * 0.8, s.body.y, s.body.z + fz * 2.2 - fx * 0.8, 0, 20);
+        ctx.waitTicks(30);
+        lookAt(ctx, center(ctx).add(0, 0.2, 0));
         shot(ctx, "sleep_night");
         cmd(world, "time set 6000");
         cmd(world, "effect clear @a");
@@ -193,7 +198,8 @@ public final class CompanionGameTest implements FabricClientGameTest {
         ctx.waitTicks(20);
         ctx.runOnClient(mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_BACK));
         tp(world, ctx, o[0] + 3.5, o[1], o[2] + 0.5, 90, 20);
-        ctx.waitTicks(16);
+        ctx.waitTicks(24);
+        log("slide: behavior %s", behavior(ctx));
         shot(ctx, "snow_slide");
         ctx.runOnClient(mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
         ctx.waitTicks(60);
