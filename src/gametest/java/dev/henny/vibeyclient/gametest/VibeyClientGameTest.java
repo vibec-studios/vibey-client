@@ -25,7 +25,7 @@ public final class VibeyClientGameTest implements FabricClientGameTest {
         context.getInput().resizeWindow(1280, 720);
         context.runOnClient(mc -> {
             ModuleManager mm = ModuleManager.get();
-            if (mm.all().size() != 11) throw new AssertionError("Expected 11 modules on Fabric 1.21.11 (with pvp, clips, hud and waypoints), got " + mm.all().size());
+            if (mm.all().size() != 12) throw new AssertionError("Expected 12 modules on Fabric 1.21.11 (with pvp, clips, hud, waypoints and info), got " + mm.all().size());
             if (!mm.isEnabled("nametags")) throw new AssertionError("nametags should be enabled by default");
             for (VibeyModule m : mm.all()) {
                 System.out.println("[vibeyclient-test] module " + m.id() + ": " + m.status() + (m.statusReason() == null ? "" : " (" + m.statusReason() + ")"));

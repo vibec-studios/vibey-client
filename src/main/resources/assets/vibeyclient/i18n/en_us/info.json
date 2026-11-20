@@ -1,0 +1,45 @@
+{
+  "name": "Info",
+  "description": "Light level, block card, food gain, tool warning, TNT timer.",
+  "summary": "Light, block card, food, TNT",
+  "section": {
+    "light": "Light & chunks",
+    "card": "Block card",
+    "food": "Food",
+    "tool": "Tool warning",
+    "tnt": "TNT"
+  },
+  "setting": {
+    "editHud": "Move the card",
+    "editHud.action": "Edit HUD",
+    "light": "Light level",
+    "light.desc": "Its light floats above the block.",
+    "lightTorch": "Only with torch",
+    "lightTorch.desc": "While you hold a light source.",
+    "chunks": "Chunk borders",
+    "chunks.desc": "The chunk key, like F3+G.",
+    "card": "Block card",
+    "card.desc": "Look at a block or mob.",
+    "cardMobs": "Mobs too",
+    "cardTool": "Right tool",
+    "cardMod": "Mod name",
+    "food": "Food gain",
+    "food.desc": "Gain shows on the hunger bar.",
+    "saturation": "Saturation",
+    "saturation.desc": "Hidden value. Some servers forbid it.",
+    "toolWarn": "Tool warning",
+    "toolWarn.desc": "Flashes when your tool almost breaks.",
+    "toolWarnAt": "Warn below",
+    "tnt": "TNT timer",
+    "tnt.desc": "Seconds until lit TNT explodes.",
+    "pinKey": "Pin card (hold)",
+    "lightKey": "Light level",
+    "chunkKey": "Chunk borders"
+  },
+  "hud": {
+    "card": "Block card",
+    "card.desc": "What you look at",
+    "toolwarn": "Tool warning",
+    "toolwarn.desc": "Tool almost broken"
+  }
+}

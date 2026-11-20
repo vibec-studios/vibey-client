@@ -37,6 +37,8 @@ final class BuiltinTemplates {
                 .place("hud.effects", Anchor.TOP_RIGHT, -4, 4, 1f).style(s -> s.variant = HudStyle.Variant.DETAILED)
                 .place("hud.items", Anchor.BOTTOM, 116, -3, 1f).option("item", "minecraft:arrow")
                 .place("hud.items.2", Anchor.BOTTOM, 160, -3, 1f).option("item", "minecraft:totem_of_undying")
+                .place("info.card", Anchor.TOP, 0, 4, 1f)
+                .place("info.toolwarn", Anchor.CENTER, 0, 24, 1f)
                 .copies("hud.items", 2)
                 .build();
     }
@@ -48,6 +50,11 @@ final class BuiltinTemplates {
                 .place("hud.coords", Anchor.TOP_LEFT, 3, 15, 1f)
                 .place("hud.clock", Anchor.TOP_RIGHT, -3, 3, 1f)
                 .place("hud.effects", Anchor.TOP_RIGHT, -3, 16, 1f)
+                .place("info.card", Anchor.TOP, 0, 4, 1f).style(s -> {
+                    s.background = true;
+                    s.bgOpacity = 0.6f;
+                })
+                .place("info.toolwarn", Anchor.CENTER, 0, 24, 1f)
                 .build();
     }
 
@@ -60,6 +67,8 @@ final class BuiltinTemplates {
                 .place("hud.clock", Anchor.TOP_RIGHT, -4, 21, 1f).option("icon", "1")
                 .place("hud.fps", Anchor.TOP_RIGHT, -4, 38, 1f).option("icon", "1")
                 .place("hud.effects", Anchor.TOP_RIGHT, -4, 56, 1f)
+                .place("info.card", Anchor.TOP, 0, 22, 1f)
+                .place("info.toolwarn", Anchor.CENTER, 0, 24, 1f)
                 .build();
     }
 
@@ -71,6 +80,8 @@ final class BuiltinTemplates {
                 .place("hud.fps", Anchor.TOP_RIGHT, -4, 31, 1f)
                 .place("hud.effects", Anchor.TOP_RIGHT, -4, 50, 1f)
                 .place("hud.keystrokes", Anchor.BOTTOM_RIGHT, -4, -4, 1f).style(s -> s.variant = HudStyle.Variant.DETAILED)
+                .place("info.card", Anchor.TOP, 0, 4, 1f)
+                .place("info.toolwarn", Anchor.CENTER, 0, 24, 1f)
                 .build();
     }
 }

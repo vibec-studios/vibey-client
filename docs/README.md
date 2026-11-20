@@ -22,6 +22,7 @@ Start with the [main README](../README.md) for what Vibey Client is, installatio
 | [VIDEO.md](VIDEO.md) | Video screens (Fabric 1.21.11): placing, players (FFmpeg / MCEF Modern), setup prompts, sharing, wiring into the Media module. Research and licences: [VIDEO-RESEARCH.md](VIDEO-RESEARCH.md). |
 | [NETWORK.md](NETWORK.md) | Every HTTP request the client makes (startup and during play), the shared HTTP client, caching/ETags, bootstrap, timeouts and retries, and how to measure it (`tools/net-bench`). |
 | [NAMETAGS.md](NAMETAGS.md) | Names and ranks: seal, rank icons (glyph table, `rank-icons.json`), animated name styles (colour function + test vectors), chat hook, server-rule keys, local backend test. |
+| [INFO.md](INFO.md) | Info module (Fabric 1.21.11): light level, chunk borders, block/mob card + world pinning, food gain, tool warning, TNT timer; fairness table, server-rule keys. |
 | [PVP.md](PVP.md) | PvP & View module (Fabric 1.21.11): zoom, toggle sprint/sneak, crosshair editor, block outline, hit colour, low fire, lower shield, server-rule keys. |
 | [WAYPOINTS.md](WAYPOINTS.md) | Waypoints module (Fabric 1.21.11): beacons with direct manipulation, share codes, fair minimap, world map, death point, nether coordinates, map tile cache. |
 | [CLIPS.md](CLIPS.md) | **Proposal** for the Clips module (replay buffer, auto clips, gallery): capture/encoder research with measurements, and the clip folder + JSON contract for the Vibe Launcher. |

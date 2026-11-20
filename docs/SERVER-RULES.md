@@ -59,11 +59,19 @@ ignored, so you can list keys that only newer clients know.
 | `nametags.ranks` | Rank and badge icons before player names (nametag, tab list, chat) |
 | `nametags.styles` | Coloured / animated name styles (nametag, tab list, chat) |
 | `waypoints.minimap` | The minimap (terrain and own waypoints; it never shows players or mobs). Waypoints, beacons and the world map stay |
+| `info.*` | Every key below |
+| `info.light` | Light level of the looked-at block |
+| `info.chunks` | Chunk border key (vanilla F3+G is not touched) |
+| `info.card` | Block/mob info card and cards pinned into the world |
+| `info.food` | Food gain on the hunger bar |
+| `info.saturation` | Saturation on the hunger bar (off by default) |
+| `info.toolwarn` | Tool break warning |
+| `info.tnt` | TNT fuse timer |
 
 The authoritative list for a given client is what it announces in `vibey:hello` (the plugin logs it, see below);
 the keys come from `ServerRules.supports(...)` calls in the modules. The current Vibey Client declares `zoom`,
 `togglesprint`, `togglesneak`, `crosshair`, `blockoutline`, `hitcolor`, `lowfire`, `lowshield`, `hud.togglestate`
-(PvP module), `clips`, `clips.auto` (Clips module), `nametags.seal`, `nametags.ranks`, `nametags.styles` (Names and ranks), `waypoints.minimap` (Waypoints), `emotes`, `cosmetics.*` slots and `discord.server`; `freelook` and the other `hud.*` keys arrive with
+(PvP module), `clips`, `clips.auto` (Clips module), `nametags.seal`, `nametags.ranks`, `nametags.styles` (Names and ranks), `waypoints.minimap` (Waypoints), `info.light`, `info.chunks`, `info.card`, `info.food`, `info.saturation`, `info.toolwarn`, `info.tnt` (Info module), `emotes`, `cosmetics.*` slots and `discord.server`; `freelook` and the other `hud.*` keys arrive with
 the HUD editor. Listing a key an older client does not know is harmless.
 
 ## Paper / Spigot: the VibeyRules plugin

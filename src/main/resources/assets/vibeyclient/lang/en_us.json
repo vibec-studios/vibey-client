@@ -22,5 +22,8 @@
   "key.vibeyclient.waypoints.addKey": "Add waypoint",
   "key.vibeyclient.waypoints.mapKey": "Open map",
   "key.vibeyclient.waypoints.minimapKey": "Toggle minimap",
-  "key.vibeyclient.waypoints.listKey": "Waypoint list"
+  "key.vibeyclient.waypoints.listKey": "Waypoint list",
+  "key.vibeyclient.info.pinKey": "Pin card (hold)",
+  "key.vibeyclient.info.lightKey": "Light level",
+  "key.vibeyclient.info.chunkKey": "Chunk borders"
 }
