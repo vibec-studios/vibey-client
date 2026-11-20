@@ -116,6 +116,9 @@ public final class CompanionGameTest implements FabricClientGameTest {
     }
 
     private static void rain(ClientGameTestContext ctx, TestSingleplayerContext world, int[] o) {
+        tp(world, ctx, o[0] - 1.5, o[1], o[2] + 0.5, 90, 20);
+        place(ctx, o[0] - 4.0, o[1], o[2] + 0.5);
+        ctx.waitTicks(30);
         cmd(world, "weather rain");
         waitFor(ctx, "rain hat", 200, () -> CompanioMc.own().propShown("rain_hat"));
         ctx.waitTicks(30);
