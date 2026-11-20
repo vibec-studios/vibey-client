@@ -24,7 +24,7 @@
   "setting.fps": "Max frame rate",
   "setting.distance": "Play within",
   "setting.distance.desc": "Farther away screens pause.",
-  "setting.removeAll": "Remove all my screens here",
+  "setting.removeAll": "Remove all",
   "setting.removeAll.button": "Remove",
   "status.nosource": "No source",
   "status.hidden": "Hidden",
@@ -106,5 +106,6 @@
   "accept.load": "Load",
   "accept.no": "Not now",
   "browser.title": "Web page",
-  "browser.hint": "Mouse and keyboard go to the page · Esc to leave"
+  "browser.hint": "Mouse and keyboard go to the page · Esc to leave",
+  "setting.removeAll.desc": "Remove all my screens here"
 }

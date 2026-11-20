@@ -13,6 +13,12 @@ import dev.henny.vibeyclient.api.setting.Settings.StringSetting;
 public final class Rows {
     private Rows() {}
 
+    public static SettingRow toggle(String id, String label, String tip, java.util.function.BooleanSupplier read,
+                                    java.util.function.Consumer<Boolean> write) {
+        SettingValue v = new SettingValue(read::getAsBoolean, o -> write.accept(dev.henny.vui.expr.Values.truthy(o)));
+        return new SettingRow(new BoolSetting(id, false), "toggle", label, tip, v);
+    }
+
     public static SettingRow of(Setting<?, ?> s) {
         if (s instanceof BoolSetting b) return OtherRows.of(b);
         if (s instanceof IntSetting i) return NumberRows.of(i);

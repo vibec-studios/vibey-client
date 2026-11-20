@@ -3,11 +3,13 @@
   "description": "Emote-Rad mit Requisiten, Partikeln und Sounds.",
   "summary": "Emote-Rad mit Requisiten und Sounds.",
   "setting": {
-    "wheel": "Emote-Rad (gedrückt halten)",
-    "thirdPerson": "Dritte Person beim Emoten",
+    "wheel": "Emote-Rad",
+    "thirdPerson": "Dritte Person",
     "volume": "Emote-Sounds",
-    "showOthers": "Emotes anderer Spieler zeigen",
-    "thirdPerson.desc": "Die Kamera wechselt, damit du dich selbst siehst."
+    "showOthers": "Andere Emotes",
+    "thirdPerson.desc": "Die Kamera wechselt, damit du dich selbst siehst.",
+    "showOthers.desc": "Emotes anderer Spieler zeigen",
+    "wheel.desc": "Emote-Rad (gedrückt halten)"
   },
   "notLoaded": "Emote lädt noch"
 }

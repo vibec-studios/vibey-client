@@ -1,5 +1,5 @@
 {
-  "name": "Names and ranks",
+  "name": "Names",
   "description": "Seal, rank icons and name styles next to player names.",
   "summary": "Ranks and styled names.",
   "section": {
@@ -15,11 +15,16 @@
     "ranks": "Rank",
     "badges": "Extra badge",
     "nameStyles": "Name styles",
-    "animate": "Animated"
+    "animate": "Animated",
+    "myStyle": "My style",
+    "myRank": "My rank",
+    "showRank": "Show rank"
   },
   "mine": {
     "showRank": "Show my rank",
     "noStyle": "None",
-    "autoRank": "Auto"
+    "autoRank": "Auto",
+    "shown": "Shown",
+    "hidden": "Hidden"
   }
 }

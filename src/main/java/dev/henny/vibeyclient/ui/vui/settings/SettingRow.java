@@ -41,7 +41,7 @@ public final class SettingRow {
     public float getMin() { return min; }
     public float getMax() { return max; }
     public float getStep() { return step; }
-    public List<Option> getOptions() { return options; }
+    public List<java.util.Map<String, Object>> getOptions() { return Option.maps(options); }
     public boolean isCompact() { return compact; }
     public String getPlaceholder() { return placeholder; }
     public String getButton() { return button; }

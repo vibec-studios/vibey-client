@@ -1,5 +1,5 @@
 {
-  "name": "Namen und Ränge",
+  "name": "Namen",
   "description": "Robbe, Rang-Icons und Namensstile neben Spielernamen.",
   "summary": "Ränge und bunte Namen.",
   "section": {
@@ -15,11 +15,16 @@
     "ranks": "Rang",
     "badges": "Zusatz-Abzeichen",
     "nameStyles": "Namensstile",
-    "animate": "Animiert"
+    "animate": "Animiert",
+    "myStyle": "Mein Stil",
+    "myRank": "Mein Rang",
+    "showRank": "Rang zeigen"
   },
   "mine": {
     "showRank": "Meinen Rang zeigen",
     "noStyle": "Keiner",
-    "autoRank": "Automatisch"
+    "autoRank": "Automatisch",
+    "shown": "Sichtbar",
+    "hidden": "Versteckt"
   }
 }

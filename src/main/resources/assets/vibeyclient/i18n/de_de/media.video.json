@@ -10,7 +10,7 @@
   "hud.overlay": "Video-Overlay",
   "setting.screens": "Leinwand-Taste",
   "setting.screens.desc": "Auf eine Leinwand schauen, um sie zu steuern, sonst eine neue anlegen.",
-  "setting.others": "Leinwände anderer Spieler",
+  "setting.others": "Andere Leinwände",
   "setting.others.desc": "Von Spielern mit Vibey Client auf diesem Server geteilt.",
   "setting.others.ask": "Erst fragen",
   "setting.others.always": "Immer laden",
@@ -24,7 +24,7 @@
   "setting.fps": "Maximale Bildrate",
   "setting.distance": "Abspielen bis",
   "setting.distance.desc": "Weiter entfernte Leinwände pausieren.",
-  "setting.removeAll": "Alle meine Leinwände hier entfernen",
+  "setting.removeAll": "Alle entfernen",
   "setting.removeAll.button": "Entfernen",
   "status.nosource": "Keine Quelle",
   "status.hidden": "Ausgeblendet",
@@ -106,5 +106,6 @@
   "accept.load": "Laden",
   "accept.no": "Nicht jetzt",
   "browser.title": "Webseite",
-  "browser.hint": "Maus und Tastatur gehen an die Seite · Esc zum Verlassen"
+  "browser.hint": "Maus und Tastatur gehen an die Seite · Esc zum Verlassen",
+  "setting.removeAll.desc": "Alle meine Leinwände hier entfernen"
 }

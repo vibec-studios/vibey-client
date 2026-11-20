@@ -53,9 +53,9 @@ public final class OnboardingController {
         return new Feature(id, icon, Lang.tr("ui.onboarding.feature." + id), tip);
     }
 
-    public List<Option> getLanguages() {
-        return List.of(new Option("AUTO", Lang.tr("ui.quick.languageAuto")), new Option("ENGLISH", "English"),
-                new Option("GERMAN", "Deutsch"));
+    public List<java.util.Map<String, Object>> getLanguages() {
+        return Option.maps(List.of(new Option("AUTO", Lang.tr("ui.quick.languageAuto")), new Option("ENGLISH", "English"),
+                new Option("GERMAN", "Deutsch")));
     }
 
     public List<KeyItem> getKeys() {

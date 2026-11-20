@@ -31,6 +31,10 @@ public final class McThumbnails {
         return true;
     }
 
+    public static Tex texture(Item item) {
+        return item == null ? null : store().get(item);
+    }
+
     private static ThumbnailStore<Tex> store() {
         if (store == null) {
             Engine e = Cosmetico.engine();

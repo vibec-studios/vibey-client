@@ -55,7 +55,7 @@ public final class MenuController {
     public String getStatus() { return Connection.status(); }
     public String getStatusLabel() { return Connection.label(); }
     public String getStatusTip() { return Connection.tip(); }
-    public List<Option> getStatusOptions() { return friends.statusOptions(); }
+    public List<java.util.Map<String, Object>> getStatusOptions() { return Option.maps(friends.statusOptions()); }
     public ModuleGrid grid() { return grid; }
 
     public void sync() {

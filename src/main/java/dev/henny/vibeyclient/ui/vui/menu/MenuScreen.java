@@ -2,26 +2,21 @@ package dev.henny.vibeyclient.ui.vui.menu;
 
 import dev.henny.vibeyclient.api.GlobalSettings;
 import dev.henny.vibeyclient.client.ClientCompat;
-import dev.henny.vibeyclient.ui.UiScale;
+import dev.henny.vibeyclient.ui.vui.SyncedScreen;
 import dev.henny.vibeyclient.ui.vui.VibeyVui;
 import dev.henny.vui.dom.Element;
-import dev.henny.vui.mc.host.VuiScreen;
 import net.minecraft.client.gui.screens.Screen;
 
 import java.util.List;
 
-public final class MenuScreen extends VuiScreen implements MenuHost {
+public final class MenuScreen extends SyncedScreen implements MenuHost {
     public static final String DOC = "vibeyclient:menu/shell";
 
     private final MenuController controller;
-    private final Screen back;
-    private int ticks;
 
     private MenuScreen(Screen parent, MenuController controller) {
-        super(DOC, controller);
+        super(DOC, controller, parent);
         this.controller = controller;
-        this.back = parent;
-        parent(parent);
         background(!ClientCompat.inWorld());
         controller.attach(this);
     }
@@ -55,28 +50,8 @@ public final class MenuScreen extends VuiScreen implements MenuHost {
     }
 
     @Override
-    protected void init() {
-        UiScale.apply(this);
-        super.init();
-    }
-
-    @Override
-    public void removed() {
-        super.removed();
-        UiScale.restore();
-    }
-
-    @Override
-    public boolean isPauseScreen() {
-        return back != null && back.isPauseScreen();
-    }
-
-    @Override
-    public void tick() {
-        super.tick();
-        if (++ticks % 5 != 0) return;
+    protected void sync() {
         controller.sync();
-        document().refresh();
     }
 
     @Override

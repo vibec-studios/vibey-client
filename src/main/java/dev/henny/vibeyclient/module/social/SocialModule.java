@@ -18,6 +18,7 @@ import dev.henny.vibeyclient.client.Keys;
 import dev.henny.vibeyclient.module.social.ui.AccountPanel;
 import dev.henny.vibeyclient.module.social.ui.ConfirmScreen;
 import dev.henny.vibeyclient.module.social.ui.SocialScreen;
+import dev.henny.vibeyclient.api.service.FriendsDrawer;
 import dev.henny.vibeyclient.api.service.SocialStatus;
 import dev.henny.vibeyclient.ui.Icons;
 import dev.henny.vibeyclient.ui.MenuEntries;
@@ -98,9 +99,9 @@ public final class SocialModule extends VibeyModule {
         // "Friends" on the Vibey title screen and in the pause menu row opens the sidebar over that screen
         java.util.function.BooleanSupplier shown = () -> isEnabled() && GlobalSettings.online();
         MenuEntries.register(MenuEntries.Place.TITLE, new MenuEntries.Entry("friends", "core.title.friends", Icons.FRIENDS, 20,
-                shown, p -> ClientCompat.openScreen(new SocialScreen(p, this, null)), this::badge));
+                shown, this::openFriends, this::badge));
         MenuEntries.register(MenuEntries.Place.PAUSE, new MenuEntries.Entry("friends", "core.title.friends", Icons.FRIENDS, 20,
-                shown, p -> ClientCompat.openScreen(new SocialScreen(p, this, null)), this::badge));
+                shown, this::openFriends, this::badge));
         GlobalSettings.backendUrl.onChange(v -> dev.henny.vibeyclient.api.Tasks.debounce("vibeyclient-social-backend", 1500,
                 () -> dev.henny.vibeyclient.api.Tasks.onMain(this::restart)));
         ToastHooks.addScreenKeyListener(this::screenKey);
@@ -130,11 +131,20 @@ public final class SocialModule extends VibeyModule {
             if (!backend.running()) backend.start(true);
             Services.register(VibeBackend.class, backend);
             Services.register(SocialStatus.class, socialStatus);
+            Services.register(FriendsDrawer.class, drawer);
         } else {
             Services.unregister(VibeBackend.class, backend);
             Services.unregister(SocialStatus.class, socialStatus);
+            Services.unregister(FriendsDrawer.class, drawer);
             if (backend.running()) backend.stop();
         }
+    }
+
+    private final FriendsDrawer drawer = new dev.henny.vibeyclient.module.social.vui.SocialDrawer(this);
+
+    private void openFriends(Screen parent) {
+        if (dev.henny.vibeyclient.ui.vui.ClassicUi.enabled()) ClientCompat.openScreen(new SocialScreen(parent, this, null));
+        else dev.henny.vibeyclient.ui.vui.Menus.openFriends(parent);
     }
 
     /** Numbers for the title screen status line and the menu badges (render thread, cheap). */
@@ -231,7 +241,8 @@ public final class SocialModule extends VibeyModule {
         if (!isEnabled() || !GlobalSettings.online()) return false;
         if (!ClientCompat.matches(openKey.mapping(), key)) return false;
         boolean safe = screen instanceof TitleScreen || screen instanceof PauseScreen || screen instanceof JoinMultiplayerScreen
-                || screen instanceof SelectWorldScreen || screen instanceof VibeyScreen;
+                || screen instanceof SelectWorldScreen || screen instanceof VibeyScreen
+                || screen instanceof dev.henny.vibeyclient.ui.vui.menu.MenuScreen;
         if (!safe) return false;
         GuiEventListener f = screen.getFocused();
         if (f instanceof EditBox eb && eb.isFocused()) return false;

@@ -3,6 +3,11 @@
 <import name="slot-rail" src="vibeyclient:wardrobe/slot-rail"/>
 <import name="item-grid" src="vibeyclient:wardrobe/item-grid"/>
 <import name="preview-pane" src="vibeyclient:wardrobe/preview-pane"/>
+<contract>
+{ "fields": { "query": "string", "slot": "string", "slots": "list", "items": "list", "current?": "object", "playing": "bool",
+              "stillImage": "string" },
+  "actions": ["pick(it)", "wear(it)", "playEmote", "openWheel", "resetView", "close"] }
+</contract>
 <template>
   <column class="wd">
     <row class="wd-bar">

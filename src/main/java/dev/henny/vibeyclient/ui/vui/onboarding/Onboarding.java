@@ -2,23 +2,18 @@ package dev.henny.vibeyclient.ui.vui.onboarding;
 
 import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.client.Keys;
-import dev.henny.vibeyclient.ui.UiScale;
+import dev.henny.vibeyclient.ui.vui.SyncedScreen;
 import dev.henny.vibeyclient.ui.vui.VibeyVui;
-import dev.henny.vui.mc.host.VuiScreen;
 import net.minecraft.client.gui.screens.Screen;
 
-public final class Onboarding extends VuiScreen {
+public final class Onboarding extends SyncedScreen {
     public static final String DOC = "vibeyclient:onboarding/onboarding";
 
     private final OnboardingController controller;
-    private final Screen next;
-    private int ticks;
 
     private Onboarding(Screen next, OnboardingController controller) {
-        super(DOC, controller);
-        this.next = next;
+        super(DOC, controller, next);
         this.controller = controller;
-        parent(next);
     }
 
     public static Onboarding create(Screen next) {
@@ -40,28 +35,8 @@ public final class Onboarding extends VuiScreen {
     }
 
     @Override
-    protected void init() {
-        UiScale.apply(this);
-        super.init();
-    }
-
-    @Override
-    public void removed() {
-        super.removed();
-        UiScale.restore();
-    }
-
-    @Override
-    public boolean isPauseScreen() {
-        return next != null && next.isPauseScreen();
-    }
-
-    @Override
-    public void tick() {
-        super.tick();
-        if (++ticks % 5 != 0) return;
+    protected void sync() {
         controller.sync();
-        document().refresh();
     }
 
     @Override

@@ -59,11 +59,11 @@
     "language.english": "English",
     "onlineFeatures": "Online features",
     "onlineFeatures.desc": "Friends, chat and cosmetics that others can see. Off: Vibey connects to nothing.",
-    "launcherStatus": "Show what I'm playing to the launcher",
+    "launcherStatus": "Launcher status",
     "launcherStatus.desc": "For the Discord status of the Vibe Launcher: your world, server and invite link. Stays on this PC.",
     "animations": "Animations",
     "animations.desc": "Smooth transitions in the Vibey menus.",
-    "open_menu": "Open the Vibey menu",
+    "open_menu": "Open menu",
     "backendUrl": "Vibe server address",
     "backendUrl.desc": "Only change this if you run your own Vibe server.",
     "classicUi": "Classic menus",
@@ -75,7 +75,8 @@
     "uiScale.game": "Auto",
     "uiScale.x2": "2×",
     "uiScale.x3": "3×",
-    "uiScale.x4": "4×"
+    "uiScale.x4": "4×",
+    "open_menu.desc": "Open the Vibey menu"
   },
   "title": {
     "wardrobe": "Wardrobe",

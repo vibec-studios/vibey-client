@@ -4,10 +4,12 @@
   "summary": "Emote wheel with props and sounds.",
   "setting": {
     "wheel": "Emote wheel (hold)",
-    "thirdPerson": "Third person while emoting",
+    "thirdPerson": "Third person",
     "volume": "Emote sounds",
-    "showOthers": "Show other players' emotes",
-    "thirdPerson.desc": "The camera switches so you can see yourself."
+    "showOthers": "Others' emotes",
+    "thirdPerson.desc": "The camera switches so you can see yourself.",
+    "showOthers.desc": "Show other players' emotes",
+    "wheel.desc": "Emote wheel (hold)"
   },
   "notLoaded": "Emote is still loading"
 }
