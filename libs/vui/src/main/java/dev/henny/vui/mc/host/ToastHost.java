@@ -40,7 +40,7 @@ public final class ToastHost {
     }
 
     boolean click(double x, double y, int button) {
-        if (stack.toasts().size() == 0 || !view.hits(x, y)) return false;
+        if (!stack.takesClick((float) x, (float) y)) return false;
         view.down(x, y, button);
         view.up(x, y, button);
         return true;

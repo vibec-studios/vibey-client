@@ -22,7 +22,7 @@ public final class MenuController {
     private final NoticeList noticeList = new NoticeList();
     private MenuHost host;
 
-    public final State<String> panel = new State<>("");
+    public final WatchedState<String> panel = new WatchedState<>("");
     public final WatchedState<String> query = new WatchedState<>("");
     public final State<ModulePage> page = new State<>(null);
     public final State<Boolean> moreOpen = new State<>(false);
@@ -32,6 +32,8 @@ public final class MenuController {
     public final ListState<SettingRow> quick = quickPart.quick;
     public final ListState<SettingRow> quickMore = quickPart.quickMore;
     public final State<Boolean> quickMoreOpen = quickPart.quickMoreOpen;
+    public final ListState<QuickHit> quickHits = quickPart.quickHits;
+    public final State<String> quickFocus = quickPart.quickFocus;
     public final ListState<NoticeRow> notices = noticeList.notices;
     public final Account account = friends.account;
     public final ListState<FriendRow> friendsOnline = friends.friendsOnline;
@@ -43,7 +45,11 @@ public final class MenuController {
     public final String version = BuildInfo.VERSION;
 
     public MenuController() {
-        query.onChange(grid::filter);
+        query.onChange(q -> {
+            grid.filter(q);
+            quickPart.filter(q);
+        });
+        panel.onChange(p -> quickFocus.set(""));
         sync();
     }
 
@@ -111,6 +117,11 @@ public final class MenuController {
     public void showWelcome() {
         panel.set("");
         if (host != null) Onboarding.open(host.screen());
+    }
+
+    public void openQuickAt(QuickHit h) {
+        panel.set("quick");
+        quickPart.focus(h);
     }
 
     public void openNotice(NoticeRow n) { noticeList.open(n); }

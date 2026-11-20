@@ -51,6 +51,7 @@ public final class ModulePage {
     public List<Section> getSections() { return sections; }
     public List<Section> getMore() { return more; }
     public int getMoreCount() { return moreCount; }
+    public dev.henny.vibeyclient.api.StatusCard getCard() { return module.statusCard(); }
 
     public List<Notice> getNotices() {
         List<Notice> out = new ArrayList<>();

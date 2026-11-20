@@ -66,5 +66,6 @@ each frame.
 ## Render modes
 
 `CUTOUT` (alpha test), `TRANSLUCENT` (blended, sorted back to front), `ADDITIVE` (`src·α + dst`, no alpha cut-off –
-soft glows stay soft), `EMISSIVE` (full bright, blended). See [backend.md](backend.md) for the mapping to Minecraft
+soft glows stay soft), `EMISSIVE` (full bright, blended), `SEE_THROUGH` (full bright, blended, ignores depth: markers and hints that must
+show through walls). See [backend.md](backend.md) for the mapping to Minecraft
 render types.

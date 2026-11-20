@@ -44,7 +44,12 @@
     "info": "Infos für Bugreport",
     "infoTip": "Kopiert Version und Verbindung.",
     "noticeOpen": "Link öffnen",
-    "noticeHide": "Ausblenden"
+    "noticeHide": "Ausblenden",
+    "theme": "Design",
+    "themeTip": "Farbsehschwäche-Sets trennen die Statusfarben.",
+    "ownAccent": "Eigener Akzent",
+    "ownAccentTip": "Deine Farbe für Knöpfe.",
+    "accent": "Akzent"
   },
   "status": {
     "online": "Online",
@@ -262,5 +267,22 @@
       "friends": "Freunde",
       "nobody": "Niemand"
     }
+  },
+  "wheel": {
+    "title": "Emotes",
+    "empty": "Leer",
+    "release": "Loslassen spielt",
+    "click": "Klick spielt",
+    "fill": "Klick belegt",
+    "cancel": "Rechtsklick bricht ab",
+    "off": "Emotes aus",
+    "editor": "Emote-Rad",
+    "slot": "Platz {0}",
+    "count": "{0}/8",
+    "clear": "Leeren",
+    "done": "Fertig",
+    "editHint": "Rechtsklick leert",
+    "none": "Keine Emotes",
+    "locked": "Gesperrt"
   }
 }

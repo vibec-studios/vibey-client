@@ -1,12 +1,14 @@
 <import name="tile" src="vibeyclient:components/tile"/>
 <import name="chip" src="vibeyclient:components/chip"/>
 <import name="empty" src="vibeyclient:components/empty"/>
+<import name="quick-hit" src="vibeyclient:components/quick-hit"/>
 <template>
   <scroll class="grid-scroll">
     <grid class="tiles" min-column="128" gap="3">
+      <quick-hit v-for="h in quickHits" :key="h.id" :id="'qhit-' + h.key" :h="h" @click="openQuickAt(h)"/>
       <tile v-for="m in modules" :key="m.id" :id="'tile-' + m.id" :m="m" @click="open(m)"/>
     </grid>
-    <empty v-if="len(modules) == 0" icon="search" :title="t('ui.menu.noResults')"/>
+    <empty v-if="len(modules) == 0 && len(quickHits) == 0" icon="search" :title="t('ui.menu.noResults')"/>
     <row v-if="len(creators) > 0" class="grid-foot">
       <chip id="creators" icon="cube" :label="t('ui.menu.creators')" :count="len(creators)" :on="showCreators"
             :tip="t('ui.menu.creatorsTip')" @click="showCreators = !showCreators"/>

@@ -49,20 +49,20 @@
 </template>
 <style>
 .screen { padding: 0; }
-.strip { padding: 4 5; background: #0a0a0fd8; gradient-to: #0a0a0ff2; border-top: 1 #ffffff1f; }
+.strip { padding: 4 5; background: alpha($panel, .85); gradient-to: alpha($panel, .95); border-top: 1 $line; }
 .strip.center { justify: center; gap: 6; }
-.key { size: 15 14; padding: 0; background: #ffffff10; border: 1 #ffffff18; color: #f4f4f5; justify: center; align: center; }
-.key:hover { background: #8b6cff; border-color: #9e84ff; transition: background 100ms out; }
-.key:active { background: #b49cff; }
-.key.on { color: #3fe0c5; border-color: #3fe0c577; }
-.key.danger:hover { background: #ff5470; border-color: #ff5470; }
+.key { size: 15 14; padding: 0; background: alpha($text, .06); border: 1 $line; color: $text; justify: center; align: center; }
+.key:hover { background: $brand; border-color: $brand-hover; color: $on-brand; transition: background 100ms out; }
+.key:active { background: mix($brand, $on-brand, .25); color: $on-brand; }
+.key.on { color: $brand2; border-color: alpha($brand2, .47); }
+.key.danger:hover { background: $danger; border-color: $danger; }
 .key.wide { width: auto; padding: 0 8; }
 .key.shape { width: auto; padding: 0 4; font-scale: 0.75; }
-.seek { flex-grow: 1; height: 6; accent: #8b6cff; }
+.seek { flex-grow: 1; height: 6; accent: $brand; }
 .seekrow { align: center; height: 9; }
-.time { color: #a1a1aa; font-scale: 0.75; text-wrap: nowrap; }
-.note { color: #a1a1aa; }
-.volume { width: 34; height: 6; accent: #3fe0c5; }
-.url { flex-grow: 1; height: 14; background: #000000a0; border: 1 #ffffff29; padding: 0 3; }
-.url:focus { border-color: #8b6cff; }
+.time { color: $muted; font-scale: 0.75; text-wrap: nowrap; }
+.note { color: $muted; }
+.volume { width: 34; height: 6; accent: $brand2; }
+.url { flex-grow: 1; height: 14; background: alpha($bg, .63); border: 1 $line2; padding: 0 3; }
+.url:focus { border-color: $brand; }
 </style>

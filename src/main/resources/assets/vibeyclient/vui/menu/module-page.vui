@@ -5,6 +5,7 @@
 <import name="chip" src="vibeyclient:components/chip"/>
 <import name="notice" src="vibeyclient:components/notice"/>
 <import name="empty" src="vibeyclient:components/empty"/>
+<import name="status-card" src="vibeyclient:components/status-card"/>
 <template>
   <column class="page">
     <row class="page-bar">
@@ -17,6 +18,7 @@
       <toggle v-if="page.available" id="page-switch" v-model="page.on"/>
     </row>
     <scroll class="page-scroll">
+      <status-card v-if="page.card" id="page-status" :s="page.card"/>
       <grid class="sections" min-column="190" gap="4">
         <section v-for="s in page.sections" :key="s.id" :title="s.title">
           <setting-row v-for="r in s.rows" :key="r.id" :row="r"/>

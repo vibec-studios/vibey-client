@@ -42,6 +42,10 @@ the first `init()` and closed in `removed()`, the controller object survives (st
 the document first (closes popovers, modals, focus) and closes the screen last (`doc.onEscape`). Input arrives in GUI
 pixels with GLFW key codes and mouse buttons on every version (26.3's SDL codes are mapped in `input/KeyCodes`).
 
+Host drawing between the tree and the overlays: `document().beforeOverlays(canvas -> …)` runs after the element
+tree is painted and before popovers, modals and tooltips, e.g. a 3D preview drawn into `doc.ref("stage")` that
+tooltips must cover.
+
 ## HUD
 
 ```java
@@ -63,7 +67,8 @@ Document menu = VuiMc.overlays().show("mymod:radial", controller);   // Esc or V
 
 Both are drawn above every screen (and on the HUD when no screen is open). While a screen is open they get clicks,
 release, wheel and keys first, but only where they have an element: a click on empty space passes through to the
-screen. Overlays do not receive typed characters; use a `VuiScreen` for text input.
+screen. Toasts are stricter: only a toast's action `<button>` takes a click (`ToastStack.takesClick`); the toast
+body and the gaps between toasts pass clicks to the screen, and hover pauses only toasts that have a button. Overlays do not receive typed characters; use a `VuiScreen` for text input.
 
 ## Resources
 

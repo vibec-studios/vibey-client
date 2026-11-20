@@ -6,11 +6,14 @@ import dev.henny.vui.style.Theme;
 import dev.henny.vui.style.ThemeLoader;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 final class ThemeFiles {
     private final Vui vui;
     private final List<String> paths = new ArrayList<>();
+    private final Map<String, String> overrides = new LinkedHashMap<>();
     private Theme base;
     private Diagnostics diagnostics = new Diagnostics();
 
@@ -21,6 +24,15 @@ final class ThemeFiles {
     void load(String resourcePath) {
         if (base == null) base = vui.theme();
         if (!paths.contains(resourcePath)) paths.add(resourcePath);
+        apply();
+    }
+
+    void use(List<String> resourcePaths, Map<String, String> tokens) {
+        if (base == null) base = vui.theme();
+        paths.clear();
+        paths.addAll(resourcePaths);
+        overrides.clear();
+        overrides.putAll(tokens);
         apply();
     }
 
@@ -42,6 +54,7 @@ final class ThemeFiles {
             if (source == null) d.error(new SourcePos(path, 1, 1), "theme file " + path + " not found", "check the resource roots");
             else next = ThemeLoader.load(vui.registry().describe(path), source, next, d);
         }
+        if (!overrides.isEmpty()) next = next.copy().putAll(overrides);
         diagnostics = d;
         vui.theme(next);
     }

@@ -41,7 +41,10 @@ public final class VibeyCore {
         ServerRulesClient.init();
         NetDispatch.setClientHandler(VibeyNet::handle);
         dev.henny.vibeyclient.dev.DevDriver.startIfRequested();
-        if (Integer.getInteger("vibeyclient.devDriver") != null) dev.henny.vibeyclient.ui.vui.DevUiCommands.register();
+        if (Integer.getInteger("vibeyclient.devDriver") != null) {
+            dev.henny.vibeyclient.ui.vui.DevUiCommands.register();
+            dev.henny.vibeyclient.ui.vui.theme.DevThemeCommands.register();
+        }
         dev.henny.vibeyclient.launcher.LauncherStatus.init(Vibey.platform().gameDir());
         Vibey.LOG.info("Vibey Client core ready, {} modules", ModuleManager.get().all().size());
     }

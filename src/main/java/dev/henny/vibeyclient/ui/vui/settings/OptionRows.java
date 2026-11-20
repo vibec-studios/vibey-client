@@ -18,6 +18,11 @@ final class OptionRows {
         }
         r.options = List.copyOf(options);
         r.compact = compact;
+        if (s.hasPreview()) {
+            r.preview = s::previewText;
+            r.previewFx = s::previewEffect;
+            r.compact = false;
+        }
         return r;
     }
 }

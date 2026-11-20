@@ -9,14 +9,15 @@
     "line2": "#ffffff29",
     "text": "#f4f4f5",
     "muted": "#a1a1aa",
-    "dim": "#6b6b75",
-    "brand": "#8b6cff",
+    "dim": "#80808b",
+    "brand": "#7759ff",
     "brand2": "#3fe0c5",
-    "brand-hover": "#9e84ff",
+    "brand-hover": "#6a4ae0",
     "ok": "#3fe0c5",
     "danger": "#ff5470",
     "warn": "#ffb547",
-    "scrim": "#000000c8"
+    "scrim": "#000000c8",
+    "on-brand": "#ffffff"
   },
   "sizes": {
     "pad": "10",

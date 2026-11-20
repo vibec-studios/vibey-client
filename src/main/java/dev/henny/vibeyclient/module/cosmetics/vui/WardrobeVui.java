@@ -16,6 +16,8 @@ public final class WardrobeVui extends SyncedScreen {
 
     private final WardrobeController controller;
     private boolean dragging;
+    private Object graphics;
+    private float delta;
 
     private WardrobeVui(Screen parent, WardrobeController controller) {
         super(DOC, controller, parent);
@@ -42,13 +44,24 @@ public final class WardrobeVui extends SyncedScreen {
     }
 
     @Override
+    protected void init() {
+        super.init();
+        document().beforeOverlays(c -> drawStage());
+    }
+
+    @Override
     protected void draw(Object graphics, int mouseX, int mouseY, float delta) {
+        this.graphics = graphics;
+        this.delta = delta;
         super.draw(graphics, mouseX, mouseY, delta);
+        this.graphics = null;
+    }
+
+    private void drawStage() {
         LayoutBox b = stageBox();
-        if (b != null && b.width > 4 && b.height > 4) {
-            controller.stage.draw(HostGfx.of(graphics), Math.round(b.x) + 1, Math.round(b.y) + 1, Math.round(b.width) - 2,
-                    Math.round(b.height) - 2, delta);
-        }
+        if (graphics == null || b == null || b.width <= 4 || b.height <= 4) return;
+        controller.stage.draw(HostGfx.of(graphics), Math.round(b.x) + 1, Math.round(b.y) + 1, Math.round(b.width) - 2,
+                Math.round(b.height) - 2, delta);
     }
 
     @Override

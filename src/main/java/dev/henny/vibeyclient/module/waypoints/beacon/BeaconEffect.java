@@ -23,6 +23,7 @@ final class BeaconEffect implements Effect, PointerContent {
     private Pos shown;
     private float time;
     private int ticks;
+    private int labelLevel;
 
     BeaconEffect(Waypoint waypoint, boolean foreign, Pos shown, BeaconState state) {
         this.waypoint = waypoint;
@@ -79,6 +80,18 @@ final class BeaconEffect implements Effect, PointerContent {
         return time;
     }
 
+    int labelLevel() {
+        return labelLevel;
+    }
+
+    void labelLevel(int level) {
+        labelLevel = level;
+    }
+
+    BeaconState state() {
+        return state;
+    }
+
     @Override
     public void tick() {
         if (ticks++ % 5 == 0) labels.refresh(this);
@@ -91,7 +104,7 @@ final class BeaconEffect implements Effect, PointerContent {
 
     @Override
     public void draw(WorldCanvas canvas, EffectContext context) {
-        BeaconDraw.draw(canvas, context, this, object.transform(), state.beams());
+        BeaconDraw.draw(canvas, context, this, object.transform(), state);
     }
 
     @Override

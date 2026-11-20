@@ -61,7 +61,7 @@
     "lowShield": "Lower shield",
     "lowShield.desc": "Your shield is held lower in first person, so you see more.",
     "shieldHeight": "How low",
-    "zoomTime": "Zoom animation time",
+    "zoomTime": "Zoom time",
     "zoomSensitivity": "Slow mouse",
     "zoomSensitivity.desc": "Mouse speed follows the zoom, so aiming feels the same.",
     "zoomScrollStep": "Wheel step",

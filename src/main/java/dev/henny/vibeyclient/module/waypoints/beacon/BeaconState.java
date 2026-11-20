@@ -7,6 +7,8 @@ import dev.henny.r3.object.WorldObject;
 final class BeaconState {
     private String navTargetId;
     private boolean beams = true;
+    private boolean through;
+    private double pixelAngle = 0.005;
 
     boolean hovered(WorldObject o) {
         Interaction i = R3Mc.scene().interaction();
@@ -21,8 +23,18 @@ final class BeaconState {
         return beams;
     }
 
-    void update(String navTargetId, boolean beams) {
+    boolean beamsThrough() {
+        return through;
+    }
+
+    double pixelAngle() {
+        return pixelAngle;
+    }
+
+    void update(String navTargetId, boolean beams, boolean through, double pixelAngle) {
         this.navTargetId = navTargetId;
         this.beams = beams;
+        this.through = through;
+        this.pixelAngle = pixelAngle;
     }
 }

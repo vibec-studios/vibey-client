@@ -10,6 +10,6 @@
     "editHud": "HUD-Layout",
     "editHud.desc": "Songtext, Now-Playing-Leiste und andere Einblendungen verschieben und skalieren.",
     "editHud.button": "Bearbeiten",
-    "editHud.action": "HUD-Layout bearbeiten"
+    "editHud.action": "HUD bearbeiten"
   }
 }

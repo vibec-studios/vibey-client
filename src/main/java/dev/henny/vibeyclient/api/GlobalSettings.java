@@ -5,6 +5,7 @@ import dev.henny.vibeyclient.api.event.Events;
 import dev.henny.vibeyclient.api.event.VibeyEvents;
 import dev.henny.vibeyclient.api.setting.Settings.ActionSetting;
 import dev.henny.vibeyclient.api.setting.Settings.BoolSetting;
+import dev.henny.vibeyclient.api.setting.Settings.ColorSetting;
 import dev.henny.vibeyclient.api.setting.Settings.EnumSetting;
 import dev.henny.vibeyclient.api.setting.Settings.KeybindSetting;
 import dev.henny.vibeyclient.api.setting.Settings.StringSetting;
@@ -36,6 +37,15 @@ public final class GlobalSettings {
             .onChange(v -> dev.henny.vibeyclient.ui.UiScale.refresh());
 
     public static final BoolSetting animations = GROUP.add(new BoolSetting("animations", true)).section("look");
+
+    public enum UiTheme { DARK, LIGHT, CONTRAST, DEUTAN, PROTAN, TRITAN }
+
+    public static final EnumSetting<UiTheme> theme = GROUP.add(new EnumSetting<>("theme", UiTheme.DARK)).section("look");
+
+    public static final BoolSetting ownAccent = GROUP.add(new BoolSetting("ownAccent", false)).section("look");
+
+    public static final ColorSetting accent = GROUP.add(new ColorSetting("accent", 0xFF7759FF)).section("look")
+            .presets(0xFF7759FF, 0xFF2F8CFF, 0xFF13A387, 0xFFE0457B, 0xFFE07A1F, 0xFF9A9AA6);
 
     /** Off: no backend connection at all, social hidden, cosmetics only local / via server packets. */
     public static final BoolSetting onlineFeatures = GROUP.add(new BoolSetting("onlineFeatures", true)).section("online")

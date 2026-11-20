@@ -13,12 +13,32 @@ public final class OptionSetting extends Setting<String, OptionSetting> {
     private final Supplier<String> read;
     private final Consumer<String> write;
     private final Supplier<List<Choice>> choices;
+    private Supplier<String> previewText;
+    private java.util.function.Function<String, String> previewEffect;
 
     public OptionSetting(String key, Supplier<String> read, Consumer<String> write, Supplier<List<Choice>> choices) {
         super(key, "");
         this.read = read;
         this.write = write;
         this.choices = choices;
+    }
+
+    public OptionSetting preview(Supplier<String> text, java.util.function.Function<String, String> effectForValue) {
+        previewText = text;
+        previewEffect = effectForValue;
+        return this;
+    }
+
+    public boolean hasPreview() {
+        return previewText != null;
+    }
+
+    public String previewText() {
+        return previewText == null ? "" : previewText.get();
+    }
+
+    public String previewEffect() {
+        return previewEffect == null ? "none" : previewEffect.apply(get());
     }
 
     public List<Choice> choices() {

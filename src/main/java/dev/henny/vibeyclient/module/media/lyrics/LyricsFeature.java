@@ -62,8 +62,10 @@ public final class LyricsFeature extends MediaFeature {
     public final ActionSetting openMenu = action("openMenu", () -> open(ClientCompat.screen()));
     public final ActionSetting panel = action("panel", () -> {
         ClientCompat.openScreen(null);
+        this.panelOn.set(true);
         MusicPanel.open();
     });
+    public final BoolSetting panelOn = bool("panelOn", true);
     public final EnumSetting<LyricsConfig.Position> position = choice("position", LyricsConfig.Position.SKY);
     public final EnumSetting<LyricsConfig.Preset> preset = choice("preset", LyricsConfig.Preset.LAVENDER);
     public final BoolSetting skyFx = bool("skyFx", true);
@@ -209,6 +211,7 @@ public final class LyricsFeature extends MediaFeature {
 
     @Override
     public void onDisable() {
+        MusicPanel.sync(false);
         Playback.suspend();
         MusicAnalyzer.stopAll();
         WorldText.tick();
@@ -218,6 +221,7 @@ public final class LyricsFeature extends MediaFeature {
     public void tick() {
         Playback.tick(Minecraft.getInstance());
         MusicAnalyzer.tick();
+        MusicPanel.sync(panelOn.get());
         MusicPanel.tick();
         WorldText.tick();
     }

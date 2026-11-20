@@ -49,22 +49,21 @@ public final class ToastGameTest implements FabricClientGameTest {
 
             ctx.setScreen(() -> new PauseScreen(true));
             ctx.waitTicks(4);
-            float[] first = ctx.computeOnClient(mc -> boxes().get(0));
-            t.hover(first[0] + 20, first[1] + first[3] / 2);
-            ctx.waitTicks(4);
-            UiTest.check(ctx.computeOnClient(mc -> VuiToasts.stack().paused()), "hovering a toast should pause it");
-            t.shot("toast_2_hover");
             float[] action = ctx.computeOnClient(mc -> actionBox());
             UiTest.check(action != null, "no action button on the toast");
+            t.hover(action[0] - 30, action[1] + action[3] / 2);
+            ctx.waitTicks(4);
+            UiTest.check(ctx.computeOnClient(mc -> VuiToasts.stack().paused()), "hovering a toast with a button should pause it");
+            t.shot("toast_2_hover");
             t.click(action[0] + action[2] / 2, action[1] + action[3] / 2);
             ctx.waitTicks(8);
             UiTest.check(acted.get(), "the toast action did not run");
             UiTest.check(count(ctx) == 1, "the toast with the action should be gone, " + count(ctx) + " left");
             float[] rest = ctx.computeOnClient(mc -> boxes().get(0));
-            t.click(rest[0] + 20, rest[1] + rest[3] / 2);
-            ctx.waitTicks(8);
-            UiTest.check(count(ctx) == 0, "clicking a toast should dismiss it");
-            t.shot("toast_3_dismissed");
+            boolean taken = ctx.computeOnClient(mc -> VuiToasts.click(rest[0] + 20, rest[1] + rest[3] / 2, 0));
+            ctx.waitTicks(2);
+            UiTest.check(!taken && count(ctx) == 1, "a toast without a button must let clicks through (taken " + taken + ")");
+            t.shot("toast_3_click_through");
             ctx.setScreen(() -> null);
             ctx.runOnClient(mc -> mc.getToastManager().clear());
         }

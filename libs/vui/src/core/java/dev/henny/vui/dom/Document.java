@@ -26,6 +26,7 @@ public final class Document {
     private final EventSystem events;
     private final LayoutEngine layout;
     private final DocumentRenderer renderer;
+    private java.util.function.Consumer<Canvas> beforeOverlays;
     private final ControllerScope rootScope;
     private CompiledTemplate template;
     private Element root;
@@ -242,6 +243,14 @@ public final class Document {
 
     public Overlays overlays() {
         return overlays;
+    }
+
+    public void beforeOverlays(java.util.function.Consumer<Canvas> painter) {
+        beforeOverlays = painter;
+    }
+
+    java.util.function.Consumer<Canvas> beforeOverlays() {
+        return beforeOverlays;
     }
 
     public DocumentStyles styles() {

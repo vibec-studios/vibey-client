@@ -24,6 +24,7 @@ final class DocumentRenderer {
         float w = document.width();
         float h = document.height();
         painter.paintTree(document.root(), ctx, w, h);
+        if (document.beforeOverlays() != null) document.beforeOverlays().accept(canvas);
         List<Element> open = document.overlays().open();
         for (int i = 0; i < open.size(); i++) {
             canvas.layer();

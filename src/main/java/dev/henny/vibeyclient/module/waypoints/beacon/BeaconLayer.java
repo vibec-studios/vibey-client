@@ -39,6 +39,11 @@ public final class BeaconLayer {
         return objects.get(waypointId);
     }
 
+    public int labelLevel(String waypointId) {
+        WorldObject o = objects.get(waypointId);
+        return o == null ? -1 : ((BeaconEffect) o.content()).labelLevel();
+    }
+
     public void sync(Minecraft mc) {
         if (!attached) return;
         WaypointsModule m = runtime.module();
@@ -46,7 +51,8 @@ public final class BeaconLayer {
             clear();
             return;
         }
-        state.update(runtime.navigator().targetId(), m.beams.get());
+        double pixelAngle = BeaconDeclutter.pixelAngle(mc);
+        state.update(runtime.navigator().targetId(), m.beams.get(), m.beamsThrough.get(), pixelAngle);
         String d = WorldContext.dimension(mc.level);
         WaypointList list = runtime.store().list();
         boolean o = m.otherDimension.get();
@@ -57,6 +63,7 @@ public final class BeaconLayer {
             e.shownPos(p);
             obj.visibility().hidden(p != null && BeaconAnchor.standingAt(mc.player, p));
         }
+        BeaconDeclutter.apply(mc, objects.values(), pixelAngle);
     }
 
     private void rebuild(WaypointList list, String d, boolean showOther) {

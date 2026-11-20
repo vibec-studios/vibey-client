@@ -32,9 +32,12 @@ final class RenderTypeCompat {
 
     private static RenderType create(RenderMode mode, String id) {
         //? if >=1.21.11 {
+        if (mode == RenderMode.SEE_THROUGH) return RenderTypes.textSeeThrough(Ids.parse(id));
         return mode == RenderMode.ADDITIVE ? RenderTypes.eyes(Ids.parse(id)) : RenderTypes.text(Ids.parse(id));
-        //?} else
-        /*return mode == RenderMode.ADDITIVE ? RenderType.eyes(Ids.parse(id)) : RenderType.text(Ids.parse(id));*/
+        //?} else {
+        /*if (mode == RenderMode.SEE_THROUGH) return RenderType.textSeeThrough(Ids.parse(id));
+        return mode == RenderMode.ADDITIVE ? RenderType.eyes(Ids.parse(id)) : RenderType.text(Ids.parse(id));
+        *///?}
     }
 
     private static RenderType lightning() {

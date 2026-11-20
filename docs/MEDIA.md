@@ -120,6 +120,13 @@ in the air). Look at a button and left click. Hold the middle mouse to move it, 
 to your view (`SoftFollowAnchor`: it stays a little below where you look and comes along when you turn away; look at
 it to use the buttons) and right click again unpins it. Saved per world as an r3 placement (`vibeyclient:music`).
 
+When it shows: only while **Media is on, Lyrics is on and *Show panel*** (`media.lyrics.panelOn`, default on) is on.
+The panel plays the lyrics feature's songs (`Playback`), so it is part of Lyrics: switching Lyrics or the whole Media
+module off hides it, and *Show panel* hides it on its own. Hiding only removes the object from the scene
+(`MusicPanel.sync(false)`); the saved placement stays and the panel comes back at the same spot when all three are on
+again (`sync(true)` restores it once per world). *Place panel* turns *Show panel* on. The ✕ on the panel removes it
+and its placement.
+
 ### Music analysis (`lyrics/fx`)
 
 | Source | When | How |

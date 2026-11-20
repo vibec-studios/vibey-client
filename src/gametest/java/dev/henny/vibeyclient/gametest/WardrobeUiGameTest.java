@@ -21,6 +21,8 @@ import dev.henny.vibeyclient.ui.Gfx;
 import dev.henny.vibeyclient.ui.Theme;
 import dev.henny.vibeyclient.module.cosmetics.vui.WardrobeController;
 import dev.henny.vibeyclient.module.cosmetics.vui.WardrobeVui;
+import dev.henny.vibeyclient.module.cosmetics.vui.EmoteWheelVui;
+import dev.henny.vibeyclient.module.cosmetics.vui.WheelEditorVui;
 import dev.henny.vibeyclient.ui.vui.Menus;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -151,6 +153,7 @@ public final class WardrobeUiGameTest implements FabricClientGameTest {
         context.runOnClient(mc -> WardrobeUi.openWheelEditor(null));
         context.waitTicks(6);
         t.shot("wardrobe_s2_en_12_wheel_editor");
+        editorAssign(context, t);
         wheel(context, "wardrobe_s2_en_13_wheel", 2);
 
         context.runOnClient(mc -> Menus.openModule(null, "cosmetics"));
@@ -236,6 +239,30 @@ public final class WardrobeUiGameTest implements FabricClientGameTest {
         t.click(c[0], c[1]);
     }
 
+    private void editorAssign(ClientGameTestContext context, UiTest t) {
+        if (!context.computeOnClient(mc -> mc.screen instanceof WheelEditorVui)) throw new AssertionError("wheel editor is not the vui screen");
+        t.click("slice-3");
+        context.waitTicks(3);
+        int sel = context.computeOnClient(mc -> ((WheelEditorVui) mc.screen).controller().selected.peek());
+        if (sel != 3) throw new AssertionError("clicking slot 4 should select it, selected " + sel);
+        String first = context.computeOnClient(mc -> ((WheelEditorVui) mc.screen).controller().emotes.get().get(0).id());
+        clickNthEditor(context, t, ".item", 0);
+        context.waitTicks(3);
+        if (!first.equals(wardrobe.wheel[3]) && !first.equals(wardrobe.wheel[0])) throw new AssertionError("emote card click should fill slot 4, wheel " + java.util.Arrays.toString(wardrobe.wheel));
+        t.shot("wardrobe_s2_en_12b_wheel_editor_assigned");
+        wardrobe.wheel[3] = null;
+    }
+
+    private static void clickNthEditor(ClientGameTestContext context, UiTest t, String selector, int index) {
+        float[] c = context.computeOnClient(mc -> {
+            var doc = ((WheelEditorVui) mc.screen).document();
+            doc.layoutIfNeeded();
+            var r = dev.henny.vui.layout.ScreenRects.of(doc.query(selector).get(index));
+            return new float[] {r.centerX(), r.centerY()};
+        });
+        t.click(c[0], c[1]);
+    }
+
     /** Opens the wheel with a simulated held key, points up-right (slot 1), screenshots, releases → plays slot 1. */
     private void wheel(ClientGameTestContext context, String shot, int scale) {
         AtomicBoolean held = new AtomicBoolean(true);
@@ -246,6 +273,8 @@ public final class WardrobeUiGameTest implements FabricClientGameTest {
         int w = guiWidth(context), h = guiHeight(context);
         moveGui(context, w / 2 + 70, h / 2 - 14 - 70);
         context.waitTicks(8);
+        int pointed = context.computeOnClient(mc -> mc.screen instanceof EmoteWheelVui v ? v.controller().hovered() : -2);
+        if (pointed != 1) throw new AssertionError("vui emote wheel should point at slot 1, got " + pointed + " (" + context.computeOnClient(mc -> String.valueOf(mc.screen)) + ")");
         context.takeScreenshot(shot);
         held.set(false);
         context.waitTicks(3);

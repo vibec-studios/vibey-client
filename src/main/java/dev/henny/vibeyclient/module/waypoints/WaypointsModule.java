@@ -24,6 +24,7 @@ public final class WaypointsModule extends VibeyModule {
 
     public final BoolSetting beacons = bool("beacons", true).section("world");
     public final BoolSetting beams = bool("beams", true).section("world").visibleWhen(this::beaconsOn);
+    public final BoolSetting beamsThrough = bool("beamsThrough", false).section("world").visibleWhen(() -> beaconsOn() && beams.get());
     public final BoolSetting deathMarker = bool("deathMarker", true).section("world");
     public final BoolSetting otherDimension = bool("otherDimension", true).section("world");
     public final BoolSetting portalCoords = bool("portalCoords", true).section("world");

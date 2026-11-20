@@ -57,7 +57,7 @@ public final class VuiToasts {
     }
 
     public static boolean click(double x, double y, int button) {
-        if (stack == null || stack.toasts().size() == 0 || !view.hits(x, y)) return false;
+        if (stack == null || !stack.takesClick((float) x, (float) y)) return false;
         view.down(x, y, button);
         view.up(x, y, button);
         return true;

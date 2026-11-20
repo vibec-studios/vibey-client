@@ -17,5 +17,5 @@
 .rst-title { grow: 1; min-width: 0; color: $text; font-weight: bold; }
 .rst-foot { gap: 4; justify: end; }
 button.danger { border-color: $danger; }
-button.danger:hover, button.danger:focus { background: $danger; color: #ffffff; }
+button.danger:hover, button.danger:focus { background: $danger; color: $bg; }
 </style>

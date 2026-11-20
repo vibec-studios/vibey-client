@@ -29,7 +29,7 @@ public final class DefaultStyles {
                      transition: background 150ms out, border-color 150ms out, color 150ms out; }
             button:hover, button:focus { background: $surface3; border-color: $brand; }
             button:active { background: $surface; }
-            button.primary { background: $brand; border-color: $brand; color: #ffffff; }
+            button.primary { background: $brand; border-color: $brand; color: $on-brand; }
             button.primary:hover, button.primary:focus { background: $brand-hover; border-color: $brand-hover; }
             button.ghost { background: transparent; border-color: transparent; color: $muted; }
             button.ghost:hover { color: $text; background: $surface2; }
@@ -37,11 +37,11 @@ public final class DefaultStyles {
             button:disabled { color: $dim; background: $surface; border-color: $line; cursor: not-allowed; }
             toggle { width: 22; height: 12; background: $surface3; border: 1 $line2; thumb-color: $muted; cursor: pointer;
                      flex-shrink: 0; transition: background 150ms out, border-color 150ms out; }
-            toggle:checked { background: $brand; border-color: $brand; thumb-color: #ffffff; }
+            toggle:checked { background: $brand; border-color: $brand; thumb-color: $on-brand; }
             toggle:focus { border-color: $brand-hover; }
             toggle:disabled { background: $surface; thumb-color: $dim; }
             checkbox { display: row; align-items: center; gap: 4; min-height: 9; padding-left: 13; color: $text;
-                       track-color: $line2; accent-color: $brand; thumb-color: #ffffff; cursor: pointer; }
+                       track-color: $line2; accent-color: $brand; thumb-color: $on-brand; cursor: pointer; }
             checkbox:focus, checkbox:hover { track-color: $brand; }
             slider { width: 120; height: 10; track-color: $surface3; accent-color: $brand; thumb-color: $text; cursor: pointer; flex-shrink: 0; }
             slider:hover, slider:focus { thumb-color: $brand-hover; }
@@ -73,7 +73,7 @@ public final class DefaultStyles {
             segment { display: row; align-items: center; justify-content: center; height: 16; padding: 0 6; color: $muted; cursor: pointer;
                       transition: background 150ms out, color 150ms out; }
             segment:hover { color: $text; }
-            segment:selected { background: $brand; color: #ffffff; }
+            segment:selected { background: $brand; color: $on-brand; }
             segmented:focus { border-color: $brand; }
             tabs { display: row; gap: 10; border-bottom: 1 $line; flex-shrink: 0; }
             tab { padding: 3 1; border-bottom: 1 transparent; color: $muted; cursor: pointer; }

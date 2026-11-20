@@ -123,9 +123,13 @@ Ids are `vibeyclient:<path>`. Screens are opened with `vui.open(id, controller)`
 | `components/keycap` | component | static key label |
 | `components/wordmark` | component | seal + VIBEY |
 | `theme.json` | theme | Vibe tokens (`ThemeLoader.load`, groups `colors`/`sizes`/`times`) |
+| `theme.<id>.json` | theme | overrides for the other UI themes (light, contrast, deutan, protan, tritan) |
+| `wardrobe/wheel` · `wardrobe/wheel-editor` · `wardrobe/wheel-ring` | screen / part | emote wheel, wheel editor, shared radial slices |
+| `components/quick-hit` · `components/status-card` · `components/emote-card` | component | settings search hit tile, module status card, emote card with slot number |
 
-Only default token names are used, so the documents also render with the stock `Preview` and the default theme;
-`theme.json` is the place for feature 28 (UI themes: light, high contrast, custom accent).
+Only default token names are used (plus `$on-brand`, now a vui default token), so the documents also render with the
+stock `Preview` and the default theme. Feature 28 lives next to `theme.json`: `theme.light.json`,
+`theme.contrast.json`, `theme.deutan.json`, `theme.protan.json`, `theme.tritan.json` (see [UI.md](UI.md#themes)).
 
 ## Controller contracts
 
@@ -298,6 +302,20 @@ go through `VuiMc.toasts()`. Keys `ui.hud.*`.
 The 3D player is drawn by the host into `doc.ref("stage").box()` after `doc.render`. Actions: `pick(it)`,
 `wear(it)` (also double click), `playEmote()`, `openWheel()`, `resetView()` (also double click on the stage),
 `rotate(dx, dy)` (drag on the stage), `close()`. Keys `ui.wardrobe.*`, `ui.slot.*`, `ui.rarity.*`.
+
+### `wardrobe/wheel` and `wardrobe/wheel-editor` (+ wheel-ring)
+
+| Field | |
+|---|---|
+| `slices` | `[{ index, number, x, y, id, name, thumb, empty }]` – positions from `WheelGeometry` (GUI px) |
+| `frame` | `{ tile, centreX, centreY, centreSize, ringX, ringY, ringSize, hintY }` |
+| `hovered` (wheel) / `selected` (editor) | slot index, −1 = none (wheel dead zone) |
+| `title` `hint` `dotX` `dotY` `available` | wheel: centre text, one hint line, direction dot |
+| `emotes` `slotLabel` `slotName` `count` `paneWidth` | editor: `[{ id, name, tip, thumb, rarityColor, locked, slot, selected }]`, centre texts, *n/8* |
+
+Actions: `pick(s)` (editor: select slot), `clear(s)` (right click: empty slot), `assign(e)`, `clearAll()`, `done()`.
+The wheel's input is handled by `EmoteWheelVui` itself (direction from the centre, key release, clicks); its
+`pick`/`clear` are no-ops. Ids `slice-<i>`, `wheel-title`, `wheel-back`, `wheel-clear`, `wheel-done`. Keys `ui.wheel.*`.
 
 ## Icons
 
@@ -519,10 +537,24 @@ WheelEditorScreen}` (emote wheel, wheel editor, title preview).
 
 ## Open issues
 
-- HUD editor chrome (`hud/*`) is not wired – another agent ports the HUD editor.
-- Emote wheel and wheel editor are still immediate-mode screens (a radial menu needs a vui behaviour).
-- Devlink's custom page (connection status) is not shown in the new menu (its two settings are); waypoints/info
-  modules were not on this branch yet – they get generated pages automatically.
-- Search hits on global settings do not lead to the quick settings yet (the old *General* tile).
-- Custom-drawn text effects: nametags *My style* shows plain style names (no animated preview of the style).
-- The 3D preview is drawn after the wardrobe document, so a tooltip over the stage is hidden behind the player.
+Closed in the polish round (2026-11-20, branch `henny/ui-polish-themes-waypoints`):
+
+| Issue | Now |
+|---|---|
+| HUD editor chrome | on vui (HUD round) |
+| Emote wheel + wheel editor were immediate mode | `wardrobe/wheel`, `wardrobe/wheel-editor` (+ `wheel-ring`, `emote-card`), see [UI.md](UI.md#emote-wheel-and-wheel-editor) |
+| Devlink connection status missing | generic page status card (`VibeyModule.statusCard()`, `components/status-card`); devlink: state chip, address, connected Blockbench windows; *Copy token* (primary), *Renew* (More, confirm) |
+| Search hits on global settings | *Settings › label* tile in the grid → quick settings open at that row (and *More* when needed), row highlighted |
+| Nametags *My style* without preview | `OptionSetting.preview` + vui text effect `namestyle(<id>)` = the client's own name-style colour function, animated |
+| Wardrobe tooltip behind the 3D preview | stage painted in `Document.beforeOverlays` (before popovers/tooltips) |
+| Labels too long | `LabelRulesTest` (JUnit): setting/section labels ≤ 3 words, action buttons ≤ 22 characters, both languages; shortened: *Place panel* / *Tafel setzen*, *Lyrics menu*, *Timer start/stop*, *Zoom time* / *Zoom-Dauer*, *HUD bearbeiten*, *Link-Port*, *Bilder in Welt* … |
+| Music panel stayed when only lyrics were off | shown only while Media **and** Lyrics **and** its own *Show panel* switch are on; hiding keeps the placement, it comes back at the same spot ([MEDIA.md](MEDIA.md#music-panel-lyricsworldmusicpanel)) |
+| Toasts swallowed clicks on screen headers | click-through except the action button ([UI.md](UI.md#toasts)) |
+| Theme support (feature 28) | six themes + own accent, AA-checked ([UI.md](UI.md#themes)) |
+
+Still open:
+
+- HUD widget contents (old immediate-mode `ui/Theme`) ignore the UI theme.
+- Social sidebar, media/clips/multiplayer screens are still immediate mode.
+- The emote wheel's hint is one line; the old "assign emotes in the wardrobe" hint is gone (empty slices show `+`,
+  click opens the editor).

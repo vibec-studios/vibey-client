@@ -118,6 +118,10 @@ public abstract class VibeyModule {
         return List.of();
     }
 
+    public StatusCard statusCard() {
+        return null;
+    }
+
     /**
      * Server-rule keys of this module's features (PLAY-LINKS.md §5), e.g. {@code List.of("emotes")}. While the current
      * server disables one, the module tile and page say "Disabled by this server" ({@link

@@ -22,10 +22,10 @@ toast:enter, toast:leave { opacity: 0; translate-y: 8; }
 toast.ok .toast-icon { color: $ok; }
 toast.warn .toast-icon { color: $warn; }
 toast.error .toast-icon { color: $danger; }
-toast.invite .toast-icon { background: $brand; color: #ffffff; }
+toast.invite .toast-icon { background: $brand; color: $on-brand; }
 .toast-body { grow: 1; min-width: 0; gap: 1; }
 .toast-title { color: $text; text-wrap: nowrap; text-overflow: ellipsis; }
 .toast-text { color: $dim; font-scale: 0.75; text-wrap: nowrap; text-overflow: ellipsis; }
 .toast-action { height: 14; padding: 0 5; }
-toast.invite .toast-action { background: $brand; border-color: $brand; color: #ffffff; }
+toast.invite .toast-action { background: $brand; border-color: $brand; color: $on-brand; }
 </style>
