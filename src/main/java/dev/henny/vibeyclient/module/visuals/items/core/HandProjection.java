@@ -3,8 +3,8 @@ package dev.henny.vibeyclient.module.visuals.items.core;
 public final class HandProjection {
     public static final float FOV_DEGREES = 70f;
     public static final float BASE_X = 0.56f, BASE_Y = -0.52f, BASE_Z = -0.72f;
-    public static final float PIVOT_X = 0.05f, PIVOT_Y = 0.16f, PIVOT_Z = 0.05f;
-    public static final float ITEM_SIZE = 0.5f;
+    public static final float PIVOT_X = 0.1f, PIVOT_Y = 0.3f, PIVOT_Z = 0f;
+    public static final float ITEM_SIZE = 0.34f;
     private static final float TAN = (float) Math.tan(Math.toRadians(FOV_DEGREES / 2));
 
     private HandProjection() {}

@@ -21,12 +21,12 @@ public final class HandSettings {
         rotX = rotation(group, hand, "RotX", "rotX", shown);
         rotY = rotation(group, hand, "RotY", "rotY", shown);
         rotZ = rotation(group, hand, "RotZ", "rotZ", shown);
-        scale = add(group, new FloatSetting(hand + "Scale", 1f, HandPose.MIN_SCALE, HandPose.MAX_SCALE, 0.05f)
+        scale = add(group, new FloatSetting(hand + "Scale", 1f, HandPose.MIN_SCALE, HandPose.MAX_SCALE, 0.01f)
                 .decimals(2), "scale", shown);
     }
 
     private FloatSetting offset(SettingsGroup g, String hand, String suffix, String label, BooleanSupplier shown) {
-        return add(g, new FloatSetting(hand + suffix, 0f, -HandPose.MAX_OFFSET, HandPose.MAX_OFFSET, 0.01f).decimals(2), label, shown);
+        return add(g, new FloatSetting(hand + suffix, 0f, -HandPose.MAX_OFFSET, HandPose.MAX_OFFSET, 0.005f).decimals(3), label, shown);
     }
 
     private FloatSetting rotation(SettingsGroup g, String hand, String suffix, String label, BooleanSupplier shown) {

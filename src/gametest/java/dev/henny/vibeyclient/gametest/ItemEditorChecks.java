@@ -53,7 +53,7 @@ final class ItemEditorChecks {
         ctx.waitTicks(3);
         check(ctx.computeOnClient(mc -> mc.screen == null && ItemEditor.session() == null), "Enter should save and close");
         HandPose saved = ctx.computeOnClient(mc -> m().held.main.pose());
-        check(HandPose.near(saved, bigger), "Enter should store the pose: " + saved + " vs " + bigger);
+        check(close(saved, bigger), "Enter should store the pose: " + saved + " vs " + bigger);
         KIT.shot(ctx, "editor_saved_in_game");
         open(ctx);
         ctx.getInput().scroll(-6);
@@ -61,9 +61,13 @@ final class ItemEditorChecks {
         ctx.getInput().pressKey(ESCAPE);
         ctx.waitTicks(3);
         HandPose kept = ctx.computeOnClient(mc -> m().held.main.pose());
-        check(ctx.computeOnClient(mc -> mc.screen == null) && HandPose.near(kept, saved), "Esc should cancel: " + kept);
+        check(ctx.computeOnClient(mc -> mc.screen == null) && close(kept, saved), "Esc should cancel: " + kept);
         ctx.runOnClient(mc -> ItemEditScreen.drawPointer = false);
         ItemModelsGameTest.reset(ctx);
+    }
+
+    private static boolean close(HandPose a, HandPose b) {
+        return Math.abs(a.x() - b.x()) < 0.01f && Math.abs(a.y() - b.y()) < 0.01f && Math.abs(a.scale() - b.scale()) < 0.011f;
     }
 
     private static void open(ClientGameTestContext ctx) {

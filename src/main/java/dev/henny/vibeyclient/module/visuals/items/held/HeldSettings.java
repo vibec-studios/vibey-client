@@ -68,7 +68,7 @@ public final class HeldSettings {
     }
 
     private static List<OptionSetting.Choice> hands() {
-        return List.of(new OptionSetting.Choice(MAIN, Lang.tr("visuals.items.hand.main")),
-                new OptionSetting.Choice(OFF, Lang.tr("visuals.items.hand.off")));
+        return List.of(new OptionSetting.Choice(MAIN, Lang.tr("visuals.items.hand.mainShort")),
+                new OptionSetting.Choice(OFF, Lang.tr("visuals.items.hand.offShort")));
     }
 }

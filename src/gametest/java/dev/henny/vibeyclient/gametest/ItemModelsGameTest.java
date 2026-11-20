@@ -53,10 +53,9 @@ public final class ItemModelsGameTest implements FabricClientGameTest {
     }
 
     private static void page(ClientGameTestContext ctx, GlobalSettings.Language lang, String name) {
-        ctx.runOnClient(mc -> {
-            GlobalSettings.language.set(lang);
-            Menus.openModule(null, "visuals");
-        });
+        ctx.runOnClient(mc -> GlobalSettings.language.set(lang));
+        ctx.waitTicks(10);
+        ctx.runOnClient(mc -> Menus.openModule(null, "visuals"));
         ctx.waitTicks(10);
         KIT.shot(ctx, name);
         ctx.setScreen(() -> null);

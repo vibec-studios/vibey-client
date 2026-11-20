@@ -50,8 +50,8 @@
 .ie-hint { height: 16; gap: 3; padding: 0 5; background: alpha($bg, .75); border: 1 $line2; }
 .ie-word { color: $muted; margin-right: 4; }
 .ie-empty { padding: 2 6; background: alpha($bg, .75); border: 1 $line2; color: $warn; }
-.ie-ring { position: absolute; border: 1 alpha($brand, .8); background: alpha($brand, .08); pointer-events: none; }
-.ie-ring.grab { border: 1 $brand; background: alpha($brand, .16); }
+.ie-ring { position: absolute; border: 1 alpha($brand, .7); pointer-events: none; }
+.ie-ring.grab { border: 1 $brand; background: alpha($brand, .1); }
 .ie-tag { position: absolute; padding: 1 4; background: alpha($bg, .8); color: $text; pointer-events: none; text-wrap: nowrap; }
 .ie-pointer { position: absolute; size: 5; background: $text; border: 1 $bg; pointer-events: none; }
 </style>

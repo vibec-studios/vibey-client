@@ -8,7 +8,9 @@
   },
   "hand": {
     "main": "Haupthand",
-    "off": "Zweithand"
+    "off": "Zweithand",
+    "mainShort": "Haupt",
+    "offShort": "Zweit"
   },
   "setting": {
     "heldEdit": "Im Spiel anpassen",

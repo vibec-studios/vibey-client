@@ -1,5 +1,6 @@
 package dev.henny.vibeyclient.module.visuals;
 
+import dev.henny.vibeyclient.api.Lang;
 import dev.henny.vibeyclient.api.ModuleCategory;
 import dev.henny.vibeyclient.api.VibeyModule;
 import dev.henny.vibeyclient.api.setting.Settings.BoolSetting;
@@ -32,6 +33,7 @@ public final class VisualsModule extends VibeyModule {
     public VisualsModule() {
         super("visuals", ModuleCategory.MISC);
         instance = this;
+        Lang.addFile("visuals.items");
     }
 
     public static VisualsModule get() {

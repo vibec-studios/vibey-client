@@ -8,7 +8,9 @@
   },
   "hand": {
     "main": "Main hand",
-    "off": "Off hand"
+    "off": "Off hand",
+    "mainShort": "Main",
+    "offShort": "Off"
   },
   "setting": {
     "heldEdit": "Edit in game",
