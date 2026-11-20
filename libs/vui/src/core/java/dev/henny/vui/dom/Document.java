@@ -2,7 +2,6 @@ package dev.henny.vui.dom;
 
 import dev.henny.vui.Vui;
 import dev.henny.vui.bind.Scheduler;
-import dev.henny.vui.contract.ContractCheck;
 import dev.henny.vui.diag.Diagnostics;
 import dev.henny.vui.diag.SourcePos;
 import dev.henny.vui.event.EventSystem;
@@ -67,10 +66,7 @@ public final class Document {
     }
 
     public Diagnostics checkContracts(boolean actions) {
-        Diagnostics out = new Diagnostics();
-        ContractCheck.check(template.contract(), controller, actions, out);
-        for (CompiledTemplate c : mounts.components()) ContractCheck.check(c.contract(), controller, actions, out);
-        return out;
+        return DocumentContracts.check(template, mounts.components(), controller, actions);
     }
 
     public void swap(CompiledTemplate next) {
