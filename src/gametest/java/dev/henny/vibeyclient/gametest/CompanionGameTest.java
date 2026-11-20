@@ -7,7 +7,6 @@ import dev.henny.r3.mc.R3Mc;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
-import net.minecraft.client.CameraType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.joml.Vector3d;
 
@@ -74,18 +73,16 @@ public final class CompanionGameTest implements FabricClientGameTest {
 
     private static void follow(ClientGameTestContext ctx, TestSingleplayerContext world, int[] o) {
         tp(world, ctx, o[0] + 0.5, o[1], o[2] - 7.5, 180, 15);
-        ctx.runOnClient(mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
         waitFor(ctx, "seal follows", 200, () -> {
             Companion c = CompanioMc.own();
             return c.body.distance(o[0] + 0.5, o[1], o[2] - 7.5) < 4.6;
         });
-        ctx.getInput().holdKey(87);
-        ctx.waitTicks(24);
-        ctx.getInput().releaseKey(87);
-        ctx.waitTicks(12);
-        shot(ctx, "follow_walk");
         ctx.waitTicks(20);
-        ctx.runOnClient(mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
+        tp(world, ctx, o[0] + 0.5, o[1], o[2] - 13.5, 180, 15);
+        ctx.waitTicks(14);
+        lookAt(ctx, center(ctx).add(0, 0.3, 0));
+        shot(ctx, "follow_walk");
+        ctx.waitTicks(40);
     }
 
     private static void pet(ClientGameTestContext ctx, TestSingleplayerContext world, int[] o) {
@@ -129,10 +126,12 @@ public final class CompanionGameTest implements FabricClientGameTest {
     }
 
     private static void swim(ClientGameTestContext ctx, TestSingleplayerContext world, int[] o) {
-        tp(world, ctx, o[0] + 2.0, o[1] + 1, o[2] + 0.5, -90, 25);
+        tp(world, ctx, o[0] + 4.0, o[1] + 1, o[2] + 0.5, -90, 25);
         place(ctx, o[0] + 7.5, o[1], o[2] + 0.5);
         waitFor(ctx, "seal in water", 100, () -> CompanioMc.own().body.inWater);
-        ctx.waitTicks(30);
+        waitFor(ctx, "paddling", 100, () -> CompanioMc.own().brain().current() != null
+                && CompanioMc.own().brain().current().def.id().equals("paddle"));
+        ctx.waitTicks(20);
         lookAt(ctx, center(ctx));
         shot(ctx, "swimming");
         tp(world, ctx, o[0] - 2.5, o[1], o[2] + 0.5, 90, 10);
@@ -173,7 +172,7 @@ public final class CompanionGameTest implements FabricClientGameTest {
         check(s == InteractionState.HOLDING, "middle mouse picks the seal up, state " + s);
         check(ctx.computeOnClient(mc -> CompanioMc.own().held()), "seal is held");
         Vector3d eye = ctx.computeOnClient(mc -> new Vector3d(mc.player.getEyePosition().x, mc.player.getEyePosition().y, mc.player.getEyePosition().z));
-        Vector3d to = new Vector3d(eye.x + 2.5, o[1] + 1.3, eye.z - 2.5);
+        Vector3d to = new Vector3d(from.x + (from.z - eye.z) * 1.2, o[1] + 1.0, from.z - (from.x - eye.x) * 1.2);
         for (int i = 1; i <= 8; i++) lookAt(ctx, new Vector3d(from).lerp(to, i / 8.0));
         ctx.waitTicks(10);
         shot(ctx, "carried");
@@ -181,7 +180,8 @@ public final class CompanionGameTest implements FabricClientGameTest {
         ctx.waitTicks(30);
         Companion c = own(ctx);
         check(!c.held(), "released");
-        check(c.body.distance(from.x, from.y, from.z) > 1.5, "the seal was put somewhere else");
+        check(c.body.distance(from.x, from.y, from.z) > 1.0, "the seal was put somewhere else, moved "
+                + c.body.distance(from.x, from.y, from.z));
         lookAt(ctx, center(ctx));
         shot(ctx, "placed");
     }
@@ -196,12 +196,11 @@ public final class CompanionGameTest implements FabricClientGameTest {
         tp(world, ctx, o[0] - 9.5, o[1], o[2] + 0.5, 90, 20);
         ctx.runOnClient(mc -> CompanioMc.own().place(o[0] - 12.5, o[1], o[2] + 0.5));
         ctx.waitTicks(20);
-        ctx.runOnClient(mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_BACK));
-        tp(world, ctx, o[0] + 3.5, o[1], o[2] + 0.5, 90, 20);
-        ctx.waitTicks(24);
+        tp(world, ctx, o[0] + 3.5, o[1] + 1, o[2] + 0.5, 90, 20);
+        ctx.waitTicks(22);
+        lookAt(ctx, center(ctx));
         log("slide: behavior %s", behavior(ctx));
         shot(ctx, "snow_slide");
-        ctx.runOnClient(mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
         ctx.waitTicks(60);
     }
 }

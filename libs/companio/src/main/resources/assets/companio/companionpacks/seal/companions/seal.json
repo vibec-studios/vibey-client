@@ -68,7 +68,7 @@
       "start": [ { "do": "sound", "name": "chirp" }, { "do": "say", "text": "@say.wheee", "seconds": 1.5 } ]
     },
     {
-      "id": "put_down", "priority": 98, "on": "place", "duration": 1.2, "obeys": false,
+      "id": "put_down", "priority": 98, "on": "place", "duration": 1.2, "obeys": false, "move": "stay",
       "anim": { "name": "shake", "blend": "replace" },
       "start": [ { "do": "particle", "name": "poof" }, { "do": "say", "text": "@say.down", "seconds": 1.5, "at": 0.6 } ]
     },
