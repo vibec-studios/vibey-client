@@ -1,0 +1,27 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<template>
+  <modal :open="confirm.open" @close="cancel()">
+    <column class="confirm">
+      <row class="confirm-head">
+        <stack class="confirm-icon" :class="{ danger: confirm.danger }"><ico :name="confirm.icon"/></stack>
+        <text class="confirm-title">{{ confirm.title }}</text>
+      </row>
+      <text v-if="confirm.text" class="confirm-text">{{ confirm.text }}</text>
+      <row class="confirm-foot">
+        <button class="ghost" @click="cancel()">{{ t('ui.confirm.cancel') }}</button>
+        <button :class="confirm.danger ? 'danger' : 'primary'" @click="accept()">{{ confirm.yes }}</button>
+      </row>
+    </column>
+  </modal>
+</template>
+<style>
+.confirm { width: 180; gap: 8; padding: 10; background: $surface; border: 1 $line2; }
+.confirm-head { gap: 8; }
+.confirm-icon { size: 18; align-items: center; background: $surface3; color: $brand2; }
+.confirm-icon.danger { color: $danger; }
+.confirm-title { grow: 1; min-width: 0; color: $text; font-weight: bold; }
+.confirm-text { color: $muted; }
+.confirm-foot { gap: 4; justify: end; }
+button.danger { border-color: $danger; }
+button.danger:hover, button.danger:focus { background: $danger; color: #ffffff; }
+</style>

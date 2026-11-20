@@ -1,0 +1,187 @@
+{
+ "view": "grid",
+ "panel": "about",
+ "query": "",
+ "status": "online",
+ "requests": 2,
+ "showCreators": false,
+ "moreOpen": false,
+ "quickMoreOpen": false,
+ "version": "0.4.0",
+ "modules": [
+  {
+   "id": "social",
+   "name": "Friends",
+   "icon": "friends",
+   "accent": "#3fe0c5",
+   "on": true,
+   "available": true,
+   "tip": "Friends, chat and world invites.",
+   "hit": ""
+  },
+  {
+   "id": "cosmetics",
+   "name": "Cosmetics",
+   "icon": "shirt",
+   "accent": "#8b6cff",
+   "on": true,
+   "available": true,
+   "tip": "Capes, wings, pets, hats.",
+   "hit": ""
+  },
+  {
+   "id": "emotes",
+   "name": "Emotes",
+   "icon": "wave",
+   "accent": "#ffb547",
+   "on": true,
+   "available": true,
+   "tip": "Emote wheel with sounds.",
+   "hit": ""
+  },
+  {
+   "id": "hud",
+   "name": "HUD",
+   "icon": "hud",
+   "accent": "#3fe0c5",
+   "on": true,
+   "available": true,
+   "tip": "FPS, coordinates, keystrokes.",
+   "hit": ""
+  },
+  {
+   "id": "pvp",
+   "name": "PvP & View",
+   "icon": "crosshair",
+   "accent": "#ff5470",
+   "on": true,
+   "available": true,
+   "tip": "Zoom, crosshair, toggle sprint.",
+   "hit": "",
+   "blocked": true
+  },
+  {
+   "id": "waypoints",
+   "name": "Waypoints",
+   "icon": "pin",
+   "accent": "#3fe0c5",
+   "on": true,
+   "available": true,
+   "tip": "Beacons, minimap, world map.",
+   "hit": ""
+  },
+  {
+   "id": "media",
+   "name": "Media",
+   "icon": "note",
+   "accent": "#ff5470",
+   "on": false,
+   "available": true,
+   "tip": "Music, lyrics, skies, video.",
+   "hit": ""
+  },
+  {
+   "id": "clips",
+   "name": "Clips",
+   "icon": "play",
+   "accent": "#8b6cff",
+   "on": false,
+   "available": true,
+   "tip": "Save the last 30 seconds.",
+   "hit": ""
+  },
+  {
+   "id": "multiplayer",
+   "name": "Host world",
+   "icon": "host",
+   "accent": "#3fe0c5",
+   "on": true,
+   "available": true,
+   "tip": "Open your world to friends.",
+   "hit": ""
+  },
+  {
+   "id": "nametags",
+   "name": "Names & ranks",
+   "icon": "star",
+   "accent": "#8b6cff",
+   "on": true,
+   "available": true,
+   "tip": "Rank icons and name styles.",
+   "hit": ""
+  },
+  {
+   "id": "chat",
+   "name": "Chat",
+   "icon": "chat",
+   "accent": "#3fe0c5",
+   "on": false,
+   "available": true,
+   "tip": "Timestamps, search, mentions.",
+   "hit": ""
+  },
+  {
+   "id": "info",
+   "name": "Look info",
+   "icon": "info",
+   "accent": "#ffb547",
+   "on": false,
+   "available": true,
+   "tip": "Block, mob and light info.",
+   "hit": ""
+  },
+  {
+   "id": "inventory",
+   "name": "Inventory",
+   "icon": "cube",
+   "accent": "#8b6cff",
+   "on": false,
+   "available": true,
+   "tip": "Shulker preview, search.",
+   "hit": ""
+  },
+  {
+   "id": "camera",
+   "name": "Camera",
+   "icon": "eye",
+   "accent": "#3fe0c5",
+   "on": false,
+   "available": true,
+   "tip": "Freelook, motion blur.",
+   "hit": ""
+  },
+  {
+   "id": "visuals",
+   "name": "Visuals",
+   "icon": "sparkle",
+   "accent": "#ff5470",
+   "on": false,
+   "available": true,
+   "tip": "Item physics, particles.",
+   "hit": ""
+  },
+  {
+   "id": "servers",
+   "name": "Servers",
+   "icon": "server",
+   "accent": "#8b6cff",
+   "on": false,
+   "available": false,
+   "tip": "Rich server list.",
+   "reason": "Own mod installed",
+   "hit": ""
+  }
+ ],
+ "creators": [
+  {
+   "id": "devlink",
+   "name": "Blockbench",
+   "icon": "code",
+   "accent": "#8b6cff",
+   "on": false,
+   "available": true,
+   "tip": "Live link to Blockbench.",
+   "hit": ""
+  }
+ ]
+}

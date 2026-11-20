@@ -1,0 +1,26 @@
+<import name="wordmark" src="vibeyclient:components/wordmark"/>
+<import name="icon-button" src="vibeyclient:components/icon-button"/>
+<template>
+  <column class="about">
+    <row class="about-head">
+      <wordmark/>
+      <text class="about-version">{{ version }}</text>
+    </row>
+    <row class="about-links">
+      <icon-button icon="globe" :tip="t('ui.about.website')" @click="link('website')"/>
+      <icon-button icon="code" :tip="t('ui.about.source')" @click="link('source')"/>
+      <icon-button icon="bug" :tip="t('ui.about.bug')" @click="link('issues')"/>
+      <icon-button icon="info" :tip="t('ui.about.licenses')" @click="link('licenses')"/>
+      <spacer/>
+      <button class="ghost" @click="showWelcome()">{{ t('ui.about.welcome') }}</button>
+    </row>
+    <text class="about-legal">{{ t('ui.about.legal') }}</text>
+  </column>
+</template>
+<style>
+.about { width: 170; gap: 4; padding: 2; }
+.about-head { gap: 6; }
+.about-version { color: $dim; }
+.about-links { gap: 2; }
+.about-legal { color: $dim; font-scale: 0.75; }
+</style>

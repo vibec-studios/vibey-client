@@ -1,0 +1,25 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<template>
+  <column class="step">
+    <text class="ob-title">{{ t('ui.onboarding.welcome') }}</text>
+    <row class="features">
+      <column v-for="f in features" :key="f.id" class="feature" :tooltip="f.tip">
+        <ico :name="f.icon" class="feature-icon"/>
+        <text class="feature-label">{{ f.label }}</text>
+      </column>
+    </row>
+    <row class="lang">
+      <ico name="globe" class="lang-icon"/>
+      <segmented v-model="language" :options="languages"/>
+    </row>
+  </column>
+</template>
+<style>
+.step { gap: 10; grow: 1; }
+.features { gap: 4; }
+.feature { grow: 1; basis: 0; align-items: center; gap: 4; padding: 6 2; background: $panel; border: 1 $line; }
+.feature-icon { size: 18; color: $brand2; }
+.feature-label { color: $muted; text-wrap: nowrap; text-overflow: ellipsis; }
+.lang { gap: 6; }
+.lang-icon { color: $muted; }
+</style>

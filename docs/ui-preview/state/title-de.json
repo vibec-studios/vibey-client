@@ -1,0 +1,33 @@
+{
+ "corner": "top-right",
+ "entries": [
+  {
+   "id": "wardrobe",
+   "icon": "shirt",
+   "label": "Kleiderschrank",
+   "badge": 0,
+   "dot": ""
+  },
+  {
+   "id": "friends",
+   "icon": "friends",
+   "label": "Freunde",
+   "badge": 2,
+   "dot": "online"
+  },
+  {
+   "id": "media",
+   "icon": "note",
+   "label": "Medien",
+   "badge": 0,
+   "dot": ""
+  },
+  {
+   "id": "vibey",
+   "icon": "seal",
+   "label": "Vibey",
+   "badge": 0,
+   "dot": ""
+  }
+ ]
+}

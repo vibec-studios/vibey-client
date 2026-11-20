@@ -1,0 +1,45 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<import name="icon-button" src="vibeyclient:components/icon-button"/>
+<import name="section" src="vibeyclient:components/section"/>
+<import name="setting-row" src="vibeyclient:components/setting-row"/>
+<import name="chip" src="vibeyclient:components/chip"/>
+<import name="notice" src="vibeyclient:components/notice"/>
+<import name="empty" src="vibeyclient:components/empty"/>
+<template>
+  <column class="page">
+    <row class="page-bar">
+      <icon-button icon="back" :tip="t('ui.menu.back')" @click="back()"/>
+      <stack class="page-icon" :style="{ color: page.accent }"><ico :name="page.icon"/></stack>
+      <text class="page-title" :tooltip="page.tip">{{ page.name }}</text>
+      <notice v-for="n in page.notices" :key="n.text" :text="n.text" :tip="n.tip"/>
+      <spacer/>
+      <button v-if="page.primary" class="primary page-primary" @click="run(page.primary)">{{ page.primary.button }}</button>
+      <toggle v-if="page.available" v-model="page.on"/>
+    </row>
+    <scroll class="page-scroll">
+      <grid class="sections" min-column="190" gap="4">
+        <section v-for="s in page.sections" :key="s.id" :title="s.title">
+          <setting-row v-for="r in s.rows" :key="r.id" :row="r"/>
+        </section>
+      </grid>
+      <empty v-if="len(page.sections) == 0" icon="check" :title="t('ui.settings.none')"/>
+      <row v-if="len(page.more) > 0" class="page-more">
+        <chip icon="sliders" :label="moreOpen ? t('ui.menu.less') : t('ui.menu.more')" :count="page.moreCount"
+              :on="moreOpen" :tip="t('ui.menu.moreTip')" @click="moreOpen = !moreOpen"/>
+      </row>
+      <grid v-if="moreOpen" class="sections" min-column="190" gap="4">
+        <section v-for="s in page.more" :key="s.id" :title="s.title">
+          <setting-row v-for="r in s.rows" :key="r.id" :row="r"/>
+        </section>
+      </grid>
+    </scroll>
+  </column>
+</template>
+<style>
+.page { grow: 1; }
+.page-bar { height: 24; gap: 5; padding: 0 6 0 4; border-bottom: 1 $line; flex-shrink: 0; }
+.page-icon { size: 13; align-items: center; background: $panel; border: 1 $line; flex-shrink: 0; }
+.page-title { font-weight: bold; color: $text; text-wrap: nowrap; text-overflow: ellipsis; min-width: 0; flex-shrink: 1; }
+.page-primary { height: 16; }
+.page-scroll { grow: 1; padding: 6; gap: 6; }
+</style>

@@ -1,0 +1,17 @@
+<import name="hud-hint" src="vibeyclient:hud/hint"/>
+<import name="widget-bar" src="vibeyclient:hud/widget-bar"/>
+<import name="hud-toolbar" src="vibeyclient:hud/toolbar"/>
+<import name="empty" src="vibeyclient:components/empty"/>
+<template>
+  <stack class="hud-editor">
+    <hud-hint v-if="firstRun"/>
+    <empty v-if="widgetCount == 0" class="hud-empty" icon="hud" :title="t('ui.hud.empty')"
+           :action="t('ui.hud.widgets')" @act="panel = 'widgets'"/>
+    <widget-bar v-if="selected"/>
+    <hud-toolbar/>
+  </stack>
+</template>
+<style>
+.hud-editor { align-items: stretch; }
+.hud-empty { position: absolute; anchor: center; }
+</style>

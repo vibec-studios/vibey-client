@@ -1,0 +1,13 @@
+<props>{ "count": 3, "index": 0 }</props>
+<template>
+  <row class="dots">
+    <box v-for="i in count" :key="i" class="dot" :class="{ on: i - 1 == index, done: i - 1 < index }"
+         tabindex="0" @click="go(i - 1)"/>
+  </row>
+</template>
+<style>
+.dots { gap: 3; }
+.dot { width: 6; height: 3; background: $surface3; cursor: pointer; transition: width 150ms out, background 150ms out; }
+.dot.done { background: $muted; }
+.dot.on { width: 14; background: $brand; }
+</style>

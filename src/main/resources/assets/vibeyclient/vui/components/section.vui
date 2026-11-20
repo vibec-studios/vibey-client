@@ -1,0 +1,11 @@
+<props>{ "title": "" }</props>
+<template>
+  <column class="section">
+    <text v-if="title" class="section-title">{{ title }}</text>
+    <slot/>
+  </column>
+</template>
+<style>
+.section { gap: 2; padding: 6 8; background: $panel; border: 1 $line; }
+.section-title { color: $brand2; text-transform: uppercase; font-scale: 0.75; margin-bottom: 2; text-wrap: nowrap; text-overflow: ellipsis; }
+</style>

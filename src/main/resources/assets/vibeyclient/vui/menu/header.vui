@@ -1,0 +1,38 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<import name="wordmark" src="vibeyclient:components/wordmark"/>
+<import name="icon-button" src="vibeyclient:components/icon-button"/>
+<import name="quick-settings" src="vibeyclient:menu/quick-settings"/>
+<import name="about" src="vibeyclient:menu/about"/>
+<template>
+  <row class="header">
+    <row class="brand" :tooltip="t('ui.menu.about')" @click="panel = panel == 'about' ? '' : 'about'">
+      <wordmark/>
+      <popover :open="panel == 'about'" @update:open="panel = ''" placement="bottom" align="start"><about/></popover>
+    </row>
+    <row class="search">
+      <ico name="search"/>
+      <textfield class="search-field" v-model="query" :placeholder="t('ui.menu.search')"/>
+    </row>
+    <row class="header-actions">
+      <icon-button icon="shirt" :tip="t('ui.menu.wardrobe')" @click="openWardrobe()"/>
+      <icon-button icon="hud" :tip="t('ui.menu.hud')" @click="openHud()"/>
+      <icon-button icon="friends" :tip="t('ui.menu.friends')" :badge="requests" :dot="status"
+                   :active="panel == 'friends'" @click="panel = panel == 'friends' ? '' : 'friends'"/>
+      <icon-button icon="gear" :tip="t('ui.menu.settings')" :active="panel == 'quick'"
+                   @click="panel = panel == 'quick' ? '' : 'quick'">
+        <popover :open="panel == 'quick'" @update:open="panel = ''" placement="bottom" align="end"><quick-settings/></popover>
+      </icon-button>
+      <box class="header-sep"/>
+      <icon-button icon="close" :tip="t('ui.menu.close')" @click="close()"/>
+    </row>
+  </row>
+</template>
+<style>
+.header { height: 24; gap: 8; padding: 0 6; border-bottom: 1 $line; flex-shrink: 0; }
+.brand { padding: 2; }
+.search { grow: 1; height: 16; gap: 4; padding: 0 4; background: $panel; border: 1 $line2; color: $dim; min-width: 60; }
+.search:focus-within { border-color: $brand; }
+.search-field { grow: 1; width: auto; height: 14; padding: 0; border: none; background: transparent; }
+.header-actions { gap: 2; }
+.header-sep { width: 1; height: 12; background: $line2; margin: 0 2; }
+</style>

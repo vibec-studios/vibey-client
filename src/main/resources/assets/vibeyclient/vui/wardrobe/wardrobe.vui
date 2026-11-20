@@ -1,0 +1,34 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<import name="icon-button" src="vibeyclient:components/icon-button"/>
+<import name="slot-rail" src="vibeyclient:wardrobe/slot-rail"/>
+<import name="item-grid" src="vibeyclient:wardrobe/item-grid"/>
+<import name="preview-pane" src="vibeyclient:wardrobe/preview-pane"/>
+<template>
+  <column class="wd">
+    <row class="wd-bar">
+      <icon-button icon="back" :tip="t('ui.menu.back')" @click="close()"/>
+      <ico name="shirt" class="wd-icon"/>
+      <text class="wd-title">{{ t('ui.wardrobe.title') }}</text>
+      <spacer/>
+      <row class="wd-search">
+        <ico name="search"/>
+        <textfield class="wd-search-field" v-model="query" :placeholder="t('ui.wardrobe.search')"/>
+      </row>
+    </row>
+    <row class="wd-main">
+      <slot-rail/>
+      <item-grid/>
+      <preview-pane/>
+    </row>
+  </column>
+</template>
+<style>
+.wd { background: $surface; }
+.wd-bar { height: 24; gap: 5; padding: 0 6 0 4; border-bottom: 1 $line; flex-shrink: 0; }
+.wd-icon { color: $brand; }
+.wd-title { color: $text; font-weight: bold; text-wrap: nowrap; }
+.wd-search { width: 110; height: 16; gap: 4; padding: 0 4; background: $panel; border: 1 $line2; color: $dim; }
+.wd-search:focus-within { border-color: $brand; }
+.wd-search-field { grow: 1; width: auto; height: 14; padding: 0; border: none; background: transparent; }
+.wd-main { grow: 1; align: stretch; }
+</style>

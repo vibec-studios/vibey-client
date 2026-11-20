@@ -1,0 +1,27 @@
+{
+ "compact": false,
+ "x": 111,
+ "y": 182,
+ "width": 204,
+ "entries": [
+  {
+   "id": "wardrobe",
+   "icon": "shirt",
+   "label": "Wardrobe",
+   "badge": 0,
+   "dot": ""
+  },
+  {
+   "id": "friends",
+   "icon": "friends",
+   "label": "Friends",
+   "badge": 2,
+   "dot": "online"
+  }
+ ],
+ "main": {
+  "id": "vibey",
+  "icon": "seal",
+  "label": "Vibey menu"
+ }
+}

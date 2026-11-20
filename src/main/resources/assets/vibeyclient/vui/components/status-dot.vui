@@ -1,0 +1,12 @@
+<props>{ "status": "offline" }</props>
+<template>
+  <box class="status-dot" :class="status"/>
+</template>
+<style>
+.status-dot { size: 5; background: $dim; flex-shrink: 0; }
+.status-dot.online { background: $ok; }
+.status-dot.away { background: $warn; }
+.status-dot.busy { background: $danger; }
+.status-dot.connecting { background: $brand; animation: dot-pulse 1s in-out infinite; }
+@keyframes dot-pulse { from { opacity: 1 } 50% { opacity: 0.3 } to { opacity: 1 } }
+</style>

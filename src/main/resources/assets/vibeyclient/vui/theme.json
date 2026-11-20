@@ -1,0 +1,29 @@
+{
+  "colors": {
+    "bg": "#000000",
+    "panel": "#08080b",
+    "surface": "#0b0b0e",
+    "surface2": "#121217",
+    "surface3": "#18181f",
+    "line": "#ffffff17",
+    "line2": "#ffffff29",
+    "text": "#f4f4f5",
+    "muted": "#a1a1aa",
+    "dim": "#6b6b75",
+    "brand": "#8b6cff",
+    "brand2": "#3fe0c5",
+    "brand-hover": "#9e84ff",
+    "ok": "#3fe0c5",
+    "danger": "#ff5470",
+    "warn": "#ffb547",
+    "scrim": "#000000c8"
+  },
+  "sizes": {
+    "pad": "10",
+    "row": "24",
+    "gap": "4"
+  },
+  "times": {
+    "duration": "150ms"
+  }
+}

@@ -1,0 +1,8 @@
+<import name="shell" src="vibeyclient:menu/shell"/>
+<import name="confirm-dialog" src="vibeyclient:dialog/confirm"/>
+<template>
+  <stack>
+    <shell/>
+    <confirm-dialog/>
+  </stack>
+</template>

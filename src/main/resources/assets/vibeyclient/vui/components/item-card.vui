@@ -1,0 +1,22 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<props>{ "it": {} }</props>
+<template>
+  <column class="item" :class="{ selected: it.selected, worn: it.worn, locked: it.locked }" :tooltip="it.tip" tabindex="0">
+    <stack class="item-thumb">
+      <image v-if="it.thumb" :src="it.thumb" fit="contain"/>
+      <ico v-if="it.worn" name="check" class="item-flag"/>
+      <ico v-if="it.locked" name="lock" class="item-flag locked"/>
+    </stack>
+    <box class="item-rarity" :style="{ background: it.rarityColor }"/>
+  </column>
+</template>
+<style>
+.item { background: $panel; border: 1 $line; cursor: pointer; transition: border-color 150ms out, background 150ms out; }
+.item:hover, .item:focus { border-color: $line2; background: $surface2; }
+.item.selected { border-color: $brand; background: $surface2; }
+.item-thumb { height: 44; padding: 3; align-items: stretch; }
+.item.locked .item-thumb { opacity: 0.4; }
+.item-flag { position: absolute; anchor: top-right; right: 2; top: 2; color: $brand2; }
+.item-flag.locked { color: $muted; }
+.item-rarity { height: 2; }
+</style>

@@ -1,0 +1,11 @@
+<props>{ "label": "" }</props>
+<template>
+  <column class="spin">
+    <spinner/>
+    <text v-if="label" class="spin-label">{{ label }}</text>
+  </column>
+</template>
+<style>
+.spin { align-items: center; justify: center; gap: 6; grow: 1; }
+.spin-label { color: $muted; }
+</style>

@@ -1,0 +1,22 @@
+<import name="pause-row" src="vibeyclient:pause/row"/>
+<template>
+  <stack class="bg">
+    <column class="vanilla" :style="{ left: x, top: y - 142 }">
+      <text class="title">Game Menu</text>
+      <box class="vb">Back to Game</box>
+      <row class="vrow"><box class="vb half">Advancements</box><box class="vb half">Statistics</box></row>
+      <row class="vrow"><box class="vb half">Give Feedback</box><box class="vb half">Report Bugs</box></row>
+      <row class="vrow"><box class="vb half">Options...</box><box class="vb half">Host World</box></row>
+      <box class="vb">Save and Quit to Title</box>
+    </column>
+    <pause-row/>
+  </stack>
+</template>
+<style>
+.bg { gradient: #5a7aa8 #2c4a22; }
+.vanilla { position: absolute; width: 204; gap: 4; align-items: stretch; }
+.title { text-align: center; color: #ffffff; margin-bottom: 8; text-shadow: on; }
+.vb { height: 20; background: #6f6f6f; border: 1 #000000; color: #ffffff; justify: center; align-items: center; text-shadow: on; }
+.vrow { gap: 4; }
+.half { grow: 1; basis: 0; }
+</style>

@@ -1,0 +1,21 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<template>
+  <column class="step">
+    <text class="ob-title">{{ t('ui.onboarding.keys') }}</text>
+    <column class="keys">
+      <row v-for="k in keys" :key="k.id" class="key-row">
+        <ico :name="k.icon" class="key-icon"/>
+        <text class="key-label">{{ k.label }}</text>
+        <keybind v-model="k.value" :tooltip="t('ui.onboarding.keysTip')"/>
+      </row>
+    </column>
+  </column>
+</template>
+<style>
+.step { gap: 8; grow: 1; }
+.keys { gap: 3; }
+.key-row { height: 18; gap: 6; padding: 0 6; background: $panel; border: 1 $line; }
+.key-icon { color: $brand2; }
+.key-label { grow: 1; color: $text; }
+.key-row keybind { height: 14; min-width: 56; }
+</style>

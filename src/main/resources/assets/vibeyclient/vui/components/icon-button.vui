@@ -1,0 +1,21 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<props>{ "icon": "", "tip": "", "badge": 0, "active": false, "dot": "" }</props>
+<template>
+  <button class="icon-btn" :class="{ active: active }" :tooltip="tip">
+    <ico :name="icon"/>
+    <text v-if="badge > 0" class="icon-badge">{{ badge > 9 ? '9+' : badge }}</text>
+    <box v-if="dot" class="icon-dot" :class="dot"/>
+    <slot/>
+  </button>
+</template>
+<style>
+.icon-btn { width: 18; height: 18; padding: 0; background: transparent; border: 1 transparent; color: $muted; }
+.icon-btn:hover, .icon-btn:focus { background: $surface2; border-color: $line2; color: $text; }
+.icon-btn.active { color: $brand; border-color: $line2; background: $surface2; }
+.icon-badge { position: absolute; anchor: top-right; left: 3; top: -3; padding: 0 2; height: 8; line-height: 8;
+              background: $brand; color: #ffffff; font-scale: 0.75; }
+.icon-dot { position: absolute; anchor: bottom-right; left: -2; top: -2; size: 4; background: $dim; }
+.icon-dot.online { background: $ok; }
+.icon-dot.away { background: $warn; }
+.icon-dot.busy { background: $danger; }
+</style>
