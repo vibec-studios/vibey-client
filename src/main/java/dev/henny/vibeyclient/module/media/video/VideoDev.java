@@ -2,9 +2,12 @@ package dev.henny.vibeyclient.module.media.video;
 
 import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.dev.DevDriver;
-import dev.henny.vibeyclient.module.media.video.player.Ffmpeg;
+import dev.henny.vibeyclient.media.ffmpeg.Ffmpeg;
+import dev.henny.vibeyclient.media.ffmpeg.FfmpegSetupScreen;
 import dev.henny.vibeyclient.module.media.video.ui.ControlsScreen;
+import dev.henny.vibeyclient.module.media.video.ui.SetupNeed;
 import dev.henny.vibeyclient.module.media.video.ui.SetupScreen;
+import dev.henny.vibeyclient.module.media.video.ui.SetupScreens;
 import dev.henny.vibeyclient.module.media.video.ui.SourceScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
@@ -134,11 +137,11 @@ final class VideoDev {
                 v.cfg.others.set(VideoFeature.Others.valueOf(a[1].toUpperCase(Locale.ROOT)));
                 return "ok";
             case "setup":
-                ClientCompat.openScreen(new SetupScreen(null, SetupScreen.Need.valueOf(switch (a[1]) {
-                    case "mod" -> "BROWSER_MOD";
-                    case "natives" -> "BROWSER_NATIVES";
-                    default -> "FFMPEG";
-                })));
+                ClientCompat.openScreen(SetupScreens.of(null, switch (a[1]) {
+                    case "mod" -> SetupNeed.BROWSER_MOD;
+                    case "natives" -> SetupNeed.BROWSER_NATIVES;
+                    default -> SetupNeed.FFMPEG;
+                }));
                 return "ok";
             case "hideffmpeg":
                 Ffmpeg.hiddenForTest = a[1].equals("on");
@@ -166,6 +169,10 @@ final class VideoDev {
                         v.placement.draft().width, v.placement.draft().normal, v.placement.draft().up, v.placement.draft().x, v.placement.draft().y, v.placement.draft().z));
             case "setupgo":
                 if (mc.screen instanceof SetupScreen ss) {
+                    ss.go();
+                    return "ok";
+                }
+                if (mc.screen instanceof FfmpegSetupScreen ss) {
                     ss.go();
                     return "ok";
                 }

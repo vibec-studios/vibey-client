@@ -16,5 +16,7 @@
   "key.vibeyclient.cosmetics.wardrobe": "Garderobe öffnen",
   "key.vibeyclient.media.video.screens": "Videoleinwände",
   "key.vibeyclient.pvp.zoomKey": "Zoomen (halten)",
-  "key.vibeyclient.hud.editor": "HUD-Editor"
+  "key.vibeyclient.hud.editor": "HUD-Editor",
+  "key.vibeyclient.clips.saveKey": "Clip speichern",
+  "key.vibeyclient.clips.galleryKey": "Clips-Galerie"
 }

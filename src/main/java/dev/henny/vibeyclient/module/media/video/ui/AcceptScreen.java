@@ -62,8 +62,8 @@ public final class AcceptScreen extends CardScreen {
         int left = buttonRight(g, x + w - PAD, by, 18, tr("accept.load"), Style.PRIMARY, () -> {
             s.accepted = true;
             Video v = Video.get();
-            SetupScreen.Need need = v.missing(s);
-            Minecraft.getInstance().setScreen(need != null ? new SetupScreen(null, need) : null);
+            SetupNeed need = v.missing(s);
+            Minecraft.getInstance().setScreen(need != null ? SetupScreens.of(null, need) : null);
         });
         buttonRight(g, left - 6, by, 18, tr("accept.no"), Style.SECONDARY, this::onClose);
     }

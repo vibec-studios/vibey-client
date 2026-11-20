@@ -53,7 +53,7 @@ Scripts: `gradle/lib/core.gradle`, `core-purity.gradle` (`:<id>`); `gradle/lib/c
 ```
 
 Add `--no-daemon --max-workers=2` and the slot script on the shared PC (docs/REBUILD.md, "PC load").
-`:fabric-1.21.11:build` (the client, source version) also runs every lib's `check` and `checkModuleBoundaries`.
+`:fabric-1.21.11:build` (the client, source version) also runs every lib's `check`, `checkModuleBoundaries` and `checkI18n`.
 Lib core tests run only through `:<id>:test`, never per target (same reason the client's JUnit is in `src/junit`:
 Stonecutter would hand `src/test` to every target).
 

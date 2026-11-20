@@ -70,7 +70,7 @@ downloaded, the size, the source and the licence, and does nothing until the use
   player's own API via `executeJavaScript` (`movie_player.playVideo/pauseVideo/seekTo/setVolume`, `<video>` for other
   pages), position reports through a JCEF message router (`window.vibeyVideoQuery`). Chromium plays sound itself:
   not positional, the distance lowers the page volume. MCEF's `GpuTextureView` is wrapped in
-  `FrameTexture.External` so it draws like any texture.
+  `ExternalTexture` so it draws like any texture.
 - `ScreenRenderer` (Fabric `WorldRenderEvents.BEFORE_ENTITIES`, submit API): dark bezel/back plate
   (`textBackground`), the picture (`RenderTypes.text(texture)`: lightmapped, no shading; glowing = full bright),
   or a status line. Texture uploads happen in `END_EXTRACTION` (no render pass open).
@@ -104,14 +104,14 @@ random 0.3–1 s delay). Owners resend `STATE` every 10 s while playing; receive
 | `MediaScreen`, `MediaSource`, `UrlPolicy` | model, link parsing (YouTube/web/stream/file), what we accept from others |
 | `Placement`, `render/ScreenRenderer` | item-free placing, world rendering |
 | `VideoNet` | `video:screen` channel (sharing) |
-| `player/FfmpegPlayer`, `player/Ffmpeg`, `player/FrameTexture` | FFmpeg playback, locating/downloading FFmpeg, GPU texture |
+| `media/player/*`, `media/ffmpeg/*` (shared with Clips) | FFmpeg playback, locating/downloading FFmpeg, GPU texture, see below |
 | `web/Web` (facade), `web/McefBridge`, `web/WebPlayer`, `web/BrowserScreen`, `web/McefInstaller` | MCEF Modern (loaded only when installed) |
-| `ui/SourceScreen`, `ui/ControlsScreen`, `ui/SetupScreen`, `ui/AcceptScreen` | screens |
+| `ui/SourceScreen`, `ui/ControlsScreen`, `ui/SetupScreen` (browser downloads), `ui/SetupScreens` (`SetupNeed` → screen), `ui/AcceptScreen` | screens |
 | `VideoDev` | DevDriver `video …` commands (dev only) |
 
-Porting to more versions: the version-specific parts are `render/ScreenRenderer` (submit API), `FrameTexture`
+Porting to more versions: the version-specific parts are `render/ScreenRenderer` (submit API), `media/player/FrameTexture`
 (blaze3d `GpuTexture` upload), the Fabric world render events in `Video.onLoad`, `Placement` (hotbar slot API) and
-MCEF Modern's per-version API; then drop the exclusion in `gradle/modules.gradle`.
+MCEF Modern's per-version API; then drop the exclusion in `gradle/modules.gradle` (`media.video` in `clientModules`, `media` in `sharedPackages`).
 
 ## Dev testing
 
@@ -126,3 +126,47 @@ MCEF Modern's per-version API; then drop the exclusion in `gradle/modules.gradle
   canceling the build"), which ends the game.
 - Test media: generate your own, e.g.
   `ffmpeg -f lavfi -i testsrc2=size=1280x720:rate=30:duration=20 -f lavfi -i sine=frequency=440:beep_factor=4:duration=20 -c:v libx264 -pix_fmt yuv420p -c:a aac -shortest testpattern.mp4`.
+
+## Shared FFmpeg and player code
+
+The video screens and the Clips module both play files with FFmpeg. Modules must not use each other, so the shared
+parts live outside `module/`, in `dev.henny.vibeyclient.media` (client core, Fabric 1.21.11 only like both modules;
+`sharedPackages` in `gradle/modules.gradle` leaves the package and `i18n/*/media.ffmpeg.json` out of the other
+targets, and `checkModuleBoundaries` fails if it imports a module).
+
+`media/ffmpeg` (finding and installing the program):
+
+- `Ffmpeg`: `find()` = our own download (`<gameDir>/vibeyclient/ffmpeg/bin`) first, then the `PATH`, on Linux/macOS also
+  the usual system directories; cached until `refresh()`. `downloadable()` = Windows x64/arm64 only, elsewhere the
+  setup screen explains the system package. `hiddenForTest` ignores everything but our own download (dev test of the
+  prompt, `video hideffmpeg on`, `ClipsGameTest`).
+- `FfmpegRelease`: `lookup()` asks the GitHub release API for the newest BtbN `ffmpeg-nX.Y-latest-<win64|winarm64>-lgpl-shared`
+  asset and its sha256. The API is rate limited per IP (403/429, e.g. shared networks), so it falls back to
+  `releases/latest/download/checksums.sha256` (`pickFromChecksums`, pure and covered by `FfmpegReleaseTest`) and takes
+  the size from a `HEAD` request (only shown in the prompt). Never a GPL build.
+- `FfmpegInstaller`: downloads to `download.zip.part`, verifies the sha256, unpacks `bin/*` into `bin.new`, swaps it
+  for `bin`, writes `SOURCE.txt` / `LICENSE.txt`. FFmpeg always runs as a separate process, nothing is linked.
+- `FfmpegSetupScreen(parent, FfmpegPurpose.PLAYBACK|RECORDING)`: asks before anything is downloaded (what, size, source,
+  licence, target folder); the button starts lookup → download → done. Strings in `media.ffmpeg.json`
+  (`playback.*` for video screens, `recording.*` for Clips). The video module's `SetupScreens.of(parent, SetupNeed)`
+  picks this screen for `FFMPEG` and its own `SetupScreen` for the browser downloads.
+
+`media/player` (playing a file):
+
+- `MediaPlayer`: created and used on the client thread, decoding happens elsewhere. `frame(visible)` is called once per
+  rendered frame before anything is drawn and uploads the newest due frame (skip uploads when not visible).
+  `durationMs()` is -1 when unknown (live streams, web pages), `error()` is the user-facing reason for `ERROR`,
+  `texture()` is null until something was decoded, `width()/height()` is the size the picture was letter-boxed to.
+  `audio(gain, pos)`: gain 0..1 with all volume settings and the distance applied, `pos == null` = "in your head"
+  (overlay). `audioOnly()` (e.g. an mp3), `interactive()` (a web page that wants input), `seekable()` (position can be
+  trusted for drift correction).
+- `FfmpegPlayer(ffmpeg, uri, w, h, fps, startMs, playing)`: one `FfmpegSession` per run (a seek starts a new one and
+  keeps the known duration). `FfmpegCommand` builds the two command lines, `FfmpegProcesses` starts them (all live
+  processes are killed on JVM exit). `FfmpegVideoLoop` reads raw RGBA frames into the session's 3 direct buffers,
+  `FfmpegAudioLoop` feeds the streaming OpenAL source (8 × 50 ms buffers) from the PCM pipe and derives the audio clock
+  from the source's sample offset, `FfmpegLogLoop` reads the duration and the last error line from FFmpeg's stderr.
+  The audio clock drives the video; if no audio arrives within 2.5 s (or there is none) a wall clock does.
+  `SoundTarget` is the gain/position shared with the audio thread.
+- `FrameTexture`: a GPU texture we write raw RGBA frames into straight from a direct buffer (no `NativeImage` copy),
+  render thread, outside a render pass. `ExternalTexture`: a texture whose GPU objects belong to someone else (the
+  browser), we only point at them.

@@ -21,5 +21,16 @@ ext.clientModuleResources = [
         clips: ['assets/vibeyclient/shaders/core/clips_*'],
 ]
 
+// Shared packages (dev.henny.vibeyclient.<path>) that several modules use instead of each other, with their targets
+// (same values as above). They must not import dev.henny.vibeyclient.module.* (checkModuleBoundaries).
+ext.sharedPackages = [
+        media: ['fabric-1.21.11'],
+]
+
+// Resources a shared package owns.
+ext.sharedPackageResources = [
+        media: ['assets/vibeyclient/i18n/*/media.ffmpeg.json'],
+]
+
 // Module -> module imports that exist and still have to be removed; checkModuleBoundaries fails on any other.
-ext.knownModuleImports = ['emotes -> cosmetics', 'clips -> media']
+ext.knownModuleImports = ['emotes -> cosmetics']

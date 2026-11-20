@@ -2,7 +2,7 @@ package dev.henny.vibeyclient.module.media.video.web;
 
 import dev.henny.vibeyclient.Vibey;
 import dev.henny.vibeyclient.module.media.video.MediaSource;
-import dev.henny.vibeyclient.module.media.video.player.MediaPlayer;
+import dev.henny.vibeyclient.media.player.MediaPlayer;
 import net.dimaskama.mcef.api.MCEFApi;
 import net.dimaskama.mcef.api.MCEFBrowser;
 import org.cef.browser.CefBrowser;

@@ -1,7 +1,7 @@
 package dev.henny.vibeyclient.module.media.video;
 
 import com.google.gson.JsonObject;
-import dev.henny.vibeyclient.module.media.video.player.MediaPlayer;
+import dev.henny.vibeyclient.media.player.MediaPlayer;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;

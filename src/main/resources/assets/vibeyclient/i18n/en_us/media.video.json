@@ -90,16 +90,9 @@
   "setup.failed": "That didn't work: {0}",
   "setup.nothing": "Nothing is downloaded until you press the button.",
   "setup.close": "Close",
-  "setup.check": "Check again",
   "setup.continue": "Continue",
   "setup.download": "Download",
   "setup.later": "Not now",
-  "setup.stillmissing": "FFmpeg was not found yet.",
-  "setup.ffmpeg.title": "Video files need FFmpeg",
-  "setup.ffmpeg.what": "Files and direct video links are played with FFmpeg, a free open-source video program. It runs as its own program next to Minecraft.",
-  "setup.ffmpeg.size": "{0} MB download",
-  "setup.ffmpegmanual.title": "Video files need FFmpeg",
-  "setup.ffmpegmanual.what": "Files and direct video links are played with FFmpeg, a free open-source video program. Install it with your system's package manager, then press \"Check again\".",
   "setup.mod.title": "YouTube and web pages need a browser",
   "setup.mod.what": "YouTube (official YouTube player) and web pages are shown with MCEF Modern, a free mod that adds Chromium. It is installed into your mods folder; on first use it downloads Chromium.",
   "setup.mod.size": "0.25 MB now, about {0} MB Chromium later",
@@ -113,10 +106,5 @@
   "accept.load": "Load",
   "accept.no": "Not now",
   "browser.title": "Web page",
-  "browser.hint": "Mouse and keyboard go to the page · Esc to leave",
-  "setup.ffmpegclips.title": "Clips need FFmpeg",
-  "setup.ffmpegclips.what": "Clips are recorded with FFmpeg, a free open-source video program, using your graphics card's video encoder. It runs as its own program next to Minecraft; it is the same download as for video screens.",
-  "setup.ffmpegmanualclips.title": "Clips need FFmpeg",
-  "setup.ffmpegmanualclips.what": "Clips are recorded with FFmpeg, a free open-source video program. Install it with your system's package manager, then press \"Check again\".",
-  "setup.done.clips": "Done. The replay buffer records once you play."
+  "browser.hint": "Mouse and keyboard go to the page · Esc to leave"
 }

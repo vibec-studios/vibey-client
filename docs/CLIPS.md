@@ -107,7 +107,7 @@ Gradle runs on this PC right now).
 
 | Option | Licence fit (Apache-2.0 mod) | Verdict |
 |---|---|---|
-| **FFmpeg CLI, separate process**: BtbN `lgpl-shared` (Windows), the system package (Linux/macOS) | LGPL, never linked or bundled, downloaded only after consent and checked against `checksums.sha256`. This is already done for video screens (`player/Ffmpeg`). | **chosen**: one code path for encoding, segmenting, remuxing, thumbnails, trimming and playback |
+| **FFmpeg CLI, separate process**: BtbN `lgpl-shared` (Windows), the system package (Linux/macOS) | LGPL, never linked or bundled, downloaded only after consent and checked against `checksums.sha256`. This is shared with the video screens (`media/ffmpeg/Ffmpeg`, see [VIDEO.md](VIDEO.md#shared-ffmpeg-and-player-code)). | **chosen**: one code path for encoding, segmenting, remuxing, thumbnails, trimming and playback |
 | Hardware encoders through that FFmpeg | BtbN's build scripts enable `ffnvcodec` (NVENC headers, MIT), `amf` (MIT headers), `onevpl` (QSV via Intel libvpl, MIT; x64 only) and `openh264` in **every** variant including LGPL. They leave out only `x264`/`x265` (`[[ $VARIANT == lgpl* ]] && return -1`). Runtimes come with the GPU driver. | **chosen, preferred** |
 | `h264_mf` (Windows Media Foundation through FFmpeg) | Windows' own encoder MFTs: a vendor hardware MFT or Microsoft's software H.264 encoder. Missing on Windows "N" editions without the Media Feature Pack. | fallback |
 | `libopenh264` (in the BtbN LGPL build) | BSD-2 source, but Cisco's patent coverage applies only to **Cisco's binaries**, and BtbN builds it from source | last resort, with a note |
@@ -280,7 +280,7 @@ first pause per session shows a toast ("Clips paused: low FPS"), later ones only
 - **Gallery** (Vibey menu → Clips → *Open gallery*, and an unbound "Clips gallery" key): a grid of thumbnails
   (JPEG → `NativeImage`, loaded lazily for visible tiles only), filter *All / Kept / Auto / Hotkey*, newest first,
   and a storage bar "1.2 of 2 GB".
-- **Player:** reuses `module/media/video` `FfmpegPlayer` + `FrameTexture` (local files are already supported),
+- **Player:** reuses the shared `media/player` `FfmpegPlayer` + `FrameTexture` (local files are already supported),
   drawn into a GUI rect, with a non-positional OpenAL source. Controls: play/pause, seek bar, volume, *Keep* (star),
   *Rename*, *Trim* (in/out marks → `-ss/-to -c copy`, snapped to the 2 s keyframes; exact re-encode later), *Delete*
   (confirm), *Open folder*, *Copy path*. The video feature is Fabric 1.21.11 only. Until it is ported, other targets
@@ -414,7 +414,7 @@ pauses. GPU TDR flakiness on the Intel Arc test PC affects long gametests. Drive
 - [OpenH264 binary licence (Cisco patent coverage)](https://www.openh264.org/BINARY_LICENSE.txt), [jcodec](https://github.com/jcodec/jcodec).
 - WASAPI process loopback: [`AUDIOCLIENT_PROCESS_LOOPBACK_PARAMS`](https://learn.microsoft.com/en-us/windows/win32/api/audioclientactivationparams/ns-audioclientactivationparams-audioclient_process_loopback_params),
   [ApplicationLoopback sample](https://learn.microsoft.com/en-us/samples/microsoft/windows-classic-samples/applicationloopbackaudio-sample/).
-- Repo: `module/media/video/player/{Ffmpeg,FfmpegPlayer,FrameTexture}`, `module/media/lyrics/fx/LoopbackCapture`,
+- Repo: `media/ffmpeg/*`, `media/player/*` (shared with the video screens), `module/media/lyrics/fx/LoopbackCapture`,
   `launcher/{SessionFile,LauncherStatus}`, `api/ServerRules`; benchmark `tools/clips-bench.py`.
 
 ## 13. What is built (MVP + auto clips, Fabric 1.21.11)
@@ -431,7 +431,7 @@ the shader out of every other target; `BuiltinModules` registers it by reflectio
 | Saving | `ClipSaver`, `store/ClipStore`, `store/ClipMeta` | One `.ts` part per FFmpeg session → `-f concat -c copy -movflags +faststart` → `.<id>.mp4.part` → rename; thumbnail via `.part`; JSON last (atomic). Cleanup after every save and at start (never `kept`), orphans at start. Own I/O thread, not the shared `Tasks` pool. JUnit: `ClipStoreTest` (contract §10). |
 | Rules | `Recorder` | Records only with module + buffer on, a world, no screen but chat (containers only with the setting), focused, not minimised, not low FPS (3 s below the threshold / 5 s above +10; the threshold never exceeds 85 % of the frame cap or the monitor rate with vsync), not "encoder behind" (> 10 % skipped in 5 s → 10 s pause). FFmpeg exits after 60 s of pause and on world leave (the ring is dropped on world leave). Server rule `clips` stops and drops the ring at once; `clips.auto` stops automatic clips. |
 | Auto clips | `AutoClips`, `mixin/ClientPacketListenerMixin`, `MultiPlayerGameModeMixin`, Fabric `ClientReceiveMessageEvents.GAME` | As in §5; post-roll merge, 10 s cooldown, max per session. |
-| UI | `ui/ClipsGalleryScreen`, `ui/ClipViewScreen`, `ui/Thumbs`, `ClipsHud`, `ClipsStats` | Gallery (filter, storage bar), player with the video screens' `FfmpegPlayer` (keep, rename, delete, open folder, copy path, kill marks on the seek bar). The REC dot is a plain HUD element (HUD templates hide unknown *widgets* on first start). `ClipsStats`: `-Dvibeyclient.clips.stats=true`. FFmpeg consent: the video screens' `SetupScreen` with Clips texts. |
+| UI | `ui/ClipsGalleryScreen`, `ui/ClipViewScreen`, `ui/Thumbs`, `ClipsHud`, `ClipsStats` | Gallery (filter, storage bar), player with the shared `media/player/FfmpegPlayer` (keep, rename, delete, open folder, copy path, kill marks on the seek bar). The REC dot is a plain HUD element (HUD templates hide unknown *widgets* on first start). `ClipsStats`: `-Dvibeyclient.clips.stats=true`. FFmpeg consent: the shared `media/ffmpeg/FfmpegSetupScreen` with `FfmpegPurpose.RECORDING` (texts in `i18n/*/media.ffmpeg.json`). |
 
 Not built yet (prepared): sound (phase 3: the encoder command has no audio input yet, `audio_codec` stays absent),
 other Minecraft versions and NeoForge (phase 4), disk ring and trimming (phase 5).
