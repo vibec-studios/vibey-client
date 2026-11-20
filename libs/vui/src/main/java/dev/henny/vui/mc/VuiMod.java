@@ -7,9 +7,13 @@ public final class VuiMod {
     public static final String ID = "vui";
     public static final Logger LOG = LoggerFactory.getLogger(ID);
 
+    private static boolean announced;
+
     private VuiMod() {}
 
-    public static void init(String version) {
+    public static synchronized void init(String version) {
+        if (announced) return;
+        announced = true;
         LOG.info("vui {} loaded", version);
     }
 }

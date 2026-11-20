@@ -6,8 +6,9 @@ hot reload and a headless renderer for free.
 
 - **Pure-Java core** (`src/core/java`, package `dev.henny.vui`): no Minecraft imports, only JDK + Gson. Tested
   with JUnit in milliseconds.
-- **Thin per-version backend** (`src/main/java`): implements `Canvas`, `TextMetrics`, `Input`, `Textures` for one
-  Minecraft version. See [docs/backend.md](docs/backend.md).
+- **Thin per-version backend** (`src/main/java`): implements `Canvas`, `TextMetrics`, `Input`, `Textures` for
+  Minecraft 1.21.1 – 26.3 (Fabric + NeoForge) and hosts documents as screens, HUD widgets, toasts and overlays.
+  See [docs/minecraft.md](docs/minecraft.md) and [docs/backend.md](docs/backend.md).
 - **Built for fast iteration**: every node knows its `file:line:col`, errors come with a hint, files reload on save,
   and a localhost dev bridge lets a tool (or an AI agent) read the tree, click and take screenshots.
 
@@ -130,11 +131,14 @@ settings page does `frame` + `render` with no per-frame allocation (~20 µs per 
 | `reload` | `DocumentRegistry`, resource roots, file watcher, `HotReloader` |
 | `dev` | dev bridge (localhost HTTP), `Preview` CLI |
 | `headless` | PNG canvas + pixel font backend, `TreeDump` – for tests and tools |
+| `demo` | `DemoController` for `assets/vui/vui/demo.vui` (every built-in component on one page) |
+| `mc.*` (`src/main`) | Minecraft backend + hosts: screens, HUD, toasts, overlays, dev tools – see [minecraft](docs/minecraft.md) |
 
 ## Docs
 
 [markup](docs/markup.md) · [styles](docs/styles.md) · [layout](docs/layout.md) · [binding](docs/binding.md) ·
 [components](docs/components.md) · [animation](docs/animation.md) · [hud](docs/hud.md) ·
-[hot reload + dev bridge](docs/hot-reload.md) · [backend](docs/backend.md)
+[hot reload + dev bridge](docs/hot-reload.md) · [backend](docs/backend.md) · [in Minecraft](docs/minecraft.md) ·
+[agent dev loop](docs/dev-loop.md)
 
 License: Apache-2.0.

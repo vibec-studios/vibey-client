@@ -1,0 +1,105 @@
+<template>
+  <column class="page">
+    <row class="top" gap="6">
+      <icon glyph="✦" class="logo"/>
+      <text id="title" class="title">{{ title }}</text>
+      <text class="sub">every built-in component</text>
+      <spacer/>
+      <tabs id="tabs" v-model="tab" :options="['Controls', 'Lists', 'Overlays']"/>
+    </row>
+    <scroll id="body" grow="1">
+      <grid min-column="196" gap="6">
+        <card>
+          <text class="head">Switches</text>
+          <row gap="6"><toggle id="sound" v-model="sound"/><text>Sound {{ sound ? 'on' : 'off' }}</text></row>
+          <checkbox id="fancy" v-model="fancy" label="Fancy graphics"/>
+          <segmented id="size" v-model="size" :options="['Small', 'Medium', 'Big']"/>
+        </card>
+        <card>
+          <text class="head">Inputs</text>
+          <textfield id="name" v-model="name" placeholder="Player name" max-length="16" @submit="save()"/>
+          <row gap="6">
+            <select id="mode" v-model="mode" grow="1" :options="[{ value: 'auto', label: 'Auto' }, { value: 'always', label: 'Always' }, { value: 'never', label: 'Never' }]"/>
+            <keybind id="zoom" v-model="zoomKey"/>
+          </row>
+          <row gap="6"><slider id="volume" v-model="volume" grow="1"/><text class="num">{{ percent(volume) }}</text></row>
+        </card>
+        <card>
+          <text class="head">Buttons</text>
+          <row gap="4" wrap="wrap">
+            <button id="save" class="primary" @click="save()" tooltip="Shows a toast">Save</button>
+            <button id="count" @click="click()">Clicked {{ clicks }}</button>
+            <button class="ghost" @click="hud()">HUD</button>
+            <button id="delete" class="danger" @click="ask()">Delete</button>
+            <button disabled="true">Off</button>
+          </row>
+          <divider/>
+          <row gap="6">
+            <button id="more" @click="menu = !menu">More
+              <popover v-model:open="menu" placement="bottom" align="start">
+                <column class="menu">
+                  <button class="ghost" @click="menu = false">Rename</button>
+                  <button class="ghost" @click="menu = false">Duplicate</button>
+                </column>
+              </popover>
+            </button>
+            <button>Rich<tooltip><text><b>Rich</b> tooltip</text></tooltip></button>
+          </row>
+        </card>
+        <card>
+          <text class="head">Text</text>
+          <text>Plain, <b>bold</b>, <i>italic</i> and <span class="accent">colored</span> runs</text>
+          <text class="gradient">Gradient text</text>
+          <text class="wave">Wavy rainbow</text>
+          <text class="shimmer">Shimmer + pulse</text>
+          <text class="ellipsis">A long line that is cut with an ellipsis at the end of the box</text>
+          <row gap="6"><icon glyph="★" class="star"/><icon glyph="♥" class="heart"/><image src="minecraft:item/diamond" size="16"/><image src="minecraft:item/emerald" size="16"/></row>
+        </card>
+        <card>
+          <text class="head">Progress</text>
+          <progress id="progress" :value="progress"/>
+          <progress/>
+          <row gap="6"><spinner/><text class="muted">Loading</text><spacer/><colorpicker id="accent" v-model="accent"/></row>
+          <stack class="badge-box"><box class="tile"/><text class="badge">3</text></stack>
+        </card>
+        <card>
+          <text class="head">List</text>
+          <list id="players" :items="players" item-size="12" height="62">
+            <template #default="{ item, index }"><row class="player"><text class="muted">{{ index + 1 }}</text><text>{{ item }}</text></row></template>
+          </list>
+          <toast class="sample"><text>Static toast</text></toast>
+        </card>
+      </grid>
+    </scroll>
+    <modal id="confirm" v-model:open="confirm">
+      <card class="dialog">
+        <text class="head">Delete world?</text>
+        <row gap="4"><button class="danger" @click="remove()">Delete</button><button @click="confirm = false">Cancel</button></row>
+      </card>
+    </modal>
+  </column>
+</template>
+<style>
+.page { padding: 8; gap: 6; background: $bg; }
+.top { align-items: center; }
+.logo { color: $brand; }
+.title { color: $text; font-weight: bold; }
+.sub { color: $dim; }
+.head { color: $brand2; text-transform: uppercase; }
+.num { width: 26; text-align: end; color: $muted; }
+.muted { color: $muted; }
+.accent { color: $brand; }
+.gradient { text-effect: gradient(#8b6cff, #3fe0c5, 0.5); }
+.wave { text-effect: rainbow(0.4) wave(1, 2); }
+.shimmer { color: $warn; text-effect: shimmer(#ffffff, 0.6) pulse(1, 0.6); }
+.ellipsis { text-wrap: nowrap; text-overflow: ellipsis; }
+.star { color: $warn; }
+.heart { color: $danger; }
+.badge-box { size: 18; }
+.tile { background: $surface3; border: 1 $line2; }
+.badge { color: $bg; background: $brand2; padding: 0 2; position: absolute; anchor: top-right; }
+.player { gap: 6; }
+.menu { gap: 2; padding: 2; }
+.dialog { padding: 10; gap: 8; }
+toast.sample { position: relative; }
+</style>

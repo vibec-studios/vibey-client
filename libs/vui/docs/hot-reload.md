@@ -66,6 +66,11 @@ DevBridge bridge = new DevBridge(vui, new DevTarget() {
 }).start(DevBridge.DEFAULT_PORT);   // 7591; 0 = any free port, see bridge.port()
 ```
 
+A backend whose frame is only readable later (GPU readback) overrides `screenshotAsync()` instead and completes the
+future when the PNG is ready; `/screenshot` waits up to 5 s for it. The Minecraft backend does this: the request is
+served at the next client tick after a frame was drawn, encoded off the render thread. In Minecraft everything above
+is already wired: see [minecraft](minecraft.md#dev-mode) and the agent loop in [dev-loop](dev-loop.md).
+
 Requests are executed on the UI thread inside `vui.tick()` (via `UiTasks`, 5 s timeout), so the game must be
 ticking.
 

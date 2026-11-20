@@ -1,0 +1,10 @@
+<template>
+  <row class="bar" gap="8">
+    <text class="name">{{ selected }}</text>
+    <text>Drag</text><text>Wheel size</text><text>R reset</text><text>H hide</text><text>Alt free</text><text>Esc done</text>
+  </row>
+</template>
+<style>
+.bar { position: absolute; anchor: bottom; bottom: 6; padding: 3 6; background: alpha($panel, .85); border: 1 $line2; color: $muted; }
+.name { color: $brand2; }
+</style>
