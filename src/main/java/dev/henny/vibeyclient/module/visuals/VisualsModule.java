@@ -6,6 +6,8 @@ import dev.henny.vibeyclient.api.VibeyModule;
 import dev.henny.vibeyclient.api.setting.Settings.BoolSetting;
 import dev.henny.vibeyclient.api.setting.Settings.IntSetting;
 import dev.henny.vibeyclient.module.visuals.core.ParticlePlan;
+import dev.henny.vibeyclient.module.visuals.effects.EffectRules;
+import dev.henny.vibeyclient.module.visuals.effects.EffectsPart;
 import dev.henny.vibeyclient.module.visuals.items.ItemRules;
 import dev.henny.vibeyclient.module.visuals.items.drop.DropSettings;
 import dev.henny.vibeyclient.module.visuals.items.edit.ItemEditor;
@@ -14,6 +16,7 @@ import dev.henny.vibeyclient.module.visuals.items.held.HeldSettings;
 import dev.henny.vibeyclient.module.visuals.items.swing.SwingSettings;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public final class VisualsModule extends VibeyModule {
     private static volatile VisualsModule instance;
@@ -29,6 +32,7 @@ public final class VisualsModule extends VibeyModule {
             .section("particles");
     public final BoolSetting keepImportant = bool("keepImportant", true).section("particles");
     public final BoolSetting ambientOff = bool("ambientOff", false).section("particles");
+    public final EffectsPart effects = new EffectsPart(this);
 
     public VisualsModule() {
         super("visuals", ModuleCategory.MISC);
@@ -47,7 +51,7 @@ public final class VisualsModule extends VibeyModule {
 
     @Override
     public List<String> serverRuleKeys() {
-        return List.of(ItemRules.HELD);
+        return Stream.concat(Stream.of(ItemRules.HELD), EffectRules.ALL.stream()).toList();
     }
 
     @Override

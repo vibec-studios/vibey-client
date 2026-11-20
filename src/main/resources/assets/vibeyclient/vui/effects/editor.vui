@@ -1,0 +1,43 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<import name="icon-button" src="vibeyclient:components/icon-button"/>
+<import name="fx-effects" src="vibeyclient:effects/effects-tab"/>
+<import name="fx-particles" src="vibeyclient:effects/particles-tab"/>
+<import name="fx-detail" src="vibeyclient:effects/particle-detail"/>
+<template>
+  <row class="fx-root">
+    <column class="fx-hint">
+      <spacer/>
+      <row class="fx-hint-row"><ico name="eye"/><text>{{ t('visuals.effects.ui.look') }}</text></row>
+    </column>
+    <column id="fx-panel" class="fx-panel">
+      <row class="fx-bar">
+        <ico name="sparkle" class="fx-accent" :tooltip="t('visuals.effects.ui.title')"/>
+        <tabs id="fx-tab" class="fx-tabs" v-model="tab" :options="tabs"/>
+        <spacer/>
+        <icon-button id="fx-close" icon="close" :tip="t('visuals.effects.ui.close')" @click="close()"/>
+      </row>
+      <row class="fx-presets" :tooltip="t('visuals.effects.ui.presetTip')">
+        <ico name="star" class="fx-dim"/>
+        <segmented id="fx-preset" class="fx-seg" v-model="preset" :options="presets"/>
+      </row>
+      <fx-effects v-if="tab == 'effects'"/>
+      <fx-particles v-if="tab == 'particles' && !sel"/>
+      <fx-detail v-if="tab == 'particles' && sel" :d="sel"/>
+    </column>
+  </row>
+</template>
+<style>
+.fx-root { pointer-events: none; align-items: stretch; justify: end; }
+.fx-hint { grow: 1; padding: 6 6 46 6; align-items: center; pointer-events: none; }
+.fx-hint-row { gap: 3; padding: 2 5; background: alpha($panel, .6); color: $muted; pointer-events: none; }
+.fx-panel { width: 192; background: alpha($panel, .84); border-left: 1 $line; align-items: stretch; }
+.fx-bar { height: 22; gap: 4; padding: 0 3 0 6; border-bottom: 1 $line; flex-shrink: 0; background: $panel; }
+.fx-accent { color: $brand2; }
+.fx-dim { color: $dim; }
+.fx-title { font-weight: bold; color: $text; text-wrap: nowrap; }
+.fx-tabs { height: 14; }
+.fx-presets { height: 20; gap: 4; padding: 0 6; border-bottom: 1 $line; flex-shrink: 0; }
+.fx-seg { grow: 1; }
+.fx-seg segment { grow: 1; height: 13; padding: 0 2; }
+tab { height: 14; padding: 0 4; }
+</style>

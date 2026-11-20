@@ -34,6 +34,7 @@
     "vibeyclient.camera.mixins.json",
     "vibeyclient.visuals.mixins.json",
     "vibeyclient.visuals.items.mixins.json",
+    "vibeyclient.visuals.effects.mixins.json",
     "vibeyclient.inventory.mixins.json",
     "vibeyclient.servers.mixins.json",
     "vibeyclient.devlink.mixins.json",

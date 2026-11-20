@@ -26,7 +26,8 @@ only: the package is excluded from the NeoForge build and not registered there; 
 toggle sprint, outlines; Fabric 1.21.11 only for now, see [PVP.md](PVP.md)), `waypoints` (beacons, share codes, minimap, world map, death point, nether
 coordinates; Fabric 1.21.11 only, see [WAYPOINTS.md](WAYPOINTS.md)), `info` (light level, chunk borders,
 block/mob card with world pinning, food gain, tool warning, TNT timer; Fabric 1.21.11 only, see [INFO.md](INFO.md)), `camera` (freelook, orbit view, motion blur; Fabric 1.21.11 only, see [CAMERA.md](CAMERA.md)),
-`visuals` (held item models with an in-game editor, swing, glint, item sizes, item physics, particle amount; Fabric 1.21.11 only, see [VISUALS.md](VISUALS.md)). The screenshot gallery is
+`visuals` (held item models with an in-game editor, swing, glint, item sizes, item physics, particle amount, part
+`visuals.effects`: effects and per-type particle editor; Fabric 1.21.11 only, see [VISUALS.md](VISUALS.md)). The screenshot gallery is
 part of `clips` ([CLIPS.md](CLIPS.md) §14). `chat` (timestamps, search, copy, mentions, filters, DM
 toasts, movable chat window; Fabric 1.21.11 only, see [CHAT.md](CHAT.md)). Social also has Discord Rich Presence and
 streamer mode (part `social.streamer`, Fabric 1.21.11), see [SOCIAL.md](SOCIAL.md); `api/privacy/Privacy` is the shared

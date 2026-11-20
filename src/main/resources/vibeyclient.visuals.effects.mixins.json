@@ -1,0 +1,22 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.henny.vibeyclient.module.visuals.mixin.effects",
+  "plugin": "dev.henny.vibeyclient.mixin.VibeyMixinPlugin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [],
+  "client": [
+    "GameRendererFxMixin",
+    "GuiFxMixin",
+    "GuiInvoker",
+    "LivingEntityFxMixin",
+    "ParticleEngineFxMixin",
+    "ParticleMixin",
+    "ScreenEffectRendererFxMixin",
+    "SingleQuadParticleMixin"
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

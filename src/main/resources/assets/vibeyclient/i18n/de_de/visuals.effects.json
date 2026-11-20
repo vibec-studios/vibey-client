@@ -1,0 +1,71 @@
+{
+  "name": "Effekte",
+  "section": {
+    "effects": "Effekte",
+    "overlays": "Overlays",
+    "camera": "Kamera",
+    "combat": "Kampf",
+    "self": "Du selbst"
+  },
+  "setting": {
+    "editEffects": "Effekt-Editor",
+    "editEffects.desc": "Live über der Welt.",
+    "fireOpacity": "Feuer-Overlay",
+    "fireOpacity.desc": "Feuer-Overlay, wenn du brennst.",
+    "pumpkinOpacity": "Kürbis-Sicht",
+    "pumpkinOpacity.desc": "Die Kürbismaske.",
+    "vignette": "Vignette",
+    "vignette.desc": "Dunkle Ränder. Grenzwarnung bleibt.",
+    "totemSize": "Totem-Animation",
+    "totemSize.desc": "Totem-Animation auf dem Bildschirm.",
+    "distortion": "Verzerrung",
+    "distortion.desc": "Übelkeit und Portal-Wabern.",
+    "hurtShake": "Treffer-Wackeln",
+    "hurtShake.desc": "Kamerakippen bei Schaden.",
+    "explosionShake": "Explosion",
+    "explosionShake.desc": "Kamerawackeln bei Explosionen.",
+    "ownPotionParticles": "Eigene Trank-Partikel",
+    "ownPotionParticles.desc": "Trank-Partikel um dich herum.",
+    "editEffects.button": "Öffnen",
+    "editEffects.action": "Effekte & Partikel"
+  },
+  "ui": {
+    "title": "Effekte",
+    "close": "Schließen",
+    "look": "Ziehen zum Umsehen",
+    "presetTip": "Vorlagen ändern Effekte und Partikel auf einmal",
+    "preset": {
+      "vanilla": "Vanilla",
+      "clean": "Ruhig",
+      "pvp": "PvP",
+      "fancy": "Schick"
+    },
+    "tab": {
+      "effects": "Effekte",
+      "particles": "Partikel"
+    },
+    "test": "Testen",
+    "pvpOff": "Vom PvP-Modul, das aus ist.",
+    "turnOn": "Einschalten",
+    "search": "Suchen",
+    "hide": "Ausblenden",
+    "hidden": "aus",
+    "back": "Zurück",
+    "reset": "Zurücksetzen",
+    "amount": "Menge",
+    "size": "Größe",
+    "color": "Farbe",
+    "strength": "Farbstärke",
+    "noTest": "Keine Vorschau möglich",
+    "cat": {
+      "all": "Alle",
+      "important": "Wichtig",
+      "ambient": "Umgebung",
+      "weather": "Wetter",
+      "block": "Blöcke",
+      "effect": "Tränke",
+      "other": "Andere",
+      "changed": "Geändert"
+    }
+  }
+}
