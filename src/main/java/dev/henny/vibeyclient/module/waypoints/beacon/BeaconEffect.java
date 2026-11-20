@@ -35,6 +35,10 @@ final class BeaconEffect implements Effect, PointerContent {
         this.object = object;
     }
 
+    void reachable(boolean near) {
+        if (object != null && object.rules().interactive() != near) object.rules().interactive(near);
+    }
+
     Waypoint waypoint() {
         return waypoint;
     }

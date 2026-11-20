@@ -35,6 +35,9 @@ full-screen map of explored terrain, a death point marker and Overworld ↔ Neth
 | Map | left click on a waypoint / right click | open it in the list / navigate |
 | Minimap | HUD editor (`H`) | move, wheel = size, like every widget |
 
+Beacons farther than 40 blocks (drawn at the 40-block edge) take no clicks or wheel, so they never block attacks,
+fireworks or the hotbar wheel.
+
 Keys (Vibey Client category, rebindable): `addKey` J, `mapKey` M, `minimapKey` Z, `listKey` unbound.
 
 ## Data
