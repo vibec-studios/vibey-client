@@ -25,7 +25,8 @@
       "dev.henny.vibeyclient.gametest.RanksGameTest",
       "dev.henny.vibeyclient.gametest.CosmeticoParityGameTest",
       "dev.henny.vibeyclient.gametest.R3GameTest",
-      "dev.henny.vibeyclient.gametest.VuiGameTest"
+      "dev.henny.vibeyclient.gametest.VuiGameTest",
+      "dev.henny.vibeyclient.gametest.WaypointsGameTest"
     ]
   },
   "mixins": ["vibeyclient-gametest.mixins.json"],

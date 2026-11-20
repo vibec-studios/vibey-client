@@ -1,0 +1,4 @@
+<props>{ "name": "" }</props>
+<template>
+  <icon class="wp-ico" :src="'vibeyclient:waypoints/icons/' + name"/>
+</template>
