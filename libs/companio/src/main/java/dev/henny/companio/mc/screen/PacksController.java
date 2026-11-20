@@ -68,7 +68,7 @@ public final class PacksController {
     }
 
     public void toggle(PackRow r) {
-        List<String> ids = client.config().active();
+        List<String> ids = client.config().editActive();
         if (r.isActive()) ids.remove(r.id());
         else if (r.loaded() && !r.id().isEmpty() && !ids.contains(r.id())) ids.add(r.id());
         client.changed();
@@ -85,7 +85,7 @@ public final class PacksController {
     }
 
     private void move(PackRow r, int d) {
-        List<String> ids = client.config().active();
+        List<String> ids = client.config().editActive();
         int i = ids.indexOf(r.id()), j = i + d;
         if (i < 0 || j < 0 || j >= ids.size()) return;
         ids.set(i, ids.get(j));

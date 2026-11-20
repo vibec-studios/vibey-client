@@ -83,12 +83,7 @@ public final class CompanioClient {
     }
 
     private void loaded(List<Pack> packs) {
-        if (config.active == null) {
-            List<String> ids = new ArrayList<>();
-            for (Pack p : packs) if (p.builtin() && p.id() != null) ids.add(p.id());
-            config.active = ids;
-            store.markDirty();
-        }
+        for (Pack p : packs) if (p.builtin() && p.id() != null && config.adoptBuiltin(p.id())) store.markDirty();
         lastLoad = packs;
         for (Consumer<List<Pack>> l : loadListeners) l.accept(packs);
         screenListener.run();
