@@ -37,7 +37,7 @@ public final class CinematicModule extends VibeyModule {
     public final BoolSetting grain = bool("grain", false).section("look");
     public final StringSetting title = string("title", "", 40).section("look");
 
-    public final KeybindSetting startKey = keybind("startKey", Keys.V).serverRule(CinematicRules.AFK)
+    public final KeybindSetting startKey = keybind("startKey", Keys.F9).serverRule(CinematicRules.AFK)
             .onPress(Cinematic::toggleFromKey);
 
     public CinematicModule() {

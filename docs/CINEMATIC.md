@@ -21,7 +21,7 @@ reflection in `BuiltinModules`). Code: `src/main/java/dev/henny/vibeyclient/modu
 | *Edit AFK screen* | – | the HUD editor on the AFK layout, with a live camera preview behind it |
 | `letterbox`, `vignette`, `grain` (section *Look*) | on, on, off | bars (11.5 % top and bottom), soft edge darkening, animated film grain |
 | `title` | empty | text of the *AFK title* widget (empty = "Be right back") |
-| key `startKey` | **V** | start / stop (F6 is vanilla's debug options since 1.21.9) |
+| key `startKey` | **F9** | start / stop (F6 and V are vanilla debug keys since 1.21.9) |
 
 Any key press, mouse click, wheel or mouse move (> 4 px) ends it; that first input is swallowed (no accidental
 attack, no pause menu). The first 0.6 s after starting ignore input (the start key's own release). It also ends when

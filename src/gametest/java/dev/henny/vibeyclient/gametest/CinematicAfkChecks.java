@@ -100,7 +100,7 @@ final class CinematicAfkChecks {
         ctx.getInput().pressKey(Keys.SPACE);
         ctx.waitTicks(40);
         ctx.runOnClient(mc -> check(!Cinematic.active(), "a key press ends it"));
-        ctx.getInput().pressKey(Keys.V);
+        ctx.getInput().pressKey(Keys.F9);
         ctx.waitTicks(5);
         ctx.runOnClient(mc -> check(Cinematic.active(), "start key"));
         ctx.runOnClient(mc -> ServerRules.apply(List.of(CinematicRules.AFK), "No AFK cams"));
