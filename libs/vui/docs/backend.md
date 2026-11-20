@@ -11,6 +11,18 @@ Vui vui = new Vui(backend);
 The headless backend (`dev.henny.vui.headless`: `ImageCanvas`, `PixelFontMetrics`, `HeadlessInput`,
 `HeadlessTextures`) is the reference implementation and is what the tests and `Preview` use.
 
+## Status
+
+| Backend | Where | State |
+|---|---|---|
+| Headless (PNG, pixel font) | `src/core/java/dev/henny/vui/headless` | complete, used by tests, `Preview`, CI |
+| Minecraft 1.21.1 – 26.3, Fabric + NeoForge | `src/main/java/dev/henny/vui/mc` ([minecraft](minecraft.md)) | complete; written and run on Fabric 1.21.11 (client gametest `VuiGameTest`), other targets compile |
+| In-world panels | r3 (`libs/r3`) | planned: r3 renders a document into its own canvas |
+
+The Minecraft canvas snaps rectangles and text origins to physical pixels (GUI scale × transform) so 1 px lines stay
+1 px at every GUI scale, caches the `String`s it hands to the font (no allocation per `text` call in steady state)
+and keeps its own copy of the transform to turn local scissor rectangles into screen space.
+
 ## Canvas
 
 All coordinates are GUI pixels in the **current transform**. Colors are ARGB ints (`0xAARRGGBB`).

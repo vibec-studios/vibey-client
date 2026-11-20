@@ -46,6 +46,7 @@ loom {
 }
 
 apply from: rootProject.file('gradle/fabric-resources.gradle')
+apply from: rootProject.file('gradle/vui-dev.gradle')
 
 // Client game test (only for the version the sources are written in): ./gradlew :fabric-1.21.11:runClientGameTest
 if (project.minecraft_version == '1.21.11') {

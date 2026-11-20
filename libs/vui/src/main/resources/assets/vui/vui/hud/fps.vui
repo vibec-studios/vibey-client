@@ -1,0 +1,5 @@
+<template><row class="hud-box" gap="3"><icon glyph="⚡" class="icon"/><text>{{ fps }} FPS</text></row></template>
+<style>
+.hud-box { padding: 2 4; background: alpha($bg, .55); border-left: 1 $brand; }
+.icon { color: $brand2; }
+</style>

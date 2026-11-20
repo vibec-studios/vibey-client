@@ -50,7 +50,7 @@ public final class DiagnosticsOverlay {
         lines.add("vui: " + all.size() + " error" + (all.size() == 1 ? "" : "s"));
         for (int i = 0; i < all.size() && lines.size() < MAX_LINES; i++) {
             Diagnostic d = all.get(i);
-            lines.add(d.pos() + "  " + d.message());
+            lines.add(d.pos().shortText() + "  " + d.message());
             if (d.hint() != null && lines.size() < MAX_LINES) lines.add("    → " + d.hint());
         }
     }

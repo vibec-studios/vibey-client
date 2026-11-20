@@ -12,6 +12,9 @@ import dev.henny.vui.layout.ScreenRects;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 final class DevRoutes {
     interface Route {
@@ -136,7 +139,14 @@ final class DevRoutes {
     }
 
     private void screenshot(HttpExchange ex, Query q) throws Exception {
-        byte[] png = tasks.call(target::screenshot);
+        CompletableFuture<byte[]> pending = tasks.call(target::screenshotAsync);
+        byte[] png;
+        try {
+            png = pending == null ? null : pending.get(UiTasks.TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            Responses.error(ex, 504, "no frame captured within " + UiTasks.TIMEOUT_MS + " ms");
+            return;
+        }
         if (png == null) Responses.error(ex, 503, "screenshot not available");
         else Responses.png(ex, png);
     }
