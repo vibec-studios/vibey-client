@@ -73,7 +73,12 @@
     "indicator": "Recording dot",
     "indicator.desc": "A small dot in the corner while the buffer records; amber when it is paused.",
     "stats": "Measuring overlay",
-    "hintShown": "Hint shown"
+    "hintShown": "Hint shown",
+    "openShots": "Screenshots",
+    "openShots.action": "Screenshots",
+    "placeShots": "Screenshots in world",
+    "placeShots.action": "Place in world",
+    "shotsKey": "Screenshots"
   },
   "status": {
     "held": " · {0} MB RAM · {1} s",
@@ -155,7 +160,8 @@
     "turnOn": "Switch the replay buffer on",
     "storage": "{0} of {1} used",
     "folder": "Open folder",
-    "settings": "Settings"
+    "settings": "Settings",
+    "shots": "Screenshots"
   },
   "view": {
     "noFfmpeg": "Playing needs FFmpeg.",
@@ -184,5 +190,29 @@
     "unkeptFlash": "Not kept any more.",
     "renamedFlash": "Saved.",
     "deleted": "Deleted."
+  },
+  "shots": {
+    "title": "Screenshots",
+    "sort": {
+      "newest": "Newest",
+      "oldest": "Oldest",
+      "name": "Name"
+    },
+    "favs": "Favourites only",
+    "fav": "Favourite",
+    "copy": "Copy",
+    "delete": "Delete",
+    "confirm": "Click again",
+    "folder": "Open folder",
+    "world": "Place in world",
+    "close": "Close",
+    "prev": "Previous",
+    "next": "Next",
+    "empty": "No screenshots yet",
+    "loading": "Loading…",
+    "copied": "Image copied",
+    "pathCopied": "Path copied",
+    "deleted": "Screenshot deleted",
+    "sortTip": "Sort"
   }
 }

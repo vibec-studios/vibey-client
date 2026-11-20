@@ -28,6 +28,8 @@ public final class BuiltinModules {
         // HUD widgets + templates: Fabric 1.21.11 only for now (gradle/modules.gradle leaves the package out elsewhere)
         registerIfPresent(mm, "dev.henny.vibeyclient.module.hud.HudModule");
         registerIfPresent(mm, "dev.henny.vibeyclient.module.waypoints.WaypointsModule");
+        registerIfPresent(mm, "dev.henny.vibeyclient.module.camera.CameraModule");
+        registerIfPresent(mm, "dev.henny.vibeyclient.module.visuals.VisualsModule");
     }
 
     /** Registers a module whose package is only part of some builds. */

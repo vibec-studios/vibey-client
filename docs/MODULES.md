@@ -25,7 +25,9 @@ only: the package is excluded from the NeoForge build and not registered there; 
 `lyrics` part conflicts with `vibeylyrics` – see [MEDIA.md](MEDIA.md)), `devlink`, `nametags` (seal, rank icons and name styles before player names; data in `client/VibeyPlayers`, `client/ranks`, see [NAMETAGS.md](NAMETAGS.md)), `pvp` (zoom, crosshair,
 toggle sprint, outlines; Fabric 1.21.11 only for now, see [PVP.md](PVP.md)), `waypoints` (beacons, share codes, minimap, world map, death point, nether
 coordinates; Fabric 1.21.11 only, see [WAYPOINTS.md](WAYPOINTS.md)), `info` (light level, chunk borders,
-block/mob card with world pinning, food gain, tool warning, TNT timer; Fabric 1.21.11 only, see [INFO.md](INFO.md)).
+block/mob card with world pinning, food gain, tool warning, TNT timer; Fabric 1.21.11 only, see [INFO.md](INFO.md)), `camera` (freelook, orbit view, motion blur; Fabric 1.21.11 only, see [CAMERA.md](CAMERA.md)),
+`visuals` (item physics, particle amount; Fabric 1.21.11 only, see [VISUALS.md](VISUALS.md)). The screenshot gallery is
+part of `clips` ([CLIPS.md](CLIPS.md) §14).
 
 ## Targets and boundaries
 

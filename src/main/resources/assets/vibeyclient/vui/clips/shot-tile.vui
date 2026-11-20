@@ -1,0 +1,16 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<props>{ "row": null }</props>
+<template>
+  <stack class="shot-tile" :class="{ sel: row.current, fav: row.fav }">
+    <image class="shot-img" :src="row.thumb"/>
+    <ico v-if="row.fav" name="star" class="shot-star"/>
+  </stack>
+</template>
+<style>
+.shot-tile { aspect-ratio: 16/9; background: $surface2; border: 1 $line; cursor: pointer; flex-shrink: 0;
+             transition: border-color 150ms out; }
+.shot-tile:hover { border-color: $line2; }
+.shot-tile.sel { border-color: $brand; }
+.shot-img { width: 100%; height: 100%; }
+.shot-star { position: absolute; anchor: top-right; left: -2; top: 2; size: 9; color: $warn; }
+</style>

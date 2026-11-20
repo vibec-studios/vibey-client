@@ -1,0 +1,66 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<import name="icon-button" src="vibeyclient:components/icon-button"/>
+<import name="chip" src="vibeyclient:components/chip"/>
+<import name="empty" src="vibeyclient:components/empty"/>
+<import name="shot-tile" src="vibeyclient:clips/shot-tile"/>
+<template>
+  <stack class="sh-scrim">
+    <column class="sh-card">
+      <row class="sh-bar">
+        <ico name="image" class="sh-accent"/>
+        <text class="sh-title">{{ t('clips.shots.title') }}</text>
+        <text class="sh-count">{{ len(rows) }}</text>
+        <spacer/>
+        <chip id="sort" icon="sort" :label="t('clips.shots.sort.' + sort)" :tip="t('clips.shots.sortTip')" @click="cycleSort()"/>
+        <icon-button id="favs" icon="star" :active="favOnly" :tip="t('clips.shots.favs')" @click="toggleFavs()"/>
+        <icon-button id="world" icon="cube" :tip="t('clips.shots.world')" @click="place()"/>
+        <icon-button id="folder" icon="folder" :tip="t('clips.shots.folder')" @click="folder()"/>
+        <icon-button id="close" icon="close" :tip="t('clips.shots.close')" @click="close()"/>
+      </row>
+      <row class="sh-body">
+        <scroll class="sh-list">
+          <grid v-if="len(rows) > 0" class="sh-grid">
+            <shot-tile v-for="r in rows" :key="r.id" :row="r" @click="select(r)"/>
+          </grid>
+          <empty v-if="len(rows) == 0" icon="image" :title="loading ? t('clips.shots.loading') : t('clips.shots.empty')"/>
+        </scroll>
+        <column v-if="sel" class="sh-side">
+          <image class="sh-preview" :src="preview"/>
+          <row class="sh-meta">
+            <text class="sh-date">{{ sel.date }}</text>
+            <spacer/>
+            <text class="sh-pos">{{ position }}</text>
+          </row>
+          <row class="sh-tools">
+            <icon-button id="prev" icon="back" :tip="t('clips.shots.prev')" @click="prev()"/>
+            <icon-button id="next" icon="next" :tip="t('clips.shots.next')" @click="next()"/>
+            <spacer/>
+            <icon-button id="fav" icon="star" :active="sel.fav" :tip="t('clips.shots.fav')" @click="fav()"/>
+            <icon-button id="copy" icon="copy" :tip="t('clips.shots.copy')" @click="copy()"/>
+            <icon-button id="delete" :icon="armed ? 'check' : 'trash'" class="sh-danger" :class="{ armed: armed }"
+                         :tip="armed ? t('clips.shots.confirm') : t('clips.shots.delete')" @click="remove()"/>
+          </row>
+        </column>
+      </row>
+    </column>
+  </stack>
+</template>
+<style>
+.sh-scrim { background: $scrim; align-items: center; justify: center; }
+.sh-card { width: 96%; max-width: 600; height: 92%; max-height: 340; background: $panel; border: 1 $line; }
+.sh-bar { height: 22; gap: 3; padding: 0 3 0 6; border-bottom: 1 $line; flex-shrink: 0; }
+.sh-accent { color: $brand2; }
+.sh-title { font-weight: bold; color: $text; text-wrap: nowrap; }
+.sh-count { color: $dim; }
+.sh-body { grow: 1; min-height: 0; align-items: stretch; }
+.sh-list { grow: 1; min-width: 0; padding: 4; }
+.sh-grid { min-column: 64; gap: 3; }
+.sh-side { width: 176; padding: 4; gap: 4; border-left: 1 $line; flex-shrink: 0; align-items: stretch; }
+.sh-preview { width: 100%; aspect-ratio: 16/9; background: $surface2; }
+.sh-meta { gap: 4; }
+.sh-date { color: $text; text-wrap: nowrap; }
+.sh-pos { color: $dim; text-wrap: nowrap; }
+.sh-tools { gap: 2; }
+.sh-danger:hover { color: $danger; }
+.sh-danger.armed { color: $danger; border-color: $danger; }
+</style>

@@ -1,0 +1,23 @@
+{
+  "name": "Kamera",
+  "description": "Freelook, Orbit-Ansicht, Bewegungsunschärfe.",
+  "summary": "Freelook, Orbit, Unschärfe",
+  "section": {
+    "look": "Blick",
+    "blur": "Bewegungsunschärfe"
+  },
+  "setting": {
+    "freelook": "Freelook",
+    "freelook.desc": "Taste halten und umsehen.",
+    "freelookToggle": "Drücken schaltet",
+    "orbit": "Orbit-Ansicht",
+    "orbit.desc": "Mittelklick-Ziehen in der dritten Person.",
+    "motionBlur": "Unschärfe",
+    "motionBlur.desc": "Standard aus. Kann unangenehm sein.",
+    "blurStrength": "Stärke",
+    "freelookKey": "Freelook"
+  },
+  "notice": {
+    "blur": "Bewegungsunschärfe: hier nicht verfügbar."
+  }
+}
