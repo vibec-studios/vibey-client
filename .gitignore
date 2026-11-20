@@ -16,3 +16,6 @@ blockbench/node_modules/
 tools/**/node_modules/
 versions/*/logs/
 .ranks-seed-totp
+
+# package folders named "build" inside sources are code, not output
+!**/src/**/build/
