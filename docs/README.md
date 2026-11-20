@@ -24,6 +24,8 @@ Start with the [main README](../README.md) for what Vibey Client is, installatio
 | [NAMETAGS.md](NAMETAGS.md) | Names and ranks: seal, rank icons (glyph table, `rank-icons.json`), animated name styles (colour function + test vectors), chat hook, server-rule keys, local backend test. |
 | [PVP.md](PVP.md) | PvP & View module (Fabric 1.21.11): zoom, toggle sprint/sneak, crosshair editor, block outline, hit colour, low fire, lower shield, server-rule keys. |
 | [WAYPOINTS.md](WAYPOINTS.md) | Waypoints module (Fabric 1.21.11): beacons with direct manipulation, share codes, fair minimap, world map, death point, nether coordinates, map tile cache. |
+| [CHAT.md](CHAT.md) | Chat module (Fabric 1.21.11): timestamps, history, search, copy a line, mention highlight, mention + DM toasts, spam collapse, filters, the chat window as a HUD element. |
+| [SOCIAL.md](SOCIAL.md) | Social additions: Discord Rich Presence (own IPC client, privacy, app id) and streamer mode (names, skins, server address; `api/privacy`). |
 | [CLIPS.md](CLIPS.md) | **Proposal** for the Clips module (replay buffer, auto clips, gallery): capture/encoder research with measurements, and the clip folder + JSON contract for the Vibe Launcher. |
 | [../blockbench/README.md](../blockbench/README.md) | Developing the Blockbench plugin: tests, mock game server, code layout. |
 

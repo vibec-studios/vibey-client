@@ -1,0 +1,17 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<template>
+  <row id="chat-search" class="cs-bar">
+    <ico name="search" class="cs-icon"/>
+    <text id="hits" class="cs-hits" :class="{ hint: empty }">{{ hits }}</text>
+    <button id="close" class="cs-close" :tooltip="t('chat.search.close')" @click="close()"><ico name="close"/></button>
+  </row>
+</template>
+<style>
+.cs-bar { position: absolute; anchor: bottom-left; left: 2; bottom: 15; height: 14; gap: 4; padding: 0 2 0 4;
+          background: $panel; border: 1 $line2; }
+.cs-icon { color: $brand2; }
+.cs-hits { color: $text; text-wrap: nowrap; }
+.cs-hits.hint { color: $dim; }
+.cs-close { width: 12; height: 12; padding: 0; background: transparent; border: 1 transparent; color: $muted; }
+.cs-close:hover { color: $text; background: $surface2; }
+</style>

@@ -24,7 +24,10 @@ Existing stubs: `social`, `cosmetics`, `emotes`, `multiplayer` (conflicts with m
 only: the package is excluded from the NeoForge build and not registered there; its parts are *media features*, the
 `lyrics` part conflicts with `vibeylyrics` – see [MEDIA.md](MEDIA.md)), `devlink`, `nametags` (seal, rank icons and name styles before player names; data in `client/VibeyPlayers`, `client/ranks`, see [NAMETAGS.md](NAMETAGS.md)), `pvp` (zoom, crosshair,
 toggle sprint, outlines; Fabric 1.21.11 only for now, see [PVP.md](PVP.md)), `waypoints` (beacons, share codes, minimap, world map, death point, nether
-coordinates; Fabric 1.21.11 only, see [WAYPOINTS.md](WAYPOINTS.md)).
+coordinates; Fabric 1.21.11 only, see [WAYPOINTS.md](WAYPOINTS.md)), `chat` (timestamps, search, copy, mentions, filters, DM
+toasts, movable chat window; Fabric 1.21.11 only, see [CHAT.md](CHAT.md)). Social also has Discord Rich Presence and
+streamer mode (part `social.streamer`, Fabric 1.21.11), see [SOCIAL.md](SOCIAL.md); `api/privacy/Privacy` is the shared
+streamer state any module can read.
 
 ## Targets and boundaries
 

@@ -22,5 +22,7 @@
   "key.vibeyclient.waypoints.addKey": "Add waypoint",
   "key.vibeyclient.waypoints.mapKey": "Open map",
   "key.vibeyclient.waypoints.minimapKey": "Toggle minimap",
-  "key.vibeyclient.waypoints.listKey": "Waypoint list"
+  "key.vibeyclient.waypoints.listKey": "Waypoint list",
+  "key.vibeyclient.chat.searchKey": "Search chat",
+  "key.vibeyclient.social.streamerKey": "Streamer mode"
 }

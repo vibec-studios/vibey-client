@@ -22,5 +22,7 @@
   "key.vibeyclient.waypoints.addKey": "Wegpunkt setzen",
   "key.vibeyclient.waypoints.mapKey": "Karte öffnen",
   "key.vibeyclient.waypoints.minimapKey": "Minimap an/aus",
-  "key.vibeyclient.waypoints.listKey": "Wegpunktliste"
+  "key.vibeyclient.waypoints.listKey": "Wegpunktliste",
+  "key.vibeyclient.chat.searchKey": "Chat durchsuchen",
+  "key.vibeyclient.social.streamerKey": "Streamer-Modus"
 }
