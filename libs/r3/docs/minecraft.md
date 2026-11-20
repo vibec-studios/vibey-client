@@ -23,11 +23,13 @@ R3Mod.whenReady(() -> R3Mc.onWorld(new WorldListener() {
 | Call | Does |
 |---|---|
 | `R3Mc.scene()` | the client's `R3Scene` (add/remove objects, `interaction()` for events, `query()`) |
+| `R3Mc.vuiContent(docId, controller)` | just the `VuiPanelContent` (e.g. as a `VideoSurface` overlay) |
 | `R3Mc.panel(docId, controller)` | a `WorldObject` showing a vui document (`assets/<ns>/vui/<name>.vui`), 2 × 1.125 blocks, `InteractionRules.screen()` |
 | `R3Mc.text(text)` | a `WorldObject` with a `Text3D` that faces the camera, not interactive |
 | `R3Mc.add(object)` | add to the scene where it is |
 | `R3Mc.place(object)` | add and start placing: follows the crosshair, sticks to block faces, left click places, right click/Esc cancels |
 | `R3Mc.remove(object)` | remove (closes a vui panel's document) |
+| `R3Mc.texture(id, handle)` | lets vui `src="id"` (and `TextureHandle.resource(id)`) draw a texture you own, e.g. a cover art you update |
 | `R3Mc.dynamicTexture(name, w, h)` | a `TextureHandle` you upload ARGB pixels to (video frames) |
 | `R3Mc.placements()` / `storage()` | `PlacementStore` of the current world, file storage |
 | `R3Mc.worldKey()` / `onWorld(listener)` | `sp:<level>` / `mp:<address>`; join/leave callbacks |
@@ -65,7 +67,8 @@ R3Mc.scene().interaction().listen(e -> {
   vui scroll container actually scrolls.
 - Panel pixels = `size × 64` per block (`WorldObject.pixelsPerBlock`); the document is laid out at that size in GUI
   pixels with the vanilla font (9 px lines).
-- Only pointer input reaches panels; keyboard input (text fields) is not routed yet.
+- Clicked buttons drop their focus (no focus ring after a pointer click); a clicked **text field** keeps it and
+  then gets the keyboard, see "Keyboard" below.
 
 ## 3D text and effects
 
@@ -90,7 +93,8 @@ Set `dimension(...)` on objects you create yourself (`R3Mc.scene().query().dimen
 | vui `src="mymod:icons/gear"` / `url(...)` | same mapping, size read from the PNG header |
 | `R3Mc.dynamicTexture("cam", 320, 180)` | `r3:dynamic/cam`; `upload(int[] argb)` on the render thread, `close()` frees it |
 
-MCEF browser views will be another `McTexture` (any class with a texture id).
+Any `TextureHandle` that also implements `McTexture` (a texture id string, may change every frame) is drawn as that
+texture – Vibey's video screens hand r3 the FFmpeg frame texture or the MCEF browser view that way.
 
 ## Input
 
@@ -100,6 +104,16 @@ MCEF browser views will be another `McTexture` (any class with a texture id).
 | wheel | consumed when the scene resizes or the crosshair is on a resizable object (hotbar keeps its slot) |
 | keys | Esc / R / Ctrl+Z go to the scene first; consumed while holding (Esc does not open the pause menu) |
 | every tick | while `blocksVanillaMouse()`: queued attack/use/pick clicks are dropped and those keys released |
+
+**Keyboard to panels.** While a panel content says `keyFocused()` (`KeyContent`; vui: a focused `textfield`),
+every key press/repeat/release and every typed character goes to it instead of the game (`charTyped` mixin):
+the player does not walk, chat does not open. **Esc** releases the focus (no pause menu), so does a click anywhere
+else; F1–F12 still reach the game. Modifiers (Shift/Ctrl/Alt) come from the held keys, Ctrl+V reads the system
+clipboard.
+
+**Block outline.** While the crosshair is on an r3 object (or one is held/resized) the vanilla block outline is not
+drawn (`BlockOutlineMixin`: `extractBlockOutline` 1.21.9–26.1, `submitBlockOutline` 26.2+, `renderHitOutline`
+before 1.21.9).
 
 Codes are GLFW numbers on every version (26.3's SDL scancodes and mouse numbers are mapped back). Letter keys follow
 the keyboard layout (Ctrl+Z is the key labelled Z on QWERTZ too). Nothing is routed while a screen or overlay is open;
@@ -164,11 +178,11 @@ mouse/keyboard input and writes screenshots to `build/review/r3/`:
 | `world` | `McWorldQuery`, `BlockRaycast`, `EntityLookup` |
 | `view` | `CameraReader` (camera → `CameraState`, frustum) |
 | `render` | `McWorldCanvas`, `McPanelCanvas`, `McFontMetrics`, draw list, render types, sinks |
-| `texture` | `McTextures`, `DynamicTextureHandle`, white texture |
+| `texture` | `McTextures`, `DynamicTextureHandle`, `ExternalTextures` (`R3Mc.texture`), white texture |
 | `input` | `InputRouter`, `HeldInput`, `NativeInput`/`SdlKeys`, `KeyLayout`, `VanillaGuard` |
-| `hud` | `HintOverlay` (hint line under the crosshair) |
+| `hud` | `HintOverlay` (small hint line: under the crosshair, or below the hovered object when that covers it – `HintPlacement`) |
 | `store` | `R3Storage`, `WorldKeyResolver` |
 | `vui` | `WorldVui` (vui backend for world panels: font metrics, resources, textures) |
 | `demo` | `/r3 demo` |
-| `mixin` | mouse, keyboard, level renderer |
+| `mixin` | mouse, keyboard (keys + characters), level renderer, block outline |
 | `fabric`, `neoforge` | entrypoints: ticks, HUD layer, commands, render event (Fabric < 1.21.9) |

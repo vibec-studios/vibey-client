@@ -263,5 +263,15 @@
   "fx.source.pc": "Effekte: aus dem PC-Sound",
   "fx.source.lyrics": "Effekte: aus dem Songtext-Timing",
   "fx.source.none": "Effekte: warten auf Musik",
-  "setting.openMenu.action": "Lyrics-Menü öffnen"
+  "setting.openMenu.action": "Lyrics-Menü öffnen",
+  "setting.panel": "Musik-Tafel",
+  "setting.panel.desc": "Was läuft, in der Welt: anschauen und Play drücken.",
+  "setting.panel.button": "Platzieren",
+  "setting.panel.action": "Musik-Tafel platzieren",
+  "panel.tip.previous": "Zurück",
+  "panel.tip.play": "Abspielen",
+  "panel.tip.pause": "Pause",
+  "panel.tip.next": "Weiter",
+  "panel.tip.close": "Entfernen",
+  "panel.nothing": "Nichts läuft"
 }

@@ -1,0 +1,39 @@
+<template>
+  <row class="music" gap="6">
+    <stack class="art">
+      <image v-if="hasCover" class="cover" src="vibeyclient:music/cover"/>
+      <text v-if="!hasCover" class="note">♫</text>
+    </stack>
+    <column class="info" gap="2">
+      <text class="title">{{ title }}</text>
+      <text class="artist">{{ artist }}</text>
+      <progress class="bar" :value="progress"/>
+      <row class="keys" gap="4">
+        <text class="time">{{ time }}</text>
+        <spacer/>
+        <button id="previous" class="key" @click="previous()" :tooltip="t('tip.previous')">⏮</button>
+        <button id="play" class="key main" @click="toggle()" :tooltip="t(playing ? 'tip.pause' : 'tip.play')">{{ playing ? '❚❚' : '▶' }}</button>
+        <button id="next" class="key" @click="next()" :tooltip="t('tip.next')">⏭</button>
+        <button id="close" class="key shut" @click="close()" :tooltip="t('tip.close')">✕</button>
+      </row>
+    </column>
+  </row>
+</template>
+<style>
+.music { padding: 6; background: #0a0a0fe6; gradient-to: #15102af0; border: 1 #8b6cff55; align: center; }
+.art { size: 48; background: #ffffff10; justify: center; align: center; }
+.cover { size: 48; }
+.note { color: #8b6cff; font-scale: 2; }
+.info { flex-grow: 1; }
+.title { color: #f4f4f5; font-weight: bold; text-wrap: nowrap; text-overflow: ellipsis; }
+.artist { color: #a1a1aa; text-wrap: nowrap; text-overflow: ellipsis; }
+.bar { height: 3; accent: #8b6cff; }
+.keys { align: center; }
+.time { color: #6b6b75; font-scale: 0.75; text-wrap: nowrap; }
+.key { size: 16 14; padding: 0; background: #ffffff10; border: 1 #ffffff18; color: #f4f4f5; justify: center; align: center; }
+.key:hover { background: #8b6cff; border-color: #9e84ff; transition: background 100ms out; }
+.key:active { background: #b49cff; }
+.key.main { width: 20; }
+.key.shut { color: #a1a1aa; }
+.key.shut:hover { background: #ff5470; border-color: #ff5470; color: #ffffff; }
+</style>

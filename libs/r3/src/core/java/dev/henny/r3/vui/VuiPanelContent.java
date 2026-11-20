@@ -1,13 +1,15 @@
 package dev.henny.r3.vui;
 
+import dev.henny.r3.panel.KeyContent;
 import dev.henny.r3.panel.PanelContent;
 import dev.henny.r3.panel.PointerButton;
 import dev.henny.r3.render.PanelCanvas;
 import dev.henny.vui.Vui;
+import dev.henny.vui.component.builtin.TextFieldBehavior;
 import dev.henny.vui.dom.Document;
 import dev.henny.vui.dom.Element;
 
-public final class VuiPanelContent implements PanelContent {
+public final class VuiPanelContent implements PanelContent, KeyContent {
     private static final float OUTSIDE = -100_000f;
 
     private final Document document;
@@ -78,6 +80,7 @@ public final class VuiPanelContent implements PanelContent {
     @Override
     public void pointerUp(float x, float y, PointerButton button) {
         document.pointerUp(x, y, glfw(button), 0);
+        if (!keyFocused()) document.events().focus().blur();
     }
 
     @Override
@@ -94,5 +97,36 @@ public final class VuiPanelContent implements PanelContent {
             case SECONDARY -> 1;
             case MIDDLE -> 2;
         };
+    }
+
+    @Override
+    public boolean keyFocused() {
+        Element focused = document.events().focus().focused();
+        return focused != null && focused.behavior() instanceof TextFieldBehavior;
+    }
+
+    @Override
+    public boolean keyDown(int key, int scancode, int mods, boolean repeat) {
+        return document.events().keyDown(key, scancode, mods, repeat);
+    }
+
+    @Override
+    public void keyUp(int key, int scancode, int mods) {
+        document.keyUp(key, scancode, mods);
+    }
+
+    @Override
+    public boolean charTyped(int codepoint, int mods) {
+        return document.charTyped(codepoint, mods);
+    }
+
+    @Override
+    public void releaseKeyFocus() {
+        document.events().focus().blur();
+    }
+
+    public void focus(String elementId) {
+        Element e = document.find(elementId);
+        if (e != null) document.events().focus().focus(e, false);
     }
 }

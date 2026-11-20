@@ -17,4 +17,6 @@ public final class AnchorRecord {
     public float yawOffset;
     public float pitchOffset;
     public float smoothing;
+    public float recenter;
+    public boolean lowers;
 }

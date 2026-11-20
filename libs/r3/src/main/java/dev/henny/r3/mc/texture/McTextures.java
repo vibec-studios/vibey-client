@@ -26,6 +26,8 @@ public final class McTextures {
     }
 
     public static TextureHandle resource(String id) {
+        TextureHandle external = ExternalTextures.get(id);
+        if (external != null) return external;
         int[] size = size(id);
         return size == null ? null : TextureHandle.resource(id, size[0], size[1]);
     }

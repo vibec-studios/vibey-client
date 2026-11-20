@@ -442,7 +442,7 @@ public final class DevTour {
         waitTicks(15);
         shot("35_lyrics_galaxy");
         run(mc -> {
-            long drawn = dev.henny.vibeyclient.module.media.lyrics.render.WorldLyrics.drawnFrames;
+            long drawn = dev.henny.vibeyclient.module.media.lyrics.world.WorldText.drawnFrames();
             dev.henny.vibeyclient.module.media.lyrics.LyricsConfig.get().sky = "vanilla";
             dev.henny.vibeyclient.module.media.lyrics.Playback.stop();
             hideHud(mc, false);

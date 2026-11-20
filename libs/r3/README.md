@@ -72,13 +72,13 @@ This exact flow runs as a unit test: `ReadmeExampleTest`.
 |---|---|
 | `math` | rays, planes, oriented rectangles/boxes, picking, faces, angles, springs, colors |
 | `view` | camera state, frustum interface, pointer rays (crosshair, mouse unproject) |
-| `object` | `WorldObject`, `Transform`, `Visibility`, contents `VideoSurface`, `Mesh` |
-| `panel` | `PanelContent` / `PointerContent` (UI-library neutral) |
+| `object` | `WorldObject`, `Transform`, `Visibility`, contents `VideoSurface` (+ `VideoOverlay` controls), `Mesh`, `CustomContent` |
+| `panel` | `PanelContent` / `PointerContent` / `KeyContent` (UI-library neutral) |
 | `text` | `Text3D`, styles, per-glyph effects, layout |
-| `anchor` | block face, free, entity, camera, view-follow anchors, `WorldQuery`, snapping |
+| `anchor` | block face, free, entity, camera, view-follow, soft-follow, lowers-when-looking-down anchors, `WorldQuery`, snapping |
 | `input` | abstract input codes, gestures, rebindable bindings |
 | `interact` | the interaction state machine (hover, grab, resize, wheel, undo, events) |
-| `hint` | first-time hints, persisted |
+| `hint` | first-time hints, persisted; where the hint line goes (`HintPlacement`) |
 | `fx` | pooled particles, beams, rings, trails, glow, budget/LOD |
 | `render` | `WorldCanvas`, `PanelCanvas`, render modes, light, quad helpers |
 | `draw` | turns objects into canvas calls |

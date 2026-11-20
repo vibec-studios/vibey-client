@@ -164,6 +164,7 @@ public final class LyricsConfig {
     public double anchorZ;
     public float anchorYaw;
     public boolean anchorSet = false;
+    public float anchorScale = 1f;
     /** World anchor: true = always faces you, false = fixed like a sign. */
     public boolean anchorBillboard = true;
 

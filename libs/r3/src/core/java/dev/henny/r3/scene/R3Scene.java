@@ -17,6 +17,7 @@ import dev.henny.r3.interact.InteractionConfig;
 import dev.henny.r3.interact.Pointer;
 import dev.henny.r3.math.Ray;
 import dev.henny.r3.object.WorldObject;
+import dev.henny.r3.panel.KeyContent;
 import dev.henny.r3.render.WorldCanvas;
 import dev.henny.r3.view.CameraState;
 import dev.henny.r3.view.ViewFrustum;
@@ -163,6 +164,20 @@ public final class R3Scene {
 
     public boolean wheel(double notches) {
         return interaction.wheel(notches);
+    }
+
+    public WorldObject keyTarget() {
+        for (int i = 0; i < ordered.size(); i++) {
+            WorldObject o = ordered.get(i);
+            if (o.content() instanceof KeyContent k && k.keyFocused()) return o;
+        }
+        return null;
+    }
+
+    public void releaseKeys() {
+        for (int i = 0; i < ordered.size(); i++) {
+            if (ordered.get(i).content() instanceof KeyContent k && k.keyFocused()) k.releaseKeyFocus();
+        }
     }
 
     public boolean blocksVanillaMouse() {
