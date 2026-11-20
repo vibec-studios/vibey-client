@@ -39,6 +39,21 @@ class PlannersTest {
     }
 
     @Test
+    void buildShotsKeepWallsOutOfTheFrame() {
+        Scene s = Scenes.of(Scenes.village());
+        BuildsPlanner p = new BuildsPlanner();
+        for (long seed = 1; seed <= 6; seed++) {
+            Shot shot = p.plan(s, new Random(seed));
+            assertNotNull(shot);
+            for (int i = 0; i <= 6; i++) {
+                var pose = shot.at(shot.duration() * i / 6);
+                assertTrue(Clearance.free(s.world(), pose.pos(), Tries.ROOMY), "roomy, seed " + seed);
+                assertTrue(Clearance.openView(s.world(), pose, 3), "open view, seed " + seed);
+            }
+        }
+    }
+
+    @Test
     void closedRoomGivesNoShotOutside() {
         Scene s = Scenes.of(Scenes.closedRoom());
         for (Planner p : OPEN_AIR) {

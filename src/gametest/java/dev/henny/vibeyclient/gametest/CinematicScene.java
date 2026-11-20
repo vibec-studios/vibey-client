@@ -18,11 +18,8 @@ final class CinematicScene {
     private CinematicScene() {}
 
     static int[] build(ClientGameTestContext ctx, TestSingleplayerContext world) {
-        int[] o = ReviewKit.platform(ctx, world, "grass_block");
+        int[] o = ground(ctx, world);
         int x = o[0], y = o[1], z = o[2];
-        cmd(world, "gamerule send_command_feedback false");
-        cmd(world, "fill %d %d %d %d %d %d minecraft:grass_block", x - 24, y - 1, z - 24, x + 24, y - 1, z + 24);
-        cmd(world, "fill %d %d %d %d %d %d minecraft:air", x - 24, y, z - 24, x + 24, y + 14, z + 24);
         house(world, x + 7, y, z - 9);
         tower(world, x - 12, y, z - 6);
         pond(world, x - 6, y, z + 8);
@@ -32,6 +29,23 @@ final class CinematicScene {
         ctx.waitTicks(20);
         world.getClientWorld().waitForChunksRender();
         return o;
+    }
+
+    private static int[] ground(ClientGameTestContext ctx, TestSingleplayerContext world) {
+        for (String c : new String[] {"gamemode creative @a", "time set 6000", "weather clear", "gamerule fall_damage false",
+                "gamerule advance_time false", "gamerule spawn_mobs false", "difficulty peaceful", "gamerule send_command_feedback false"}) cmd(world, c);
+        int[] p = ctx.computeOnClient(mc -> new int[] {(int) Math.floor(mc.player.getX()), (int) Math.floor(mc.player.getZ())});
+        int x = p[0], z = p[1];
+        int y = world.getServer().computeOnServer(s -> s.overworld().getHeight(
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z));
+        cmd(world, "fill %d %d %d %d %d %d minecraft:air", x - 22, y, z - 22, x + 22, y + 11, z + 22);
+        cmd(world, "fill %d %d %d %d %d %d minecraft:air", x - 22, y + 12, z - 22, x + 22, y + 24, z + 22);
+        cmd(world, "fill %d %d %d %d %d %d minecraft:dirt", x - 22, y - 4, z - 22, x + 22, y - 2, z + 22);
+        cmd(world, "fill %d %d %d %d %d %d minecraft:grass_block", x - 22, y - 1, z - 22, x + 22, y - 1, z + 22);
+        cmd(world, "tp @a %.1f %d %.1f 200 10", x + 0.5, y, z + 0.5);
+        ctx.waitTicks(40);
+        world.getClientWorld().waitForChunksRender();
+        return new int[] {x, y, z};
     }
 
     private static void house(TestSingleplayerContext w, int x, int y, int z) {

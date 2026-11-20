@@ -10,7 +10,7 @@ import java.util.Random;
 public final class DroniePlanner implements Planner {
     @Override
     public Shot plan(Scene s, Random rnd) {
-        Tries tries = new Tries(s);
+        Tries tries = new Tries(s, Tries.ROOMY, 1.5);
         V3 head = s.feet().add(0, 1.5, 0);
         double far = Math.min(26, s.radius() * 0.65), up = Math.min(16, s.radius() * 0.4);
         for (int i = 0; i < 8 && !tries.exhausted(); i++) {

@@ -41,7 +41,7 @@ final class AfkPresets {
                 .place(CLOCK, Anchor.TOP_RIGHT, -14, 14, 1.5f)
                 .place(HINT, Anchor.TOP_LEFT, 14, 16, 1f).style(s -> s.textColor = 0xFF9A9AA6)
                 .place(NOW_PLAYING, Anchor.TOP, 0, 8, 1f)
-                .place(LYRICS, Anchor.BOTTOM, 0, -58, 1.25f)
+                .place(LYRICS, Anchor.BOTTOM, 0, -48, 1f)
                 .build();
     }
 

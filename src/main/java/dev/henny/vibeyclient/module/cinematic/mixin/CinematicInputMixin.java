@@ -20,6 +20,11 @@ abstract class CinematicInputMixin {
         if (InputGate.scroll()) ci.cancel();
     }
 
+    @Inject(method = "turnPlayer", at = @At("HEAD"), cancellable = true)
+    private void vibey$afkTurn(double elapsed, CallbackInfo ci) {
+        if (InputGate.holdView()) ci.cancel();
+    }
+
     @Inject(method = "onMove", at = @At("HEAD"))
     private void vibey$afkMove(long window, double x, double y, CallbackInfo ci) {
         InputGate.move(x, y);

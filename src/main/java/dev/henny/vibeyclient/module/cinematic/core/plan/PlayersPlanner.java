@@ -33,7 +33,7 @@ public final class PlayersPlanner implements Planner {
     public Shot plan(Scene s, Random rnd) {
         List<Scene.Subject> list = candidates(s);
         if (list.size() > 1) list.sort(Comparator.comparing(p -> p.id().equals(last)));
-        Tries tries = new Tries(s);
+        Tries tries = new Tries(s, Tries.CLOSE, 1.2);
         for (Scene.Subject p : list) {
             double base = rnd.nextDouble() * 360;
             for (int i = 0; i < 6 && !tries.exhausted(); i++) {

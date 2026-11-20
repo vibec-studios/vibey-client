@@ -18,7 +18,7 @@ public final class SkyPlanner implements Planner {
 
     @Override
     public Shot plan(Scene s, Random rnd) {
-        Tries tries = new Tries(s);
+        Tries tries = new Tries(s, Tries.CLOSE, 0);
         for (int i = 0; i < 6 && !tries.exhausted(); i++) {
             V3 from = s.eye().add(V3.heading(rnd.nextDouble() * 360).mul(i == 0 ? 0 : 2)).add(0, Tries.range(rnd, 1.5, 3), 0);
             if (!Clearance.openSky(s.world(), from, OPEN)) continue;

@@ -14,7 +14,7 @@ public final class SelfPlanner implements Planner {
 
     @Override
     public Shot plan(Scene s, Random rnd) {
-        Tries tries = new Tries(s);
+        Tries tries = new Tries(s, Tries.CLOSE, 1.2);
         V3 target = s.feet().add(0, LOOK, 0);
         for (int i = 0; i < 9 && !tries.exhausted(); i++) {
             int kind = next + i;

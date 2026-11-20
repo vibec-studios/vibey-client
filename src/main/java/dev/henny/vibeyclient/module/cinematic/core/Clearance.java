@@ -7,11 +7,23 @@ public final class Clearance {
     private Clearance() {}
 
     public static boolean free(WorldView w, V3 p) {
+        return free(w, p, MARGIN);
+    }
+
+    public static boolean openView(WorldView w, Pose pose, double dist) {
+        for (int i = -1; i <= 1; i++) {
+            V3 dir = Look.direction(pose.yaw() + i * 28, Math.max(-30, Math.min(12, pose.pitch())));
+            if (!sight(w, pose.pos(), pose.pos().add(dir.mul(dist)))) return false;
+        }
+        return true;
+    }
+
+    public static boolean free(WorldView w, V3 p, double margin) {
         if (!p.finite() || p.y() < w.minY() + 1 || p.y() > w.maxY() - 1) return false;
         for (int i = 0; i < 8; i++) {
-            double x = p.x() + ((i & 1) == 0 ? -MARGIN : MARGIN);
-            double y = p.y() + ((i & 2) == 0 ? -MARGIN : MARGIN);
-            double z = p.z() + ((i & 4) == 0 ? -MARGIN : MARGIN);
+            double x = p.x() + ((i & 1) == 0 ? -margin : margin);
+            double y = p.y() + ((i & 2) == 0 ? -Math.min(margin, MARGIN) : margin);
+            double z = p.z() + ((i & 4) == 0 ? -margin : margin);
             int bx = floor(x), by = floor(y), bz = floor(z);
             if (!w.loaded(bx, bz)) return false;
             if ((w.tags(bx, by, bz) & (WorldView.SOLID | WorldView.WATER)) != 0) return false;

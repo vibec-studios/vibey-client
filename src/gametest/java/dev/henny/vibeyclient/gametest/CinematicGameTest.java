@@ -33,6 +33,7 @@ public final class CinematicGameTest implements FabricClientGameTest {
             m.settings().all().forEach(s -> s.reset());
             m.auto.set(false);
             m.grain.set(true);
+            KIT.log("start key conflicts: '%s'", dev.henny.vibeyclient.client.MappingKeys.conflicts(m.startKey.mapping()));
         });
         page(ctx, GlobalSettings.Language.ENGLISH, "page_en");
         page(ctx, GlobalSettings.Language.GERMAN, "page_de");
