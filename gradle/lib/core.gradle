@@ -29,8 +29,8 @@ sourceSets {
 
 dependencies {
     project.libDeps.each { api project(":$it") }
-    compileOnlyApi "org.joml:joml:${project.joml_version}"
-    compileOnlyApi "com.google.code.gson:gson:${project.gson_version}"
+    compileOnly "org.joml:joml:${project.joml_version}"
+    compileOnly "com.google.code.gson:gson:${project.gson_version}"
     testImplementation "org.joml:joml:${project.joml_version}"
     testImplementation "com.google.code.gson:gson:${project.gson_version}"
     testImplementation platform("org.junit:junit-bom:${project.junit_version}")

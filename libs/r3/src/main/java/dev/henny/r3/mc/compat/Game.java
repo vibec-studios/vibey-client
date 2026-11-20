@@ -45,7 +45,7 @@ public final class Game {
     }
 
     public static float partialTick() {
-        //? if >=1.21.5 {
+        //? if >=1.21.3 {
         return mc().getDeltaTracker().getGameTimeDeltaPartialTick(false);
         //?} else
         /*return mc().getTimer().getGameTimeDeltaPartialTick(false);*/

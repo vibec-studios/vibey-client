@@ -16,7 +16,7 @@ final class NativeTextures {
     }
 
     static void setPixel(NativeImage image, int x, int y, int argb) {
-        //? if >=1.21.5 {
+        //? if >=1.21.3 {
         image.setPixel(x, y, argb);
         //?} else
         /*image.setPixelRGBA(x, y, (argb & 0xFF00FF00) | (argb >> 16 & 0xFF) | (argb & 0xFF) << 16);*/
