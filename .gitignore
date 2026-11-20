@@ -19,3 +19,4 @@ versions/*/logs/
 
 # package folders named "build" inside sources are code, not output
 !**/src/**/build/
+!**/src/**/run/
