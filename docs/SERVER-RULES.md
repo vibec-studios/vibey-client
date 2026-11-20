@@ -26,6 +26,7 @@ ignored, so you can list keys that only newer clients know.
 | `camera.freelook` (or `freelook`) | Freelook (looking around without turning) |
 | `camera.orbit` | Rotating the third-person camera around the player with the middle mouse (F5 stays) |
 | `camera.*` | Both camera keys |
+| `cinematic.afk` | AFK cinematics: the camera flying around while you are away (stops a running one at once) |
 | `togglesprint` | Toggle sprint |
 | `togglesneak` | Toggle sneak |
 | `crosshair` | Custom crosshair |
@@ -76,7 +77,7 @@ ignored, so you can list keys that only newer clients know.
 The authoritative list for a given client is what it announces in `vibey:hello` (the plugin logs it, see below);
 the keys come from `ServerRules.supports(...)` calls in the modules. The current Vibey Client declares `zoom`,
 `togglesprint`, `togglesneak`, `crosshair`, `blockoutline`, `hitcolor`, `lowfire`, `lowshield`, `hud.togglestate`
-(PvP module), `clips`, `clips.auto` (Clips module), `nametags.seal`, `nametags.ranks`, `nametags.styles` (Names and ranks), `waypoints.minimap` (Waypoints), `info.light`, `info.chunks`, `info.card`, `info.food`, `info.saturation`, `info.toolwarn`, `info.tnt` (Info module), `camera.freelook`, `freelook`, `camera.orbit` (Camera module), `inventory.tweaks`, `inventory.presets` (Inventory), `emotes`, `cosmetics.*` slots, `discord.server` and every `hud.*` key
+(PvP module), `clips`, `clips.auto` (Clips module), `nametags.seal`, `nametags.ranks`, `nametags.styles` (Names and ranks), `waypoints.minimap` (Waypoints), `info.light`, `info.chunks`, `info.card`, `info.food`, `info.saturation`, `info.toolwarn`, `info.tnt` (Info module), `camera.freelook`, `freelook`, `camera.orbit` (Camera module), `cinematic.afk` (Cinematic), `inventory.tweaks`, `inventory.presets` (Inventory), `emotes`, `cosmetics.*` slots, `discord.server` and every `hud.*` key
 above (HUD module). Listing a key an older client does not know is harmless.
 
 ## Paper / Spigot: the VibeyRules plugin

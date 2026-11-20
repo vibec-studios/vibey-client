@@ -32,7 +32,8 @@ toasts, movable chat window; Fabric 1.21.11 only, see [CHAT.md](CHAT.md)). Socia
 streamer mode (part `social.streamer`, Fabric 1.21.11), see [SOCIAL.md](SOCIAL.md); `api/privacy/Privacy` is the shared
 streamer state any module can read. `inventory` (durability %, shulker preview, quick moves, search, hotbar presets; Fabric
 1.21.11 only, see [INVENTORY.md](INVENTORY.md)), `servers` (live pings, search, favourites, MOTD preview in the
-multiplayer screen; Fabric 1.21.11 only, see [SERVERS.md](SERVERS.md)).
+multiplayer screen; Fabric 1.21.11 only, see [SERVERS.md](SERVERS.md)), `cinematic` (AFK camera flights and an
+editable AFK screen; Fabric 1.21.11 only, see [CINEMATIC.md](CINEMATIC.md)).
 
 ## Targets and boundaries
 
@@ -115,7 +116,7 @@ thread) and rendered automatically in the Vibey menu.
 | `bool(key, def)` | `BoolSetting` | switch |
 | `intRange(key, def, min, max[, step])` | `IntSetting` (`.unit("%")`) | slider + value |
 | `floatRange(key, def, min, max, step)` | `FloatSetting` (`.decimals(n)`) | slider + value |
-| `choice(key, Enum.DEFAULT)` | `EnumSetting<E>` | ‹ value › cycler |
+| `choice(key, Enum.DEFAULT)` | `EnumSetting<E>` | segments / select; `.icons(e -> iconName)` = icon segments, the name on hover |
 | `string(key, def[, maxLength])` | `StringSetting` | text field |
 | `color(key, argb)` | `ColorSetting` (`.presets(...)`) | swatches |
 | `keybind(key, Keys.X or Keys.UNBOUND)` | `KeybindSetting` (`.onPress(...)`, `isDown()`) | key field in its section (click, press a key) |
@@ -235,6 +236,8 @@ Services.get(HostSessionService.class).ifPresent(...);    // consumer, look up l
 
 `HostingService` (api/service) is provided by the multiplayer module while it is enabled (it posts
 `HostingService.HostingChanged` with the host-only address; the port comes from `port()`).
+`WaypointPoints` (api/service) is provided by the waypoints module: the visible waypoints (name, dimension, block
+position) for modules that only read them (the cinematic tour).
 Put shared service interfaces in the providing module's package (e.g. `module.multiplayer.HostSessionService`).
 
 ## Vibe backend and toasts
