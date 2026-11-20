@@ -35,5 +35,6 @@
   "key.vibeyclient.social.streamerKey": "Streamer-Modus",
   "key.vibeyclient.inventory.presetKey": "Hotbar-Set (tippen/halten)",
   "key.vibeyclient.inventory.presetSaveKey": "Hotbar-Set speichern",
-  "key.vibeyclient.visuals.itemEditor": "Item-Editor (Optik)"
+  "key.vibeyclient.visuals.itemEditor": "Item-Editor (Optik)",
+  "key.vibeyclient.screens.editKey": "Menü bearbeiten"
 }

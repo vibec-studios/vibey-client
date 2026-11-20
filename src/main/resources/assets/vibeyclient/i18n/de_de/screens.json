@@ -1,0 +1,44 @@
+{
+  "name": "Menüs",
+  "description": "Knöpfe in jedem Menü verschieben, skalieren und ausblenden, Hintergrund anpassen.",
+  "summary": "Jedes Menü anordnen",
+  "setting": {
+    "tryIt": "Menü bearbeiten",
+    "tryIt.action": "Ausprobieren",
+    "tryIt.desc": "Öffnet die Optionen im Bearbeiten-Modus.",
+    "pencil": "Stift-Knopf",
+    "pencil.desc": "Kleiner Bearbeiten-Knopf in einer Ecke jedes Menüs.",
+    "editKey": "Bearbeiten-Taste",
+    "resetAll": "Alle zurücksetzen",
+    "resetAll.button": "Alle zurücksetzen",
+    "blocked": "Menüs auslassen",
+    "blocked.desc": "Klassennamen, durch Komma getrennt (Name* = Anfang)."
+  },
+  "ui": {
+    "size": "Größe",
+    "dim": "Abdunkeln",
+    "blur": "Unschärfe",
+    "title": "Titel",
+    "reset": "Zurücksetzen",
+    "done": "Fertig",
+    "auto": "auto",
+    "hide": "Ausblenden",
+    "show": "Einblenden",
+    "resetOne": "Zurücksetzen",
+    "resetScreen": "Menü zurücksetzen",
+    "undo": "Rückgängig",
+    "hidden": "ausgeblendet",
+    "widget": "Element",
+    "panel": "Fenster",
+    "pencil": "Menü bearbeiten ({0})",
+    "hint": "Ziehen · Mausrad = Größe · Rechtsklick · Esc"
+  },
+  "toast": {
+    "failed": "Menü-Layout übersprungen"
+  },
+  "status": {
+    "label": "Bearbeitet ({0})",
+    "more": "+{0}",
+    "detail": "Ein Menü zurücksetzen: öffnen, Bearbeiten-Taste, Zurücksetzen."
+  }
+}

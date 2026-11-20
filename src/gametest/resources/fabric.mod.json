@@ -39,7 +39,8 @@
       "dev.henny.vibeyclient.gametest.PolishGameTest",
       "dev.henny.vibeyclient.gametest.ItemModelsGameTest",
       "dev.henny.vibeyclient.gametest.EffectsGameTest",
-      "dev.henny.vibeyclient.gametest.ServerListsGameTest"
+      "dev.henny.vibeyclient.gametest.ServerListsGameTest",
+      "dev.henny.vibeyclient.gametest.ScreensGameTest"
     ]
   },
   "mixins": ["vibeyclient-gametest.mixins.json"],

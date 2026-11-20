@@ -34,7 +34,8 @@ streamer mode (part `social.streamer`, Fabric 1.21.11), see [SOCIAL.md](SOCIAL.m
 streamer state any module can read. `inventory` (durability %, shulker preview, quick moves, search, hotbar presets; Fabric
 1.21.11 only, see [INVENTORY.md](INVENTORY.md)), `servers` (live pings, search, favourites, MOTD preview, drag & drop, friends tab in the
 multiplayer screen, own world order; Fabric 1.21.11 only, see [SERVERS.md](SERVERS.md)), `cinematic` (AFK camera flights and an
-editable AFK screen; Fabric 1.21.11 only, see [CINEMATIC.md](CINEMATIC.md)).
+editable AFK screen; Fabric 1.21.11 only, see [CINEMATIC.md](CINEMATIC.md)), `screens` (screen editor: move/scale/hide the widgets of any menu, container panels, own
+screen size, dim/blur, hide title; Fabric 1.21.11 only, see [SCREENS.md](SCREENS.md)).
 
 ## Targets and boundaries
 
