@@ -28,7 +28,8 @@ final class RemoteScreens implements SharedObjectsListener {
     @Override
     public void upserted(UUID owner, PlacementRecord record, boolean created) {
         try {
-            UUID id = UUID.fromString(record.id);
+            UUID id = canonical(record.id);
+            if (id == null) return;
             MediaScreen s = video.screens.get(id);
             if (s != null && (!s.remote || !owner.equals(s.owner))) return;
             if (s == null) create(owner, id, record);
@@ -70,8 +71,8 @@ final class RemoteScreens implements SharedObjectsListener {
 
     @Override
     public void state(UUID owner, String id, JsonObject payload) {
-        MediaScreen s = video.screens.get(UUID.fromString(id));
-        if (s == null || !s.remote || payload == null) return;
+        MediaScreen s = own(owner, id);
+        if (s == null || payload == null) return;
         try {
             s.setTimeline(payload.get("playing").getAsBoolean(), payload.get("pos").getAsLong());
         } catch (RuntimeException e) {
@@ -81,9 +82,23 @@ final class RemoteScreens implements SharedObjectsListener {
 
     @Override
     public void removed(UUID owner, String id) {
-        MediaScreen s = video.screens.get(UUID.fromString(id));
-        if (s == null || !s.remote) return;
-        video.actions.remove(s);
+        MediaScreen s = own(owner, id);
+        if (s != null) video.actions.remove(s);
+    }
+
+    private MediaScreen own(UUID owner, String id) {
+        UUID uuid = canonical(id);
+        MediaScreen s = uuid != null ? video.screens.get(uuid) : null;
+        return s != null && s.remote && owner.equals(s.owner) ? s : null;
+    }
+
+    static UUID canonical(String id) {
+        try {
+            UUID uuid = UUID.fromString(id);
+            return uuid.toString().equals(id) ? uuid : null;
+        } catch (RuntimeException e) {
+            return null;
+        }
     }
 
     private static String name(UUID owner) {

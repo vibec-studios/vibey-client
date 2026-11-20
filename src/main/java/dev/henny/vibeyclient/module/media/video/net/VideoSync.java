@@ -1,5 +1,6 @@
 package dev.henny.vibeyclient.module.media.video.net;
 
+import dev.henny.r3.persist.AnchorCodec;
 import dev.henny.r3.persist.PlacementCodec;
 import dev.henny.r3.sync.SharedObjects;
 import dev.henny.r3.sync.SyncPolicy;
@@ -47,7 +48,8 @@ public final class VideoSync {
         Minecraft mc = Minecraft.getInstance();
         UUID self = mc.player != null ? mc.player.getUUID() : new UUID(0, 0);
         SyncPolicy policy = SyncPolicy.defaults().accepting(r ->
-                video.cfg.others.get() != VideoFeature.Others.NEVER && UrlPolicy.acceptRemote(ScreenData.source(r.data)));
+                video.cfg.others.get() != VideoFeature.Others.NEVER && RemoteScreens.canonical(r.id) != null
+                        && !AnchorCodec.decode(r.anchor).followsSomething() && UrlPolicy.acceptRemote(ScreenData.source(r.data)));
         shared = new SharedObjects(ScreenObjects.KIND, channel, policy, remote, self, System::currentTimeMillis, System.nanoTime());
         requestPending = true;
     }
