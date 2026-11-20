@@ -1,0 +1,57 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<import name="keycap" src="vibeyclient:components/keycap"/>
+<import name="item-menu" src="vibeyclient:items/menu"/>
+<contract>
+{ "fields": { "hand": "string", "ringOn": "bool", "ringLeft": "number", "ringTop": "number", "ringSize": "number",
+              "tag": "string", "tagLeft": "number", "tagTop": "number", "empty": "bool", "grabbing": "bool",
+              "panel": "string", "menu": "object", "pointerOn": "bool", "pointerX": "number", "pointerY": "number" },
+  "actions": ["pickHand(h)", "save()", "cancel()", "menuPick(m)"] }
+</contract>
+<template>
+  <stack class="ie">
+    <box v-if="ringOn" id="ie-ring" class="ie-ring" :class="{ grab: grabbing }"
+         :style="{ left: ringLeft, top: ringTop, width: ringSize, height: ringSize }"/>
+    <text v-if="ringOn" id="ie-tag" class="ie-tag" :style="{ left: tagLeft, top: tagTop }">{{ tag }}</text>
+    <column class="ie-top">
+      <row id="ie-bar" class="ie-bar">
+        <button id="ie-main" class="ie-hand" :class="{ on: hand == 'main' }" @click="pickHand('main')">
+          <ico name="person"/><text>{{ t('visuals.items.hand.main') }}</text>
+        </button>
+        <button id="ie-off" class="ie-hand" :class="{ on: hand == 'off' }" @click="pickHand('off')">
+          <ico name="shield"/><text>{{ t('visuals.items.hand.off') }}</text>
+        </button>
+        <box class="ie-sep"/>
+        <button id="ie-cancel" class="ghost" @click="cancel()">{{ t('visuals.items.edit.cancel') }}</button>
+        <button id="ie-save" class="primary" @click="save()">{{ t('visuals.items.edit.save') }}</button>
+      </row>
+      <row id="ie-hint" class="ie-hint">
+        <keycap :label="t('visuals.items.edit.keyDrag')"/><text class="ie-word">{{ t('visuals.items.edit.move') }}</text>
+        <keycap :label="t('visuals.items.edit.keyWheel')"/><text class="ie-word">{{ t('visuals.items.edit.size') }}</text>
+        <keycap :label="t('visuals.items.edit.keyShift')"/><text class="ie-word">{{ t('visuals.items.edit.depth') }}</text>
+        <keycap :label="t('visuals.items.edit.keyCtrl')"/><text class="ie-word">{{ t('visuals.items.edit.turn') }}</text>
+        <keycap :label="t('visuals.items.edit.keyAlt')"/><text class="ie-word">{{ t('visuals.items.edit.roll') }}</text>
+        <keycap :label="t('visuals.items.edit.keyRight')"/><text class="ie-word">{{ t('visuals.items.edit.presets') }}</text>
+      </row>
+      <text v-if="empty" id="ie-empty" class="ie-empty">{{ t('visuals.items.edit.empty') }}</text>
+    </column>
+    <item-menu/>
+    <box v-if="pointerOn" class="ie-pointer" :style="{ left: pointerX, top: pointerY }"/>
+  </stack>
+</template>
+<style>
+.ie { pointer-events: none; }
+.ie-top { position: absolute; anchor: top; top: 6; align-items: center; gap: 3; pointer-events: none; }
+.ie-bar { height: 24; gap: 3; padding: 0 3; background: $surface; border: 1 $line2; pointer-events: auto; }
+.ie-hand { height: 18; padding: 0 5; gap: 4; background: transparent; border-color: transparent; color: $muted; }
+.ie-hand:hover { color: $text; background: $surface2; }
+.ie-hand.on { color: $text; background: $surface2; border-color: $line2; }
+.ie-hand.on .ico { color: $brand; }
+.ie-sep { width: 1; height: 12; background: $line2; margin: 0 2; }
+.ie-hint { height: 16; gap: 3; padding: 0 5; background: alpha($bg, .75); border: 1 $line2; }
+.ie-word { color: $muted; margin-right: 4; }
+.ie-empty { padding: 2 6; background: alpha($bg, .75); border: 1 $line2; color: $warn; }
+.ie-ring { position: absolute; border: 1 alpha($brand, .8); background: alpha($brand, .08); pointer-events: none; }
+.ie-ring.grab { border: 1 $brand; background: alpha($brand, .16); }
+.ie-tag { position: absolute; padding: 1 4; background: alpha($bg, .8); color: $text; pointer-events: none; text-wrap: nowrap; }
+.ie-pointer { position: absolute; size: 5; background: $text; border: 1 $bg; pointer-events: none; }
+</style>

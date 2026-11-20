@@ -31,8 +31,8 @@ abstract class ItemEntityRendererMixin {
             target = "Lcom/mojang/blaze3d/vertex/PoseStack;translate(FFF)V"))
     private void vibey$lift(PoseStack stack, float x, float y, float z, Operation<Void> original,
                             @Local(argsOnly = true) ItemEntityRenderState state) {
-        if (ItemPhysics.active(state)) original.call(stack, 0f, ItemPhysics.lift(state), 0f);
-        else original.call(stack, x, y, z);
+        if (ItemPhysics.active(state)) original.call(stack, 0f, ItemPhysics.liftY(state, y), 0f);
+        else original.call(stack, x, ItemPhysics.liftY(state, y), z);
     }
 
     @WrapOperation(method = SUBMIT, require = 0, at = @At(value = "INVOKE",
@@ -40,6 +40,9 @@ abstract class ItemEntityRendererMixin {
     private void vibey$rotate(PoseStack stack, Quaternionfc rotation, Operation<Void> original,
                               @Local(argsOnly = true) ItemEntityRenderState state) {
         if (ItemPhysics.active(state)) ItemPhysics.rotate(stack, state);
-        else original.call(stack, rotation);
+        else {
+            original.call(stack, rotation);
+            ItemPhysics.scaleVanilla(stack);
+        }
     }
 }

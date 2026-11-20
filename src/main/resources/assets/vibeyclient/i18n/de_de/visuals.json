@@ -1,9 +1,12 @@
 {
   "name": "Optik",
-  "description": "Item-Physik und Partikelmenge.",
-  "summary": "Item-Physik, Partikel",
+  "description": "Items in der Hand, Schwung, Glanz, Item-Physik und Partikel.",
+  "summary": "Hand-Items, Glanz, Partikel",
   "section": {
+    "held": "Item in der Hand",
+    "swing": "Schwung",
     "items": "Items",
+    "glint": "Glanz",
     "particles": "Partikel"
   },
   "setting": {

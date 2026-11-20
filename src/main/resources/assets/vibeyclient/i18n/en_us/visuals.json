@@ -1,9 +1,12 @@
 {
   "name": "Visuals",
-  "description": "Item physics and particle amount.",
-  "summary": "Item physics, particles",
+  "description": "Held items, swing, glint, item physics and particles.",
+  "summary": "Held items, glint, particles",
   "section": {
+    "held": "Held item",
+    "swing": "Swing",
     "items": "Items",
+    "glint": "Glint",
     "particles": "Particles"
   },
   "setting": {

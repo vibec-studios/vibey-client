@@ -5,6 +5,8 @@ import com.mojang.math.Axis;
 import dev.henny.vibeyclient.module.visuals.VisualsModule;
 import dev.henny.vibeyclient.module.visuals.core.ItemLift;
 import dev.henny.vibeyclient.module.visuals.core.ItemTumble;
+import dev.henny.vibeyclient.module.visuals.items.core.DropScale;
+import dev.henny.vibeyclient.module.visuals.items.drop.DropRender;
 import net.minecraft.client.renderer.entity.state.ItemEntityRenderState;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.phys.AABB;
@@ -36,14 +38,24 @@ public final class ItemPhysics {
         return ((ItemPose) state).vibey$active();
     }
 
-    public static float lift(ItemEntityRenderState state) {
-        return ((ItemPose) state).vibey$lift();
+    public static float liftY(ItemEntityRenderState state, float vanillaY) {
+        float scale = DropRender.dropped();
+        if (active(state)) return DropScale.physicsLift(((ItemPose) state).vibey$lift(), scale);
+        if (scale == 1f) return vanillaY;
+        return DropScale.vanillaLift(vanillaY, (float) state.item.getModelBoundingBox().minY, scale);
     }
 
     public static void rotate(PoseStack stack, ItemEntityRenderState state) {
         ItemPose p = (ItemPose) state;
+        float scale = DropRender.dropped();
         stack.mulPose(Axis.YP.rotation(p.vibey$yaw()));
         stack.mulPose(Axis.XP.rotation(p.vibey$rotX()));
+        if (scale != 1f) stack.scale(scale, scale, scale);
         stack.translate(0f, -p.vibey$centerY(), -p.vibey$centerZ());
+    }
+
+    public static void scaleVanilla(PoseStack stack) {
+        float scale = DropRender.dropped();
+        if (scale != 1f) stack.scale(scale, scale, scale);
     }
 }

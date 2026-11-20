@@ -1,14 +1,16 @@
 # Visuals module (`visuals`)
 
-Item physics for dropped items and a particle amount control (features #26, #27 of [FEATURES.md](FEATURES.md)).
+Held item models, swing, enchantment glint, item sizes, item physics for dropped items and a particle amount
+control (features #26, #27 of [FEATURES.md](FEATURES.md); item models are part `visuals.items`).
 **Fabric 1.21.11 only for now** (`gradle/modules.gradle`: `visuals: ['fabric-1.21.11']`, registered by reflection in
 `BuiltinModules`). Code: `src/main/java/dev/henny/vibeyclient/module/visuals`.
 
 > See also: [MODULES.md](MODULES.md) · [CAMERA.md](CAMERA.md)
 
-Both features are purely visual and client side: entity positions, hitboxes, pickup and the particles' gameplay
-meaning are untouched. No server rule (hiding particles is what vanilla's *Particles: Minimal* does already, and
-the important ones stay unless the player turns that off too).
+Everything is purely visual and client side: entity positions, hitboxes, pickup and the particles' gameplay
+meaning are untouched. Particles have no server rule (hiding particles is what vanilla's *Particles: Minimal*
+does already, and the important ones stay unless the player turns that off too). Held item poses have one:
+`visuals.helditem` (see below).
 
 ## Item physics
 
@@ -47,11 +49,79 @@ Settings (section `particles`): `particles` 0–300 % (100, steps of 25), `keepI
   (`add(TerrainParticle)`) follow the block budget (they can be hidden or thinned, not multiplied). The category is
   cached per `ParticleType` (identity map), so a spawn costs one map lookup.
 
+## Item models (part `visuals.items`)
+
+Ideas from other clients (NoRisk, Lunar), no code or assets taken. Part `visuals.items` in `gradle/modules.gradle`
+(Fabric 1.21.11), code in `module/visuals/items/**`, mixins in `module/visuals/mixin/items/**`
+(`vibeyclient.visuals.items.mixins.json`), strings in `i18n/*/visuals.items.json` (section titles in `visuals.json`),
+editor documents `vui/items/editor.vui` + `menu.vui`. Everything defaults to vanilla.
+
+### Held item (section `held`)
+
+Per hand (main / off hand, in *right arm* space – mirrored for the left arm): sideways, height, depth (−1…1),
+tilt / turn / roll (±180°), size (10–250 %). Stored as `mainX`, `mainY`, `mainZ`, `mainRotX`, `mainRotY`, `mainRotZ`,
+`mainScale` and the same with `off…` in `config/vibeyclient/visuals.json`. The page shows one hand's sliders at a time
+(*Hand* switch, not stored). *Preset* (not stored, applies to both hands): Vanilla, Small, Low, Centered; anything
+else reads *Custom*.
+
+- Rendering: `HeldItemMixin` adds the offset at the end of `ItemInHandRenderer.applyItemArmTransform` (so the vanilla
+  swing still pivots normally) and the rotation + scale at the head of `renderItem` for the first-person display
+  contexts, around a pivot near the item's centre (`HandProjection.PIVOT_*`). Maps and the empty arm are not moved.
+- Server rule **`visuals.helditem`**: a smaller / lower / hidden item or arm means less on screen in PvP, so a server
+  can switch it off. Poses fall back to vanilla, *Hide empty hand* is ignored, the editor won't open, the rows show
+  *Disabled by this server*.
+
+### Edit mode (direct manipulation)
+
+*Edit in game* (the page's primary button, or the unbound *Edit key* in the controls) opens `ItemEditScreen` over the
+world in first person (third person is switched to first person). It does not pause. One bar on top (Main hand /
+Off hand, Cancel, **Save**) and one hint line; everything else happens on the item:
+
+| Gesture | Effect |
+|---|---|
+| hover | ring around the item + preset name and size |
+| left or middle drag | move the item (follows the pointer at its depth; the hand nearest the pointer is picked) |
+| Ctrl + drag / Alt + drag | turn and tilt / roll |
+| wheel / Shift + wheel | size (×1.08 per step) / depth |
+| right click | menu: Vanilla, Small, Low, Centered, *Copy to other hand*, *Undo changes* |
+| Tab / R / Space | other hand / undo changes / swing once (preview) |
+| Enter / Esc | save / cancel (Esc closes the menu first) |
+
+Edits live in a pure `core/EditSession` (working copy + start snapshot); the render hooks read the session while the
+editor is open, so nothing is written to the settings until Enter.
+
+### Swing (section `swing`)
+
+`swingSpeed` 25–300 % (the local player's swing length: `LivingEntity.getCurrentSwingDuration` scaled, at least 1
+tick; other players and the server are untouched), `swingStyle` *Vanilla* / *Classic* (no dip after a hit – the
+attack-cooldown dip is skipped, like before 1.9) / *Smooth* (smaller arc) / *Punch* (a short jab forward),
+`noEquipBob` (the item never dips on switch or use and the new item shows at once), `hideEmptyHand` (no arm when the
+main hand is empty).
+
+### Item sizes (section `items`)
+
+`dropScale` 50–300 % for dropped items: with item physics the model is scaled around its centre and the lift is
+scaled too, without it the vanilla bob height is corrected so the item still floats at the same height above the
+ground (`core/DropScale`). `frameScale` 50–200 % for items in item frames (maps are not scaled).
+
+### Glint (section `glint`)
+
+`glintStrength` 0–200 % (0 = off), `glintSpeed` 0–400 % (multiplies vanilla's *Glint Speed* accessibility option),
+`glintTint` + `glintColor`. The glint shader adds `texture² × ColorModulator²`, so `core/GlintTint` turns a colour
+into a per-channel modulator from the measured energy of vanilla's purple glint texture (R 0.128, G 0.030, B 0.335):
+any colour (even green, which the texture barely has) comes out with the brightness of vanilla's blue channel.
+`GlintColorMixin` swaps the `ColorModulator` that `RenderType.draw` writes for the four glint render types (items,
+entities, armour); `GlintSpeedMixin` scales the speed read in `TextureTransform.setupGlintTexturing`.
+
 ## Code map
 
 | Package | Job |
 |---|---|
 | `visuals` | `VisualsModule` (settings, `itemPhysicsActive`, `particlesActive`) |
+| `visuals.items.core` | pure, JUnit in `src/junit/java/.../module/visuals/items/core`: `HandPose`, `HandPreset`, `HandProjection`, `HandPick`, `PoseGestures`, `EditSession`, `SwingStyle`, `SwingShape`, `SwingTiming`, `GlintTint`, `DropScale` |
+| `visuals.items.held` / `swing` / `drop` / `glint` | settings + render facades (`HeldSettings`, `HandSettings`, `HeldRender`, `SwingSettings`, `SwingRender`, `DropSettings`, `DropRender`, `GlintSettings`, `GlintRender`), `ItemRules` |
+| `visuals.items.edit` | `ItemEditor` (open, active session), `ItemEditScreen`, `ItemEditController`, `EditGestures`, `EditMenu` |
+| `visuals.mixin.items` | `HeldItemMixin`, `HeldSwingMixin`, `SwingDurationMixin`, `ItemFrameScaleMixin`, `GlintColorMixin`, `RenderSetupAccess`, `GlintSpeedMixin` |
 | `visuals.core` | pure, JUnit in `src/junit/java/.../module/visuals/core`: `ItemTumble`, `ItemLift`, `ParticleCategory`, `ParticleTable`, `ParticleBudget`, `ParticlePlan` |
 | `visuals.items` | `ItemPhysics`, `ItemMotion`, `ItemMotionHolder`, `ItemPose` |
 | `visuals.particles` | `ParticleGate` (plan per spawn, extra copies, stats for tests) |
@@ -59,7 +129,11 @@ Settings (section `particles`): `particles` 0–300 % (100, steps of 25), `keepI
 
 ## Testing
 
-- Unit: `./gradlew :fabric-1.21.11:test --tests "dev.henny.vibeyclient.module.visuals.*"` (11 tests).
+- Unit: `./gradlew :fabric-1.21.11:test --tests "dev.henny.vibeyclient.module.visuals.*"` (11 + 14 item model tests).
+- Game (item models): `ItemModelsGameTest` (+ `ItemHeldChecks`, `ItemEditorChecks`, `ItemWorldChecks`), shots in
+  `build/review/items/`: page EN/DE, vanilla / Small / Low / Centered / custom pose, the editor (hover ring, grab and
+  drag, wheel bigger, preset menu, saved), Enter saves and Esc cancels, swing length at 50 / 100 / 200 %, the punch
+  style, glint vanilla / red / green / off, dropped items at 300 % with and without physics, item frames at 180 %.
 - Game: `VisualsGameTest` (+ `VisualsItemChecks`, `VisualsParticleChecks`), shots in `build/review/visuals/`: module
   page EN/DE, 10 summoned items falling and on the ground with physics and vanilla (all settle), `/particle flame`
   ×300 at 0 / 100 / 200 % (0 / 300 / 600 created), crits at 0 % kept and not kept, `ambientOff`, frame time with ~60
