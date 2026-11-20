@@ -1,16 +1,17 @@
 package dev.henny.vibeyclient.gametest;
 
+import dev.henny.cosmetico.dev.PushAction;
+import dev.henny.cosmetico.dev.PushResult;
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.authlib.GameProfile;
 import dev.henny.vibeyclient.api.Services;
-import dev.henny.vibeyclient.avatar.AvatarItem;
-import dev.henny.vibeyclient.avatar.AvatarItems;
-import dev.henny.vibeyclient.avatar.AvatarState;
-import dev.henny.vibeyclient.avatar.AvatarStates;
-import dev.henny.vibeyclient.avatar.DevItems;
-import dev.henny.vibeyclient.avatar.anim.Clock;
+import dev.henny.cosmetico.registry.Item;
+import dev.henny.cosmetico.Cosmetico;
+import dev.henny.cosmetico.state.Avatar;
+import dev.henny.cosmetico.dev.DevItems;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
@@ -81,7 +82,7 @@ public final class ShowcaseGameTest implements FabricClientGameTest {
             for (JsonElement e : plan.getAsJsonObject("wardrobe").getAsJsonArray("noThumbnail")) thumbs.remove(e.getAsString());
         System.out.println("[vibeyclient-showcase] " + items.size() + " items from " + dir);
         context.getInput().resizeWindow(1280, 720);
-        context.waitFor(mc -> AvatarItems.all().size() >= 20, 600);
+        context.waitFor(mc -> Cosmetico.items().all().size() >= 20, 600);
         JsonObject planItems = plan.has("items") ? plan.getAsJsonObject("items") : new JsonObject();
 
         try (TestSingleplayerContext world = context.worldBuilder().create()) {
@@ -92,7 +93,7 @@ public final class ShowcaseGameTest implements FabricClientGameTest {
             context.runOnClient(mc -> {
                 DevItems dev = Services.get(DevItems.class).orElseThrow();
                 for (var e : bytes.entrySet()) {
-                    DevItems.PushResult r = dev.push(e.getValue(), DevItems.Action.NONE, thumbs.get(e.getKey()));
+                    PushResult r = dev.push(e.getValue(), PushAction.NONE, thumbs.get(e.getKey()));
                     if (!r.ok()) throw new AssertionError("push " + e.getKey() + ": " + r.error());
                     System.out.println("[vibeyclient-showcase] pushed " + r.id() + " warnings=" + r.warnings());
                 }
@@ -110,7 +111,7 @@ public final class ShowcaseGameTest implements FabricClientGameTest {
                 mannequin.setPos(baseX, baseY, baseZ);
                 face(mannequin, 180f);
                 mc.level.addEntity(mannequin);
-                AvatarStates.get(MANNEQUIN);
+                Cosmetico.engine().avatars.get(MANNEQUIN);
             });
             context.waitTicks(20);
             String onlyEnv = System.getenv("VIBEYCLIENT_SHOWCASE_ONLY");
@@ -162,8 +163,8 @@ public final class ShowcaseGameTest implements FabricClientGameTest {
                 context.runOnClient(mc -> mannequin.setShiftKeyDown(false));
                 context.waitTicks(10);
                 context.runOnClient(mc -> {
-                    AvatarState st = AvatarStates.get(MANNEQUIN);
-                    for (String l : st.locators.keySet()) {
+                    Avatar st = Cosmetico.engine().avatars.get(MANNEQUIN);
+                    for (String l : st.locators.names()) {
                         double[] v = st.locators.get(l);
                         System.out.println("[vibeyclient-showcase] " + it.id + " locator " + l + " = " + (Double.isNaN(v[0]) ? "NaN" : String.format(java.util.Locale.ROOT, "%.2f %.2f %.2f", v[0], v[1], v[2])));
                     }
@@ -211,11 +212,11 @@ public final class ShowcaseGameTest implements FabricClientGameTest {
                     DevItems devItems = Services.get(DevItems.class).orElseThrow();
                     if (w.has("equip")) for (var s : w.getAsJsonObject("equip").entrySet()) {
                         byte[] b = bytes.get(s.getValue().getAsString());
-                        if (b != null) devItems.push(b, DevItems.Action.EQUIP, null);
+                        if (b != null) devItems.push(b, PushAction.EQUIP, null);
                     }
                     mc.options.hideGui = false;
                     dev.henny.vibeyclient.module.cosmetics.ui.WardrobeUi.openWardrobe(null,
-                            dev.henny.vibeyclient.avatar.Slot.of(w.has("slot") ? w.get("slot").getAsString() : "pet"));
+                            dev.henny.cosmetico.model.Slot.of(w.has("slot") ? w.get("slot").getAsString() : "pet"));
                 });
                 context.waitTicks(60);
                 context.takeScreenshot("sc_wardrobe_dev_thumbnails");
@@ -223,7 +224,7 @@ public final class ShowcaseGameTest implements FabricClientGameTest {
                 context.runOnClient(mc -> mc.options.hideGui = true);
             }
             context.runOnClient(mc -> {
-                AvatarStates.setLoadout(MANNEQUIN, Map.of());
+                Cosmetico.loadouts().setIds(MANNEQUIN, Map.of());
                 mc.level.removeEntity(mannequin.getId(), net.minecraft.world.entity.Entity.RemovalReason.DISCARDED);
                 DevItems dev = Services.get(DevItems.class).orElseThrow();
                 for (String id : bytes.keySet()) dev.remove(id);
@@ -318,13 +319,13 @@ public final class ShowcaseGameTest implements FabricClientGameTest {
             case "happy" -> {
                 context.runOnClient(mc -> {
                     face(mannequin, yaw);
-                    AvatarStates.play(AvatarStates.get(MANNEQUIN), s.has("emote") ? s.get("emote").getAsString() : "vibey:wave");
+                    Cosmetico.engine().emotes.play(Cosmetico.engine().avatars.get(MANNEQUIN), s.has("emote") ? s.get("emote").getAsString() : "vibey:wave");
                 });
                 if (pet) closeOnPet(context, 2.0);
                 else context.waitTicks(25);
                 context.runOnClient(mc -> debugWeights(name));
                 context.takeScreenshot("sc_state_" + name);
-                context.runOnClient(mc -> AvatarStates.stop(AvatarStates.get(MANNEQUIN)));
+                context.runOnClient(mc -> Cosmetico.engine().emotes.stop(Cosmetico.engine().avatars.get(MANNEQUIN)));
                 if (pet) restoreCamera(context, 2.6, 22f);
             }
             default -> throw new AssertionError("unknown showcase state " + state);
@@ -334,17 +335,17 @@ public final class ShowcaseGameTest implements FabricClientGameTest {
 
     /** Logs the smoothed states and the blend weights of every worn item (state shots). */
     private void debugWeights(String name) {
-        AvatarState st = AvatarStates.get(MANNEQUIN);
+        Avatar st = Cosmetico.engine().avatars.get(MANNEQUIN);
         StringBuilder sb = new StringBuilder("[vibeyclient-showcase] " + name + String.format(java.util.Locale.ROOT,
                 " walk=%.2f sprint=%.2f glide=%.2f fly=%.2f idleLong=%.2f happy=%.2f petMove=%.2f sprinting=%s",
-                st.walk, st.sprint, st.glide, st.fly, st.idleLong, st.happy, st.petMove, mannequin.isSprinting()));
-        float[] w = new float[dev.henny.vibeyclient.avatar.render.AvatarDraw.COSMETIC_ANIMS.length];
-        for (dev.henny.vibeyclient.avatar.Slot slot : dev.henny.vibeyclient.avatar.Slot.all()) {
-            var b = dev.henny.vibeyclient.avatar.render.AvatarDraw.bundle(st, slot);
+                st.motion.walk, st.motion.sprint, st.motion.glide, st.motion.fly, st.motion.idleLong, st.motion.happy, st.pet.move, mannequin.isSprinting()));
+        float[] w = new float[dev.henny.cosmetico.anim.StateWeights.NAMES.length];
+        for (dev.henny.cosmetico.model.Slot slot : dev.henny.cosmetico.model.Slot.all()) {
+            var b = Cosmetico.engine().shown.bundle(st, slot);
             if (b == null) continue;
-            dev.henny.vibeyclient.avatar.render.AvatarDraw.weights(st, b, slot, w);
+            new dev.henny.cosmetico.draw.StateWeightsInput().weights(st, b, slot, w);
             sb.append(" | ").append(slot.id()).append(':');
-            for (int k = 0; k < w.length; k++) if (w[k] > 0.01f) sb.append(' ').append(dev.henny.vibeyclient.avatar.render.AvatarDraw.COSMETIC_ANIMS[k]).append('=').append(String.format(java.util.Locale.ROOT, "%.2f", w[k]));
+            for (int k = 0; k < w.length; k++) if (w[k] > 0.01f) sb.append(' ').append(dev.henny.cosmetico.anim.StateWeights.NAMES[k]).append('=').append(String.format(java.util.Locale.ROOT, "%.2f", w[k]));
         }
         System.out.println(sb);
     }
@@ -413,9 +414,9 @@ public final class ShowcaseGameTest implements FabricClientGameTest {
     private void closeOnPet(ClientGameTestContext context, double dist) {
         context.runOnClient(mc -> {
             face(mannequin, 180f);
-            var b = dev.henny.vibeyclient.avatar.render.AvatarDraw.bundle(AvatarStates.get(MANNEQUIN), dev.henny.vibeyclient.avatar.Slot.PET);
-            double side = dev.henny.vibeyclient.avatar.AvatarTicker.petSide(b);
-            double half = dev.henny.vibeyclient.avatar.AvatarTicker.petHalfWidth(b);
+            var b = Cosmetico.engine().shown.bundle(Cosmetico.engine().avatars.get(MANNEQUIN), dev.henny.cosmetico.model.Slot.PET);
+            double side = dev.henny.cosmetico.sim.PetGeometry.side(b);
+            double half = dev.henny.cosmetico.sim.PetGeometry.halfWidth(b);
             double back = 0.35 + Math.max(0, half - 0.3) * 0.5;
             mannequin.setPos(baseX - side, baseY, camZ + dist - back);
             float pitch = (float) Math.toDegrees(Math.atan2(1.62 - 0.6, dist));
@@ -438,7 +439,7 @@ public final class ShowcaseGameTest implements FabricClientGameTest {
     /** Wait until the global animation clock is at {@code t} within a loop of {@code len} seconds. */
     private static void waitPhase(ClientGameTestContext context, double len, double t) {
         context.waitFor(mc -> {
-            double ph = Clock.now() % len;
+            double ph = Cosmetico.engine().clock.now() % len;
             return ph >= t && ph < t + 0.12;
         }, (int) Math.ceil(len * 20) + 40);
     }
@@ -472,10 +473,10 @@ public final class ShowcaseGameTest implements FabricClientGameTest {
     private void wear(ClientGameTestContext context, Map<String, String> slots) {
         context.runOnClient(mc -> {
             for (String id : slots.values()) {
-                AvatarItem i = AvatarItems.get(id);
+                dev.henny.cosmetico.registry.Item i = Cosmetico.items().get(id);
                 if (i == null || i.bundle() == null) throw new AssertionError("item missing: " + id);
             }
-            AvatarStates.setLoadout(MANNEQUIN, slots);
+            Cosmetico.loadouts().setIds(MANNEQUIN, slots);
         });
         context.waitTicks(10);
     }

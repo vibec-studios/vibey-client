@@ -4,11 +4,11 @@
 
 | Step | State |
 |---|---|
-| 0 baseline | **done**: golden dumps of the old engine in `libs/cosmetico/src/test/resources/golden` (126 files, 1.8 MB), written by `src/junit/.../avatar/golden/OldEngineGoldenTest` (`:fabric-1.21.11:test`, compares once the files exist). No change to the old engine; the only seams are test-side (reflection on `BoneRenderer`'s scratch arrays and `AvatarDraw.cosmeticMix`, a `GpuBundle` built without textures). Format: [testing.md](testing.md). The gametest screenshot baseline is **not** taken yet (no Minecraft start in this round) → do it before step 4. |
+| 0 baseline | **done**: golden dumps of the old engine in `libs/cosmetico/src/test/resources/golden` (126 files, 1.8 MB), written by `src/junit/.../avatar/golden/OldEngineGoldenTest` (`:fabric-1.21.11:test`, compares once the files exist). No change to the old engine; the only seams are test-side (reflection on `BoneRenderer`'s scratch arrays and `AvatarDraw.cosmeticMix`, a `GpuBundle` built without textures). Format: [testing.md](testing.md). Step 0b: screenshot baseline of the old engine taken with `CosmeticoParityGameTest` (31 shots, `build/review/cosmetico/baseline`, harness in [testing.md](testing.md)). |
 | 1 model + parser | **done**: `model`, `parse`, `version`, host port (`language`, `contentVersion`). |
 | 2 rest of the core | **done**: `registry`, `load`, `config`, `anim`, `state`, `sim`, `draw`, `skeleton`, `mesh`, `pose`, `fx`, `texture`, `thumbs`, `dev`, `preview`, `Engine` + `Cosmetico` facade, ports. 166 files, longest 118 lines, no comments. See [core.md](core.md). |
-| 3 MC backend | open |
-| 4 switch | open |
+| 3 MC backend | **done**: `src/main/java/dev/henny/cosmetico/mc/**`, see [backend.md](backend.md). Compiles on fabric 1.21.1 / 1.21.4 / 1.21.5 / 1.21.11 / 26.1 / 26.3, neoforge 1.21.11 / 26.3. |
+| 4 switch | **done**: the client implements `CosmeticoHost` (`module/cosmetics/host`), loads builtin items through `IndexLoader` and the catalog through `module/cosmetics/catalog/*` (split from `ItemLoader`), UI/LoadoutSync/devlink/DevDriver/gametests use the cosmetico API; `cosmetico.mixins.json` is active, the client's `vibeyclient.cosmetics/emotes.mixins.json` and their mixin classes are gone. Screenshot parity vs. the baseline: see below. Standalone: `CosmeticoStandaloneGameTest`. API for other mods: [api.md](api.md). |
 | 5 delete old engine | open |
 
 Tests: 228 JUnit tests in `libs/cosmetico/src/test` (126 golden parity + 102 behaviour), all green with JOML 1.10.5
@@ -46,7 +46,24 @@ P28 (core part: `ShownBundle`, `SlotVisibility`), P30 (core part: `PreviewState`
 - The infra branch's `checkCorePurity` bans `net.minecraft`, `com.mojang`, `net.fabricmc`, `net.neoforged`; this plan
   also wants `org.lwjgl` and `dev.henny.vibeyclient` banned (the core has neither today).
 
-### What step 3 has to do
+### Step 3/4 notes (2026-11-20)
+
+- Old `avatar/**` classes are still in the client (unused, compiled). Only `avatar/preview/PreviewLegacy` changed (its
+  accessor now comes from cosmetico, so it still compiles on 1.21.2–1.21.5).
+- Not split yet although touched: `LoadoutSync` (561 lines), `WardrobeScreen` (497), `CosmeticsModule` (~320): only
+  the API calls changed. Do the §1.3 splits before more features land there.
+- Not ported: the old `SelfTest` (`VIBEYCLIENT_AVATAR_TEST`) – no longer ticked; P39 needs a cosmetico self-test.
+- `CosmeticoConfig.thirdPersonEmotes` / `emoteVolume` are now set by the emotes module; the module broadcasts its own
+  emotes through an `EmoteListener` (start/stop of the local player), so stop-on-move inside cosmetico is broadcast too.
+- `Locators` got `names()` / `clear()` (used by the showcase gametest), `Clock` got `pin()`.
+- Screenshot parity (31 shots, `build/review/cosmetico/report.md`): 15 shots bit-identical to the old engine, the
+  others within the old-vs-old noise of the harness (vanilla particles, vanilla arm bob, sprite particles); a first
+  new-engine run (`after_run1`) showed tick-timing noise on 5 shots that a second run did not, so the harness still
+  has run-to-run timing noise around world joins. R1 checked in the test: exactly one `CosmeticLayer`.
+- Client build: `gradle/client-libs.gradle` adds each lib's core project as `compileOnly` (fabric 26.x and NeoForge
+  compile against the lib target's class dirs, which do not contain the core; their runtime uses the jar, which does).
+
+### What step 3 had to do (kept for reference)
 
 1. `mc` backend per the tables in §1 and §4: `BoneDraw` (walk `BonePose`, pick render type per `MeshMode`, submit
    through `MeshSink`), `ModelPartFrames implements PartFrames`, `GpuBundle` / `GpuCache` (built from `Rig`, textures
@@ -524,7 +541,10 @@ uses) + `VIBEYCLIENT_AVATAR_TEST=true` on fabric-1.21.4.
 Risk: **high** (see R1–R6). Rollback = revert the merge. The old `avatar/` package still exists, so the revert is
 clean.
 
-**Step 5 – delete the old engine.**
+**Step 5 – delete the old engine.** (After the user's in-game OK.) Delete: `src/main/java/dev/henny/vibeyclient/avatar/**`
+(66 files incl. `ItemLoader`, `SelfTest`, `DevItemsImpl`, `EmoteBridge`, `Wardrobe`, `preview/*`, `render/*`, `fx/*`),
+`mixin/client/RenderTypeInvoker`, the old JUnit `src/junit/.../avatar/**` (golden writer `OldEngineGoldenTest` +
+dumps, `StateWeightsTest`, `OffsetWhenParseTest`; the golden files stay as reference). Then: `docs/AVATAR.md` → pointer.
 Remove `src/main/java/dev/henny/vibeyclient/avatar/**`, the client `RenderTypeInvoker`, `EmoteBridge`, and the old
 JUnit tests (they moved). Update `docs/AVATAR.md` → short pointer to `libs/cosmetico/docs`, keep `FORMAT.md`.
 Precondition: every row in §5 has its new test green.

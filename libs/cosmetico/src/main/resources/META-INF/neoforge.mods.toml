@@ -11,6 +11,9 @@ authors = "Vibe Craft Studios"
 displayURL = "https://github.com/vibec-studios/vibey-client"
 description = """Cosmetics engine: .vibey bundles, rendering, animation and effects on players."""
 
+[[mixins]]
+config = "cosmetico.mixins.json"
+
 [[dependencies.${mod_id}]]
 modId = "neoforge"
 type = "required"

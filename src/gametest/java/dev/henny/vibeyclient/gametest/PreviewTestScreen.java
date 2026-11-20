@@ -1,7 +1,7 @@
 package dev.henny.vibeyclient.gametest;
 
 import dev.henny.vibeyclient.api.Services;
-import dev.henny.vibeyclient.avatar.preview.AvatarPreview;
+import dev.henny.vibeyclient.module.cosmetics.preview.AvatarPreview;
 import dev.henny.vibeyclient.ui.BaseScreen;
 import dev.henny.vibeyclient.ui.Gfx;
 import dev.henny.vibeyclient.ui.Theme;

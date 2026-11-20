@@ -45,8 +45,34 @@ The fixed inputs (base frame, part rotations, state values, times) are written d
 Format: one record per line, `key value value …`, floats as Java `Float.toString` (round-trip exact), arrays as
 `[a b c]`. Files are LF; the comparison ignores CRLF.
 
-## Gametests and the self-test
+## Gametests
 
-Rendering, textures, sounds and mixins are checked in the Minecraft gametests of the client (`CosmeticsGameTest`,
-`AuditBundlesGameTest`, `ShowcaseGameTest`, `WardrobeUiGameTest`) and the self-test. See the parity table in
-[extraction-plan.md](extraction-plan.md) §5 for what still needs a gametest once the backend switches over.
+| Test | Where | Run |
+|---|---|---|
+| `CosmeticoParityGameTest` | client `src/gametest` (`parity/`) | `./gradlew :fabric-1.21.11:runClientGameTest -Dvibeyclient.test.only=CosmeticoParityGameTest -Dvibeyclient.test.relay=off` |
+| `CosmeticoStandaloneGameTest` | `libs/cosmetico/src/gametest` (only cosmetico, r3, vui, Fabric API) | `./gradlew :cosmetico:fabric-1.21.11:runClientGameTest` |
+| `CosmeticsGameTest`, `AuditBundlesGameTest`, `ShowcaseGameTest`, `WardrobeUiGameTest` | client `src/gametest` | `-Dvibeyclient.test.only=<name>` |
+
+### Screenshot parity
+
+`CosmeticoParityGameTest` takes 31 shots (title previews, thumbnails, wardrobe, a mannequin with every slot from fixed
+angles, six emotes, the local player in third person, inventory, first-person shield, local emote) through a
+`ParityEngine` adapter. Step 0b took them with the old engine (`build/review/cosmetico/baseline`), step 4 with
+cosmetico (`build/review/cosmetico/after`); `COSMETICO_PARITY_DIR=<folder>` writes elsewhere.
+
+To make two runs comparable the test pins what it can: animation time is pinned to client ticks (gametest mixins on
+`Minecraft.tick`, `GameRenderer.render` and `DeltaTracker` partial tick; `Clock.pin` in cosmetico), the ticker's
+tick counter and 25 ms gate are reset every tick, sprite and particle randoms are seeded, the player stands on a fixed
+block. What stays random: vanilla particles (every vanilla particle has its own random), a few vanilla animations. Two
+runs of the *same* engine therefore differ in a few shots; that noise floor is part of the report
+(`build/review/cosmetico/noise-floor.md`). Compare with
+
+```
+python libs/cosmetico/tools/shotdiff.py build/review/cosmetico/baseline build/review/cosmetico/after build/review/cosmetico/after-mask
+```
+
+(max channel difference, changed pixels, pixels off by more than 16; masks of changed pixels in the third folder).
+
+## Self-test
+
+The old `VIBEYCLIENT_AVATAR_TEST` self-test belongs to the old engine and is not wired to cosmetico yet (see the plan).

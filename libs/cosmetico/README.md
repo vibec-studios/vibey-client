@@ -4,8 +4,8 @@ Cosmetics engine for Minecraft mods: `.vibey` bundles (capes, wings, auras, pets
 made in Blockbench), animation states, emotes, particles and sounds, previews and thumbnails. Extracted from Vibey
 Client; usable without it.
 
-Status: the pure core (`src/core`) is done and tested against the old engine. The Minecraft backend comes next, so
-cosmetico does not draw anything in the game yet.
+Status: core and Minecraft backend are done; Vibey Client draws its cosmetics through cosmetico (fabric 1.21.11 tested in
+game, the other targets compile). Without a host mod cosmetico runs with a default host.
 
 ## 30 seconds
 
@@ -25,7 +25,9 @@ Cosmetico.emotes().play(playerUuid, "mymod:wave");
 
 ## Docs
 
+- [docs/api.md](docs/api.md): the API for mod developers.
+- [docs/backend.md](docs/backend.md): the Minecraft part (render passes, mixins, tick, versions).
 - [docs/core.md](docs/core.md): packages, host interfaces, how a frame flows.
-- [docs/testing.md](docs/testing.md): JUnit, golden parity files.
+- [docs/testing.md](docs/testing.md): JUnit, golden parity files, gametests and screenshot parity.
 - [docs/extraction-plan.md](docs/extraction-plan.md): how the engine moves out of Vibey Client, step by step.
 - The bundle format: [docs/FORMAT.md](../../docs/FORMAT.md) of the client.

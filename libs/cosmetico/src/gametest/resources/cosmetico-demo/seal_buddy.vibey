@@ -1,0 +1,239 @@
+{
+  "format": "vibey",
+  "formatVersion": 1,
+  "kind": "cosmetic",
+  "id": "vibey:seal_buddy",
+  "name": {"en":"Seal Buddy","de":"Robbenkumpel"},
+  "description": {
+    "en": "Our mascot as a tiny pet. Blinks, wiggles its flippers and galumphs after you.",
+    "de": "Unser Maskottchen als kleines Haustier. Blinzelt, wackelt mit den Flossen und robbt dir hinterher."
+  },
+  "author": "Vibe Craft Studios",
+  "tags": ["seal","cute","mascot","pet","starter"],
+  "rarity": "epic",
+  "cosmetic": {"slot":"pet","pet":{"follow":"ground","scale":0.4}},
+  "textures": [
+    {
+      "id": "main",
+      "width": 64,
+      "height": 64,
+      "png": "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"
+    }
+  ],
+  "model": {
+    "texture": "main",
+    "bones": [
+      {
+        "name": "seal",
+        "parent": null,
+        "attach": "world",
+        "pivot": [0,0,0],
+        "rotation": [0,0,0],
+        "cubes": [
+          {"from":[-5,0,-8],"to":[5,7,8],"uv":{"box":[0,0]}},
+          {"from":[-3,0,8],"to":[3,4,12],"uv":{"box":[32,23]}}
+        ],
+        "emissive": false,
+        "translucent": false
+      },
+      {
+        "name": "seal_head",
+        "parent": "seal",
+        "pivot": [0,6.5,-6],
+        "rotation": [0,0,0],
+        "cubes": [
+          {"from":[-4,5,-13],"to":[4,13,-5],"uv":{"box":[0,23]}},
+          {"from":[-3,5,-16],"to":[3,8,-13],"uv":{"box":[0,39]}}
+        ],
+        "emissive": false,
+        "translucent": false
+      },
+      {
+        "name": "seal_lids",
+        "parent": "seal_head",
+        "pivot": [0,9,-13],
+        "rotation": [0,0,0],
+        "cubes": [
+          {"from":[1,8,-13.05],"to":[3,10,-13.05],"uv":{"box":[32,45]}},
+          {"from":[-3,8,-13.05],"to":[-1,10,-13.05],"uv":{"box":[36,45]}}
+        ],
+        "emissive": false,
+        "translucent": false
+      },
+      {
+        "name": "seal_fin_left",
+        "parent": "seal",
+        "pivot": [-5,1,-4],
+        "rotation": [0,-26,0],
+        "cubes": [{"from":[-7.5,0,-8],"to":[-4.5,1,-3],"uv":{"box":[18,39]}}],
+        "emissive": false,
+        "translucent": false
+      },
+      {
+        "name": "seal_fin_right",
+        "parent": "seal",
+        "pivot": [5,1,-4],
+        "rotation": [0,26,0],
+        "cubes": [{"from":[4.5,0,-8],"to":[7.5,1,-3],"uv":{"box":[34,39]}}],
+        "emissive": false,
+        "translucent": false
+      },
+      {
+        "name": "seal_tail_left",
+        "parent": "seal",
+        "pivot": [-1.2,1,12],
+        "rotation": [0,29,0],
+        "cubes": [{"from":[-3.7,0,11.5],"to":[-0.7,1,16.5],"uv":{"box":[0,45]}}],
+        "emissive": false,
+        "translucent": false
+      },
+      {
+        "name": "seal_tail_right",
+        "parent": "seal",
+        "pivot": [1.2,1,12],
+        "rotation": [0,-29,0],
+        "cubes": [{"from":[0.7,0,11.5],"to":[3.7,1,16.5],"uv":{"box":[16,45]}}],
+        "emissive": false,
+        "translucent": false
+      }
+    ]
+  },
+  "animations": {
+    "idle": {
+      "length": 4,
+      "loop": true,
+      "bones": {
+        "seal_head": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.6,"v":[-5,0,0],"i":"catmullrom"},
+            {"t":1.2,"v":[-2,16,0],"i":"catmullrom"},
+            {"t":1.9,"v":[-2,16,0],"i":"catmullrom"},
+            {"t":2.5,"v":[3,-10,-4],"i":"catmullrom"},
+            {"t":3.2,"v":[0,-6,0],"i":"catmullrom"},
+            {"t":4,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "seal_fin_left": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.35,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.5,"v":[0,0,-18],"i":"catmullrom"},
+            {"t":0.65,"v":[0,0,6],"i":"catmullrom"},
+            {"t":0.8,"v":[0,0,-18],"i":"catmullrom"},
+            {"t":0.95,"v":[0,0,0],"i":"catmullrom"},
+            {"t":4,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "seal_fin_right": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.35,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.5,"v":[0,0,18],"i":"catmullrom"},
+            {"t":0.65,"v":[0,0,-6],"i":"catmullrom"},
+            {"t":0.8,"v":[0,0,18],"i":"catmullrom"},
+            {"t":0.95,"v":[0,0,0],"i":"catmullrom"},
+            {"t":4,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "seal_tail_left": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":1,"v":[0,10,0],"i":"catmullrom"},
+            {"t":2,"v":[0,0,0],"i":"catmullrom"},
+            {"t":3,"v":[0,10,0],"i":"catmullrom"},
+            {"t":4,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "seal_tail_right": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":1,"v":[0,-10,0],"i":"catmullrom"},
+            {"t":2,"v":[0,0,0],"i":"catmullrom"},
+            {"t":3,"v":[0,-10,0],"i":"catmullrom"},
+            {"t":4,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        },
+        "seal": {
+          "rotation": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":2,"v":[-1.5,0,0],"i":"catmullrom"},
+            {"t":4,"v":[0,0,0],"i":"catmullrom"}
+          ]
+        }
+      },
+      "events": [
+        {"t":0,"type":"visibility","bone":"seal_lids","visible":false},
+        {"t":2.7,"type":"visibility","bone":"seal_lids","visible":true},
+        {"t":2.85,"type":"visibility","bone":"seal_lids","visible":false}
+      ]
+    },
+    "walk": {
+      "length": 0.8,
+      "loop": true,
+      "bones": {
+        "seal": {
+          "position": [
+            {"t":0,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.2,"v":[0,2.5,0],"i":"catmullrom"},
+            {"t":0.4,"v":[0,0,0],"i":"catmullrom"},
+            {"t":0.6,"v":[0,2.5,0],"i":"catmullrom"},
+            {"t":0.8,"v":[0,0,0],"i":"catmullrom"}
+          ],
+          "rotation": [
+            {"t":0,"v":[-4,0,0],"i":"catmullrom"},
+            {"t":0.2,"v":[4,0,0],"i":"catmullrom"},
+            {"t":0.4,"v":[-4,0,0],"i":"catmullrom"},
+            {"t":0.6,"v":[4,0,0],"i":"catmullrom"},
+            {"t":0.8,"v":[-4,0,0],"i":"catmullrom"}
+          ]
+        },
+        "seal_head": {
+          "rotation": [
+            {"t":0,"v":[5,0,0],"i":"catmullrom"},
+            {"t":0.2,"v":[-6,0,0],"i":"catmullrom"},
+            {"t":0.4,"v":[5,0,0],"i":"catmullrom"},
+            {"t":0.6,"v":[-6,0,0],"i":"catmullrom"},
+            {"t":0.8,"v":[5,0,0],"i":"catmullrom"}
+          ]
+        },
+        "seal_fin_left": {
+          "rotation": [
+            {"t":0,"v":[0,22,0],"i":"catmullrom"},
+            {"t":0.2,"v":[0,-14,0],"i":"catmullrom"},
+            {"t":0.4,"v":[0,22,0],"i":"catmullrom"},
+            {"t":0.6,"v":[0,-14,0],"i":"catmullrom"},
+            {"t":0.8,"v":[0,22,0],"i":"catmullrom"}
+          ]
+        },
+        "seal_fin_right": {
+          "rotation": [
+            {"t":0,"v":[0,-22,0],"i":"catmullrom"},
+            {"t":0.2,"v":[0,14,0],"i":"catmullrom"},
+            {"t":0.4,"v":[0,-22,0],"i":"catmullrom"},
+            {"t":0.6,"v":[0,14,0],"i":"catmullrom"},
+            {"t":0.8,"v":[0,-22,0],"i":"catmullrom"}
+          ]
+        },
+        "seal_tail_left": {
+          "rotation": [
+            {"t":0,"v":[0,-12,0],"i":"catmullrom"},
+            {"t":0.2,"v":[0,14,0],"i":"catmullrom"},
+            {"t":0.4,"v":[0,-12,0],"i":"catmullrom"},
+            {"t":0.6,"v":[0,14,0],"i":"catmullrom"},
+            {"t":0.8,"v":[0,-12,0],"i":"catmullrom"}
+          ]
+        },
+        "seal_tail_right": {
+          "rotation": [
+            {"t":0,"v":[0,12,0],"i":"catmullrom"},
+            {"t":0.2,"v":[0,-14,0],"i":"catmullrom"},
+            {"t":0.4,"v":[0,12,0],"i":"catmullrom"},
+            {"t":0.6,"v":[0,-14,0],"i":"catmullrom"},
+            {"t":0.8,"v":[0,12,0],"i":"catmullrom"}
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,11 +1,11 @@
 package dev.henny.vibeyclient.module.cosmetics.ui;
 
 import dev.henny.vibeyclient.api.Lang;
-import dev.henny.vibeyclient.avatar.AvatarItem;
-import dev.henny.vibeyclient.avatar.Rarity;
-import dev.henny.vibeyclient.avatar.Slot;
-import dev.henny.vibeyclient.avatar.Thumbnails;
-import dev.henny.vibeyclient.avatar.preview.AvatarPreview;
+import dev.henny.cosmetico.registry.Item;
+import dev.henny.cosmetico.model.Rarity;
+import dev.henny.cosmetico.model.Slot;
+import dev.henny.cosmetico.mc.thumbs.McThumbnails;
+import dev.henny.vibeyclient.module.cosmetics.preview.AvatarPreview;
 import dev.henny.vibeyclient.api.Services;
 import dev.henny.vibeyclient.ui.Gfx;
 import dev.henny.vibeyclient.ui.Theme;
@@ -30,7 +30,7 @@ final class Cards {
      * Draws one card. {@code hov} is the 0..1 hover animation, {@code badge} an optional short text in the bottom
      * right of the thumbnail (wheel slot number), {@code lockedReason} replaces the rarity line of locked items.
      */
-    static void draw(Gfx g, AvatarItem item, int x, int y, int w, int flags, float hov, String badge, String lockedReason) {
+    static void draw(Gfx g, Item item, int x, int y, int w, int flags, float hov, String badge, String lockedReason) {
         int h = height(w);
         boolean equipped = (flags & EQUIPPED) != 0;
         boolean locked = (flags & LOCKED) != 0;
@@ -63,18 +63,18 @@ final class Cards {
         int ny = ty + ts + 3;
         g.text(g.clip(item.name(), textW), tx, ny, locked ? Theme.DIM : Theme.mix(Theme.MUTED, Theme.TEXT, accent ? 1f : 0.6f + 0.4f * hov));
         if (locked && lockedReason != null) g.text(g.clip(lockedReason, textW), tx, ny + 10, Theme.DIM);
-        else g.text(g.clip(rarityLabel(item.rarity()), textW), tx, ny + 10, locked ? Theme.alpha(item.rarity().color, 0.5f) : item.rarity().color);
+        else g.text(g.clip(rarityLabel(item.rarity()), textW), tx, ny + 10, locked ? Theme.alpha(RarityColors.of(item.rarity()), 0.5f) : RarityColors.of(item.rarity()));
     }
 
     /**
      * Thumbnail, or – for a DEV item pushed without one – a small live 3D preview of the item on the player, or a
      * monogram tile in the rarity colour while it loads / without one.
      */
-    static void thumbnail(Gfx g, AvatarItem item, int x, int y, int size) {
-        if (Thumbnails.draw(g, item, x, y, size)) return;
+    static void thumbnail(Gfx g, Item item, int x, int y, int size) {
+        if (McThumbnails.draw(g.g, item, x, y, size)) return;
         if (item.isDev() && devPreview(g, item, x, y, size)) return;
         int m = Math.max(10, size / 2);
-        Widgets.monogram(g, item.name(), x + (size - m) / 2, y + (size - m) / 2, m, item.rarity().color);
+        Widgets.monogram(g, item.name(), x + (size - m) / 2, y + (size - m) / 2, m, RarityColors.of(item.rarity()));
     }
 
     /** Live previews of DEV items without a thumbnail (by id + revision), least recently used first out. */
@@ -87,7 +87,7 @@ final class Cards {
     };
     private static AvatarPreview devService;
 
-    private static boolean devPreview(Gfx g, AvatarItem item, int x, int y, int size) {
+    private static boolean devPreview(Gfx g, Item item, int x, int y, int size) {
         if (item.bundle() == null || size < 24) return false;
         AvatarPreview service = Services.get(AvatarPreview.class).orElse(null);
         if (service == null) return false;

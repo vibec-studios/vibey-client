@@ -38,6 +38,7 @@ public final class ParityWorld {
             world.getClientWorld().waitForChunksRender();
             spawn();
             context.waitTicks(20);
+            context.runOnClient(mc -> LayerCount.assertOne(mc.getEntityRenderDispatcher().getRenderer(mannequin)));
             cosmetics();
             emotes();
             context.runOnClient(mc -> mannequin.setPos(mannequin.getX() + 40, mannequin.getY(), mannequin.getZ()));

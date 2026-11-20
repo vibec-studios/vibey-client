@@ -2,6 +2,7 @@
 gradle.vibeyLibs.each { id ->
     dependencies {
         implementation project.ext.libDep(id)
+        compileOnly project(":${id}")
         add(project.ext.libNest, project(":${id}:${project.name}"))
     }
 }

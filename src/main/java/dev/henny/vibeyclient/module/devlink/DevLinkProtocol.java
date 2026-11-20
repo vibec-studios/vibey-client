@@ -1,10 +1,13 @@
 package dev.henny.vibeyclient.module.devlink;
 
+import dev.henny.cosmetico.dev.PushAction;
+import dev.henny.cosmetico.dev.PushResult;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import dev.henny.vibeyclient.avatar.DevItems;
+import dev.henny.cosmetico.dev.DevItems;
 import dev.henny.vibeyclient.module.devlink.WebSocketServer.Connection;
 
 import java.nio.charset.StandardCharsets;
@@ -46,7 +49,7 @@ public final class DevLinkProtocol implements WebSocketServer.Handler {
 
         default void disconnected() {}
 
-        default void pushed(JsonObject bundle, DevItems.PushResult result) {}
+        default void pushed(JsonObject bundle, PushResult result) {}
 
         default void rejected(String id, JsonObject bundle, String message) {}
 
@@ -224,9 +227,9 @@ public final class DevLinkProtocol implements WebSocketServer.Handler {
             return;
         }
         String actionName = str(msg, "action");
-        DevItems.Action action;
+        PushAction action;
         try {
-            action = actionName == null ? DevItems.Action.NONE : DevItems.Action.valueOf(actionName.toUpperCase(Locale.ROOT));
+            action = actionName == null ? PushAction.NONE : PushAction.valueOf(actionName.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
             reject(c, id, bundle, "unknown action " + actionName);
             return;
