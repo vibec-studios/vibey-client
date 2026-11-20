@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken;
 import dev.henny.r3.hint.SetHintStore;
 import dev.henny.r3.input.GestureBindings;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
@@ -50,8 +51,12 @@ public final class ConfigStore {
     }
 
     public PlacementStore loadWorld(String worldKey) {
-        String json = TextFiles.read(worldFile(worldKey));
-        return json == null ? new PlacementStore() : PlacementStore.fromJson(json);
+        Path file = worldFile(worldKey);
+        String json = TextFiles.read(file);
+        PlacementStore store = json == null ? null : PlacementStore.parse(json);
+        if (store != null) return store;
+        if (Files.exists(file)) TextFiles.keepBroken(file);
+        return new PlacementStore();
     }
 
     public boolean saveWorld(String worldKey, PlacementStore store) {

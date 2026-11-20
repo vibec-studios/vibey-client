@@ -40,16 +40,21 @@ public final class WaypointJson {
     }
 
     public static List<Waypoint> read(String json) {
+        List<Waypoint> out = parse(json);
+        return out != null ? out : new ArrayList<>();
+    }
+
+    public static List<Waypoint> parse(String json) {
         List<Waypoint> out = new ArrayList<>();
         JsonElement root;
         try {
             root = JsonParser.parseString(json);
         } catch (RuntimeException e) {
-            return out;
+            return null;
         }
-        if (!root.isJsonObject() || !root.getAsJsonObject().has("waypoints")) return out;
+        if (!root.isJsonObject() || !root.getAsJsonObject().has("waypoints")) return null;
         JsonElement arr = root.getAsJsonObject().get("waypoints");
-        if (!arr.isJsonArray()) return out;
+        if (!arr.isJsonArray()) return null;
         for (JsonElement e : arr.getAsJsonArray()) {
             Waypoint w = readOne(e);
             if (w != null && out.size() < WaypointList.MAX && out.stream().noneMatch(o -> o.id().equals(w.id()))) out.add(w);

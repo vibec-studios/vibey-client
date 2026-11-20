@@ -80,13 +80,19 @@ public final class PlacementStore {
     }
 
     public static PlacementStore fromJson(String json) {
+        PlacementStore store = parse(json);
+        return store != null ? store : new PlacementStore();
+    }
+
+    public static PlacementStore parse(String json) {
         PlacementStore store = new PlacementStore();
         if (json == null || json.isBlank()) return store;
         try {
             JsonElement root = GSON.fromJson(json, JsonElement.class);
-            if (root != null && root.isJsonObject()) store.load(root.getAsJsonObject());
+            if (root == null || !root.isJsonObject()) return null;
+            store.load(root.getAsJsonObject());
         } catch (JsonParseException e) {
-            return store;
+            return null;
         }
         return store;
     }

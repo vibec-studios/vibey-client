@@ -39,6 +39,8 @@ class WaypointModelTest {
         assertEquals(1, back.size());
         assertEquals("ok", back.get(0).id());
         assertTrue(WaypointJson.read("not json {").isEmpty());
+        assertNull(WaypointJson.parse("{\"format\":1,\"waypoints\":[{\"id\":"));
+        assertTrue(WaypointJson.parse("{\"format\":1,\"waypoints\":[]}").isEmpty());
     }
 
     @Test

@@ -18,6 +18,13 @@ final class TextFiles {
         }
     }
 
+    static void keepBroken(Path file) {
+        try {
+            Files.move(file, file.resolveSibling(file.getFileName() + ".broken-" + System.currentTimeMillis()));
+        } catch (IOException ignored) {
+        }
+    }
+
     static boolean write(Path file, String text) {
         try {
             Files.createDirectories(file.getParent());
