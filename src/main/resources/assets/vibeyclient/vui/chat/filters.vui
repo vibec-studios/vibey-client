@@ -1,0 +1,57 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<import name="icon-button" src="vibeyclient:components/icon-button"/>
+<template>
+  <stack class="cf-scrim">
+    <column class="cf-card">
+      <row class="cf-bar">
+        <ico name="chat" class="cf-accent"/>
+        <text class="cf-title">{{ t('chat.filters.title') }}</text>
+        <text class="cf-count">{{ len(rows) }}</text>
+        <spacer/>
+        <text class="cf-dim">{{ hidden }}</text>
+        <icon-button id="close" icon="close" :tip="t('chat.filters.close')" @click="close()"/>
+      </row>
+      <row class="cf-add">
+        <textfield id="pattern" class="cf-field" v-model="draft" :invalid="invalid" max-length="120"
+                   :placeholder="t('chat.filters.placeholder')" @input="typed()" @submit="add()"/>
+        <button id="add" class="primary cf-add-btn" @click="add()">{{ t('chat.filters.add') }}</button>
+      </row>
+      <scroll class="cf-rows">
+        <row v-for="r in rows" :key="r.id" class="cf-row">
+          <text v-if="r.regex" class="cf-tag">.*</text>
+          <text class="cf-text">{{ r.text }}</text>
+          <icon-button icon="close" :tip="t('chat.filters.remove')" @click="remove(r)"/>
+        </row>
+        <column v-if="len(rows) == 0" class="cf-empty">
+          <ico name="eye" class="cf-empty-icon"/>
+          <text class="cf-dim">{{ t('chat.filters.empty') }}</text>
+        </column>
+      </scroll>
+      <row class="cf-foot">
+        <text class="cf-label" :tooltip="t('chat.filters.collapseTip')">{{ t('chat.filters.collapse') }}</text>
+        <spacer/>
+        <toggle id="collapse" :value="collapse" @change="toggleCollapse()"/>
+      </row>
+    </column>
+  </stack>
+</template>
+<style>
+.cf-scrim { background: $scrim; align-items: center; }
+.cf-card { width: 260; height: 180; background: $panel; border: 1 $line; }
+.cf-bar { height: 22; gap: 4; padding: 0 3 0 6; border-bottom: 1 $line; flex-shrink: 0; }
+.cf-accent { color: $brand2; }
+.cf-title { font-weight: bold; color: $text; text-wrap: nowrap; }
+.cf-count { color: $dim; }
+.cf-dim { color: $dim; text-wrap: nowrap; }
+.cf-add { height: 24; gap: 4; padding: 4 6; flex-shrink: 0; }
+.cf-field { grow: 1; height: 16; min-width: 0; }
+.cf-add-btn { height: 16; padding: 0 6; }
+.cf-rows { grow: 1; min-height: 0; padding: 0 6; gap: 1; justify: start; }
+.cf-row { height: 18; gap: 4; padding: 0 0 0 4; border: 1 $line; background: $surface; flex-shrink: 0; }
+.cf-tag { color: $brand2; font-scale: 0.75; }
+.cf-text { grow: 1; min-width: 0; color: $text; text-wrap: nowrap; text-overflow: ellipsis; }
+.cf-empty { grow: 1; align-items: center; justify: center; gap: 4; padding: 10; }
+.cf-empty-icon { color: $dim; }
+.cf-foot { height: 22; gap: 4; padding: 0 6; border-top: 1 $line; flex-shrink: 0; }
+.cf-label { color: $muted; }
+</style>

@@ -15,6 +15,8 @@ import dev.henny.vibeyclient.backend.AuthStore;
 import dev.henny.vibeyclient.backend.BackendClient;
 import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.client.Keys;
+import dev.henny.vibeyclient.module.social.discord.DiscordPresence;
+import dev.henny.vibeyclient.module.social.privacy.StreamerMode;
 import dev.henny.vibeyclient.module.social.ui.AccountPanel;
 import dev.henny.vibeyclient.module.social.ui.ConfirmScreen;
 import dev.henny.vibeyclient.module.social.ui.SocialScreen;
@@ -54,11 +56,20 @@ public final class SocialModule extends VibeyModule {
     public final BoolSetting toastMessages = bool("toastMessages", true).section("notifications");
     public final BoolSetting toastInvites = bool("toastInvites", true).section("notifications");
     public final BoolSetting toastSystem = bool("toastSystem", true).section("notifications");
+    public final BoolSetting discord = bool("discord", true).section("discord");
+    public final BoolSetting discordServer = bool("discordServer", false).section("discord");
+    public final BoolSetting streamer = bool("streamer", false).section("streamer");
+    public final BoolSetting streamerNames = bool("streamerNames", true).section("streamer");
+    public final BoolSetting streamerSkins = bool("streamerSkins", true).section("streamer");
+    public final BoolSetting streamerServer = bool("streamerServer", true).section("streamer");
+    public final KeybindSetting streamerKey = keybind("streamerKey", Keys.F7).onPress(() -> this.streamerMode.toggle());
 
     private BackendClient backend;
     private SocialService service;
     private PresenceTracker presence;
     private InviteFlow invites;
+    private final StreamerMode streamerMode = new StreamerMode(this);
+    private final DiscordPresence discordPresence = new DiscordPresence(this);
 
     public SocialModule() {
         super("social", ModuleCategory.SOCIAL);
@@ -66,6 +77,9 @@ public final class SocialModule extends VibeyModule {
         for (BoolSetting b : new BoolSetting[]{toastFriendOnline, toastRequests, toastMessages, toastInvites, toastSystem}) {
             b.visibleWhen(() -> !doNotDisturb.on());
         }
+        discordServer.visibleWhen(discord::on);
+        streamerNames.visibleWhen(streamerMode::partPresent);
+        streamerSkins.visibleWhen(streamerMode::partPresent);
     }
 
     /** Social needs the backend: hidden while online features are off. */
@@ -91,6 +105,13 @@ public final class SocialModule extends VibeyModule {
         status.onChange(s -> presence.changed());
         showPresence.onChange(v -> presence.changed());
         hideServerAddress.onChange(v -> presence.changed());
+        for (BoolSetting b : new BoolSetting[]{streamer, streamerNames, streamerSkins, streamerServer}) {
+            b.onChange(v -> {
+                streamerMode.apply();
+                presence.changed();
+            });
+        }
+        installStreamerPart();
 
         VibeyTabs.register(new VibeyTabs.Tab("account", "social.tab.account", 10, () -> new AccountPanel(this),
                 () -> isEnabled() && GlobalSettings.online(), Icons.USER));
@@ -111,17 +132,31 @@ public final class SocialModule extends VibeyModule {
     @Override
     public void onEnable() {
         apply();
+        streamerMode.apply();
     }
 
     @Override
     public void onDisable() {
         apply();
+        streamerMode.apply();
+        discordPresence.stop();
         if (ClientCompat.screen() instanceof SocialScreen s) ClientCompat.openScreen(s.parent());
     }
 
     @Override
     public void tick() {
         presence.tick();
+        streamerMode.tick();
+        discordPresence.tick();
+    }
+
+    private void installStreamerPart() {
+        if (!streamerMode.partPresent()) return;
+        try {
+            Class.forName("dev.henny.vibeyclient.module.social.streamer.StreamerPart").getMethod("install").invoke(null);
+        } catch (ReflectiveOperationException | LinkageError e) {
+            log.error("Could not install streamer mode", e);
+        }
     }
 
     /** Connects when the module and online features are on, disconnects otherwise (keeps the stored login). */
@@ -190,6 +225,14 @@ public final class SocialModule extends VibeyModule {
 
     public InviteFlow invites() {
         return invites;
+    }
+
+    public StreamerMode streamerMode() {
+        return streamerMode;
+    }
+
+    public DiscordPresence discordPresence() {
+        return discordPresence;
     }
 
     public boolean dnd() {

@@ -29,5 +29,7 @@
   "key.vibeyclient.info.lightKey": "Light level",
   "key.vibeyclient.info.chunkKey": "Chunk borders",
   "key.vibeyclient.clips.shotsKey": "Screenshots",
-  "key.vibeyclient.camera.freelookKey": "Freelook"
+  "key.vibeyclient.camera.freelookKey": "Freelook",
+  "key.vibeyclient.chat.searchKey": "Search chat",
+  "key.vibeyclient.social.streamerKey": "Streamer mode"
 }

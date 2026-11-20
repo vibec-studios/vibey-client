@@ -1,0 +1,67 @@
+{
+  "name": "Chat",
+  "description": "Uhrzeit, Suche, Kopieren, Erwähnungen und Filter.",
+  "summary": "Suche, Erwähnungen, Filter",
+  "section": {
+    "lines": "Zeilen",
+    "mentions": "Erwähnungen",
+    "filter": "Filter"
+  },
+  "setting": {
+    "editFilters": "Filter",
+    "editFilters.action": "Filter",
+    "timestamps": "Uhrzeit",
+    "timeStyle": "Format",
+    "timeStyle.h24": "14:05",
+    "timeStyle.h24_seconds": "14:05:09",
+    "timeStyle.h12": "2:05 PM",
+    "copyButton": "Kopieren-Knopf",
+    "copyButton.desc": "Zeige im offenen Chat auf eine Zeile.",
+    "movable": "Chat verschieben",
+    "movable.desc": "Im HUD-Editor ziehen.",
+    "history": "Verlauf",
+    "history.desc": "Zeilen zum Scrollen und Suchen.",
+    "keepOnLeave": "Beim Verlassen behalten",
+    "highlight": "Erwähnungen markieren",
+    "mentionWords": "Weitere Wörter",
+    "mentionWords.desc": "Mit Komma getrennt.",
+    "mentionToast": "Erwähnung melden",
+    "dmToast": "Nachricht melden",
+    "mentionSound": "Ping-Ton",
+    "collapse": "Wiederholungen bündeln",
+    "collapse.desc": "Dieselbe Zeile wird zu ×2, ×3 …",
+    "filters": "Muster ausblenden",
+    "filters.desc": "Passende Zeilen werden nicht gezeigt.",
+    "searchKey": "Chat durchsuchen"
+  },
+  "tag": {
+    "mention": "Erwähnt dich"
+  },
+  "toast": {
+    "mention": "Erwähnt",
+    "open": "Öffnen",
+    "reply": "Antworten",
+    "copied": "Kopiert"
+  },
+  "search": {
+    "hint": "Suchen",
+    "hits": "{0} gefunden",
+    "close": "Suche schließen"
+  },
+  "filters": {
+    "title": "Filter",
+    "close": "Schließen",
+    "placeholder": "Wort oder /Regex/",
+    "add": "Hinzufügen",
+    "remove": "Entfernen",
+    "empty": "Nichts ausgeblendet",
+    "collapse": "Wiederholungen bündeln",
+    "collapseTip": "Dieselbe Zeile wird zu ×2.",
+    "hidden": "{0} ausgeblendet"
+  },
+  "hud": {
+    "window": "Chat",
+    "window.desc": "Ziehen oder mit Mitteltaste verschieben, Rad = Größe.",
+    "empty": "Chat"
+  }
+}
