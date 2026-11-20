@@ -3,13 +3,14 @@ package dev.henny.vibeyclient.module.screens.core;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public record ScreenLayout(float scale, int dim, int blur, boolean hideTitle, Map<String, Placement> widgets) {
+public record ScreenLayout(float scale, int dim, int blur, boolean hideTitle, Map<String, Placement> widgets,
+                           String label) {
     public static final float MIN_SCALE = 0.5f;
     public static final float MAX_SCALE = 2f;
     public static final int VANILLA = -1;
     public static final int MAX_DIM = 100;
     public static final int MAX_BLUR = 10;
-    public static final ScreenLayout EMPTY = new ScreenLayout(1f, VANILLA, VANILLA, false, Map.of());
+    public static final ScreenLayout EMPTY = new ScreenLayout(1f, VANILLA, VANILLA, false, Map.of(), null);
 
     public ScreenLayout {
         scale = Float.isFinite(scale) ? Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale)) : 1f;
@@ -20,6 +21,7 @@ public record ScreenLayout(float scale, int dim, int blur, boolean hideTitle, Ma
             if (k != null && v != null && !v.isDefault()) copy.put(k, v);
         });
         widgets = Map.copyOf(copy);
+        label = label == null || label.isBlank() ? null : label;
     }
 
     public boolean isEmpty() {
@@ -35,22 +37,26 @@ public record ScreenLayout(float scale, int dim, int blur, boolean hideTitle, Ma
         Map<String, Placement> m = new LinkedHashMap<>(widgets);
         if (p == null || p.isDefault()) m.remove(id);
         else m.put(id, p);
-        return new ScreenLayout(scale, dim, blur, hideTitle, m);
+        return new ScreenLayout(scale, dim, blur, hideTitle, m, label);
     }
 
     public ScreenLayout withScale(float s) {
-        return new ScreenLayout(s, dim, blur, hideTitle, widgets);
+        return new ScreenLayout(s, dim, blur, hideTitle, widgets, label);
     }
 
     public ScreenLayout withDim(int d) {
-        return new ScreenLayout(scale, d, blur, hideTitle, widgets);
+        return new ScreenLayout(scale, d, blur, hideTitle, widgets, label);
     }
 
     public ScreenLayout withBlur(int b) {
-        return new ScreenLayout(scale, dim, b, hideTitle, widgets);
+        return new ScreenLayout(scale, dim, b, hideTitle, widgets, label);
+    }
+
+    public ScreenLayout withLabel(String l) {
+        return new ScreenLayout(scale, dim, blur, hideTitle, widgets, l);
     }
 
     public ScreenLayout withHideTitle(boolean h) {
-        return new ScreenLayout(scale, dim, blur, h, widgets);
+        return new ScreenLayout(scale, dim, blur, h, widgets, label);
     }
 }

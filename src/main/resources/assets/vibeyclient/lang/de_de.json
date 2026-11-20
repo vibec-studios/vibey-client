@@ -33,5 +33,6 @@
   "key.vibeyclient.chat.searchKey": "Chat durchsuchen",
   "key.vibeyclient.social.streamerKey": "Streamer-Modus",
   "key.vibeyclient.inventory.presetKey": "Hotbar-Set (tippen/halten)",
-  "key.vibeyclient.inventory.presetSaveKey": "Hotbar-Set speichern"
+  "key.vibeyclient.inventory.presetSaveKey": "Hotbar-Set speichern",
+  "key.vibeyclient.screens.editKey": "Menü bearbeiten"
 }

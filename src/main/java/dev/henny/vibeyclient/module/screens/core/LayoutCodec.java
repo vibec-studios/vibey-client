@@ -47,6 +47,7 @@ public final class LayoutCodec {
         if (l.dim() != ScreenLayout.VANILLA) o.addProperty("dim", l.dim());
         if (l.blur() != ScreenLayout.VANILLA) o.addProperty("blur", l.blur());
         if (l.hideTitle()) o.addProperty("hideTitle", true);
+        if (l.label() != null) o.addProperty("label", l.label());
         JsonObject w = new JsonObject();
         l.widgets().forEach((id, p) -> w.add(id, placement(p)));
         if (!w.isEmpty()) o.add("widgets", w);
@@ -61,7 +62,7 @@ public final class LayoutCodec {
             }
         }
         return new ScreenLayout(num(o, "scale", 1f), (int) num(o, "dim", -1), (int) num(o, "blur", -1),
-                bool(o, "hideTitle"), widgets);
+                bool(o, "hideTitle"), widgets, str(o, "label"));
     }
 
     static JsonObject placement(Placement p) {
@@ -84,8 +85,7 @@ public final class LayoutCodec {
         if (o.has("ax") && o.has("ay")) {
             pos = new Pos(clampAnchor((int) num(o, "ax", 1)), clampAnchor((int) num(o, "ay", 1)), num(o, "x", 0), num(o, "y", 0));
         }
-        String fb = o.get("fallback") != null && o.get("fallback").isJsonPrimitive() ? o.get("fallback").getAsString() : null;
-        return new Placement(pos, num(o, "scale", 1f), (int) num(o, "width", 0), bool(o, "hidden"), fb);
+        return new Placement(pos, num(o, "scale", 1f), (int) num(o, "width", 0), bool(o, "hidden"), str(o, "fallback"));
     }
 
     private static int clampAnchor(int a) {
@@ -97,6 +97,11 @@ public final class LayoutCodec {
         if (e == null || !e.isJsonPrimitive() || !e.getAsJsonPrimitive().isNumber()) return def;
         float v = e.getAsFloat();
         return Float.isFinite(v) ? v : def;
+    }
+
+    private static String str(JsonObject o, String key) {
+        JsonElement e = o.get(key);
+        return e != null && e.isJsonPrimitive() && e.getAsJsonPrimitive().isString() ? e.getAsString() : null;
     }
 
     private static boolean bool(JsonObject o, String key) {

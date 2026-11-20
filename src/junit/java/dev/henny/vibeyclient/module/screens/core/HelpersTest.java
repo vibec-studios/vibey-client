@@ -71,6 +71,8 @@ class HelpersTest {
         Box first = Spots.pick(400, 300, 14, List.of());
         assertEquals(400 - Spots.MARGIN - 14, first.x(), 0.01);
         Box second = Spots.pick(400, 300, 14, List.of(new Box(300, 280, 100, 20)));
-        assertEquals(Spots.MARGIN, second.x(), 0.01);
+        assertEquals(Spots.MARGIN, second.y(), 0.01);
+        Box third = Spots.pick(400, 300, 14, List.of(new Box(300, 280, 100, 20), new Box(300, 0, 100, 20)));
+        assertEquals(Spots.MARGIN, third.x(), 0.01);
     }
 }

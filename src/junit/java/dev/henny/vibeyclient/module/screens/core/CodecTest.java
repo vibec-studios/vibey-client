@@ -12,7 +12,7 @@ class CodecTest {
     @Test
     void roundTrip() {
         Placement p = new Placement(new Pos(2, 0, -4.5f, 12f), 1.5f, 220, true, "button@3");
-        ScreenLayout l = new ScreenLayout(1.25f, 40, 3, true, Map.of("button:gui.done", p, "slider:x", Placement.DEFAULT));
+        ScreenLayout l = new ScreenLayout(1.25f, 40, 3, true, Map.of("button:gui.done", p, "slider:x", Placement.DEFAULT), "Options");
         Map<String, ScreenLayout> in = new LinkedHashMap<>();
         in.put("net.minecraft.client.gui.screens.options.OptionsScreen", l);
         in.put("empty", ScreenLayout.EMPTY);

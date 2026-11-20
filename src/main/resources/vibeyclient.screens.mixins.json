@@ -1,0 +1,22 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.henny.vibeyclient.module.screens.mixin",
+  "plugin": "dev.henny.vibeyclient.mixin.VibeyMixinPlugin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [],
+  "client": [
+    "ContainerAccess",
+    "GameRendererScreenMixin",
+    "MouseScreenMixin",
+    "OptionsBlurMixin",
+    "ScreenAccess",
+    "ScreenLifecycleMixin",
+    "TitleTextMixin",
+    "WidgetStateMixin"
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

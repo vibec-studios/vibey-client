@@ -9,7 +9,7 @@ public final class Spots {
 
     public static Box pick(float screenW, float screenH, float size, List<Box> taken) {
         float far = screenW - MARGIN - size, low = screenH - MARGIN - size;
-        float[][] tries = {{far, low}, {MARGIN, low}, {far, MARGIN}, {MARGIN, MARGIN},
+        float[][] tries = {{far, low}, {far, MARGIN}, {MARGIN, MARGIN}, {MARGIN, low},
                 {screenW / 2f - size / 2f, low}, {far, screenH / 2f - size / 2f}};
         for (float[] t : tries) {
             Box b = new Box(t[0], t[1], size, size);

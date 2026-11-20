@@ -32,7 +32,8 @@ toasts, movable chat window; Fabric 1.21.11 only, see [CHAT.md](CHAT.md)). Socia
 streamer mode (part `social.streamer`, Fabric 1.21.11), see [SOCIAL.md](SOCIAL.md); `api/privacy/Privacy` is the shared
 streamer state any module can read. `inventory` (durability %, shulker preview, quick moves, search, hotbar presets; Fabric
 1.21.11 only, see [INVENTORY.md](INVENTORY.md)), `servers` (live pings, search, favourites, MOTD preview in the
-multiplayer screen; Fabric 1.21.11 only, see [SERVERS.md](SERVERS.md)).
+multiplayer screen; Fabric 1.21.11 only, see [SERVERS.md](SERVERS.md)), `screens` (screen editor: move/scale/hide the widgets of any menu, container panels, own
+screen size, dim/blur, hide title; Fabric 1.21.11 only, see [SCREENS.md](SCREENS.md)).
 
 ## Targets and boundaries
 
