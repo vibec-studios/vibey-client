@@ -1,0 +1,20 @@
+{
+  "packs": [
+    {
+      "id": "seal",
+      "files": [
+        "companion.json",
+        "companions/seal.json",
+        "lang/de_de.json",
+        "lang/en_us.json",
+        "models/seal.vibey",
+        "pack.png",
+        "sounds/bark.ogg",
+        "sounds/chirp.ogg",
+        "sounds/snore.ogg",
+        "textures/seal_arctic.png",
+        "textures/seal_harbor.png"
+      ]
+    }
+  ]
+}

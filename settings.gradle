@@ -62,7 +62,7 @@ stonecutter {
         libs.each { id ->
             branch(id) {
                 branchScript = 'build.gradle'
-                targets.findAll { t -> libTargets[id] == null || t.name in libTargets[id] }
+                targets.findAll { t -> libTargets[id] == null || t.name.toString() in libTargets[id] }
                         .each { t -> version(t.name, t.mc).buildscript(libScript(t.script)) }
             }
         }
