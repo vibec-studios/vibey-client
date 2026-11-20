@@ -2,6 +2,7 @@ package dev.henny.r3.draw;
 
 import dev.henny.r3.fx.Effect;
 import dev.henny.r3.fx.EffectContext;
+import dev.henny.r3.object.CustomContent;
 import dev.henny.r3.object.Mesh;
 import dev.henny.r3.object.ObjectContent;
 import dev.henny.r3.object.VideoSurface;
@@ -24,6 +25,7 @@ public final class ObjectDrawer {
         else if (content instanceof VideoSurface video) videos.draw(canvas, object, video, light);
         else if (content instanceof Text3D text) texts.draw(canvas, object, text, light);
         else if (content instanceof Mesh mesh) meshes.draw(canvas, object, mesh, light);
+        else if (content instanceof CustomContent custom) custom.draw(canvas, object, light);
         else if (content instanceof Effect effect) effect.draw(canvas, effects);
     }
 }

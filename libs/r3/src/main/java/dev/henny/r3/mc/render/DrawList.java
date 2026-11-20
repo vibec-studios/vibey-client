@@ -40,4 +40,10 @@ final class DrawList {
         if (texts == textPool.size()) textPool.add(new TextItem());
         items.add(textPool.get(texts++).set(pose, text, x, y, argb, light, mode, shadow, bold));
     }
+
+    void styledText(Matrix4fc pose, String text, String font, boolean bold, float x, float y, int argb, int light, TextMode mode) {
+        int before = items.size();
+        text(pose, text, x, y, argb, light, mode, false, bold);
+        if (items.size() > before) ((TextItem) items.get(items.size() - 1)).font = font;
+    }
 }

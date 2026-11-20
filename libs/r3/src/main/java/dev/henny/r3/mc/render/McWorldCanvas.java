@@ -122,6 +122,11 @@ public final class McWorldCanvas implements WorldCanvas {
     }
 
     @Override
+    public void styledText(String text, String font, boolean bold, float x, float y, int argb, int light, boolean front) {
+        list.styledText(stack.top(), text, font, bold, x, y, argb, light, front ? TextMode.POLYGON_OFFSET : TextMode.NORMAL);
+    }
+
+    @Override
     public PanelCanvas beginPanel(int pixelWidth, int pixelHeight, int light, float alpha) {
         if (inPanel) throw new IllegalStateException("r3 canvas: nested beginPanel");
         inPanel = true;

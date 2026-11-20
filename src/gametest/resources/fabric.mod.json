@@ -27,7 +27,8 @@
       "dev.henny.vibeyclient.gametest.R3GameTest",
       "dev.henny.vibeyclient.gametest.VuiGameTest",
       "dev.henny.vibeyclient.gametest.WaypointsGameTest",
-      "dev.henny.vibeyclient.gametest.InfoGameTest"
+      "dev.henny.vibeyclient.gametest.InfoGameTest",
+      "dev.henny.vibeyclient.gametest.MediaR3GameTest"
     ]
   },
   "mixins": ["vibeyclient-gametest.mixins.json"],

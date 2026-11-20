@@ -37,10 +37,11 @@ up, q)` from block faces, `Axes.fromAxes(right, up, normal, q)` from any orthono
 | Content | Use |
 |---|---|
 | `PanelContent` | 2D UI drawn into the panel (`layout(w, h)`, `draw(PanelCanvas)`, pointer events, `controlAt(x, y)` → control id). vui documents implement it through an adapter. |
-| `VideoSurface` | a texture per frame (`texture(handle)`, crop UVs, `aspect()`), dark bezel/back plate, a status line when there is no picture; `drawnFrames()` tells the player whether the screen was drawn (upload frames only then) |
+| `VideoSurface` | a texture per frame (`overlay(panelContent)`: controls drawn on top while you look at it, see below) (`texture(handle)`, crop UVs, `aspect()`), dark bezel/back plate, a status line when there is no picture; `drawnFrames()` tells the player whether the screen was drawn (upload frames only then) |
 | `Text3D` | text in the world, see [text3d.md](text3d.md) |
 | `Mesh` | quads (`Mesh.builder(mode, texture).quad(...).box(...).build()`), local coordinates in blocks |
 | `Effect` | particles, beams, rings, trails, glow, see [effects.md](effects.md) |
+| `CustomContent` | draws itself: `draw(WorldCanvas, object, light)` – for rich content none of the above covers (Vibey's lyric frames) |
 
 Any `ObjectContent` gets `tick()` (20/s, from `scene.tick()`), `update(dt)` (per frame), `facing()` (applied after
 the anchor, e.g. billboards), `translucent()` (draw order) and `boundingRadius()` (culling). Contents that implement
@@ -58,6 +59,16 @@ the anchor, e.g. billboards), `translucent()` (draw order) and `boundingRadius()
 
 Own anchors: implement `Anchor` (`resolve(ctx, transform)` returns false to hide the object this frame).
 `Facing` (`CAMERA`, `CAMERA_YAW`, `ENTITY_YAW`, `KEEP`) turns an object towards the viewer or with the entity.
+
+| `SoftFollowAnchor` | around the camera at a fixed elevation: `soft` rests until you turn > 30° away, then glides back (2.6/s); `follow` always eases after the view (4.5/s); `fixed` stays at one yaw |
+| `LowersWhenLookingDown(inner)` | wraps any anchor around the camera: looking down (smoothed pitch) lowers the elevation by that much, never below 2° (or the set elevation if lower) |
+
+### Video overlay (controls on a screen)
+
+`new VideoSurface().overlay(content)` adds a `PanelContent` (usually a vui document) laid out at the object's panel
+size and drawn 6 mm in front of the picture. It shows while the pointer is on the object, `linger` (1.5 s) after it
+left, while `pinned(true)` (an open menu) and while it has the keyboard. While it is hidden it has no controls, so the
+whole screen is body (grab, wheel). Pointer and key events are forwarded to it.
 
 ### Snapping to block faces
 

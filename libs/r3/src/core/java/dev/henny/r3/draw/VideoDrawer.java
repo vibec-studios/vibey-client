@@ -10,14 +10,19 @@ import dev.henny.r3.render.RenderMode;
 import dev.henny.r3.render.TextMetrics;
 import dev.henny.r3.render.WorldCanvas;
 
+import org.joml.Vector3d;
+
 import java.util.List;
 
 public final class VideoDrawer {
     public static final double BACK_OFFSET = -0.012;
     public static final double PANEL_OFFSET = -0.004;
     public static final double TEXT_OFFSET = 0.002;
+    public static final double OVERLAY_OFFSET = 0.006;
 
     private final Basis basis = new Basis();
+    private final PanelDrawer panels = new PanelDrawer();
+    private final Vector3d normal = new Vector3d();
 
     public void draw(WorldCanvas canvas, WorldObject object, VideoSurface surface, int light) {
         Transform t = object.transform();
@@ -36,13 +41,22 @@ public final class VideoDrawer {
                     Argb.multiplyAlpha(0xFFFFFFFF, alpha), light);
             canvas.endQuads();
             surface.markDrawn();
-            return;
+        } else {
+            basis.set(t, canvas.cameraPosition(), PANEL_OFFSET);
+            canvas.beginQuads(RenderMode.TRANSLUCENT, null);
+            Quads.quad(canvas, basis.center, basis.right, basis.up, hw, hh, Argb.multiplyAlpha(surface.panelColor(), alpha), light);
+            canvas.endQuads();
+            if (surface.status() != null && !surface.status().isEmpty()) drawStatus(canvas, object, surface, alpha);
         }
-        basis.set(t, canvas.cameraPosition(), PANEL_OFFSET);
-        canvas.beginQuads(RenderMode.TRANSLUCENT, null);
-        Quads.quad(canvas, basis.center, basis.right, basis.up, hw, hh, Argb.multiplyAlpha(surface.panelColor(), alpha), light);
-        canvas.endQuads();
-        if (surface.status() != null && !surface.status().isEmpty()) drawStatus(canvas, object, surface, alpha);
+        if (surface.overlayShown()) drawOverlay(canvas, object, surface, light);
+    }
+
+    private void drawOverlay(WorldCanvas canvas, WorldObject object, VideoSurface surface, int light) {
+        object.transform().normal(normal).mul(OVERLAY_OFFSET);
+        canvas.push();
+        canvas.translate((float) normal.x, (float) normal.y, (float) normal.z);
+        panels.draw(canvas, object, surface.overlay().content(), light);
+        canvas.pop();
     }
 
     private void drawStatus(WorldCanvas canvas, WorldObject object, VideoSurface surface, float alpha) {

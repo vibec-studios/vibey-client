@@ -154,7 +154,7 @@ public final class SetupScreen extends CardScreen {
             step = Step.LOOKUP;
             background(this::installMod);
         } else {
-            Video.get().setBrowserConsent();
+            Video.get().status.setBrowserConsent();
             Web.start();
             step = Step.DOWNLOAD;
         }
@@ -164,7 +164,7 @@ public final class SetupScreen extends CardScreen {
         McefInstaller.Release rel = McefInstaller.lookup();
         step = Step.DOWNLOAD;
         McefInstaller.install(rel, f -> progress = f);
-        Video.get().setBrowserConsent();
+        Video.get().status.setBrowserConsent();
         step = Step.DONE;
     }
 

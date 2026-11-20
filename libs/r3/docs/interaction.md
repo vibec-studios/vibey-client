@@ -93,12 +93,20 @@ series; wheel notches on the same object within 1 s are one entry. `undo()` (or 
 `MOVED`, `PLACED`, `PLACEMENT_CANCELLED`, `MOVE_CANCELLED`, `RESIZE_STARTED`, `RESIZED`, `RESIZE_CANCELLED`,
 `UNDONE`. `event.changedPose()` is true for the four that should be saved/synced.
 
+## Keyboard focus
+
+A content that implements `KeyContent` can take the keyboard: `keyFocused()` (true while e.g. a text field has the
+focus), `keyDown/keyUp/charTyped`, `releaseKeyFocus()`. `R3Scene.keyTarget()` finds the object, `releaseKeys()`
+drops the focus. The backend routes keys there before any gesture; Esc releases. `VuiPanelContent` and
+`VideoSurface` (its overlay) implement it.
+
 ## First-time hints
 
 `Interaction.hint()` / `hintText()` return one short line for the current situation until the player has done that
 gesture once (or seen the line for 6 s): `HOVER` "Middle mouse: move · Wheel: size", `HOLD`, `PLACE`, `EDGE`. Texts
 follow the bindings; ids (`r3.hint.hover` …) are for translations. `SetHintStore` persists the seen ids
-(`toJson()/fromJson()`, `onChange` to save). Draw the line near the crosshair.
+(`toJson()/fromJson()`, `onChange` to save). Draw the line small, under the crosshair; when the hovered or held object covers that spot, below the object
+(`HintPlacement.bottomOf` projects the object's corners, `lineY` picks the row, `ScreenProjection` is the math).
 
 ## Config
 

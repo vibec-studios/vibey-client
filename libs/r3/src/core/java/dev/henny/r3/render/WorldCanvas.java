@@ -31,6 +31,10 @@ public interface WorldCanvas {
 
     void text(String text, float x, float y, int argb, int light, boolean seeThrough);
 
+    default void styledText(String text, String font, boolean bold, float x, float y, int argb, int light, boolean front) {
+        text(text, x, y, argb, light, false);
+    }
+
     PanelCanvas beginPanel(int pixelWidth, int pixelHeight, int light, float alpha);
 
     void endPanel();

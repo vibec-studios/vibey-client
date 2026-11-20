@@ -90,13 +90,35 @@ move, soft flash on drops, use PC sound for effects, sync offset, menus, bar, sp
 clouds, shooting stars, lyrics over hills, keybinds. Everything else (fonts, colors, animation, sky picker) is in
 the player screen (K) → *Advanced*.
 
-### Sky lyrics "where you look" (default)
+### Lyrics in the world (r3)
 
-`render/WorldLyrics.view`: the text rests in the sky while you look within ~20° of it; after 350 ms outside that
-zone (at once beyond 55°) it glides to where you look now with a critically damped spring (0.5 s, max 170°/s, no
-overshoot), 9° above your crosshair and between 9° and 58° above the horizon. Uses the real frame time, so it is
-smooth at any frame rate. The older modes stay: *follow softly* (sideways only), *glued to your view*, *stay in one
-direction*.
+Sky, front and world lyrics are one r3 world object (`lyrics/world/WorldText`, kind `vibeyclient:lyrics`) whose
+content (`LyricsContent`, an r3 `CustomContent`) builds the `LyricLayout` frame every frame and paints it through r3's
+`WorldCanvas` (`CanvasPainter`: words with the lyric font via `styledText`, glow rings, 3D sides, chroma edges, caption
+boxes as quads) – the same look as before, now drawn by r3 (sky layer −1000, "over hills" = r3 shrinks it towards the
+eye to 3.5 blocks). Where it sits is an r3 anchor (`LyricsPlacement`):
+
+| Mode | Anchor |
+|---|---|
+| Sky – where you look (default) | `ViewFollowAnchor`: rests within ~20°, glides after 350 ms (at once beyond 55°), critically damped 0.5 s, ≤ 170°/s, 9° above the crosshair, 9–58° above the horizon |
+| Sky – follow softly | `LowersWhenLookingDown(SoftFollowAnchor.soft)`: rests until you turn > 30° away, then glides back |
+| Sky – glued to your view | `LowersWhenLookingDown(SoftFollowAnchor.follow)`: eases after every turn |
+| Sky – one direction | `SoftFollowAnchor.fixed`: the yaw from when the song started |
+| In front | `CameraAnchor(distance, 0, +6°, 4.5/s)` |
+| In the world | a free object at the saved spot: **grab it with the middle mouse to move it, wheel to resize** (saved as `anchorX/Y/Z`, `anchorScale`) |
+
+Sky size = distance × 0.013 × size (distance = render distance × 0.35, 32–96 blocks). After a pause (no song, other
+position, hidden) of more than a second the anchor starts again where you look. The sky dome and sky effects still use
+their own hook (`render/SkyHook` → `SkyDome`, `WorldSink`).
+
+### Music panel (`lyrics/world/MusicPanel`)
+
+A small vui panel in the world (`assets/vibeyclient/vui/music/panel.vui`, 1.5 × 0.5 blocks): cover, title, artist,
+progress, ⏮ ▶/❚❚ ⏭ ✕ – from the same source as the now playing bar (`Playback`: songs from the folder or the PC's
+player). Media settings → *Music panel* → *Place*: it follows the crosshair, left click places it on a wall/floor (or
+in the air). Look at a button and left click. Hold the middle mouse to move it, wheel to resize, right click pins it
+to your view (`SoftFollowAnchor`: it stays a little below where you look and comes along when you turn away; look at
+it to use the buttons) and right click again unpins it. Saved per world as an r3 placement (`vibeyclient:music`).
 
 ### Music analysis (`lyrics/fx`)
 

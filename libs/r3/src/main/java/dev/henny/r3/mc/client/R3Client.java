@@ -100,6 +100,10 @@ public final class R3Client {
         if (Game.level() != null) scene.tick();
     }
 
+    public boolean hidesBlockOutline() {
+        return Game.playing() && (scene.interaction().capturing() || scene.interaction().hover().target() != null);
+    }
+
     public String hint() {
         return Game.playing() ? scene.interaction().hintText() : null;
     }

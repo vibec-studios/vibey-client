@@ -22,6 +22,7 @@ r3 (media, cosmetico), "backend" = the r3 MC backend.
 | Hit only from the front, nearer than the block in the way, ≤ 64 | `R3Scene.update` (block-limited pointer, reach 64), single-sided by default |
 | Bezel/back plate (both windings), picture on top (lit, no shading), glowing = full bright, else light 0.3 in front | `VideoDrawer` + `WorldObject.fullBright`, light probe 0.3 along the normal |
 | Status line without a picture: ~7 lines per height, wrap, shrink to ≤ 3 lines | `VideoSurface.status`, same rules |
+| Controls window (play, seek, volume, size, glow, overlay, move, source, remove, use page) | **moved into the world:** `VideoSurface.overlay` + vui strip; size = wheel/edge, move = grab (done in Vibey, see docs/VIDEO.md) |
 | Ghost (translucent plate) while placing | the real object is drawn while held, plus a blue outline (`HandleDrawer`) |
 | Upload frames only while in the frustum; distance 160 / render 128 | `state().visible()`, `VideoSurface.drawnFrames()`, `Visibility.maxDistance` |
 | Screens per world (`sp:<level>`, `mp:<ip>`), overlays not saved, come back paused | `PlacementStore` + `WorldKeys`; paused/overlay = feature data |
@@ -32,7 +33,7 @@ r3 (media, cosmetico), "backend" = the r3 MC backend.
 | Binary `FriendlyByteBuf` codec | **changed:** JSON string ≤ 8192 chars (`SyncCodec`); the backend channel carries it |
 | Timeline, drift correction, ≤ 6 decoders, positional audio, volume falloff | feature (uses `state().distance()`, `transform().position()`) |
 | HUD overlay (picture-in-picture) | HUD / vui; the same interaction works in 2D (`InteractionConfig.hud()`) |
-| *Use page* (mouse to the web page) | `PointerContent` pointer events in panel pixels; keyboard forwarding is the feature's |
+| *Use page* (mouse to the web page) | still the browser screen of the feature; panel text fields get keys through `KeyContent` |
 | Clicks swallowed at tick start, wheel via hotbar slot | backend, driven by `press/wheel` return values and `blocksVanillaMouse/HotbarScroll` |
 
 ## World lyrics
@@ -76,16 +77,16 @@ r3 (media, cosmetico), "backend" = the r3 MC backend.
 
 ## Gaps (not in r3, on purpose or for later)
 
-- **Lyrics "follow softly" (30° recenter) and "looking down lowers the text"**: not built-in; small custom
-  `Anchor`s if the modes stay.
-- **Lyrics rich frames** (`LyricLayout` runs with per-word yaw and z for the 3D flight, chroma neon edges): `Text3D`
-  is one string with per-glyph offset/scale/roll/color; per-glyph **yaw** and chroma edges are not there yet – use
-  several `Text3D` objects or a custom content.
+- ~~Lyrics "follow softly" and "looking down lowers the text"~~: **done**, `SoftFollowAnchor` +
+  `LowersWhenLookingDown`.
+- **Lyrics rich frames**: Vibey draws them as a `CustomContent` through `WorldCanvas` (`styledText` with the lyric
+  font, boxes as quads) – exact parity with the old painter (per-word yaw/z, glow rings, 3D sides, chroma edges).
+  `Text3D` itself still has no per-glyph yaw or custom fonts; use `CustomContent` for such text.
 - **Vanilla particle types and sounds** of animation events: cosmetico calls Minecraft directly; r3 only has its own
   particles.
 - **Bone locators** (particles at a bone): cosmetico sets the object transform each frame (custom `Anchor`).
 - **Block removed under a screen**: anchors do not check that the block still exists (today neither).
-- **Keyboard input to panels** (text fields, *Use page*): r3 routes pointer events only; keys stay with the UI lib.
+- ~~Keyboard input to panels~~: **done** (`KeyContent`, routed by the backend while a field has the focus).
 - **Frustum**: the backend culls with a camera cone (`CameraFrustum`, options fov + 12°), not the game's frustum –
   slightly more objects are updated than needed, nothing visible is culled.
 - **Panel layering**: panels are direct quads (no render-to-texture); draw calls are separated by tiny z steps and
