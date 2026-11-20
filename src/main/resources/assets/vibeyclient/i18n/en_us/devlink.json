@@ -6,7 +6,13 @@
     "creatorMode": "Creator mode",
     "creatorMode.desc": "Lets the Blockbench plugin send models into the game.",
     "port": "Live link port",
-    "port.desc": "Local port of the live link (only reachable from this computer)."
+    "port.desc": "Local port of the live link (only reachable from this computer).",
+    "copyToken": "Token",
+    "copyToken.action": "Copy token",
+    "copyToken.desc": "The key Blockbench needs to connect.",
+    "newToken": "New token",
+    "newToken.action": "Renew",
+    "newToken.desc": "Disconnects every Blockbench."
   },
   "panel": {
     "status": "Live link",
@@ -50,5 +56,22 @@
     "signIn": "Sign in to Vibe first: online features on and the game connected to the Vibe backend.",
     "sent": "Submitted {0} to Vibe",
     "sentBody": "The Vibe team reviews it; you get a notice when it is approved."
+  },
+  "status": {
+    "on": "Listening",
+    "off": "Off",
+    "error": "Error",
+    "portInUse": "Port {0} busy",
+    "creatorOff": "Creator mode off",
+    "moduleOff": "Module off",
+    "noClient": "No Blockbench",
+    "clients": "{0} Blockbench",
+    "token": "Token",
+    "copied": "Copied",
+    "noClipboard": "No clipboard",
+    "renewAsk": "New token?",
+    "renewText": "Blockbench must connect again.",
+    "renew": "Renew",
+    "renewed": "Renewed"
   }
 }

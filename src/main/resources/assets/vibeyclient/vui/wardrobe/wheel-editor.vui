@@ -1,0 +1,58 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<import name="icon-button" src="vibeyclient:components/icon-button"/>
+<import name="empty" src="vibeyclient:components/empty"/>
+<import name="emote-card" src="vibeyclient:components/emote-card"/>
+<import name="wheel-ring" src="vibeyclient:wardrobe/wheel-ring"/>
+<contract>
+{ "fields": { "slices": "list", "emotes": "list", "selected": "number", "frame?": "object", "paneWidth": "number",
+              "slotLabel": "string", "slotName": "string", "count": "string", "available": "bool" },
+  "actions": ["pick(s)", "clear(s)", "assign(e)", "clearAll", "done"] }
+</contract>
+<template>
+  <column class="we">
+    <row class="we-bar">
+      <icon-button id="wheel-back" icon="back" :tip="t('ui.menu.back')" @click="done()"/>
+      <ico name="wave" class="we-icon"/>
+      <text class="we-title">{{ t('ui.wheel.editor') }}</text>
+      <text class="we-count">{{ count }}</text>
+      <spacer/>
+      <button id="wheel-clear" class="ghost" :disabled="!available" @click="clearAll()">{{ t('ui.wheel.clear') }}</button>
+      <button id="wheel-done" class="primary we-done" @click="done()">{{ t('ui.wheel.done') }}</button>
+    </row>
+    <row class="we-main">
+      <stack class="we-pane" :style="{ width: paneWidth }">
+        <wheel-ring v-if="frame" :slices="slices" :frame="frame" :on="selected" :numbers="true"/>
+        <column v-if="frame" class="we-centre"
+                :style="{ left: frame.centreX, top: frame.centreY, width: frame.centreSize, height: frame.centreSize }">
+          <text class="we-slot">{{ slotLabel }}</text>
+          <text id="wheel-slot-name" class="we-name">{{ slotName }}</text>
+        </column>
+        <row v-if="frame" class="we-hint" :style="{ top: frame.hintY }">
+          <text :class="{ warn: !available }">{{ available ? t('ui.wheel.editHint') : t('ui.wheel.off') }}</text>
+        </row>
+      </stack>
+      <scroll class="we-list">
+        <grid class="we-grid" min-column="52" gap="3">
+          <emote-card v-for="e in emotes" :key="e.id" :e="e" @click="assign(e)"/>
+        </grid>
+        <empty v-if="len(emotes) == 0" icon="wave" :title="t('ui.wheel.none')"/>
+      </scroll>
+    </row>
+  </column>
+</template>
+<style>
+.we { background: $surface; }
+.we-bar { height: 24; gap: 5; padding: 0 6 0 4; border-bottom: 1 $line; flex-shrink: 0; }
+.we-icon { color: $brand; }
+.we-title { color: $text; font-weight: bold; text-wrap: nowrap; }
+.we-count { color: $dim; text-wrap: nowrap; }
+.we-done { height: 16; }
+.we-main { grow: 1; align: stretch; }
+.we-pane { background: $panel; border-right: 1 $line; flex-shrink: 0; }
+.we-centre { position: absolute; align-items: center; justify-content: center; gap: 2; pointer-events: none; }
+.we-slot { color: $brand2; font-scale: 0.75; text-transform: uppercase; }
+.we-name { max-width: 100%; color: $text; font-weight: bold; text-align: center; text-wrap: nowrap; text-overflow: ellipsis; }
+.we-hint { position: absolute; left: 0; right: 0; justify-content: center; color: $dim; pointer-events: none; }
+.we-hint .warn { color: $warn; }
+.we-list { grow: 1; basis: 0; padding: 5; }
+</style>

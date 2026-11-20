@@ -1,0 +1,10 @@
+{
+  "colors": {
+    "brand": "#c2409e",
+    "brand-hover": "#a8338a",
+    "brand2": "#3fe0c5",
+    "ok": "#3fe0c5",
+    "warn": "#ffd23d",
+    "danger": "#ff3d5e"
+  }
+}

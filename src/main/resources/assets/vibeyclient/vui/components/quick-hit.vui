@@ -1,0 +1,22 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<props>{ "h": {} }</props>
+<template>
+  <row class="tile qhit" tabindex="0">
+    <box class="tile-bar"/>
+    <stack class="tile-icon"><ico name="gear"/></stack>
+    <column class="tile-text">
+      <text class="tile-name">{{ t('ui.menu.settings') }}</text>
+      <text class="tile-hit">› {{ h.label }}</text>
+    </column>
+  </row>
+</template>
+<style>
+.tile { height: 24; gap: 5; padding-right: 5; background: $surface; border: 1 $line; cursor: pointer;
+        transition: background 150ms out, border-color 150ms out; }
+.tile:hover, .tile:focus { background: $surface2; border-color: $line2; }
+.tile-bar { width: 2; align-self: stretch; background: $brand2; }
+.tile-icon { size: 13; align-items: center; background: $panel; border: 1 $line; flex-shrink: 0; color: $muted; }
+.tile-text { grow: 1; gap: 1; min-width: 0; }
+.tile-name { color: $text; text-wrap: nowrap; text-overflow: ellipsis; }
+.tile-hit { color: $brand2; font-scale: 0.75; text-wrap: nowrap; text-overflow: ellipsis; }
+</style>

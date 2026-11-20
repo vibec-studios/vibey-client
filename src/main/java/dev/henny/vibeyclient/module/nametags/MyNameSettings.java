@@ -19,7 +19,9 @@ final class MyNameSettings {
     private MyNameSettings() {}
 
     static void declare(NametagsModule m) {
-        m.settings().add(new OptionSetting("myStyle", MyNameSettings::style, MyNameSettings::setStyle, () -> styles(m)))
+        dev.henny.vibeyclient.client.names.NameStyleEffect.register();
+        m.settings().add(new OptionSetting("myStyle", MyNameSettings::style, MyNameSettings::setStyle, () -> styles(m))
+                        .preview(dev.henny.vibeyclient.client.ClientCompat::playerName, MyNameSettings::effect))
                 .section("mine").visibleWhen(() -> shown() && styles(m).size() > 1);
         m.settings().add(new OptionSetting("myRank", MyNameSettings::rank, MyNameSettings::setRank, () -> ranks(m)))
                 .section("mine").visibleWhen(() -> shown() && ranks(m).size() > 2);
@@ -34,6 +36,10 @@ final class MyNameSettings {
     private static String style() {
         String s = Ranks.own().style();
         return s == null ? NONE : s;
+    }
+
+    private static String effect(String v) {
+        return NONE.equals(v) ? "none" : dev.henny.vibeyclient.client.names.NameStyleEffect.css(v);
     }
 
     private static void setStyle(String v) {

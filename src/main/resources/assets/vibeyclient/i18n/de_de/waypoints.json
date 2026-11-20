@@ -31,7 +31,9 @@
     "minimapKey": "Minimap an/aus",
     "listKey": "Wegpunktliste",
     "cacheMb": "Karten-Cache",
-    "cacheMb.desc": "Speicherplatz für erkundete Kartenteile."
+    "cacheMb.desc": "Speicherplatz für erkundete Kartenteile.",
+    "beamsThrough": "Strahl durch Berge",
+    "beamsThrough.desc": "Ein schwacher Strahl bleibt hinter Gelände sichtbar."
   },
   "hud": {
     "minimap": "Minimap",

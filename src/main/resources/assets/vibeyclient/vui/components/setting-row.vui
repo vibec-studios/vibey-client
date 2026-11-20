@@ -5,6 +5,7 @@
     <text class="setting-label" :tooltip="row.blocked ? t('ui.module.blockedTip') : row.tip">{{ row.label }}</text>
     <ico v-if="row.blocked" name="lock" class="setting-lock"/>
     <row class="setting-control" :disabled="row.blocked">
+      <text v-if="row.preview" class="setting-preview" :style="{ textEffect: row.previewFx }">{{ row.preview }}</text>
       <toggle v-if="row.kind == 'toggle'" v-model="row.value"/>
       <template v-else-if="row.kind == 'slider'">
         <slider class="setting-slider" v-model="row.value" :min="row.min" :max="row.max" :step="row.step"/>
@@ -30,6 +31,7 @@
 .setting-slider { width: 64; }
 .setting-value { width: 24; color: $muted; text-align: end; text-wrap: nowrap; }
 .setting-text { width: 96; }
+.setting-preview { color: $text; max-width: 72; text-wrap: nowrap; text-overflow: ellipsis; }
 .setting-action { height: 14; }
 keybind.conflict { border-color: $warn; color: $warn; }
 segment { height: 12; padding: 0 4; }

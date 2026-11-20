@@ -1,0 +1,26 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<props>{ "slices": [], "frame": {}, "on": -1, "numbers": false }</props>
+<template>
+  <stack class="ring">
+    <stack v-for="s in slices" :key="s.index" :id="'slice-' + s.index" class="slice" :class="{ on: s.index == on, empty: s.empty }"
+           :tooltip="numbers ? s.name : ''" :style="{ left: s.x, top: s.y, width: frame.tile, height: frame.tile }"
+           @click="pick(s)" @contextmenu="clear(s)">
+      <image v-if="s.thumb" class="slice-thumb" :src="s.thumb" fit="contain"/>
+      <ico v-else-if="s.empty" name="plus" class="slice-plus"/>
+      <text v-else class="slice-name">{{ s.name }}</text>
+      <text v-if="numbers" class="slice-no">{{ s.number }}</text>
+    </stack>
+  </stack>
+</template>
+<style>
+.ring { position: absolute; left: 0; top: 0; right: 0; bottom: 0; pointer-events: none; }
+.slice { position: absolute; padding: 3; background: alpha($panel, .9); border: 1 $line2; align-items: stretch;
+         pointer-events: auto; cursor: pointer; transition: background 100ms out, border-color 100ms out; }
+.slice:hover { border-color: $muted; }
+.slice.on { background: mix($panel, $brand, .3); border-color: $brand; }
+.slice.empty { background: alpha($panel, .72); border-color: $line; color: $dim; align-items: center; }
+.slice.empty.on { color: $text; border-color: $brand; }
+.slice-name { color: $muted; font-scale: 0.75; text-align: center; align-self: center; }
+.slice-no { position: absolute; anchor: top-left; left: 2; top: 1; color: $dim; font-scale: 0.75; }
+.slice.on .slice-no { color: $brand2; }
+</style>

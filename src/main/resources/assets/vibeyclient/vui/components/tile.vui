@@ -3,7 +3,7 @@
 <template>
   <row class="tile" :class="{ on: m.on, unavailable: !m.available }" :tooltip="m.tip" tabindex="0">
     <box class="tile-bar" :style="{ background: m.on ? m.accent : 'transparent' }"/>
-    <stack class="tile-icon" :style="{ color: m.on ? m.accent : '#6b6b75' }"><ico :name="m.icon"/></stack>
+    <stack class="tile-icon" :style="{ color: m.on ? m.accent : '$dim' }"><ico :name="m.icon"/></stack>
     <column class="tile-text">
       <text class="tile-name">{{ m.name }}</text>
       <text v-if="m.hit" class="tile-hit">› {{ m.hit }}</text>

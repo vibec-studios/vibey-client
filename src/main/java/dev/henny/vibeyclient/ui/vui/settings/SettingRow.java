@@ -24,6 +24,8 @@ public final class SettingRow {
     int maxLength = 256;
     List<Integer> presets = List.of();
     Supplier<String> conflict = () -> "";
+    Supplier<String> preview = () -> "";
+    Supplier<String> previewFx = () -> "none";
 
     SettingRow(Setting<?, ?> setting, String kind, String label, String tip, SettingValue value) {
         this.setting = setting;
@@ -49,6 +51,8 @@ public final class SettingRow {
     public List<Integer> getPresets() { return presets; }
     public String getDisplay() { return format.apply(value.get()); }
     public String getConflict() { return conflict.get(); }
+    public String getPreview() { return preview.get(); }
+    public String getPreviewFx() { return previewFx.get(); }
     public boolean isBlocked() { return setting.blockedByServer(); }
     public Setting<?, ?> setting() { return setting; }
 

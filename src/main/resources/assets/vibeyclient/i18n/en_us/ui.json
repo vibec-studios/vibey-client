@@ -44,7 +44,12 @@
     "info": "Bug report info",
     "infoTip": "Copies version and connection.",
     "noticeOpen": "Open link",
-    "noticeHide": "Hide"
+    "noticeHide": "Hide",
+    "theme": "Theme",
+    "themeTip": "Colour-blind sets keep status colours apart.",
+    "ownAccent": "Own accent",
+    "ownAccentTip": "Your colour for buttons.",
+    "accent": "Accent"
   },
   "status": {
     "online": "Online",
@@ -262,5 +267,22 @@
       "friends": "Friends",
       "nobody": "Nobody"
     }
+  },
+  "wheel": {
+    "title": "Emotes",
+    "empty": "Empty",
+    "release": "Release to play",
+    "click": "Click to play",
+    "fill": "Click to fill",
+    "cancel": "Right click cancels",
+    "off": "Emotes off",
+    "editor": "Emote wheel",
+    "slot": "Slot {0}",
+    "count": "{0}/8",
+    "clear": "Clear",
+    "done": "Done",
+    "editHint": "Right click clears",
+    "none": "No emotes",
+    "locked": "Locked"
   }
 }

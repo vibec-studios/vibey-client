@@ -31,7 +31,9 @@
     "minimapKey": "Toggle minimap",
     "listKey": "Waypoint list",
     "cacheMb": "Map cache",
-    "cacheMb.desc": "Disk space for explored map tiles."
+    "cacheMb.desc": "Disk space for explored map tiles.",
+    "beamsThrough": "Beams through hills",
+    "beamsThrough.desc": "A faint beam stays visible behind terrain."
   },
   "hud": {
     "minimap": "Minimap",

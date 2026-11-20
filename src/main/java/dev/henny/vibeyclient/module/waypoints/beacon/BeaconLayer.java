@@ -46,7 +46,8 @@ public final class BeaconLayer {
             clear();
             return;
         }
-        state.update(runtime.navigator().targetId(), m.beams.get());
+        double pixelAngle = BeaconDeclutter.pixelAngle(mc);
+        state.update(runtime.navigator().targetId(), m.beams.get(), m.beamsThrough.get(), pixelAngle);
         String d = WorldContext.dimension(mc.level);
         WaypointList list = runtime.store().list();
         boolean o = m.otherDimension.get();
@@ -57,6 +58,7 @@ public final class BeaconLayer {
             e.shownPos(p);
             obj.visibility().hidden(p != null && BeaconAnchor.standingAt(mc.player, p));
         }
+        BeaconDeclutter.apply(mc, objects.values(), pixelAngle);
     }
 
     private void rebuild(WaypointList list, String d, boolean showOther) {

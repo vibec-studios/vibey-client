@@ -42,6 +42,8 @@ public final class DevLinkModule extends VibeyModule {
 
     public final BoolSetting creatorMode = bool("creatorMode", Vibey.platform().isDevelopment());
     public final IntSetting port = intRange("port", 47821, 1024, 65535).field().advanced();
+    public final dev.henny.vibeyclient.api.setting.Settings.ActionSetting copyToken = action("copyToken", () -> DevLinkToken.copy(this));
+    public final dev.henny.vibeyclient.api.setting.Settings.ActionSetting newToken = action("newToken", () -> DevLinkToken.renew(this)).advanced();
 
     private final ExecutorService control = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r, "VibeyClient-DevLink");
@@ -120,6 +122,11 @@ public final class DevLinkModule extends VibeyModule {
             o.add("submission", sub);
             p.broadcast(o);
         });
+    }
+
+    @Override
+    public dev.henny.vibeyclient.api.StatusCard statusCard() {
+        return DevLinkStatus.of(this);
     }
 
     @Override

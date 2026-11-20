@@ -263,11 +263,11 @@
   "fx.source.pc": "Effekte: aus dem PC-Sound",
   "fx.source.lyrics": "Effekte: aus dem Songtext-Timing",
   "fx.source.none": "Effekte: warten auf Musik",
-  "setting.openMenu.action": "Lyrics-Menü öffnen",
+  "setting.openMenu.action": "Lyrics-Menü",
   "setting.panel": "Musik-Tafel",
   "setting.panel.desc": "Was läuft, in der Welt: anschauen und Play drücken.",
   "setting.panel.button": "Platzieren",
-  "setting.panel.action": "Musik-Tafel platzieren",
+  "setting.panel.action": "Tafel setzen",
   "panel.tip.previous": "Zurück",
   "panel.tip.play": "Abspielen",
   "panel.tip.pause": "Pause",
@@ -279,5 +279,7 @@
   "setting.earlier.desc": "Lyrics 0,1 s früher",
   "setting.later.desc": "Lyrics 0,1 s später",
   "setting.hide.desc": "Lyrics aus-/einblenden",
-  "setting.hideClouds.desc": "Wolken bei eigenen Himmeln ausblenden"
+  "setting.hideClouds.desc": "Wolken bei eigenen Himmeln ausblenden",
+  "setting.panelOn": "Tafel zeigen",
+  "setting.panelOn.desc": "Aus blendet die Musik-Tafel aus; ihr Platz bleibt."
 }

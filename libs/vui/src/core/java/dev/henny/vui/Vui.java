@@ -77,6 +77,11 @@ public final class Vui {
         return this;
     }
 
+    public Vui useThemes(List<String> resourcePaths, java.util.Map<String, String> tokens) {
+        themeFiles.use(resourcePaths, tokens);
+        return this;
+    }
+
     public Diagnostics themeDiagnostics() {
         return themeFiles.diagnostics();
     }

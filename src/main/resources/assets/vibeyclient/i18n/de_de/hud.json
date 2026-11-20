@@ -21,8 +21,8 @@
     "resetLayout.desc": "Mit dem Standard-Layout neu anfangen",
     "intro.desc": "Die Editor-Einführung noch mal zeigen",
     "folder.desc": "Ordner mit gespeicherten Layouts",
-    "timerKey": "Taste: Timer Start/Stopp",
-    "timerLap": "Taste: Timer Runde/Reset"
+    "timerKey": "Timer Start/Stopp",
+    "timerLap": "Timer Runde/Reset"
   },
   "widget": {
     "fps": "FPS",

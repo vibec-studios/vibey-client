@@ -19,6 +19,7 @@ public final class VibeTheme {
                 .put("brand", "#8b6cff")
                 .put("brand2", "#3fe0c5")
                 .put("brand-hover", "#9e84ff")
+                .put("on-brand", "#ffffff")
                 .put("ok", "#3fe0c5")
                 .put("danger", "#ff5470")
                 .put("warn", "#ffb547")

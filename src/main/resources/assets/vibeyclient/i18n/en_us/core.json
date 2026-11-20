@@ -76,7 +76,19 @@
     "uiScale.x2": "2×",
     "uiScale.x3": "3×",
     "uiScale.x4": "4×",
-    "open_menu.desc": "Open the Vibey menu"
+    "open_menu.desc": "Open the Vibey menu",
+    "theme": "Theme",
+    "theme.desc": "Colours of the Vibey menus.",
+    "theme.dark": "Vibe dark",
+    "theme.light": "Light",
+    "theme.contrast": "High contrast",
+    "theme.deutan": "Deuteranopia",
+    "theme.protan": "Protanopia",
+    "theme.tritan": "Tritanopia",
+    "ownAccent": "Own accent",
+    "ownAccent.desc": "Your colour for buttons and highlights.",
+    "accent": "Accent",
+    "accent.desc": "Colour of buttons and highlights."
   },
   "title": {
     "wardrobe": "Wardrobe",

@@ -1,0 +1,22 @@
+{
+  "colors": {
+    "bg": "#000000",
+    "panel": "#000000",
+    "surface": "#000000",
+    "surface2": "#0e0e0e",
+    "surface3": "#1c1c1c",
+    "line": "#ffffff70",
+    "line2": "#ffffffb0",
+    "text": "#ffffff",
+    "muted": "#e6e6e6",
+    "dim": "#bdbdbd",
+    "brand": "#b9a8ff",
+    "brand2": "#62f5dd",
+    "brand-hover": "#d6ccff",
+    "on-brand": "#000000",
+    "ok": "#62f5dd",
+    "danger": "#ff8a9c",
+    "warn": "#ffd27a",
+    "scrim": "#000000e6"
+  }
+}

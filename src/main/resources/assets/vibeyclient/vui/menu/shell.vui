@@ -7,13 +7,13 @@
   "fields": {
     "view": "string", "panel": "string", "query": "string", "status": "string", "statusLabel": "string",
     "statusTip": "string", "requests": "number", "modules": "list", "creators": "list", "showCreators": "bool",
-    "page?": "object", "moreOpen": "bool", "quick": "list", "quickMore": "list", "quickMoreOpen": "bool",
+    "page?": "object", "moreOpen": "bool", "quick": "list", "quickMore": "list", "quickMoreOpen": "bool", "quickHits": "list", "quickFocus": "string",
     "notices?": "list", "version": "string", "account": "object", "statusOptions": "list", "friendsOnline": "list",
     "friendsOffline": "list", "showOffline": "bool", "adding": "bool", "addName": "string"
   },
   "actions": ["open(m)", "toggled(m)", "back", "run(row)", "close", "openWardrobe", "openHud", "link(id)", "showWelcome",
               "openInbox", "chat(f)", "invite(f)", "join(f)", "addFriend(name)", "openAccount", "goOnline", "signIn", "retry",
-              "openNotice(n)", "dismissNotice(n)"]
+              "openNotice(n)", "dismissNotice(n)", "openQuickAt(h)"]
 }
 </contract>
 <template>

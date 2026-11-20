@@ -13,9 +13,18 @@ import dev.henny.vui.text.effect.Wave;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 public final class TextEffects {
+    private static final Map<String, Function<List<String>, TextEffect>> CUSTOM = new ConcurrentHashMap<>();
+
     private TextEffects() {
+    }
+
+    public static void register(String name, Function<List<String>, TextEffect> factory) {
+        CUSTOM.put(name, factory);
     }
 
     public static TextEffect parse(String source) {
@@ -30,6 +39,8 @@ public final class TextEffects {
         int open = word.indexOf('(');
         String name = open < 0 ? word : word.substring(0, open);
         List<String> args = open < 0 ? List.of() : CssValues.arguments(word);
+        Function<List<String>, TextEffect> custom = CUSTOM.get(name);
+        if (custom != null) return custom.apply(args);
         return switch (name) {
             case "gradient" -> gradient(args);
             case "wave" -> new Wave(num(args, 0, 1f), num(args, 1, 1f), num(args, 2, 0.6f));

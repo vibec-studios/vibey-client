@@ -76,7 +76,19 @@
     "uiScale.x2": "2×",
     "uiScale.x3": "3×",
     "uiScale.x4": "4×",
-    "open_menu.desc": "Vibey-Menü öffnen"
+    "open_menu.desc": "Vibey-Menü öffnen",
+    "theme": "Design",
+    "theme.desc": "Farben der Vibey-Menüs.",
+    "theme.dark": "Vibe dunkel",
+    "theme.light": "Hell",
+    "theme.contrast": "Hoher Kontrast",
+    "theme.deutan": "Deuteranopie",
+    "theme.protan": "Protanopie",
+    "theme.tritan": "Tritanopie",
+    "ownAccent": "Eigener Akzent",
+    "ownAccent.desc": "Deine Farbe für Knöpfe und Markierungen.",
+    "accent": "Akzent",
+    "accent.desc": "Farbe für Knöpfe und Markierungen."
   },
   "title": {
     "wardrobe": "Garderobe",

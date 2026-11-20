@@ -26,6 +26,7 @@ public final class MusicPanel {
     private static final MusicControls controls = new MusicControls();
     private static WorldObject panel;
     private static boolean hooked;
+    private static boolean restored;
 
     private MusicPanel() {}
 
@@ -38,14 +39,17 @@ public final class MusicPanel {
             R3Mc.onWorld(new WorldListener() {
                 @Override
                 public void worldJoined(String worldKey) {
-                    restore();
+                    restored = false;
                 }
 
                 @Override
                 public void worldLeft(String worldKey) {
-                    save();
-                    if (panel != null) R3Mc.remove(panel);
+                    if (panel != null) {
+                        save();
+                        R3Mc.remove(panel);
+                    }
                     panel = null;
+                    restored = false;
                 }
             });
         });
@@ -59,8 +63,21 @@ public final class MusicPanel {
         return controls;
     }
 
+    public static void sync(boolean wanted) {
+        if (!wanted) {
+            if (panel != null) R3Mc.remove(panel);
+            panel = null;
+            restored = false;
+            return;
+        }
+        if (panel != null || restored || R3Mc.worldKey() == null) return;
+        restored = true;
+        restore();
+    }
+
     public static void open() {
         if (R3Mc.worldKey() == null) return;
+        restored = true;
         if (panel != null && R3Mc.scene().get(panel.id()) != null) {
             R3Mc.scene().interaction().beginMove(panel);
             return;
