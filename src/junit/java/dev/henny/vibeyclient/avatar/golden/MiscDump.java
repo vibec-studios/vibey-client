@@ -3,7 +3,6 @@ package dev.henny.vibeyclient.avatar.golden;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import dev.henny.vibeyclient.BuildInfo;
 import dev.henny.vibeyclient.avatar.AvatarItem;
 import dev.henny.vibeyclient.avatar.AvatarItems;
 import dev.henny.vibeyclient.avatar.ClientVersion;
@@ -18,12 +17,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 final class MiscDump {
+    static final String PINNED_CONTENT_VERSION = "0.3.1";
+
     private MiscDump() {}
 
     static String versions() {
-        Out o = new Out().line("contentVersion", BuildInfo.VERSION);
+        Out o = new Out().line("contentVersion", PINNED_CONTENT_VERSION);
         for (String[] p : Tables.VERSIONS) o.line("compare", "'" + p[0] + "'", "'" + p[1] + "'", Integer.signum(ClientVersion.compare(p[0], p[1])));
-        for (String[] p : Tables.VERSIONS) if (p[1] != null) o.line("satisfies", "'" + p[1] + "'", ClientVersion.satisfies(p[1]));
+        for (String[] p : Tables.VERSIONS) if (p[1] != null) o.line("satisfies", "'" + p[1] + "'", ClientVersion.compare(PINNED_CONTENT_VERSION, p[1]) >= 0);
         byte[][] thumbs = Tables.thumbnails();
         for (int i = 0; i < thumbs.length; i++) o.line("thumbnail", i, DevItems.checkThumbnail(thumbs[i]));
         return o.toString();

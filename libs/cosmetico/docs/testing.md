@@ -27,7 +27,10 @@ file when it is missing (or with `-Dcosmetico.golden.write=true`) and otherwise 
 engine while it still exists. After the old engine is deleted the files stay the reference.
 
 Inputs: every bundle in `content/dist`, `content/dist/polar-pals` and `content/audit` (42 files, also the ones that
-must fail). The content version is the client version of the dump (first line of `versions.txt`).
+must fail). The content version of the dump is pinned to `0.3.1` (first line of `versions.txt`, constant
+`PINNED_CONTENT_VERSION` in the old engine's `MiscDump`), so a client version bump never changes the golden files.
+Only the parse of the audit bundle `needs_update` (requires 9.0.0) still follows the real client version; it
+changes from 9.0.0 on, long after the old engine is deleted.
 
 | File | Content | Compared |
 |---|---|---|
