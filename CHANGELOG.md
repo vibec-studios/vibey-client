@@ -2,6 +2,52 @@
 
 All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.properties`.
 
+## 0.4.0-beta.2 – companions, AFK cinematics and a screen editor (beta)
+
+Another **beta**: you only get it on the beta / dev channel of the Vibe Launcher or from GitHub. 0.3.2 stays the
+normal version.
+
+> **Fabric 1.21.11 only.** Everything new in this beta is only in the Fabric 1.21.11 jar. All other jars (Fabric and
+> NeoForge, other Minecraft versions) are the same as in beta.1, without these features.
+>
+> *Kurz auf Deutsch:* Alles Neue in dieser Beta (Item-Modelle, Effekte und Partikel, AFK-Cinematics, Screen-Editor,
+> Server- und Weltenliste mit Freunde-Tab, Companions, farbige Modul-Icons) gibt es nur in der Fabric-1.21.11-Version.
+> Alle anderen Versionen bleiben wie in beta.1, ohne diese Funktionen.
+
+**Companions (new)**
+- Living companions that follow you around, from companion packs. A seal, a penguin and a robot come with the client;
+  more packs go into `.minecraft/companionpacks`, just like resource packs.
+
+**AFK cinematics (new)**
+- When you are AFK for a few minutes (or press **F9**), the camera flies on its own: your builds and the world, other
+  players, an orbit around you, a panorama, your waypoints, the sky, a dronie or a mix of everything.
+- The AFK screen has its own HUD layout, so you can show lyrics, the clock or whatever you like while it runs.
+
+**Screen editor (new)**
+- Press **F12** (or the pencil) in any menu to move, resize or hide its elements, group them in panels, and set the
+  size, dimming and blur per screen.
+
+**Item models**
+- Move, turn and resize the item in each hand with an in-game editor.
+- Swing styles and swing speed, enchantment glint colour and strength, and the size of dropped items and items in
+  frames.
+
+**Effects and particles**
+- Tone down or switch off fire, the pumpkin overlay, the vignette, the totem animation, nausea and the hurt shake.
+- Every particle type on its own: amount, size, colour or off. Presets Vanilla, Clean, PvP and Fancy, with a live
+  editor.
+
+**Server and world lists**
+- Sort servers and worlds by drag and drop, including your own world order.
+- A new **Friends** tab shows which friends are on which server (also on LAN), worlds they host, and your invites.
+- New privacy switch *Share server address*, **off** by default.
+
+**And also**
+- Every module has its own coloured icon.
+
+Servers can switch the new features off as before (e.g. `visuals.helditem`, `visuals.fire`, `visuals.pumpkin`,
+`visuals.totem`, `visuals.particles`, `cinematic.afk`, `companion.show`).
+
 ## 0.4.0-beta.1 – the rebuilt client (beta)
 
 This is a **beta**. It is not the normal release: you only get it if you pick the beta / dev channel in the Vibe
