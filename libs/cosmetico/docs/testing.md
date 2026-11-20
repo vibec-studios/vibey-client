@@ -73,6 +73,16 @@ python libs/cosmetico/tools/shotdiff.py build/review/cosmetico/baseline build/re
 
 (max channel difference, changed pixels, pixels off by more than 16; masks of changed pixels in the third folder).
 
-## Self-test
+## Self-test (other versions, Vibey Client)
 
-The old `VIBEYCLIENT_AVATAR_TEST` self-test belongs to the old engine and is not wired to cosmetico yet (see the plan).
+For targets without a client gametest: `VIBEYCLIENT_AVATAR_TEST=true|world|devlink` (or `-Dvibeyclient.avatarTest=true`)
+plus `runClient`, dev environment only. It lives in the client (`module/cosmetics/selftest`, it uses the wardrobe and
+the builtin items) and runs on cosmetico: three previews on the title screen (front/side/back, then a wave), with
+`world` the local player in third person (front, guitar emote, back), with `devlink` a front/back shot of every item
+pushed from Blockbench. Screenshots in the run dir, log prefix `[vibeyclient-avatartest]`, the game quits at the end.
+
+## Gametests and the production catalog
+
+Dev runs fetch the real catalog (`GlobalSettings.backend()`). Tests that depend on the exact item order switch online
+features off for their duration (`WardrobeUiGameTest`); catalog items such as `vibey:dev_cape` (sort 0) would
+otherwise sort in front of the test's own items.

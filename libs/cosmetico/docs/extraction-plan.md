@@ -52,7 +52,10 @@ P28 (core part: `ShownBundle`, `SlotVisibility`), P30 (core part: `PreviewState`
   accessor now comes from cosmetico, so it still compiles on 1.21.2–1.21.5).
 - Not split yet although touched: `LoadoutSync` (561 lines), `WardrobeScreen` (497), `CosmeticsModule` (~320): only
   the API calls changed. Do the §1.3 splits before more features land there.
-- Not ported: the old `SelfTest` (`VIBEYCLIENT_AVATAR_TEST`) – no longer ticked; P39 needs a cosmetico self-test.
+- Self-test (P39) ported to the client: `module/cosmetics/selftest/*` on the cosmetico API, same env var, shot names
+  and log prefix (it needs the wardrobe and builtin items, so it stays a Vibey Client tool).
+- `WardrobeUiGameTest` failed after the merge because the production catalog gained `vibey:dev_cape` (sort 0); the
+  pre-switch commit fails the same way. The test now runs with online features off.
 - `CosmeticoConfig.thirdPersonEmotes` / `emoteVolume` are now set by the emotes module; the module broadcasts its own
   emotes through an `EmoteListener` (start/stop of the local player), so stop-on-move inside cosmetico is broadcast too.
 - `Locators` got `names()` / `clear()` (used by the showcase gametest), `Clock` got `pin()`.

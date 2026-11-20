@@ -48,12 +48,15 @@ public final class WardrobeUiGameTest implements FabricClientGameTest {
     private Optional<Wardrobe> oldWardrobe = Optional.empty();
     private Optional<AvatarPreview> oldPreview = Optional.empty();
     private int oldScale;
+    private boolean wasOnline;
 
     @Override
     public void runTest(ClientGameTestContext context) {
         context.getInput().resizeWindow(1280, 720);
         context.runOnClient(mc -> {
             oldScale = mc.options.guiScale().get();
+            wasOnline = GlobalSettings.onlineFeatures.on();
+            GlobalSettings.onlineFeatures.set(false);
             oldWardrobe = Services.get(Wardrobe.class);
             oldPreview = Services.get(AvatarPreview.class);
             Services.register(Wardrobe.class, wardrobe);
@@ -69,6 +72,7 @@ public final class WardrobeUiGameTest implements FabricClientGameTest {
             wardrobe.wheel[4] = NS + "sit";
             wardrobe.wheel[6] = NS + "seal_summon";
         });
+        context.waitFor(mc -> Cosmetico.items().all().stream().noneMatch(i -> ItemSource.REMOTE.equals(i.source()) && !i.id().startsWith(NS)), 100);
         try {
             titleScreen(context);
             inWorld(context);
@@ -81,6 +85,7 @@ public final class WardrobeUiGameTest implements FabricClientGameTest {
                 oldWardrobe.ifPresent(w -> Services.register(Wardrobe.class, w));
                 oldPreview.ifPresent(p -> Services.register(AvatarPreview.class, p));
                 GlobalSettings.language.set(GlobalSettings.Language.AUTO);
+                GlobalSettings.onlineFeatures.set(wasOnline);
             });
             setScale(context, oldScale);
             context.getInput().resizeWindow(1280, 720);
