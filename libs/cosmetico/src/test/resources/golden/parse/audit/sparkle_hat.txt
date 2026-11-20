@@ -1,0 +1,50 @@
+id vibeytest:sparkle_hat
+kind COSMETIC
+name Audit Sparkle Hat | Audit Sparkle Hat
+description  | null
+author Vibey audit
+tags [audit]
+rarity RARE
+slot HAT
+hideWithArmor [HEAD]
+pet GROUND 1.0
+cape -1 shield -1
+emote null
+sha256 ea8803f2b0197f911a3ea7b49fe9f29264c95507d4d388ede944b0021d2ea910 size 8931
+warning hideWithArmor: unknown armor slot "tail"
+warning animation idle bone brim position: unknown interpolation "elastic", using linear
+warning animation idle event: unknown type light
+texture 0 main 16 16 64 64 1 1 [0] false false 1 1b82de52e9fdaa346e67b97577c8b5df61e66694ed781ff708069ee9180276e0
+sprite 0 spark 0 0.0 0.0 4.0 4.0
+sound 0 pop 4240 5e3b5ab8f958e9739d4f28997c7bb69970d65d6804b36c8d906103bc3eae8c7d
+model 0 cubes 2 bones 2 locators 2
+bone 0 brim -1 HEAD [0.0 32.0 0.0] [0.0 0.0 0.0] false false false false 1
+cube [-5.0 32.0 -5.0] [5.0 33.0 5.0] 0.0 false null null [0.0 0.0] 0
+bone 1 orbit 0 null [0.0 33.0 0.0] [0.0 0.0 0.0] true false true false 1
+cube [5.0 34.0 -1.0] [7.0 36.0 1.0] 0.0 false null null [0.0 0.0] 0
+locator orbit_tip 1 null [6.0 36.0 0.0]
+locator crown 0 null [0.0 34.0 0.0]
+animation idle 2.0 true false false tracks 2 events 6
+track 1 null
+channel rotation 5
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.5 [0.0 90.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 180.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 270.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 360.0 0.0] [NaN NaN NaN] CATMULLROM
+track 0 null
+channel position 3
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] LINEAR
+key 1.0 [0.0 0.5 0.0] [NaN NaN NaN] LINEAR
+key 2.0 [0.0 0.0 0.0] [NaN NaN NaN] LINEAR
+event 0.0 SOUND minecraft:block.amethyst_block.chime -1 -1 null 1 null null 0.0 0.0 0.0 false 0.3 1.4 -1 true
+event 0.25 PARTICLE minecraft:end_rod -1 -1 orbit_tip 2 [0.02 0.02 0.02] [0.0 0.01 0.0] 1.0 0.15 0.0 false 1.0 1.0 -1 true
+event 0.75 PARTICLE null 0 -1 orbit_tip 3 [0.05 0.05 0.05] [0.0 0.02 0.0] 0.6 0.12 -0.002 true 1.0 1.0 -1 true
+event 1.25 PARTICLE minecraft:heart -1 -1 crown 1 [0.0 0.0 0.0] [0.0 0.0 0.0] 1.0 0.15 0.0 false 1.0 1.0 -1 true
+event 1.5 SOUND pop -1 0 orbit_tip 1 null null 0.0 0.0 0.0 false 0.4 1.2 -1 true
+event 1.9 PARTICLE minecraft:dust -1 -1 crown 1 [0.0 0.0 0.0] [0.0 0.0 0.0] 1.0 0.15 0.0 false 1.0 1.0 -1 true
+animation celebrate 1.0 false false false tracks 1 events 0
+track 0 null
+channel scale 2
+key 0.0 [1.0 1.0 1.0] [NaN NaN NaN] LINEAR
+key 1.0 [2.0 2.0 2.0] [NaN NaN NaN] LINEAR

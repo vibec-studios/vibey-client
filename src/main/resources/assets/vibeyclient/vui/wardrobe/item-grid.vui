@@ -1,0 +1,14 @@
+<import name="item-card" src="vibeyclient:components/item-card"/>
+<import name="empty" src="vibeyclient:components/empty"/>
+<template>
+  <scroll class="items">
+    <grid class="item-grid" min-column="52" gap="3">
+      <item-card v-for="it in items" :key="it.id" :it="it" @click="pick(it)" @dblclick="wear(it)"/>
+    </grid>
+    <empty v-if="len(items) == 0" :icon="query ? 'search' : 'shirt'"
+           :title="query ? t('ui.wardrobe.noMatch') : t('ui.wardrobe.empty')"/>
+  </scroll>
+</template>
+<style>
+.items { grow: 1; basis: 0; padding: 5; }
+</style>

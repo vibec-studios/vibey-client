@@ -11,6 +11,7 @@ import dev.henny.vibeyclient.ui.MenuEntries.Place;
 import dev.henny.vibeyclient.ui.VibeyScreen;
 import dev.henny.vibeyclient.ui.VibeyTabs;
 import dev.henny.vibeyclient.ui.screen.ModulesPanel;
+import dev.henny.vibeyclient.ui.vui.Menus;
 import net.minecraft.client.gui.screens.Screen;
 
 /**
@@ -33,11 +34,11 @@ public final class CoreMenus {
                 MenuEntries.whenOnline("social"), p -> openTab(p, FRIENDS_TABS, "social"), CoreMenus::socialBadge));
         // 30: "media" (the media module registers it)
         MenuEntries.register(Place.TITLE, new Entry("vibey", "core.title.vibey", Icons.SEAL, 100,
-                () -> true, p -> ClientCompat.openScreen(new VibeyScreen(p))));
+                () -> true, Menus::open));
 
         // ---------------------------------------------------------------- pause
         MenuEntries.register(Place.PAUSE, new Entry("vibey", "core.pause.vibey", Icons.SEAL, 0,
-                () -> true, p -> ClientCompat.openScreen(new VibeyScreen(p))));
+                () -> true, Menus::open));
         MenuEntries.register(Place.PAUSE, new Entry("wardrobe", "core.title.wardrobe", Icons.SHIRT, 10,
                 MenuEntries.whenEnabled("cosmetics"), p -> openTab(p, WARDROBE_TABS, "cosmetics")));
         MenuEntries.register(Place.PAUSE, new Entry("friends", "core.title.friends", Icons.FRIENDS, 20,
@@ -51,6 +52,11 @@ public final class CoreMenus {
 
     /** Opens the first existing Vibey tab of {@code tabs}, else the settings page of {@code moduleId}. */
     public static void openTab(Screen parent, String[] tabs, String moduleId) {
+        if (!dev.henny.vibeyclient.ui.vui.ClassicUi.enabled()) {
+            if ("social".equals(moduleId)) Menus.openFriends(parent);
+            else Menus.openModule(parent, moduleId);
+            return;
+        }
         for (String t : tabs) {
             for (VibeyTabs.Tab tab : VibeyTabs.visible()) {
                 if (tab.id().equals(t)) {

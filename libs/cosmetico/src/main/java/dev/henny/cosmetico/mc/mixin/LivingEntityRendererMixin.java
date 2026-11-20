@@ -1,0 +1,35 @@
+package dev.henny.cosmetico.mc.mixin;
+
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import org.spongepowered.asm.mixin.Mixin;
+//? if >=1.21.2 {
+import com.mojang.blaze3d.vertex.PoseStack;
+import dev.henny.cosmetico.mc.render.AvatarCarrier;
+import dev.henny.cosmetico.mc.render.WorldPass;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+//?}
+
+@Mixin(LivingEntityRenderer.class)
+public abstract class LivingEntityRendererMixin {
+    //? if >=1.21.9 {
+    //? if >=26.1 {
+    /*@Inject(method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V", at = @At("HEAD"))
+    private void cosmetico$world(net.minecraft.client.renderer.entity.state.LivingEntityRenderState state, PoseStack ps,
+                             net.minecraft.client.renderer.SubmitNodeCollector out, net.minecraft.client.renderer.state.level.CameraRenderState camera, CallbackInfo ci) {
+    *///?} else {
+    @Inject(method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/CameraRenderState;)V", at = @At("HEAD"))
+    private void cosmetico$world(net.minecraft.client.renderer.entity.state.LivingEntityRenderState state, PoseStack ps,
+                             net.minecraft.client.renderer.SubmitNodeCollector out, net.minecraft.client.renderer.state.CameraRenderState camera, CallbackInfo ci) {
+    //?}
+        if (state instanceof AvatarCarrier c && c.cosmetico$avatar() != null) WorldPass.submit(c.cosmetico$avatar(), state, ps, out, camera);
+    }
+    //?} else if >=1.21.2 {
+    /*@Inject(method = "render(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", at = @At("HEAD"))
+    private void cosmetico$world(net.minecraft.client.renderer.entity.state.LivingEntityRenderState state, PoseStack ps,
+                             net.minecraft.client.renderer.MultiBufferSource buffers, int light, CallbackInfo ci) {
+        if (state instanceof AvatarCarrier c && c.cosmetico$avatar() != null) WorldPass.render(c.cosmetico$avatar(), state, ps, buffers, light);
+    }
+    *///?}
+}

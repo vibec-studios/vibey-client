@@ -25,19 +25,28 @@
   "mixins": [
     "vibeyclient.mixins.json",
     "vibeyclient.social.mixins.json",
-    "vibeyclient.cosmetics.mixins.json",
-    "vibeyclient.emotes.mixins.json",
     "vibeyclient.multiplayer.mixins.json",
     "vibeyclient.media.lyrics.mixins.json",
     "vibeyclient.pvp.mixins.json",
+    "vibeyclient.hud.mixins.json",
     "vibeyclient.clips.mixins.json",
+    "vibeyclient.info.mixins.json",
+    "vibeyclient.camera.mixins.json",
+    "vibeyclient.visuals.mixins.json",
+    "vibeyclient.inventory.mixins.json",
+    "vibeyclient.servers.mixins.json",
     "vibeyclient.devlink.mixins.json",
-    "vibeyclient.nametags.mixins.json"
+    "vibeyclient.nametags.mixins.json",
+    "vibeyclient.chat.mixins.json",
+    "vibeyclient.social.streamer.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.16.5",
     "fabric-api": "*",
     "minecraft": "${minecraft_range}",
-    "java": ">=${java}"
+    "java": ">=${java}",
+    "vui": ">=${vui_version}",
+    "r3": ">=${r3_version}",
+    "cosmetico": ">=${cosmetico_version}"
   }
 }

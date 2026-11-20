@@ -1,0 +1,19 @@
+{
+  "name": "Optik",
+  "description": "Item-Physik und Partikelmenge.",
+  "summary": "Item-Physik, Partikel",
+  "section": {
+    "items": "Items",
+    "particles": "Partikel"
+  },
+  "setting": {
+    "itemPhysics": "Item-Physik",
+    "itemPhysics.desc": "Drops kippen und liegen flach.",
+    "particles": "Partikel",
+    "particles.desc": "0 % blendet sie aus.",
+    "keepImportant": "Treffer behalten",
+    "keepImportant.desc": "Krits, Schaden, Explosionen bleiben.",
+    "ambientOff": "Keine Umgebung",
+    "ambientOff.desc": "Keine Sporen, Asche, Tropfen, Regen."
+  }
+}

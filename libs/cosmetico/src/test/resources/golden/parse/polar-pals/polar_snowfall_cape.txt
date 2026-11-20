@@ -1,0 +1,14 @@
+id vibey:polar_snowfall_cape
+kind COSMETIC
+name Polar Pals · Snowfall Cape | Polar Pals · Schneefall-Umhang
+description HD animated cape: the seal pup and the penguin sit on their ice floe under a rippling aurora while snow falls. The penguin waves, the seal blinks. Purple fleece lining with teal snowflakes. | Animierter HD-Umhang: Robbenbaby und Pinguin sitzen auf ihrer Eisscholle unter wogendem Polarlicht, während Schnee fällt. Der Pinguin winkt, die Robbe blinzelt. Lila Fleecefutter mit türkisen Schneeflocken.
+author Vibe Craft Studios
+tags [polar-pals, cape, aurora, seal, penguin, animated]
+rarity RARE
+slot CAPE
+hideWithArmor []
+pet GROUND 1.0
+cape 0 shield -1
+emote null
+sha256 db8dca2c27dacdf8484c3a5fc2c6318757fdcb852c8ebf7f902a503f36ffe11b size 179061
+texture 0 cape 64 32 256 1024 8 3 [0 1 2 3 4 5 6 7] false true 24 e30f01833fdba96472e9374c7afe94142992a30510068e9fe067bec00c549d17

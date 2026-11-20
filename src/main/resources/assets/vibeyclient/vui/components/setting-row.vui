@@ -1,0 +1,40 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<props>{ "row": {} }</props>
+<template>
+  <row class="setting" :class="{ blocked: row.blocked }">
+    <text class="setting-label" :tooltip="row.blocked ? t('ui.module.blockedTip') : row.tip">{{ row.label }}</text>
+    <ico v-if="row.blocked" name="lock" class="setting-lock"/>
+    <row class="setting-control" :disabled="row.blocked">
+      <text v-if="row.preview" class="setting-preview" :style="{ textEffect: row.previewFx }">{{ row.preview }}</text>
+      <toggle v-if="row.kind == 'toggle'" v-model="row.value"/>
+      <template v-else-if="row.kind == 'slider'">
+        <slider class="setting-slider" v-model="row.value" :min="row.min" :max="row.max" :step="row.step"/>
+        <text class="setting-value">{{ row.display }}</text>
+      </template>
+      <segmented v-else-if="row.kind == 'choice' && row.compact" v-model="row.value" :options="row.options"/>
+      <select v-else-if="row.kind == 'choice'" v-model="row.value" :options="row.options"/>
+      <keybind v-else-if="row.kind == 'key'" v-model="row.value" :class="{ conflict: row.conflict }"
+               :tooltip="row.conflict ? t('ui.settings.conflict', row.conflict) : ''"/>
+      <colorpicker v-else-if="row.kind == 'color'" v-model="row.value" :presets="row.presets"/>
+      <textfield v-else-if="row.kind == 'text'" class="setting-text" v-model.trim="row.value" :placeholder="row.placeholder"
+                 :max-length="row.maxLength"/>
+      <button v-else-if="row.kind == 'action'" :id="'act-' + row.id" class="setting-action" @click="run(row)">{{ row.button }}</button>
+    </row>
+  </row>
+</template>
+<style>
+.setting { height: 18; gap: 4; }
+.setting-label { grow: 1; min-width: 0; color: $text; text-wrap: nowrap; text-overflow: ellipsis; }
+.setting.blocked .setting-label { color: $dim; }
+.setting-lock { color: $warn; }
+.setting-control { gap: 4; flex-shrink: 0; }
+.setting-slider { width: 64; }
+.setting-value { width: 24; color: $muted; text-align: end; text-wrap: nowrap; }
+.setting-text { width: 96; }
+.setting-preview { color: $text; max-width: 72; text-wrap: nowrap; text-overflow: ellipsis; }
+.setting-action { height: 14; }
+keybind.conflict { border-color: $warn; color: $warn; }
+segment { height: 12; padding: 0 4; }
+select { height: 14; }
+keybind { height: 14; }
+</style>

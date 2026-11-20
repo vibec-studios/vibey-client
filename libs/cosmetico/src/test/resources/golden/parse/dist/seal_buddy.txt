@@ -1,0 +1,131 @@
+id vibey:seal_buddy
+kind COSMETIC
+name Seal Buddy | Robbenkumpel
+description Our mascot as a tiny pet. Blinks, wiggles its flippers and galumphs after you. | Unser Maskottchen als kleines Haustier. Blinzelt, wackelt mit den Flossen und robbt dir hinterher.
+author Vibe Craft Studios
+tags [seal, cute, mascot, pet, starter]
+rarity EPIC
+slot PET
+hideWithArmor []
+pet GROUND 0.4
+cape -1 shield -1
+emote null
+sha256 2649cb997d160b0683c4445c0be1257f077fd32a6c9fda6aa0b1a001a4a2034c size 10438
+texture 0 main 64 64 64 64 1 1 [0] false false 1 e8bcd8606c99a5d4cf27639088d3701c0a0cf63f53f8ed5094b9335567456df0
+model 0 cubes 10 bones 7 locators 0
+bone 0 seal -1 WORLD [0.0 0.0 0.0] [0.0 0.0 0.0] false false false false 2
+cube [-5.0 0.0 -8.0] [5.0 7.0 8.0] 0.0 false null null [0.0 0.0] 0
+cube [-3.0 0.0 8.0] [3.0 4.0 12.0] 0.0 false null null [32.0 23.0] 0
+bone 1 seal_head 0 null [0.0 6.5 -6.0] [0.0 0.0 0.0] false false false false 2
+cube [-4.0 5.0 -13.0] [4.0 13.0 -5.0] 0.0 false null null [0.0 23.0] 0
+cube [-3.0 5.0 -16.0] [3.0 8.0 -13.0] 0.0 false null null [0.0 39.0] 0
+bone 2 seal_lids 1 null [0.0 9.0 -13.0] [0.0 0.0 0.0] false false false false 2
+cube [1.0 8.0 -13.05] [3.0 10.0 -13.05] 0.0 false null null [32.0 45.0] 0
+cube [-3.0 8.0 -13.05] [-1.0 10.0 -13.05] 0.0 false null null [36.0 45.0] 0
+bone 3 seal_fin_left 0 null [-5.0 1.0 -4.0] [0.0 -26.0 0.0] false false false false 1
+cube [-7.5 0.0 -8.0] [-4.5 1.0 -3.0] 0.0 false null null [18.0 39.0] 0
+bone 4 seal_fin_right 0 null [5.0 1.0 -4.0] [0.0 26.0 0.0] false false false false 1
+cube [4.5 0.0 -8.0] [7.5 1.0 -3.0] 0.0 false null null [34.0 39.0] 0
+bone 5 seal_tail_left 0 null [-1.2 1.0 12.0] [0.0 29.0 0.0] false false false false 1
+cube [-3.7 0.0 11.5] [-0.7 1.0 16.5] 0.0 false null null [0.0 45.0] 0
+bone 6 seal_tail_right 0 null [1.2 1.0 12.0] [0.0 -29.0 0.0] false false false false 1
+cube [0.7 0.0 11.5] [3.7 1.0 16.5] 0.0 false null null [16.0 45.0] 0
+animation idle 4.0 true false true tracks 6 events 3
+track 1 null
+channel rotation 7
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.6 [-5.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.2 [-2.0 16.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.9 [-2.0 16.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.5 [3.0 -10.0 -4.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 -6.0 0.0] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 3 null
+channel rotation 7
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.35 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.5 [0.0 0.0 -18.0] [NaN NaN NaN] CATMULLROM
+key 0.65 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 0.8 [0.0 0.0 -18.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 4 null
+channel rotation 7
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.35 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.5 [0.0 0.0 18.0] [NaN NaN NaN] CATMULLROM
+key 0.65 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 0.8 [0.0 0.0 18.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 5 null
+channel rotation 5
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 10.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 10.0 0.0] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 6 null
+channel rotation 5
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 -10.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 -10.0 0.0] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 0 null
+channel rotation 3
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [-1.5 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+event 0.0 VISIBILITY null -1 -1 null 0 null null 0.0 0.0 0.0 false 0.0 0.0 2 false
+event 2.7 VISIBILITY null -1 -1 null 0 null null 0.0 0.0 0.0 false 0.0 0.0 2 true
+event 2.85 VISIBILITY null -1 -1 null 0 null null 0.0 0.0 0.0 false 0.0 0.0 2 false
+animation walk 0.8 true false false tracks 6 events 0
+track 0 null
+channel rotation 5
+key 0.0 [-4.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.2 [4.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.4 [-4.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.6 [4.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.8 [-4.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+channel position 5
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.2 [0.0 2.5 0.0] [NaN NaN NaN] CATMULLROM
+key 0.4 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 2.5 0.0] [NaN NaN NaN] CATMULLROM
+key 0.8 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 1 null
+channel rotation 5
+key 0.0 [5.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.2 [-6.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.4 [5.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.6 [-6.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.8 [5.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 3 null
+channel rotation 5
+key 0.0 [0.0 22.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.2 [0.0 -14.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.4 [0.0 22.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 -14.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.8 [0.0 22.0 0.0] [NaN NaN NaN] CATMULLROM
+track 4 null
+channel rotation 5
+key 0.0 [0.0 -22.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.2 [0.0 14.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.4 [0.0 -22.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 14.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.8 [0.0 -22.0 0.0] [NaN NaN NaN] CATMULLROM
+track 5 null
+channel rotation 5
+key 0.0 [0.0 -12.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.2 [0.0 14.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.4 [0.0 -12.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 14.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.8 [0.0 -12.0 0.0] [NaN NaN NaN] CATMULLROM
+track 6 null
+channel rotation 5
+key 0.0 [0.0 12.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.2 [0.0 -14.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.4 [0.0 12.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 -14.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.8 [0.0 12.0 0.0] [NaN NaN NaN] CATMULLROM

@@ -23,7 +23,9 @@ ignored, so you can list keys that only newer clients know.
 | Key | What is switched off |
 |---|---|
 | `zoom` | Zoom |
-| `freelook` | Freelook (looking around without turning) |
+| `camera.freelook` (or `freelook`) | Freelook (looking around without turning) |
+| `camera.orbit` | Rotating the third-person camera around the player with the middle mouse (F5 stays) |
+| `camera.*` | Both camera keys |
 | `togglesprint` | Toggle sprint |
 | `togglesneak` | Toggle sneak |
 | `crosshair` | Custom crosshair |
@@ -47,6 +49,7 @@ ignored, so you can list keys that only newer clients know.
 | `hud.items` | Item counter |
 | `hud.memory` | Memory usage |
 | `hud.compass` | Compass |
+| `hud.timer` | Stopwatch / countdown / split timer |
 | `emotes` | Emotes: no emote wheel, no own emotes, other players' emotes are not shown |
 | `cosmetics.*` | Every cosmetic below |
 | `cosmetics.pets` | Pets (own and other players') |
@@ -54,12 +57,27 @@ ignored, so you can list keys that only newer clients know.
 | `discord.server` | The server name in the Discord / launcher status ("Playing on …"), and in saved clips |
 | `clips` | Clips: no recording at all. The replay buffer stops at once and what it held is thrown away; the save key shows "Clips are off on this server" |
 | `clips.auto` | Clips: no automatic clips (kill, multi-kill, clutch, death). Saving with the key still works |
+| `nametags.*` | Every key below |
+| `nametags.seal` | The Vibey seal before player names |
+| `nametags.ranks` | Rank and badge icons before player names (nametag, tab list, chat) |
+| `nametags.styles` | Coloured / animated name styles (nametag, tab list, chat) |
+| `waypoints.minimap` | The minimap (terrain and own waypoints; it never shows players or mobs). Waypoints, beacons and the world map stay |
+| `info.*` | Every key below |
+| `info.light` | Light level of the looked-at block |
+| `info.chunks` | Chunk border key (vanilla F3+G is not touched) |
+| `info.card` | Block/mob info card and cards pinned into the world |
+| `info.food` | Food gain on the hunger bar |
+| `info.saturation` | Saturation on the hunger bar (off by default) |
+| `info.toolwarn` | Tool break warning |
+| `info.tnt` | TNT fuse timer |
+| `inventory.tweaks` | Quick moves in inventories (Shift-drag and mouse-wheel moves; off by default in the client too) |
+| `inventory.presets` | Hotbar presets (switch key, preset bar) |
 
 The authoritative list for a given client is what it announces in `vibey:hello` (the plugin logs it, see below);
 the keys come from `ServerRules.supports(...)` calls in the modules. The current Vibey Client declares `zoom`,
 `togglesprint`, `togglesneak`, `crosshair`, `blockoutline`, `hitcolor`, `lowfire`, `lowshield`, `hud.togglestate`
-(PvP module), `clips`, `clips.auto` (Clips module), `emotes`, `cosmetics.*` slots and `discord.server`; `freelook` and the other `hud.*` keys arrive with
-the HUD editor. Listing a key an older client does not know is harmless.
+(PvP module), `clips`, `clips.auto` (Clips module), `nametags.seal`, `nametags.ranks`, `nametags.styles` (Names and ranks), `waypoints.minimap` (Waypoints), `info.light`, `info.chunks`, `info.card`, `info.food`, `info.saturation`, `info.toolwarn`, `info.tnt` (Info module), `camera.freelook`, `freelook`, `camera.orbit` (Camera module), `inventory.tweaks`, `inventory.presets` (Inventory), `emotes`, `cosmetics.*` slots, `discord.server` and every `hud.*` key
+above (HUD module). Listing a key an older client does not know is harmless.
 
 ## Paper / Spigot: the VibeyRules plugin
 
@@ -87,7 +105,7 @@ log-hello: true      # log who announced Vibey Client and which keys their clien
 5. Staff that should keep everything: give them `vibeyrules.bypass` (nobody has it by default, not even operators).
 
 The log then shows lines like
-`[VibeyRules] Alex announced vibey:hello: vibey-client 0.3.0, supports [zoom, freelook, …] (does not know: [minimap])`.
+`[VibeyRules] Alex announced vibey:hello: vibey-client 0.3.0, supports [zoom, freelook, …] (does not know: [waypoints.minimap])`.
 
 ## Fabric / NeoForge servers
 

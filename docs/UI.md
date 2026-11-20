@@ -1,173 +1,214 @@
 # Vibey Client UI
 
-How the client looks and how a module plugs into it. Code: `dev.henny.vibeyclient.ui` (widgets, menu shell),
-`ui.screen` (module grid, module pages, General, About), `ui.title` (title screen buttons, onboarding),
-`client/PauseMenu` (pause row). Tokens: `ui/Theme` (SPEC §4).
+How the client's menus are built and how a module plugs into them. Every menu is a **vui document**
+(`src/main/resources/assets/vibeyclient/vui/**`, Vue-like `.vui` files) bound to one small Java controller. The design
+(principles, screen map, previews, contracts) is [UI-NEW.md](UI-NEW.md); the library is [libs/vui](../libs/vui/README.md).
 
-> See also: [MODULES.md](MODULES.md) (module API) · [SPEC §4](SPEC.md#4-design-system-vibe) (design tokens) ·
-> [docs index](README.md)
+> See also: [UI-NEW.md](UI-NEW.md) (design + contracts) · [MODULES.md](MODULES.md) (module API) ·
+> [HUD.md](HUD.md) (HUD editor) · [vui dev loop](../libs/vui/docs/dev-loop.md)
 
-## Design rules
+## Rules
 
-- **Same product as the Vibe launcher:** deep black (`BG`, `PANEL`, `SURFACE*`), square corners, 1 px lines
-  (`LINE`, `LINE2`), purple `BRAND` for "active/primary", teal `BRAND2` for small labels and "ok". No rounded
-  corners, no gradients – the only soft thing allowed is a faint brand glow (stacked translucent rects).
-- **Text:** Minecraft font for everything you read. `PixelFont` (blocky 5-row display font) only for the "VIBEY"
-  wordmark and short brand words. Small uppercase captions (`Widgets.caption`) for section titles, dim text for
-  secondary info. Every string in `i18n/en_us` **and** `i18n/de_de`; German is ~30 % longer – check it fits.
-- **Crisp at every GUI scale:** draw with `Gfx` fills; icons are 9 × 9 pixel maps (`Icons`), the seal is rendered
-  at screen-pixel density (`Seal`). Don't draw scaled-down PNGs.
-- **Motion:** 150 ms, `cubic-bezier(0.2, 0.8, 0.2, 1)` (`Anim`), fade/slide 6–8 px. Never block input while
-  something animates; no per-frame allocation in hot paths. `GlobalSettings.animations` off = no motion.
-- **States:** hover and keyboard focus look the same (`ui.focusedLast()` → draw it like hover); otherwise the `Ui`
-  context draws a 1 px brand focus ring. Active/selected = brand bar or underline. Disabled = `DIM`.
-- **Layering:** since 1.21.6 text is drawn after shapes inside one layer – call `g.layer()` before anything that
-  must cover text (overlays, popups, tooltips).
-- **Smallest screen:** 427 × 240 GUI px (1280 × 720 at GUI scale 3). Everything must fit there; long content
-  scrolls (`ScrollArea`), long labels clip with "…" and get a tooltip (`ui.tooltip`).
+- **Less text.** Labels ≤ 3 words (module names ≤ 12 characters), one sentence at most in a tooltip, no paragraphs.
+  Details go into `setting.<key>.desc` (shown on hover). `checkI18n` keeps both languages complete.
+- **One primary action per view** (purple), everything else ghost, icon or row.
+- **Icons first:** 9 × 9 pixel icons from `vui/icons.json` (`<ico name="gear"/>`), label in the tooltip where space is
+  short.
+- **427 × 240 GUI px first** (GUI scale 3 at 1280 × 720), English and German; wider screens get more columns.
+- **Keyboard:** Tab / Shift+Tab move focus, Enter / Space activate, Esc steps back (key capture → field → popover →
+  page → search → close). Typing anywhere in the menu searches.
+- **Look:** theme tokens (`$brand`, `$brand2`, `$on-brand`, `$surface`, `$line` …, see [Themes](#themes)) – never a
+  hex colour in a document; square corners, 1 px lines,
+  150 ms `out` motion; the global *Animations* switch turns motion off (`VuiMc.animations`).
+- **Code:** one controller class per document, short single-purpose files, no code comments – explanations live here.
+
+## Packages
+
+| Package | Job |
+|---|---|
+| `ui/vui` | glue: `VibeyVui` (translator from `Lang`, `theme.json`, animations switch, dev controllers), `Menus` (all ways into the menu), `ClassicUi` (switch back to the old screens), `SyncedScreen` (base screen: UI scale, pause like the parent, re-sync every 5 ticks), `WatchedState`, `HeadTextures` (player faces as vui textures), `HostGfx` (`Gfx` for code that draws into a vui screen), `DevUiCommands` |
+| `ui/vui/settings` | the settings adapter: `Setting` → row descriptor for `components/setting-row` (`Rows`, `NumberRows`, `ChoiceRows`, `OptionRows`, `OtherRows`, `SettingRow`, `SettingValue`, `PageSections`) |
+| `ui/vui/menu` | the Vibey menu: `MenuScreen`, `MenuController` (facade over the parts below), `ModuleGrid`/`ModuleTile`/`ModuleSwitch`, `ModulePage`, `QuickSettings`, `Connection`, `BugInfo`, `NoticeList`, `Places`, `ModuleLook` |
+| `ui/vui/friends` | friends drawer: `FriendsPanel`, `Account`, `FriendRow` (data from the `FriendsDrawer` service) |
+| `ui/vui/corner` | title-screen corner icons and the pause row: `Decorations`, `Decor`, `TitleCorner`, `PauseRow`, `CornerEntry`, `ProxyButton`, `Bounds` |
+| `ui/vui/onboarding` | first-start welcome: `Onboarding`, `OnboardingController`, `KeyItem`, `Feature` |
+| `ui/vui/toast` | toasts: `VuiToasts` (the `Notify` sink), `ToastRequest` |
+| `ui/vui/theme` | UI themes: `UiThemes` (theme files + accent → `vui.useThemes`, live switch), `Accent` (custom accent → `brand`, `brand-hover`, `on-brand`), `Contrast` (WCAG maths), `ColorVision` (colour-blind simulation), `ThemeAudit` (the contrast/status checks), `DevThemeCommands` |
+| `ui/vui/dialog` | `Confirm.ask(...)` – the confirm modal |
+| `module/social/vui` | `SocialDrawer` (the `FriendsDrawer` service), `AccountScreen` + `AccountController` + `PrivacyRows` |
+| `module/cosmetics/vui` | wardrobe: `WardrobeVui`, `WardrobeController`, `Stage` (3D preview), `Thumbs`, `ItemList`, `Slots`; emote wheel: `EmoteWheelVui` + `WheelController`, wheel editor: `WheelEditorVui` + `WheelEditorController`, shared `WheelGeometry` / `WheelFrame` / `WheelSlices`, `EmoteRows`, `WheelDevCommands` |
 
 ## Screens
 
-| Screen | Class | Notes |
+| Screen | Document | Opened by |
 |---|---|---|
-| Title | vanilla `TitleScreen` + `ui/title/TitleButtons` | The title screen stays vanilla. Vibey adds a row of small square icon buttons (entries of `MenuEntries.Place.TITLE`: wardrobe, friends with unread badge, media, Vibey menu) in a free corner: top right, else top left, else bottom left. Tooltips on hover, Tab/Enter work. |
-| Onboarding | `ui/title/OnboardingScreen` | Once before the first title screen (`TitleHook` via `mixin/client/ScreenSwapMixin`, `GlobalSettings.onboarded()`), reopen from About. Skipped under Fabric's client gametest runner and the smoke test. |
-| Vibey menu | `ui/VibeyScreen` | Right Shift. Tabs from `VibeyTabs`: *Modules* (grid → module pages), *General*, *Account* (social), *About*. Tab/Shift+Tab focus, Enter clicks, Ctrl+Tab switches tabs, Esc: cancel key capture → leave text field → module page back to the grid → clear search → close. Typing anywhere searches modules and settings. |
-| Pause row | `client/PauseMenu` | One row under the vanilla buttons; above them or icon-only in the corner when the GUI is too small. |
+| Vibey menu | `menu/shell` (+ `header`, `module-grid`, `module-page`, `quick-settings`, `about`, `friends`) | Right Shift, title corner *Vibey*, pause row *Vibey*, `Menus.open/openModule/openFriends/openQuick/openAbout` |
+| Title corner | `title/corner` | drawn over the vanilla title screen (`Decorations.title`) |
+| Pause row | `pause/row` | drawn over the vanilla pause screen (`Decorations.pause`) |
+| Onboarding | `onboarding/onboarding` (+ 3 steps) | once before the first title screen (`TitleHook`), *Intro* in About |
+| Account | `social/account` | the account icon in the friends drawer, the social sidebar |
+| Wardrobe | `wardrobe/wardrobe` (+ rail, grid, preview) | title/pause *Wardrobe*, header shirt icon, cosmetics page *Open wardrobe* |
+| Toasts | `toast/stack` | `Notify.*` from any thread |
+| Confirm | `dialog/confirm` | `Confirm.ask(icon, title, text, yes, danger, onYes)` |
+| Emote wheel | `wardrobe/wheel` (+ `wheel-ring`) | emote wheel key (hold), `WardrobeUi.openWheel` |
+| Wheel editor | `wardrobe/wheel-editor` (+ `wheel-ring`, `components/emote-card`) | wardrobe wheel icon, empty slot click in the wheel, `WardrobeUi.openWheelEditor` |
+| Social sidebar, media/clips/multiplayer screens | still immediate mode (`Ui`/`Widgets`, `CardScreen`) | unchanged |
 
-Global *UI scale* (`GlobalSettings.uiScale`: game / 2× / 3× / 4×) sets the window GUI scale while a Vibey screen is
-open (`UiScale.apply/restore`) – whole numbers only, so nothing gets blurry.
+### Menu
 
-## Settings: module grid and pages
+`MenuScreen` hosts `menu/shell` with a `MenuController`. The controller is a thin facade: its public fields are the
+`State`s of small parts (`ModuleGrid`, `QuickSettings`, `FriendsPanel`, `NoticeList`) so the documents keep the flat
+names of the contract, and its methods delegate. `sync()` runs every 5 ticks (`SyncedScreen`) and keeps switches,
+values, lists and the open page in step with the game; `document().refresh()` re-reads plain getters.
 
-Built like the mod screens of the big clients, in the Vibe look (`ui/screen/ModulesPanel`, `SettingsView`):
+- **Grid:** one `ModuleTile` per visible module (`<id>.name`, icon from `ModuleLook.icon`, accent colour, switch =
+  `ModuleSwitch`, a `State` that writes through to `ModuleManager.setEnabled`). Tooltip = `<id>.summary`.
+  `ModuleCategory.CREATOR` modules sit behind the *Creator tools n* chip. Search (`query`) matches the name, the
+  summary and every setting label; a setting hit shows *› label* on the tile.
+- **Module page:** `ModulePage` = bar (back, icon, name with the description as tooltip, notice chips, the primary
+  action, the switch) + an optional status card (`VibeyModule.statusCard()` → `StatusCard{kind ok/warn/error/off,
+  label, text, detail}`, `components/status-card`, id `page-status`; devlink shows *Listening · 127.0.0.1:port · n
+  Blockbench* there) + sections. Notices: why the module cannot run, *Disabled by this server* (`ServerBadge`) and
+  `VibeyModule.notices()`.
+- **Quick settings** (gear): language, menu size, theme, animations, online, menu key; *More*: own accent (+ accent
+  colour while it is on), Vibe server, *Bug report info → Copy* (`BugInfo`), and *Classic menus* while the classic UI
+  is on. Search also matches these rows: a hit shows a *Settings › label* tile (`qhit-<setting key>`, e.g. `qhit-theme`) first in the
+  grid; clicking it opens the quick settings (and *More* if needed) with that row highlighted (`quickFocus`). Announcements (`Announcements.active()`)
+  are listed on top with *open link* and *hide*.
+- **About** (click the wordmark): version, website / source / bug report / licenses, *Intro*.
+- **Friends drawer:** filled from the `FriendsDrawer` service the social module registers while it is on and online:
+  me + status, requests chip, online friends with hover actions (invite, join, chat), *Offline n*, *+ Add*, account
+  icon. Without the service the drawer shows *Online is off* / *Not signed in* with one button.
 
-- **Grid:** search bar (modules, descriptions and setting labels; a hit on a setting shows "› setting name" on the
-  tile, a hit on a global setting adds a *General* tile), then one tile per module: icon, name, one or two lines of
-  description, on/off switch, accent bar while on. Modules of category `CREATOR` (Blockbench link) sit in a
-  collapsed *For creators* area under the grid.
-- **Module page:** toolbar with *‹ Modules / name* and the on/off switch, then the intro (big icon, description,
-  the module's buttons = its non-advanced `ActionSetting`s labelled `<label>.action` or the label, the first one
-  primary; then `notices()`, e.g. parts provided by the standalone Vibey Lyrics), then the settings as cards:
-  untitled first, then one card per `.section(...)`, three or more plain switches in two columns, the keys
-  (key caps, conflicts in amber with a tooltip), and at the bottom the collapsed *Advanced · for creators* area with
-  every `.advanced()` setting. Enums with up to four short values are segmented controls, else ‹ value ›.
-- **General tab** (`GeneralPanel`): language, menu size, animations, online features (+ connection status with a
-  tooltip), the menu key; advanced: Vibe server address, and technical info (version, game, server, connection,
-  protocol, settings folder) with *Copy* for bug reports.
-- **Account tab** (social `AccountPanel`): profile card (head, name, signed in or not, *Open friends* / *Sign out* or
-  *Sign in*), status, privacy, devices, blocked players. Server address, account id, sign-in method and device
-  addresses only in the advanced area.
+### Title corner and pause row
 
-Rule of thumb for texts: say what the player gets, no jargon; anything only a developer or creator needs is
-`.advanced()`.
+The vanilla title and pause screens stay vanilla. `Decorations` builds the corner/row document when the screen
+initialises and draws it after the screen (`ToastHooks.addScreenOverlay`), so tooltips are never covered by the title
+logo. Input stays vanilla: one invisible `ProxyButton` (a `VibeyButton` that draws nothing) per entry sits exactly on
+the drawn button, so clicks, Tab, Enter and narration work like any vanilla widget; the focused proxy's id is passed
+to the document as `focus`. Entries come from `MenuEntries` as before. Position: the free corner (top right → top left
+→ bottom left) and below the vanilla pause buttons (above, or icons only in the corner when there is no room).
 
-## In the world
+### Toasts
 
-- **Nametag icons** (module `nametags`): glyphs of the bitmap font `vibeyclient:icons` (`assets/vibeyclient/font/icons.json`,
-  8 × 8 cells, art drawn in 7 × 7 like the vanilla font, generated by `tools/gen-nametag-icons.mjs`): U+E000 seal,
-  U+E001 staff, U+E002 supporter, U+E003 creator. `NameIcons.glyphs(...)` gives a component for other UIs. They are
-  crisp at every GUI scale because they are font pixels.
-- **Wardrobe:** community items show *by <creator>* under the rarity in the preview column; items for a newer client
-  are greyed out with a lock and *Update Vibey Client*. New items arrive with one *New cosmetics available* toast
-  per batch.
+`VuiToasts` is the `Notify` sink: requests from any thread are queued and pushed into a vui `ToastStack` with the
+`toast/stack` template on the render thread. Kinds: info, ok, warn, error, invite (social toasts with an action). A
+toast with an action (`Notify.Toast.action`, or the first button of `ToastStack.show(toast, buttons, ms, key)`) gets
+one button; `ToastStack.dismiss(key)` still removes keyed toasts. Bottom right. Player-UUID icon keys become head
+textures.
 
-## HUD editor
+Toasts never block the screen under them: only their action button takes a click (`ToastStack.takesClick`, used by
+`VuiToasts.click` and vui's `ToastHost`), everything else – the toast body, the gaps of the stack – passes the click
+to the screen (e.g. the gallery's header buttons stay usable while *Image copied* is shown). Hovering pauses the
+countdown only for toasts with a button, so a plain toast under a resting cursor still goes away on time.
 
-`ui/hud`: the HUD editor and the widget API for every module – drag, 8 resize handles (Shift = free), snapping
-with guides and distance readouts, multi-select, undo/redo, right-click menu, style popover (global + per widget),
-widget library, templates, share codes and a first-run intro. Open it with `HudLayout.openEditor(parent)`.
-**Everything about it, and how to add a widget: [HUD.md](HUD.md).**
+### Settings adapter
 
-## Extension points
+Module pages are generated from the settings API (`docs/MODULES.md`):
 
-**Tabs in the Vibey menu** (in `onLoad`):
+| Setting | Row kind | Notes |
+|---|---|---|
+| `bool` | `toggle` | |
+| `intRange` / `floatRange` | `slider` | `display` formats unit / decimals / percent (`0..1` floats) |
+| `intRange(...).field()` | `text` | parsed on change |
+| `choice` | `choice` | segmented when ≤ 4 options of ≤ 6 characters, else a select; labels `<label>.<value>` |
+| `OptionSetting` | `choice` | options from a supplier, value read/written by lambdas (not stored) – e.g. nametags *My style*; `.preview(text, valueToEffect)` adds a live text before the control with a vui `text-effect` (*My style*: your name in the chosen style, `namestyle(<id>)`) |
+| `string` | `text` | |
+| `color` | `color` | presets from `ColorSetting.presets()` |
+| `keybind` | `key` | rebinding writes the vanilla mapping; `conflict` names other mappings on the same key |
+| `action` | `action` | the first non-advanced action is the page's primary button (`<label>.action`), the others are rows |
 
-```java
-VibeyTabs.register(new VibeyTabs.Tab("wardrobe", "cosmetics.tab.wardrobe", 10, WardrobePanel::new,
-        () -> isEnabled(), Icons.SHIRT));
-```
+Sections: settings without a section first (untitled), then one card per `.section(...)` in order of their first
+setting. Keybinds without a section join the untitled card, or a card titled with the module name. `.advanced()`
+settings go behind *More n*. `.visibleWhen(...)` rows are left out (the page is rebuilt when visibility changes).
+`.serverRule(key)` rows dim with a lock (`blocked`). Custom `createSettingsPanel()` pages are **not** shown in the new
+menu – port their content to settings (`OptionSetting`, actions) or to an own document.
 
-Conventional ids: `wardrobe`, `friends`, `account`. Order: Modules 0, About 1000. The icon is used when the window
-is too narrow for all labels. A `Panel` draws into `(x, y, w, h)` every frame with the `Ui` context; it may
-override `key(int)`, `typed(int)`, `onShow()`, `onHide()`.
+### Wardrobe
 
-**Title screen buttons and pause menu entries** (`ui/MenuEntries`, same id replaces):
+`WardrobeVui` (a `SyncedScreen`) hosts `wardrobe/wardrobe`. Thumbnails are cosmetico's thumbnail textures registered
+as vui textures (`Thumbs`); the 3D player is drawn by the host into `doc.ref("stage")` after the document (`Stage`
+wraps the `AvatarPreview` service). Click = pick (tries the item on, plays an emote), double click or the primary
+button = wear / take off, drag on the stage = rotate (`PreviewView.mouse`), double click on the stage = reset. The
+stage is painted from `Document.beforeOverlays`, i.e. after the document tree but before popovers and tooltips, so a
+tooltip over the stage is drawn above the player.
 
-```java
-MenuEntries.register(MenuEntries.Place.TITLE, new MenuEntries.Entry("media", "media.menu.title",
-        Icons.NOTE, 30, MenuEntries.whenEnabled("media"), parent -> ClientCompat.openScreen(new MediaScreen(parent))));
-MenuEntries.register(MenuEntries.Place.PAUSE, new MenuEntries.Entry("friends", "social.menu.friends",
-        Icons.FRIENDS, 20, MenuEntries.whenOnline("social"), parent -> ..., () -> unreadCount()));   // badge
-```
+### Emote wheel and wheel editor
 
-On the title screen every entry is a 20 × 20 icon button (the label is its tooltip and narration), so give it a
-clear `Icons` icon. Core orders – title: wardrobe 10, friends 20, media 30 (free for the media module), Vibey menu
-100 (last). Pause: Vibey 0, wardrobe 10, friends 20. The core registers defaults for `wardrobe` / `friends` (open the tab
-with that id, else the module's settings page); the cosmetics module replaces `wardrobe` with its full-screen
-wardrobe and social replaces `friends` with the sidebar. There is no `host` pause entry: the multiplayer module puts
-*Host World* in place of vanilla's *Open to LAN*. Entries of disabled modules are hidden via `visible`.
+`EmoteWheelVui` (does not pause, no vanilla background) hosts `wardrobe/wheel`: 8 square slices on a circle around
+the screen centre (slot 0 at the top, clockwise), the hovered emote's name in the middle, a small direction dot and
+one hint line above the wheel. `WheelGeometry.fit` sizes it so it stays between the top edge and the hotbar/hearts
+(44 GUI px) on every GUI scale; the centre is the screen centre, so the cursor MC puts there on open sits in the dead
+zone (30 % of the radius) and nothing is preselected. Selection is by direction: move the mouse towards a slice →
+it highlights (`hovered`), release the key → it plays and the wheel closes. A tap (released within 250 ms without
+pointing) keeps it open: click plays; left click on an empty slice opens the editor; right click / Esc cancel.
 
-**Player preview** – `api/service/MenuPreview` (the cosmetics module registers `TitlePreview`, the player with all
-equipped cosmetics, drag to rotate). The vanilla title screen does not show it; any Vibey screen that wants the
-player model can look it up:
+`WheelEditorVui` hosts `wardrobe/wheel-editor`: bar (back, title, *n/8*, *Clear*, primary *Done*), the same
+`wheel-ring` on the left (click = select a slot, right click = clear it, numbers on the slices) and the emotes as
+`emote-card`s on the right (click = put on the selected slot; an emote already on another slot swaps; the selection
+moves to the next empty slot). The old `EmoteWheelScreen` / `WheelEditorScreen` stay for the classic UI.
 
-```java
-Services.register(MenuPreview.class, new MenuPreview() {
-    public void render(Gfx g, int x, int y, int w, int h, int mouseX, int mouseY, float delta) { /* player in the box */ }
-    public boolean mouseClicked(double x, double y, int button) { return true; }          // start drag-rotate
-    public boolean mouseDragged(double x, double y, int b, double dx, double dy) { yaw += dx; return true; }
-});
-```
+## Themes
 
-Without one, show the seal (`Seal`) instead.
+Feature 28. *Theme* in the quick settings: `Vibe dark` (default, `vui/theme.json`), `Light`, `High contrast`,
+`Deuteranopia`, `Protanopia`, `Tritanopia`; *More → Own accent* + colour replaces `brand`/`brand-hover`/`on-brand`.
+Each theme is a vui theme JSON next to the base file (`vui/theme.<id>.json`, only the tokens it changes);
+`UiThemes.apply` calls `vui.useThemes([theme.json, theme.<id>.json], accentTokens)` and reloads every open document,
+so menus, HUD editor chrome, toasts, the emote wheel and world panels (music panel, video screens) change live.
+Documents use tokens only (`$on-brand` for text on `$brand`, `$bg` for text on `$danger`). HUD widget contents are
+still drawn by the old immediate-mode `ui/Theme` and keep the dark look.
 
-**Status numbers** – the social module registers `api/service/SocialStatus` (`onlineFriends()`, `badge()`); the
-title *Friends* button shows the badge, the General tab "Online · 3 friends online". Backend reachability comes from
-the public `GET /api/v1/meta` (`ui/title/BackendStatus`, refreshed when the title screen or the General tab opens),
-only while online features are on.
+| Theme | What changes |
+|---|---|
+| Vibe dark | the Vibe look; `brand` #7759ff (was #8b6cff: white button text now passes AA), darker hover, `dim` #80808b |
+| Light | light surfaces, dark text, deeper purple/teal/red/amber for AA on white |
+| High contrast | pure black, white text, brighter lines, light purple with black button text |
+| Deuteranopia / Protanopia | status colours from the Okabe–Ito set: ok = blue, warn = yellow, danger = pink / light red |
+| Tritanopia | magenta brand, teal ok, yellow warn, red danger |
 
-## Widgets cheat sheet
+Checks (`ThemeAudit`, JUnit `ThemeContrastTest`, gametest `PolishGameTest`): WCAG AA 4.5:1 for every text token on
+every surface it is used on (`text`, `muted`, `dim` on panel/surface/surface2/surface3, `brand2` captions,
+`on-brand` on `brand`/`brand-hover`, `bg` on `danger`, status colours on surface), 3:1 for non-text (`brand` icons and
+borders, `dim` on surface3). The colour-blind sets are checked by simulating the vision (Machado 2009 matrices) and
+measuring ΔE between ok / warn / danger: ≥ 60 in each set under its own condition (the dark theme: 32–48). A custom
+accent always gets black or white text, whichever contrasts more (≥ 4.58:1 by construction), and is darkened (light
+themes) or lightened (dark themes) in 4 % steps until it keeps 3:1 against `surface3` (e.g. teal #13a387 on Light
+becomes a deeper teal), so icons and borders in the accent stay visible.
 
-Immediate mode (`Ui` + `Widgets`), call every frame, keys must be stable objects (newer helpers: `segmented`,
-`keycap`, `disclosure`, `card`, `iconTile`, `drawToggle` for rows that are clickable as a whole):
+## Classic UI
 
-```java
-if (Widgets.button(ui, this, x, y, 80, 16, label, Widgets.Style.PRIMARY)) save();
-if (Widgets.toggle(ui, setting, x, y, setting.on(), true)) setting.toggle();
-float v = Widgets.slider(ui, key, x, y, 100, value);
-int d = Widgets.cycler(ui, key, x, y, 120, valueLabel);          // -1 / +1
-Widgets.textField(ui, key, x, y, 160, text, 64, s -> text = s);
-ui.tooltip(key, x, y, w, h, "Shown after 350 ms");
-if (ui.clicked(x, y, w, h)) ...;  boolean hot = ui.focusedLast() || ui.hover(x, y, w, h);
-int top = scroll.begin(ui, x, y, w, h); ...; scroll.end(ui, bottom);
-Icons.draw(g, Icons.SHIRT, x, y, Theme.MUTED);   PixelFont.drawExtruded(g, "VIBEY", x, y, 3, Theme.TEXT, Theme.BRAND);
-```
+The old screens (`VibeyScreen` with tabs, `TitleButtons`, the old pause row, `OnboardingScreen`, the old toast
+stack, `WardrobeScreen`) are still in the jar and come back with `-Dvibeyclient.classicUi=true` or the hidden global
+setting `core.classicUi` (shown under *More* in the quick settings only while it is on). What can be deleted once the
+new UI is approved: [UI-NEW.md → Deleting the classic UI](UI-NEW.md#deleting-the-classic-ui).
 
-On vanilla screens use `VibeyButton` (a real widget: Tab/Enter, narration). The seal: `new Seal(withIce)`,
-`seal.draw(g, x, y, unit, hovered)`, `seal.close()` in `removed()`.
+## Writing UI for a module
 
-## Testing
+- Settings: declare them (`MODULES.md`); labels ≤ 3 words, `.desc` one sentence. That's all for most modules.
+- A button on the page: `action("key", run)`; the first one is the page's primary.
+- Dynamic choices: `settings().add(new OptionSetting("key", read, write, choices))`.
+- An own screen: a `.vui` document under `assets/vibeyclient/vui/<module>/` + a controller + a `SyncedScreen`
+  subclass (see `AccountScreen`). Declare the controller fields in a `<contract>` block.
+- Title/pause entries: `MenuEntries.register(...)` as before; give each a pixel icon name from `vui/icons.json`.
+- Toasts: `Notify.info/success/warn/error(title, body)`; ≤ 2 words body, subject as title.
+- Confirmations: `Confirm.ask(...)`.
 
-`./gradlew :fabric-1.21.11:runClientGameTest` runs `VibeyUiGameTest`: vanilla title with the corner buttons (+ hover
-tooltip), module grid, a module page, the advanced area closed and open, General, Account, search, About,
-onboarding and the pause row, at GUI scales 2 / 3 and 1280 × 720 / 1920 × 1080, English and German. It also clicks
-through the real mouse input (title button → menu, tile → module page, Esc → grid).
-Screenshots: `versions/fabric-1.21.11/build/run/clientGameTest/screenshots/ui_*.png` – look at them.
+## Development and tests
 
-**Click self-test (every version, both loaders).** The client gametest only runs on 1.21.11, so clicks on the other
-versions are checked by `dev/ClickTest`: `./gradlew :fabric-26.3:runClient -Dvibeyclient.clicktest=<outdir>` (NeoForge:
-env `VIBEYCLIENT_CLICKTEST=<outdir>`). It feeds real mouse presses/releases into the game's `MouseHandler` (through
-`mixin/client/MouseHandlerAccessor`, so GUI scaling and the native button numbers are included) and checks an
-immediate-mode button, a right-click area and a `VibeyButton` on a test screen, then a tab of the real Vibey menu, the
-Vibey corner button on the vanilla title screen, a module tile (→ its page) and the key code round trip. It
-logs `[vibeyclient-clicktest] PASS|FAIL <check>` and a `SUMMARY`, writes `<outdir>/clicktest.txt` plus screenshots
-(`clicktest-screen.png`, `menu-before.png`, `menu-after.png`, `title-button-after.png`, `module-page.png`) and quits. Run it on 26.3 after touching input code.
-
-Mouse buttons: our code (`Ui`, `click(x, y, button)`, previews) uses GLFW numbers (`Keys.MOUSE_LEFT` = 0, right 1,
-middle 2). 26.3 (SDL) reports 1 left, 2 middle, 3 right; `BaseScreen` and `ToastHooks` convert with
-`Keys.mouseFromNative`, so never compare `MouseButtonEvent#button()` directly.
-
-Keys: screens compare GLFW codes (`Keys.ESCAPE`, `TAB`, ...). 26.3 reports SDL scancodes; `BaseScreen#key` and the
-screen key listeners get `Keys.fromNative(code)` (identity before 26.3; keys without a GLFW constant arrive as
-`Keys.NATIVE_ONLY + code`). `ClientCompat.matches` and the keybind capture convert back with `Keys.toNativeAny`.
+- **Dev loop:** `runClient` reads `.vui` files from the source folders. With `-Dvibeyclient.devDriver=<port>` the
+  DevDriver adds `menu [module|-] [panel]`, `title`, `pause`, `onboarding`, `lang en|de`, `uiscale X2`. Then
+  `scripts/vui-dev.sh loop shot.png` (reload + errors + screenshot, ~0.4 s), `click <id>`, `tree`, `errors`.
+- **Ids for tests and the bridge:** `open-about`, `open-wardrobe`, `open-hud`, `open-friends`, `open-quick`,
+  `close-menu`, `tile-<module>`, `page-back`, `page-primary`, `page-switch`, `page-more`, `creators`,
+  `dismiss-<notice>`, `act-<setting id>`, corner/pause `e-<entry>`.
+- **Gametests** (`./gradlew :fabric-1.21.11:runClientGameTest -Dvibeyclient.test.only=...`):
+  `VibeyUiGameTest` (every screen EN + DE at 427 × 240 and 640 × 360, search, onboarding steps, toast, confirm,
+  real clicks: title corner → menu, tile → page, Esc, tile switch, gear at GUI scale 2/3/4, menu size, pause row),
+  `ToastGameTest`, `WardrobeUiGameTest`, `NoticesGameTest` (needs the mock), `PolishGameTest` (every theme EN + DE:
+  menu grid, waypoints page, HUD editor + live contrast check; own accent; settings search hit; devlink card;
+  shots in `build/review/polish/`). Screenshots are copied to
+  `build/review/ui-new/`.
+- **Click self-test on other versions:** `dev/ClickTest` (`-Dvibeyclient.clicktest=<dir>`) clicks the gear, the title
+  corner button and a module tile of the new menu through the real mouse handler.
+- Mouse buttons and keys: vui gets GLFW codes on every version (26.3 SDL codes are mapped in the vui backend);
+  `MappingKeys` converts vanilla key mappings to and from vui keybind values (`-100 + button` for mouse buttons).

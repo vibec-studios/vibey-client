@@ -1,8 +1,8 @@
 package dev.henny.vibeyclient.module.cosmetics.ui;
 
 import dev.henny.vibeyclient.api.Lang;
-import dev.henny.vibeyclient.avatar.AvatarItem;
-import dev.henny.vibeyclient.avatar.Slot;
+import dev.henny.cosmetico.registry.Item;
+import dev.henny.cosmetico.model.Slot;
 
 /** The wardrobe's left column: one entry per cosmetic slot (SPEC §5 order) plus emotes. */
 enum Category {
@@ -28,7 +28,7 @@ enum Category {
         return slot == null;
     }
 
-    static Category of(AvatarItem item) {
+    static Category of(Item item) {
         if (item.isEmote()) return EMOTES;
         return item.slot() == null ? null : of(item.slot());
     }

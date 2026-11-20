@@ -1,0 +1,72 @@
+{
+  "name": "Waypoints",
+  "description": "Your own points as beacons, a map and a fair minimap.",
+  "summary": "Beacons, map, minimap",
+  "default": "Waypoint",
+  "death": "Death",
+  "section": {
+    "world": "In the world",
+    "minimap": "Minimap"
+  },
+  "setting": {
+    "openList": "Waypoints",
+    "openList.action": "Waypoints",
+    "openMap": "Map",
+    "openMap.action": "Map",
+    "beacons": "Beacons",
+    "beacons.desc": "Look at one to select it. Middle mouse moves it, the wheel sizes it, left click navigates.",
+    "beams": "Light beams",
+    "deathMarker": "Death point",
+    "deathMarker.desc": "Marks where you died.",
+    "otherDimension": "Nether ↔ Overworld",
+    "otherDimension.desc": "Shows points of the other dimension at the matching place.",
+    "portalCoords": "Portal coordinates",
+    "portalCoords.desc": "Look at a portal to see where it leads.",
+    "minimap": "Minimap",
+    "minimap.desc": "Explored terrain and your points. No players, no mobs.",
+    "minimapRotate": "Turn with me",
+    "minimapZoom": "Zoom",
+    "addKey": "Add waypoint",
+    "mapKey": "Open map",
+    "minimapKey": "Toggle minimap",
+    "listKey": "Waypoint list",
+    "cacheMb": "Map cache",
+    "cacheMb.desc": "Disk space for explored map tiles.",
+    "beamsThrough": "Beams through hills",
+    "beamsThrough.desc": "A faint beam stays visible behind terrain."
+  },
+  "hud": {
+    "minimap": "Minimap",
+    "minimap.desc": "Explored terrain and your points.",
+    "portal": "Portal coords",
+    "portal.desc": "Where you would be in the other dimension."
+  },
+  "dim": {
+    "overworld": "Overworld",
+    "nether": "Nether",
+    "end": "End"
+  },
+  "toast": {
+    "added": "Added",
+    "copied": "Code copied",
+    "imported": "Imported",
+    "bad": "No waypoint code"
+  },
+  "ui": {
+    "title": "Waypoints",
+    "add": "Add here",
+    "import": "Paste code",
+    "shareAll": "Copy all",
+    "share": "Copy code",
+    "map": "Map",
+    "list": "List",
+    "close": "Close",
+    "navigate": "Navigate",
+    "visible": "Show",
+    "delete": "Delete",
+    "empty": "No waypoints",
+    "center": "Center",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out"
+  }
+}

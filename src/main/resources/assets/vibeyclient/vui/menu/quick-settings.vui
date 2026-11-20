@@ -1,0 +1,36 @@
+<import name="setting-row" src="vibeyclient:components/setting-row"/>
+<import name="status-dot" src="vibeyclient:components/status-dot"/>
+<import name="chip" src="vibeyclient:components/chip"/>
+<import name="notice" src="vibeyclient:components/notice"/>
+<import name="icon-button" src="vibeyclient:components/icon-button"/>
+<template>
+  <column class="quick">
+    <row class="quick-status" :tooltip="statusTip">
+      <status-dot :status="status"/>
+      <text class="quick-status-text">{{ statusLabel }}</text>
+    </row>
+    <row v-for="n in notices" :key="n.id" class="quick-notice">
+      <notice class="quick-notice-text" :kind="n.kind" :text="n.title" :tip="n.body"/>
+      <icon-button v-if="n.url" icon="link" :tip="t('ui.quick.noticeOpen')" @click="openNotice(n)"/>
+      <icon-button :id="'dismiss-' + n.id" icon="close" :tip="t('ui.quick.noticeHide')" @click="dismissNotice(n)"/>
+    </row>
+    <setting-row v-for="r in quick" :key="r.id" :row="r" :class="{ hit: r.id == quickFocus }"/>
+    <row class="quick-foot">
+      <chip icon="sliders" :label="quickMoreOpen ? t('ui.menu.less') : t('ui.menu.more')" :on="quickMoreOpen"
+            @click="quickMoreOpen = !quickMoreOpen"/>
+    </row>
+    <column v-if="quickMoreOpen" class="quick-more">
+      <setting-row v-for="r in quickMore" :key="r.id" :row="r" :class="{ hit: r.id == quickFocus }"/>
+    </column>
+  </column>
+</template>
+<style>
+.quick { width: 196; gap: 2; padding: 2; }
+.quick-status { height: 14; gap: 4; padding: 0 2; border-bottom: 1 $line; margin-bottom: 2; }
+.quick-status-text { color: $muted; }
+.quick-foot { padding-top: 3; }
+.quick-notice { gap: 2; margin-bottom: 2; }
+.quick-notice-text { grow: 1; min-width: 0; flex-shrink: 1; }
+.hit { background: alpha($brand, .18); border-left: 2 $brand; padding-left: 2; }
+.quick-more { gap: 2; padding-top: 3; border-top: 1 $line; }
+</style>

@@ -1,0 +1,22 @@
+{
+  "colors": {
+    "bg": "#e9e9ef",
+    "panel": "#ffffff",
+    "surface": "#f7f7fa",
+    "surface2": "#eeeef3",
+    "surface3": "#e3e3ea",
+    "line": "#0000001c",
+    "line2": "#00000033",
+    "text": "#14141b",
+    "muted": "#4a4a56",
+    "dim": "#5f5f6b",
+    "brand": "#6646e6",
+    "brand2": "#0a7a69",
+    "brand-hover": "#5233cc",
+    "on-brand": "#ffffff",
+    "ok": "#0a7a69",
+    "danger": "#c4213c",
+    "warn": "#9a5400",
+    "scrim": "#14141b80"
+  }
+}

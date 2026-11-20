@@ -1,0 +1,36 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "Apache-2.0"
+issueTrackerURL = "https://github.com/vibec-studios/vibey-client/issues"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${version}"
+displayName = "cosmetico"
+authors = "Vibe Craft Studios"
+displayURL = "https://github.com/vibec-studios/vibey-client"
+description = """Cosmetics engine: .vibey bundles, rendering, animation and effects on players."""
+
+[[mixins]]
+config = "cosmetico.mixins.json"
+
+[[dependencies.${mod_id}]]
+modId = "neoforge"
+type = "required"
+versionRange = "${neo_range}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "minecraft"
+type = "required"
+versionRange = "${minecraft_neo_range}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "r3"
+type = "required"
+versionRange = "[${r3_version},)"
+ordering = "AFTER"
+side = "BOTH"

@@ -1,0 +1,36 @@
+{
+ "toasts": [
+  {
+   "id": "1",
+   "kind": "invite",
+   "icon": "vibeyclient:host",
+   "title": "PolarPia",
+   "text": "Invites you",
+   "action": "Join"
+  },
+  {
+   "id": "2",
+   "kind": "info",
+   "icon": "vibeyclient:friends",
+   "title": "Klexi",
+   "text": "Online",
+   "action": ""
+  },
+  {
+   "id": "3",
+   "kind": "ok",
+   "icon": "vibeyclient:shirt",
+   "title": "New cosmetics",
+   "text": "3 items",
+   "action": "Open"
+  },
+  {
+   "id": "4",
+   "kind": "info",
+   "icon": "vibeyclient:undo",
+   "title": "Preset applied",
+   "text": "",
+   "action": "Undo"
+  }
+ ]
+}

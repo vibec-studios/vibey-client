@@ -1,0 +1,48 @@
+id vibeytest:prop_pet
+kind COSMETIC
+name Audit Prop Pet | Audit Prop Pet
+description  | null
+author Vibey audit
+tags [audit]
+rarity RARE
+slot PET
+hideWithArmor []
+pet FLOAT 0.7
+cape -1 shield -1
+emote null
+sha256 42591ed538af0ea436df7f0cdbfd8c9732c9d1e48d7bb3f986b6a1ffd203c4bd size 15174
+texture 0 main 32 32 32 32 1 1 [0] false false 1 e6556f147eee1d35d95c498d11bbe4c20e7a88dbbfa6829d2cc25d07f7a41f3a
+sound 0 squeak 9021 bed2ef3296b6e0bc89869a935b7a504e4e2a2ae05ce142df5227c2c88e8f5935
+model 0 cubes 5 bones 4 locators 2
+bone 0 body -1 WORLD [0.0 4.0 0.0] [0.0 0.0 0.0] false false false false 1
+cube [-3.0 0.0 -3.0] [3.0 6.0 3.0] 0.0 false null null [0.0 0.0] 0
+bone 1 hat_prop 0 null [0.0 6.0 0.0] [0.0 0.0 10.0] false false false false 1
+cube [-2.0 6.0 -2.0] [2.0 8.0 2.0] 0.0 false null null [0.0 12.0] 0
+bone 2 balloon 0 null [3.0 6.0 0.0] [0.0 0.0 0.0] false true false true 2
+cube [3.0 10.0 -1.5] [6.0 13.0 1.5] 0.0 false null null [16.0 12.0] 0
+cube [4.25 6.0 -0.25] [4.75 10.0 0.25] 0.0 false null null [24.0 0.0] 0
+bone 3 sign 0 null [0.0 6.0 0.0] [0.0 0.0 0.0] false false false false 1
+cube [-3.0 8.0 3.0] [3.0 11.0 3.5] 0.0 false null null [0.0 24.0] 0
+locator top 1 null [0.0 8.0 0.0]
+locator balloon 2 null [4.5 13.0 0.0]
+animation idle 2.0 true false true tracks 1 events 5
+track 2 null
+channel rotation 3
+key 0.0 [0.0 0.0 -8.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 8.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -8.0] [NaN NaN NaN] CATMULLROM
+event 0.0 VISIBILITY null -1 -1 null 0 null null 0.0 0.0 0.0 false 0.0 0.0 3 false
+event 0.0 VISIBILITY null -1 -1 null 0 null null 0.0 0.0 0.0 false 0.0 0.0 2 true
+event 0.5 PARTICLE minecraft:note -1 -1 balloon 1 [0.0 0.0 0.0] [0.0 0.0 0.0] 1.0 0.15 0.0 false 1.0 1.0 -1 true
+event 1.2 VISIBILITY null -1 -1 null 0 null null 0.0 0.0 0.0 false 0.0 0.0 2 false
+event 1.8 VISIBILITY null -1 -1 null 0 null null 0.0 0.0 0.0 false 0.0 0.0 2 true
+animation walk 1.0 true false true tracks 1 events 4
+track 0 null
+channel position 3
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] LINEAR
+key 0.5 [0.0 1.0 0.0] [NaN NaN NaN] LINEAR
+key 1.0 [0.0 0.0 0.0] [NaN NaN NaN] LINEAR
+event 0.0 VISIBILITY null -1 -1 null 0 null null 0.0 0.0 0.0 false 0.0 0.0 3 true
+event 0.0 VISIBILITY null -1 -1 null 0 null null 0.0 0.0 0.0 false 0.0 0.0 2 false
+event 0.5 PARTICLE minecraft:cloud -1 -1 top 2 [0.1 0.0 0.1] [0.0 0.0 0.0] 1.0 0.15 0.0 false 1.0 1.0 -1 true
+event 0.9 SOUND squeak -1 0 top 1 null null 0.0 0.0 0.0 false 0.2 1.6 -1 true

@@ -2,7 +2,7 @@ package dev.henny.vibeyclient.module.cosmetics.ui;
 
 import dev.henny.vibeyclient.api.Lang;
 import dev.henny.vibeyclient.api.ModuleManager;
-import dev.henny.vibeyclient.avatar.Slot;
+import dev.henny.cosmetico.model.Slot;
 import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.ui.Icons;
 import dev.henny.vibeyclient.ui.MenuEntries;
@@ -31,6 +31,7 @@ public final class WardrobeUi {
     /** Same as {@link #register()} with an own visibility condition. Safe to call again (replaces the tab). */
     public static void register(BooleanSupplier visible) {
         Lang.addFile("wardrobe");
+        dev.henny.vibeyclient.module.cosmetics.vui.WheelDevCommands.register();
         VibeyTabs.register(new VibeyTabs.Tab(TAB_ID, "wardrobe.tab", 20, WardrobePanel::new, visible, Icons.SHIRT));
         // "Wardrobe" on the title screen and in the pause row opens the full-screen wardrobe (replaces the core
         // default, which would open the Vibey menu tab)
@@ -57,6 +58,11 @@ public final class WardrobeUi {
 
     static void openWardrobe(Screen parent, Category category) {
         Lang.addFile("wardrobe");
+        if (!dev.henny.vibeyclient.ui.vui.ClassicUi.enabled()) {
+            String slot = category == null ? null : category.name().toLowerCase(java.util.Locale.ROOT);
+            dev.henny.vibeyclient.module.cosmetics.vui.WardrobeVui.open(parent, slot);
+            return;
+        }
         ClientCompat.openScreen(new WardrobeScreen(parent, category));
     }
 
@@ -68,19 +74,31 @@ public final class WardrobeUi {
     public static void openWheel(BooleanSupplier keyHeld) {
         Lang.addFile("wardrobe");
         Screen current = ClientCompat.screen();
-        if (current instanceof EmoteWheelScreen) return;
-        ClientCompat.openScreen(new EmoteWheelScreen(current, keyHeld == null ? () -> false : keyHeld));
+        if (current instanceof EmoteWheelScreen || current instanceof dev.henny.vibeyclient.module.cosmetics.vui.EmoteWheelVui) return;
+        BooleanSupplier held = keyHeld == null ? () -> false : keyHeld;
+        if (!dev.henny.vibeyclient.ui.vui.ClassicUi.enabled()) {
+            dev.henny.vibeyclient.module.cosmetics.vui.EmoteWheelVui.open(current, held);
+            return;
+        }
+        ClientCompat.openScreen(new EmoteWheelScreen(current, held));
     }
 
     /** Opens the editor for the 8 wheel slots; closing returns to {@code parent} (null = game). */
     public static void openWheelEditor(Screen parent) {
         Lang.addFile("wardrobe");
+        if (!dev.henny.vibeyclient.ui.vui.ClassicUi.enabled()) {
+            dev.henny.vibeyclient.module.cosmetics.vui.WheelEditorVui.open(parent);
+            return;
+        }
         ClientCompat.openScreen(new WheelEditorScreen(parent));
     }
 
     /** True while one of the wardrobe screens (wardrobe, wheel, editor) is open. */
     public static boolean isOpen() {
         Screen s = ClientCompat.screen();
-        return s instanceof WardrobeScreen || s instanceof EmoteWheelScreen || s instanceof WheelEditorScreen;
+        return s instanceof WardrobeScreen || s instanceof EmoteWheelScreen || s instanceof WheelEditorScreen
+                || s instanceof dev.henny.vibeyclient.module.cosmetics.vui.WardrobeVui
+                || s instanceof dev.henny.vibeyclient.module.cosmetics.vui.EmoteWheelVui
+                || s instanceof dev.henny.vibeyclient.module.cosmetics.vui.WheelEditorVui;
     }
 }

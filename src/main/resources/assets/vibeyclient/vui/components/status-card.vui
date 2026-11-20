@@ -1,0 +1,25 @@
+<props>{ "s": {} }</props>
+<template>
+  <row class="status-card" :class="s.kind">
+    <box class="status-bar"/>
+    <column class="status-body">
+      <text class="status-text">{{ s.text }}</text>
+      <text v-if="s.detail" class="status-detail">{{ s.detail }}</text>
+    </column>
+    <text class="status-chip">{{ s.label }}</text>
+  </row>
+</template>
+<style>
+.status-card { gap: 6; padding-right: 6; min-height: 22; background: $panel; border: 1 $line; flex-shrink: 0; }
+.status-bar { width: 2; align-self: stretch; background: $dim; }
+.status-body { grow: 1; min-width: 0; gap: 1; padding: 4 0; }
+.status-text { color: $text; text-wrap: nowrap; text-overflow: ellipsis; }
+.status-detail { color: $muted; font-scale: 0.75; text-wrap: nowrap; text-overflow: ellipsis; }
+.status-chip { padding: 1 4; border: 1 $line2; color: $muted; font-scale: 0.75; flex-shrink: 0; }
+.status-card.ok .status-bar { background: $ok; }
+.status-card.ok .status-chip { color: $ok; border-color: alpha($ok, .5); }
+.status-card.warn .status-bar { background: $warn; }
+.status-card.warn .status-chip { color: $warn; border-color: alpha($warn, .5); }
+.status-card.error .status-bar { background: $danger; }
+.status-card.error .status-chip { color: $danger; border-color: alpha($danger, .5); }
+</style>

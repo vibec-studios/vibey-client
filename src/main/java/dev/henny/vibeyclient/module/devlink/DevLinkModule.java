@@ -1,5 +1,7 @@
 package dev.henny.vibeyclient.module.devlink;
 
+import dev.henny.cosmetico.dev.PushResult;
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import dev.henny.vibeyclient.BuildInfo;
@@ -12,7 +14,7 @@ import dev.henny.vibeyclient.api.VibeyModule;
 import dev.henny.vibeyclient.api.service.Notify;
 import dev.henny.vibeyclient.api.setting.Settings.BoolSetting;
 import dev.henny.vibeyclient.api.setting.Settings.IntSetting;
-import dev.henny.vibeyclient.avatar.DevItems;
+import dev.henny.cosmetico.dev.DevItems;
 import dev.henny.vibeyclient.ui.Panel;
 import net.minecraft.client.Minecraft;
 
@@ -40,6 +42,8 @@ public final class DevLinkModule extends VibeyModule {
 
     public final BoolSetting creatorMode = bool("creatorMode", Vibey.platform().isDevelopment());
     public final IntSetting port = intRange("port", 47821, 1024, 65535).field().advanced();
+    public final dev.henny.vibeyclient.api.setting.Settings.ActionSetting copyToken = action("copyToken", () -> DevLinkToken.copy(this));
+    public final dev.henny.vibeyclient.api.setting.Settings.ActionSetting newToken = action("newToken", () -> DevLinkToken.renew(this)).advanced();
 
     private final ExecutorService control = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r, "VibeyClient-DevLink");
@@ -118,6 +122,11 @@ public final class DevLinkModule extends VibeyModule {
             o.add("submission", sub);
             p.broadcast(o);
         });
+    }
+
+    @Override
+    public dev.henny.vibeyclient.api.StatusCard statusCard() {
+        return DevLinkStatus.of(this);
     }
 
     @Override
@@ -287,7 +296,7 @@ public final class DevLinkModule extends VibeyModule {
         }
 
         @Override
-        public void pushed(JsonObject bundle, DevItems.PushResult result) {
+        public void pushed(JsonObject bundle, PushResult result) {
             String id = result.id() != null ? result.id() : "";
             // Auto-push sends every ~300 ms while editing: one toast per item and second is plenty.
             if (!throttle("ok:" + id, 1500)) return;
@@ -323,7 +332,7 @@ public final class DevLinkModule extends VibeyModule {
         public java.util.concurrent.CompletableFuture<JsonObject> submit(JsonObject bundle, String name, String description, byte[] thumbnail) {
             byte[] bytes = bundle.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
             try {
-                dev.henny.vibeyclient.avatar.bundle.BundleParser.parse(bytes); // same checks as the backend, faster feedback
+                dev.henny.cosmetico.parse.Bundles.parse(bytes, dev.henny.cosmetico.Cosmetico.versionGate());
             } catch (RuntimeException e) {
                 return java.util.concurrent.CompletableFuture.failedFuture(new IllegalStateException("Invalid bundle: " + e.getMessage()));
             }

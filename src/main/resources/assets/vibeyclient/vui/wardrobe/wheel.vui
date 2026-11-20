@@ -1,0 +1,30 @@
+<import name="wheel-ring" src="vibeyclient:wardrobe/wheel-ring"/>
+<contract>
+{ "fields": { "slices": "list", "hovered": "number", "frame?": "object", "title": "string", "hint": "string",
+              "dotX": "number", "dotY": "number", "available": "bool" },
+  "actions": ["pick(s)", "clear(s)"] }
+</contract>
+<template>
+  <stack class="wheel">
+    <wheel-ring v-if="frame" :slices="slices" :frame="frame" :on="hovered"/>
+    <column v-if="frame" class="wheel-centre"
+            :style="{ left: frame.centreX, top: frame.centreY, width: frame.centreSize, height: frame.centreSize }">
+      <text id="wheel-title" class="wheel-title" :class="{ idle: hovered < 0 }">{{ title }}</text>
+    </column>
+    <box v-if="frame && hovered >= 0" class="wheel-dot" :style="{ left: dotX, top: dotY }"/>
+    <row v-if="frame" class="wheel-hint" :style="{ top: frame.hintY }">
+      <text class="wheel-hint-text" :class="{ warn: !available }">{{ hint }}</text>
+    </row>
+  </stack>
+</template>
+<style>
+.wheel { background: alpha($bg, .3); }
+.wheel-centre { position: absolute; align-items: center; justify-content: center; pointer-events: none; }
+.wheel-title { max-width: 100%; padding: 3 6; background: alpha($panel, .85); border: 1 $line; color: $text;
+               font-weight: bold; text-align: center; }
+.wheel-title.idle { color: $muted; font-weight: normal; }
+.wheel-dot { position: absolute; size: 4; background: $brand; pointer-events: none; }
+.wheel-hint { position: absolute; left: 0; right: 0; justify-content: center; pointer-events: none; }
+.wheel-hint-text { padding: 2 6; background: alpha($panel, .85); border: 1 $line; color: $muted; }
+.wheel-hint-text.warn { color: $warn; }
+</style>

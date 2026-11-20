@@ -1,0 +1,25 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<props>{ "icon": "", "title": "", "text": "", "on": false, "tip": "" }</props>
+<template>
+  <column class="choice" :class="{ on: on }" :tooltip="tip" tabindex="0">
+    <row class="choice-head">
+      <box class="choice-radio"/>
+      <ico :name="icon" class="choice-icon"/>
+      <text class="choice-title">{{ title }}</text>
+    </row>
+    <text class="choice-text">{{ text }}</text>
+  </column>
+</template>
+<style>
+.choice { grow: 1; basis: 0; gap: 4; padding: 8; background: $panel; border: 1 $line2; cursor: pointer;
+          transition: border-color 150ms out, background 150ms out; }
+.choice:hover, .choice:focus { border-color: $muted; }
+.choice.on { border-color: $brand; background: $surface2; }
+.choice-head { gap: 5; }
+.choice-radio { size: 7; border: 1 $line2; background: $surface3; }
+.choice.on .choice-radio { background: $brand; border-color: $brand; }
+.choice-icon { color: $muted; }
+.choice.on .choice-icon { color: $brand2; }
+.choice-title { color: $text; font-weight: bold; }
+.choice-text { color: $muted; max-lines: 2; text-overflow: ellipsis; }
+</style>

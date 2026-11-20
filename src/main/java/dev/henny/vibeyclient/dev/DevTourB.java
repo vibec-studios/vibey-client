@@ -4,10 +4,10 @@ import dev.henny.vibeyclient.Vibey;
 import dev.henny.vibeyclient.api.GlobalSettings;
 import dev.henny.vibeyclient.api.ModuleManager;
 import dev.henny.vibeyclient.api.Services;
-import dev.henny.vibeyclient.avatar.AvatarItem;
-import dev.henny.vibeyclient.avatar.AvatarItems;
-import dev.henny.vibeyclient.avatar.Slot;
-import dev.henny.vibeyclient.avatar.Wardrobe;
+import dev.henny.cosmetico.registry.Item;
+import dev.henny.cosmetico.Cosmetico;
+import dev.henny.cosmetico.model.Slot;
+import dev.henny.vibeyclient.module.cosmetics.Wardrobe;
 import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.module.cosmetics.ui.WardrobeUi;
 import dev.henny.vibeyclient.module.multiplayer.screen.HostScreen;
@@ -266,7 +266,7 @@ public final class DevTourB {
             Wardrobe w = Services.get(Wardrobe.class).orElseThrow(() -> new IllegalStateException("no Wardrobe service"));
             List<String> missing = new ArrayList<>();
             for (String id : ITEMS) {
-                AvatarItem item = AvatarItems.get(id);
+                Item item = Cosmetico.items().get(id);
                 if (item == null) {
                     missing.add(id);
                     continue;
@@ -356,7 +356,7 @@ public final class DevTourB {
         String id = "vibey:" + name;
         l.add(act("emote " + name, () -> {
             Wardrobe w = Services.get(Wardrobe.class).orElseThrow();
-            if (AvatarItems.get(id) == null) throw new IllegalStateException("no emote " + id);
+            if (Cosmetico.items().get(id) == null) throw new IllegalStateException("no emote " + id);
             mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT);
             face(mc, 0f, 0f);
             hud(mc, false);

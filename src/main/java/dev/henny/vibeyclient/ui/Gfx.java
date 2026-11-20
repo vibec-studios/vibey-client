@@ -27,6 +27,13 @@ public final class Gfx {
         this.font = font;
     }
 
+    public static Gfx of(Object graphics) {
+        //? if >=26.1 {
+        /*return new Gfx((GuiGraphicsExtractor) graphics, net.minecraft.client.Minecraft.getInstance().font);
+        *///?} else
+        return new Gfx((GuiGraphics) graphics, net.minecraft.client.Minecraft.getInstance().font);
+    }
+
     public int screenWidth() {
         return g.guiWidth();
     }

@@ -1,5 +1,8 @@
 package dev.henny.vibeyclient.gametest;
 
+import dev.henny.cosmetico.dev.PushAction;
+import dev.henny.cosmetico.dev.PushResult;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -7,19 +10,18 @@ import com.mojang.authlib.GameProfile;
 import com.sun.net.httpserver.HttpServer;
 import dev.henny.vibeyclient.api.GlobalSettings;
 import dev.henny.vibeyclient.api.Services;
-import dev.henny.vibeyclient.avatar.AvatarItem;
-import dev.henny.vibeyclient.avatar.AvatarItems;
-import dev.henny.vibeyclient.avatar.AvatarState;
-import dev.henny.vibeyclient.avatar.AvatarStates;
-import dev.henny.vibeyclient.avatar.DevItems;
-import dev.henny.vibeyclient.avatar.ItemLoader;
-import dev.henny.vibeyclient.avatar.ItemSource;
-import dev.henny.vibeyclient.avatar.Slot;
-import dev.henny.vibeyclient.avatar.Wardrobe;
-import dev.henny.vibeyclient.avatar.bundle.Bundle;
-import dev.henny.vibeyclient.avatar.bundle.BundleException;
-import dev.henny.vibeyclient.avatar.bundle.BundleParser;
-import dev.henny.vibeyclient.avatar.bundle.NeedsUpdateException;
+import dev.henny.cosmetico.registry.Item;
+import dev.henny.cosmetico.Cosmetico;
+import dev.henny.cosmetico.state.Avatar;
+import dev.henny.cosmetico.dev.DevItems;
+import dev.henny.vibeyclient.module.cosmetics.catalog.Catalog;
+import dev.henny.cosmetico.registry.ItemSource;
+import dev.henny.cosmetico.model.Slot;
+import dev.henny.vibeyclient.module.cosmetics.Wardrobe;
+import dev.henny.cosmetico.model.Bundle;
+import dev.henny.cosmetico.parse.BundleException;
+import dev.henny.cosmetico.parse.Bundles;
+import dev.henny.cosmetico.parse.NeedsUpdateException;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
@@ -59,7 +61,7 @@ public final class AuditBundlesGameTest implements FabricClientGameTest {
     @Override
     public void runTest(ClientGameTestContext context) {
         context.getInput().resizeWindow(1280, 720);
-        context.waitFor(mc -> AvatarItems.all().size() >= 20, 600);
+        context.waitFor(mc -> Cosmetico.items().all().size() >= 20, 600);
         Path dir = auditDir();
         Map<String, byte[]> files = new HashMap<>();
         try {
@@ -71,18 +73,18 @@ public final class AuditBundlesGameTest implements FabricClientGameTest {
         }
 
         // ---------------------------------------------------------------- 1. parser
-        Bundle hat = BundleParser.parse(files.get("sparkle_hat"));
+        Bundle hat = Bundles.parse(files.get("sparkle_hat"));
         expectWarning(hat, "unknown type light");
         expectWarning(hat, "unknown interpolation \"elastic\"");
-        Bundle wings = BundleParser.parse(files.get("future_wings"));
+        Bundle wings = Bundles.parse(files.get("future_wings"));
         expectWarning(wings, "unknown attach \"tail\"");
         expectWarning(wings, "unknown interpolation \"bounce\"");
-        Bundle back = BundleParser.parse(files.get("faces_back"));
+        Bundle back = Bundles.parse(files.get("faces_back"));
         check(back.textures.length == 3 && back.textures[1].frameCount == 4 && back.textures[1].interpolate, "faces_back strip texture");
         check(back.textures[2].pngWidth == 128 && back.textures[2].width == 16, "faces_back HD texture");
-        Bundle emote = BundleParser.parse(files.get("triple_prop_emote"));
+        Bundle emote = Bundles.parse(files.get("triple_prop_emote"));
         check(emote.model.locators.size() == 4 && emote.isEmote(), "triple_prop_emote locators");
-        BundleParser.parse(files.get("prop_pet"));
+        Bundles.parse(files.get("prop_pet"));
         expectThrows(files.get("needs_update"), NeedsUpdateException.class, "9.0.0");
         expectThrows(files.get("future_format"), NeedsUpdateException.class, "formatVersion 2");
         expectThrows(files.get("unknown_slot"), BundleException.class, "tail");
@@ -98,7 +100,7 @@ public final class AuditBundlesGameTest implements FabricClientGameTest {
             context.runOnClient(mc -> {
                 DevItems dev = Services.get(DevItems.class).orElseThrow();
                 for (String f : List.of("sparkle_hat", "prop_pet", "faces_back", "future_wings", "triple_prop_emote")) {
-                    DevItems.PushResult r = dev.push(files.get(f), DevItems.Action.NONE);
+                    PushResult r = dev.push(files.get(f), PushAction.NONE, null);
                     if (!r.ok()) throw new AssertionError("push " + f + ": " + r.error());
                 }
                 mc.options.hideGui = true;
@@ -116,7 +118,7 @@ public final class AuditBundlesGameTest implements FabricClientGameTest {
                 slots.put("pet", "vibeytest:prop_pet");
                 slots.put("back", "vibeytest:faces_back");
                 slots.put("wings", "vibeytest:future_wings");
-                AvatarStates.setLoadout(MANNEQUIN, slots);
+                Cosmetico.loadouts().setIds(MANNEQUIN, slots);
             });
             context.waitTicks(30);
             context.takeScreenshot("a01_audit_front");
@@ -124,7 +126,7 @@ public final class AuditBundlesGameTest implements FabricClientGameTest {
             context.waitTicks(12);
             context.takeScreenshot("a02_audit_back");
             context.runOnClient(mc -> {
-                AvatarState st = AvatarStates.get(MANNEQUIN);
+                Avatar st = Cosmetico.engine().avatars.get(MANNEQUIN);
                 for (String l : List.of("orbit_tip", "crown", "top", "balloon")) {
                     double[] p = st.locators.get(l);
                     if (p == null || Double.isNaN(p[0])) throw new AssertionError("locator " + l + " has no world position");
@@ -144,20 +146,20 @@ public final class AuditBundlesGameTest implements FabricClientGameTest {
                 mannequin.xo = mannequin.getX();
                 mannequin.zo = mannequin.getZ();
                 face(mannequin, 180f);
-                AvatarStates.setLoadout(MANNEQUIN, Map.of());
-                if (!AvatarStates.play(AvatarStates.get(MANNEQUIN), "vibeytest:triple_prop_emote")) throw new AssertionError("emote did not start");
+                Cosmetico.loadouts().setIds(MANNEQUIN, Map.of());
+                if (!Cosmetico.engine().emotes.play(Cosmetico.engine().avatars.get(MANNEQUIN), "vibeytest:triple_prop_emote")) throw new AssertionError("emote did not start");
             });
             context.waitTicks(16);
             context.takeScreenshot("a04_audit_emote_props");
             context.waitTicks(10);
             context.takeScreenshot("a05_audit_emote_props_later");
             context.runOnClient(mc -> {
-                AvatarState st = AvatarStates.get(MANNEQUIN);
+                Avatar st = Cosmetico.engine().avatars.get(MANNEQUIN);
                 for (String l : List.of("wand_tip", "lantern", "halo", "hand")) {
                     double[] p = st.locators.get(l);
                     if (p == null || Double.isNaN(p[0])) throw new AssertionError("emote locator " + l + " has no world position");
                 }
-                AvatarStates.stop(st);
+                Cosmetico.engine().emotes.stop(st);
                 DevItems dev = Services.get(DevItems.class).orElseThrow();
                 for (String id : new ArrayList<>(dev.ids())) if (id.startsWith("vibeytest:")) dev.remove(id);
             });
@@ -221,7 +223,7 @@ public final class AuditBundlesGameTest implements FabricClientGameTest {
         }
 
         JsonObject item(String id, String kind, String slot, byte[] bundle, String availability) {
-            String hash = BundleParser.sha256(bundle);
+            String hash = Bundles.sha256(bundle);
             assets.put(hash, bundle);
             JsonObject o = new JsonObject();
             o.addProperty("id", id);
@@ -285,24 +287,24 @@ public final class AuditBundlesGameTest implements FabricClientGameTest {
             context.runOnClient(mc -> {
                 saved[0] = GlobalSettings.backendUrl.get();
                 wasOnline[0] = GlobalSettings.online();
-                hook[0] = ItemLoader.onNewItems;
+                hook[0] = Catalog.newItemsListener();
                 @SuppressWarnings("unchecked")
                 java.util.function.Consumer<Set<String>> prev = hook[0];
-                ItemLoader.onNewItems = ids -> {
+                Catalog.onNewItems(ids -> {
                     announced.addAll(ids);
                     announcements.incrementAndGet();
                     prev.accept(ids);
-                };
-                ItemLoader.dropCatalog();
+                });
+                Catalog.dropCatalog();
                 GlobalSettings.backendUrl.set(mock.url());
                 GlobalSettings.onlineFeatures.set(true);
-                ItemLoader.refreshCatalog(true);
+                Catalog.refreshCatalog(true);
             });
-            context.waitFor(mc -> AvatarItems.get(hatV1, ItemSource.CATALOG) != null && AvatarItems.get(hatV1).bundle() != null, 1600);
+            context.waitFor(mc -> Cosmetico.items().get(hatV1, ItemSource.REMOTE) != null && Cosmetico.items().get(hatV1).bundle() != null, 1600);
             Bundle[] first = new Bundle[1];
             context.runOnClient(mc -> {
                 Wardrobe w = Services.get(Wardrobe.class).orElseThrow();
-                AvatarItem item = AvatarItems.get(hatV1);
+                Item item = Cosmetico.items().get(hatV1);
                 if (!w.canUse(item)) throw new AssertionError("default catalog item not usable");
                 w.equip(item);
                 first[0] = item.bundle();
@@ -333,24 +335,24 @@ public final class AuditBundlesGameTest implements FabricClientGameTest {
             mock.publish("v2", hatItem2,
                     mock.item("community:ota_pet", "cosmetic", "pet", withId(files.get("prop_pet"), "community:ota_pet", "OTA Pet"), "default"),
                     emote, newer, unknownKind, gone);
-            context.runOnClient(mc -> ItemLoader.requestCatalog(0)); // what catalog.updated does (minus the jitter)
+            context.runOnClient(mc -> Catalog.requestCatalog(0)); // what catalog.updated does (minus the jitter)
             context.waitFor(mc -> {
-                AvatarItem i = AvatarItems.get(hatV1);
+                Item i = Cosmetico.items().get(hatV1);
                 return i != null && i.bundle() != null && i.bundle() != first[0];
             }, 800);
             context.runOnClient(mc -> {
                 Wardrobe w = Services.get(Wardrobe.class).orElseThrow();
-                AvatarItem hatItem = AvatarItems.get(hatV1);
+                Item hatItem = Cosmetico.items().get(hatV1);
                 if (!hatV1.equals(w.equipped(Slot.HAT))) throw new AssertionError("hot swap unequipped the hat");
                 if (!"OTA Hat v2".equals(hatItem.bundle().name.en())) throw new AssertionError("hat not swapped");
-                AvatarItem e = AvatarItems.get("community:ota_emote");
+                Item e = Cosmetico.items().get("community:ota_emote");
                 if (e == null || e.bundle() == null || !"AuditCreator".equals(e.creator())) throw new AssertionError("new emote/creator: " + e);
-                AvatarItem n = AvatarItems.get("community:ota_newer");
+                Item n = Cosmetico.items().get("community:ota_newer");
                 if (n == null || !n.needsUpdate() || w.canUse(n) || n.bundle() != null) throw new AssertionError("needs-update stub: " + n);
                 if (!w.lockedReason(n).toLowerCase(java.util.Locale.ROOT).contains("vibey")) throw new AssertionError("locked reason: " + w.lockedReason(n));
-                if (AvatarItems.get("community:ota_pose") != null) throw new AssertionError("unknown kind must be skipped");
-                AvatarItem b = AvatarItems.get("community:ota_back");
-                if (b == null || !AvatarItem.DELETED_CREATOR.equals(b.creator())) throw new AssertionError("deleted creator: " + (b == null ? null : b.creator()));
+                if (Cosmetico.items().get("community:ota_pose") != null) throw new AssertionError("unknown kind must be skipped");
+                Item b = Cosmetico.items().get("community:ota_back");
+                if (b == null || !Item.DELETED_CREATOR.equals(b.creator())) throw new AssertionError("deleted creator: " + (b == null ? null : b.creator()));
             });
             context.waitFor(mc -> announcements.get() > 0, 100);
             if (announcements.get() != 1 || !announced.containsAll(List.of("community:ota_emote", "community:ota_back")))
@@ -372,13 +374,13 @@ public final class AuditBundlesGameTest implements FabricClientGameTest {
             Bundle[] kept = new Bundle[1];
             int before = mock.notModified.get();
             context.runOnClient(mc -> {
-                kept[0] = AvatarItems.get(hatV1).bundle();
-                ItemLoader.requestCatalog(0);
+                kept[0] = Cosmetico.items().get(hatV1).bundle();
+                Catalog.requestCatalog(0);
             });
             context.waitFor(mc -> mock.notModified.get() > before, 800);
             context.waitTicks(10);
             context.runOnClient(mc -> {
-                if (AvatarItems.get(hatV1).bundle() != kept[0]) throw new AssertionError("304 re-parsed the hat");
+                if (Cosmetico.items().get(hatV1).bundle() != kept[0]) throw new AssertionError("304 re-parsed the hat");
             });
             System.out.println("[vibeyclient-test] ota 304 ok (" + mock.catalogs.get() + " catalogs, " + mock.notModified.get() + " not modified, " + mock.assetHits.get() + " asset downloads)");
         } finally {
@@ -388,12 +390,12 @@ public final class AuditBundlesGameTest implements FabricClientGameTest {
                 if (hook[0] != null) {
                     @SuppressWarnings("unchecked")
                     java.util.function.Consumer<Set<String>> prev = hook[0];
-                    ItemLoader.onNewItems = prev;
+                    Catalog.onNewItems(prev);
                 }
-                ItemLoader.dropCatalog();
+                Catalog.dropCatalog();
                 if (saved[0] != null) GlobalSettings.backendUrl.set(saved[0]);
                 GlobalSettings.onlineFeatures.set(wasOnline[0]);
-                if (wasOnline[0]) ItemLoader.refreshCatalog(true);
+                if (wasOnline[0]) Catalog.refreshCatalog(true);
             });
             mock.server.stop(0);
         }
@@ -417,7 +419,7 @@ public final class AuditBundlesGameTest implements FabricClientGameTest {
 
     private static void expectThrows(byte[] bytes, Class<? extends RuntimeException> type, String part) {
         try {
-            BundleParser.parse(bytes);
+            Bundles.parse(bytes);
         } catch (RuntimeException e) {
             if (type.isInstance(e) && String.valueOf(e.getMessage()).contains(part)) return;
             throw new AssertionError("expected " + type.getSimpleName() + " with '" + part + "', got " + e);

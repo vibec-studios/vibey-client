@@ -1,0 +1,15 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<props>{ "icon": "info", "title": "", "action": "", "kind": "" }</props>
+<template>
+  <column class="empty" :class="kind">
+    <ico :name="icon" class="empty-icon"/>
+    <text class="empty-title">{{ title }}</text>
+    <button v-if="action" class="primary empty-action" @click="$emit('act')">{{ action }}</button>
+  </column>
+</template>
+<style>
+.empty { align-items: center; justify: center; gap: 6; padding: 12; grow: 1; }
+.empty-icon { size: 18; color: $dim; }
+.empty.error .empty-icon { color: $danger; }
+.empty-title { color: $muted; text-align: center; }
+</style>

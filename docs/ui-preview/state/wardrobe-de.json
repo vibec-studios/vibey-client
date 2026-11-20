@@ -1,0 +1,183 @@
+{
+ "slot": "wings",
+ "query": "",
+ "playing": false,
+ "stillImage": "vibeyclient:preview/player",
+ "slots": [
+  {
+   "id": "cape",
+   "icon": "cape",
+   "name": "Umhänge",
+   "count": 4,
+   "worn": true
+  },
+  {
+   "id": "wings",
+   "icon": "wings",
+   "name": "Flügel",
+   "count": 8,
+   "worn": true
+  },
+  {
+   "id": "aura",
+   "icon": "aura",
+   "name": "Auren",
+   "count": 2,
+   "worn": false
+  },
+  {
+   "id": "pet",
+   "icon": "paw",
+   "name": "Haustiere",
+   "count": 2,
+   "worn": true
+  },
+  {
+   "id": "shield",
+   "icon": "shield",
+   "name": "Schilde",
+   "count": 3,
+   "worn": false
+  },
+  {
+   "id": "hat",
+   "icon": "hat",
+   "name": "Hüte",
+   "count": 2,
+   "worn": true
+  },
+  {
+   "id": "back",
+   "icon": "bag",
+   "name": "Rücken",
+   "count": 1,
+   "worn": false
+  },
+  {
+   "id": "emotes",
+   "icon": "wave",
+   "name": "Emotes",
+   "count": 10,
+   "worn": false
+  }
+ ],
+ "items": [
+  {
+   "id": "w0",
+   "name": "Crystal Ice Wings",
+   "rarity": "Legendär",
+   "rarityColor": "#ffb547",
+   "worn": true,
+   "locked": false,
+   "lockReason": "Gesperrt",
+   "creator": "",
+   "thumb": "vibeyclient:preview/item0",
+   "selected": true,
+   "tip": "Crystal Ice Wings · Legendär"
+  },
+  {
+   "id": "w1",
+   "name": "Neon Pixel Wings",
+   "rarity": "Episch",
+   "rarityColor": "#8b6cff",
+   "worn": false,
+   "locked": false,
+   "lockReason": "Gesperrt",
+   "creator": "",
+   "thumb": "vibeyclient:preview/item1",
+   "selected": false,
+   "tip": "Neon Pixel Wings · Episch"
+  },
+  {
+   "id": "w2",
+   "name": "Seal Flippers",
+   "rarity": "Selten",
+   "rarityColor": "#3fe0c5",
+   "worn": false,
+   "locked": false,
+   "lockReason": "Gesperrt",
+   "creator": "PolarPia",
+   "thumb": "vibeyclient:preview/item2",
+   "selected": false,
+   "tip": "Seal Flippers · Selten"
+  },
+  {
+   "id": "w3",
+   "name": "Bat Wings",
+   "rarity": "Gewöhnlich",
+   "rarityColor": "#a1a1aa",
+   "worn": false,
+   "locked": false,
+   "lockReason": "Gesperrt",
+   "creator": "",
+   "thumb": "vibeyclient:preview/item3",
+   "selected": false,
+   "tip": "Bat Wings · Gewöhnlich"
+  },
+  {
+   "id": "w4",
+   "name": "Dragon Wings",
+   "rarity": "Legendär",
+   "rarityColor": "#ffb547",
+   "worn": false,
+   "locked": true,
+   "lockReason": "Gesperrt",
+   "creator": "",
+   "thumb": "vibeyclient:preview/item4",
+   "selected": false,
+   "tip": "Dragon Wings · Legendär"
+  },
+  {
+   "id": "w5",
+   "name": "Paper Wings",
+   "rarity": "Gewöhnlich",
+   "rarityColor": "#a1a1aa",
+   "worn": false,
+   "locked": false,
+   "lockReason": "Gesperrt",
+   "creator": "noodle_dev",
+   "thumb": "vibeyclient:preview/item5",
+   "selected": false,
+   "tip": "Paper Wings · Gewöhnlich"
+  },
+  {
+   "id": "w6",
+   "name": "Aurora Wings",
+   "rarity": "Episch",
+   "rarityColor": "#8b6cff",
+   "worn": false,
+   "locked": false,
+   "lockReason": "Gesperrt",
+   "creator": "",
+   "thumb": "vibeyclient:preview/item6",
+   "selected": false,
+   "tip": "Aurora Wings · Episch"
+  },
+  {
+   "id": "w7",
+   "name": "Bee Wings",
+   "rarity": "Selten",
+   "rarityColor": "#3fe0c5",
+   "worn": false,
+   "locked": false,
+   "lockReason": "Gesperrt",
+   "creator": "",
+   "thumb": "vibeyclient:preview/item7",
+   "selected": false,
+   "tip": "Bee Wings · Selten"
+  }
+ ],
+ "current": {
+  "id": "w0",
+  "name": "Crystal Ice Wings",
+  "rarity": "Legendär",
+  "rarityColor": "#ffb547",
+  "worn": true,
+  "locked": false,
+  "lockReason": "Gesperrt",
+  "creator": "",
+  "thumb": "vibeyclient:preview/item0",
+  "selected": true,
+  "tip": "Crystal Ice Wings · Legendär"
+ }
+}

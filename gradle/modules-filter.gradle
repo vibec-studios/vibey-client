@@ -1,0 +1,40 @@
+// Leaves out every client module (package, strings, mixin configs, metadata lines) this target doesn't build.
+apply from: rootProject.file('gradle/modules.gradle')
+
+def targetMatches = { t ->
+    t == 'all' || (t instanceof String && project.name.startsWith("${t}-")) || (t instanceof List && t.contains(project.name))
+}
+def supports = { String id -> targetMatches(clientModules[id]) }
+ext.moduleIncluded = { String id -> supports(id) && (!id.contains('.') || supports(id.substring(0, id.lastIndexOf('.')))) }
+
+def excluded = clientModules.keySet().findAll { !moduleIncluded(it) }
+def sharedExcluded = sharedPackages.keySet().findAll { !targetMatches(sharedPackages[it]) }
+def mixinLine = excluded.collect { java.util.regex.Pattern.quote("vibeyclient.${it}") + /(\.[\w.]+)?\.mixins\.json"/ }
+def mixinPattern = mixinLine ? ~('"' + mixinLine.join('|"')) : null
+
+sourceSets.main.java {
+    excluded.each { exclude "dev/henny/vibeyclient/module/${it.replace('.', '/')}/**" }
+    sharedExcluded.each { exclude "dev/henny/vibeyclient/${it.replace('.', '/')}/**" }
+}
+
+processResources {
+    inputs.property('excludedModules', (excluded + sharedExcluded).sort().join(','))
+    sharedExcluded.each { id -> (sharedPackageResources[id] ?: []).each { exclude it } }
+    excluded.each { id ->
+        exclude "assets/vibeyclient/i18n/*/${id}.json", "assets/vibeyclient/i18n/*/${id}.*.json"
+        exclude "vibeyclient.${id}.mixins.json", "vibeyclient.${id}.*.mixins.json"
+        (clientModuleResources[id] ?: []).each { exclude it }
+    }
+    if (mixinPattern) {
+        filesMatching('fabric.mod.json') { filter { String line -> line =~ mixinPattern ? null : line } }
+        filesMatching('META-INF/neoforge.mods.toml') {
+            String held = null
+            filter { String line ->
+                if (line.trim() == '[[mixins]]') { held = line; return null }
+                def out = held != null && !(line =~ mixinPattern) ? held + '\n' + line : (held != null ? null : line)
+                held = null
+                out
+            }
+        }
+    }
+}

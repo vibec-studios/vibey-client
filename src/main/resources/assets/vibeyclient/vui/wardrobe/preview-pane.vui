@@ -1,0 +1,35 @@
+<import name="icon-button" src="vibeyclient:components/icon-button"/>
+<template>
+  <column class="pv">
+    <stack ref="stage" class="pv-stage" :tooltip="t('ui.wardrobe.rotate')" @dblclick="resetView()">
+      <image v-if="stillImage" :src="stillImage" fit="contain"/>
+    </stack>
+    <column v-if="current" class="pv-info">
+      <text class="pv-name">{{ current.name }}</text>
+      <row class="pv-meta">
+        <text class="pv-rarity" :style="{ color: current.rarityColor }">{{ current.rarity }}</text>
+        <text v-if="current.creator" class="pv-by">{{ t('ui.wardrobe.by', current.creator) }}</text>
+      </row>
+    </column>
+    <row class="pv-actions">
+      <button v-if="current && current.locked" class="pv-main" disabled="true">{{ current.lockReason }}</button>
+      <button v-else-if="current && slot == 'emotes'" class="primary pv-main" @click="playEmote()">{{ playing ? t('ui.wardrobe.stop') : t('ui.wardrobe.play') }}</button>
+      <button v-else-if="current" class="pv-main" :class="current.worn ? '' : 'primary'" @click="wear(current)">
+        {{ current.worn ? t('ui.wardrobe.remove') : t('ui.wardrobe.equip') }}
+      </button>
+      <icon-button icon="wave" :tip="t('ui.wardrobe.wheel')" @click="openWheel()"/>
+      <icon-button icon="reset" :tip="t('ui.wardrobe.resetView')" @click="resetView()"/>
+    </row>
+  </column>
+</template>
+<style>
+.pv { width: 30%; min-width: 120; max-width: 190; padding: 5; gap: 4; border-left: 1 $line; flex-shrink: 0; }
+.pv-stage { grow: 1; background: $bg; border: 1 $line; align-items: stretch; cursor: grab; }
+.pv-info { gap: 1; }
+.pv-name { color: $text; font-weight: bold; text-wrap: nowrap; text-overflow: ellipsis; }
+.pv-meta { gap: 4; }
+.pv-rarity { text-wrap: nowrap; }
+.pv-by { color: $dim; text-wrap: nowrap; text-overflow: ellipsis; min-width: 0; }
+.pv-actions { gap: 2; }
+.pv-main { grow: 1; height: 18; padding: 0 4; }
+</style>

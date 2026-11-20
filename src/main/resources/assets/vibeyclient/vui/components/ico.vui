@@ -1,0 +1,4 @@
+<props>{ "name": "" }</props>
+<template>
+  <icon class="ico" set="vibeyclient" :name="name"/>
+</template>

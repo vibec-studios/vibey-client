@@ -10,17 +10,17 @@ import dev.henny.vibeyclient.api.Services;
 import dev.henny.vibeyclient.api.Tasks;
 import dev.henny.vibeyclient.api.net.VibeyNet;
 import dev.henny.vibeyclient.api.service.VibeBackend;
-import dev.henny.vibeyclient.avatar.AvatarItem;
-import dev.henny.vibeyclient.avatar.AvatarItems;
-import dev.henny.vibeyclient.avatar.AvatarState;
-import dev.henny.vibeyclient.avatar.AvatarStates;
-import dev.henny.vibeyclient.avatar.ItemLoader;
-import dev.henny.vibeyclient.avatar.ItemSource;
-import dev.henny.vibeyclient.avatar.Slot;
+import dev.henny.cosmetico.registry.Item;
+import dev.henny.cosmetico.Cosmetico;
+import dev.henny.cosmetico.state.Avatar;
+import dev.henny.vibeyclient.module.cosmetics.catalog.Catalog;
+import dev.henny.cosmetico.registry.ItemSource;
+import dev.henny.cosmetico.model.Slot;
 import dev.henny.vibeyclient.backend.BackendClient;
 import dev.henny.vibeyclient.backend.LoadoutKeys;
 import dev.henny.vibeyclient.backend.net.Meta;
 import dev.henny.vibeyclient.client.VibeyPlayers;
+import dev.henny.vibeyclient.client.ranks.PlayerEntry;
 import dev.henny.vibeyclient.net.LoadoutToken;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
@@ -98,9 +98,9 @@ public final class LoadoutSync {
     // ============================================================================================ ownership
 
     /** Online items need to be owned; builtin and dev items are always usable locally. */
-    public boolean canUse(AvatarItem item) {
+    public boolean canUse(Item item) {
         if (item == null || item.needsUpdate()) return false;
-        if (item.source() != ItemSource.CATALOG) return true;
+        if (item.source() != ItemSource.REMOTE) return true;
         if ("default".equals(item.availability())) return true;
         return owned.contains(item.id());
     }
@@ -154,22 +154,20 @@ public final class LoadoutSync {
         listeners.add(b.onEvent("loadout.updated", d -> {
             UUID id = uuid(d.get("userId"));
             if (id == null) return;
-            // VIBE-API-2 §5: client/badges also come with loadout updates (absent on older backends)
-            if (d.has("client") || d.has("badges"))
-                VibeyPlayers.backend(id, d.get("client") instanceof JsonPrimitive c && "vibey".equals(c.getAsString()), badges(d.get("badges")));
+            if (PlayerEntry.carriesNametag(d)) PlayerEntry.apply(id, d);
             if (id.equals(module.selfId())) return;
             fromBackend.put(id, new Remote(slots(d.get("slots")), System.currentTimeMillis()));
         }));
         // OTA cosmetics (VIBE-API-2 §4): reload the catalog (spread over a few seconds) and what we own (grants)
         listeners.add(b.onEvent("catalog.updated", d -> {
-            ItemLoader.requestCatalog(5_000);
+            Catalog.requestCatalog(5_000);
             Tasks.debounce("vibeyclient:cosmetics:owned", 2_000, () -> Tasks.onMain(this::reloadOwned));
         }));
         // after a reconnect the catalog may have changed while we were away (ready carries catalogVersion); at start
         // the first catalog load is usually still running: then it is compared once that load is done
         listeners.add(b.onEvent(dev.henny.vibeyclient.backend.BackendClient.EV_READY, d -> {
             String v = d.get("catalogVersion") instanceof JsonPrimitive p ? p.getAsString() : null;
-            ItemLoader.readyVersion(v);
+            Catalog.readyVersion(v);
         }));
         listeners.add(b.onEvent("emote.played", d -> {
             UUID id = uuid(d.get("userId"));
@@ -193,7 +191,7 @@ public final class LoadoutSync {
             if (!own.equals(owned)) nextTokenFetch = 0; // granted emotes are part of the signed token
             owned = own;
             fresh.removeIf(id -> {
-                AvatarItem i = AvatarItems.get(id, ItemSource.CATALOG);
+                Item i = Cosmetico.items().get(id, ItemSource.REMOTE);
                 return i == null || "default".equals(i.availability()) || i.needsUpdate();
             });
             if (!fresh.isEmpty()) module.newItems(fresh);
@@ -234,7 +232,7 @@ public final class LoadoutSync {
     }
 
     private boolean canPush() {
-        return backendReady() && ownedKnown && ItemLoader.catalogConfirmed();
+        return backendReady() && ownedKnown && Catalog.catalogConfirmed();
     }
 
     /**
@@ -253,15 +251,15 @@ public final class LoadoutSync {
         JsonObject slots = new JsonObject();
         for (Slot s : Slot.all()) {
             String id = l.get(s);
-            AvatarItem item = AvatarItems.get(id);
-            boolean online = item != null && item.source() != ItemSource.DEV && AvatarItems.get(id, ItemSource.CATALOG) != null
-                    && canUse(AvatarItems.get(id, ItemSource.CATALOG));
+            Item item = Cosmetico.items().get(id);
+            boolean online = item != null && item.source() != ItemSource.DEV && Cosmetico.items().get(id, ItemSource.REMOTE) != null
+                    && canUse(Cosmetico.items().get(id, ItemSource.REMOTE));
             slots.add(s.id(), online ? new JsonPrimitive(id) : com.google.gson.JsonNull.INSTANCE);
         }
         body.add("slots", slots);
         JsonArray wheel = new JsonArray();
         for (String id : l.wheel) {
-            AvatarItem item = AvatarItems.get(id, ItemSource.CATALOG);
+            Item item = Cosmetico.items().get(id, ItemSource.REMOTE);
             wheel.add(item != null && canUse(item) ? new JsonPrimitive(id) : com.google.gson.JsonNull.INSTANCE);
         }
         body.add("emoteWheel", wheel);
@@ -375,9 +373,9 @@ public final class LoadoutSync {
     /** Items everyone has: {@code default} in the catalog, or built in (and not overridden by the catalog). */
     public static boolean isDefault(String id) {
         if (id == null || id.isEmpty()) return false;
-        AvatarItem c = AvatarItems.get(id, ItemSource.CATALOG);
+        Item c = Cosmetico.items().get(id, ItemSource.REMOTE);
         if (c != null) return "default".equals(c.availability());
-        return AvatarItems.get(id, ItemSource.BUILTIN) != null;
+        return Cosmetico.items().get(id, ItemSource.BUILTIN) != null;
     }
 
     /**
@@ -400,7 +398,7 @@ public final class LoadoutSync {
 
     /** Our emote to everybody: gateway op + server channel. */
     void sendEmote(String emoteId, boolean play) {
-        AvatarItem item = AvatarItems.get(emoteId);
+        Item item = Cosmetico.items().get(emoteId);
         if (item == null || item.isDev()) return; // dev items stay local
         VibeyNet.sendEmote(emoteId, play);
         if (backendReady()) {
@@ -476,19 +474,12 @@ public final class LoadoutSync {
             for (Map.Entry<String, JsonElement> e : users.entrySet()) {
                 UUID id = uuid(new JsonPrimitive(e.getKey()));
                 if (id == null || !(e.getValue() instanceof JsonObject u)) continue;
-                VibeyPlayers.backend(id, u.get("client") instanceof JsonPrimitive c && "vibey".equals(c.getAsString()), badges(u.get("badges")));
+                PlayerEntry.apply(id, u);
                 if (id.equals(me)) continue; // our own loadout is local
                 Remote old = fromBackend.get(id);
                 if (old == null || old.time < t) fromBackend.put(id, new Remote(slots(u.get("slots")), t));
             }
         }));
-    }
-
-    private static List<String> badges(JsonElement e) {
-        if (!(e instanceof JsonArray a)) return List.of();
-        List<String> out = new ArrayList<>();
-        for (JsonElement x : a) if (x instanceof JsonPrimitive p && p.isString()) out.add(p.getAsString());
-        return out;
     }
 
     /**
@@ -529,11 +520,11 @@ public final class LoadoutSync {
             else if (a == null) slots = effective(b, nowS);
             else if (b.verified() != null && b.verified().live(nowS) && b.time() > a.time) slots = effective(b, nowS);
             else slots = a.slots; // unproven server data never overrides the backend
-            AvatarState st = AvatarStates.get(id);
-            java.util.Arrays.fill(st.slots, null);
+            Avatar st = Cosmetico.engine().avatars.get(id);
+            st.loadout.clearBase();
             for (Map.Entry<String, String> e : slots.entrySet()) {
                 Slot s = Slot.of(e.getKey());
-                if (s != null) st.slots[s.ordinal()] = e.getValue();
+                if (s != null) st.loadout.base[s.ordinal()] = e.getValue();
             }
         }
     }

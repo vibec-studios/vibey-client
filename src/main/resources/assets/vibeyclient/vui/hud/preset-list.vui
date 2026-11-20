@@ -1,0 +1,16 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<template>
+  <column class="presets">
+    <row v-for="p in presets" :key="p.id" :id="'preset-' + p.id" class="preset" :tooltip="p.tip" tabindex="0" @click="applyPreset(p)">
+      <ico :name="p.icon" class="preset-icon"/>
+      <text class="preset-name">{{ p.name }}</text>
+    </row>
+  </column>
+</template>
+<style>
+.presets { width: 110; gap: 1; padding: 1; }
+.preset { height: 16; gap: 6; padding: 0 5; cursor: pointer; color: $muted; }
+.preset:hover, .preset:focus { background: $surface2; color: $text; }
+.preset-icon { color: $brand2; }
+.preset-name { text-wrap: nowrap; }
+</style>

@@ -10,10 +10,9 @@ import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.module.clips.ClipSaver;
 import dev.henny.vibeyclient.module.clips.ClipsFiles;
 import dev.henny.vibeyclient.module.clips.store.ClipStore;
-import dev.henny.vibeyclient.module.media.video.MediaSource;
-import dev.henny.vibeyclient.module.media.video.player.Ffmpeg;
-import dev.henny.vibeyclient.module.media.video.player.FfmpegPlayer;
-import dev.henny.vibeyclient.module.media.video.player.MediaPlayer;
+import dev.henny.vibeyclient.media.ffmpeg.Ffmpeg;
+import dev.henny.vibeyclient.media.player.FfmpegPlayer;
+import dev.henny.vibeyclient.media.player.MediaPlayer;
 import dev.henny.vibeyclient.ui.CardScreen;
 import dev.henny.vibeyclient.ui.Gfx;
 import dev.henny.vibeyclient.ui.Icons;
@@ -64,13 +63,13 @@ public final class ClipViewScreen extends CardScreen {
     private void startPlayer(long atMs, boolean playing) {
         String ff = Ffmpeg.find();
         if (ff == null) {
-            playerError = tr("noFfmpeg");
+            playerError = Lang.tr("clips.view.noFfmpeg");
             return;
         }
         int w = Math.min(PLAY_W, Math.max(2, clip.integer("width", PLAY_W)));
         int h = Math.min(PLAY_H, Math.max(2, clip.integer("height", PLAY_H)));
         int fps = Math.max(1, Math.min(60, clip.integer("fps", 30)));
-        player = new FfmpegPlayer(ff, new MediaSource(MediaSource.Kind.FILE, clip.video().toAbsolutePath().toString()), w, h, fps, atMs, playing);
+        player = new FfmpegPlayer(ff, clip.video().toAbsolutePath().toString(), w, h, fps, atMs, playing);
         player.audio(1f, null);
     }
 
@@ -144,7 +143,7 @@ public final class ClipViewScreen extends CardScreen {
             Identifier tex = p.texture();
             if (tex != null) g.image(tex, vx, y, vw, vh, 0, 0, p.width(), p.height(), p.width(), p.height());
             if (p.status() == MediaPlayer.Status.ERROR) g.textCenter(g.clip(String.valueOf(p.error()), vw - 10), vx + vw / 2, y + vh / 2 - 4, RED);
-            else if (tex == null) g.textCenter(tr("loading") + dots(), vx + vw / 2, y + vh / 2 - 4, MUTED);
+            else if (tex == null) g.textCenter(Lang.tr("clips.view.loading") + dots(), vx + vw / 2, y + vh / 2 - 4, MUTED);
             if (p.status() == MediaPlayer.Status.PAUSED || p.status() == MediaPlayer.Status.ENDED) {
                 g.rect(vx + vw / 2 - 14, y + vh / 2 - 14, 28, 28, 0x90000000);
                 playGlyph(g, vx + vw / 2 - 4, y + vh / 2 - 7, 0xFFFFFFFF);
@@ -187,23 +186,23 @@ public final class ClipViewScreen extends CardScreen {
 
         // rename
         if (renaming) {
-            g.text(tr("rename.label"), x, y + 4, MUTED);
+            g.text(Lang.tr("clips.view.rename.label"), x, y + 4, MUTED);
             int bx = x + 70;
             inputBox(g, nameBox, bx, y, w - 70 - 130);
             int right = x + w;
-            int l = buttonRight(g, right, y - 1, 18, tr("rename.save"), Style.PRIMARY, this::saveName);
-            buttonRight(g, l - 6, y - 1, 18, tr("rename.cancel"), Style.SECONDARY, () -> renaming = false);
+            int l = buttonRight(g, right, y - 1, 18, Lang.tr("clips.view.rename.save"), Style.PRIMARY, this::saveName);
+            buttonRight(g, l - 6, y - 1, 18, Lang.tr("clips.view.rename.cancel"), Style.SECONDARY, () -> renaming = false);
             y += 24;
         }
 
         // facts
         String reason = Lang.tr("clips.reason." + ClipSaver.reasonKey(c.reason()));
-        y = fact(g, x, y, w, tr("reason"), reason + (c.integer("kills", 0) > 1 ? " · " + tr("kills", c.integer("kills", 0)) : ""));
+        y = fact(g, x, y, w, Lang.tr("clips.view.reason"), reason + (c.integer("kills", 0) > 1 ? " · " + Lang.tr("clips.view.kills", c.integer("kills", 0)) : ""));
         String server = c.str("server"), world = c.str("world");
-        if (server != null) y = fact(g, x, y, w, tr("server"), server);
-        else if (world != null) y = fact(g, x, y, w, tr("world"), world);
-        y = fact(g, x, y, w, tr("date"), ClipsGalleryScreen.DATE.format(c.createdAt()));
-        y = fact(g, x, y, w, tr("length"), ClipSaver.duration(c.durationMs()) + "  ·  " + c.integer("width", 0) + "×" + c.integer("height", 0)
+        if (server != null) y = fact(g, x, y, w, Lang.tr("clips.view.server"), server);
+        else if (world != null) y = fact(g, x, y, w, Lang.tr("clips.view.world"), world);
+        y = fact(g, x, y, w, Lang.tr("clips.view.date"), ClipsGalleryScreen.DATE.format(c.createdAt()));
+        y = fact(g, x, y, w, Lang.tr("clips.view.length"), ClipSaver.duration(c.durationMs()) + "  ·  " + c.integer("width", 0) + "×" + c.integer("height", 0)
                 + " @ " + c.integer("fps", 0) + " fps  ·  " + String.format(Locale.ROOT, "%.1f MB", c.sizeBytes() / 1048576.0));
         if (c.json().get("events") instanceof JsonArray events && !events.isEmpty()) {
             StringBuilder sb = new StringBuilder();
@@ -213,11 +212,11 @@ public final class ClipViewScreen extends CardScreen {
                 String type = o.has("type") ? o.get("type").getAsString() : "";
                 String victim = o.has("victim") ? o.get("victim").getAsString() : "";
                 long t = o.has("t_ms") ? o.get("t_ms").getAsLong() : 0;
-                sb.append(ClipSaver.duration(t)).append(' ').append(type.equals("death") ? tr("event.death") : victim);
+                sb.append(ClipSaver.duration(t)).append(' ').append(type.equals("death") ? Lang.tr("clips.view.event.death") : victim);
             }
-            y = fact(g, x, y, w, tr("events"), sb.toString());
+            y = fact(g, x, y, w, Lang.tr("clips.view.events"), sb.toString());
         }
-        if (c.str("encoder") != null) y = fact(g, x, y, w, tr("encoder"), c.str("encoder"));
+        if (c.str("encoder") != null) y = fact(g, x, y, w, Lang.tr("clips.view.encoder"), c.str("encoder"));
         if (flash != null && System.currentTimeMillis() < flashUntil) {
             g.text(flash, x, y + 4, GREEN);
             y += 14;
@@ -241,21 +240,21 @@ public final class ClipViewScreen extends CardScreen {
         int by = y + 11;
         int lx = x + PAD;
         ClipStore.Clip c = clip;
-        String keep = tr(c.kept() ? "kept" : "keep");
+        String keep = (c.kept() ? Lang.tr("clips.view.kept") : Lang.tr("clips.view.keep"));
         int kw = g.width(keep) + 34; // room for the star left of the centred label
         button(g, lx, by, kw, 18, keep, c.kept() ? Style.PRIMARY : Style.SECONDARY, this::toggleKeep);
         Icons.draw(g, Icons.STAR, lx + 6, by + 5, c.kept() ? 0xFFFFFFFF : Theme.WARN);
         lx += kw + 6;
-        lx += button(g, lx, by, g.width(tr("rename")) + 14, 18, tr("rename"), Style.SECONDARY, this::startRename) + 6;
+        lx += button(g, lx, by, g.width(Lang.tr("clips.view.rename")) + 14, 18, Lang.tr("clips.view.rename"), Style.SECONDARY, this::startRename) + 6;
         boolean armed = System.currentTimeMillis() < deleteArmedUntil;
-        String del = tr(armed ? "deleteConfirm" : "delete");
+        String del = (armed ? Lang.tr("clips.view.deleteConfirm") : Lang.tr("clips.view.delete"));
         button(g, lx, by, g.width(del) + 14, 18, del, Style.DANGER, this::delete);
         int right = x + w - PAD;
-        int l = buttonRight(g, right, by, 18, tr("copyPath"), Style.SECONDARY, () -> {
+        int l = buttonRight(g, right, by, 18, Lang.tr("clips.view.copyPath"), Style.SECONDARY, () -> {
             ClientCompat.setClipboard(clip.video().toAbsolutePath().toString());
-            flash(tr("copied"));
+            flash(Lang.tr("clips.view.copied"));
         });
-        buttonRight(g, l - 6, by, 18, tr("folder"), Style.SECONDARY, ClipsFiles::openFolder);
+        buttonRight(g, l - 6, by, 18, Lang.tr("clips.view.folder"), Style.SECONDARY, ClipsFiles::openFolder);
     }
 
     private void flash(String s) {
@@ -286,7 +285,7 @@ public final class ClipViewScreen extends CardScreen {
 
     public void toggleKeep() {
         boolean to = !clip.kept();
-        edit(to, null, to ? tr("keptFlash") : tr("unkeptFlash"));
+        edit(to, null, to ? Lang.tr("clips.view.keptFlash") : Lang.tr("clips.view.unkeptFlash"));
     }
 
     public void startRename() {
@@ -297,7 +296,7 @@ public final class ClipViewScreen extends CardScreen {
     }
 
     public void rename(String title) {
-        edit(null, title == null ? "" : title, tr("renamedFlash"));
+        edit(null, title == null ? "" : title, Lang.tr("clips.view.renamedFlash"));
         renaming = false;
     }
 
@@ -333,7 +332,7 @@ public final class ClipViewScreen extends CardScreen {
             player.close(); // release the file before deleting it
             player = null;
         }
-        playerError = tr("deleted");
+        playerError = Lang.tr("clips.view.deleted");
         ClipsFiles.io(() -> {
             ClipStore store = ClipsFiles.store();
             store.delete(id);

@@ -1,0 +1,26 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "Apache-2.0"
+issueTrackerURL = "https://github.com/vibec-studios/vibey-client/issues"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${version}"
+displayName = "vui"
+authors = "Vibe Craft Studios"
+displayURL = "https://github.com/vibec-studios/vibey-client"
+description = """UI library: markup, layout, styles, animation, data binding and HUD for Minecraft screens."""
+
+[[dependencies.${mod_id}]]
+modId = "neoforge"
+type = "required"
+versionRange = "${neo_range}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "minecraft"
+type = "required"
+versionRange = "${minecraft_neo_range}"
+ordering = "NONE"
+side = "BOTH"

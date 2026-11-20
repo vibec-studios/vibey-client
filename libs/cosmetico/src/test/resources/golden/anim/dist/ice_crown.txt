@@ -1,0 +1,8 @@
+animation idle 3.0 true
+time 0.3 0.3
+time 7.77 1.77
+time 123.456 0.456
+local -0.5 0.0 2.5
+local 0.2 0.2 0.2
+local 4.5 3.0 1.5
+local 9.75 3.0 0.75

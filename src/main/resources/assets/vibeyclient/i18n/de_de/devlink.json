@@ -1,12 +1,18 @@
 {
-  "name": "Blockbench-Link",
+  "name": "Blockbench",
   "description": "Live-Verbindung zu Blockbench zum Erstellen von Cosmetics und Emotes.",
   "summary": "Modelle live aus Blockbench schicken.",
   "setting": {
     "creatorMode": "Creator-Modus",
     "creatorMode.desc": "Erlaubt dem Blockbench-Plugin, Modelle ins Spiel zu schicken.",
-    "port": "Port der Live-Verbindung",
-    "port.desc": "Lokaler Port der Live-Verbindung (nur von diesem Computer erreichbar)."
+    "port": "Link-Port",
+    "port.desc": "Lokaler Port der Live-Verbindung (nur von diesem Computer erreichbar).",
+    "copyToken": "Token",
+    "copyToken.action": "Token kopieren",
+    "copyToken.desc": "Der Schlüssel, den Blockbench zum Verbinden braucht.",
+    "newToken": "Neuer Token",
+    "newToken.action": "Erneuern",
+    "newToken.desc": "Trennt jedes Blockbench."
   },
   "panel": {
     "status": "Live-Verbindung",
@@ -50,5 +56,22 @@
     "signIn": "Melde dich zuerst bei Vibe an: Online-Funktionen an und das Spiel mit dem Vibe-Backend verbunden.",
     "sent": "{0} an Vibe eingereicht",
     "sentBody": "Das Vibe-Team prüft es; du bekommst einen Hinweis, wenn es freigegeben ist."
+  },
+  "status": {
+    "on": "Bereit",
+    "off": "Aus",
+    "error": "Fehler",
+    "portInUse": "Port {0} belegt",
+    "creatorOff": "Creator-Modus aus",
+    "moduleOff": "Modul aus",
+    "noClient": "Kein Blockbench",
+    "clients": "{0} Blockbench",
+    "token": "Token",
+    "copied": "Kopiert",
+    "noClipboard": "Keine Zwischenablage",
+    "renewAsk": "Neuer Token?",
+    "renewText": "Blockbench muss sich neu verbinden.",
+    "renew": "Erneuern",
+    "renewed": "Erneuert"
   }
 }

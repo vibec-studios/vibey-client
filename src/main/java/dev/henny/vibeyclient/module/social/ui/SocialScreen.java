@@ -466,6 +466,10 @@ public final class SocialScreen extends BaseScreen {
 
     /** Opens the Vibey menu on the account tab (from the sidebar). */
     void openAccount() {
+        if (!dev.henny.vibeyclient.ui.vui.ClassicUi.enabled()) {
+            dev.henny.vibeyclient.module.social.vui.AccountScreen.open(parent, module);
+            return;
+        }
         ClientCompat.openScreen(new VibeyScreen(parent, "account"));
     }
 }

@@ -1,0 +1,17 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<props>{ "label": "", "icon": "", "count": -1, "on": false, "tip": "" }</props>
+<template>
+  <row class="chip" :class="{ on: on }" :tooltip="tip" tabindex="0">
+    <ico v-if="icon" :name="icon"/>
+    <text class="chip-label">{{ label }}</text>
+    <text v-if="count >= 0" class="chip-count">{{ count }}</text>
+  </row>
+</template>
+<style>
+.chip { height: 14; padding: 0 5; gap: 3; border: 1 $line2; background: $panel; color: $muted; cursor: pointer;
+        flex-shrink: 0; transition: border-color 150ms out, color 150ms out; }
+.chip:hover, .chip:focus { border-color: $brand; color: $text; }
+.chip.on { border-color: $brand; color: $text; background: $surface2; }
+.chip-label { text-wrap: nowrap; }
+.chip-count { color: $dim; }
+</style>

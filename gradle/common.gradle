@@ -18,11 +18,13 @@ def generatedDir = layout.buildDirectory.dir('generated/vibeyclient')
 def genTask = tasks.register('generateBuildInfo') {
     def relay = project.default_relay
     def backend = project.default_backend
+    def discord = project.findProperty('discord_app_id') ?: ''
     def ver = project.version.toString()
     def mc = project.minecraft_version
     def label = project.minecraft_label
     inputs.property('relay', relay)
     inputs.property('backend', backend)
+    inputs.property('discord', discord)
     inputs.property('version', ver)
     inputs.property('mc', mc)
     inputs.property('label', label)
@@ -42,6 +44,7 @@ public final class BuildInfo {
     /** Vibe backend + Vibey relay: official builds only, forks use their own (https://github.com/vibec-studios/.github/blob/main/SERVICES.md). */
     public static final String DEFAULT_BACKEND = "${backend}";
     public static final String DEFAULT_RELAY = "${relay}";
+    public static final String DISCORD_APP_ID = "${discord}";
     private BuildInfo() {}
 }
 """
@@ -49,35 +52,9 @@ public final class BuildInfo {
 }
 sourceSets.main.java.srcDir(generatedDir)
 
-// The video screens (module/media/video) are written for Fabric 1.21.11 only for now; every other target leaves them out.
-if (project.name != 'fabric-1.21.11') {
-    sourceSets.main.java { exclude 'dev/henny/vibeyclient/module/media/video/**' }
-    processResources { exclude 'assets/vibeyclient/i18n/*/media.video.json' }
-}
-// The HUD module (module/hud: built-in widgets, templates) is Fabric 1.21.11 only for now, like the video screens.
-// The editor and widget API (ui/hud) are in every target.
-if (project.name != 'fabric-1.21.11') {
-    sourceSets.main.java { exclude 'dev/henny/vibeyclient/module/hud/**' }
-    processResources { exclude 'assets/vibeyclient/i18n/*/hud.json' }
-}
-// The PvP module (module/pvp) is also Fabric 1.21.11 only for now: its package, mixin config, strings and its line in
-// fabric.mod.json are left out everywhere else (BuiltinModules registers it by reflection when present).
-if (project.name != 'fabric-1.21.11') {
-    sourceSets.main.java { exclude 'dev/henny/vibeyclient/module/pvp/**' }
-    processResources {
-        exclude 'vibeyclient.pvp.mixins.json', 'assets/vibeyclient/i18n/*/pvp.json'
-        filesMatching('fabric.mod.json') { filter { String line -> line.contains('vibeyclient.pvp.mixins.json') ? null : line } }
-    }
-}
-// The Clips module (module/clips: replay buffer, auto clips, gallery) is Fabric 1.21.11 only for now, like pvp: package,
-// mixin config, strings, shader and its fabric.mod.json line are left out everywhere else (registered by reflection).
-if (project.name != 'fabric-1.21.11') {
-    sourceSets.main.java { exclude 'dev/henny/vibeyclient/module/clips/**' }
-    processResources {
-        exclude 'vibeyclient.clips.mixins.json', 'assets/vibeyclient/i18n/*/clips.json', 'assets/vibeyclient/shaders/core/clips_*'
-        filesMatching('fabric.mod.json') { filter { String line -> line.contains('vibeyclient.clips.mixins.json') ? null : line } }
-    }
-}
+apply from: rootProject.file('gradle/modules-filter.gradle')
+apply from: rootProject.file('gradle/client-libs.gradle')
+apply from: rootProject.file('gradle/client-checks.gradle')
 tasks.named('compileJava') { dependsOn genTask }
 afterEvaluate {
     tasks.matching { it.name == 'sourcesJar' }.configureEach { dependsOn genTask }
@@ -100,5 +77,5 @@ jar {
     from(rootProject.file('NOTICE')) { rename { "NOTICE_vibeyclient" } }
     from(rootProject.files('licenses/vibey-multiplayer-MIT.txt', 'licenses/vibey-lyrics-MIT.txt')) { into 'licenses/vibeyclient' }
     // The fonts of the lyrics module must travel with their licenses (SIL OFL 1.1 / Apache 2.0).
-    if (project.name.startsWith('fabric-')) from(rootProject.file('licenses/lyrics')) { into 'licenses/vibeyclient/lyrics' }
+    if (moduleIncluded('media')) from(rootProject.file('licenses/lyrics')) { into 'licenses/vibeyclient/lyrics' }
 }

@@ -1,0 +1,13 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<template>
+  <row class="wordmark" gap="3">
+    <ico name="seal" class="wordmark-seal"/>
+    <text class="wordmark-text">VIBEY</text>
+  </row>
+</template>
+<style>
+.wordmark { flex-shrink: 0; cursor: pointer; }
+.wordmark-seal { color: $brand; }
+.wordmark-text { font-weight: bold; letter-spacing: 1; color: $text; }
+.wordmark:hover .wordmark-text { color: $brand-hover; }
+</style>

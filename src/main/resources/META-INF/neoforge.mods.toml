@@ -19,12 +19,6 @@ config = "vibeyclient.mixins.json"
 config = "vibeyclient.social.mixins.json"
 
 [[mixins]]
-config = "vibeyclient.cosmetics.mixins.json"
-
-[[mixins]]
-config = "vibeyclient.emotes.mixins.json"
-
-[[mixins]]
 config = "vibeyclient.multiplayer.mixins.json"
 
 [[mixins]]
@@ -45,4 +39,25 @@ modId = "minecraft"
 type = "required"
 versionRange = "${minecraft_neo_range}"
 ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "vui"
+type = "required"
+versionRange = "[${vui_version},)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "r3"
+type = "required"
+versionRange = "[${r3_version},)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "cosmetico"
+type = "required"
+versionRange = "[${cosmetico_version},)"
+ordering = "AFTER"
 side = "BOTH"

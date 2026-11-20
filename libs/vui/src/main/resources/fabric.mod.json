@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${version}",
+  "name": "vui",
+  "description": "UI library: markup, layout, styles, animation, data binding and HUD for Minecraft screens.",
+  "authors": [
+    "Vibe Craft Studios"
+  ],
+  "contact": {
+    "sources": "https://github.com/vibec-studios/vibey-client",
+    "issues": "https://github.com/vibec-studios/vibey-client/issues"
+  },
+  "license": "Apache-2.0",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "dev.henny.vui.mc.fabric.VuiFabric"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.5",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_range}",
+    "java": ">=${java}"
+  }
+}

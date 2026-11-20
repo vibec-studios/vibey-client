@@ -1,0 +1,13 @@
+{
+ "view": "grid",
+ "panel": "",
+ "query": "xray",
+ "status": "online",
+ "requests": 2,
+ "showCreators": false,
+ "moreOpen": false,
+ "quickMoreOpen": false,
+ "version": "0.4.0",
+ "modules": [],
+ "creators": []
+}

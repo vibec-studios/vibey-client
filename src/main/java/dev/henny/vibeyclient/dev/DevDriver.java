@@ -9,12 +9,11 @@ import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.api.net.VibeyNet;
 import dev.henny.vibeyclient.api.service.HostingService;
 import dev.henny.vibeyclient.api.service.VibeBackend;
-import dev.henny.vibeyclient.avatar.AvatarItem;
-import dev.henny.vibeyclient.avatar.AvatarItems;
-import dev.henny.vibeyclient.avatar.AvatarState;
-import dev.henny.vibeyclient.avatar.AvatarStates;
-import dev.henny.vibeyclient.avatar.Slot;
-import dev.henny.vibeyclient.avatar.Wardrobe;
+import dev.henny.cosmetico.registry.Item;
+import dev.henny.cosmetico.Cosmetico;
+import dev.henny.cosmetico.state.Avatar;
+import dev.henny.cosmetico.model.Slot;
+import dev.henny.vibeyclient.module.cosmetics.Wardrobe;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.world.entity.player.Player;
@@ -131,16 +130,16 @@ public final class DevDriver {
             case "avatar": {
                 UUID id = resolve(mc, arg);
                 if (id == null) return "err unknown player " + arg;
-                AvatarState st = AvatarStates.peek(id);
+                Avatar st = Cosmetico.engine().avatars.peek(id);
                 if (st == null) return "ok " + id + " none";
                 StringBuilder sb = new StringBuilder("ok ").append(id);
-                for (Slot sl : Slot.all()) if (st.slots[sl.ordinal()] != null) sb.append(' ').append(sl.id()).append('=').append(st.slots[sl.ordinal()]);
+                for (Slot sl : Slot.all()) if (st.loadout.base[sl.ordinal()] != null) sb.append(' ').append(sl.id()).append('=').append(st.loadout.base[sl.ordinal()]);
                 sb.append(" emote=").append(st.emote == null ? "none" : st.emote.id + (st.emote.stopping() ? "(stopping)" : ""));
                 return sb.toString();
             }
             case "equip": {
                 if (wd == null) return "err no wardrobe";
-                AvatarItem item = AvatarItems.get(arg);
+                Item item = Cosmetico.items().get(arg);
                 if (item == null) return "err unknown item " + arg;
                 if (!wd.canUse(item)) return "err locked " + arg;
                 wd.equip(item);
@@ -163,7 +162,7 @@ public final class DevDriver {
                 return "ok";
             case "wardrobe": // wardrobe [slot]
                 dev.henny.vibeyclient.module.cosmetics.ui.WardrobeUi.openWardrobe(ClientCompat.screen(),
-                        arg == null || arg.isBlank() ? null : dev.henny.vibeyclient.avatar.Slot.of(arg.trim()));
+                        arg == null || arg.isBlank() ? null : dev.henny.cosmetico.model.Slot.of(arg.trim()));
                 return "ok";
             case "close":
                 ClientCompat.openScreen(null);
@@ -209,7 +208,7 @@ public final class DevDriver {
                 return "ok";
             }
             case "camera":
-                dev.henny.vibeyclient.avatar.EngineCompat.setCamera(switch (arg) {
+                dev.henny.cosmetico.mc.compat.McCamera.set(switch (arg) {
                     case "back" -> net.minecraft.client.CameraType.THIRD_PERSON_BACK;
                     case "front" -> net.minecraft.client.CameraType.THIRD_PERSON_FRONT;
                     default -> net.minecraft.client.CameraType.FIRST_PERSON;
@@ -263,11 +262,9 @@ public final class DevDriver {
                 return "ok";
             }
             case "page": { // page <module id>: open the Vibey menu on that module's settings page
-                dev.henny.vibeyclient.ui.screen.ModulesPanel.preselect(arg.isEmpty() ? null : arg);
                 ClientCompat.openScreen(null);
-                dev.henny.vibeyclient.client.VibeyCore.openMenu();
-                if (ClientCompat.screen() instanceof dev.henny.vibeyclient.ui.VibeyScreen vs) vs.showTab(dev.henny.vibeyclient.ui.VibeyTabs.MODULES);
-                return "ok " + dev.henny.vibeyclient.ui.screen.ModulesPanel.openPage();
+                dev.henny.vibeyclient.ui.vui.Menus.openModule(null, arg.isEmpty() ? null : arg);
+                return "ok " + arg;
             }
             case "shot":
                 shot(mc);

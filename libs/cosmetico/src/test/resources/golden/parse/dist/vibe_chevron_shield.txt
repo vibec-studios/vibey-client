@@ -1,0 +1,14 @@
+id vibey:vibe_chevron_shield
+kind COSMETIC
+name Vibe Chevron Shield | Vibe-Sparren-Schild
+description Bold purple and teal chevrons – the Vibe colours, made to block. | Kräftige lila und türkise Sparren – die Vibe-Farben, gemacht zum Blocken.
+author Vibe Craft Studios
+tags [vibe, chevron, starter]
+rarity COMMON
+slot SHIELD
+hideWithArmor []
+pet GROUND 1.0
+cape -1 shield 0
+emote null
+sha256 ee54c7338fb3a9e760054ab26d4e8e4854ea2e6c3ed11d7cf73586e1082b1240 size 2275
+texture 0 shield 64 64 64 64 1 1 [0] false false 1 fa628c76e82228b26c9f088a9a77954cf4371df975721eacccab363db564f828

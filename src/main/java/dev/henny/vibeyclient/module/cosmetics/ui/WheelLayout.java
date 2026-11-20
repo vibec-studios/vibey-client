@@ -1,7 +1,7 @@
 package dev.henny.vibeyclient.module.cosmetics.ui;
 
-import dev.henny.vibeyclient.avatar.AvatarItem;
-import dev.henny.vibeyclient.avatar.AvatarItems;
+import dev.henny.cosmetico.registry.Item;
+import dev.henny.cosmetico.Cosmetico;
 import dev.henny.vibeyclient.ui.Gfx;
 import dev.henny.vibeyclient.ui.Theme;
 
@@ -87,7 +87,7 @@ final class WheelLayout {
             plus(g, x + s / 2, y + s / 2, Math.max(7, s / 5), Theme.alpha(Theme.mix(Theme.DIM, Theme.TEXT, t), a));
             return;
         }
-        AvatarItem item = AvatarItems.get(emoteId);
+        Item item = Cosmetico.items().get(emoteId);
         int nameH = s >= 40 ? 12 : 0;
         int ts = Math.min(s - 10, s - nameH - 8);
         int tx = x + (s - ts) / 2;

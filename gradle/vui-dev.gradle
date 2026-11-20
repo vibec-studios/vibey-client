@@ -1,0 +1,26 @@
+// vui dev mode for the client's dev runs (libs/vui/docs/dev-loop.md): .vui files are read from the source folders,
+// reloaded on save, and the dev bridge runs on 127.0.0.1:7591 (gametest: any free port).
+def vuiSourceRoots = [rootProject.file('src/main/resources')] + gradle.vibeyLibs.collect { rootProject.file("libs/${it}/src/main/resources") }
+def vuiTestOverride = rootProject.file('build/vui-test-override')
+def vuiRoots = { List<File> extra -> (extra + vuiSourceRoots).collect { it.absolutePath }.join(';') }
+
+loom.runs.matching { it.name == 'client' }.configureEach {
+    vmArg '-Dvui.dev=true'
+    vmArg "-Dvui.dev.roots=${vuiRoots([])}"
+    def port = System.getProperty('vui.dev.port')
+    if (port) vmArg "-Dvui.dev.port=${port}"
+}
+
+loom.runs.matching { it.name == 'clientGameTest' }.configureEach {
+    vmArg '-Dvui.dev=true'
+    vmArg '-Dvui.dev.port=0'
+    vmArg "-Dvui.dev.roots=${vuiRoots([vuiTestOverride])}"
+    vmArg "-Dvui.review.dir=${rootProject.file('build/review/vui').absolutePath}"
+}
+
+tasks.matching { it.name == 'runClientGameTest' }.configureEach {
+    doFirst {
+        project.delete(vuiTestOverride)
+        new File(vuiTestOverride, 'assets/vui/vui').mkdirs()
+    }
+}

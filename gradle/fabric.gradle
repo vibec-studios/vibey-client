@@ -4,6 +4,8 @@ plugins {
 }
 
 ext.javaVersion = 21
+ext.libDep = { String id -> dependencies.project(path: ":${id}:${project.name}", configuration: 'namedElements') }
+ext.libNest = 'include'
 apply from: rootProject.file('gradle/common.gradle')
 
 repositories {
@@ -44,6 +46,7 @@ loom {
 }
 
 apply from: rootProject.file('gradle/fabric-resources.gradle')
+apply from: rootProject.file('gradle/vui-dev.gradle')
 
 // Client game test (only for the version the sources are written in): ./gradlew :fabric-1.21.11:runClientGameTest
 if (project.minecraft_version == '1.21.11') {
@@ -79,7 +82,7 @@ if (project.minecraft_version == '1.21.11') {
     // They live in src/junit, not src/test: Stonecutter would hand src/test to every version, which has no JUnit.
     sourceSets.named('test') {
         java.srcDirs = [rootProject.file('src/junit/java')]
-        resources.srcDirs = []
+        resources.srcDirs = [rootProject.file('src/junit/resources')]
     }
     dependencies {
         testImplementation platform('org.junit:junit-bom:5.11.4')
@@ -103,7 +106,7 @@ if (project.minecraft_version == '1.21.11') {
     // -Dvibeyclient.api=http://localhost:3100 -Dvibeyclient.username=VibeyTester (see SocialGameTest)
     ['clientGameTest', 'client'].each { run ->
         loom.runs.named(run) {
-            ['vibeyclient.devAuth', 'vibeyclient.api', 'vibeyclient.socialTest', 'vibeyclient.devDriver', 'vibeyclient.devOfflineHost', 'vibeyclient.playLinkTest', 'vibeyclient.noticeTest',
+            ['vibeyclient.devAuth', 'vibeyclient.api', 'vibeyclient.socialTest', 'vibeyclient.devDriver', 'vibeyclient.devOfflineHost', 'vibeyclient.playLinkTest', 'vibeyclient.noticeTest', 'vibeyclient.ranksSeed',
              'vibeyclient.clips.stats', 'vibeyclient.clips.readback', 'vibeyclient.clips.lgplTest'].each { k ->
                 def v = System.getProperty(k)
                 if (v != null) vmArg "-D${k}=${v}"

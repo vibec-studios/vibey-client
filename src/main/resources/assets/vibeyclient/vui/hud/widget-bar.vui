@@ -1,0 +1,22 @@
+<import name="icon-button" src="vibeyclient:components/icon-button"/>
+<import name="style-panel" src="vibeyclient:hud/style-panel"/>
+<template>
+  <row id="wbar" ref="wbar" class="wbar" :style="{ left: selected?.barX, top: selected?.barY }">
+    <text class="wbar-name">{{ selected?.name }}</text>
+    <text id="wbar-scale" class="wbar-scale" :tooltip="t('ui.hud.wheelTip')">{{ selected?.pct }}</text>
+    <box class="wbar-sep"/>
+    <stack class="wbar-slot">
+      <icon-button id="wbar-style" icon="sliders" :tip="t('ui.hud.style')" :active="panel == 'style'" @click="styleSelected()"/>
+      <popover :open="panel == 'style'" @update:open="panel = ''" :placement="selected?.above ? 'top' : 'bottom'" align="start"><style-panel/></popover>
+    </stack>
+    <icon-button id="wbar-hide" :icon="selected?.copy ? 'hud_trash' : 'eye'" :tip="selected?.copy ? t('ui.hud.remove') : t('ui.hud.hide')" @click="hideSelected()"/>
+    <icon-button id="wbar-reset" icon="reset" :tip="t('ui.hud.reset')" @click="resetSelected()"/>
+  </row>
+</template>
+<style>
+.wbar { position: absolute; height: 18; gap: 3; padding: 0 1 0 5; background: $surface; border: 1 $brand; pointer-events: auto; }
+.wbar-name { color: $text; text-wrap: nowrap; }
+.wbar-scale { color: $brand2; text-wrap: nowrap; }
+.wbar-sep { width: 1; height: 10; background: $line2; margin: 0 1; }
+.wbar .icon-btn { size: 16; }
+</style>

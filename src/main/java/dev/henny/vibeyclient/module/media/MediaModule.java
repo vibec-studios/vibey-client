@@ -13,9 +13,7 @@ import dev.henny.vibeyclient.module.media.lyrics.LyricsFeature;
 import dev.henny.vibeyclient.ui.Gfx;
 import dev.henny.vibeyclient.ui.Icons;
 import dev.henny.vibeyclient.ui.MenuEntries;
-import dev.henny.vibeyclient.ui.VibeyScreen;
 import dev.henny.vibeyclient.ui.hud.HudLayout;
-import dev.henny.vibeyclient.ui.screen.ModulesPanel;
 import net.minecraft.client.gui.screens.Screen;
 
 import java.util.ArrayList;
@@ -186,8 +184,7 @@ public final class MediaModule extends VibeyModule {
             ly.open(parent);
             return;
         }
-        ModulesPanel.preselect(ID);
-        ClientCompat.openScreen(new VibeyScreen(parent));
+        dev.henny.vibeyclient.ui.vui.Menus.openModule(parent, ID);
     }
 
     private static String modName(String id) {

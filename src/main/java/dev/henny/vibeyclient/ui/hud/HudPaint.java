@@ -3,20 +3,12 @@ package dev.henny.vibeyclient.ui.hud;
 import dev.henny.vibeyclient.ui.Gfx;
 import dev.henny.vibeyclient.ui.Theme;
 
-/**
- * What a {@link HudWidget} gets to draw with: the box size, the resolved style, the widget's options and helpers that
- * draw text and backgrounds in that style. One instance is reused for every widget and frame (never keep it).
- */
 public final class HudPaint {
     public Gfx g;
-    /** Box size in unscaled GUI pixels (draw into 0..w, 0..h). */
     public int w;
     public int h;
-    /** Drawn by the HUD editor: show sample values when there is nothing real to show. */
     public boolean preview;
-    /** The resolved style of this widget. */
     public HudStyle.Resolved style;
-    /** Milliseconds (System.currentTimeMillis), the same for the whole frame. */
     public long now;
     HudElement element;
     HudLayout.Placement placement;
@@ -25,7 +17,6 @@ public final class HudPaint {
         return element;
     }
 
-    /** -1 left, 0 centre, 1 right: the style's alignment, AUTO following the anchor column. */
     public int align() {
         return switch (style.align) {
             case LEFT -> -1;
@@ -35,7 +26,6 @@ public final class HudPaint {
         };
     }
 
-    /** Left x of content {@code cw} wide inside the box with {@code pad} px padding, following {@link #align()}. */
     public int alignX(int cw, int pad) {
         int a = align();
         if (a < 0) return pad;
@@ -47,7 +37,6 @@ public final class HudPaint {
         return style.detailed();
     }
 
-    /** The stored value of option {@code key} (its default when unset). */
     public String option(String key) {
         if (placement != null && placement.opts != null) {
             String v = placement.opts.get(key);
@@ -63,9 +52,6 @@ public final class HudPaint {
         return "1".equals(option(key));
     }
 
-    // ============================================================================================ drawing
-
-    /** The style's background over the whole box (nothing when switched off). */
     public void background() {
         background(0, 0, w, h);
     }
@@ -76,7 +62,6 @@ public final class HudPaint {
         if (s.border) outlineShape(x, y, bw, bh, Theme.alpha(s.accent, 0.7f));
     }
 
-    /** A filled rectangle in the style's corner shape (square or a 1 px bevel). */
     public void fillShape(int x, int y, int bw, int bh, int argb) {
         if (style.corners == HudStyle.Corners.BEVEL && bw > 2 && bh > 2) {
             g.rect(x + 1, y, bw - 2, 1, argb);
@@ -98,7 +83,6 @@ public final class HudPaint {
         }
     }
 
-    /** Main text in the style's text paint (colour, accent or rainbow), with the style's shadow. */
     public void text(String s, int x, int y) {
         switch (style.paint) {
             case ACCENT -> plain(s, x, y, style.accent);
@@ -107,19 +91,16 @@ public final class HudPaint {
         }
     }
 
-    /** Text in the accent colour (labels, icons); rainbow when the style's paint is rainbow. */
     public void accentText(String s, int x, int y) {
         if (style.paint == HudStyle.TextPaint.RAINBOW) rainbow(s, x, y, 0xFF);
         else plain(s, x, y, style.accent);
     }
 
-    /** Text in the main colour at {@code alpha} (0..1), for secondary values. */
     public void dimText(String s, int x, int y, float alpha) {
         int c = style.paint == HudStyle.TextPaint.ACCENT ? style.accent : style.text;
         plain(s, x, y, Theme.alpha(c, alpha));
     }
 
-    /** Text in a fixed ARGB colour, with the style's shadow. */
     public void plain(String s, int x, int y, int argb) {
         if (s == null || s.isEmpty()) return;
         if (style.shadow) g.textShadow(s, x, y, argb);
@@ -133,7 +114,6 @@ public final class HudPaint {
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
             if (c >= CHARS.length) {
-                // outside the cached range: the rest in one colour (no allocation for the common case)
                 plain(s.substring(i), cx, y, rainbowColor(base + cx * 0.008f, alpha));
                 return;
             }
@@ -145,13 +125,11 @@ public final class HudPaint {
         }
     }
 
-    /** A rainbow colour at {@code t} (wraps at 1) in the Vibe tones (soft, not neon). */
     public static int rainbowColor(float t, int alpha) {
         float h = t - (float) Math.floor(t);
         return (alpha << 24) | hsv(h, 0.62f, 1f);
     }
 
-    /** RGB of hue/saturation/value in 0..1. */
     public static int hsv(float h, float s, float v) {
         h = (h - (float) Math.floor(h)) * 6f;
         int i = (int) h;
@@ -169,7 +147,6 @@ public final class HudPaint {
         return (Math.round(r * 255) << 16) | (Math.round(gg * 255) << 8) | Math.round(b * 255);
     }
 
-    /** One-character strings for the rainbow paint (no allocation per frame). */
     private static final String[] CHARS = new String[0x250];
 
     static {

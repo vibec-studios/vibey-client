@@ -1,0 +1,72 @@
+{
+  "name": "Wegpunkte",
+  "description": "Deine eigenen Punkte als Leuchtfeuer, eine Karte und eine faire Minimap.",
+  "summary": "Leuchtfeuer, Karte, Minimap",
+  "default": "Wegpunkt",
+  "death": "Tod",
+  "section": {
+    "world": "In der Welt",
+    "minimap": "Minimap"
+  },
+  "setting": {
+    "openList": "Wegpunkte",
+    "openList.action": "Wegpunkte",
+    "openMap": "Karte",
+    "openMap.action": "Karte",
+    "beacons": "Leuchtfeuer",
+    "beacons.desc": "Ansehen wählt es aus. Mittlere Maustaste verschiebt, das Mausrad ändert die Größe, Linksklick navigiert.",
+    "beams": "Lichtstrahlen",
+    "deathMarker": "Todespunkt",
+    "deathMarker.desc": "Markiert, wo du gestorben bist.",
+    "otherDimension": "Nether ↔ Oberwelt",
+    "otherDimension.desc": "Zeigt Punkte der anderen Dimension an der passenden Stelle.",
+    "portalCoords": "Portal-Koordinaten",
+    "portalCoords.desc": "Sieh ein Portal an, um zu sehen, wohin es führt.",
+    "minimap": "Minimap",
+    "minimap.desc": "Erkundetes Gelände und deine Punkte. Keine Spieler, keine Mobs.",
+    "minimapRotate": "Mitdrehen",
+    "minimapZoom": "Zoom",
+    "addKey": "Wegpunkt setzen",
+    "mapKey": "Karte öffnen",
+    "minimapKey": "Minimap an/aus",
+    "listKey": "Wegpunktliste",
+    "cacheMb": "Karten-Cache",
+    "cacheMb.desc": "Speicherplatz für erkundete Kartenteile.",
+    "beamsThrough": "Strahl durch Berge",
+    "beamsThrough.desc": "Ein schwacher Strahl bleibt hinter Gelände sichtbar."
+  },
+  "hud": {
+    "minimap": "Minimap",
+    "minimap.desc": "Erkundetes Gelände und deine Punkte.",
+    "portal": "Portal-Koord.",
+    "portal.desc": "Wo du in der anderen Dimension wärst."
+  },
+  "dim": {
+    "overworld": "Oberwelt",
+    "nether": "Nether",
+    "end": "End"
+  },
+  "toast": {
+    "added": "Gesetzt",
+    "copied": "Code kopiert",
+    "imported": "Importiert",
+    "bad": "Kein Wegpunkt-Code"
+  },
+  "ui": {
+    "title": "Wegpunkte",
+    "add": "Hier setzen",
+    "import": "Code einfügen",
+    "shareAll": "Alle kopieren",
+    "share": "Code kopieren",
+    "map": "Karte",
+    "list": "Liste",
+    "close": "Schließen",
+    "navigate": "Navigieren",
+    "visible": "Zeigen",
+    "delete": "Löschen",
+    "empty": "Keine Wegpunkte",
+    "center": "Zentrieren",
+    "zoomIn": "Vergrößern",
+    "zoomOut": "Verkleinern"
+  }
+}

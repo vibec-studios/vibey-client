@@ -4,7 +4,7 @@
   "summary": "Capes, wings, pets, hats and more.",
   "setting": {
     "showOwn": "Show my cosmetics",
-    "showOthers": "Show other players' cosmetics",
+    "showOthers": "Others' cosmetics",
     "hideWithArmor": "Hide under armor",
     "hideWithArmor.desc": "For example hats under a helmet.",
     "show_cape": "Capes",
@@ -15,9 +15,10 @@
     "show_hat": "Hats",
     "show_back": "Back items",
     "wardrobe": "Open wardrobe",
-    "notifyNew": "Tell me about new cosmetics",
+    "notifyNew": "New item alerts",
     "notifyNew.desc": "A short notice when new items arrive in your wardrobe.",
-    "openWardrobe": "Open wardrobe"
+    "openWardrobe": "Open wardrobe",
+    "showOthers.desc": "Show other players' cosmetics"
   },
   "locked": {
     "notUnlocked": "Not unlocked",
@@ -40,6 +41,6 @@
   },
   "section": {
     "show": "What you see",
-    "types": "Show these on everyone"
+    "types": "Shown on all"
   }
 }

@@ -1,0 +1,254 @@
+{
+ "view": "page",
+ "panel": "",
+ "query": "",
+ "status": "online",
+ "requests": 0,
+ "moreOpen": true,
+ "page": {
+  "id": "pvp",
+  "name": "PvP & View",
+  "icon": "crosshair",
+  "accent": "#ff5470",
+  "tip": "Zoom, crosshair, toggle sprint. Nothing vanilla forbids.",
+  "on": true,
+  "available": true,
+  "notices": [],
+  "primary": {
+   "id": "editCrosshair",
+   "kind": "action",
+   "button": "Edit crosshair"
+  },
+  "moreCount": 4,
+  "sections": [
+   {
+    "id": "zoom",
+    "title": "Zoom",
+    "rows": [
+     {
+      "id": "zoom",
+      "kind": "toggle",
+      "label": "Zoom",
+      "tip": "Hold the key to look closer.",
+      "value": true,
+      "blocked": true
+     },
+     {
+      "id": "zoomLevel",
+      "kind": "slider",
+      "label": "Strength",
+      "value": 4,
+      "min": 2,
+      "max": 10,
+      "step": 0.5,
+      "display": "4×"
+     },
+     {
+      "id": "zoomSmooth",
+      "kind": "toggle",
+      "label": "Smooth",
+      "value": true
+     },
+     {
+      "id": "zoomKey",
+      "kind": "key",
+      "label": "Key",
+      "value": 67,
+      "conflict": ""
+     }
+    ]
+   },
+   {
+    "id": "crosshair",
+    "title": "Crosshair",
+    "rows": [
+     {
+      "id": "crosshair",
+      "kind": "choice",
+      "label": "Shape",
+      "value": "cross",
+      "options": [
+       {
+        "value": "vanilla",
+        "label": "Vanilla"
+       },
+       {
+        "value": "cross",
+        "label": "Cross"
+       },
+       {
+        "value": "circle",
+        "label": "Circle"
+       },
+       {
+        "value": "dot",
+        "label": "Dot"
+       },
+       {
+        "value": "t",
+        "label": "T"
+       }
+      ]
+     },
+     {
+      "id": "chSize",
+      "kind": "slider",
+      "label": "Size",
+      "value": 6,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "display": "6"
+     },
+     {
+      "id": "chColor",
+      "kind": "color",
+      "label": "Colour",
+      "value": "#3fe0c5"
+     },
+     {
+      "id": "chDot",
+      "kind": "toggle",
+      "label": "Centre dot",
+      "value": false
+     }
+    ]
+   },
+   {
+    "id": "movement",
+    "title": "Sprint & sneak",
+    "rows": [
+     {
+      "id": "toggleSprint",
+      "kind": "toggle",
+      "label": "Toggle sprint",
+      "tip": "Press once to keep sprinting.",
+      "value": true
+     },
+     {
+      "id": "toggleSneak",
+      "kind": "toggle",
+      "label": "Toggle sneak",
+      "tip": "Press once to keep sneaking.",
+      "value": false
+     },
+     {
+      "id": "showToggleState",
+      "kind": "toggle",
+      "label": "Show on HUD",
+      "value": true
+     }
+    ]
+   },
+   {
+    "id": "outline",
+    "title": "Block outline",
+    "rows": [
+     {
+      "id": "outline",
+      "kind": "toggle",
+      "label": "Custom outline",
+      "value": true
+     },
+     {
+      "id": "outlineColor",
+      "kind": "color",
+      "label": "Colour",
+      "value": "#8b6cff"
+     },
+     {
+      "id": "outlineWidth",
+      "kind": "slider",
+      "label": "Thickness",
+      "value": 2,
+      "min": 1,
+      "max": 5,
+      "step": 0.5,
+      "display": "2"
+     }
+    ]
+   },
+   {
+    "id": "view",
+    "title": "First person",
+    "rows": [
+     {
+      "id": "lowFire",
+      "kind": "toggle",
+      "label": "Low fire",
+      "tip": "Flames sit lower when you burn.",
+      "value": true
+     },
+     {
+      "id": "lowShield",
+      "kind": "toggle",
+      "label": "Low shield",
+      "tip": "Shield is held lower.",
+      "value": false
+     },
+     {
+      "id": "outlineMode",
+      "kind": "choice",
+      "label": "Hit colour",
+      "value": "red",
+      "options": [
+       {
+        "value": "red",
+        "label": "Red"
+       },
+       {
+        "value": "custom",
+        "label": "Own"
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "more": [
+   {
+    "id": "advanced",
+    "title": "",
+    "rows": [
+     {
+      "id": "zoomTime",
+      "kind": "slider",
+      "label": "Zoom speed",
+      "value": 0.2,
+      "min": 0,
+      "max": 1,
+      "step": 0.05,
+      "display": "0.2s"
+     },
+     {
+      "id": "zoomScrollStep",
+      "kind": "slider",
+      "label": "Wheel step",
+      "value": 0.5,
+      "min": 0.1,
+      "max": 2,
+      "step": 0.1,
+      "display": "0.5"
+     },
+     {
+      "id": "zoomSensitivity",
+      "kind": "toggle",
+      "label": "Slow mouse",
+      "tip": "Aim feels the same while zoomed.",
+      "value": true
+     },
+     {
+      "id": "chDynamicAmount",
+      "kind": "slider",
+      "label": "Spread",
+      "value": 2,
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "display": "2"
+     }
+    ]
+   }
+  ]
+ }
+}

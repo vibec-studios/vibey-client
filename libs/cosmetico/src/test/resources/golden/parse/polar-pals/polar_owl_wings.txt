@@ -1,0 +1,960 @@
+id vibey:polar_owl_wings
+kind COSMETIC
+name Polar Pals · Snowy Owl Wings | Polar Pals · Schneeeulen-Flügel
+description Big feathered wings with layered coverts, secondaries and primaries. Folded on your back while you walk, one clean flap and a long glide while flying, tucked in tight when you sneak. | Große Federflügel mit geschichteten Deck-, Arm- und Handschwingen. Auf dem Rücken gefaltet beim Gehen, ein sauberer Flügelschlag und ein langer Gleitflug beim Fliegen, eng angelegt beim Schleichen.
+author Vibe Craft Studios
+tags [polar-pals, wings, owl, feathers, animated]
+rarity LEGENDARY
+slot WINGS
+hideWithArmor []
+pet GROUND 1.0
+cape -1 shield -1
+emote null
+sha256 4ff31098e8318def5bea2b099b1d1041167b4b5b5263d60abb63242270b86772 size 106404
+offsetWhen BACK [0.0 2.5 6.0] [-10.0 0.0 0.0]
+texture 0 main 64 64 256 256 1 1 [0] false false 1 0c44e94e21d13761ad2d7153edccd49ec0b8e8acd7be0c8d4c19d84c453d95c6
+sprite 0 feather 0 42.0 6.0 46.0 10.0
+model 0 cubes 32 bones 34 locators 2
+bone 0 wing_r -1 BODY [4.5 21.0 2.4] [0.0 0.0 0.0] false false false false 0
+bone 1 r_arm 0 null [4.5 21.0 2.4] [0.0 0.0 0.0] false false false false 1
+cube [4.5 20.0 2.2] [11.5 22.0 3.2] 0.15 false null null [18.0 44.0] 0
+bone 2 r_lesser 1 null [4.5 21.0 3.1] [0.0 0.0 0.0] false false false false 1
+cube [4.5 16.5 3.1] [12.5 20.5 4.1] 0.0 false null null [40.0 0.0] 0
+bone 3 r_fore 1 null [11.5 21.0 2.4] [0.0 0.0 0.0] false false false false 1
+cube [11.5 20.0 2.2] [19.5 22.0 3.2] 0.15 false null null [44.0 41.0] 0
+bone 4 r_greater 3 null [11.5 20.5 2.9] [0.0 0.0 0.0] false false false false 1
+cube [11.0 15.0 2.9] [20.0 20.0 3.9] 0.0 false null null [0.0 0.0] 0
+bone 5 r_sec1 3 null [12.1 20.5 2.55] [0.0 0.0 -96.0] false false false false 1
+cube [12.1 19.0 2.55] [23.1 22.0 2.55] 0.0 false null null [0.0 41.0] 0
+bone 6 r_sec2 3 null [13.8 20.5 2.57] [0.0 0.0 -93.0] false false false false 1
+cube [13.8 19.0 2.57] [25.8 22.0 2.57] 0.0 false null null [0.0 32.0] 0
+bone 7 r_sec3 3 null [15.5 20.5 2.59] [0.0 0.0 -90.0] false false false false 1
+cube [15.5 19.0 2.59] [27.5 22.0 2.59] 0.0 false null null [24.0 32.0] 0
+bone 8 r_sec4 3 null [17.2 20.5 2.61] [0.0 0.0 -87.0] false false false false 1
+cube [17.2 19.0 2.61] [29.2 22.0 2.61] 0.0 false null null [0.0 35.0] 0
+bone 9 r_sec5 3 null [18.9 20.5 2.63] [0.0 0.0 -83.0] false false false false 1
+cube [18.9 19.0 2.63] [31.9 22.0 2.63] 0.0 false null null [0.0 26.0] 0
+bone 10 r_hand 3 null [19.5 21.0 2.4] [0.0 0.0 0.0] false false false false 1
+cube [19.5 20.0 2.2] [23.5 22.0 3.2] 0.15 false null null [50.0 44.0] 0
+bone 11 r_alula 10 null [19.5 21.0 2.8] [0.0 0.0 0.0] false false false false 1
+cube [19.0 17.0 2.8] [24.0 20.0 3.8] 0.0 false null null [18.0 6.0] 0
+bone 12 r_p1 10 null [20.1 21.0 2.4] [0.0 0.0 -78.0] false false false false 1
+cube [20.1 19.5 2.4] [33.1 22.5 2.4] 0.0 false null null [26.0 26.0] 0
+bone 13 r_p2 10 null [21.1 21.0 2.37] [0.0 0.0 -62.0] false false false false 1
+cube [21.1 19.5 2.37] [36.1 22.5 2.37] 0.0 false null null [0.0 23.0] 0
+bone 14 r_p3 10 null [22.1 21.0 2.34] [0.0 0.0 -46.0] false false false false 1
+cube [22.1 19.5 2.34] [38.1 22.5 2.34] 0.0 false null null [0.0 17.0] 0
+bone 15 r_p4 10 null [22.9 21.0 2.31] [0.0 0.0 -31.0] false false false false 1
+cube [22.9 19.5 2.31] [39.9 22.5 2.31] 0.0 false null null [0.0 11.0] 0
+bone 16 r_p5 10 null [23.5 21.0 2.28] [0.0 0.0 -17.0] false false false false 1
+cube [23.5 19.5 2.28] [39.5 22.5 2.28] 0.0 false null null [32.0 17.0] 0
+bone 17 wing_l -1 BODY [-4.5 21.0 2.4] [0.0 0.0 0.0] false false false false 0
+bone 18 l_arm 17 null [-4.5 21.0 2.4] [0.0 0.0 0.0] false false false false 1
+cube [-11.5 20.0 2.2] [-4.5 22.0 3.2] 0.15 false null null [34.0 44.0] 0
+bone 19 l_lesser 18 null [-4.5 21.0 3.1] [0.0 0.0 0.0] false false false false 1
+cube [-12.5 16.5 3.1] [-4.5 20.5 4.1] 0.0 false null null [0.0 6.0] 0
+bone 20 l_fore 18 null [-11.5 21.0 2.4] [0.0 0.0 0.0] false false false false 1
+cube [-19.5 20.0 2.2] [-11.5 22.0 3.2] 0.15 false null null [0.0 44.0] 0
+bone 21 l_greater 20 null [-11.5 20.5 2.9] [0.0 0.0 0.0] false false false false 1
+cube [-20.0 15.0 2.9] [-11.0 20.0 3.9] 0.0 false null null [20.0 0.0] 0
+bone 22 l_sec1 20 null [-12.1 20.5 2.55] [0.0 0.0 96.0] false false false false 1
+cube [-23.1 19.0 2.55] [-12.1 22.0 2.55] 0.0 false null null [22.0 41.0] 0
+bone 23 l_sec2 20 null [-13.8 20.5 2.57] [0.0 0.0 93.0] false false false false 1
+cube [-25.8 19.0 2.57] [-13.8 22.0 2.57] 0.0 false null null [24.0 35.0] 0
+bone 24 l_sec3 20 null [-15.5 20.5 2.59] [0.0 0.0 90.0] false false false false 1
+cube [-27.5 19.0 2.59] [-15.5 22.0 2.59] 0.0 false null null [0.0 38.0] 0
+bone 25 l_sec4 20 null [-17.2 20.5 2.61] [0.0 0.0 87.0] false false false false 1
+cube [-29.2 19.0 2.61] [-17.2 22.0 2.61] 0.0 false null null [24.0 38.0] 0
+bone 26 l_sec5 20 null [-18.9 20.5 2.63] [0.0 0.0 83.0] false false false false 1
+cube [-31.9 19.0 2.63] [-18.9 22.0 2.63] 0.0 false null null [0.0 29.0] 0
+bone 27 l_hand 20 null [-19.5 21.0 2.4] [0.0 0.0 0.0] false false false false 1
+cube [-23.5 20.0 2.2] [-19.5 22.0 3.2] 0.15 false null null [0.0 47.0] 0
+bone 28 l_alula 27 null [-19.5 21.0 2.8] [0.0 0.0 0.0] false false false false 1
+cube [-24.0 17.0 2.8] [-19.0 20.0 3.8] 0.0 false null null [30.0 6.0] 0
+bone 29 l_p1 27 null [-20.1 21.0 2.4] [0.0 0.0 78.0] false false false false 1
+cube [-33.1 19.5 2.4] [-20.1 22.5 2.4] 0.0 false null null [26.0 29.0] 0
+bone 30 l_p2 27 null [-21.1 21.0 2.37] [0.0 0.0 62.0] false false false false 1
+cube [-36.1 19.5 2.37] [-21.1 22.5 2.37] 0.0 false null null [30.0 23.0] 0
+bone 31 l_p3 27 null [-22.1 21.0 2.34] [0.0 0.0 46.0] false false false false 1
+cube [-38.1 19.5 2.34] [-22.1 22.5 2.34] 0.0 false null null [0.0 20.0] 0
+bone 32 l_p4 27 null [-22.9 21.0 2.31] [0.0 0.0 31.0] false false false false 1
+cube [-39.9 19.5 2.31] [-22.9 22.5 2.31] 0.0 false null null [0.0 14.0] 0
+bone 33 l_p5 27 null [-23.5 21.0 2.28] [0.0 0.0 17.0] false false false false 1
+cube [-39.5 19.5 2.28] [-23.5 22.5 2.28] 0.0 false null null [32.0 20.0] 0
+locator tip_r 15 null [38.5 20.0 2.4]
+locator tip_l 32 null [-38.5 20.0 2.4]
+animation idle 4.0 true false false tracks 28 events 0
+track 0 null
+channel rotation 3
+key 0.0 [4.0 -38.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [3.76 -36.32 0.0] [NaN NaN NaN] CATMULLROM
+key 4.0 [4.0 -38.0 0.0] [NaN NaN NaN] CATMULLROM
+track 1 null
+channel rotation 3
+key 0.0 [0.0 0.0 44.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 41.72] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 44.0] [NaN NaN NaN] CATMULLROM
+track 3 null
+channel rotation 3
+key 0.0 [0.0 0.0 -152.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -143.24] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 -152.0] [NaN NaN NaN] CATMULLROM
+track 10 null
+channel rotation 3
+key 0.0 [0.0 0.0 80.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 75.44] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 80.0] [NaN NaN NaN] CATMULLROM
+track 5 null
+channel rotation 3
+key 0.0 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 94.36] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+track 12 null
+channel rotation 3
+key 0.0 [0.0 0.0 10.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 6.96] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 10.0] [NaN NaN NaN] CATMULLROM
+track 6 null
+channel rotation 3
+key 0.0 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 94.36] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+track 13 null
+channel rotation 3
+key 0.0 [0.0 0.0 -3.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -4.04] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 -3.0] [NaN NaN NaN] CATMULLROM
+track 7 null
+channel rotation 3
+key 0.0 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 94.36] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+track 14 null
+channel rotation 3
+key 0.0 [0.0 0.0 -16.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -15.04] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 -16.0] [NaN NaN NaN] CATMULLROM
+track 8 null
+channel rotation 3
+key 0.0 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 94.36] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+track 15 null
+channel rotation 3
+key 0.0 [0.0 0.0 -29.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -26.04] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 -29.0] [NaN NaN NaN] CATMULLROM
+track 9 null
+channel rotation 3
+key 0.0 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 94.36] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+track 16 null
+channel rotation 3
+key 0.0 [0.0 0.0 -42.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -37.04] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 -42.0] [NaN NaN NaN] CATMULLROM
+track 17 null
+channel rotation 3
+key 0.0 [4.0 38.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [3.76 36.32 0.0] [NaN NaN NaN] CATMULLROM
+key 4.0 [4.0 38.0 0.0] [NaN NaN NaN] CATMULLROM
+track 18 null
+channel rotation 3
+key 0.0 [0.0 0.0 -44.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -41.72] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 -44.0] [NaN NaN NaN] CATMULLROM
+track 20 null
+channel rotation 3
+key 0.0 [0.0 0.0 152.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 143.24] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 152.0] [NaN NaN NaN] CATMULLROM
+track 27 null
+channel rotation 3
+key 0.0 [0.0 0.0 -80.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -75.44] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 -80.0] [NaN NaN NaN] CATMULLROM
+track 22 null
+channel rotation 3
+key 0.0 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -94.36] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+track 29 null
+channel rotation 3
+key 0.0 [0.0 0.0 -10.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -6.96] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 -10.0] [NaN NaN NaN] CATMULLROM
+track 23 null
+channel rotation 3
+key 0.0 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -94.36] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+track 30 null
+channel rotation 3
+key 0.0 [0.0 0.0 3.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 4.04] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 3.0] [NaN NaN NaN] CATMULLROM
+track 24 null
+channel rotation 3
+key 0.0 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -94.36] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+track 31 null
+channel rotation 3
+key 0.0 [0.0 0.0 16.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 15.04] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 16.0] [NaN NaN NaN] CATMULLROM
+track 25 null
+channel rotation 3
+key 0.0 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -94.36] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+track 32 null
+channel rotation 3
+key 0.0 [0.0 0.0 29.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 26.04] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 29.0] [NaN NaN NaN] CATMULLROM
+track 26 null
+channel rotation 3
+key 0.0 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -94.36] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+track 33 null
+channel rotation 3
+key 0.0 [0.0 0.0 42.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 37.04] [NaN NaN NaN] CATMULLROM
+key 4.0 [0.0 0.0 42.0] [NaN NaN NaN] CATMULLROM
+animation walk 0.6 true false false tracks 28 events 0
+track 0 null
+channel rotation 5
+key 0.0 [4.0 -38.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [3.72 -36.88 0.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [4.0 -38.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [3.72 -36.88 0.0] [NaN NaN NaN] CATMULLROM
+key 0.6 [4.0 -38.0 0.0] [NaN NaN NaN] CATMULLROM
+track 1 null
+channel rotation 5
+key 0.0 [0.0 0.0 44.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 44.84] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 44.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 44.84] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 44.0] [NaN NaN NaN] CATMULLROM
+track 3 null
+channel rotation 5
+key 0.0 [0.0 0.0 -152.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 -143.88] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -152.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 -143.88] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 -152.0] [NaN NaN NaN] CATMULLROM
+track 10 null
+channel rotation 5
+key 0.0 [0.0 0.0 80.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 72.3] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 80.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 72.3] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 80.0] [NaN NaN NaN] CATMULLROM
+track 5 null
+channel rotation 5
+key 0.0 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 94.4] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 94.4] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+track 12 null
+channel rotation 5
+key 0.0 [0.0 0.0 10.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 10.94] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 10.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 10.94] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 10.0] [NaN NaN NaN] CATMULLROM
+track 6 null
+channel rotation 5
+key 0.0 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 94.4] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 94.4] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+track 13 null
+channel rotation 5
+key 0.0 [0.0 0.0 -3.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 -1.06] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -3.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 -1.06] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 -3.0] [NaN NaN NaN] CATMULLROM
+track 7 null
+channel rotation 5
+key 0.0 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 94.4] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 94.4] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+track 14 null
+channel rotation 5
+key 0.0 [0.0 0.0 -16.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 -13.06] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -16.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 -13.06] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 -16.0] [NaN NaN NaN] CATMULLROM
+track 8 null
+channel rotation 5
+key 0.0 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 94.4] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 94.4] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+track 15 null
+channel rotation 5
+key 0.0 [0.0 0.0 -29.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 -25.06] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -29.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 -25.06] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 -29.0] [NaN NaN NaN] CATMULLROM
+track 9 null
+channel rotation 5
+key 0.0 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 94.4] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 94.4] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 100.0] [NaN NaN NaN] CATMULLROM
+track 16 null
+channel rotation 5
+key 0.0 [0.0 0.0 -42.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 -37.06] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -42.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 -37.06] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 -42.0] [NaN NaN NaN] CATMULLROM
+track 17 null
+channel rotation 5
+key 0.0 [4.0 38.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [3.72 36.88 0.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [4.0 38.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [3.72 36.88 0.0] [NaN NaN NaN] CATMULLROM
+key 0.6 [4.0 38.0 0.0] [NaN NaN NaN] CATMULLROM
+track 18 null
+channel rotation 5
+key 0.0 [0.0 0.0 -44.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 -44.84] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -44.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 -44.84] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 -44.0] [NaN NaN NaN] CATMULLROM
+track 20 null
+channel rotation 5
+key 0.0 [0.0 0.0 152.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 143.88] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 152.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 143.88] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 152.0] [NaN NaN NaN] CATMULLROM
+track 27 null
+channel rotation 5
+key 0.0 [0.0 0.0 -80.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 -72.3] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -80.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 -72.3] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 -80.0] [NaN NaN NaN] CATMULLROM
+track 22 null
+channel rotation 5
+key 0.0 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 -94.4] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 -94.4] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+track 29 null
+channel rotation 5
+key 0.0 [0.0 0.0 -10.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 -10.94] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -10.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 -10.94] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 -10.0] [NaN NaN NaN] CATMULLROM
+track 23 null
+channel rotation 5
+key 0.0 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 -94.4] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 -94.4] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+track 30 null
+channel rotation 5
+key 0.0 [0.0 0.0 3.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 1.06] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 3.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 1.06] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 3.0] [NaN NaN NaN] CATMULLROM
+track 24 null
+channel rotation 5
+key 0.0 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 -94.4] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 -94.4] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+track 31 null
+channel rotation 5
+key 0.0 [0.0 0.0 16.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 13.06] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 16.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 13.06] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 16.0] [NaN NaN NaN] CATMULLROM
+track 25 null
+channel rotation 5
+key 0.0 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 -94.4] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 -94.4] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+track 32 null
+channel rotation 5
+key 0.0 [0.0 0.0 29.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 25.06] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 29.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 25.06] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 29.0] [NaN NaN NaN] CATMULLROM
+track 26 null
+channel rotation 5
+key 0.0 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 -94.4] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 -94.4] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 -100.0] [NaN NaN NaN] CATMULLROM
+track 33 null
+channel rotation 5
+key 0.0 [0.0 0.0 42.0] [NaN NaN NaN] CATMULLROM
+key 0.15 [0.0 0.0 37.06] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 42.0] [NaN NaN NaN] CATMULLROM
+key 0.45 [0.0 0.0 37.06] [NaN NaN NaN] CATMULLROM
+key 0.6 [0.0 0.0 42.0] [NaN NaN NaN] CATMULLROM
+animation fly 3.2 true false false tracks 28 events 2
+track 0 null
+channel rotation 7
+key 0.0 [0.0 -10.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 -22.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 -4.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 -10.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 -13.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 -8.0 0.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 -10.0 0.0] [NaN NaN NaN] CATMULLROM
+track 1 null
+channel rotation 7
+key 0.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 56.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 -34.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 10.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 2.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+track 3 null
+channel rotation 7
+key 0.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -36.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 14.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+track 10 null
+channel rotation 7
+key 0.0 [0.0 0.0 4.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -30.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 18.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 4.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 4.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 4.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 4.0] [NaN NaN NaN] CATMULLROM
+track 5 null
+channel rotation 7
+key 0.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 20.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 -4.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+track 12 null
+channel rotation 7
+key 0.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 26.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 -20.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 -8.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 -10.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 -8.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+track 6 null
+channel rotation 7
+key 0.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 20.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 -4.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+track 13 null
+channel rotation 7
+key 0.0 [0.0 0.0 -3.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 26.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 -15.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 -4.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 -5.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 -4.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 -3.0] [NaN NaN NaN] CATMULLROM
+track 7 null
+channel rotation 7
+key 0.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 20.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 -4.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+track 14 null
+channel rotation 7
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 26.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 -10.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 8 null
+channel rotation 7
+key 0.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 20.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 -4.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+track 15 null
+channel rotation 7
+key 0.0 [0.0 0.0 3.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 26.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 -5.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 4.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 5.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 4.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 3.0] [NaN NaN NaN] CATMULLROM
+track 9 null
+channel rotation 7
+key 0.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 20.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 -4.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+track 16 null
+channel rotation 7
+key 0.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 26.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 8.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 10.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 8.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+track 17 null
+channel rotation 7
+key 0.0 [0.0 10.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 22.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 4.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 10.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 13.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 8.0 0.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 10.0 0.0] [NaN NaN NaN] CATMULLROM
+track 18 null
+channel rotation 7
+key 0.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -56.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 34.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 -10.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 -2.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+track 20 null
+channel rotation 7
+key 0.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 36.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 -14.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+track 27 null
+channel rotation 7
+key 0.0 [0.0 0.0 -4.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 30.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 -18.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 -4.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 -4.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 -4.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 -4.0] [NaN NaN NaN] CATMULLROM
+track 22 null
+channel rotation 7
+key 0.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -20.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 4.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+track 29 null
+channel rotation 7
+key 0.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -26.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 20.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 8.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 10.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 8.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+track 23 null
+channel rotation 7
+key 0.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -20.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 4.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+track 30 null
+channel rotation 7
+key 0.0 [0.0 0.0 3.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -26.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 15.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 4.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 5.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 4.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 3.0] [NaN NaN NaN] CATMULLROM
+track 24 null
+channel rotation 7
+key 0.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -20.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 4.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+track 31 null
+channel rotation 7
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -26.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 10.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 25 null
+channel rotation 7
+key 0.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -20.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 4.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+track 32 null
+channel rotation 7
+key 0.0 [0.0 0.0 -3.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -26.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 5.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 -4.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 -5.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 -4.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 -3.0] [NaN NaN NaN] CATMULLROM
+track 26 null
+channel rotation 7
+key 0.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -20.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 4.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+track 33 null
+channel rotation 7
+key 0.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [0.0 0.0 -26.0] [NaN NaN NaN] CATMULLROM
+key 0.62 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.95 [0.0 0.0 -8.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [0.0 0.0 -10.0] [NaN NaN NaN] CATMULLROM
+key 2.6 [0.0 0.0 -8.0] [NaN NaN NaN] CATMULLROM
+key 3.2 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+event 0.62 PARTICLE null 0 -1 tip_r 1 [0.2 0.1 0.2] [0.0 -0.02 0.02] 2.2 0.18 0.002 false 1.0 1.0 -1 true
+event 0.62 PARTICLE null 0 -1 tip_l 1 [0.2 0.1 0.2] [0.0 -0.02 0.02] 2.2 0.18 0.002 false 1.0 1.0 -1 true
+animation glide 3.0 true false false tracks 28 events 0
+track 0 null
+channel rotation 3
+key 0.0 [-6.0 -6.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [-4.0 -12.0 0.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [-6.0 -6.0 0.0] [NaN NaN NaN] CATMULLROM
+track 1 null
+channel rotation 3
+key 0.0 [0.0 0.0 4.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 10.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 4.0] [NaN NaN NaN] CATMULLROM
+track 3 null
+channel rotation 3
+key 0.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+track 10 null
+channel rotation 3
+key 0.0 [0.0 0.0 4.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 4.0] [NaN NaN NaN] CATMULLROM
+track 5 null
+channel rotation 3
+key 0.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+track 12 null
+channel rotation 3
+key 0.0 [0.0 0.0 -12.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 -12.0] [NaN NaN NaN] CATMULLROM
+track 6 null
+channel rotation 3
+key 0.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+track 13 null
+channel rotation 3
+key 0.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 -3.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+track 7 null
+channel rotation 3
+key 0.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+track 14 null
+channel rotation 3
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 8 null
+channel rotation 3
+key 0.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+track 15 null
+channel rotation 3
+key 0.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 3.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+track 9 null
+channel rotation 3
+key 0.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+track 16 null
+channel rotation 3
+key 0.0 [0.0 0.0 12.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 12.0] [NaN NaN NaN] CATMULLROM
+track 17 null
+channel rotation 3
+key 0.0 [-6.0 6.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [-4.0 12.0 0.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [-6.0 6.0 0.0] [NaN NaN NaN] CATMULLROM
+track 18 null
+channel rotation 3
+key 0.0 [0.0 0.0 -4.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 -10.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 -4.0] [NaN NaN NaN] CATMULLROM
+track 20 null
+channel rotation 3
+key 0.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+track 27 null
+channel rotation 3
+key 0.0 [0.0 0.0 -4.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 -4.0] [NaN NaN NaN] CATMULLROM
+track 22 null
+channel rotation 3
+key 0.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+track 29 null
+channel rotation 3
+key 0.0 [0.0 0.0 12.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 12.0] [NaN NaN NaN] CATMULLROM
+track 23 null
+channel rotation 3
+key 0.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+track 30 null
+channel rotation 3
+key 0.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 3.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 6.0] [NaN NaN NaN] CATMULLROM
+track 24 null
+channel rotation 3
+key 0.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+track 31 null
+channel rotation 3
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track 25 null
+channel rotation 3
+key 0.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+track 32 null
+channel rotation 3
+key 0.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 -3.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+track 26 null
+channel rotation 3
+key 0.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+track 33 null
+channel rotation 3
+key 0.0 [0.0 0.0 -12.0] [NaN NaN NaN] CATMULLROM
+key 1.5 [0.0 0.0 -6.0] [NaN NaN NaN] CATMULLROM
+key 3.0 [0.0 0.0 -12.0] [NaN NaN NaN] CATMULLROM
+animation sneak 2.0 true false false tracks 28 events 0
+track 0 null
+channel rotation 3
+key 0.0 [2.0 -24.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [2.3 -26.1 0.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [2.0 -24.0 0.0] [NaN NaN NaN] CATMULLROM
+track 1 null
+channel rotation 3
+key 0.0 [0.0 0.0 38.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 38.9] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 38.0] [NaN NaN NaN] CATMULLROM
+track 3 null
+channel rotation 3
+key 0.0 [0.0 0.0 -160.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 -158.8] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -160.0] [NaN NaN NaN] CATMULLROM
+track 10 null
+channel rotation 3
+key 0.0 [0.0 0.0 86.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 85.1] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 86.0] [NaN NaN NaN] CATMULLROM
+track 5 null
+channel rotation 3
+key 0.0 [0.0 0.0 106.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 105.1] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 106.0] [NaN NaN NaN] CATMULLROM
+track 12 null
+channel rotation 3
+key 0.0 [0.0 0.0 16.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 15.4] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 16.0] [NaN NaN NaN] CATMULLROM
+track 6 null
+channel rotation 3
+key 0.0 [0.0 0.0 106.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 105.1] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 106.0] [NaN NaN NaN] CATMULLROM
+track 13 null
+channel rotation 3
+key 0.0 [0.0 0.0 2.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 1.4] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 2.0] [NaN NaN NaN] CATMULLROM
+track 7 null
+channel rotation 3
+key 0.0 [0.0 0.0 106.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 105.1] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 106.0] [NaN NaN NaN] CATMULLROM
+track 14 null
+channel rotation 3
+key 0.0 [0.0 0.0 -12.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 -12.6] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -12.0] [NaN NaN NaN] CATMULLROM
+track 8 null
+channel rotation 3
+key 0.0 [0.0 0.0 106.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 105.1] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 106.0] [NaN NaN NaN] CATMULLROM
+track 15 null
+channel rotation 3
+key 0.0 [0.0 0.0 -26.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 -26.6] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -26.0] [NaN NaN NaN] CATMULLROM
+track 9 null
+channel rotation 3
+key 0.0 [0.0 0.0 106.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 105.1] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 106.0] [NaN NaN NaN] CATMULLROM
+track 16 null
+channel rotation 3
+key 0.0 [0.0 0.0 -40.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 -40.6] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -40.0] [NaN NaN NaN] CATMULLROM
+track 17 null
+channel rotation 3
+key 0.0 [2.0 24.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [2.3 26.1 0.0] [NaN NaN NaN] CATMULLROM
+key 2.0 [2.0 24.0 0.0] [NaN NaN NaN] CATMULLROM
+track 18 null
+channel rotation 3
+key 0.0 [0.0 0.0 -38.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 -38.9] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -38.0] [NaN NaN NaN] CATMULLROM
+track 20 null
+channel rotation 3
+key 0.0 [0.0 0.0 160.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 158.8] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 160.0] [NaN NaN NaN] CATMULLROM
+track 27 null
+channel rotation 3
+key 0.0 [0.0 0.0 -86.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 -85.1] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -86.0] [NaN NaN NaN] CATMULLROM
+track 22 null
+channel rotation 3
+key 0.0 [0.0 0.0 -106.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 -105.1] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -106.0] [NaN NaN NaN] CATMULLROM
+track 29 null
+channel rotation 3
+key 0.0 [0.0 0.0 -16.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 -15.4] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -16.0] [NaN NaN NaN] CATMULLROM
+track 23 null
+channel rotation 3
+key 0.0 [0.0 0.0 -106.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 -105.1] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -106.0] [NaN NaN NaN] CATMULLROM
+track 30 null
+channel rotation 3
+key 0.0 [0.0 0.0 -2.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 -1.4] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -2.0] [NaN NaN NaN] CATMULLROM
+track 24 null
+channel rotation 3
+key 0.0 [0.0 0.0 -106.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 -105.1] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -106.0] [NaN NaN NaN] CATMULLROM
+track 31 null
+channel rotation 3
+key 0.0 [0.0 0.0 12.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 12.6] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 12.0] [NaN NaN NaN] CATMULLROM
+track 25 null
+channel rotation 3
+key 0.0 [0.0 0.0 -106.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 -105.1] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -106.0] [NaN NaN NaN] CATMULLROM
+track 32 null
+channel rotation 3
+key 0.0 [0.0 0.0 26.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 26.6] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 26.0] [NaN NaN NaN] CATMULLROM
+track 26 null
+channel rotation 3
+key 0.0 [0.0 0.0 -106.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 -105.1] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 -106.0] [NaN NaN NaN] CATMULLROM
+track 33 null
+channel rotation 3
+key 0.0 [0.0 0.0 40.0] [NaN NaN NaN] CATMULLROM
+key 1.0 [0.0 0.0 40.6] [NaN NaN NaN] CATMULLROM
+key 2.0 [0.0 0.0 40.0] [NaN NaN NaN] CATMULLROM

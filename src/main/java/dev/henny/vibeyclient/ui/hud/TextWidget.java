@@ -2,20 +2,6 @@ package dev.henny.vibeyclient.ui.hud;
 
 import dev.henny.vibeyclient.ui.Icons;
 
-/**
- * A widget of one or more "label value" lines ("FPS 144", "XYZ 12 64 -30"). Implement {@link #lines} (called at the
- * widget's {@link #rate()}, allocation there is fine) and call {@link #line} once per line; labels use the accent
- * colour, values the text colour. Width grows at once and shrinks only after it stayed smaller for a moment, so a
- * right-anchored FPS counter does not jitter.
- *
- * <pre>{@code
- * public final class SprintIndicator extends TextWidget {
- *     @Override protected void lines(HudPaint p) {
- *         if (p.preview || sprinting) line(null, sprintingText);
- *     }
- * }
- * }</pre>
- */
 public abstract class TextWidget extends HudWidget {
     public static final int PAD_X = 4;
     public static final int PAD_Y = 3;
@@ -31,15 +17,12 @@ public abstract class TextWidget extends HudWidget {
     private int contentW;
     private long shrinkSince;
 
-    /** Fills the lines: call {@link #line(String, String)} for each (up to 8). */
     protected abstract void lines(HudPaint p);
 
-    /** An {@link Icons} name drawn before the first line in the accent colour (null = none). */
     protected String icon(HudPaint p) {
         return null;
     }
 
-    /** Adds a line; {@code label} may be null (value only). */
     protected final void line(String label, String value) {
         if (building >= MAX) return;
         labels[building] = label == null || label.isEmpty() ? null : label;
@@ -47,7 +30,6 @@ public abstract class TextWidget extends HudWidget {
         building++;
     }
 
-    /** Number of lines of the last update. */
     protected final int lineCount() {
         return count;
     }
@@ -65,7 +47,6 @@ public abstract class TextWidget extends HudWidget {
             max = Math.max(max, lineW[i]);
         }
         int want = max + iconW;
-        // grow now, shrink after 1.5 s of being smaller (numbers changing width must not make the box jitter)
         if (want >= contentW || contentW == 0) {
             contentW = want;
             shrinkSince = 0;

@@ -1,0 +1,32 @@
+{
+  "name": "Servers",
+  "description": "Live pings, search, favourites and a MOTD preview in the server list.",
+  "summary": "Pings, search, favourites",
+  "section": {
+    "list": "Server list",
+    "ping": "Live ping"
+  },
+  "setting": {
+    "search": "Search field",
+    "search.desc": "Ctrl+F in the server list.",
+    "favourites": "Favourites",
+    "favourites.desc": "Click the star on a row.",
+    "favouritesFirst": "Favourites first",
+    "motdPreview": "MOTD preview",
+    "motdPreview.desc": "Hover a row for details.",
+    "livePing": "Live ping",
+    "livePing.desc": "Pings again while the list is open.",
+    "pingEvery": "Ping every",
+    "pingParallel": "Parallel pings",
+    "pingParallel.desc": "How many servers at once."
+  },
+  "ui": {
+    "search": "Search",
+    "clear": "Clear",
+    "favourites": "Favourites",
+    "favouritesTip": "Only favourites",
+    "ping": "{0} ms",
+    "offline": "Offline",
+    "players": "{0}/{1}"
+  }
+}

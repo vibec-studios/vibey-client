@@ -3,7 +3,6 @@ package dev.henny.vibeyclient.module.hud;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 
-/** The player's speed in blocks per second (horizontal and 3D), from the position change per tick, smoothed. */
 final class Motion {
     private Motion() {}
 
@@ -22,7 +21,6 @@ final class Motion {
             double dx = x - lastX, dy = y - lastY, dz = z - lastZ;
             double h = Math.sqrt(dx * dx + dz * dz) * 20.0;
             double f = Math.sqrt(dx * dx + dy * dy + dz * dz) * 20.0;
-            // teleports are not speed
             if (f > 200) h = f = 0;
             horizontal += (h - horizontal) * 0.35;
             full += (f - full) * 0.35;

@@ -1,0 +1,67 @@
+{
+  "name": "Chat",
+  "description": "Timestamps, search, copy, mentions and filters.",
+  "summary": "Search, mentions, filters",
+  "section": {
+    "lines": "Lines",
+    "mentions": "Mentions",
+    "filter": "Filters"
+  },
+  "setting": {
+    "editFilters": "Filters",
+    "editFilters.action": "Filters",
+    "timestamps": "Timestamps",
+    "timeStyle": "Clock",
+    "timeStyle.h24": "14:05",
+    "timeStyle.h24_seconds": "14:05:09",
+    "timeStyle.h12": "2:05 PM",
+    "copyButton": "Copy button",
+    "copyButton.desc": "Hover a line in the open chat.",
+    "movable": "Move chat",
+    "movable.desc": "Drag it in the HUD editor.",
+    "history": "History",
+    "history.desc": "Lines kept for scrolling and search.",
+    "keepOnLeave": "Keep on leave",
+    "highlight": "Highlight mentions",
+    "mentionWords": "Extra words",
+    "mentionWords.desc": "Comma separated.",
+    "mentionToast": "Mention toast",
+    "dmToast": "Message toast",
+    "mentionSound": "Ping sound",
+    "collapse": "Collapse repeats",
+    "collapse.desc": "Same line again becomes ×2, ×3 …",
+    "filters": "Hide patterns",
+    "filters.desc": "Lines matching a filter are not shown.",
+    "searchKey": "Search chat"
+  },
+  "tag": {
+    "mention": "Mentions you"
+  },
+  "toast": {
+    "mention": "Mentioned",
+    "open": "Open",
+    "reply": "Reply",
+    "copied": "Copied"
+  },
+  "search": {
+    "hint": "Search",
+    "hits": "{0} found",
+    "close": "Close search"
+  },
+  "filters": {
+    "title": "Filters",
+    "close": "Close",
+    "placeholder": "word or /regex/",
+    "add": "Add",
+    "remove": "Remove",
+    "empty": "Nothing hidden",
+    "collapse": "Collapse repeats",
+    "collapseTip": "Same line again becomes ×2.",
+    "hidden": "{0} hidden"
+  },
+  "hud": {
+    "window": "Chat",
+    "window.desc": "Middle-drag or drag to move, wheel to size.",
+    "empty": "Chat"
+  }
+}

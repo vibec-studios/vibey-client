@@ -36,7 +36,7 @@ public record ServerRulesConfig(boolean enabled, List<String> disable, String me
     static final String DEFAULT = """
             {
               "_help": "Vibey server rules: features listed in 'disable' are switched off for players with Vibey Client while they are on this server. Keys and examples: https://github.com/vibec-studios/vibey-client/blob/main/docs/SERVER-RULES.md . Reload with /vibeyrules reload.",
-              "_example": { "disable": ["zoom", "freelook", "hud.coords", "minimap"], "message": "Zoom, freelook and coordinates are off on this server.", "worlds": { "minecraft:the_nether": { "disable": ["hud.*"] } }, "bypass": ["StaffName", "00000000-0000-0000-0000-000000000000"] },
+              "_example": { "disable": ["zoom", "freelook", "hud.coords", "waypoints.minimap"], "message": "Zoom, freelook and coordinates are off on this server.", "worlds": { "minecraft:the_nether": { "disable": ["hud.*"] } }, "bypass": ["StaffName", "00000000-0000-0000-0000-000000000000"] },
               "enabled": true,
               "disable": [],
               "message": "",

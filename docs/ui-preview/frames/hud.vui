@@ -1,0 +1,37 @@
+<import name="hud-editor" src="vibeyclient:hud/editor"/>
+<template>
+  <stack class="bg">
+    <box class="ground"/>
+    <box class="hotbar"/>
+    <box class="guide-v"/>
+    <row class="w fps"><text class="k">FPS</text><text>144</text></row>
+    <column class="w coords"><text>XYZ 112 64 -380</text><text class="k">Facing N - Plains</text></column>
+    <column class="w keys sel">
+      <row class="kr"><box class="key"/><box class="key on"/><box class="key"/></row>
+      <row class="kr"><box class="key on"/><box class="key on"/><box class="key"/></row>
+      <box class="h h1"/><box class="h h2"/><box class="h h3"/><box class="h h4"/>
+    </column>
+    <row class="w clock hidden"><text>21:04</text></row>
+    <hud-editor/>
+  </stack>
+</template>
+<style>
+.bg { gradient: #6a8fc4 #9fc0e0; }
+.ground { position: absolute; left: 0; right: 0; bottom: 0; height: 38%; gradient: #4f7a35 #2e4a1f; }
+.hotbar { position: absolute; anchor: bottom; bottom: 34; width: 182; height: 22; background: #00000080; border: 1 #000000; }
+.w { position: absolute; padding: 3 4; gap: 3; background: #00000080; color: #ffffff; border: 1 $line2; }
+.k { color: $brand2; }
+.fps { left: 4; top: 4; }
+.coords { left: 4; top: 22; gap: 1; }
+.keys { left: 4; top: 94; gap: 2; padding: 3; border: 1 $brand; }
+.kr { gap: 2; }
+.key { size: 12; background: #ffffff30; }
+.key.on { background: #ffffffc0; }
+.h { position: absolute; size: 3; background: $brand; }
+.h1 { left: -2; top: -2; }
+.h2 { right: -2; top: -2; }
+.h3 { left: -2; bottom: -2; }
+.h4 { right: -2; bottom: -2; }
+.clock { right: 4; top: 4; opacity: 0.35; border: 1 $line2; }
+.guide-v { position: absolute; left: 4; top: 0; bottom: 0; width: 1; background: alpha($brand2, .7); }
+</style>

@@ -5,6 +5,7 @@ import dev.henny.vibeyclient.api.event.Events;
 import dev.henny.vibeyclient.api.event.VibeyEvents;
 import dev.henny.vibeyclient.api.setting.Settings.ActionSetting;
 import dev.henny.vibeyclient.api.setting.Settings.BoolSetting;
+import dev.henny.vibeyclient.api.setting.Settings.ColorSetting;
 import dev.henny.vibeyclient.api.setting.Settings.EnumSetting;
 import dev.henny.vibeyclient.api.setting.Settings.KeybindSetting;
 import dev.henny.vibeyclient.api.setting.Settings.StringSetting;
@@ -37,6 +38,15 @@ public final class GlobalSettings {
 
     public static final BoolSetting animations = GROUP.add(new BoolSetting("animations", true)).section("look");
 
+    public enum UiTheme { DARK, LIGHT, CONTRAST, DEUTAN, PROTAN, TRITAN }
+
+    public static final EnumSetting<UiTheme> theme = GROUP.add(new EnumSetting<>("theme", UiTheme.DARK)).section("look");
+
+    public static final BoolSetting ownAccent = GROUP.add(new BoolSetting("ownAccent", false)).section("look");
+
+    public static final ColorSetting accent = GROUP.add(new ColorSetting("accent", 0xFF7759FF)).section("look")
+            .presets(0xFF7759FF, 0xFF2F8CFF, 0xFF13A387, 0xFFE0457B, 0xFFE07A1F, 0xFF9A9AA6);
+
     /** Off: no backend connection at all, social hidden, cosmetics only local / via server packets. */
     public static final BoolSetting onlineFeatures = GROUP.add(new BoolSetting("onlineFeatures", true)).section("online")
             .onChange(on -> Events.post(new VibeyEvents.OnlineFeaturesChanged(on)));
@@ -51,6 +61,9 @@ public final class GlobalSettings {
 
     /** Default = BuildInfo.DEFAULT_BACKEND: our backend, official builds only (forks: own default_backend, https://github.com/vibec-studios/.github/blob/main/SERVICES.md). */
     public static final StringSetting backendUrl = GROUP.add(new StringSetting("backendUrl", BuildInfo.DEFAULT_BACKEND, 256)).advanced();
+
+    public static final BoolSetting classicUi = GROUP.add(new BoolSetting("classicUi", false)).advanced()
+            .visibleWhen(() -> GlobalSettings.classicUi.on());
 
     public static final ActionSetting resetBackend = GROUP.add(new ActionSetting("resetBackend",
             () -> GlobalSettings.backendUrl.reset())).advanced();

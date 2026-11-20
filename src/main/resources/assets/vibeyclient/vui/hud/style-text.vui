@@ -1,0 +1,25 @@
+<import name="style-row" src="vibeyclient:hud/style-row"/>
+<template>
+  <column class="spage">
+    <style-row :label="t('ui.hud.paint')" :own="st.o_paint" prop="paint">
+      <segmented id="style-paint" class="sval" :value="st.paint" @change="set('paint', $event)"
+                 :options="[{ value: 'color', label: t('ui.hud.paintColor') }, { value: 'accent', label: t('ui.hud.paintAccent') }, { value: 'rainbow', label: t('ui.hud.paintRainbow') }]"/>
+    </style-row>
+    <style-row :label="t('ui.hud.text')" :own="st.o_textColor" prop="textColor">
+      <spacer/><colorpicker id="style-textcolor" :value="st.textColor" @change="set('textColor', $event)"/>
+    </style-row>
+    <style-row :label="t('ui.hud.accent')" :own="st.o_accent" prop="accent">
+      <spacer/><colorpicker :value="st.accent" @change="set('accent', $event)"/>
+    </style-row>
+    <style-row :label="t('ui.hud.shadow')" :own="st.o_shadow" prop="shadow">
+      <spacer/><toggle :value="st.shadow" @change="set('shadow', $event)"/>
+    </style-row>
+    <style-row :label="t('ui.hud.align')" :own="st.o_align" prop="align">
+      <segmented class="sval" :value="st.align" @change="set('align', $event)"
+                 :options="[{ value: 'auto', label: t('ui.hud.auto') }, { value: 'left', label: t('ui.hud.left') }, { value: 'center', label: t('ui.hud.center') }, { value: 'right', label: t('ui.hud.right') }]"/>
+    </style-row>
+  </column>
+</template>
+<style>
+.spage { gap: 3; }
+</style>

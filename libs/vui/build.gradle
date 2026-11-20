@@ -1,0 +1,2 @@
+ext.libDeps = []
+apply from: rootProject.file('gradle/lib/core.gradle')

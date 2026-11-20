@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "cosmetico-gametest",
+  "version": "1.0.0",
+  "name": "cosmetico gametest",
+  "environment": "client",
+  "entrypoints": {
+    "fabric-client-gametest": [
+      "dev.henny.cosmetico.gametest.CosmeticoStandaloneGameTest"
+    ]
+  },
+  "depends": {
+    "cosmetico": "*"
+  }
+}

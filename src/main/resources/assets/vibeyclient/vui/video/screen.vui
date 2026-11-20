@@ -1,0 +1,68 @@
+<template>
+  <column class="screen">
+    <spacer/>
+    <row v-if="mode == 'gate'" class="strip center">
+      <button v-if="needsAccept" id="load" class="key wide" @click="load()" :tooltip="t('tip.load')">{{ t('load') }}</button>
+      <button v-if="needsSetup" id="setup" class="key wide" @click="setup()" :tooltip="t('tip.setup')">{{ t('setup') }}</button>
+    </row>
+    <row v-if="mode == 'url'" class="strip" gap="3">
+      <textfield id="url" class="url" v-model="url" :placeholder="t('url.hint')" max-length="1024" @submit="applyUrl()"/>
+      <button id="file" class="key" @click="pickFile()" :tooltip="t('tip.file')">…</button>
+      <button id="apply" class="key on" @click="applyUrl()" :tooltip="t('tip.apply')">✓</button>
+      <button id="cancelUrl" class="key" @click="closeMode()" :tooltip="t('tip.back')">✕</button>
+    </row>
+    <column v-if="mode == 'more'" class="strip" gap="3">
+      <row gap="3">
+        <button id="glow" class="key" :class="{ on: glow }" @click="toggleGlow()" :tooltip="t('tip.glow')">☀</button>
+        <button id="loop" class="key" :class="{ on: loop }" @click="toggleLoop()" :tooltip="t('tip.loop')">⟳</button>
+        <button v-if="canShare" id="share" class="key" :class="{ on: shared }" @click="toggleShare()" :tooltip="t('tip.share')">⇄</button>
+        <button id="overlay" class="key" :class="{ on: overlay }" @click="toggleOverlay()" :tooltip="t('tip.overlay')">▣</button>
+        <button v-if="interactive" id="page" class="key" @click="usePage()" :tooltip="t('tip.page')">⌨</button>
+        <spacer/>
+        <button id="closeMore" class="key" @click="closeMode()" :tooltip="t('tip.back')">✕</button>
+      </row>
+      <row v-if="!remote" gap="3">
+        <button v-for="s in shapes" :key="s" class="key shape" :class="{ on: s == shape }" @click="setShape(s)">{{ s }}</button>
+      </row>
+    </column>
+    <column v-if="mode == ''" class="strip" gap="3">
+      <row class="seekrow" gap="4">
+        <slider v-if="seekable" id="seek" class="seek" :value="progress" @change="seekTo($event)"/>
+        <spacer v-if="!seekable"/>
+        <text class="time">{{ time }}</text>
+      </row>
+      <row gap="3">
+        <button id="play" class="key" @click="toggle()" :tooltip="t(playing ? 'tip.pause' : 'tip.play')">{{ playing ? '❚❚' : '▶' }}</button>
+        <button id="stop" class="key" @click="stop()" :tooltip="t('tip.stop')">■</button>
+        <button id="back" class="key" @click="back()" :tooltip="t('tip.backTen')">⏮</button>
+        <button id="next" class="key" @click="next()" :tooltip="t('tip.next')">⏭</button>
+        <spacer/>
+        <text class="note">♪</text>
+        <slider id="volume" class="volume" :value="volume" @input="setVolume($event)"/>
+        <button v-if="!remote" id="source" class="key" @click="editSource()" :tooltip="t('tip.source')">✎</button>
+        <button v-if="!remote" id="lock" class="key" :class="{ on: locked }" @click="toggleLock()" :tooltip="t(locked ? 'tip.unlock' : 'tip.lock')">{{ locked ? '⚿' : '○' }}</button>
+        <button id="close" class="key danger" @click="close()" :tooltip="t(remote ? 'tip.unload' : 'tip.close')">✕</button>
+        <button id="more" class="key" @click="openMore()" :tooltip="t('tip.more')">⋯</button>
+      </row>
+    </column>
+  </column>
+</template>
+<style>
+.screen { padding: 0; }
+.strip { padding: 4 5; background: alpha($panel, .85); gradient-to: alpha($panel, .95); border-top: 1 $line; }
+.strip.center { justify: center; gap: 6; }
+.key { size: 15 14; padding: 0; background: alpha($text, .06); border: 1 $line; color: $text; justify: center; align: center; }
+.key:hover { background: $brand; border-color: $brand-hover; color: $on-brand; transition: background 100ms out; }
+.key:active { background: mix($brand, $on-brand, .25); color: $on-brand; }
+.key.on { color: $brand2; border-color: alpha($brand2, .47); }
+.key.danger:hover { background: $danger; border-color: $danger; }
+.key.wide { width: auto; padding: 0 8; }
+.key.shape { width: auto; padding: 0 4; font-scale: 0.75; }
+.seek { flex-grow: 1; height: 6; accent: $brand; }
+.seekrow { align: center; height: 9; }
+.time { color: $muted; font-scale: 0.75; text-wrap: nowrap; }
+.note { color: $muted; }
+.volume { width: 34; height: 6; accent: $brand2; }
+.url { flex-grow: 1; height: 14; background: alpha($bg, .63); border: 1 $line2; padding: 0 3; }
+.url:focus { border-color: $brand; }
+</style>

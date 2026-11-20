@@ -1,0 +1,14 @@
+id vibey:glacier_shield
+kind COSMETIC
+name Glacier Shield | Gletscherschild
+description Cut from a glacier, polished by a very patient seal. | Aus einem Gletscher geschnitten, poliert von einer sehr geduldigen Robbe.
+author Vibe Craft Studios
+tags [ice, winter, snowflake, starter]
+rarity RARE
+slot SHIELD
+hideWithArmor []
+pet GROUND 1.0
+cape -1 shield 0
+emote null
+sha256 f6fd8935761f4d82e5dea509dbe3910a492730ea43c7e43b869879960396b837 size 2475
+texture 0 shield 64 64 64 64 1 1 [0] false false 1 d199646e388d7fc4e5ee84cc459c62238357be6d832418f76aa969a6ac5d69a0

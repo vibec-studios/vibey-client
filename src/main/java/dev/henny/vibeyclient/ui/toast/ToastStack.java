@@ -99,6 +99,10 @@ public final class ToastStack {
      * be null. {@code durationMs <= 0}: default.
      */
     public static void show(Notify.Toast toast, List<Button> buttons, int durationMs, String key) {
+        if (!dev.henny.vibeyclient.ui.vui.ClassicUi.enabled()) {
+            dev.henny.vibeyclient.ui.vui.toast.VuiToasts.show(toast, buttons, durationMs, key);
+            return;
+        }
         int ms = durationMs > 0 ? durationMs : buttons.isEmpty() ? DEFAULT_MS : ACTION_MS;
         synchronized (LOCK) {
             incoming.add(new Entry(toast, List.copyOf(buttons), ms, key));
@@ -108,6 +112,7 @@ public final class ToastStack {
     /** Removes toasts with {@code key} (e.g. the invite was answered elsewhere). */
     public static void dismiss(String key) {
         if (key == null) return;
+        dev.henny.vibeyclient.ui.vui.toast.VuiToasts.dismiss(key);
         synchronized (LOCK) {
             incoming.removeIf(e -> key.equals(e.key));
         }

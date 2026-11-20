@@ -1,0 +1,43 @@
+id vibey:ice_crown
+kind COSMETIC
+name Ice Crown | Eiskrone
+description A circlet of glacier ice with a glowing teal gem. Sparkles now and then. | Ein Reif aus Gletschereis mit leuchtendem türkisen Edelstein. Funkelt ab und zu.
+author Vibe Craft Studios
+tags [ice, crown, royal, starter]
+rarity EPIC
+slot HAT
+hideWithArmor [HEAD]
+pet GROUND 1.0
+cape -1 shield -1
+emote null
+sha256 2f9ba0fc5cc708d9156eff537c8f053035619a67f75149c76627d9bfcd663b31 size 4244
+texture 0 main 32 32 32 32 1 1 [0] false false 1 741a10db4fa62fbca2d52d62f6241b193de53e9d7c51edd118d68c303bbe1027
+sprite 0 glint 0 0.0 10.0 5.0 15.0
+model 0 cubes 18 bones 2 locators 3
+bone 0 crown -1 HEAD [0.0 32.0 0.0] [0.0 0.0 0.0] false true false true 17
+cube [-4.0 31.0 -4.0] [4.0 33.0 4.0] 0.55 false null null [0.0 0.0] 0
+cube [-1.0 33.55 -4.55] [1.0 35.55 -3.55] 0.0 false null null [17.0 10.0] 0
+cube [-0.5 35.55 -4.55] [0.5 36.55 -3.55] 0.0 false null null [6.0 15.0] 0
+cube [2.0 33.55 -4.55] [3.0 34.55 -3.55] 0.0 false null null [10.0 15.0] 0
+cube [-3.0 33.55 -4.55] [-2.0 34.55 -3.55] 0.0 false null null [14.0 15.0] 0
+cube [3.55 33.55 -1.0] [4.55 35.55 1.0] 0.0 false null null [5.0 10.0] 0
+cube [3.55 35.55 -0.5] [4.55 36.55 0.5] 0.0 false null null [18.0 15.0] 0
+cube [3.55 33.55 -3.0] [4.55 34.55 -2.0] 0.0 false null null [22.0 15.0] 0
+cube [3.55 33.55 2.0] [4.55 34.55 3.0] 0.0 false null null [26.0 15.0] 0
+cube [-1.0 33.55 3.55] [1.0 35.55 4.55] 0.0 false null null [23.0 10.0] 0
+cube [-0.5 35.55 3.55] [0.5 36.55 4.55] 0.0 false null null [0.0 18.0] 0
+cube [2.0 33.55 3.55] [3.0 34.55 4.55] 0.0 false null null [4.0 18.0] 0
+cube [-3.0 33.55 3.55] [-2.0 34.55 4.55] 0.0 false null null [8.0 18.0] 0
+cube [-4.55 33.55 -1.0] [-3.55 35.55 1.0] 0.0 false null null [11.0 10.0] 0
+cube [-4.55 35.55 -0.5] [-3.55 36.55 0.5] 0.0 false null null [12.0 18.0] 0
+cube [-4.55 33.55 -3.0] [-3.55 34.55 -2.0] 0.0 false null null [16.0 18.0] 0
+cube [-4.55 33.55 2.0] [-3.55 34.55 3.0] 0.0 false null null [20.0 18.0] 0
+bone 1 gem 0 null [0.0 32.0 -4.6] [0.0 0.0 0.0] true false true true 1
+cube [-1.0 31.4 -5.4] [1.0 33.4 -4.4] 0.0 false null null [0.0 15.0] 0
+locator tip_front 0 null [0.0 36.5 -4.2]
+locator tip_left 0 null [-4.2 36.5 0.0]
+locator tip_right 0 null [4.2 36.5 0.0]
+animation idle 3.0 true false false tracks 0 events 3
+event 0.3 PARTICLE null 0 -1 tip_front 1 [0.02 0.02 0.02] [0.0 0.004 0.0] 0.45 0.14 0.0 true 1.0 1.0 -1 true
+event 1.4 PARTICLE null 0 -1 tip_left 1 [0.02 0.02 0.02] [0.0 0.004 0.0] 0.45 0.14 0.0 true 1.0 1.0 -1 true
+event 2.3 PARTICLE null 0 -1 tip_right 1 [0.02 0.02 0.02] [0.0 0.004 0.0] 0.45 0.14 0.0 true 1.0 1.0 -1 true

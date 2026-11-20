@@ -4,9 +4,9 @@ import dev.henny.vibeyclient.ui.Ui;
 
 import dev.henny.vibeyclient.api.Lang;
 import dev.henny.vibeyclient.api.Services;
-import dev.henny.vibeyclient.avatar.AvatarItem;
-import dev.henny.vibeyclient.avatar.AvatarItems;
-import dev.henny.vibeyclient.avatar.Wardrobe;
+import dev.henny.cosmetico.registry.Item;
+import dev.henny.cosmetico.Cosmetico;
+import dev.henny.vibeyclient.module.cosmetics.Wardrobe;
 import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.ui.Anim;
 import dev.henny.vibeyclient.ui.BaseScreen;
@@ -154,7 +154,7 @@ final class EmoteWheelScreen extends BaseScreen {
         String title;
         int color = Theme.TEXT;
         if (hovered >= 0 && ids[hovered] != null) {
-            AvatarItem item = AvatarItems.get(ids[hovered]);
+            Item item = Cosmetico.items().get(ids[hovered]);
             title = item != null ? item.name() : ids[hovered];
         } else if (hovered >= 0) {
             title = Lang.tr("wardrobe.wheel.empty");

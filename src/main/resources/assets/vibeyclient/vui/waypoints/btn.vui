@@ -1,0 +1,13 @@
+<import name="wp-ico" src="vibeyclient:waypoints/ico"/>
+<props>{ "icon": "", "tip": "", "active": false }</props>
+<template>
+  <button class="wp-btn" :class="{ active: active }" :tooltip="tip">
+    <wp-ico :name="icon"/>
+  </button>
+</template>
+<style>
+.wp-btn { width: 16; height: 16; padding: 0; background: transparent; border: 1 transparent; color: $muted; flex-shrink: 0; }
+.wp-btn:hover, .wp-btn:focus { background: $surface2; border-color: $line2; color: $text; }
+.wp-btn.active { color: $brand2; border-color: $line2; }
+.wp-btn.danger:hover { color: $danger; }
+</style>

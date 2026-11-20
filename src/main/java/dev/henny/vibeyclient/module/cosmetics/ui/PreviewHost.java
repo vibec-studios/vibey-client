@@ -1,11 +1,13 @@
 package dev.henny.vibeyclient.module.cosmetics.ui;
 
+import dev.henny.cosmetico.preview.MouseAction;
+
 import dev.henny.vibeyclient.Compat;
 import dev.henny.vibeyclient.Vibey;
 import dev.henny.vibeyclient.api.Lang;
 import dev.henny.vibeyclient.api.Services;
-import dev.henny.vibeyclient.avatar.Slot;
-import dev.henny.vibeyclient.avatar.preview.AvatarPreview;
+import dev.henny.cosmetico.model.Slot;
+import dev.henny.vibeyclient.module.cosmetics.preview.AvatarPreview;
 import dev.henny.vibeyclient.ui.Gfx;
 import dev.henny.vibeyclient.ui.Theme;
 
@@ -88,7 +90,7 @@ final class PreviewHost {
         }
     }
 
-    boolean mouse(AvatarPreview.MouseAction action, double x, double y) {
+    boolean mouse(MouseAction action, double x, double y) {
         AvatarPreview.View v = view();
         if (v == null) return false;
         try {

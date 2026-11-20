@@ -1,6 +1,6 @@
 # PvP & View module (`pvp`)
 
-Small PvP basics and view tweaks, **Fabric 1.21.11 only for now** (`gradle/common.gradle` leaves
+Small PvP basics and view tweaks, **Fabric 1.21.11 only for now** (`gradle/modules.gradle` leaves
 `module/pvp/**`, `vibeyclient.pvp.mixins.json`, `i18n/*/pvp.json` and its `fabric.mod.json` line out of every other
 target; `BuiltinModules` registers the module by reflection when the class is there). Code:
 `src/main/java/dev/henny/vibeyclient/module/pvp`.
@@ -60,4 +60,4 @@ python tools/pvp-review.py      # → build/review/pvp/ (prefix stripped, 5× cr
 
 Porting to the other versions later: the targets that differ most are `Gui.renderCrosshair` (GuiGraphicsExtractor on
 26.x), `LevelRenderer.renderBlockOutline`/`renderHitOutline` (line width per vertex since 1.21.9), the overlay texture
-and `ItemInHandRenderer` (SubmitNodeCollector since 1.21.9). Then drop the exclusions in `gradle/common.gradle`.
+and `ItemInHandRenderer` (SubmitNodeCollector since 1.21.9). Then drop the exclusions in `gradle/modules.gradle`.

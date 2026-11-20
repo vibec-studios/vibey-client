@@ -1,0 +1,24 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<props>{ "e": {} }</props>
+<template>
+  <column class="item" :class="{ selected: e.selected, locked: e.locked }" :tooltip="e.tip" tabindex="0">
+    <stack class="item-thumb">
+      <image v-if="e.thumb" :src="e.thumb" fit="contain"/>
+      <text v-if="!e.thumb" class="item-name">{{ e.name }}</text>
+      <text v-if="e.slot" class="item-slot">{{ e.slot }}</text>
+      <ico v-if="e.locked" name="lock" class="item-flag"/>
+    </stack>
+    <box class="item-rarity" :style="{ background: e.rarityColor }"/>
+  </column>
+</template>
+<style>
+.item { background: $panel; border: 1 $line; cursor: pointer; transition: border-color 150ms out, background 150ms out; }
+.item:hover, .item:focus { border-color: $line2; background: $surface2; }
+.item.selected { border-color: $brand; background: $surface2; }
+.item-thumb { height: 44; padding: 3; align-items: stretch; }
+.item-name { color: $dim; font-scale: 0.75; text-align: center; align-self: center; }
+.item.locked .item-thumb { opacity: 0.4; }
+.item-slot { position: absolute; anchor: top-right; right: 2; top: 1; padding: 0 2; background: $brand; color: $on-brand; font-scale: 0.75; }
+.item-flag { position: absolute; anchor: top-left; left: 2; top: 2; color: $muted; }
+.item-rarity { height: 2; }
+</style>

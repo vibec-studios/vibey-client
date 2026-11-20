@@ -1,0 +1,66 @@
+id vibey:clap
+kind EMOTE
+name Clap | Klatschen
+description Give it up! Four claps with a snappy beat. | Applaus! Vier Klatscher mit knackigem Beat.
+author Vibe Craft Studios
+tags [applause, sound, starter]
+rarity COMMON
+slot null
+hideWithArmor []
+pet null
+cape -1 shield -1
+emote main false true true true
+sha256 6acb10b1a6c468d79046da3efd2d5698c4ce23e3d57435ecceda9a1cf30116e9 size 5046
+texture 0 main 16 16 16 16 1 1 [0] false false 1 ad2bf348e88b6e479b2ab7ba4da6f74db846c5c2dddd29a8c5d1f4bf14a01b0d
+sprite 0 star 0 0.0 0.0 3.0 3.0
+model 0 cubes 0 bones 2 locators 3
+bone 0 right_hand -1 RIGHT_ARM [5.0 22.0 0.0] [0.0 0.0 0.0] false false false false 0
+bone 1 left_hand -1 LEFT_ARM [-5.0 22.0 0.0] [0.0 0.0 0.0] false false false false 0
+locator right_hand 0 null [6.0 12.0 0.0]
+locator left_hand 1 null [-6.0 12.0 0.0]
+locator clap 0 null [4.0 12.0 0.0]
+animation main 2.2 false false false tracks 3 events 8
+track -1 RIGHT_ARM
+channel rotation 12
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [62.0 -8.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.38 [64.0 -10.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.5 [62.0 24.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.73 [64.0 -10.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.85 [62.0 24.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.08 [64.0 -10.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.2 [62.0 24.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.43 [64.0 -10.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.55 [62.0 24.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [50.0 -6.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.2 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track -1 LEFT_ARM
+channel rotation 12
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.3 [62.0 8.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.38 [64.0 10.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.5 [62.0 -24.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.73 [64.0 10.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.85 [62.0 -24.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.08 [64.0 10.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.2 [62.0 -24.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.43 [64.0 10.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.55 [62.0 -24.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.8 [50.0 6.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.2 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+track -1 HEAD
+channel rotation 6
+key 0.0 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.5 [-4.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 0.85 [2.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.2 [-4.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 1.55 [2.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+key 2.2 [0.0 0.0 0.0] [NaN NaN NaN] CATMULLROM
+event 0.5 PARTICLE null 0 -1 clap 3 [0.15 0.1 0.05] [0.0 0.03 0.0] 0.35 0.1 0.0 true 1.0 1.0 -1 true
+event 0.5 SOUND minecraft:block.note_block.snare -1 -1 null 1 null null 0.0 0.0 0.0 false 0.7 1.35 -1 true
+event 0.85 PARTICLE null 0 -1 clap 3 [0.15 0.1 0.05] [0.0 0.03 0.0] 0.35 0.1 0.0 true 1.0 1.0 -1 true
+event 0.85 SOUND minecraft:block.note_block.snare -1 -1 null 1 null null 0.0 0.0 0.0 false 0.7 1.35 -1 true
+event 1.2 PARTICLE null 0 -1 clap 3 [0.15 0.1 0.05] [0.0 0.03 0.0] 0.35 0.1 0.0 true 1.0 1.0 -1 true
+event 1.2 SOUND minecraft:block.note_block.snare -1 -1 null 1 null null 0.0 0.0 0.0 false 0.7 1.35 -1 true
+event 1.55 PARTICLE null 0 -1 clap 3 [0.15 0.1 0.05] [0.0 0.03 0.0] 0.35 0.1 0.0 true 1.0 1.0 -1 true
+event 1.55 SOUND minecraft:block.note_block.snare -1 -1 null 1 null null 0.0 0.0 0.0 false 0.7 1.35 -1 true

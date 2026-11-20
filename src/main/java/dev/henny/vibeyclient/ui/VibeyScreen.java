@@ -44,6 +44,10 @@ public class VibeyScreen extends BaseScreen {
         this.tab = tab;
     }
 
+    public boolean typing() {
+        return ui.anyInputFocused();
+    }
+
     @Override
     protected void init() {
         UiScale.apply(this);

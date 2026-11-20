@@ -21,9 +21,24 @@
       "dev.henny.vibeyclient.gametest.ToastGameTest",
       "dev.henny.vibeyclient.gametest.PlayLinksGameTest",
       "dev.henny.vibeyclient.gametest.HudGameTest",
-      "dev.henny.vibeyclient.gametest.NoticesGameTest"
+      "dev.henny.vibeyclient.gametest.NoticesGameTest",
+      "dev.henny.vibeyclient.gametest.RanksGameTest",
+      "dev.henny.vibeyclient.gametest.CosmeticoParityGameTest",
+      "dev.henny.vibeyclient.gametest.R3GameTest",
+      "dev.henny.vibeyclient.gametest.VuiGameTest",
+      "dev.henny.vibeyclient.gametest.WaypointsGameTest",
+      "dev.henny.vibeyclient.gametest.InfoGameTest",
+      "dev.henny.vibeyclient.gametest.MediaR3GameTest",
+      "dev.henny.vibeyclient.gametest.CameraGameTest",
+      "dev.henny.vibeyclient.gametest.VisualsGameTest",
+      "dev.henny.vibeyclient.gametest.GalleryGameTest",
+      "dev.henny.vibeyclient.gametest.ChatGameTest",
+      "dev.henny.vibeyclient.gametest.InventoryGameTest",
+      "dev.henny.vibeyclient.gametest.ServersGameTest",
+      "dev.henny.vibeyclient.gametest.PolishGameTest"
     ]
   },
+  "mixins": ["vibeyclient-gametest.mixins.json"],
   "depends": {
     "vibeyclient": "*"
   }

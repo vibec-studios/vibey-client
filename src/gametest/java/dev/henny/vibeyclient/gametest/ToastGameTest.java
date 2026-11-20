@@ -3,88 +3,91 @@ package dev.henny.vibeyclient.gametest;
 import dev.henny.vibeyclient.api.GlobalSettings;
 import dev.henny.vibeyclient.api.service.Notify;
 import dev.henny.vibeyclient.client.ClientCompat;
-import dev.henny.vibeyclient.ui.toast.ToastStack;
+import dev.henny.vibeyclient.ui.vui.toast.VuiToasts;
+import dev.henny.vui.dom.Element;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.network.chat.Component;
 
-/**
- * The Vibey toast stack and vanilla toasts share the top right corner: ours goes below the visible vanilla toasts
- * ("Chat messages can't be verified", advancements, recipes) and moves back up when they are gone. Screenshots
- * {@code toast_1_before_overlap} (old behaviour, layout switched off), {@code toast_2_below_vanilla},
- * {@code toast_3_vanilla_gone}.
- */
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public final class ToastGameTest implements FabricClientGameTest {
     private static final String LOG = "[vibeyclient-toast-test] ";
 
     @Override
     public void runTest(ClientGameTestContext ctx) {
-        ctx.getInput().resizeWindow(1280, 720);
+        UiTest t = new UiTest(ctx, "ui-new");
+        t.window(1280, 720);
+        t.scale(3);
         ctx.runOnClient(mc -> GlobalSettings.language.set(GlobalSettings.Language.ENGLISH));
+        AtomicBoolean acted = new AtomicBoolean();
         try (TestSingleplayerContext world = ctx.worldBuilder().setUseConsistentSettings(false)
                 .adjustSettings(s -> s.setSeed("vibeytoasts")).create()) {
             world.getServer().runCommand("time set 1000");
-            world.getServer().runCommand("weather clear");
             world.getServer().runCommand("gamerule announceAdvancements false");
             world.getClientWorld().waitForChunksRender();
             ctx.runOnClient(mc -> {
-                mc.gui.getChat().clearMessages(false);
-                mc.options.hideGui = false;
-                mc.player.setXRot(-8f);
-            });
-            ctx.waitTicks(10);
-            if (ctx.computeOnClient(mc -> ClientCompat.vanillaToastBottom()) > 0f) {
-                ctx.runOnClient(mc -> mc.getToastManager().clear());
-                ctx.waitTicks(5);
-            }
-
-            // two vanilla toasts (the real "chat can't be verified" text) + two Vibey toasts
-            ctx.runOnClient(mc -> {
+                mc.getToastManager().clear();
                 mc.getToastManager().addToast(SystemToast.multiline(mc, SystemToast.SystemToastId.UNSECURE_SERVER_WARNING,
                         Component.translatable("multiplayer.unsecureserver.toast.title"),
                         Component.translatable("multiplayer.unsecureserver.toast")));
-                SystemToast.add(mc.getToastManager(), SystemToast.SystemToastId.PERIODIC_NOTIFICATION,
-                        Component.literal("Advancement Made!"), Component.literal("Stone Age"));
-                Notify.show(new Notify.Toast("Friend online", "Bee is playing now", Notify.Kind.SOCIAL, "B", null));
-                Notify.show(new Notify.Toast("Invite link copied", "http://127.0.0.1:3470/j/k7m2xq", Notify.Kind.SUCCESS, null, null));
+                Notify.show(new Notify.Toast("Bee", "Online", Notify.Kind.SOCIAL, null, null));
+                Notify.show(new Notify.Toast("New cosmetics", "3 items", Notify.Kind.INFO, null, () -> acted.set(true)));
             });
-            ctx.waitTicks(30); // vanilla slides in for 600 ms, ours moves within 150 ms
+            ctx.waitTicks(30);
+            UiTest.check(count(ctx) == 2, "expected 2 Vibey toasts, got " + count(ctx));
+            float vanilla = ctx.computeOnClient(mc -> ClientCompat.vanillaToastBottom());
+            float top = ctx.computeOnClient(mc -> boxes().get(0)[1]);
+            UiTest.check(vanilla > 0, "vanilla toast not seen");
+            UiTest.check(top > vanilla, "Vibey toasts (y " + top + ") overlap vanilla toasts down to " + vanilla);
+            t.shot("toast_1_bottom_right");
+            log("vanilla bottom " + vanilla + ", Vibey stack from y " + top);
 
-            float bottom = ctx.computeOnClient(mc -> ClientCompat.vanillaToastBottom());
-            if (bottom < 64f) throw new AssertionError("vanilla toasts not seen: bottom " + bottom);
-
-            // what it looked like before: the stack on top of the vanilla toasts
-            ToastStack.belowVanilla = false;
-            ctx.waitTicks(10);
-            ctx.takeScreenshot("toast_1_before_overlap");
-            ToastStack.belowVanilla = true;
-            ctx.waitTicks(10);
-            int top = ctx.computeOnClient(mc -> ToastStack.debugTop());
-            if (top < bottom) throw new AssertionError("Vibey toasts at y " + top + " overlap vanilla toasts down to " + bottom);
-            ctx.takeScreenshot("toast_2_below_vanilla");
-            log("vanilla bottom " + bottom + ", Vibey stack from y " + top);
-
-            // vanilla toasts go (system toasts last 5 s, the multiline one a bit longer): the stack moves back up
-            ctx.runOnClient(mc -> {
-                SystemToast.forceHide(mc.getToastManager(), SystemToast.SystemToastId.UNSECURE_SERVER_WARNING);
-                SystemToast.forceHide(mc.getToastManager(), SystemToast.SystemToastId.PERIODIC_NOTIFICATION);
-            });
-            boolean up = false;
-            for (int t = 0; t < 60 && !up; t += 2) {
-                ctx.waitTicks(2);
-                up = ctx.computeOnClient(mc -> ToastStack.debugTop()) <= 6 && ctx.computeOnClient(mc -> ClientCompat.vanillaToastBottom()) <= 0.5f;
-            }
-            if (!up) throw new AssertionError("stack did not move up: top " + ctx.computeOnClient(mc -> ToastStack.debugTop()));
-            ctx.waitTicks(6);
-            ctx.takeScreenshot("toast_3_vanilla_gone");
-            log("vanilla gone, stack back at the top");
+            ctx.setScreen(() -> new PauseScreen(true));
+            ctx.waitTicks(4);
+            float[] action = ctx.computeOnClient(mc -> actionBox());
+            UiTest.check(action != null, "no action button on the toast");
+            t.hover(action[0] - 30, action[1] + action[3] / 2);
+            ctx.waitTicks(4);
+            UiTest.check(ctx.computeOnClient(mc -> VuiToasts.stack().paused()), "hovering a toast with a button should pause it");
+            t.shot("toast_2_hover");
+            t.click(action[0] + action[2] / 2, action[1] + action[3] / 2);
+            ctx.waitTicks(8);
+            UiTest.check(acted.get(), "the toast action did not run");
+            UiTest.check(count(ctx) == 1, "the toast with the action should be gone, " + count(ctx) + " left");
+            float[] rest = ctx.computeOnClient(mc -> boxes().get(0));
+            boolean taken = ctx.computeOnClient(mc -> VuiToasts.click(rest[0] + 20, rest[1] + rest[3] / 2, 0));
+            ctx.waitTicks(2);
+            UiTest.check(!taken && count(ctx) == 1, "a toast without a button must let clicks through (taken " + taken + ")");
+            t.shot("toast_3_click_through");
+            ctx.setScreen(() -> null);
             ctx.runOnClient(mc -> mc.getToastManager().clear());
-            ctx.waitTicks(20 * 6); // let ours expire before the next test
         }
         ctx.runOnClient(mc -> GlobalSettings.language.set(GlobalSettings.Language.AUTO));
         log("done");
+    }
+
+    private static int count(ClientGameTestContext ctx) {
+        return ctx.computeOnClient(mc -> VuiToasts.stack().toasts().size());
+    }
+
+    private static List<float[]> boxes() {
+        var doc = VuiToasts.stack().document();
+        doc.layoutIfNeeded();
+        return doc.query("toast").stream().map(e -> new float[] {e.box().x, e.box().y, e.box().width, e.box().height}).toList();
+    }
+
+    private static float[] actionBox() {
+        var doc = VuiToasts.stack().document();
+        doc.layoutIfNeeded();
+        List<Element> list = doc.query(".toast-action");
+        if (list.isEmpty()) return null;
+        var b = list.get(0).box();
+        return new float[] {b.x, b.y, b.width, b.height};
     }
 
     private static void log(String s) {

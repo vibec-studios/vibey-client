@@ -1,11 +1,13 @@
 package dev.henny.vibeyclient.module.cosmetics.ui;
 
+import dev.henny.cosmetico.preview.MouseAction;
+
 import dev.henny.vibeyclient.api.Services;
 import dev.henny.vibeyclient.api.service.MenuPreview;
-import dev.henny.vibeyclient.avatar.AvatarItem;
-import dev.henny.vibeyclient.avatar.AvatarItems;
-import dev.henny.vibeyclient.avatar.Wardrobe;
-import dev.henny.vibeyclient.avatar.preview.AvatarPreview;
+import dev.henny.cosmetico.registry.Item;
+import dev.henny.cosmetico.Cosmetico;
+import dev.henny.vibeyclient.module.cosmetics.Wardrobe;
+import dev.henny.vibeyclient.module.cosmetics.preview.AvatarPreview;
 import dev.henny.vibeyclient.ui.Gfx;
 
 import java.util.ArrayList;
@@ -55,11 +57,11 @@ public final class TitlePreview implements MenuPreview {
         if (wd == null) return null;
         candidates.clear();
         for (int i = 0; i < Wardrobe.WHEEL_SLOTS; i++) {
-            AvatarItem item = AvatarItems.get(wd.wheel(i));
+            Item item = Cosmetico.items().get(wd.wheel(i));
             if (usable(wd, item)) candidates.add(item.id());
         }
         if (candidates.isEmpty()) {
-            for (AvatarItem item : AvatarItems.emotes()) if (usable(wd, item)) candidates.add(item.id());
+            for (Item item : Cosmetico.items().emotes()) if (usable(wd, item)) candidates.add(item.id());
         }
         if (candidates.size() > 1) candidates.remove(lastEmote);
         if (candidates.isEmpty()) return null;
@@ -67,7 +69,7 @@ public final class TitlePreview implements MenuPreview {
         return lastEmote;
     }
 
-    private static boolean usable(Wardrobe wd, AvatarItem item) {
+    private static boolean usable(Wardrobe wd, Item item) {
         // looping emotes (sit, dance) would never end on the title screen
         return item != null && item.isEmote() && !item.isDev() && wd.canUse(item)
                 && item.bundle() != null && (item.bundle().emote == null || !item.bundle().emote.loop());
@@ -75,17 +77,17 @@ public final class TitlePreview implements MenuPreview {
 
     @Override
     public boolean mouseClicked(double x, double y, int button) {
-        return button == 0 && host.mouse(AvatarPreview.MouseAction.PRESS, x, y);
+        return button == 0 && host.mouse(MouseAction.PRESS, x, y);
     }
 
     @Override
     public boolean mouseDragged(double x, double y, int button, double dx, double dy) {
-        return host.mouse(AvatarPreview.MouseAction.DRAG, x, y);
+        return host.mouse(MouseAction.DRAG, x, y);
     }
 
     @Override
     public boolean mouseReleased(double x, double y, int button) {
-        return host.mouse(AvatarPreview.MouseAction.RELEASE, x, y);
+        return host.mouse(MouseAction.RELEASE, x, y);
     }
 
     @Override

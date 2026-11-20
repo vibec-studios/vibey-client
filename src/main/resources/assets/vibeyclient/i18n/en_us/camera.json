@@ -1,0 +1,23 @@
+{
+  "name": "Camera",
+  "description": "Freelook, orbit view, motion blur.",
+  "summary": "Freelook, orbit, blur",
+  "section": {
+    "look": "Look",
+    "blur": "Motion blur"
+  },
+  "setting": {
+    "freelook": "Freelook",
+    "freelook.desc": "Hold the key to look around.",
+    "freelookToggle": "Press to toggle",
+    "orbit": "Orbit view",
+    "orbit.desc": "Middle-drag in third person.",
+    "motionBlur": "Motion blur",
+    "motionBlur.desc": "Off by default. Can cause discomfort.",
+    "blurStrength": "Strength",
+    "freelookKey": "Freelook"
+  },
+  "notice": {
+    "blur": "Motion blur: not available here."
+  }
+}

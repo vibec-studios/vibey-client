@@ -4,10 +4,10 @@ import dev.henny.vibeyclient.Vibey;
 import dev.henny.vibeyclient.api.GlobalSettings;
 import dev.henny.vibeyclient.api.ModuleManager;
 import dev.henny.vibeyclient.api.Services;
-import dev.henny.vibeyclient.avatar.AvatarItem;
-import dev.henny.vibeyclient.avatar.AvatarItems;
-import dev.henny.vibeyclient.avatar.Slot;
-import dev.henny.vibeyclient.avatar.Wardrobe;
+import dev.henny.cosmetico.registry.Item;
+import dev.henny.cosmetico.Cosmetico;
+import dev.henny.cosmetico.model.Slot;
+import dev.henny.vibeyclient.module.cosmetics.Wardrobe;
 import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.module.cosmetics.ui.WardrobeUi;
 import dev.henny.vibeyclient.module.multiplayer.screen.HostScreen;
@@ -98,7 +98,7 @@ public final class DevTour {
             build();
             LogTap.install();
             log("start: Minecraft " + dev.henny.vibeyclient.BuildInfo.MINECRAFT + " on " + Vibey.platform().loader() + ", "
-                    + AvatarItems.all().size() + " items, output " + Path.of(OUT).toAbsolutePath());
+                    + Cosmetico.items().all().size() + " items, output " + Path.of(OUT).toAbsolutePath());
             next();
             return;
         }
@@ -128,7 +128,7 @@ public final class DevTour {
 
     /** Before the first step: the game (and our modules) are up and a title-like screen is showing. */
     private static boolean ready(Minecraft mc) {
-        if (!ModuleManager.get().isStarted() || AvatarItems.all().size() < 20 || Services.get(Wardrobe.class).isEmpty()) return false;
+        if (!ModuleManager.get().isStarted() || Cosmetico.items().all().size() < 20 || Services.get(Wardrobe.class).isEmpty()) return false;
         //? if <26.2 {
         if (mc.getOverlay() != null) return false;
         //?}
@@ -442,7 +442,7 @@ public final class DevTour {
         waitTicks(15);
         shot("35_lyrics_galaxy");
         run(mc -> {
-            long drawn = dev.henny.vibeyclient.module.media.lyrics.render.WorldLyrics.drawnFrames;
+            long drawn = dev.henny.vibeyclient.module.media.lyrics.world.WorldText.drawnFrames();
             dev.henny.vibeyclient.module.media.lyrics.LyricsConfig.get().sky = "vanilla";
             dev.henny.vibeyclient.module.media.lyrics.Playback.stop();
             hideHud(mc, false);
@@ -483,7 +483,7 @@ public final class DevTour {
             hideHud(mc, true);
             look(mc, 0f, 10f);
             mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT);
-            if (AvatarItems.get(id) == null) throw new IllegalStateException("emote missing: " + id);
+            if (Cosmetico.items().get(id) == null) throw new IllegalStateException("emote missing: " + id);
             w.playEmote(id);
         });
         waitTicks(ticks);
@@ -503,7 +503,7 @@ public final class DevTour {
     }
 
     private static void equip(Wardrobe w, String id) {
-        AvatarItem i = AvatarItems.get(id);
+        Item i = Cosmetico.items().get(id);
         if (i == null) throw new IllegalStateException("item missing: " + id);
         w.equip(i);
         Slot slot = i.slot();

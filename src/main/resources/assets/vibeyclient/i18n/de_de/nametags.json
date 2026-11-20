@@ -1,13 +1,30 @@
 {
-  "name": "Nametag-Icons",
-  "description": "Eine kleine Robbe vor den Namen von Spielern mit Vibey Client, dazu Team-, Unterstützer- und Creator-Abzeichen.",
-  "summary": "Eine Robbe vor den Namen von Vibey-Spielern.",
+  "name": "Namen",
+  "description": "Robbe, Rang-Icons und Namensstile neben Spielernamen.",
+  "summary": "Ränge und bunte Namen.",
+  "section": {
+    "show": "Wo",
+    "icons": "Icons",
+    "names": "Namensstile",
+    "mine": "Mein Name"
+  },
   "setting": {
-    "nametag": "Icons über Spielern",
-    "nametag.desc": "Eine kleine Robbe vor den Namen von Vibey-Spielern.",
-    "tabList": "Icons in der Spielerliste",
-    "tabList.desc": "Wenn du Tab gedrückt hältst.",
-    "badges": "Abzeichen",
-    "badges.desc": "Team-, Unterstützer- und Creator-Icons neben der Robbe."
+    "nametag": "Über Spielern",
+    "tabList": "Spielerliste",
+    "chat": "Chat",
+    "ranks": "Rang",
+    "badges": "Zusatz-Abzeichen",
+    "nameStyles": "Namensstile",
+    "animate": "Animiert",
+    "myStyle": "Mein Stil",
+    "myRank": "Mein Rang",
+    "showRank": "Rang zeigen"
+  },
+  "mine": {
+    "showRank": "Meinen Rang zeigen",
+    "noStyle": "Keiner",
+    "autoRank": "Automatisch",
+    "shown": "Sichtbar",
+    "hidden": "Versteckt"
   }
 }

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${version}",
+  "name": "cosmetico",
+  "description": "Cosmetics engine: .vibey bundles, rendering, animation and effects on players.",
+  "authors": [
+    "Vibe Craft Studios"
+  ],
+  "contact": {
+    "sources": "https://github.com/vibec-studios/vibey-client",
+    "issues": "https://github.com/vibec-studios/vibey-client/issues"
+  },
+  "license": "Apache-2.0",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "dev.henny.cosmetico.mc.fabric.CosmeticoFabric"
+    ]
+  },
+  "mixins": [
+    "cosmetico.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.5",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_range}",
+    "java": ">=${java}",
+    "r3": ">=${r3_version}"
+  }
+}

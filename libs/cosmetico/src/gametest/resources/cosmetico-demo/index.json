@@ -1,0 +1,31 @@
+{
+  "format": "vibey-index",
+  "formatVersion": 1,
+  "items": [
+    {
+      "id": "vibey:vibe_cape",
+      "file": "vibe_cape.vibey",
+      "sort": 0
+    },
+    {
+      "id": "vibey:seal_beanie",
+      "file": "seal_beanie.vibey",
+      "sort": 1
+    },
+    {
+      "id": "vibey:seal_buddy",
+      "file": "seal_buddy.vibey",
+      "sort": 2
+    },
+    {
+      "id": "vibey:neon_wings",
+      "file": "neon_wings.vibey",
+      "sort": 3
+    },
+    {
+      "id": "vibey:wave",
+      "file": "wave.vibey",
+      "sort": 4
+    }
+  ]
+}

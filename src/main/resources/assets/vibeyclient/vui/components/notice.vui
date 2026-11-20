@@ -1,0 +1,13 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<props>{ "text": "", "tip": "", "kind": "warn" }</props>
+<template>
+  <row class="notice" :class="kind" :tooltip="tip">
+    <ico :name="kind == 'warn' ? 'warn' : 'info'"/>
+    <text class="notice-text">{{ text }}</text>
+  </row>
+</template>
+<style>
+.notice { gap: 4; height: 14; padding: 0 5; border: 1 $line2; color: $muted; flex-shrink: 0; }
+.notice.warn { border-color: alpha($warn, .5); color: $warn; }
+.notice-text { text-wrap: nowrap; text-overflow: ellipsis; }
+</style>

@@ -1,0 +1,16 @@
+<import name="choice-card" src="vibeyclient:components/choice-card"/>
+<template>
+  <column class="step">
+    <text class="ob-title">{{ t('ui.onboarding.online') }}</text>
+    <row class="choices">
+      <choice-card icon="globe" :title="t('ui.onboarding.onTitle')" :text="t('ui.onboarding.onText')"
+                   :tip="t('ui.onboarding.onTip')" :on="online" @click="online = true"/>
+      <choice-card icon="power" :title="t('ui.onboarding.offTitle')" :text="t('ui.onboarding.offText')"
+                   :tip="t('ui.onboarding.offTip')" :on="!online" @click="online = false"/>
+    </row>
+  </column>
+</template>
+<style>
+.step { gap: 10; grow: 1; }
+.choices { gap: 6; align: stretch; }
+</style>

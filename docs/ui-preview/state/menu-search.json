@@ -1,0 +1,45 @@
+{
+ "view": "grid",
+ "panel": "",
+ "query": "zoom",
+ "status": "online",
+ "requests": 2,
+ "showCreators": false,
+ "moreOpen": false,
+ "quickMoreOpen": false,
+ "version": "0.4.0",
+ "modules": [
+  {
+   "id": "pvp",
+   "name": "PvP & View",
+   "icon": "crosshair",
+   "accent": "#ff5470",
+   "on": true,
+   "available": true,
+   "tip": "Zoom, crosshair, toggle sprint.",
+   "hit": "Zoom",
+   "blocked": true
+  },
+  {
+   "id": "waypoints",
+   "name": "Waypoints",
+   "icon": "pin",
+   "accent": "#3fe0c5",
+   "on": true,
+   "available": true,
+   "tip": "Beacons, minimap, world map.",
+   "hit": "Map zoom"
+  },
+  {
+   "id": "camera",
+   "name": "Camera",
+   "icon": "eye",
+   "accent": "#3fe0c5",
+   "on": false,
+   "available": true,
+   "tip": "Freelook, motion blur.",
+   "hit": "Zoom on wheel"
+  }
+ ],
+ "creators": []
+}

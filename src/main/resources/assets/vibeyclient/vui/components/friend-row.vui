@@ -1,0 +1,25 @@
+<import name="head" src="vibeyclient:components/head"/>
+<import name="status-dot" src="vibeyclient:components/status-dot"/>
+<import name="icon-button" src="vibeyclient:components/icon-button"/>
+<props>{ "f": {} }</props>
+<template>
+  <row class="friend" :class="f.status" :tooltip="f.activity">
+    <head :src="f.head" :size="10"/>
+    <text class="friend-name">{{ f.name }}</text>
+    <row class="friend-actions">
+      <icon-button v-if="f.canInvite" icon="host" :tip="t('ui.friends.invite')" @click.stop="invite(f)"/>
+      <icon-button v-if="f.canJoin" icon="play" :tip="t('ui.friends.join')" @click.stop="join(f)"/>
+      <icon-button icon="chat" :tip="t('ui.friends.chat')" @click.stop="chat(f)"/>
+    </row>
+    <status-dot :status="f.status"/>
+  </row>
+</template>
+<style>
+.friend { height: 16; gap: 4; padding: 0 3; cursor: pointer; }
+.friend:hover { background: $surface2; }
+.friend-name { grow: 1; min-width: 0; color: $text; text-wrap: nowrap; text-overflow: ellipsis; }
+.friend.offline .friend-name { color: $dim; }
+.friend-actions { gap: 0; visibility: hidden; }
+.friend:hover .friend-actions { visibility: visible; }
+.friend-actions .icon-btn { size: 14; }
+</style>

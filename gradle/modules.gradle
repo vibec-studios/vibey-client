@@ -1,0 +1,50 @@
+// Client modules (dev.henny.vibeyclient.module.<id>) and the targets that build them: 'all', a loader
+// ('fabric', 'neoforge') or a list of target names. A dotted id is a part of a module (its subpackage).
+// Read by gradle/modules-filter.gradle and gradle/module-boundaries.gradle, see docs/MODULES.md.
+ext.clientModules = [
+        social       : 'all',
+        cosmetics    : 'all',
+        emotes       : 'all',
+        multiplayer  : 'all',
+        devlink      : 'all',
+        nametags     : 'all',
+        media        : 'fabric',
+        'media.video': ['fabric-1.21.11'],
+        hud          : ['fabric-1.21.11'],
+        pvp          : ['fabric-1.21.11'],
+        clips        : ['fabric-1.21.11'],
+        waypoints    : ['fabric-1.21.11'],
+        info         : ['fabric-1.21.11'],
+        camera       : ['fabric-1.21.11'],
+        visuals      : ['fabric-1.21.11'],
+        chat         : ['fabric-1.21.11'],
+        'social.streamer': ['fabric-1.21.11'],
+        inventory    : ['fabric-1.21.11'],
+        servers      : ['fabric-1.21.11'],
+]
+
+// Resources a module owns besides its i18n files (i18n/*/<id>[.*].json) and mixin configs (vibeyclient.<id>[.*].mixins.json).
+ext.clientModuleResources = [
+        media: ['assets/vibeyclient/font/lyrics/**', 'assets/vibeyclient/textures/lyrics/**', 'assets/vibeyclient/lyrics/**'],
+        clips: ['assets/vibeyclient/shaders/core/clips_*', 'assets/vibeyclient/vui/clips/**'],
+        camera: ['assets/vibeyclient/post_effect/motion_blur.json', 'assets/vibeyclient/shaders/post/motion_blur.fsh'],
+        waypoints: ['assets/vibeyclient/vui/waypoints/**', 'assets/vibeyclient/textures/waypoints/**'],
+        info : ['assets/vibeyclient/vui/info/**'],
+        chat: ['assets/vibeyclient/vui/chat/**'],
+        inventory: ['assets/vibeyclient/vui/inventory/**'],
+        servers: ['assets/vibeyclient/vui/servers/**'],
+]
+
+// Shared packages (dev.henny.vibeyclient.<path>) that several modules use instead of each other, with their targets
+// (same values as above). They must not import dev.henny.vibeyclient.module.* (checkModuleBoundaries).
+ext.sharedPackages = [
+        media: ['fabric-1.21.11'],
+]
+
+// Resources a shared package owns.
+ext.sharedPackageResources = [
+        media: ['assets/vibeyclient/i18n/*/media.ffmpeg.json'],
+]
+
+// Module -> module imports that exist and still have to be removed; checkModuleBoundaries fails on any other.
+ext.knownModuleImports = ['emotes -> cosmetics']

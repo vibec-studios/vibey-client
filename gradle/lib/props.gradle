@@ -1,0 +1,5 @@
+// A lib target reads the Minecraft/loader versions of the client target with the same name.
+def file = rootProject.file("versions/${project.name}/gradle.properties")
+def props = new Properties()
+file.withReader('UTF-8') { props.load(it) }
+props.each { k, v -> project.ext.set(k as String, v) }

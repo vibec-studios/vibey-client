@@ -107,7 +107,7 @@ Gradle runs on this PC right now).
 
 | Option | Licence fit (Apache-2.0 mod) | Verdict |
 |---|---|---|
-| **FFmpeg CLI, separate process**: BtbN `lgpl-shared` (Windows), the system package (Linux/macOS) | LGPL, never linked or bundled, downloaded only after consent and checked against `checksums.sha256`. This is already done for video screens (`player/Ffmpeg`). | **chosen**: one code path for encoding, segmenting, remuxing, thumbnails, trimming and playback |
+| **FFmpeg CLI, separate process**: BtbN `lgpl-shared` (Windows), the system package (Linux/macOS) | LGPL, never linked or bundled, downloaded only after consent and checked against `checksums.sha256`. This is shared with the video screens (`media/ffmpeg/Ffmpeg`, see [VIDEO.md](VIDEO.md#shared-ffmpeg-and-player-code)). | **chosen**: one code path for encoding, segmenting, remuxing, thumbnails, trimming and playback |
 | Hardware encoders through that FFmpeg | BtbN's build scripts enable `ffnvcodec` (NVENC headers, MIT), `amf` (MIT headers), `onevpl` (QSV via Intel libvpl, MIT; x64 only) and `openh264` in **every** variant including LGPL. They leave out only `x264`/`x265` (`[[ $VARIANT == lgpl* ]] && return -1`). Runtimes come with the GPU driver. | **chosen, preferred** |
 | `h264_mf` (Windows Media Foundation through FFmpeg) | Windows' own encoder MFTs: a vendor hardware MFT or Microsoft's software H.264 encoder. Missing on Windows "N" editions without the Media Feature Pack. | fallback |
 | `libopenh264` (in the BtbN LGPL build) | BSD-2 source, but Cisco's patent coverage applies only to **Cisco's binaries**, and BtbN builds it from source | last resort, with a note |
@@ -280,7 +280,7 @@ first pause per session shows a toast ("Clips paused: low FPS"), later ones only
 - **Gallery** (Vibey menu → Clips → *Open gallery*, and an unbound "Clips gallery" key): a grid of thumbnails
   (JPEG → `NativeImage`, loaded lazily for visible tiles only), filter *All / Kept / Auto / Hotkey*, newest first,
   and a storage bar "1.2 of 2 GB".
-- **Player:** reuses `module/media/video` `FfmpegPlayer` + `FrameTexture` (local files are already supported),
+- **Player:** reuses the shared `media/player` `FfmpegPlayer` + `FrameTexture` (local files are already supported),
   drawn into a GUI rect, with a non-positional OpenAL source. Controls: play/pause, seek bar, volume, *Keep* (star),
   *Rename*, *Trim* (in/out marks → `-ss/-to -c copy`, snapped to the 2 s keyframes; exact re-encode later), *Delete*
   (confirm), *Open folder*, *Copy path*. The video feature is Fabric 1.21.11 only. Until it is ported, other targets
@@ -414,12 +414,12 @@ pauses. GPU TDR flakiness on the Intel Arc test PC affects long gametests. Drive
 - [OpenH264 binary licence (Cisco patent coverage)](https://www.openh264.org/BINARY_LICENSE.txt), [jcodec](https://github.com/jcodec/jcodec).
 - WASAPI process loopback: [`AUDIOCLIENT_PROCESS_LOOPBACK_PARAMS`](https://learn.microsoft.com/en-us/windows/win32/api/audioclientactivationparams/ns-audioclientactivationparams-audioclient_process_loopback_params),
   [ApplicationLoopback sample](https://learn.microsoft.com/en-us/samples/microsoft/windows-classic-samples/applicationloopbackaudio-sample/).
-- Repo: `module/media/video/player/{Ffmpeg,FfmpegPlayer,FrameTexture}`, `module/media/lyrics/fx/LoopbackCapture`,
+- Repo: `media/ffmpeg/*`, `media/player/*` (shared with the video screens), `module/media/lyrics/fx/LoopbackCapture`,
   `launcher/{SessionFile,LauncherStatus}`, `api/ServerRules`; benchmark `tools/clips-bench.py`.
 
 ## 13. What is built (MVP + auto clips, Fabric 1.21.11)
 
-Package `module/clips` (1.21.11-only wiring like `pvp`: gradle/common.gradle leaves package, mixin config, strings and
+Package `module/clips` (1.21.11-only wiring like `pvp`: gradle/modules.gradle leaves package, mixin config, strings and
 the shader out of every other target; `BuiltinModules` registers it by reflection).
 
 | Part | Where | Notes |
@@ -431,8 +431,59 @@ the shader out of every other target; `BuiltinModules` registers it by reflectio
 | Saving | `ClipSaver`, `store/ClipStore`, `store/ClipMeta` | One `.ts` part per FFmpeg session → `-f concat -c copy -movflags +faststart` → `.<id>.mp4.part` → rename; thumbnail via `.part`; JSON last (atomic). Cleanup after every save and at start (never `kept`), orphans at start. Own I/O thread, not the shared `Tasks` pool. JUnit: `ClipStoreTest` (contract §10). |
 | Rules | `Recorder` | Records only with module + buffer on, a world, no screen but chat (containers only with the setting), focused, not minimised, not low FPS (3 s below the threshold / 5 s above +10; the threshold never exceeds 85 % of the frame cap or the monitor rate with vsync), not "encoder behind" (> 10 % skipped in 5 s → 10 s pause). FFmpeg exits after 60 s of pause and on world leave (the ring is dropped on world leave). Server rule `clips` stops and drops the ring at once; `clips.auto` stops automatic clips. |
 | Auto clips | `AutoClips`, `mixin/ClientPacketListenerMixin`, `MultiPlayerGameModeMixin`, Fabric `ClientReceiveMessageEvents.GAME` | As in §5; post-roll merge, 10 s cooldown, max per session. |
-| UI | `ui/ClipsGalleryScreen`, `ui/ClipViewScreen`, `ui/Thumbs`, `ClipsHud`, `ClipsStats` | Gallery (filter, storage bar), player with the video screens' `FfmpegPlayer` (keep, rename, delete, open folder, copy path, kill marks on the seek bar). The REC dot is a plain HUD element (HUD templates hide unknown *widgets* on first start). `ClipsStats`: `-Dvibeyclient.clips.stats=true`. FFmpeg consent: the video screens' `SetupScreen` with Clips texts. |
+| UI | `ui/ClipsGalleryScreen`, `ui/ClipViewScreen`, `ui/Thumbs`, `ClipsHud`, `ClipsStats` | Gallery (filter, storage bar), player with the shared `media/player/FfmpegPlayer` (keep, rename, delete, open folder, copy path, kill marks on the seek bar). The REC dot is a plain HUD element (HUD templates hide unknown *widgets* on first start). `ClipsStats`: `-Dvibeyclient.clips.stats=true`. FFmpeg consent: the shared `media/ffmpeg/FfmpegSetupScreen` with `FfmpegPurpose.RECORDING` (texts in `i18n/*/media.ffmpeg.json`). |
 
 Not built yet (prepared): sound (phase 3: the encoder command has no audio input yet, `audio_codec` stays absent),
 other Minecraft versions and NeoForge (phase 4), disk ring and trimming (phase 5).
 
+
+## 14. Screenshot gallery (feature #22)
+
+Vanilla screenshots (`<gameDir>/screenshots/*.png|jpg`, F2) next to the clips: browse, sort, favourite, copy, delete –
+as a **screen** and as an **r3 world panel** you look at. Package `module/clips/shots` (same 1.21.11-only wiring as
+the rest of clips; documents in `assets/vibeyclient/vui/clips/`).
+
+| Open | How |
+|---|---|
+| Screen | Clips page button *Screenshots*, the *Screenshots* button in the clips gallery footer, unbound key `shotsKey` |
+| World panel | the cube icon in the screen, or the Clips page button *Place in world* (in a world) |
+
+**Screen** (`clips/shots.vui`, `ShotsScreen` = `VuiScreen`): header with count, sort chip (Newest → Oldest → Name),
+favourites-only star, place in world, open folder, close; thumbnail grid (`clips/shot-tile.vui`, 16:9, star on
+favourites, purple border on the selected one); side pane with the large preview, date, position "3 / 12", ← →,
+favourite, copy, delete (first click arms – red ✔ for 3 s – the second deletes; `core/ArmedConfirm`).
+
+**World panel** (`clips/shots-panel.vui`, `ShotsPanel`, 3.2 × 2 blocks at 120 px/block): large preview with ‹ › at the
+sides, a strip of 5 thumbnails around the selected one, favourite/copy/close in the bar. Interaction model:
+**look at a thumbnail** for 0.45 s and it becomes the big picture (`@enter`/`@leave` → `GalleryController.look`,
+dwell checked in `poll`), look at ‹ › or a button + left click to use it, **middle-drag** the panel to move it (snaps
+to walls/floor/ceiling), **wheel** to resize, border = resize handle, **right click** closes it. One panel at a time;
+it is not saved (gone after leaving the world).
+
+Both views bind the same `GalleryController` (vui `State`/`ListState`), so a change in one shows in the other.
+
+| Part | Job |
+|---|---|
+| `shots/core` (pure, JUnit `ShotsCoreTest`) | `Shot`, `ShotSort`, `ShotList` (view = filter + sort, step with wrap, strip window, keep-or-near after delete), `Favourites` (JSON), `ImageFit` (cover crop / contain box), `Downscale` (box filter, letterbox), `ArmedConfirm` |
+| `ShotFiles` | folder scan (top level, png/jpg), favourites file, delete, open folder |
+| `ShotLibrary` | list + favourites + sort/filter state; rescans every 3 s while a view is open (shared `Tasks` pool) |
+| `ShotDecoder`, `ShotImages` | decode on one low-priority thread: thumbnails 192 × 108 (cover; cached as PNG in `<gameDir>/vibeyclient/cache/shots/<sha1(name,mtime,size)>.png`), previews 960 × 540 (letterboxed); LRU of 400 thumbnails / 3 previews; everything is released when neither the screen nor the panel is open |
+| `ShotTextures` | one r3 `DynamicTextureHandle` per image (`r3:dynamic/vibeyclient/shots/n`), registered in `VuiMc.textures()` as `vibeyclient:shots/n`; the panel resolves the same ids through its own `TextureResolver` (`ShotsPanel::texture`), so one upload serves both |
+| `ShotClipboard`, `GalleryActions` | copy the **image** (Windows: PowerShell `-STA` `Clipboard.SetImage`; macOS: `osascript` PNG; Linux: `wl-copy` / `xclip`), else the file path; toast either way |
+| `Shots` | facade: open/close the screen, place/remove the panel, `tick` (dwell + rescan while only the panel is shown) |
+
+Favourites file (contract addition for the launcher, schema 1): `<gameDir>/vibeyclient/screenshots.json`
+`{"schema":1,"favorites":["2026-11-20_12.00.00.png", …]}` – file names relative to `screenshots/`, written atomically
+(temp + rename). Unknown names are ignored; a deleted screenshot is removed from the list.
+
+`ShotFiles.useFolder(ShotFolder)` points the gallery at another folder + favourites file (tests use
+`<gameDir>/vibeyclient-test/gallery/`, so screenshots of other tests and the review shots never mix in). The selection
+follows the file name when the folder changes while the gallery is open (`ShotList.keepOrNear`).
+
+Test: `GalleryGameTest` (+ `GalleryFixtures`, `GalleryScreenChecks`, `GalleryPanelChecks`, `GalleryAim`), shots in
+`build/review/gallery/`: 7 generated screenshots + real ones, grid newest first, tile click, next, sort cycle, favourite
+(file written, filter), copy (toast), delete (armed, then gone), place on the north wall by left click, look at a strip
+thumbnail → selected, look at › + click, middle-drag to the east wall, wheel bigger, right click closes.
+
+Known: toasts (top right, `ui/toast/ToastStack`) cover the gallery header buttons for ~4 s after copy/delete; the
+gametest waits for them. A later fix belongs to the toast stack (avoid open screens' headers), not to the gallery.

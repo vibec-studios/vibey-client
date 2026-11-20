@@ -41,9 +41,26 @@ def targets = [
         neo('26.3', '26.3'),
 ]
 
+// Libraries (libs/<id>, project :<id>, see libs/README.md): one Stonecutter branch each, same targets, switched
+// together. Node scripts are resolved from libs/<id>/versions/<target>, hence the extra ../../.
+def libs = ['vui', 'r3', 'cosmetico']
+libs.each { id ->
+    include id
+    project(":$id").projectDir = file("libs/$id")
+}
+gradle.ext.vibeyLibs = libs
+gradle.ext.vibeyVcs = 'fabric-1.21.11'
+def libScript = { String script -> '../../' + script.replace('gradle/', 'gradle/lib/') }
+
 stonecutter {
     create(getRootProject()) {
         targets.each { t -> version(t.name, t.mc).buildscript(t.script) }
-        vcsVersion = 'fabric-1.21.11'
+        vcsVersion = gradle.vibeyVcs
+        libs.each { id ->
+            branch(id) {
+                branchScript = 'build.gradle'
+                targets.each { t -> version(t.name, t.mc).buildscript(libScript(t.script)) }
+            }
+        }
     }
 }

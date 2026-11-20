@@ -34,7 +34,7 @@ public final class SkyDome {
         SkyTheme theme = SkyLook.active();
         Minecraft mc = Minecraft.getInstance();
         double rd = mc.options.getEffectiveRenderDistance() * 16.0;
-        // Just behind the sky lyrics (see WorldLyrics) and well inside the fog, which would wash it out further away.
+        // Just behind the sky lyrics (see lyrics/world/WorldText) and well inside the fog, which would wash it out further away.
         float radius = (float) (Math.max(32, Math.min(96, rd * 0.35)) + 28);
         tint = SkyFx.update(theme) & 0xFFFFFF;
         if (theme == null) {

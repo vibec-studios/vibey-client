@@ -1,0 +1,37 @@
+item vibey:aurora_cape COSMETIC CAPE 10 /assets/vibeyclient/builtin/thumbnails/aurora_cape.png default Aurora Cape EPIC
+item vibey:ice_floe_cape COSMETIC CAPE 20 /assets/vibeyclient/builtin/thumbnails/ice_floe_cape.png default Ice Floe Cape RARE
+item vibey:pixel_stars_cape COSMETIC CAPE 30 /assets/vibeyclient/builtin/thumbnails/pixel_stars_cape.png default Pixel Stars Cape RARE
+item vibey:vibe_cape COSMETIC CAPE 40 /assets/vibeyclient/builtin/thumbnails/vibe_cape.png default Vibe Cape RARE
+item vibey:crystal_wings COSMETIC WINGS 50 /assets/vibeyclient/builtin/thumbnails/crystal_wings.png default Crystal Ice Wings LEGENDARY
+item vibey:neon_wings COSMETIC WINGS 60 /assets/vibeyclient/builtin/thumbnails/neon_wings.png default Neon Pixel Wings EPIC
+item vibey:ember_sparks COSMETIC AURA 70 /assets/vibeyclient/builtin/thumbnails/ember_sparks.png default Ember Sparks EPIC
+item vibey:snowflake_orbit COSMETIC AURA 80 /assets/vibeyclient/builtin/thumbnails/snowflake_orbit.png default Snowflake Orbit EPIC
+item vibey:pixel_penguin COSMETIC PET 90 /assets/vibeyclient/builtin/thumbnails/pixel_penguin.png default Pixel Penguin RARE
+item vibey:seal_buddy COSMETIC PET 100 /assets/vibeyclient/builtin/thumbnails/seal_buddy.png default Seal Buddy EPIC
+item vibey:glacier_shield COSMETIC SHIELD 110 /assets/vibeyclient/builtin/thumbnails/glacier_shield.png default Glacier Shield RARE
+item vibey:seal_crest_shield COSMETIC SHIELD 120 /assets/vibeyclient/builtin/thumbnails/seal_crest_shield.png default Seal Crest Shield RARE
+item vibey:vibe_chevron_shield COSMETIC SHIELD 130 /assets/vibeyclient/builtin/thumbnails/vibe_chevron_shield.png default Vibe Chevron Shield COMMON
+item vibey:ice_crown COSMETIC HAT 140 /assets/vibeyclient/builtin/thumbnails/ice_crown.png default Ice Crown EPIC
+item vibey:seal_beanie COSMETIC HAT 150 /assets/vibeyclient/builtin/thumbnails/seal_beanie.png default Seal Beanie RARE
+item vibey:seal_backpack COSMETIC BACK 160 /assets/vibeyclient/builtin/thumbnails/seal_backpack.png default Seal Backpack RARE
+item vibey:cheer EMOTE null 170 /assets/vibeyclient/builtin/thumbnails/cheer.png default Cheer COMMON
+item vibey:clap EMOTE null 180 /assets/vibeyclient/builtin/thumbnails/clap.png default Clap COMMON
+item vibey:facepalm EMOTE null 190 /assets/vibeyclient/builtin/thumbnails/facepalm.png default Facepalm COMMON
+item vibey:guitar EMOTE null 200 /assets/vibeyclient/builtin/thumbnails/guitar.png default Guitar Jam RARE
+item vibey:seal_flop EMOTE null 210 /assets/vibeyclient/builtin/thumbnails/seal_flop.png default Seal Flop RARE
+item vibey:seal_summon EMOTE null 220 /assets/vibeyclient/builtin/thumbnails/seal_summon.png default Seal Summon EPIC
+item vibey:shrug EMOTE null 230 /assets/vibeyclient/builtin/thumbnails/shrug.png default Shrug COMMON
+item vibey:sit EMOTE null 240 /assets/vibeyclient/builtin/thumbnails/sit.png default Sit COMMON
+item vibey:vibe_dance EMOTE null 250 /assets/vibeyclient/builtin/thumbnails/vibe_dance.png default Vibe Dance COMMON
+item vibey:wave EMOTE null 260 /assets/vibeyclient/builtin/thumbnails/wave.png default Wave COMMON
+slot CAPE cape 4
+slot WINGS wings 2
+slot AURA aura 2
+slot PET pet 2
+slot SHIELD shield 3
+slot HAT hat 2
+slot BACK back 1
+emotes 10
+winner DEV vibey:aurora_cape -1
+winner BUILTIN
+empty 0

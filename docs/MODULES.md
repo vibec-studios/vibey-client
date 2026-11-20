@@ -22,8 +22,37 @@ src/main/resources/
 
 Existing stubs: `social`, `cosmetics`, `emotes`, `multiplayer` (conflicts with mod id `vibey`), `media` (Fabric
 only: the package is excluded from the NeoForge build and not registered there; its parts are *media features*, the
-`lyrics` part conflicts with `vibeylyrics` – see [MEDIA.md](MEDIA.md)), `devlink`, `nametags` (seal + badge glyphs before player names; data in `client/VibeyPlayers`), `pvp` (zoom, crosshair,
-toggle sprint, outlines; Fabric 1.21.11 only for now, see [PVP.md](PVP.md)).
+`lyrics` part conflicts with `vibeylyrics` – see [MEDIA.md](MEDIA.md)), `devlink`, `nametags` (seal, rank icons and name styles before player names; data in `client/VibeyPlayers`, `client/ranks`, see [NAMETAGS.md](NAMETAGS.md)), `pvp` (zoom, crosshair,
+toggle sprint, outlines; Fabric 1.21.11 only for now, see [PVP.md](PVP.md)), `waypoints` (beacons, share codes, minimap, world map, death point, nether
+coordinates; Fabric 1.21.11 only, see [WAYPOINTS.md](WAYPOINTS.md)), `info` (light level, chunk borders,
+block/mob card with world pinning, food gain, tool warning, TNT timer; Fabric 1.21.11 only, see [INFO.md](INFO.md)), `camera` (freelook, orbit view, motion blur; Fabric 1.21.11 only, see [CAMERA.md](CAMERA.md)),
+`visuals` (item physics, particle amount; Fabric 1.21.11 only, see [VISUALS.md](VISUALS.md)). The screenshot gallery is
+part of `clips` ([CLIPS.md](CLIPS.md) §14). `chat` (timestamps, search, copy, mentions, filters, DM
+toasts, movable chat window; Fabric 1.21.11 only, see [CHAT.md](CHAT.md)). Social also has Discord Rich Presence and
+streamer mode (part `social.streamer`, Fabric 1.21.11), see [SOCIAL.md](SOCIAL.md); `api/privacy/Privacy` is the shared
+streamer state any module can read. `inventory` (durability %, shulker preview, quick moves, search, hotbar presets; Fabric
+1.21.11 only, see [INVENTORY.md](INVENTORY.md)), `servers` (live pings, search, favourites, MOTD preview in the
+multiplayer screen; Fabric 1.21.11 only, see [SERVERS.md](SERVERS.md)).
+
+## Targets and boundaries
+
+`gradle/modules.gradle` is the one place that says which targets build a module: `'all'`, a loader (`'fabric'`,
+`'neoforge'`) or a list of target names; a dotted id is a part (`'media.video'` = `module/media/video`). For every
+target that does not build it, `gradle/modules-filter.gradle` leaves out the package, `i18n/*/<id>[.*].json`,
+`vibeyclient.<id>[.*].mixins.json`, the matching lines in `fabric.mod.json` / `neoforge.mods.toml` and the extra
+resources listed in `clientModuleResources`. Modules present only in some jars are registered by reflection in
+`BuiltinModules`. To port a module, widen its entry.
+
+Modules must not use each other: `checkModuleBoundaries` (part of `:fabric-1.21.11:check` and `buildAll`) fails when
+a file in `module/<a>/` names `dev.henny.vibeyclient.module.<b>.…`. Shared code goes to `api`, `client`, `ui` or a
+lib. Code that only some targets build and several modules need goes into a shared package outside `module/`
+(`sharedPackages` in `gradle/modules.gradle`, same target syntax as modules; it must not import a module, also
+checked). Today: `media` (`media/ffmpeg`, `media/player`: FFmpeg lookup/download/setup screen and the file player
+used by the video screens and Clips, see [VIDEO.md](VIDEO.md#shared-ffmpeg-and-player-code)). Existing exceptions
+still to remove are listed in `knownModuleImports`.
+
+`checkI18n` (every string in en_us and de_de, every literal key exists) runs in the same places, so a missing
+translation fails `:fabric-1.21.11:build`.
 
 ## Client only
 
@@ -68,10 +97,11 @@ logged (first 3 per module), they do not crash the game.
 
 Other knobs on `VibeyModule`: `nameKey()`/`descriptionKey()` (default `<id>.name`, `<id>.description`),
 `icon()` (texture id or null for a monogram tile), `accentColor()`, `visible()` (social hides itself while online
-features are off), `canToggle()`, `createSettingsPanel()` (custom page body instead of the generated one),
-`notices()` (warning lines at the top of the module page, e.g. "Lyrics: provided by the installed Vibey Lyrics"). The
-category picks the place in the menu: `ModuleCategory.CREATOR` modules sit in the collapsed *For creators* area
-under the module grid. `<id>.summary` (optional) is the short text on the module's tile (default: the description).
+features are off), `canToggle()`, `createSettingsPanel()` (classic UI only: custom page body),
+`notices()` (warning chips in the page bar, the full text on hover, e.g. "Lyrics: provided by the installed Vibey
+Lyrics"). The category picks the place in the menu: `ModuleCategory.CREATOR` modules sit behind the *Creator tools*
+chip under the module grid. `<id>.name` ≤ 12 characters; `<id>.summary` (optional) is the tile's tooltip (default:
+the description).
 
 Look modules up with `ModuleManager.get().get(EmotesModule.class)` or `.get("emotes")`, check `isEnabled()`.
 
@@ -88,7 +118,7 @@ thread) and rendered automatically in the Vibey menu.
 | `choice(key, Enum.DEFAULT)` | `EnumSetting<E>` | ‹ value › cycler |
 | `string(key, def[, maxLength])` | `StringSetting` | text field |
 | `color(key, argb)` | `ColorSetting` (`.presets(...)`) | swatches |
-| `keybind(key, Keys.X or Keys.UNBOUND)` | `KeybindSetting` (`.onPress(...)`, `isDown()`) | key cap in the "Keys" card |
+| `keybind(key, Keys.X or Keys.UNBOUND)` | `KeybindSetting` (`.onPress(...)`, `isDown()`) | key field in its section (click, press a key) |
 | `action(key, runnable)` | `ActionSetting` | button at the top of the module page (advanced: a row) |
 
 Every setting: `get()`, `set(v)` (clamped, listeners fire, save scheduled), `reset()`, `.onChange(v -> ...)`,
@@ -102,14 +132,15 @@ screen (a part that is off because a standalone mod provides it).
 normal players:
 
 - Settings without a section come first; `.section("show")` groups settings into a card titled `section.show`
-  (sections appear in the order of their first setting). Three or more switches in a row without a description are
-  laid out in two columns.
-- Keybinds go into a "Keys" card at the end; non-advanced `action(...)`s become buttons under the module's
-  description (the first one is the primary button, e.g. *Open wardrobe*, *Host my world…*).
+  (sections appear in the order of their first setting; 1 column at 427 px, more on wider screens).
+- Keybinds go into their section; without one they join the untitled card (or a card titled with the module name).
+  The first non-advanced `action(...)` is the page's one primary button (e.g. *Open wardrobe*); further actions are
+  rows with a button.
 - `.advanced()` is for **technical** things only (addresses, ports, tokens, debug switches, protocol details): they
-  sit in the collapsed *Advanced · for creators* area at the bottom. A normal player should never need it.
-- Plain language: say what the player gets ("Show other players' cosmetics"), no jargon in labels or descriptions,
-  descriptions one short sentence. Every string in English and German.
+  sit behind the *More n* chip at the bottom. A normal player should never need it.
+- Labels ≤ 3 words, no jargon; the details go into `setting.<key>.desc` (one sentence, shown on hover). Every string
+  in English and German. Dynamic choices that are not stored in the settings file: `OptionSetting`.
+- The new menu does not show `createSettingsPanel()`; see [UI.md](UI.md#writing-ui-for-a-module).
 
 Labels come from your i18n file: `setting.<key>` (label), `setting.<key>.desc` (optional second line),
 `setting.<key>.<enum value lower case>` for enum values, `setting.<key>.button` for an action button in a row,
@@ -120,7 +151,7 @@ another key, e.g. each media feature's card is titled with `media.<id>.name`).
 Free-form persistent data (caches, lists): `settings().data()` is a `JsonObject` stored under `"_data"`; call
 `settings().markDirty()` after changing it.
 
-Global settings (`GlobalSettings`, the *General* tab): `language` (auto/de/en), `uiScale`, `animations`,
+Global settings (`GlobalSettings`, the gear's quick settings): `language` (auto/de/en), `uiScale`, `animations`,
 `onlineFeatures` (default on; when off: **no backend connection at all**), `openMenu` keybind (Right Shift),
 `backendUrl` (advanced; use
 `GlobalSettings.backend()`). Listen to `VibeyEvents.OnlineFeaturesChanged`.
@@ -227,8 +258,10 @@ AutoCloseable h = backend.onEvent("loadout.updated", d -> ...);       // client 
 `<gameDir>/vibeyclient/auth.json` (per backend URL and Minecraft account), never in `config/`.
 
 Toasts from any module: `Notify.info/success/warn/error(title, body)` or `Notify.show(new Notify.Toast(...))`
-(icon key = a player UUID for a head). The sink is `ui/toast/ToastStack` (top right below any vanilla toasts, max 4, over every screen and
-on the HUD; `ToastStack.show(toast, buttons, durationMs, key)` for toasts with buttons).
+(icon key = a player UUID for a head, or a pixel icon name like `vibeyclient:host`). The sink is
+`ui/vui/toast/VuiToasts` (vui `toast/stack`, bottom right, over every screen and on the HUD; a `Notify.Toast` action
+becomes the toast's one button). `ToastStack.show(toast, buttons, durationMs, key)` / `ToastStack.dismiss(key)` still
+work (first button = the action).
 
 ## Background work
 
@@ -271,12 +304,9 @@ service (`MenuPreview`), icons and the widget cheat sheet: **[docs/UI.md](UI.md)
 - `CardScreen`: one centered card in the Vibe look, immediate mode with hit areas (header, scrollable body, footer;
   `row`, `toggle`, `button`, `segmented`, `cycler`, `stepper`, `swatches`, `inputBox`, ...). Used by the host screens
   (multiplayer) and the lyrics screens; texts passed to `row` are keys relative to the module's i18n prefix.
-- `VibeyScreen` is the menu (Right Shift, pause menu button). Add a top-level tab from `onLoad`:
-  `VibeyTabs.register(new VibeyTabs.Tab("friends", "social.tab.friends", 10, FriendsPanel::new, this::isEnabled))`.
-  A `Panel` draws into the content area with the `Ui` context. A module can replace the body of its generated
-  settings page with `createSettingsPanel()`: the menu still draws the toolbar (back, name, on/off switch) above it;
-  start with `ModulesPanel.intro(ui, module, x, y, w)` for the standard icon + description + buttons and use
-  `SettingsView.draw(ui, settings(), ...)` to keep the generated cards.
+- The menu is the vui `MenuScreen` (`Menus.open(parent)`, `Menus.openModule(parent, id)`); new screens are vui
+  documents, see [UI.md](UI.md). `VibeyScreen`/`VibeyTabs`/`Panel` only serve the classic UI
+  (`-Dvibeyclient.classicUi=true`).
 
 ## Mixins
 

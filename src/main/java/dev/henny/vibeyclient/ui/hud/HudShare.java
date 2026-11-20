@@ -18,20 +18,13 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
-/**
- * Share codes and layout files. A share code is {@code VHUD1.} + base64url(deflate(layout JSON)), versioned by the
- * prefix and the JSON's {@code "v"}; a layout file ({@code .vhud}) is the same JSON, readable. Import is strict about
- * size and shape and never throws anything but {@link BadLayout} (with an i18n key for the player).
- */
 public final class HudShare {
     private HudShare() {}
 
     public static final String PREFIX = "VHUD1.";
-    /** Longest code / file we read (a full layout is ~1–3 KB as a code). */
     public static final int MAX_CODE = 24_000;
     public static final int MAX_JSON = 192_000;
 
-    /** Import failed; {@link #key} is the i18n key of the reason. */
     public static final class BadLayout extends Exception {
         public final String key;
 
@@ -41,9 +34,6 @@ public final class HudShare {
         }
     }
 
-    // ============================================================================================ codec (pure)
-
-    /** Encodes layout JSON into a share code. */
     public static String encode(JsonObject json) {
         byte[] raw = json.toString().getBytes(StandardCharsets.UTF_8);
         Deflater d = new Deflater(Deflater.BEST_COMPRESSION);
@@ -59,10 +49,6 @@ public final class HudShare {
         }
     }
 
-    /**
-     * Decodes a share code (whitespace, quotes and a missing prefix are tolerated; a pasted layout JSON works too)
-     * into its JSON object.
-     */
     public static JsonObject decode(String code) throws BadLayout {
         if (code == null) throw new BadLayout("core.hud.share.error.empty");
         String c = code.strip();
@@ -125,18 +111,14 @@ public final class HudShare {
         }
     }
 
-    // ============================================================================================ layout
-
-    /** The current layout as a share code. */
     public static String exportCode() {
-        return encode(HudLayout.stateJson(HudLayout.capture(), false));
+        return encode(StateJson.write(HudLayout.capture(), false));
     }
 
-    /** Parses a code into a state (does not apply it). */
     public static HudLayout.State importCode(String code) throws BadLayout {
         JsonObject json = decode(code);
         try {
-            HudLayout.State s = HudLayout.parseState(json);
+            HudLayout.State s = StateJson.parse(json);
             if (s.placements.isEmpty() && s.unknown.isEmpty()) throw new BadLayout("core.hud.share.error.notLayout");
             return s;
         } catch (IllegalArgumentException e) {
@@ -144,12 +126,10 @@ public final class HudShare {
         }
     }
 
-    /** Where layout files go: {@code config/vibeyclient/hud-layouts}. */
     public static Path folder() {
         return dev.henny.vibeyclient.api.setting.SettingsGroup.configDir().resolve("hud-layouts");
     }
 
-    /** Writes the current layout to a new {@code .vhud} file; returns it. */
     public static Path exportFile() throws java.io.IOException {
         Path dir = folder();
         Files.createDirectories(dir);
@@ -157,11 +137,10 @@ public final class HudShare {
         Path f = dir.resolve(name + ".vhud");
         for (int i = 2; Files.exists(f); i++) f = dir.resolve(name + "-" + i + ".vhud");
         com.google.gson.Gson gson = new com.google.gson.GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-        Files.writeString(f, gson.toJson(HudLayout.stateJson(HudLayout.capture(), false)), StandardCharsets.UTF_8);
+        Files.writeString(f, gson.toJson(StateJson.write(HudLayout.capture(), false)), StandardCharsets.UTF_8);
         return f;
     }
 
-    /** Reads a layout file (JSON or a share code in a text file). */
     public static HudLayout.State importFile(Path f) throws BadLayout {
         try {
             if (!Files.isRegularFile(f)) throw new BadLayout("core.hud.share.error.noFile");
@@ -172,7 +151,6 @@ public final class HudShare {
         }
     }
 
-    /** Layout files in {@link #folder()}, newest first (at most 30). */
     public static List<Path> files() {
         List<Path> out = new ArrayList<>();
         Path dir = folder();
@@ -189,7 +167,6 @@ public final class HudShare {
                 }
             }).limit(30).forEach(out::add);
         } catch (java.io.IOException | RuntimeException e) {
-            // empty list
         }
         return out;
     }
