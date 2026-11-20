@@ -34,7 +34,7 @@ public final class Physics {
             return;
         }
         if (b.inWater && in.swim) {
-            double target = b.waterTop - b.height * 0.45;
+            double target = b.waterTop - b.height * 0.6;
             b.vy += Math.max(-0.04, Math.min(0.05, (target - b.y) * 0.12));
             b.vy *= 0.8;
             return;

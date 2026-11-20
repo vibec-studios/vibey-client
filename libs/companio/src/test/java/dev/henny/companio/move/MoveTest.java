@@ -65,7 +65,7 @@ class MoveTest {
         in.swim = true;
         steps(b, v, in, 120);
         assertTrue(b.inWater);
-        assertEquals(63.9 - 0.27, b.y, 0.15);
+        assertEquals(63.9 - 0.36, b.y, 0.15);
     }
 
     @Test

@@ -34,7 +34,7 @@ public final class Interactions {
         switch (e.kind()) {
             case ACTION -> c.pet();
             case GRAB_STARTED -> c.pickUp();
-            case PLACED, MOVE_CANCELLED -> place(c, t);
+            case PLACED, MOVED, MOVE_CANCELLED -> place(c, t);
             case UNDONE -> t.reanchor();
             case RESIZED -> resize(c, t);
             case CONTEXT_MENU -> menu(c);

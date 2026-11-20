@@ -93,13 +93,28 @@ public final class CompanionGameTest implements FabricClientGameTest {
         ctx.waitTicks(10);
         lookAt(ctx, center(ctx));
         check(ctx.computeOnClient(mc -> CompanioMc.own() != null && dev.henny.companio.mc.client.CompanioClient.get().target().hovered()),
-                "looking at the seal hovers it");
+                "looking at the seal hovers it: " + targetInfo(ctx));
         ctx.getInput().pressMouse(LEFT);
         ctx.waitTicks(10);
         check("petted".equals(behavior(ctx)), "left click pets the seal, behavior " + behavior(ctx));
         lookAt(ctx, center(ctx).add(0, 0.25, 0));
         shot(ctx, "petted");
         ctx.waitTicks(40);
+    }
+
+    private static String targetInfo(ClientGameTestContext ctx) {
+        return ctx.computeOnClient(mc -> {
+            var o = dev.henny.companio.mc.client.CompanioClient.get().target().object();
+            var hover = R3Mc.scene().interaction().hover().target();
+            Companion c = CompanioMc.own();
+            String self = String.format(java.util.Locale.ROOT, "seal %.2f %.2f %.2f eye %.2f %.2f %.2f", c.body.x, c.body.y, c.body.z,
+                    mc.player.getEyePosition().x, mc.player.getEyePosition().y, mc.player.getEyePosition().z);
+            if (o == null) return "no target object; " + self;
+            var p = o.transform().position();
+            return String.format(java.util.Locale.ROOT, "target %.2f %.2f %.2f size %.2fx%.2f visible %s anchored %s in scene %s hover %s; %s",
+                    p.x, p.y, p.z, o.transform().worldWidth(), o.transform().worldHeight(), o.state().visible(), o.state().anchored(),
+                    R3Mc.scene().get(o.id()) != null, hover == null ? "-" : hover.getClass().getSimpleName(), self);
+        });
     }
 
     private static void rain(ClientGameTestContext ctx, TestSingleplayerContext world, int[] o) {
@@ -129,6 +144,7 @@ public final class CompanionGameTest implements FabricClientGameTest {
 
     private static void sleep(ClientGameTestContext ctx, TestSingleplayerContext world, int[] o) {
         cmd(world, "time set 18000");
+        cmd(world, "effect give @a minecraft:night_vision infinite 0 true");
         ctx.runOnClient(mc -> CompanioMc.own().brain().needs().set("energy", 0.3f));
         waitFor(ctx, "sleeping", 300, () -> {
             Companion c = CompanioMc.own();
@@ -138,6 +154,7 @@ public final class CompanionGameTest implements FabricClientGameTest {
         lookAt(ctx, center(ctx).add(0, 0.3, 0));
         shot(ctx, "sleep_night");
         cmd(world, "time set 6000");
+        cmd(world, "effect clear @a");
         ctx.runOnClient(mc -> CompanioMc.own().brain().needs().set("energy", 1f));
         ctx.waitTicks(40);
     }
