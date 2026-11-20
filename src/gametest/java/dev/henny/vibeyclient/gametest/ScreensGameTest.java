@@ -3,8 +3,6 @@ package dev.henny.vibeyclient.gametest;
 import dev.henny.vibeyclient.api.GlobalSettings;
 import dev.henny.vibeyclient.module.screens.Screens;
 import dev.henny.vibeyclient.module.screens.edit.EditMode;
-import dev.henny.vibeyclient.ui.VibeyScreen;
-import dev.henny.vibeyclient.ui.screen.ModulesPanel;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
@@ -50,8 +48,7 @@ public final class ScreensGameTest implements FabricClientGameTest {
     private static void page(ClientGameTestContext ctx, GlobalSettings.Language lang, String name) {
         ctx.runOnClient(mc -> GlobalSettings.language.set(lang));
         ctx.waitTicks(3);
-        ModulesPanel.preselect("screens");
-        ctx.setScreen(() -> new VibeyScreen(null));
+        ctx.runOnClient(mc -> dev.henny.vibeyclient.ui.vui.Menus.openModule(null, "screens"));
         ctx.waitTicks(10);
         shot(ctx, name);
         ctx.setScreen(() -> null);
