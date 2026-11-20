@@ -15,7 +15,9 @@
     "intro": "Die Editor-Einführung noch mal zeigen",
     "intro.button": "Zeigen",
     "folder": "Ordner mit gespeicherten Layouts",
-    "folder.button": "Öffnen"
+    "folder.button": "Öffnen",
+    "timerKey": "Taste: Timer Start/Stopp",
+    "timerLap": "Taste: Timer Runde/Reset"
   },
   "widget": {
     "fps": "FPS",
@@ -45,7 +47,17 @@
     "memory": "Speicher",
     "memory.desc": "Wie viel Arbeitsspeicher das Spiel nutzt",
     "compass": "Kompass",
-    "compass.desc": "Ein Kompassband mit deiner Richtung"
+    "compass.desc": "Ein Kompassband mit deiner Richtung",
+    "timer": "Timer",
+    "timer.desc": "Stoppuhr, Countdown oder Runden",
+    "scoreboard": "Scoreboard",
+    "scoreboard.desc": "Seitenleiste zum Verschieben",
+    "tablist": "Spielerliste",
+    "tablist.desc": "Tab-Liste mit Köpfen und Ping",
+    "bossbar": "Bossleiste",
+    "bossbar.desc": "Lebensleisten von Bossen",
+    "title": "Titel",
+    "title.desc": "Titel und Untertitel"
   },
   "label": {
     "fps": "FPS",
@@ -119,7 +131,19 @@
     "vertical": "Auf und ab mitzählen",
     "item": "Item",
     "item.held": "Das Item in deiner Hand nehmen",
-    "zero": "Auch zeigen, wenn du keins hast"
+    "zero": "Auch zeigen, wenn du keins hast",
+    "mode.stopwatch": "Stoppuhr",
+    "mode.countdown": "Countdown",
+    "mode.splits": "Runden",
+    "length": "Dauer",
+    "numbers": "Zahlen",
+    "title": "Titelzeile",
+    "sort": "Sortierung",
+    "sort.vanilla": "Server",
+    "sort.name": "Name",
+    "sort.ping": "Ping",
+    "heads": "Köpfe",
+    "ms": "Ping in ms"
   },
   "template": {
     "pvp": "PvP",

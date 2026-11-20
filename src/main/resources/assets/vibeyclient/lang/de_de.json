@@ -18,5 +18,7 @@
   "key.vibeyclient.pvp.zoomKey": "Zoomen (halten)",
   "key.vibeyclient.hud.editor": "HUD-Editor",
   "key.vibeyclient.clips.saveKey": "Clip speichern",
-  "key.vibeyclient.clips.galleryKey": "Clips-Galerie"
+  "key.vibeyclient.clips.galleryKey": "Clips-Galerie",
+  "key.vibeyclient.hud.timerKey": "Timer Start/Stopp",
+  "key.vibeyclient.hud.timerLap": "Timer Runde/Reset"
 }

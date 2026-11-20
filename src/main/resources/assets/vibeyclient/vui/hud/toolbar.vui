@@ -2,29 +2,39 @@
 <import name="icon-button" src="vibeyclient:components/icon-button"/>
 <import name="widget-library" src="vibeyclient:hud/widget-library"/>
 <import name="preset-list" src="vibeyclient:hud/preset-list"/>
+<import name="share-menu" src="vibeyclient:hud/share-menu"/>
 <template>
-  <row class="dock" :class="{ top: dockTop }">
-    <button class="dock-btn" :class="{ on: panel == 'widgets' }" @click="panel = panel == 'widgets' ? '' : 'widgets'">
-      <ico name="plus"/><text>{{ t('ui.hud.widgets') }}</text>
+  <row id="dock" class="dock" :class="{ top: dockTop, away: busy }">
+    <stack class="dock-slot">
+      <button id="dock-widgets" class="dock-btn" :class="{ on: panel == 'widgets' }" @click="panel = panel == 'widgets' ? '' : 'widgets'">
+        <ico name="plus"/><text>{{ t('ui.hud.widgets') }}</text>
+      </button>
       <popover :open="panel == 'widgets'" @update:open="panel = ''" :placement="dockTop ? 'bottom' : 'top'" align="start"><widget-library/></popover>
-    </button>
-    <button class="dock-btn" :class="{ on: panel == 'presets' }" @click="panel = panel == 'presets' ? '' : 'presets'">
-      <ico name="layers"/><text>{{ t('ui.hud.presets') }}</text>
+    </stack>
+    <stack class="dock-slot">
+      <button id="dock-presets" class="dock-btn" :class="{ on: panel == 'presets' }" @click="panel = panel == 'presets' ? '' : 'presets'">
+        <ico name="layers"/><text>{{ t('ui.hud.presets') }}</text>
+      </button>
       <popover :open="panel == 'presets'" @update:open="panel = ''" :placement="dockTop ? 'bottom' : 'top'" align="start"><preset-list/></popover>
-    </button>
+    </stack>
     <box class="dock-sep"/>
-    <icon-button icon="undo" :tip="t('ui.hud.undo')" :disabled="!canUndo" @click="undo()"/>
-    <icon-button icon="redo" :tip="t('ui.hud.redo')" :disabled="!canRedo" @click="redo()"/>
-    <icon-button icon="magnet" :tip="t('ui.hud.snapTip')" :active="snap" @click="snap = !snap"/>
-    <icon-button icon="copy" :tip="t('ui.hud.shareTip')" @click="share()"/>
-    <icon-button icon="reset" :tip="t('ui.hud.resetAll')" @click="askReset()"/>
+    <icon-button id="dock-undo" icon="undo" :tip="t('ui.hud.undo')" :disabled="!canUndo" @click="undo()"/>
+    <icon-button id="dock-redo" icon="redo" :tip="t('ui.hud.redo')" :disabled="!canRedo" @click="redo()"/>
+    <icon-button id="dock-snap" icon="magnet" :tip="t('ui.hud.snapTip')" :active="snap" @click="snap = !snap"/>
+    <stack class="dock-slot">
+      <icon-button id="dock-share" icon="copy" :tip="t('ui.hud.shareTip')" :active="panel == 'share'" @click="panel = panel == 'share' ? '' : 'share'"/>
+      <popover :open="panel == 'share'" @update:open="panel = ''" :placement="dockTop ? 'bottom' : 'top'" align="center"><share-menu/></popover>
+    </stack>
+    <icon-button id="dock-reset" icon="reset" :tip="t('ui.hud.resetAll')" @click="panel = 'reset'"/>
     <box class="dock-sep"/>
-    <button class="ghost dock-cancel" @click="cancel()">{{ t('ui.hud.cancel') }}</button>
-    <button class="primary" @click="done()">{{ t('ui.hud.done') }}</button>
+    <button id="dock-cancel" class="ghost dock-cancel" @click="cancel()">{{ t('ui.hud.cancel') }}</button>
+    <button id="dock-done" class="primary" @click="done()">{{ t('ui.hud.done') }}</button>
   </row>
 </template>
 <style>
-.dock { position: absolute; anchor: bottom; bottom: 6; height: 24; gap: 3; padding: 0 3; background: $surface; border: 1 $line2; }
+.dock { position: absolute; anchor: bottom; bottom: 6; height: 24; gap: 3; padding: 0 3; background: $surface; border: 1 $line2;
+        pointer-events: auto; transition: opacity 150ms out; }
+.dock.away { opacity: 0; pointer-events: none; }
 .dock-btn { height: 18; padding: 0 5; gap: 4; background: transparent; border-color: transparent; color: $muted; }
 .dock-btn:hover, .dock-btn.on { color: $text; background: $surface2; border-color: $line2; }
 .dock-btn.on .ico { color: $brand; }

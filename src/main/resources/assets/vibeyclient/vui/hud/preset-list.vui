@@ -1,7 +1,7 @@
 <import name="ico" src="vibeyclient:components/ico"/>
 <template>
   <column class="presets">
-    <row v-for="p in presets" :key="p.id" class="preset" :tooltip="p.tip" tabindex="0" @click="applyPreset(p)">
+    <row v-for="p in presets" :key="p.id" :id="'preset-' + p.id" class="preset" :tooltip="p.tip" tabindex="0" @click="applyPreset(p)">
       <ico :name="p.icon" class="preset-icon"/>
       <text class="preset-name">{{ p.name }}</text>
     </row>

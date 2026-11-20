@@ -1,0 +1,25 @@
+<import name="style-row" src="vibeyclient:hud/style-row"/>
+<template>
+  <column class="spage">
+    <style-row :label="t('ui.hud.background')" :own="st.o_bg" prop="bg">
+      <spacer/><toggle id="style-bg" :value="st.bg" @change="set('bg', $event)"/>
+    </style-row>
+    <style-row :label="t('ui.hud.color')" :own="st.o_bgColor" prop="bgColor">
+      <spacer/><colorpicker id="style-bgcolor" :value="st.bgColor" @change="set('bgColor', $event)"/>
+    </style-row>
+    <style-row :label="t('ui.hud.opacity')" :own="st.o_opacity" prop="opacity">
+      <slider id="style-opacity" class="sval" :value="st.opacity" :step="0.05" @change="set('opacity', $event)"/>
+      <text class="snum">{{ percent(st.opacity) }}</text>
+    </style-row>
+    <style-row :label="t('ui.hud.corners')" :own="st.o_corners" prop="corners">
+      <segmented class="sval" :value="st.corners" @change="set('corners', $event)"
+                 :options="[{ value: 'square', label: t('ui.hud.square') }, { value: 'bevel', label: t('ui.hud.bevel') }]"/>
+    </style-row>
+    <style-row :label="t('ui.hud.border')" :own="st.o_border" prop="border">
+      <spacer/><toggle :value="st.border" @change="set('border', $event)"/>
+    </style-row>
+  </column>
+</template>
+<style>
+.spage { gap: 3; }
+</style>

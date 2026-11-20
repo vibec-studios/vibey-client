@@ -1,0 +1,35 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<template>
+  <modal :open="panel == 'import'" @close="panel = ''">
+    <column id="import" class="imp">
+      <row class="imp-head"><ico name="hud_paste" class="imp-icon"/><text class="imp-title">{{ t('ui.hud.importCode') }}</text></row>
+      <row class="imp-field">
+        <textfield id="import-code" v-model="importCode" grow="1" placeholder="VHUD1." :max-length="maxCode" @submit="importNow()"/>
+        <button class="ghost" @click="pasteCode()">{{ t('ui.hud.paste') }}</button>
+      </row>
+      <row v-if="importError" class="imp-error"><ico name="warn"/><text>{{ importError }}</text></row>
+      <column v-if="files.length > 0" class="imp-files">
+        <row v-for="f in files" :key="f.name" class="imp-file" tabindex="0" @click="importFile(f)"><ico name="hud_file"/><text class="imp-name">{{ f.name }}</text></row>
+      </column>
+      <row class="imp-foot">
+        <button class="ghost" @click="openFolder()">{{ t('ui.hud.folder') }}</button>
+        <spacer/>
+        <button class="ghost" @click="panel = ''">{{ t('ui.hud.cancel') }}</button>
+        <button id="import-go" class="primary" :disabled="importCode == ''" @click="importNow()">{{ t('ui.hud.import') }}</button>
+      </row>
+    </column>
+  </modal>
+</template>
+<style>
+.imp { width: 220; gap: 6; padding: 8; background: $surface; border: 1 $line2; }
+.imp-head { gap: 6; }
+.imp-icon { color: $brand2; }
+.imp-title { color: $text; font-weight: bold; }
+.imp-field { gap: 4; }
+.imp-error { gap: 4; color: $danger; }
+.imp-files { gap: 1; max-height: 70; }
+.imp-file { height: 14; gap: 5; padding: 0 4; color: $muted; cursor: pointer; }
+.imp-file:hover, .imp-file:focus { background: $surface2; color: $text; }
+.imp-name { text-wrap: nowrap; text-overflow: ellipsis; min-width: 0; grow: 1; }
+.imp-foot { gap: 4; }
+</style>

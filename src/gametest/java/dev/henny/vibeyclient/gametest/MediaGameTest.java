@@ -14,7 +14,7 @@ import dev.henny.vibeyclient.module.media.lyrics.library.Song;
 import dev.henny.vibeyclient.module.media.lyrics.library.SongLibrary;
 import dev.henny.vibeyclient.module.media.lyrics.render.WorldLyrics;
 import dev.henny.vibeyclient.ui.VibeyScreen;
-import dev.henny.vibeyclient.ui.hud.HudEditorScreen;
+import dev.henny.vibeyclient.ui.hud.editor.HudEditorScreen;
 import dev.henny.vibeyclient.ui.hud.HudElement;
 import dev.henny.vibeyclient.ui.hud.HudLayout;
 import dev.henny.vibeyclient.ui.screen.ModulesPanel;

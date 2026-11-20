@@ -15,7 +15,9 @@
     "intro": "Show the editor intro again",
     "intro.button": "Show",
     "folder": "Folder with saved layouts",
-    "folder.button": "Open"
+    "folder.button": "Open",
+    "timerKey": "Key: timer start/stop",
+    "timerLap": "Key: timer lap/reset"
   },
   "widget": {
     "fps": "FPS",
@@ -45,7 +47,17 @@
     "memory": "Memory",
     "memory.desc": "How much memory the game uses",
     "compass": "Compass",
-    "compass.desc": "A compass strip with your heading"
+    "compass.desc": "A compass strip with your heading",
+    "timer": "Timer",
+    "timer.desc": "Stopwatch, countdown or splits",
+    "scoreboard": "Scoreboard",
+    "scoreboard.desc": "Sidebar scores you can move",
+    "tablist": "Player list",
+    "tablist.desc": "Tab list with heads and ping",
+    "bossbar": "Boss bar",
+    "bossbar.desc": "Boss health bars",
+    "title": "Title",
+    "title.desc": "Titles and subtitles"
   },
   "label": {
     "fps": "FPS",
@@ -119,7 +131,19 @@
     "vertical": "Count up and down",
     "item": "Item",
     "item.held": "Use the item in your hand",
-    "zero": "Show when you have none"
+    "zero": "Show when you have none",
+    "mode.stopwatch": "Stopwatch",
+    "mode.countdown": "Countdown",
+    "mode.splits": "Splits",
+    "length": "Length",
+    "numbers": "Numbers",
+    "title": "Title row",
+    "sort": "Sort",
+    "sort.vanilla": "Server",
+    "sort.name": "Name",
+    "sort.ping": "Ping",
+    "heads": "Heads",
+    "ms": "Ping in ms"
   },
   "template": {
     "pvp": "PvP",

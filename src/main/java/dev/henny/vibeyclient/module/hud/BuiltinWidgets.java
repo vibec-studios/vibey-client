@@ -15,7 +15,7 @@ final class BuiltinWidgets {
 
     static final java.util.List<String> RULE_KEYS = java.util.List.of("hud.fps", "hud.cps", "hud.keystrokes",
             "hud.coords", "hud.armor", "hud.effects", "hud.clock", "hud.ping", "hud.server", "hud.speed", "hud.time",
-            "hud.items", "hud.memory", "hud.compass");
+            "hud.items", "hud.memory", "hud.compass", "hud.timer");
 
     private static final HudOption ICON = HudOption.toggle("icon", "hud.opt.icon", false);
 

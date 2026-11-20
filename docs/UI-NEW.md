@@ -102,7 +102,7 @@ Ids are `vibeyclient:<path>`. Screens are opened with `vui.open(id, controller)`
 | `toast/stack` | overlay | template for `ToastStack` |
 | `dialog/confirm` | overlay | confirm modal |
 | `hud/editor` | overlay | above the HUD layer in edit mode: hint, empty state, selection bar, dock |
-| `hud/toolbar` · `hint` · `widget-bar` · `widget-library` · `preset-list` | part | dock, key hint, selection bar, widgets popover, presets popover |
+| `hud/toolbar` · `hint` · `widget-bar` · `widget-library` · `preset-list` · `share-menu` · `context-menu` · `style-panel` (`style-box` · `style-text` · `style-size` · `style-row`) · `import-dialog` · `reset-dialog` · `server-badge` | part | dock, key hint, selection bar, widgets popover, presets popover, share popover, right-click menu, style popover, import modal, reset confirm, server badge |
 | `wardrobe/wardrobe` | screen | bar + rail + grid + preview |
 | `wardrobe/slot-rail` · `item-grid` · `preview-pane` | part | slot icons, item cards, player stage + primary |
 | `components/ico` | component | `name` → `vibeyclient:ui/icons/<name>` (the one place that maps icon names to textures) |
@@ -253,25 +253,36 @@ Rule: `title` = the subject (a player name, *New cosmetics*), `text` ≤ 2 words
 
 Keys: `ui.confirm.*` (sign out, reset HUD, remove friend).
 
-### `hud/editor` (+ toolbar, hint, widget-bar, widget-library, preset-list)
+### `hud/editor` (+ toolbar, hint, widget-bar, widget-library, preset-list, share-menu, context-menu, style-panel, import-dialog, reset-dialog, server-badge)
 
-Drawn above `HudLayer` while `HudEditor` is active; pointer input goes to the document first, then to the editor
-(drag = move, wheel = size, Alt = no snap, arrows = nudge – all from the vui HUD core).
+Drawn above the vui `HudLayer` by `ui/hud/editor/HudEditorScreen` (controller `EditorController`, details in
+[HUD.md](HUD.md#editor)). The root stack has `pointer-events: none`: pointer input goes to the document where it has an
+element (or while an overlay is open), everything else to the editor (drag = move, wheel = size, Shift+wheel =
+widget value, Alt = no snap, arrows = nudge, right-click = menu).
 
 | Field | |
 |---|---|
-| `firstRun` | shows the key hint (*Drag move · Wheel size · Alt free*) until the first drag |
+| `firstRun` | shows the key hint (*Drag move · Wheel size · Alt free · Ctrl more*) until the first drag |
+| `busy` | a widget is being moved or resized: hint and bar hidden, dock fades out |
 | `widgetCount` | 0 → empty state with *Widgets* |
-| `panel` ✎ | `''` `'widgets'` `'presets'` |
-| `snap` ✎ | magnet toggle (`editor.snapping`) |
+| `panel` ✎ | `''` `'widgets'` `'presets'` `'share'` `'style'` `'menu'` `'import'` `'reset'` |
+| `snap` ✎ | magnet toggle |
 | `canUndo` `canRedo` | |
-| `dockTop` | true while a widget is dragged near the bottom edge (dock and popovers flip to the top) |
-| `selected` | `{ name, scale (0.5..4), barX, barY }` or null – the bar sits under the selected widget |
-| `widgets` | `[{ id, name, tip, on ✎, count }]` (library) |
-| `presets` | `[{ id, name, icon, tip }]` (today's templates) |
+| `dockTop` | the selection sits at the bottom centre: dock, hint and popovers flip to the top |
+| `selected` | `{ name, pct, barX, barY, above, copy }` or null – the bar sits under (or above) the selection |
+| `widgets` | `[{ id, name, tip, on, locked, canAdd }]` (library; `placed(w, on)`, `addCopy(w)`) |
+| `presets` | `[{ id, name, icon, tip }]` (templates; `applyPreset(p)`) |
+| `badges` | `[{ id, x, y, tip }]` – *Server off* badges on widgets the server disabled |
+| `menu` | `{ x, y, items: [{ id, icon, label, keys }] }` – right-click menu (`menuPick(m)`) |
+| `importCode` ✎ `importError` `files` `maxCode` | import dialog |
+| `st` | style panel values (Model): `scope tab styleable oneLabel bg bgColor opacity corners border paint textColor accent shadow align variant scale minScale maxScale hasVariants autoAnchor` + `o_<key>` (own value) |
+| `opts` `anchors` | the selected widget's options `[{ key, label, toggle, on, value, capture }]`, the 3 × 3 anchor grid |
 
-Actions: `undo()` `redo()` `share()` `askReset()` (→ confirm) `cancel()` `done()` `styleSelected()`
-`hideSelected()` `resetSelected()` `placed(w)` `applyPreset(p)` (→ toast with *Undo*). Keys `ui.hud.*`.
+Actions: `undo()` `redo()` `cancel()` `done()` `confirmReset()` `styleSelected()` `hideSelected()`
+`resetSelected()` `copyCode()` `openImport()` `pasteCode()` `importNow()` `importFile(f)` `saveFile()`
+`openFolder()` `styleScope(s)` `styleTab(t)` `set(key, value)` `inherit(key)` `setScale(s)` `setAnchor(id)`
+`optionSet(o, on)` `optionStep(o, dir)` `optionCapture(o)`. Toasts (undo, hidden, copied, imported, preset applied)
+go through `VuiMc.toasts()`. Keys `ui.hud.*`.
 
 ### `wardrobe/wardrobe` (+ slot-rail, item-grid, preview-pane)
 

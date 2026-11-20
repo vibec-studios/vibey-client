@@ -7,6 +7,7 @@ import dev.henny.vibeyclient.api.setting.Settings.BoolSetting;
 import dev.henny.vibeyclient.api.setting.Settings.KeybindSetting;
 import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.client.Keys;
+import dev.henny.vibeyclient.module.hud.timer.Timers;
 import dev.henny.vibeyclient.ui.Gfx;
 import dev.henny.vibeyclient.ui.MenuEntries;
 import dev.henny.vibeyclient.ui.Theme;
@@ -32,6 +33,8 @@ public final class HudModule extends VibeyModule {
     public final KeybindSetting editor = keybind("editor", Keys.H).onPress(() -> {
         if (ClientCompat.screen() == null) HudLayout.openEditor(null);
     });
+    public final KeybindSetting timerKey = keybind("timerKey", Keys.J).onPress(Timers::toggle);
+    public final KeybindSetting timerLap = keybind("timerLap", Keys.K).onPress(Timers::lap);
     public final BoolSetting hideF3 = bool("hideF3", true);
     public final BoolSetting hideVanillaEffects = bool("hideVanillaEffects", true);
     public final ActionSetting resetLayout = action("resetLayout", this::resetToDefault).advanced();
@@ -74,7 +77,9 @@ public final class HudModule extends VibeyModule {
     @Override
     public void onLoad() {
         BuiltinWidgets.registerAll(this);
+        ExtraWidgets.registerAll(this);
         BuiltinTemplates.registerAll();
+        HudTemplates.setDefault(DEFAULT_TEMPLATE);
         MenuEntries.register(MenuEntries.Place.PAUSE, new MenuEntries.Entry("hud", "hud.menu", HudIcons.LIBRARY, 25,
                 MenuEntries.whenEnabled(ID), HudLayout::openEditor));
         HudLayout.hideWidgetsWhen(() -> hideF3.get() && debugOpen());

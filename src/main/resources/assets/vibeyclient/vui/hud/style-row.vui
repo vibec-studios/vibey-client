@@ -1,0 +1,17 @@
+<props>{ "label": "", "own": false, "prop": "" }</props>
+<template>
+  <row class="srow" :class="{ own: own }">
+    <box class="sdot" :class="{ on: own }" :tooltip="own ? t('ui.hud.inheritTip') : ''" @click="inherit(prop)"/>
+    <text class="slabel">{{ label }}</text>
+    <slot/>
+  </row>
+</template>
+<style>
+.srow { height: 16; gap: 4; align-items: center; }
+.sdot { size: 4; background: transparent; cursor: pointer; }
+.sdot.on { background: $brand; }
+.slabel { width: 64; color: $muted; text-wrap: nowrap; text-overflow: ellipsis; }
+.srow.own .slabel { color: $text; }
+.sval { grow: 1; min-width: 0; }
+.snum { width: 30; text-align: end; color: $text; text-wrap: nowrap; }
+</style>

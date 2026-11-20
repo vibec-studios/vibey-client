@@ -1,0 +1,21 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<template>
+  <modal :open="panel == 'reset'" @close="panel = ''">
+    <column id="reset-dialog" class="rst">
+      <row class="rst-head"><stack class="rst-icon"><ico name="reset"/></stack><text class="rst-title">{{ t('ui.hud.resetAsk') }}</text></row>
+      <row class="rst-foot">
+        <button class="ghost" @click="panel = ''">{{ t('ui.hud.cancel') }}</button>
+        <button id="reset-yes" class="danger" @click="confirmReset()">{{ t('ui.hud.resetAll') }}</button>
+      </row>
+    </column>
+  </modal>
+</template>
+<style>
+.rst { width: 170; gap: 8; padding: 10; background: $surface; border: 1 $line2; }
+.rst-head { gap: 8; }
+.rst-icon { size: 18; align-items: center; background: $surface3; color: $danger; }
+.rst-title { grow: 1; min-width: 0; color: $text; font-weight: bold; }
+.rst-foot { gap: 4; justify: end; }
+button.danger { border-color: $danger; }
+button.danger:hover, button.danger:focus { background: $danger; color: #ffffff; }
+</style>
