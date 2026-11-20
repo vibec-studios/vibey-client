@@ -11,8 +11,13 @@ import java.util.TreeSet;
 final class HudFile {
     private HudFile() {}
 
-    private static final SettingsGroup FILE = new SettingsGroup("hud-layout");
+    private static final Map<String, SettingsGroup> GROUPS = new java.util.HashMap<>();
+    private static SettingsGroup FILE = group(HudProfiles.MAIN.file());
     private static volatile boolean loaded;
+
+    private static SettingsGroup group(String name) {
+        return GROUPS.computeIfAbsent(name, SettingsGroup::new);
+    }
 
     static boolean loaded() {
         return loaded;
@@ -33,7 +38,7 @@ final class HudFile {
             FILE.load();
             loaded = true;
             JsonObject data = FILE.data();
-            if (data.size() == 0) LegacyHudFile.migrate(data, FILE);
+            if (data.size() == 0 && HudProfiles.active().main()) LegacyHudFile.migrate(data, FILE);
             HudRegistry.GLOBAL.set(HudStyle.defaults());
             HudRegistry.GLOBAL.overlay(HudStyle.fromJson(data.get("_global")));
             readCopies(data);
@@ -60,6 +65,30 @@ final class HudFile {
                 HudRegistry.addCopy(copy, new HudLayout.Placement(copy));
             }
         }
+    }
+
+    static void saveIfLoaded() {
+        if (loaded) save();
+    }
+
+    static void reload() {
+        synchronized (HudLayout.class) {
+            for (HudElement e : new ArrayList<>(HudRegistry.ELEMENTS.values())) {
+                if (e.isCopy()) {
+                    HudRegistry.ELEMENTS.remove(e.id());
+                    HudRegistry.PLACEMENTS.remove(e.id());
+                }
+            }
+            HudRegistry.COPIES.clear();
+            FILE = group(HudProfiles.active().file());
+            loaded = false;
+            for (Map.Entry<String, HudLayout.Placement> en : HudRegistry.PLACEMENTS.entrySet()) {
+                HudElement e = HudRegistry.ELEMENTS.get(en.getKey());
+                if (e != null) Placements.reset(en.getValue(), e);
+            }
+            ensureLoaded();
+        }
+        HudCaches.styleChanged();
     }
 
     static void save() {

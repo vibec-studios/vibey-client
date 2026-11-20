@@ -11,6 +11,9 @@
         <slider class="setting-slider" v-model="row.value" :min="row.min" :max="row.max" :step="row.step"/>
         <text class="setting-value">{{ row.display }}</text>
       </template>
+      <segmented v-else-if="row.kind == 'choice' && row.icons" class="setting-icons" v-model="row.value">
+        <segment v-for="o in row.options" :key="o.value" :value="o.value" :tooltip="o.label"><ico :name="o.icon"/></segment>
+      </segmented>
       <segmented v-else-if="row.kind == 'choice' && row.compact" v-model="row.value" :options="row.options"/>
       <select v-else-if="row.kind == 'choice'" v-model="row.value" :options="row.options"/>
       <keybind v-else-if="row.kind == 'key'" v-model="row.value" :class="{ conflict: row.conflict }"
@@ -35,6 +38,7 @@
 .setting-action { height: 14; }
 keybind.conflict { border-color: $warn; color: $warn; }
 segment { height: 12; padding: 0 4; }
+.setting-icons segment { padding: 0 2; }
 select { height: 14; }
 keybind { height: 14; }
 </style>

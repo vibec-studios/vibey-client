@@ -19,6 +19,7 @@ public final class SettingRow {
     Function<Object, String> format = String::valueOf;
     List<Option> options = List.of();
     boolean compact;
+    boolean icons;
     String placeholder = "";
     String button = "";
     int maxLength = 256;
@@ -45,6 +46,7 @@ public final class SettingRow {
     public float getStep() { return step; }
     public List<java.util.Map<String, Object>> getOptions() { return Option.maps(options); }
     public boolean isCompact() { return compact; }
+    public boolean isIcons() { return icons; }
     public String getPlaceholder() { return placeholder; }
     public String getButton() { return button; }
     public int getMaxLength() { return maxLength; }

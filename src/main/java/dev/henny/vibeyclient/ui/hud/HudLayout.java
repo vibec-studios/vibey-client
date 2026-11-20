@@ -172,6 +172,27 @@ public final class HudLayout {
         ClientCompat.openScreen(new HudEditorScreen(parent));
     }
 
+    public static void openEditor(Screen parent, String profile, Runnable onClose) {
+        String before = profile();
+        useProfile(profile);
+        ClientCompat.openScreen(new HudEditorScreen(parent, () -> {
+            useProfile(before);
+            if (onClose != null) onClose.run();
+        }));
+    }
+
+    public static void registerProfile(String id, java.util.Set<String> shownByDefault) {
+        HudProfiles.register(id, shownByDefault);
+    }
+
+    public static String profile() {
+        return HudProfiles.active().id();
+    }
+
+    public static boolean useProfile(String id) {
+        return HudProfiles.use(id);
+    }
+
     public static void moveTo(HudElement e, float x, float y, int sw, int sh) {
         HudGeometry.moveTo(e, x, y, sw, sh);
     }

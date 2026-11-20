@@ -1,0 +1,67 @@
+{
+  "name": "Kino",
+  "description": "AFK-Kameraflüge und ein AFK-Bildschirm.",
+  "summary": "AFK-Kamera + Bildschirm",
+  "section": {
+    "look": "Look"
+  },
+  "setting": {
+    "start": "Jetzt starten",
+    "start.desc": "Jede Eingabe holt dich zurück.",
+    "mode": "Modus",
+    "mode.desc": "Was die Kamera zeigt.",
+    "mode.builds": "Bauten & Welt",
+    "mode.players": "Spieler",
+    "mode.self": "Showcase",
+    "mode.panorama": "Panorama",
+    "mode.waypoints": "Wegpunkte",
+    "mode.sky": "Himmel & Sterne",
+    "mode.dronie": "Dronie",
+    "mode.mix": "Mix",
+    "auto": "Bei AFK starten",
+    "auto.desc": "Startet nach einer Weile ohne Eingabe.",
+    "afkMinutes": "AFK nach",
+    "speed": "Tempo",
+    "radius": "Radius",
+    "radius.desc": "Wie weit die Kamera fliegen darf.",
+    "mixSeconds": "Wechsel alle",
+    "editAfk": "AFK-Bildschirm",
+    "editAfk.button": "Bearbeiten",
+    "letterbox": "Kinobalken",
+    "vignette": "Vignette",
+    "grain": "Filmkorn",
+    "title": "Titel",
+    "title.desc": "Großer Text auf dem AFK-Bildschirm.",
+    "startKey": "Start-Taste"
+  },
+  "afk": {
+    "title": "Bin gleich zurück",
+    "away": "AFK",
+    "friends": "Freunde",
+    "hint": "Bewegen zum Zurückkehren"
+  },
+  "hud": {
+    "title": "AFK-Titel",
+    "title.desc": "Großer Titeltext.",
+    "afktime": "AFK-Zeit",
+    "afktime.desc": "Wie lange du weg bist.",
+    "mode": "Kameramodus",
+    "mode.desc": "Aktueller Modus und Motiv.",
+    "friends": "Freunde online",
+    "friends.desc": "Freunde, die gerade online sind.",
+    "hint": "Zurück-Hinweis",
+    "hint.desc": "Wie du zurückkommst.",
+    "content": "Zeigt",
+    "content.text": "Titel",
+    "content.name": "Dein Name",
+    "content.world": "Welt"
+  },
+  "preset": {
+    "cinema": "Kino",
+    "cinema.desc": "Titel in den Balken, Lyrics unten.",
+    "music": "Musik",
+    "music.desc": "Große Lyrics in der Mitte.",
+    "minimal": "Minimal",
+    "minimal.desc": "Uhr und AFK-Zeit."
+  }
+}

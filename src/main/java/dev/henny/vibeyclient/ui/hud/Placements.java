@@ -11,7 +11,7 @@ final class Placements {
         p.scale = e.defaultScale();
         p.bw = 0;
         p.bh = 0;
-        p.hidden = e.startHidden();
+        p.hidden = HudProfiles.active().hiddenByDefault(e);
         p.style.clear();
         p.opts.clear();
         p.custom = false;

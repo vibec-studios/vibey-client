@@ -42,7 +42,7 @@ final class HudStates {
             if (src != null) {
                 Placements.copy(p, src);
                 p.scale = HudGeometry.clampScale(e, p.scale);
-            } else if (hideUnlisted && e.isWidget() && e.startHidden()) {
+            } else if (hideUnlisted && HudProfiles.active().hidesUnlisted(e)) {
                 Placements.reset(p, e);
                 p.hidden = true;
                 p.custom = true;

@@ -96,6 +96,7 @@ public final class WaypointsModule extends VibeyModule {
             if (on) WaypointHud.showMinimap();
         });
         runtime.load();
+        dev.henny.vibeyclient.api.Services.register(dev.henny.vibeyclient.api.service.WaypointPoints.class, () -> runtime.store().list().all().stream().filter(w -> w.visible()).map(w -> new dev.henny.vibeyclient.api.service.WaypointPoints.Point(w.name(), w.dimension(), w.pos().x(), w.pos().y(), w.pos().z())).toList());
     }
 
     @Override

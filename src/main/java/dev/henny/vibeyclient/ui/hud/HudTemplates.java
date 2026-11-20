@@ -1,23 +1,33 @@
 package dev.henny.vibeyclient.ui.hud;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public final class HudTemplates {
     private HudTemplates() {}
 
-    public record Template(String id, String labelKey, String descKey, Supplier<HudLayout.State> state) {}
-
-    private static final List<Template> ALL = new ArrayList<>();
-    private static String defaultId;
-
-    public static void setDefault(String id) {
-        defaultId = id;
+    public record Template(String id, String labelKey, String descKey, Supplier<HudLayout.State> state, String profile) {
+        public Template(String id, String labelKey, String descKey, Supplier<HudLayout.State> state) {
+            this(id, labelKey, descKey, state, HudProfile.MAIN);
+        }
     }
 
-    public static String defaultId() {
-        return defaultId;
+    private static final List<Template> ALL = new ArrayList<>();
+    private static final Map<String, String> DEFAULTS = new HashMap<>();
+
+    public static void setDefault(String id) {
+        setDefault(HudProfile.MAIN, id);
+    }
+
+    public static synchronized void setDefault(String profile, String id) {
+        DEFAULTS.put(profile, id);
+    }
+
+    public static synchronized String defaultId() {
+        return DEFAULTS.get(HudProfiles.active().id());
     }
 
     public static synchronized void register(Template t) {
@@ -26,7 +36,10 @@ public final class HudTemplates {
     }
 
     public static synchronized List<Template> all() {
-        return List.copyOf(ALL);
+        String p = HudProfiles.active().id();
+        List<Template> out = new ArrayList<>();
+        for (Template t : ALL) if (t.profile().equals(p)) out.add(t);
+        return List.copyOf(out);
     }
 
     public static synchronized Template get(String id) {
