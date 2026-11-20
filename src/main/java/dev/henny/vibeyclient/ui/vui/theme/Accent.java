@@ -7,11 +7,12 @@ public final class Accent {
     private static final int WHITE = 0xFFFFFFFF;
     private static final int BLACK = 0xFF000000;
     private static final float HOVER = 0.16f;
+    private static final float STEP = 0.04f;
 
     private Accent() {}
 
-    public static Map<String, String> tokens(int argb) {
-        int brand = 0xFF000000 | argb;
+    public static Map<String, String> tokens(int argb, String surfaceHex) {
+        int brand = readable(0xFF000000 | argb, Contrast.over(Contrast.parse(surfaceHex), BLACK));
         boolean light = Contrast.ratio(WHITE, brand) >= Contrast.ratio(BLACK, brand);
         int onBrand = light ? WHITE : BLACK;
         int hover = blend(brand, light ? BLACK : WHITE, HOVER);
@@ -19,6 +20,13 @@ public final class Accent {
         out.put("brand", Contrast.hex(brand));
         out.put("brand-hover", Contrast.hex(hover));
         out.put("on-brand", Contrast.hex(onBrand));
+        return out;
+    }
+
+    static int readable(int brand, int surface) {
+        int towards = Contrast.luminance(surface) > 0.4 ? BLACK : WHITE;
+        int out = brand;
+        for (float t = STEP; Contrast.ratio(out, surface) < ThemeAudit.UI && t <= 1f; t += STEP) out = blend(brand, towards, t);
         return out;
     }
 

@@ -26,7 +26,12 @@ final class BeaconMarker {
         if (b.navTarget()) ring(c, w + o * 3, h + o * 3.6f, o, Argb.withAlpha(0xFFFFFFFF, 0.8f * alpha));
         c.endQuads();
         if (b.waypoint().kind() == WaypointKind.DEATH) skull(c, k, alpha);
-        return h + o * 1.4f;
+        return top(size, b.hovered());
+    }
+
+    static float top(float size, boolean hover) {
+        float k = size * (hover ? HOVER : 1f);
+        return HALF_H * k + OUTLINE * k * 1.4f;
     }
 
     private static void diamond(WorldCanvas c, float cy, float w, float h, int argb) {
@@ -46,10 +51,6 @@ final class BeaconMarker {
         c.vertex(x1, y1, 0, 1, 0, argb, l);
         c.vertex(x2, y2, 0, 1, 1, argb, l);
         c.vertex(x3, y3, 0, 0, 1, argb, l);
-        c.vertex(x3, y3, 0, 0, 1, argb, l);
-        c.vertex(x2, y2, 0, 1, 1, argb, l);
-        c.vertex(x1, y1, 0, 1, 0, argb, l);
-        c.vertex(x0, y0, 0, 0, 0, argb, l);
     }
 
     private static void skull(WorldCanvas c, float k, float alpha) {

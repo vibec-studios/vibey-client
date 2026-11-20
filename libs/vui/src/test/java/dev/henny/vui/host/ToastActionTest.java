@@ -45,7 +45,7 @@ class ToastActionTest {
     @Test
     void hoverPausesAutoDismiss() {
         ToastStack s = stack();
-        Toast t = s.push("Saved", "", null, "ok", 1f);
+        Toast t = s.push(new Toast("Saved", "", null, "ok", 1f).action("Undo", () -> {}));
         settle(s);
         Element toast = s.document().query("toast").get(0);
         s.document().pointerMove(toast.box().x + 3, toast.box().y + 3);
@@ -57,6 +57,22 @@ class ToastActionTest {
         for (int i = 0; i < 12; i++) s.frame(0.1f);
         assertEquals(0, s.toasts().size());
         assertEquals("", t.getIconTexture());
+    }
+
+    @Test
+    void onlyTheActionButtonTakesClicks() {
+        ToastStack s = stack();
+        s.push("Copied", "", null, "ok", 3f);
+        s.push(new Toast("Bee", "", null, "invite", 3f).action("Join", () -> {}));
+        settle(s);
+        List<Element> toasts = s.document().query("toast");
+        Element plain = toasts.stream().filter(e -> s.document().query(".toast-action").stream().noneMatch(b -> b.parent() == e)).findFirst().orElseThrow();
+        Element button = s.document().query(".toast-action").get(0);
+        assertFalse(s.takesClick(plain.box().x + 3, plain.box().y + 3));
+        assertTrue(s.takesClick(button.box().x + 2, button.box().y + 2));
+        assertFalse(s.takesClick(1, 1));
+        s.document().pointerMove(plain.box().x + 3, plain.box().y + 3);
+        assertFalse(s.paused());
     }
 
     @Test

@@ -39,6 +39,11 @@ public final class BeaconLayer {
         return objects.get(waypointId);
     }
 
+    public int labelLevel(String waypointId) {
+        WorldObject o = objects.get(waypointId);
+        return o == null ? -1 : ((BeaconEffect) o.content()).labelLevel();
+    }
+
     public void sync(Minecraft mc) {
         if (!attached) return;
         WaypointsModule m = runtime.module();

@@ -16,7 +16,7 @@ backend: vibe-backend `docs/RANKS.md` and `docs/PROTOCOL.md` § Ränge und Namen
 | `ranks` (pure, no Minecraft) | `RanksDoc`/`RankDef`/`NameStyleDef` + `RanksDocJson` (`GET /api/v1/ranks`), `Identity` + `IdentityJson` (rank, tags, nameStyle of one player; falls back to `LegacyBadges` when the backend has no `rank` field), `OwnRanks` (`Me.ranks`, `privacy.showRank`) |
 | `ranks/style` (pure) | The colour function: `ColorMath` + one record per effect (`GradientStyle`, `WaveStyle`, `RainbowStyle`, `PulseStyle`, `ShimmerStyle`), `NameStyleJson` |
 | `client/ranks` | `Ranks` (current definitions + own ranks, version counter for caches), `RanksCache` (disk copy + ETag GET), `RanksSync` (gateway listeners), `PlayerEntry` (one lookup entry → `VibeyPlayers`), `MyRanksApi` (own choices) |
-| `client/names` | Drawing shared by modules: `IconFont`, `RankGlyphs` (rank → glyph), `NamePrefix`, `NameRecolor` (style on the name segment), `NameLine` (UI lines), `StyleClock`, `Profiles` (GameProfile compat) |
+| `client/names` | Drawing shared by modules: `NameStyleEffect` (vui text effect `namestyle(id)` for previews), `IconFont`, `RankGlyphs` (rank → glyph), `NamePrefix`, `NameRecolor` (style on the name segment), `NameLine` (UI lines), `StyleClock`, `Profiles` (GameProfile compat) |
 | `module/nametags` | `NameIcons` (entry for the mixins), `Surface` (settings + server rules → flags), `Decorator`, `DecorCache`, `AnimatedSet`, settings page (`NametagsPanel`, `MyNameCard`, `Chips`, `MyStyles`) |
 | `module/nametags/mixin` | `NameTagMixin` (world nametag), `TabListMixin`, `ChatListenerMixin` |
 | `module/social/ui/SocialNames` | Friends list name + profile rank chip |
@@ -82,6 +82,11 @@ no trigonometry. `NameStyleVectorsTest` checks all 280 shared vectors (`src/juni
 
 Module page: *My name* (preview, style chips, rank chips when 2+ ranks can be primary, "Show my rank"), *Where*
 (above players, player list, chat), *Icons* (rank, extra badge), *Name styles* (on, animated).
+
+In the new vui menu *My name* is three rows (`MyNameSettings`): *My style* (select), *My rank*, *Show my rank*. The
+style row shows your name before the select, animated with the chosen style: `OptionSetting.preview` passes the
+vui text effect `namestyle(<style id>)` (`client/names/NameStyleEffect`, registered with `TextEffects.register`),
+which calls the same `NameStyle.colorAt(index, length, t)` as the nametags, so the preview matches the world.
 
 Server rules (docs/SERVER-RULES.md): `nametags.seal`, `nametags.ranks` (rank + badge), `nametags.styles`,
 `nametags.*`. They apply to the world nametag, the tab list and new chat lines; the own social UI is unaffected.

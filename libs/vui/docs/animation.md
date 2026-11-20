@@ -114,7 +114,9 @@ glyphs.draw(canvas, metrics, name, 0, name.length(), x, y, 0xFFFFFFFF, true, fal
 ```
 
 Own effects implement `TextEffect.apply(GlyphState g)` and change `g.color`, `g.dx`, `g.dy`, `g.alpha`,
-`g.visible` using `g.index`, `g.count`, `g.time`, `g.x`, `g.width`, `g.totalWidth`.
+`g.visible` using `g.index`, `g.count`, `g.time`, `g.x`, `g.width`, `g.totalWidth`. Register one by name to use it in
+styles: `TextEffects.register("namestyle", args -> new MyEffect(args.get(0)))` → `text-effect: namestyle(sunset)`
+(also in bound styles: `:style="{ textEffect: row.fx }"`).
 
 ## Limits
 

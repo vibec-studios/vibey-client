@@ -6,7 +6,7 @@ import dev.henny.vibeyclient.module.chat.screen.SearchMode;
 import dev.henny.vibeyclient.module.chat.window.ChatSize;
 import dev.henny.vibeyclient.module.chat.window.ChatTransform;
 import dev.henny.vibeyclient.module.chat.window.ChatWindow;
-import dev.henny.vibeyclient.ui.hud.HudEditorScreen;
+import dev.henny.vibeyclient.ui.hud.editor.HudEditorScreen;
 import dev.henny.vibeyclient.ui.hud.HudLayout;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.minecraft.client.gui.screens.ChatScreen;

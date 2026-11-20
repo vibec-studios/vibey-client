@@ -65,6 +65,12 @@ public final class WheelController {
     public void clear(WheelSlice s) {
     }
 
+    public void hoverSlot(int i) {
+        if (geo == null) return;
+        if (i < 0) hover(geo.cx(), geo.cy());
+        else hover(geo.sliceX(i) + geo.tile() / 2, geo.sliceY(i) + geo.tile() / 2);
+    }
+
     public int hovered() {
         return hovered.peek();
     }

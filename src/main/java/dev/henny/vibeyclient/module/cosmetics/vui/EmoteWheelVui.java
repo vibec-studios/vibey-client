@@ -61,6 +61,12 @@ public final class EmoteWheelVui extends SyncedScreen {
     }
 
     @Override
+    protected void draw(Object graphics, int mouseX, int mouseY, float delta) {
+        if (!done) controller.hover(mouseX, mouseY);
+        super.draw(graphics, mouseX, mouseY, delta);
+    }
+
+    @Override
     protected boolean pointerMove(double x, double y) {
         controller.hover(x, y);
         return true;

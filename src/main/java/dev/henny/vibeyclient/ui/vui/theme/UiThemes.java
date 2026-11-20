@@ -29,13 +29,11 @@ public final class UiThemes {
         return List.of(BASE, "assets/vibeyclient/vui/theme." + theme.name().toLowerCase(Locale.ROOT) + ".json");
     }
 
-    public static Map<String, String> overrides() {
-        return GlobalSettings.ownAccent.on() ? Accent.tokens(GlobalSettings.accent.argb()) : Map.of();
-    }
-
     public static void apply() {
         if (vui == null) return;
-        vui.useThemes(files(GlobalSettings.theme.get()), overrides());
+        List<String> files = files(GlobalSettings.theme.get());
+        vui.useThemes(files, Map.of());
+        if (GlobalSettings.ownAccent.on()) vui.useThemes(files, Accent.tokens(GlobalSettings.accent.argb(), vui.theme().get("surface3")));
         if (!vui.themeDiagnostics().isEmpty()) Vibey.LOG.warn("vui theme: {}", vui.themeDiagnostics().format());
         vui.reloader().reloadAll();
     }

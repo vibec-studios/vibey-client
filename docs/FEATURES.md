@@ -42,7 +42,7 @@ vanilla player could not see; features that could be an advantage sit behind a s
 | 25 | Motion blur (toggle, strength) | `camera` | – | ok |
 | 26 | Item physics for drops | `visuals` | – | ok |
 | 27 | Particle multiplier / hide | `visuals` | – | ok |
-| 28 | UI themes (Vibe dark, light, high contrast, custom accent) | core (vui theme) | Live preview panel | ok |
+| 28 | UI themes (Vibe dark, light, high contrast, colour-blind sets, custom accent) | core (vui theme, `ui/vui/theme`) | Quick settings, applied live to every vui screen and world panel; AA-checked ([UI.md](UI.md#themes)) | ok – done |
 | 29 | Mouse tweaks + item scroller (drag/wheel moves stacks) | `inventory` | Wheel over a stack moves it | rule `inventory.tweaks` (rate-limited) |
 | 30 | Inventory search + hotbar presets | `inventory` | Search field as HUD object; look at a preset bar + key | ok |
 

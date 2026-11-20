@@ -9,7 +9,15 @@ import java.util.Map;
 public final class LabelStack {
     public static final int MAX_LEVEL = 4;
 
-    public record Label(String key, double yaw, double pitch, double width, double height, double distance) {}
+    public record Label(String key, double yaw, double base, double width, double line, int lines, double distance) {
+        double bottom(int level) {
+            return base + level * line;
+        }
+
+        double top(int level) {
+            return bottom(level) + lines * line;
+        }
+    }
 
     private record Placed(Label label, int level) {}
 
@@ -35,12 +43,10 @@ public final class LabelStack {
     }
 
     static boolean overlaps(Label a, int levelA, Label b, int levelB) {
-        double cos = Math.cos((a.pitch() + b.pitch()) / 2);
+        double cos = Math.cos((a.base() + b.base()) / 2);
         double dx = wrap(a.yaw() - b.yaw()) * cos;
         if (Math.abs(dx) >= (a.width() + b.width()) / 2) return false;
-        double ya = a.pitch() + levelA * a.height();
-        double yb = b.pitch() + levelB * b.height();
-        return Math.abs(ya - yb) < (a.height() + b.height()) / 2;
+        return a.bottom(levelA) < b.top(levelB) && b.bottom(levelB) < a.top(levelA);
     }
 
     private static double wrap(double angle) {

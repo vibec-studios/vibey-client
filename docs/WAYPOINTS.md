@@ -106,7 +106,21 @@ the content reads the `Waypoint` live, so r3's undo history survives.
   far beacons readable. Wheel/`RESIZED` stores `size = scale / factor`.
 - `BeaconGestures` maps r3 events: `MOVED`/`PLACED` → position from the `BlockFaceAnchor` (block + face step) or
   the free position − lift, then our anchor is put back; `UNDONE` restores the stored position of the matching move.
-- The ◆/☠ and the labels are see-through font glyphs; the beam is two additive ribbons (depth tested).
+- `BeaconDraw` = `BeaconBeam` + `BeaconMarker` + `BeaconLabel`, all in the camera-facing frame of the object.
+- **Marker** (`BeaconMarker`): a filled diamond of quads (r3 `RenderMode.SEE_THROUGH`, visible through terrain) –
+  dark outline, the waypoint colour, a light top facet – 1.2 × 0.88 of the object size, 1.3× while hovered; the
+  navigation target gets a white diamond ring; the death point adds a dark ☠ glyph on the diamond. The old ◆ font
+  glyph read as "+" at low resolutions.
+- **Label** (`BeaconLabel`): *name · distance* (hover: + coordinates, + Nether/Overworld counterpart) with a constant
+  screen size of 0.75 GUI px per font pixel (0.85 hovered): world size per font pixel = 0.75 × distance ×
+  2·tan(fov/2) / GUI height. Cap: never bigger than 6 % of the object size, so a shrunk waypoint keeps a small label.
+- **Declutter** (`BeaconDeclutter`, pure `core/LabelStack`): every tick each label becomes a box in view angles from
+  the eyes, with the same numbers the drawing uses: base = the marker top + gap above the rendered object position,
+  line height and width = font pixels × `BeaconLabel.scale` / distance, 1 line (hovered: 2–3 lines: coordinates,
+  counterpart). Nearest first, a label whose box overlaps an already placed one moves up one line (`labelLevel`, at
+  most 4). Angles do not change when you turn, so the stack is stable while looking around.
+- **Beam** (`BeaconBeam`): two additive ribbons (depth tested). *Beams through hills* (`beamsThrough`, off by
+  default, under *Light beams*) adds a see-through ribbon (55 %, a bit wider than the core) so the beam shows behind terrain.
 
 ### Map pipeline (no frame drops)
 
@@ -149,5 +163,4 @@ Memory: ≤ 256 tiles in RAM (LRU, ~200 KB each incl. the shaded copy) and ≤ 1
 - Minimap "look + key = pan" from FEATURES.md is not built (wheel = zoom happens in the HUD editor as size; in game
   the zoom is a setting).
 - Waypoint sync to friends / server (r3 `SharedObjects`) and keyboard input on world panels.
-- Light beams are depth tested; behind a hill only the see-through marker and label show.
 - The list screen uses its own small icon set (`textures/waypoints/icons`) until the client exports `ui/icons`.

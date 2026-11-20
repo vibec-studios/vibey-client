@@ -64,7 +64,28 @@ public final class ToastStack {
     }
 
     public boolean paused() {
-        for (Element e = document.events().hovered(); e != null; e = e.parent()) if (e.tag().equals("toast")) return true;
+        Element t = toastOf(document.events().hovered());
+        return t != null && hasButton(t);
+    }
+
+    public boolean takesClick(float x, float y) {
+        if (toasts.size() == 0) return false;
+        document.layoutIfNeeded();
+        for (Element e = document.events().hit(x, y); e != null; e = e.parent()) {
+            if (e.tag().equals("button")) return true;
+            if (e.tag().equals("toast")) return false;
+        }
+        return false;
+    }
+
+    private static Element toastOf(Element e) {
+        for (; e != null; e = e.parent()) if (e.tag().equals("toast")) return e;
+        return null;
+    }
+
+    private static boolean hasButton(Element e) {
+        if (e.tag().equals("button")) return true;
+        for (int i = 0; i < e.childCount(); i++) if (hasButton(e.child(i))) return true;
         return false;
     }
 

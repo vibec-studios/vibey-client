@@ -150,7 +150,8 @@ player).
 - The canvas transforms every vertex on the CPU (camera-relative floats) and keeps the draw order: consecutive quads
   of the same mode/texture share one draw, a text or another texture starts the next.
 - Render modes: `CUTOUT`/`TRANSLUCENT` → `text(texture)` (a white texture for plain colors), `EMISSIVE` → the same
-  with full-bright light, `ADDITIVE` → `lightning()` untextured, `eyes(texture)` textured.
+  with full-bright light, `ADDITIVE` → `lightning()` untextured, `eyes(texture)` textured, `SEE_THROUGH` →
+  `textSeeThrough(texture)`.
 - Every quad is turned to face the camera, so winding never hides anything (panels are mirrored by their y-down
   pixel space).
 - Panels: each draw call sits 0.012 px further toward the viewer (at most 160 steps ≈ 0.03 blocks), text uses the

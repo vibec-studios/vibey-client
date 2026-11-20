@@ -164,7 +164,7 @@ Unknown properties and bad values are reported with position and a suggestion
 | `$scrim` | `#000000c8` | | `$danger` | `#ff5470` |
 | `$pad` | `10` | | `$warn` | `#ffb547` |
 | `$row` | `24` | | `$gap` | `4` |
-| `$duration` | `150ms` | | | |
+| `$duration` | `150ms` | | `$on-brand` | `#ffffff` (text/thumbs on `$brand`) |
 
 Change tokens in code (`vui.theme(VibeTheme.create().put("brand", "#ff8800"))`) or load a theme file with
 `ThemeLoader.load(fileName, source, base, diagnostics)`. Two formats:
@@ -179,6 +179,11 @@ $panel: #101010;
 ```
 
 Groups `colors`, `sizes`, `tokens`, `times` are flattened. Tokens may refer to other tokens.
+
+Switch themes at run time with `vui.useThemes(List.of("assets/mymod/vui/theme.json", "assets/mymod/vui/theme.light.json"),
+Map.of("brand", "#13a387"))`: the files are applied in order over the defaults, the map last; it replaces the list of
+`loadTheme` calls (the files keep hot reloading). Declarations re-resolve their tokens when the theme version changes;
+`vui.reloader().reloadAll()` rebuilds open documents so bound inline styles pick it up at once.
 
 ## Default look
 

@@ -76,7 +76,8 @@ Map GLFW codes 1:1 (`InputCode.key(glfwKey)`, `InputCode.mouse(button)`), then:
 
 Suggested render types (1.21.11): `CUTOUT` → `RenderTypes.text(tex)` / cutout entity; `TRANSLUCENT` →
 `textBackground()` or entity translucent; `ADDITIVE` → `lightning()` (position-color, additive) or an additive
-textured type for sprites; `EMISSIVE` → the translucent type with `Light.FULL_BRIGHT`. Light values are packed like
+textured type for sprites; `EMISSIVE` → the translucent type with `Light.FULL_BRIGHT`; `SEE_THROUGH` → `textSeeThrough(texture)` (no depth test,
+full bright, drawn over terrain like see-through name tags). Light values are packed like
 the vanilla lightmap (`Light.pack(block, sky)`, `FULL_BRIGHT = 0xF000F0`).
 
 ## Video textures

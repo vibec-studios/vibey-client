@@ -12,6 +12,7 @@ public final class QuickHit {
     }
 
     public String getId() { return id; }
+    public String getKey() { return id.substring(id.lastIndexOf('.') + 1); }
     public String getLabel() { return label; }
     public boolean isMore() { return more; }
 }

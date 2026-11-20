@@ -33,6 +33,7 @@ public final class WaypointsGameTest implements FabricClientGameTest {
             middleDrag(ctx, tower, o);
             wheel(ctx, tower);
             contextMenu(ctx, tower);
+            WaypointsVisualChecks.run(ctx, world, o);
             WaypointsMapChecks.minimap(ctx);
             WaypointsMapChecks.worldMap(ctx);
             WaypointsMapChecks.shareRoundTrip(ctx);

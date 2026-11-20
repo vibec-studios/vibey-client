@@ -8,7 +8,7 @@ import dev.henny.r3.render.WorldCanvas;
 
 final class BeaconBeam {
     static final float HEIGHT = 160f;
-    static final float THROUGH = 0.22f;
+    static final float THROUGH = 0.55f;
 
     private BeaconBeam() {}
 
@@ -25,7 +25,7 @@ final class BeaconBeam {
         c.endQuads();
         if (!through) return;
         c.beginQuads(RenderMode.SEE_THROUGH, null);
-        Quads.ribbon(c, ox, base, oz, ox, top, oz, size * 0.06f, size * 0.06f,
+        Quads.ribbon(c, ox, base, oz, ox, top, oz, size * 0.09f, size * 0.09f,
                 Argb.withAlpha(rgb, THROUGH * pulse * alpha), Argb.withAlpha(rgb, 0f), Light.FULL_BRIGHT);
         c.endQuads();
     }
