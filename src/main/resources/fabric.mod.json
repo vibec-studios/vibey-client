@@ -31,8 +31,12 @@
     "vibeyclient.hud.mixins.json",
     "vibeyclient.clips.mixins.json",
     "vibeyclient.info.mixins.json",
+    "vibeyclient.camera.mixins.json",
+    "vibeyclient.visuals.mixins.json",
     "vibeyclient.devlink.mixins.json",
-    "vibeyclient.nametags.mixins.json"
+    "vibeyclient.nametags.mixins.json",
+    "vibeyclient.chat.mixins.json",
+    "vibeyclient.social.streamer.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.16.5",

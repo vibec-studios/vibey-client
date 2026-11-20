@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.henny.vibeyclient.module.visuals.mixin",
+  "plugin": "dev.henny.vibeyclient.mixin.VibeyMixinPlugin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [],
+  "client": [
+    "ItemEntityMixin",
+    "ItemEntityRendererMixin",
+    "ItemEntityRenderStateMixin",
+    "ParticleEngineMixin"
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

@@ -76,7 +76,12 @@
     "hintShown": "Hinweis gezeigt",
     "maxPerSession.desc": "Höchstens pro Sitzung",
     "ramCap.desc": "Speicher für den Puffer",
-    "autoDelete.desc": "Älteste automatisch löschen"
+    "autoDelete.desc": "Älteste automatisch löschen",
+    "openShots": "Screenshots",
+    "openShots.action": "Screenshots",
+    "placeShots": "Screenshots in der Welt",
+    "placeShots.action": "In Welt platzieren",
+    "shotsKey": "Screenshots"
   },
   "status": {
     "held": " · {0} MB RAM · {1} s",
@@ -158,7 +163,8 @@
     "turnOn": "Rückblick-Puffer einschalten",
     "storage": "{0} von {1} belegt",
     "folder": "Ordner öffnen",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "shots": "Screenshots"
   },
   "view": {
     "noFfmpeg": "Zum Abspielen wird FFmpeg gebraucht.",
@@ -187,5 +193,29 @@
     "unkeptFlash": "Nicht mehr behalten.",
     "renamedFlash": "Gespeichert.",
     "deleted": "Gelöscht."
+  },
+  "shots": {
+    "title": "Screenshots",
+    "sort": {
+      "newest": "Neueste",
+      "oldest": "Älteste",
+      "name": "Name"
+    },
+    "favs": "Nur Favoriten",
+    "fav": "Favorit",
+    "copy": "Kopieren",
+    "delete": "Löschen",
+    "confirm": "Nochmal klicken",
+    "folder": "Ordner öffnen",
+    "world": "In Welt platzieren",
+    "close": "Schließen",
+    "prev": "Zurück",
+    "next": "Weiter",
+    "empty": "Noch keine Screenshots",
+    "loading": "Lädt…",
+    "copied": "Bild kopiert",
+    "pathCopied": "Pfad kopiert",
+    "deleted": "Screenshot gelöscht",
+    "sortTip": "Sortieren"
   }
 }

@@ -1,0 +1,19 @@
+{
+  "name": "Visuals",
+  "description": "Item physics and particle amount.",
+  "summary": "Item physics, particles",
+  "section": {
+    "items": "Items",
+    "particles": "Particles"
+  },
+  "setting": {
+    "itemPhysics": "Item physics",
+    "itemPhysics.desc": "Drops tumble and lie flat.",
+    "particles": "Particles",
+    "particles.desc": "0 % hides them.",
+    "keepImportant": "Keep hit particles",
+    "keepImportant.desc": "Crits, damage, explosions stay.",
+    "ambientOff": "No ambient",
+    "ambientOff.desc": "No spores, ash, drips, rain."
+  }
+}

@@ -18,11 +18,13 @@ def generatedDir = layout.buildDirectory.dir('generated/vibeyclient')
 def genTask = tasks.register('generateBuildInfo') {
     def relay = project.default_relay
     def backend = project.default_backend
+    def discord = project.findProperty('discord_app_id') ?: ''
     def ver = project.version.toString()
     def mc = project.minecraft_version
     def label = project.minecraft_label
     inputs.property('relay', relay)
     inputs.property('backend', backend)
+    inputs.property('discord', discord)
     inputs.property('version', ver)
     inputs.property('mc', mc)
     inputs.property('label', label)
@@ -42,6 +44,7 @@ public final class BuildInfo {
     /** Vibe backend + Vibey relay: official builds only, forks use their own (https://github.com/vibec-studios/.github/blob/main/SERVICES.md). */
     public static final String DEFAULT_BACKEND = "${backend}";
     public static final String DEFAULT_RELAY = "${relay}";
+    public static final String DISCORD_APP_ID = "${discord}";
     private BuildInfo() {}
 }
 """

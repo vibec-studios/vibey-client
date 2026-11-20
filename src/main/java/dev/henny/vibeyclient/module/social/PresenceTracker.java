@@ -119,7 +119,7 @@ public final class PresenceTracker {
         if (world != null) {
             a.addProperty("world", clip(world, 100));
         } else if (server != null) {
-            a.addProperty("server", module.hideServerAddress.on() ? "Multiplayer" : clip(server, 255));
+            a.addProperty("server", module.hideServerAddress.on() || dev.henny.vibeyclient.api.privacy.Privacy.hideServer() ? "Multiplayer" : clip(server, 255));
         }
         return a;
     }

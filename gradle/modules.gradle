@@ -15,14 +15,20 @@ ext.clientModules = [
         clips        : ['fabric-1.21.11'],
         waypoints    : ['fabric-1.21.11'],
         info         : ['fabric-1.21.11'],
+        camera       : ['fabric-1.21.11'],
+        visuals      : ['fabric-1.21.11'],
+        chat         : ['fabric-1.21.11'],
+        'social.streamer': ['fabric-1.21.11'],
 ]
 
 // Resources a module owns besides its i18n files (i18n/*/<id>[.*].json) and mixin configs (vibeyclient.<id>[.*].mixins.json).
 ext.clientModuleResources = [
         media: ['assets/vibeyclient/font/lyrics/**', 'assets/vibeyclient/textures/lyrics/**', 'assets/vibeyclient/lyrics/**'],
-        clips: ['assets/vibeyclient/shaders/core/clips_*'],
+        clips: ['assets/vibeyclient/shaders/core/clips_*', 'assets/vibeyclient/vui/clips/**'],
+        camera: ['assets/vibeyclient/post_effect/motion_blur.json', 'assets/vibeyclient/shaders/post/motion_blur.fsh'],
         waypoints: ['assets/vibeyclient/vui/waypoints/**', 'assets/vibeyclient/textures/waypoints/**'],
         info : ['assets/vibeyclient/vui/info/**'],
+        chat: ['assets/vibeyclient/vui/chat/**'],
 ]
 
 // Shared packages (dev.henny.vibeyclient.<path>) that several modules use instead of each other, with their targets

@@ -27,5 +27,9 @@
   "key.vibeyclient.waypoints.listKey": "Wegpunktliste",
   "key.vibeyclient.info.pinKey": "Karte anheften (halten)",
   "key.vibeyclient.info.lightKey": "Lichtlevel",
-  "key.vibeyclient.info.chunkKey": "Chunkgrenzen"
+  "key.vibeyclient.info.chunkKey": "Chunkgrenzen",
+  "key.vibeyclient.clips.shotsKey": "Screenshots",
+  "key.vibeyclient.camera.freelookKey": "Freelook",
+  "key.vibeyclient.chat.searchKey": "Chat durchsuchen",
+  "key.vibeyclient.social.streamerKey": "Streamer-Modus"
 }
