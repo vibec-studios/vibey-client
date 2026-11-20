@@ -21,6 +21,14 @@ public final class ModuleLook {
             case "clips" -> "play";
             case "waypoints" -> "pin";
             case "info" -> "info";
+            case "camera" -> "camera";
+            case "visuals" -> "palette";
+            case "chat" -> "chat";
+            case "inventory" -> "bag";
+            case "servers" -> "server";
+            case "cinematic" -> "film";
+            case "screens" -> "window";
+            case "companion" -> "paw";
             default -> "puzzle";
         };
     }
