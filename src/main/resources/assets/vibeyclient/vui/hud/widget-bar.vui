@@ -1,0 +1,18 @@
+<import name="icon-button" src="vibeyclient:components/icon-button"/>
+<template>
+  <row class="wbar" :style="{ left: selected.barX, top: selected.barY }">
+    <text class="wbar-name">{{ selected.name }}</text>
+    <text class="wbar-scale" :tooltip="t('ui.hud.wheelTip')">{{ percent(selected.scale) }}</text>
+    <box class="wbar-sep"/>
+    <icon-button icon="sliders" :tip="t('ui.hud.style')" @click="styleSelected()"/>
+    <icon-button icon="eye" :tip="t('ui.hud.hide')" @click="hideSelected()"/>
+    <icon-button icon="reset" :tip="t('ui.hud.reset')" @click="resetSelected()"/>
+  </row>
+</template>
+<style>
+.wbar { position: absolute; height: 18; gap: 3; padding: 0 1 0 5; background: $surface; border: 1 $brand; }
+.wbar-name { color: $text; text-wrap: nowrap; }
+.wbar-scale { color: $brand2; text-wrap: nowrap; }
+.wbar-sep { width: 1; height: 10; background: $line2; margin: 0 1; }
+.wbar .icon-btn { size: 16; }
+</style>

@@ -1,0 +1,8 @@
+<props>{ "label": "" }</props>
+<template>
+  <row class="keycap"><text>{{ label }}</text></row>
+</template>
+<style>
+.keycap { height: 12; min-width: 12; padding: 0 3; justify: center; background: $surface3; border: 1 $line2;
+          border-bottom: 2 $line2; color: $text; flex-shrink: 0; }
+</style>

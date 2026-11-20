@@ -1,0 +1,11 @@
+<props>{ "src": "", "size": 12 }</props>
+<template>
+  <stack class="head" :style="{ width: size, height: size }">
+    <image v-if="src" :src="src" fit="fill"/>
+    <box v-else class="head-empty"/>
+  </stack>
+</template>
+<style>
+.head { flex-shrink: 0; background: $surface3; border: 1 $line2; }
+.head-empty { background: $surface3; }
+</style>

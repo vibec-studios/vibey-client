@@ -1,0 +1,65 @@
+{
+ "step": 1,
+ "language": "auto",
+ "languages": [
+  {
+   "value": "auto",
+   "label": "Auto"
+  },
+  {
+   "value": "en",
+   "label": "English"
+  },
+  {
+   "value": "de",
+   "label": "Deutsch"
+  }
+ ],
+ "features": [
+  {
+   "id": "friends",
+   "icon": "friends",
+   "label": "Freunde",
+   "tip": "Freunde, Chat, Einladungen."
+  },
+  {
+   "id": "cosmetics",
+   "icon": "shirt",
+   "label": "Kosmetik",
+   "tip": "Umhänge, Flügel, Tiere."
+  },
+  {
+   "id": "emotes",
+   "icon": "wave",
+   "label": "Emotes",
+   "tip": "Emote-Rad."
+  },
+  {
+   "id": "hud",
+   "icon": "hud",
+   "label": "HUD",
+   "tip": "Widgets frei verschieben."
+  }
+ ],
+ "online": true,
+ "keys": [
+  {
+   "id": "menu",
+   "icon": "seal",
+   "label": "Menü",
+   "value": 344
+  },
+  {
+   "id": "emotes",
+   "icon": "wave",
+   "label": "Emotes",
+   "value": 66
+  },
+  {
+   "id": "hud",
+   "icon": "hud",
+   "label": "HUD",
+   "value": 72
+  }
+ ]
+}

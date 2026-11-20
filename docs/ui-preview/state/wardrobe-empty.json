@@ -1,0 +1,66 @@
+{
+ "slot": "wings",
+ "query": "unicorn",
+ "playing": false,
+ "stillImage": "vibeyclient:preview/player",
+ "slots": [
+  {
+   "id": "cape",
+   "icon": "cape",
+   "name": "Capes",
+   "count": 4,
+   "worn": true
+  },
+  {
+   "id": "wings",
+   "icon": "wings",
+   "name": "Wings",
+   "count": 8,
+   "worn": true
+  },
+  {
+   "id": "aura",
+   "icon": "aura",
+   "name": "Auras",
+   "count": 2,
+   "worn": false
+  },
+  {
+   "id": "pet",
+   "icon": "paw",
+   "name": "Pets",
+   "count": 2,
+   "worn": true
+  },
+  {
+   "id": "shield",
+   "icon": "shield",
+   "name": "Shields",
+   "count": 3,
+   "worn": false
+  },
+  {
+   "id": "hat",
+   "icon": "hat",
+   "name": "Hats",
+   "count": 2,
+   "worn": true
+  },
+  {
+   "id": "back",
+   "icon": "bag",
+   "name": "Back",
+   "count": 1,
+   "worn": false
+  },
+  {
+   "id": "emotes",
+   "icon": "wave",
+   "name": "Emotes",
+   "count": 10,
+   "worn": false
+  }
+ ],
+ "items": [],
+ "current": null
+}

@@ -1,0 +1,36 @@
+<import name="wordmark" src="vibeyclient:components/wordmark"/>
+<import name="step-dots" src="vibeyclient:components/step-dots"/>
+<import name="step-welcome" src="vibeyclient:onboarding/step-welcome"/>
+<import name="step-online" src="vibeyclient:onboarding/step-online"/>
+<import name="step-keys" src="vibeyclient:onboarding/step-keys"/>
+<template>
+  <stack class="ob-scrim">
+    <column class="ob-card">
+      <row class="ob-head">
+        <wordmark/>
+        <spacer/>
+        <step-dots :count="3" :index="step"/>
+      </row>
+      <column class="ob-body">
+        <step-welcome v-if="step == 0"/>
+        <step-online v-else-if="step == 1"/>
+        <step-keys v-else/>
+      </column>
+      <row class="ob-foot">
+        <button class="ghost" @click="skip()">{{ t('ui.onboarding.skip') }}</button>
+        <spacer/>
+        <button class="primary ob-next" @click="next()">{{ step == 2 ? t('ui.onboarding.done') : t('ui.onboarding.next') }}</button>
+      </row>
+    </column>
+  </stack>
+</template>
+<style>
+.ob-scrim { background: $scrim; align-items: center; }
+.ob-card { width: 300; background: $surface; border: 1 $line2; }
+.ob-head { height: 24; padding: 0 10; border-bottom: 1 $line; }
+.ob-body { height: 116; padding: 12 10; gap: 10; }
+.ob-body > * { transition: opacity 150ms out, translate-x 150ms out; }
+.ob-foot { height: 28; padding: 0 10; gap: 6; border-top: 1 $line; }
+.ob-next { min-width: 64; }
+.ob-title { font-scale: 2; font-weight: bold; color: $text; }
+</style>

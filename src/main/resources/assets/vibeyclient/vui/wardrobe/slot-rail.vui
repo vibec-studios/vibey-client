@@ -1,0 +1,18 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<template>
+  <column class="rail">
+    <row v-for="s in slots" :key="s.id" class="rail-slot" :class="{ on: s.id == slot, worn: s.worn }"
+         :tooltip="s.name + ': ' + s.count" tabindex="0" @click="slot = s.id">
+      <ico :name="s.icon"/>
+      <box v-if="s.worn" class="rail-worn"/>
+    </row>
+  </column>
+</template>
+<style>
+.rail { width: 22; padding: 3 0; gap: 2; border-right: 1 $line; align-items: center; flex-shrink: 0; }
+.rail-slot { size: 18; justify: center; color: $dim; border: 1 transparent; cursor: pointer;
+             transition: color 150ms out, background 150ms out; }
+.rail-slot:hover, .rail-slot:focus { color: $text; background: $surface2; }
+.rail-slot.on { color: $brand; background: $surface2; border-color: $line2; }
+.rail-worn { position: absolute; anchor: bottom-right; right: 1; bottom: 1; size: 3; background: $brand2; }
+</style>

@@ -1,0 +1,19 @@
+<template>
+  <column class="lib">
+    <grid class="lib-grid" columns="2" gap="2">
+      <row v-for="w in widgets" :key="w.id" class="lib-item" :class="{ on: w.on }" :tooltip="w.tip">
+        <toggle v-model="w.on" @change="placed(w)"/>
+        <text class="lib-name">{{ w.name }}</text>
+        <text v-if="w.count > 1" class="lib-count">{{ w.count }}</text>
+      </row>
+    </grid>
+  </column>
+</template>
+<style>
+.lib { width: 220; padding: 2; }
+.lib-item { height: 16; gap: 5; padding: 0 4; }
+.lib-item:hover { background: $surface2; }
+.lib-name { grow: 1; min-width: 0; color: $muted; text-wrap: nowrap; text-overflow: ellipsis; }
+.lib-item.on .lib-name { color: $text; }
+.lib-count { color: $dim; }
+</style>

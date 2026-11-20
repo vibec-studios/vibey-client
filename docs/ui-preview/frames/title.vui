@@ -1,0 +1,21 @@
+<import name="corner" src="vibeyclient:title/corner"/>
+<template>
+  <stack class="bg">
+    <column class="vanilla">
+      <text class="logo">MINECRAFT</text>
+      <box class="vb">Singleplayer</box>
+      <box class="vb">Multiplayer</box>
+      <box class="vb">Minecraft Realms</box>
+      <row class="vrow"><box class="vb half">Options...</box><box class="vb half">Quit Game</box></row>
+    </column>
+    <corner/>
+  </stack>
+</template>
+<style>
+.bg { gradient: #2a3a52 #0d1a12; align-items: center; }
+.vanilla { width: 200; gap: 4; align-items: stretch; }
+.logo { font-scale: 3; font-weight: bold; color: #c8c8c8; text-align: center; margin-bottom: 18; text-shadow: on; }
+.vb { height: 20; background: #6f6f6f; border: 1 #000000; color: #ffffff; justify: center; align-items: center; text-shadow: on; }
+.vrow { gap: 4; }
+.half { grow: 1; basis: 0; }
+</style>

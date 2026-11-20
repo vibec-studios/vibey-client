@@ -1,0 +1,21 @@
+<import name="menu-header" src="vibeyclient:menu/header"/>
+<import name="module-grid" src="vibeyclient:menu/module-grid"/>
+<import name="module-page" src="vibeyclient:menu/module-page"/>
+<import name="friends-panel" src="vibeyclient:menu/friends"/>
+<template>
+  <stack class="scrim">
+    <column class="shell">
+      <menu-header/>
+      <stack class="body">
+        <module-grid v-if="view == 'grid'"/>
+        <module-page v-else/>
+        <friends-panel v-if="panel == 'friends'"/>
+      </stack>
+    </column>
+  </stack>
+</template>
+<style>
+.scrim { background: alpha($bg, .6); padding: 8; }
+.shell { background: $surface; border: 1 $line2; }
+.body { grow: 1; align-items: stretch; }
+</style>

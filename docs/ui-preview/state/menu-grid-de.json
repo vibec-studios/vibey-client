@@ -1,0 +1,187 @@
+{
+ "view": "grid",
+ "panel": "",
+ "query": "",
+ "status": "online",
+ "requests": 2,
+ "showCreators": false,
+ "moreOpen": false,
+ "quickMoreOpen": false,
+ "version": "0.4.0",
+ "modules": [
+  {
+   "id": "social",
+   "name": "Freunde",
+   "icon": "friends",
+   "accent": "#3fe0c5",
+   "on": true,
+   "available": true,
+   "tip": "Freunde, Chat und Einladungen.",
+   "hit": ""
+  },
+  {
+   "id": "cosmetics",
+   "name": "Kosmetik",
+   "icon": "shirt",
+   "accent": "#8b6cff",
+   "on": true,
+   "available": true,
+   "tip": "Umhänge, Flügel, Tiere, Hüte.",
+   "hit": ""
+  },
+  {
+   "id": "emotes",
+   "name": "Emotes",
+   "icon": "wave",
+   "accent": "#ffb547",
+   "on": true,
+   "available": true,
+   "tip": "Emote-Rad mit Sounds.",
+   "hit": ""
+  },
+  {
+   "id": "hud",
+   "name": "HUD",
+   "icon": "hud",
+   "accent": "#3fe0c5",
+   "on": true,
+   "available": true,
+   "tip": "FPS, coordinates, keystrokes.",
+   "hit": ""
+  },
+  {
+   "id": "pvp",
+   "name": "PvP & View",
+   "icon": "crosshair",
+   "accent": "#ff5470",
+   "on": true,
+   "available": true,
+   "tip": "Zoom, Fadenkreuz, Dauersprint.",
+   "hit": "",
+   "blocked": true
+  },
+  {
+   "id": "waypoints",
+   "name": "Wegpunkte",
+   "icon": "pin",
+   "accent": "#3fe0c5",
+   "on": true,
+   "available": true,
+   "tip": "Leuchtfeuer, Minikarte, Weltkarte.",
+   "hit": ""
+  },
+  {
+   "id": "media",
+   "name": "Medien",
+   "icon": "note",
+   "accent": "#ff5470",
+   "on": false,
+   "available": true,
+   "tip": "Musik, Lyrics, Himmel, Video.",
+   "hit": ""
+  },
+  {
+   "id": "clips",
+   "name": "Clips",
+   "icon": "play",
+   "accent": "#8b6cff",
+   "on": false,
+   "available": true,
+   "tip": "Die letzten 30 Sekunden sichern.",
+   "hit": ""
+  },
+  {
+   "id": "multiplayer",
+   "name": "Welt hosten",
+   "icon": "host",
+   "accent": "#3fe0c5",
+   "on": true,
+   "available": true,
+   "tip": "Welt für Freunde öffnen.",
+   "hit": ""
+  },
+  {
+   "id": "nametags",
+   "name": "Namen & Ränge",
+   "icon": "star",
+   "accent": "#8b6cff",
+   "on": true,
+   "available": true,
+   "tip": "Rang-Icons und Namensstile.",
+   "hit": ""
+  },
+  {
+   "id": "chat",
+   "name": "Chat",
+   "icon": "chat",
+   "accent": "#3fe0c5",
+   "on": false,
+   "available": true,
+   "tip": "Zeitstempel, Suche, Erwähnungen.",
+   "hit": ""
+  },
+  {
+   "id": "info",
+   "name": "Blick-Info",
+   "icon": "info",
+   "accent": "#ffb547",
+   "on": false,
+   "available": true,
+   "tip": "Infos zu Block, Mob, Licht.",
+   "hit": ""
+  },
+  {
+   "id": "inventory",
+   "name": "Inventar",
+   "icon": "cube",
+   "accent": "#8b6cff",
+   "on": false,
+   "available": true,
+   "tip": "Shulker-Vorschau, Suche.",
+   "hit": ""
+  },
+  {
+   "id": "camera",
+   "name": "Kamera",
+   "icon": "eye",
+   "accent": "#3fe0c5",
+   "on": false,
+   "available": true,
+   "tip": "Freelook, Bewegungsunschärfe.",
+   "hit": ""
+  },
+  {
+   "id": "visuals",
+   "name": "Optik",
+   "icon": "sparkle",
+   "accent": "#ff5470",
+   "on": false,
+   "available": true,
+   "tip": "Item-Physik, Partikel.",
+   "hit": ""
+  },
+  {
+   "id": "servers",
+   "name": "Server",
+   "icon": "server",
+   "accent": "#8b6cff",
+   "on": false,
+   "available": false,
+   "tip": "Bessere Serverliste.",
+   "reason": "Eigene Mod installiert",
+   "hit": ""
+  }
+ ],
+ "creators": [
+  {
+   "id": "devlink",
+   "name": "Blockbench",
+   "icon": "code",
+   "accent": "#8b6cff",
+   "on": false,
+   "available": true,
+   "tip": "Live-Verbindung zu Blockbench.",
+   "hit": ""
+  }
+ ]
+}

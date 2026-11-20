@@ -1,0 +1,254 @@
+{
+ "view": "page",
+ "panel": "",
+ "query": "",
+ "status": "online",
+ "requests": 0,
+ "moreOpen": true,
+ "page": {
+  "id": "pvp",
+  "name": "PvP & View",
+  "icon": "crosshair",
+  "accent": "#ff5470",
+  "tip": "Zoom, Fadenkreuz, Dauersprint. Nichts Verbotenes.",
+  "on": true,
+  "available": true,
+  "notices": [],
+  "primary": {
+   "id": "editCrosshair",
+   "kind": "action",
+   "button": "Fadenkreuz bearbeiten"
+  },
+  "moreCount": 4,
+  "sections": [
+   {
+    "id": "zoom",
+    "title": "Zoom",
+    "rows": [
+     {
+      "id": "zoom",
+      "kind": "toggle",
+      "label": "Zoom",
+      "tip": "Taste halten zum Heranzoomen.",
+      "value": true,
+      "blocked": true
+     },
+     {
+      "id": "zoomLevel",
+      "kind": "slider",
+      "label": "Stärke",
+      "value": 4,
+      "min": 2,
+      "max": 10,
+      "step": 0.5,
+      "display": "4×"
+     },
+     {
+      "id": "zoomSmooth",
+      "kind": "toggle",
+      "label": "Weich",
+      "value": true
+     },
+     {
+      "id": "zoomKey",
+      "kind": "key",
+      "label": "Taste",
+      "value": 67,
+      "conflict": ""
+     }
+    ]
+   },
+   {
+    "id": "crosshair",
+    "title": "Fadenkreuz",
+    "rows": [
+     {
+      "id": "crosshair",
+      "kind": "choice",
+      "label": "Form",
+      "value": "cross",
+      "options": [
+       {
+        "value": "vanilla",
+        "label": "Vanilla"
+       },
+       {
+        "value": "cross",
+        "label": "Kreuz"
+       },
+       {
+        "value": "circle",
+        "label": "Kreis"
+       },
+       {
+        "value": "dot",
+        "label": "Punkt"
+       },
+       {
+        "value": "t",
+        "label": "T"
+       }
+      ]
+     },
+     {
+      "id": "chSize",
+      "kind": "slider",
+      "label": "Größe",
+      "value": 6,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "display": "6"
+     },
+     {
+      "id": "chColor",
+      "kind": "color",
+      "label": "Farbe",
+      "value": "#3fe0c5"
+     },
+     {
+      "id": "chDot",
+      "kind": "toggle",
+      "label": "Mittelpunkt",
+      "value": false
+     }
+    ]
+   },
+   {
+    "id": "movement",
+    "title": "Sprinten & Schleichen",
+    "rows": [
+     {
+      "id": "toggleSprint",
+      "kind": "toggle",
+      "label": "Dauersprint",
+      "tip": "Einmal drücken, weiter sprinten.",
+      "value": true
+     },
+     {
+      "id": "toggleSneak",
+      "kind": "toggle",
+      "label": "Dauerschleichen",
+      "tip": "Einmal drücken, weiter schleichen.",
+      "value": false
+     },
+     {
+      "id": "showToggleState",
+      "kind": "toggle",
+      "label": "Im HUD zeigen",
+      "value": true
+     }
+    ]
+   },
+   {
+    "id": "outline",
+    "title": "Blockrahmen",
+    "rows": [
+     {
+      "id": "outline",
+      "kind": "toggle",
+      "label": "Eigener Rahmen",
+      "value": true
+     },
+     {
+      "id": "outlineColor",
+      "kind": "color",
+      "label": "Farbe",
+      "value": "#8b6cff"
+     },
+     {
+      "id": "outlineWidth",
+      "kind": "slider",
+      "label": "Dicke",
+      "value": 2,
+      "min": 1,
+      "max": 5,
+      "step": 0.5,
+      "display": "2"
+     }
+    ]
+   },
+   {
+    "id": "view",
+    "title": "Ich-Perspektive",
+    "rows": [
+     {
+      "id": "lowFire",
+      "kind": "toggle",
+      "label": "Tiefes Feuer",
+      "tip": "Flammen sitzen tiefer beim Brennen.",
+      "value": true
+     },
+     {
+      "id": "lowShield",
+      "kind": "toggle",
+      "label": "Tiefer Schild",
+      "tip": "Schild wird tiefer gehalten.",
+      "value": false
+     },
+     {
+      "id": "outlineMode",
+      "kind": "choice",
+      "label": "Trefferfarbe",
+      "value": "red",
+      "options": [
+       {
+        "value": "red",
+        "label": "Rot"
+       },
+       {
+        "value": "custom",
+        "label": "Eigene"
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "more": [
+   {
+    "id": "advanced",
+    "title": "",
+    "rows": [
+     {
+      "id": "zoomTime",
+      "kind": "slider",
+      "label": "Zoom-Tempo",
+      "value": 0.2,
+      "min": 0,
+      "max": 1,
+      "step": 0.05,
+      "display": "0.2s"
+     },
+     {
+      "id": "zoomScrollStep",
+      "kind": "slider",
+      "label": "Mausrad-Schritt",
+      "value": 0.5,
+      "min": 0.1,
+      "max": 2,
+      "step": 0.1,
+      "display": "0.5"
+     },
+     {
+      "id": "zoomSensitivity",
+      "kind": "toggle",
+      "label": "Langsame Maus",
+      "tip": "Zielen fühlt sich gezoomt gleich an.",
+      "value": true
+     },
+     {
+      "id": "chDynamicAmount",
+      "kind": "slider",
+      "label": "Streuung",
+      "value": 2,
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "display": "2"
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,107 @@
+{
+ "firstRun": false,
+ "panel": "presets",
+ "snap": true,
+ "canUndo": true,
+ "canRedo": false,
+ "widgetCount": 4,
+ "selected": null,
+ "widgets": [
+  {
+   "id": "fps",
+   "name": "FPS",
+   "on": true,
+   "tip": "Bilder pro Sekunde.",
+   "count": 1
+  },
+  {
+   "id": "cps",
+   "name": "CPS",
+   "on": false,
+   "tip": "Klicks pro Sekunde.",
+   "count": 1
+  },
+  {
+   "id": "keystrokes",
+   "name": "Tastenanzeige",
+   "on": true,
+   "tip": "Tasten beim Drücken.",
+   "count": 1
+  },
+  {
+   "id": "coords",
+   "name": "Koordinaten",
+   "on": true,
+   "tip": "Position und Blickrichtung.",
+   "count": 1
+  },
+  {
+   "id": "armor",
+   "name": "Rüstung",
+   "on": false,
+   "tip": "Getragene Rüstung.",
+   "count": 1
+  },
+  {
+   "id": "effects",
+   "name": "Effekte",
+   "on": false,
+   "tip": "Trankeffekte.",
+   "count": 1
+  },
+  {
+   "id": "clock",
+   "name": "Uhr",
+   "on": true,
+   "tip": "Echte Uhrzeit.",
+   "count": 1
+  },
+  {
+   "id": "ping",
+   "name": "Ping",
+   "on": false,
+   "tip": "Server-Latenz.",
+   "count": 1
+  },
+  {
+   "id": "speed",
+   "name": "Tempo",
+   "on": false,
+   "tip": "Blöcke pro Sekunde.",
+   "count": 1
+  },
+  {
+   "id": "compass",
+   "name": "Kompass",
+   "on": false,
+   "tip": "Richtungsleiste.",
+   "count": 1
+  }
+ ],
+ "presets": [
+  {
+   "id": "pvp",
+   "name": "PvP",
+   "icon": "crosshair",
+   "tip": "FPS, CPS, keys, armour, effects."
+  },
+  {
+   "id": "minimal",
+   "name": "Minimal",
+   "icon": "eye",
+   "tip": "FPS, coordinates, time."
+  },
+  {
+   "id": "building",
+   "name": "Bauen",
+   "icon": "cube",
+   "tip": "Koordinaten, Kompass, Zeit."
+  },
+  {
+   "id": "streamer",
+   "name": "Streamer",
+   "icon": "play",
+   "tip": "Ohne Adresse, große Uhr."
+  }
+ ]
+}

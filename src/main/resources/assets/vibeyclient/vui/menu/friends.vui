@@ -1,0 +1,60 @@
+<import name="head" src="vibeyclient:components/head"/>
+<import name="chip" src="vibeyclient:components/chip"/>
+<import name="empty" src="vibeyclient:components/empty"/>
+<import name="spin" src="vibeyclient:components/spin"/>
+<import name="friend-row" src="vibeyclient:components/friend-row"/>
+<import name="icon-button" src="vibeyclient:components/icon-button"/>
+<template>
+  <column class="drawer">
+    <template v-if="account.state == 'ready'">
+      <row class="me">
+        <head :src="account.head" :size="16"/>
+        <column class="me-text">
+          <text class="me-name">{{ account.name }}</text>
+          <select class="me-status" v-model="account.status" :options="statusOptions"/>
+        </column>
+      </row>
+      <chip v-if="requests > 0" icon="friends" :on="true"
+            :label="requests == 1 ? t('ui.friends.request') : t('ui.friends.requests', requests)" @click="openInbox()"/>
+      <scroll class="friend-list">
+        <friend-row v-for="f in friendsOnline" :key="f.id" :f="f" @click="chat(f)"/>
+        <row v-if="len(friendsOffline) > 0" class="offline-head">
+          <chip :label="t('ui.friends.offline')" :count="len(friendsOffline)" :on="showOffline"
+                @click="showOffline = !showOffline"/>
+        </row>
+        <template v-if="showOffline">
+          <friend-row v-for="f in friendsOffline" :key="f.id" :f="f" @click="chat(f)"/>
+        </template>
+        <empty v-if="len(friendsOnline) + len(friendsOffline) == 0" icon="friends" :title="t('ui.friends.empty')"/>
+      </scroll>
+      <row class="drawer-foot">
+        <textfield v-if="adding" class="add-field" v-model.trim="addName" :placeholder="t('ui.friends.name')"
+                   max-length="16" @submit="addFriend(addName)"/>
+        <button v-else class="add" @click="adding = true">+ {{ t('ui.friends.add') }}</button>
+        <spacer/>
+        <icon-button icon="sliders" :tip="t('ui.friends.account')" @click="openAccount()"/>
+      </row>
+    </template>
+    <empty v-else-if="account.state == 'off'" icon="power" :title="t('ui.status.off')"
+           :action="t('ui.friends.turnOn')" @act="goOnline()"/>
+    <empty v-else-if="account.state == 'signedOut'" icon="person" :title="t('ui.status.signedOut')"
+           :action="t('ui.friends.signIn')" @act="signIn()"/>
+    <empty v-else-if="account.state == 'error'" kind="error" icon="warn" :title="t('ui.status.error')"
+           :action="t('ui.empty.retry')" @act="retry()"/>
+    <spin v-else :label="t('ui.status.connecting')"/>
+  </column>
+</template>
+<style>
+.drawer { position: absolute; anchor: top-right; left: 0; top: 0; width: 150; height: 100%; gap: 4; padding: 6;
+          background: $surface; border-left: 1 $line2; transition: translate-x 150ms out, opacity 150ms out; }
+.drawer:enter, .drawer:leave { translate-x: 12; opacity: 0; }
+.me { gap: 5; padding-bottom: 4; border-bottom: 1 $line; }
+.me-text { grow: 1; min-width: 0; gap: 2; }
+.me-name { color: $text; text-wrap: nowrap; text-overflow: ellipsis; }
+.me-status { height: 12; min-width: 0; }
+.friend-list { grow: 1; gap: 1; }
+.offline-head { padding: 3 0; }
+.drawer-foot { gap: 4; padding-top: 4; border-top: 1 $line; }
+.add { height: 14; }
+.add-field { width: 100; height: 14; }
+</style>
