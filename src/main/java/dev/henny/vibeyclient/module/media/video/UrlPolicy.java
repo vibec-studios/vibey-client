@@ -3,6 +3,7 @@ package dev.henny.vibeyclient.module.media.video;
 import java.net.InetAddress;
 import java.net.URI;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 /**
  * What we accept from OTHER players. Only http(s) URLs that point at a public host: no local files, no other
@@ -29,27 +30,29 @@ public final class UrlPolicy {
         return publicHost(host.toLowerCase(Locale.ROOT));
     }
 
+    private static final Pattern NUMERIC_LABEL = Pattern.compile("(0x[0-9a-f]*|[0-9]+)");
+    private static final Pattern DOTTED_QUAD = Pattern.compile("((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])[.]){3}"
+            + "(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])");
+
     static boolean publicHost(String host) {
-        if (host.startsWith("[") && host.endsWith("]")) host = host.substring(1, host.length() - 1);
-        if (host.equals("localhost") || host.endsWith(".localhost") || host.endsWith(".local") || host.endsWith(".lan")
-                || host.endsWith(".internal") || host.endsWith(".home.arpa") || !host.contains(".") && !host.contains(":")) {
-            return false;
-        }
-        if (looksLikeIp(host)) {
-            try {
-                // A literal is parsed without a DNS lookup.
-                InetAddress a = InetAddress.getByName(host);
-                return !(a.isLoopbackAddress() || a.isAnyLocalAddress() || a.isLinkLocalAddress() || a.isSiteLocalAddress()
-                        || a.isMulticastAddress() || isUniqueLocalV6(a) || isCgnat(a));
-            } catch (Exception e) {
-                return false;
-            }
-        }
-        return true;
+        if (host.startsWith("[") && host.endsWith("]")) return publicAddress(host.substring(1, host.length() - 1));
+        while (host.endsWith(".")) host = host.substring(0, host.length() - 1);
+        if (host.isEmpty() || host.contains(":")) return false;
+        String last = host.substring(host.lastIndexOf('.') + 1);
+        if (NUMERIC_LABEL.matcher(last).matches()) return DOTTED_QUAD.matcher(host).matches() && publicAddress(host);
+        return !(host.equals("localhost") || host.endsWith(".localhost") || host.endsWith(".local") || host.endsWith(".lan")
+                || host.endsWith(".internal") || host.endsWith(".home.arpa") || !host.contains("."));
     }
 
-    private static boolean looksLikeIp(String host) {
-        return host.contains(":") || host.chars().allMatch(c -> c == '.' || c >= '0' && c <= '9');
+    private static boolean publicAddress(String literal) {
+        if (!literal.contains(":") && !DOTTED_QUAD.matcher(literal).matches()) return false;
+        try {
+            InetAddress a = InetAddress.getByName(literal);
+            return !(a.isLoopbackAddress() || a.isAnyLocalAddress() || a.isLinkLocalAddress() || a.isSiteLocalAddress()
+                    || a.isMulticastAddress() || isUniqueLocalV6(a) || isCgnat(a));
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private static boolean isUniqueLocalV6(InetAddress a) {
