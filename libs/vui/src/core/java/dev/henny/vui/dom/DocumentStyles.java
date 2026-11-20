@@ -9,6 +9,7 @@ import dev.henny.vui.style.StyleResolver;
 import dev.henny.vui.style.StyleSheet;
 import dev.henny.vui.style.Theme;
 import dev.henny.vui.style.TransitionSpec;
+import dev.henny.vui.template.CompiledTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,11 +21,14 @@ public final class DocumentStyles {
     private final StyleResolver resolver;
     private final ComputedStyle scratch = ComputedStyle.initial();
     private final List<Element> animating = new ArrayList<>();
-    private final List<String> componentSheets = new ArrayList<>();
+    private final ComponentSheets componentSheets = new ComponentSheets();
+    private StyleSheet defaults;
+    private StyleSheet own;
     private boolean dirty = true;
     private boolean enterRules;
     private boolean leaveRules;
     private int descendantStates;
+    private boolean siblingRules;
     private int restyles;
 
     DocumentStyles(Document document, Theme theme) {
@@ -41,20 +45,24 @@ public final class DocumentStyles {
     }
 
     void sheets(StyleSheet defaults, StyleSheet own) {
-        resolver.clearSheets();
+        this.defaults = defaults;
+        this.own = own;
         componentSheets.clear();
-        resolver.addSheet(defaults);
-        resolver.addSheet(own);
-        scanRules();
+        order();
     }
 
-    void addComponentSheet(String id, StyleSheet sheet) {
-        if (componentSheets.contains(id)) return;
-        componentSheets.add(id);
-        List<StyleSheet> sheets = resolver.sheets();
-        sheets.add(Math.max(1, sheets.size() - 1), sheet);
-        scanRules();
+    void addComponentSheet(CompiledTemplate component) {
+        if (!componentSheets.add(component)) return;
+        order();
         invalidate();
+    }
+
+    private void order() {
+        resolver.clearSheets();
+        resolver.addSheet(defaults);
+        for (CompiledTemplate t : componentSheets.importsFirst()) resolver.addSheet(t.styles());
+        resolver.addSheet(own);
+        scanRules();
     }
 
     public boolean hasEnterRules() {
@@ -84,11 +92,22 @@ public final class DocumentStyles {
         boolean cascade = false;
         if (restyle) cascade = restyle(e, parentStyle) || e.flags().styleSubtree;
         if (cascade || e.flags().childStyle) {
-            for (int i = 0; i < e.childCount(); i++) visit(e.child(i), e.style(), cascade);
+            boolean after = false;
+            for (int i = 0; i < e.childCount(); i++) {
+                Element c = e.child(i);
+                if (after) c.flags().styleSubtree = true;
+                boolean changed = cascade || after || c.flags().style;
+                visit(c, e.style(), cascade || after);
+                after |= siblingRules && changed;
+            }
         }
         e.flags().style = false;
         e.flags().childStyle = false;
         e.flags().styleSubtree = false;
+    }
+
+    public boolean usesSiblings() {
+        return siblingRules;
     }
 
     public boolean statesAffectDescendants(int states) {
@@ -180,9 +199,11 @@ public final class DocumentStyles {
         enterRules = false;
         leaveRules = false;
         descendantStates = 0;
+        siblingRules = false;
         for (StyleSheet s : resolver.sheets()) {
             for (dev.henny.vui.style.Rule r : s.rules()) {
                 descendantStates |= r.selector().stateMaskOfAncestors();
+                siblingRules |= r.selector().usesSiblings();
                 int mask = r.selector().stateMaskOfSubject();
                 if ((mask & StateFlags.ENTER) != 0) enterRules = true;
                 if ((mask & StateFlags.LEAVE) != 0) leaveRules = true;

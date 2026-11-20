@@ -11,8 +11,8 @@ import static dev.henny.vui.style.Prop.BORDER_TOP;
 
 public final class Shorthands {
     private static final Set<String> NAMES = Set.of("padding", "margin", "gap", "border", "border-top", "border-right",
-            "border-bottom", "border-left", "border-width", "inset", "background", "flex", "size", "gradient", "padding-x",
-            "padding-y", "margin-x", "margin-y", "translate");
+            "border-bottom", "border-left", "border-width", "border-color", "inset", "background", "flex", "size", "gradient",
+            "padding-x", "padding-y", "margin-x", "margin-y", "translate", "grid-column", "grid-row");
 
     private Shorthands() {
     }
@@ -29,14 +29,16 @@ public final class Shorthands {
     }
 
     public static List<Prop> longhandsOf(String name) {
+        List<Prop> border = BorderShorthands.longhandsOf(name);
+        if (border != null) return border;
         Prop single = Prop.byName(name);
         if (single != null) return List.of(single);
         return switch (name) {
             case "padding" -> List.of(Prop.PADDING_TOP, Prop.PADDING_RIGHT, Prop.PADDING_BOTTOM, Prop.PADDING_LEFT);
             case "margin" -> List.of(Prop.MARGIN_TOP, Prop.MARGIN_RIGHT, Prop.MARGIN_BOTTOM, Prop.MARGIN_LEFT);
             case "gap" -> List.of(Prop.ROW_GAP, Prop.COLUMN_GAP);
-            case "border" -> List.of(BORDER_TOP, BORDER_RIGHT, BORDER_BOTTOM, BORDER_LEFT, Prop.BORDER_COLOR);
-            case "border-width" -> List.of(BORDER_TOP, BORDER_RIGHT, BORDER_BOTTOM, BORDER_LEFT);
+            case "grid-column" -> List.of(Prop.GRID_COLUMN_SPAN);
+            case "grid-row" -> List.of(Prop.GRID_ROW_SPAN);
             case "inset" -> List.of(Prop.TOP, Prop.RIGHT, Prop.BOTTOM, Prop.LEFT);
             case "background" -> List.of(Prop.BACKGROUND, Prop.GRADIENT_TO);
             case "size" -> List.of(Prop.WIDTH, Prop.HEIGHT);
@@ -48,6 +50,7 @@ public final class Shorthands {
     public static List<Longhand> expand(String name, String value) {
         List<Longhand> out = new ArrayList<>();
         List<String> w = CssValues.words(value);
+        if (BorderShorthands.expand(name, w, out)) return out;
         switch (name) {
             case "padding" -> box(out, w, Prop.PADDING_TOP, Prop.PADDING_RIGHT, Prop.PADDING_BOTTOM, Prop.PADDING_LEFT);
             case "margin" -> box(out, w, Prop.MARGIN_TOP, Prop.MARGIN_RIGHT, Prop.MARGIN_BOTTOM, Prop.MARGIN_LEFT);
@@ -60,11 +63,8 @@ public final class Shorthands {
             case "gap" -> two(out, w, Prop.ROW_GAP, Prop.COLUMN_GAP);
             case "size" -> two(out, w, Prop.WIDTH, Prop.HEIGHT);
             case "translate" -> two(out, w, Prop.TRANSLATE_X, Prop.TRANSLATE_Y);
-            case "border" -> border(out, w, BORDER_TOP, BORDER_RIGHT, BORDER_BOTTOM, BORDER_LEFT);
-            case "border-top" -> border(out, w, BORDER_TOP);
-            case "border-right" -> border(out, w, BORDER_RIGHT);
-            case "border-bottom" -> border(out, w, BORDER_BOTTOM);
-            case "border-left" -> border(out, w, BORDER_LEFT);
+            case "grid-column" -> span(out, w, Prop.GRID_COLUMN_SPAN);
+            case "grid-row" -> span(out, w, Prop.GRID_ROW_SPAN);
             case "background", "gradient" -> background(out, w);
             case "flex" -> flex(out, w);
             default -> throw new StyleError("unknown shorthand '" + name + "'", null);
@@ -96,18 +96,10 @@ public final class Shorthands {
         out.add(new Longhand(second, w.size() > 1 ? w.get(1) : w.get(0)));
     }
 
-    private static void border(List<Longhand> out, List<String> w, Prop... sides) {
-        String width = null;
-        String color = null;
-        for (String word : w) {
-            if (ColorParser.looksLikeColor(word)) color = word;
-            else if (word.equals("none")) width = "0";
-            else if (!word.equals("solid")) width = word;
-        }
-        if (width == null && color == null) throw new StyleError("border needs a width and/or a color", "e.g. border: 1 $line");
-        if (width == null) width = "1";
-        for (Prop side : sides) out.add(new Longhand(side, width));
-        if (color != null) out.add(new Longhand(Prop.BORDER_COLOR, color));
+    private static void span(List<Longhand> out, List<String> w, Prop prop) {
+        String n = w.size() == 2 && w.get(0).equals("span") ? w.get(1) : w.size() == 1 ? w.get(0) : null;
+        if (n == null) throw new StyleError("expected 'span n'", "e.g. grid-column: span 2");
+        out.add(new Longhand(prop, n));
     }
 
     private static void background(List<Longhand> out, List<String> w) {

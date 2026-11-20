@@ -11,7 +11,8 @@ public final class PropertyNames {
             entry("background", "background"), entry("bg", "background"), entry("columns", "grid-columns"),
             entry("min-column", "grid-min-column"), entry("font-size", "font-scale"), entry("accent", "accent-color"),
             entry("text-color", "color"), entry("x", "left"), entry("y", "top"), entry("flex-direction", "display"),
-            entry("border-width", "border-width"), entry("white-space", "text-wrap"));
+            entry("border-width", "border-width"), entry("white-space", "text-wrap"),
+            entry("col-span", "grid-column"), entry("row-span", "grid-row"), entry("ratio", "aspect-ratio"));
 
     private PropertyNames() {
     }

@@ -1,6 +1,7 @@
 package dev.henny.vui.dom.build;
 
 import dev.henny.vui.bind.Action;
+import dev.henny.vui.bind.Effect;
 import dev.henny.vui.dom.Element;
 import dev.henny.vui.dom.StaticChild;
 import dev.henny.vui.expr.Scope;
@@ -41,9 +42,10 @@ public final class ComponentBuilder {
         defaults[propNames.size()] = (Action) args -> emit(hostRef[0], args);
         VarScope props = new VarScope(host.rootScope(), names, defaults);
         Fallthrough fallthrough = Fallthrough.split(usage, propNames);
+        List<Effect> bound = fallthrough.bindProps(this, props, usageScope, propNames);
         Element root = buildRoot(t, props, Slots.collect(usage, usageScope, usageCtx));
         hostRef[0] = root;
-        fallthrough.bindProps(this, root, props, usageScope, propNames);
+        fallthrough.attach(this, root, bound, usageScope, propNames);
         fallthrough.apply(tree, root, usageScope);
         return root;
     }

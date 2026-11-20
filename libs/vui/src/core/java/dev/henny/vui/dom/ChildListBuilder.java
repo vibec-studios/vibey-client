@@ -21,9 +21,12 @@ final class ChildListBuilder {
         children.addAll(next);
         next.clear();
         int last = children.size() - 1;
+        boolean siblings = changed && parent.document() != null && parent.document().styles().usesSiblings();
         for (int i = 0; i <= last; i++) {
             Element c = children.get(i);
             c.parent(parent);
+            c.siblingIndex = i;
+            if (siblings) c.markSubtreeStyleDirty();
             if (c.document() != parent.document()) c.attach(parent.document());
             if (!c.flags().styledOnce) c.markStyleDirty();
             c.state(StateFlags.FIRST, i == 0);

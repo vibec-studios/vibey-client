@@ -6,6 +6,7 @@ import dev.henny.vui.style.Prop;
 
 final class GridLayout {
     private final LayoutEngine engine;
+    private final GridPlacement grid = new GridPlacement();
 
     GridLayout(LayoutEngine engine) {
         this.engine = engine;
@@ -15,36 +16,11 @@ final class GridLayout {
         ComputedStyle s = e.style();
         float colGap = Lengths.orZero(s, Prop.COLUMN_GAP, innerMaxW);
         float rowGap = Lengths.orZero(s, Prop.ROW_GAP, innerMaxW);
-        if (!Float.isFinite(innerMaxW)) {
-            float widest = 0;
-            for (int i = 0; i < e.childCount(); i++) {
-                Element c = e.child(i);
-                if (!Flow.inFlow(c)) continue;
-                engine.measure(c, Float.POSITIVE_INFINITY, innerMaxH);
-                widest = Math.max(widest, Flow.outerWidth(c.box(), c.box().measuredWidth));
-            }
-            innerMaxW = widest * Math.max(1, columns(s, widest * 4, colGap)) + colGap * 3;
-        }
+        if (!Float.isFinite(innerMaxW)) innerMaxW = naturalWidth(e, s, innerMaxH, colGap);
         int cols = columns(s, innerMaxW, colGap);
         float cell = cellWidth(innerMaxW, cols, colGap);
-        float height = 0;
-        float rowHeight = 0;
-        int col = 0;
-        int rows = 0;
-        for (int i = 0; i < e.childCount(); i++) {
-            Element c = e.child(i);
-            if (!Flow.inFlow(c)) continue;
-            engine.measure(c, cell, Float.POSITIVE_INFINITY);
-            rowHeight = Math.max(rowHeight, Flow.outerHeight(c.box(), c.box().measuredHeight));
-            if (++col == cols) {
-                height += rowHeight + (rows > 0 ? rowGap : 0);
-                rows++;
-                rowHeight = 0;
-                col = 0;
-            }
-        }
-        if (col > 0) height += rowHeight + (rows > 0 ? rowGap : 0);
-        out.set(innerMaxW, height);
+        rowHeights(e, cols, cell, colGap, rowGap, false);
+        out.set(innerMaxW, grid.totalHeight(rowGap));
     }
 
     void arrange(Element e) {
@@ -55,46 +31,55 @@ final class GridLayout {
         float rowGap = Lengths.orZero(s, Prop.ROW_GAP, iw);
         int cols = columns(s, iw, colGap);
         float cell = cellWidth(iw, cols, colGap);
-        float y = b.innerY();
-        int rowStart = 0;
-        int col = 0;
-        float rowHeight = 0;
-        for (int i = 0; i <= e.childCount(); i++) {
-            boolean end = i == e.childCount();
-            if (!end) {
-                Element c = e.child(i);
-                if (!Flow.inFlow(c)) continue;
-                engine.measure(c, cell, Float.POSITIVE_INFINITY);
-                float h = Lengths.resolve(c.style(), Prop.HEIGHT, Float.NaN);
-                rowHeight = Math.max(rowHeight, Flow.outerHeight(c.box(), Float.isNaN(h) ? c.box().measuredHeight : h));
-                col++;
-            }
-            if (col == cols || end && col > 0) {
-                placeRow(e, rowStart, end ? i : i + 1, y, cell, colGap, rowHeight);
-                y += rowHeight + rowGap;
-                rowStart = i + 1;
-                col = 0;
-                rowHeight = 0;
+        rowHeights(e, cols, cell, colGap, rowGap, true);
+        for (int k = 0; k < grid.count; k++) {
+            Element c = e.child(grid.child[k]);
+            LayoutBox cb = c.box();
+            float area = grid.spanHeight(k, rowGap);
+            boolean stretch = Flow.align(c, e).equals("stretch") && !AspectRatio.has(c);
+            float h = Lengths.resolve(c.style(), Prop.HEIGHT, area);
+            if (Float.isNaN(h)) h = stretch ? area - cb.marginTop - cb.marginBottom : cb.measuredHeight;
+            float x = b.innerX() + grid.col[k] * (cell + colGap) + cb.marginLeft;
+            float y = b.innerY() + grid.rowTop(grid.row[k], rowGap) + cb.marginTop;
+            float w = grid.spanWidth(k, cell, colGap) - cb.marginLeft - cb.marginRight;
+            engine.arrange(c, x, y, w, h);
+            engine.extend(b, x + w + cb.marginRight, y + h + cb.marginBottom);
+        }
+    }
+
+    private void rowHeights(Element e, int cols, float cell, float colGap, float rowGap, boolean fixedHeights) {
+        grid.place(e, cols);
+        grid.clearHeights();
+        for (int pass = 0; pass < 2; pass++) {
+            for (int k = 0; k < grid.count; k++) {
+                boolean single = grid.rowSpan[k] == 1;
+                if (single != (pass == 0)) continue;
+                Element c = e.child(grid.child[k]);
+                engine.measure(c, grid.spanWidth(k, cell, colGap), Float.POSITIVE_INFINITY);
+                float h = fixedHeights ? Lengths.resolve(c.style(), Prop.HEIGHT, Float.NaN) : Float.NaN;
+                float outer = Flow.outerHeight(c.box(), Float.isNaN(h) ? c.box().measuredHeight : h);
+                if (single) grid.rowHeight[grid.row[k]] = Math.max(grid.rowHeight[grid.row[k]], outer);
+                else spread(k, outer, rowGap);
             }
         }
     }
 
-    private void placeRow(Element e, int from, int to, float y, float cell, float colGap, float rowHeight) {
-        LayoutBox b = e.box();
-        int col = 0;
-        for (int i = from; i < to; i++) {
+    private void spread(int k, float outer, float rowGap) {
+        float have = grid.spanHeight(k, rowGap);
+        if (outer <= have) return;
+        float extra = (outer - have) / grid.rowSpan[k];
+        for (int r = grid.row[k]; r < grid.row[k] + grid.rowSpan[k]; r++) grid.rowHeight[r] += extra;
+    }
+
+    private float naturalWidth(Element e, ComputedStyle s, float innerMaxH, float colGap) {
+        float widest = 0;
+        for (int i = 0; i < e.childCount(); i++) {
             Element c = e.child(i);
             if (!Flow.inFlow(c)) continue;
-            LayoutBox cb = c.box();
-            boolean stretch = Flow.align(c, e).equals("stretch");
-            float h = Lengths.resolve(c.style(), Prop.HEIGHT, rowHeight);
-            if (Float.isNaN(h)) h = stretch ? rowHeight - cb.marginTop - cb.marginBottom : cb.measuredHeight;
-            float x = b.innerX() + col * (cell + colGap) + cb.marginLeft;
-            float w = cell - cb.marginLeft - cb.marginRight;
-            engine.arrange(c, x, y + cb.marginTop, w, h);
-            engine.extend(b, x + w + cb.marginRight, y + cb.marginTop + h + cb.marginBottom);
-            col++;
+            engine.measure(c, Float.POSITIVE_INFINITY, innerMaxH);
+            widest = Math.max(widest, Flow.outerWidth(c.box(), c.box().measuredWidth));
         }
+        return widest * Math.max(1, columns(s, widest * 4, colGap)) + colGap * 3;
     }
 
     private static int columns(ComputedStyle s, float width, float gap) {
