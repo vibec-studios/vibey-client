@@ -46,7 +46,7 @@ final class ShotLibrary {
     boolean toggleFavourite(String name) {
         boolean on = favourites.toggle(name);
         String json = favourites.toJson();
-        Tasks.run(() -> ShotFiles.saveFavourites(json));
+        Tasks.inOrder(() -> ShotFiles.saveFavourites(json));
         listener.run();
         return on;
     }
@@ -54,7 +54,7 @@ final class ShotLibrary {
     void delete(Shot s) {
         favourites.forget(s.name());
         String json = favourites.toJson();
-        Tasks.run(() -> {
+        Tasks.inOrder(() -> {
             ShotFiles.delete(s);
             ShotFiles.saveFavourites(json);
             Tasks.onMain(this::rescan);

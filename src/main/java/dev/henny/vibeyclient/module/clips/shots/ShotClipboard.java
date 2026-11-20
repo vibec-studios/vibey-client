@@ -5,9 +5,16 @@ import dev.henny.vibeyclient.Vibey;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 final class ShotClipboard {
+    static final ExecutorService THREAD = Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "VibeyClient-Clipboard");
+        t.setDaemon(true);
+        return t;
+    });
     private static final String ENV = "VIBEY_SHOT";
     private static final String WINDOWS = "Add-Type -AssemblyName System.Windows.Forms; Add-Type -AssemblyName System.Drawing; "
             + "$i=[System.Drawing.Image]::FromFile($env:VIBEY_SHOT); [System.Windows.Forms.Clipboard]::SetImage($i); $i.Dispose()";
