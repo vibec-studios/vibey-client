@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import dev.henny.vibeyclient.BuildInfo;
 import dev.henny.vibeyclient.api.GlobalSettings;
 import dev.henny.vibeyclient.api.Lang;
+import dev.henny.vibeyclient.api.ServerRules;
 import dev.henny.vibeyclient.api.Services;
 import dev.henny.vibeyclient.api.privacy.Privacy;
 import dev.henny.vibeyclient.api.service.HostingService;
@@ -63,7 +64,8 @@ public final class DiscordPresence {
             startedAt = System.currentTimeMillis();
         }
         RpcInputs in = new RpcInputs(module.showPresence.on(), module.presence().effectiveStatus(), place, server,
-                module.discordServer.on() && !module.hideServerAddress.on(), Privacy.hideServer(), startedAt,
+                module.discordServer.on() && !module.hideServerAddress.on() && !ServerRules.isDisabled("discord.server"),
+                Privacy.hideServer(), startedAt,
                 "Vibey Client " + BuildInfo.VERSION + " · " + BuildInfo.MINECRAFT);
         return RpcPayload.build(in, labels());
     }

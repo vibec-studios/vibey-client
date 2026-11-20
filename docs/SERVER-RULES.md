@@ -104,7 +104,7 @@ log-hello: true      # log who announced Vibey Client and which keys their clien
 5. Staff that should keep everything: give them `vibeyrules.bypass` (nobody has it by default, not even operators).
 
 The log then shows lines like
-`[VibeyRules] Alex announced vibey:hello: vibey-client 0.3.0, supports [zoom, freelook, …] (does not know: [minimap])`.
+`[VibeyRules] Alex announced vibey:hello: vibey-client 0.3.0, supports [zoom, freelook, …] (does not know: [waypoints.minimap])`.
 
 ## Fabric / NeoForge servers
 
