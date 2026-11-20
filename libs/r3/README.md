@@ -85,6 +85,8 @@ This exact flow runs as a unit test: `ReadmeExampleTest`.
 | `persist` | Gson placement records per world/server |
 | `sync` | shared objects over a `SyncChannel`, conflict rule |
 | `scene` | `R3Scene`: registry, update, culling, input routing, render order |
+| `vui` | `VuiPanelContent`: a vui document as panel content (controls = elements with an id or `@click`) |
+| `mc` (backend jar) | the Minecraft side for every version, facade `R3Mc`, `/r3 demo` – see [minecraft.md](docs/minecraft.md) |
 
 ## Guides
 
@@ -93,7 +95,8 @@ This exact flow runs as a unit test: `ReadmeExampleTest`.
 - [text3d.md](docs/text3d.md) – 3D text, facing, sizes, glow/depth, glyph effects
 - [effects.md](docs/effects.md) – particles and other effects, budget, no-allocation rules
 - [persistence.md](docs/persistence.md) – saving placements, sharing with other players, conflict rule
-- [backend.md](docs/backend.md) – what a Minecraft version backend implements
+- [minecraft.md](docs/minecraft.md) – using r3 from a mod: facade, vui panels, input, storage, rendering
+- [backend.md](docs/backend.md) – what a Minecraft version backend implements (and its status)
 - [parity.md](docs/parity.md) – how r3 covers today's video screens, world lyrics and cosmetic effects
 
 ## Building the core without Gradle

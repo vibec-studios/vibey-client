@@ -62,6 +62,18 @@ r3 (media, cosmetico), "backend" = the r3 MC backend.
 | Directions relative to the body yaw | `Emitter.localVelocity(true)` + object orientation (`Facing.ENTITY_YAW` or bone pose) |
 | Partial-tick interpolation | simulated per frame with real dt (not needed) |
 
+## Minecraft backend (done)
+
+| Today | r3 backend |
+|---|---|
+| Video: `WorldRenderEvents.BEFORE_ENTITIES` + submit collector (1.21.11 only) | every target: Fabric `AFTER_ENTITIES` < 1.21.9, `submitEntities` mixin ≥ 1.21.9 (Fabric and NeoForge) |
+| Lyrics: `WorldSink` per version (buffer source / submit collector) | `McWorldCanvas` + `DrawSink`, same render types (`text`, `lightning`) plus `eyes` for textured additive |
+| Bezel/back plate drawn with both windings | every quad is turned to the camera; no culling issues for mirrored panels |
+| Clicks swallowed at `START_CLIENT_TICK`, wheel undone via the hotbar slot | mouse/scroll/key mixins cancel at the source; tick guard drops queued clicks while hovering |
+| Placement R key read with `isKeyDown` | key events routed to the scene (`ROTATE`), letters follow the keyboard layout |
+| `LevelRenderer.getLightColor` 0.3 in front | `McWorldQuery.lightAt` (block + sky light at that block) |
+| `sp:<level>` / `mp:<ip>` keys, own JSON per feature | `WorldKeyResolver` + `config/r3/worlds/<key>.json` (`PlacementStore`) |
+
 ## Gaps (not in r3, on purpose or for later)
 
 - **Lyrics "follow softly" (30° recenter) and "looking down lowers the text"**: not built-in; small custom
@@ -74,4 +86,10 @@ r3 (media, cosmetico), "backend" = the r3 MC backend.
 - **Bone locators** (particles at a bone): cosmetico sets the object transform each frame (custom `Anchor`).
 - **Block removed under a screen**: anchors do not check that the block still exists (today neither).
 - **Keyboard input to panels** (text fields, *Use page*): r3 routes pointer events only; keys stay with the UI lib.
+- **Frustum**: the backend culls with a camera cone (`CameraFrustum`, options fov + 12°), not the game's frustum –
+  slightly more objects are updated than needed, nothing visible is culled.
+- **Panel layering**: panels are direct quads (no render-to-texture); draw calls are separated by tiny z steps and
+  scissors clip on the CPU (text glyph by glyph), so very long documents (> 160 draw calls) share the last layer.
+- **Pause screen**: the scene keeps updating hover while a screen is open but gets no presses; a grab in progress
+  ends on the next release.
 - **Ghost look while placing**: the outline replaces the old translucent plate.

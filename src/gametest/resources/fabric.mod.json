@@ -22,7 +22,8 @@
       "dev.henny.vibeyclient.gametest.PlayLinksGameTest",
       "dev.henny.vibeyclient.gametest.HudGameTest",
       "dev.henny.vibeyclient.gametest.NoticesGameTest",
-      "dev.henny.vibeyclient.gametest.RanksGameTest"
+      "dev.henny.vibeyclient.gametest.RanksGameTest",
+      "dev.henny.vibeyclient.gametest.R3GameTest"
     ]
   },
   "depends": {
