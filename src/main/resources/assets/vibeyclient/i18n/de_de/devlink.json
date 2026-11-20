@@ -1,5 +1,5 @@
 {
-  "name": "Blockbench-Link",
+  "name": "Blockbench",
   "description": "Live-Verbindung zu Blockbench zum Erstellen von Cosmetics und Emotes.",
   "summary": "Modelle live aus Blockbench schicken.",
   "setting": {

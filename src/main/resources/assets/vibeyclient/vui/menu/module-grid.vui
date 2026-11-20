@@ -4,15 +4,15 @@
 <template>
   <scroll class="grid-scroll">
     <grid class="tiles" min-column="128" gap="3">
-      <tile v-for="m in modules" :key="m.id" :m="m" @click="open(m)"/>
+      <tile v-for="m in modules" :key="m.id" :id="'tile-' + m.id" :m="m" @click="open(m)"/>
     </grid>
     <empty v-if="len(modules) == 0" icon="search" :title="t('ui.menu.noResults')"/>
     <row v-if="len(creators) > 0" class="grid-foot">
-      <chip icon="cube" :label="t('ui.menu.creators')" :count="len(creators)" :on="showCreators"
+      <chip id="creators" icon="cube" :label="t('ui.menu.creators')" :count="len(creators)" :on="showCreators"
             :tip="t('ui.menu.creatorsTip')" @click="showCreators = !showCreators"/>
     </row>
     <grid v-if="showCreators" class="tiles" min-column="128" gap="3">
-      <tile v-for="m in creators" :key="m.id" :m="m" @click="open(m)"/>
+      <tile v-for="m in creators" :key="m.id" :id="'tile-' + m.id" :m="m" @click="open(m)"/>
     </grid>
   </scroll>
 </template>

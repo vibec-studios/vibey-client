@@ -57,6 +57,11 @@ public final class WardrobeUi {
 
     static void openWardrobe(Screen parent, Category category) {
         Lang.addFile("wardrobe");
+        if (!dev.henny.vibeyclient.ui.vui.ClassicUi.enabled()) {
+            String slot = category == null ? null : category.name().toLowerCase(java.util.Locale.ROOT);
+            dev.henny.vibeyclient.module.cosmetics.vui.WardrobeVui.open(parent, slot);
+            return;
+        }
         ClientCompat.openScreen(new WardrobeScreen(parent, category));
     }
 
@@ -81,6 +86,7 @@ public final class WardrobeUi {
     /** True while one of the wardrobe screens (wardrobe, wheel, editor) is open. */
     public static boolean isOpen() {
         Screen s = ClientCompat.screen();
-        return s instanceof WardrobeScreen || s instanceof EmoteWheelScreen || s instanceof WheelEditorScreen;
+        return s instanceof WardrobeScreen || s instanceof EmoteWheelScreen || s instanceof WheelEditorScreen
+                || s instanceof dev.henny.vibeyclient.module.cosmetics.vui.WardrobeVui;
     }
 }

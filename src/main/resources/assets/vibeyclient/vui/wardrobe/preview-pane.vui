@@ -1,7 +1,7 @@
 <import name="icon-button" src="vibeyclient:components/icon-button"/>
 <template>
   <column class="pv">
-    <stack ref="stage" class="pv-stage" :tooltip="t('ui.wardrobe.rotate')" @drag="rotate($event.dx(), $event.dy())" @dblclick="resetView()">
+    <stack ref="stage" class="pv-stage" :tooltip="t('ui.wardrobe.rotate')" @dblclick="resetView()">
       <image v-if="stillImage" :src="stillImage" fit="contain"/>
     </stack>
     <column v-if="current" class="pv-info">

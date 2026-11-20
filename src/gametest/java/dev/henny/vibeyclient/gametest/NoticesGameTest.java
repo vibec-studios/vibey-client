@@ -8,10 +8,8 @@ import dev.henny.vibeyclient.BuildInfo;
 import dev.henny.vibeyclient.api.GlobalSettings;
 import dev.henny.vibeyclient.backend.DomainMove;
 import dev.henny.vibeyclient.backend.Notices;
-import dev.henny.vibeyclient.ui.VibeyScreen;
-import dev.henny.vibeyclient.ui.VibeyTabs;
 import dev.henny.vibeyclient.ui.notice.Announcements;
-import dev.henny.vibeyclient.ui.notice.NoticeCards;
+import dev.henny.vibeyclient.ui.vui.Menus;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.minecraft.client.gui.screens.TitleScreen;
@@ -119,9 +117,10 @@ public final class NoticesGameTest implements FabricClientGameTest {
             throw new AssertionError("bad announcements request: " + req);
         log("request " + q);
 
-        ctx.setScreen(() -> new VibeyScreen(new TitleScreen(), VibeyTabs.GENERAL));
+        UiTest ui = new UiTest(ctx, "ui-new");
+        ctx.runOnClient(mc -> Menus.openQuick(new TitleScreen()));
         ctx.waitTicks(15);
-        if (!NoticeCards.DISMISS_BOUNDS.containsKey(BUILTIN)) throw new AssertionError("no card for the built-in notice");
+        if (!ui.has("dismiss-" + BUILTIN)) throw new AssertionError("no row for the built-in notice in the quick settings");
         ctx.takeScreenshot("notice_2_builtin_card");
         ctx.runOnClient(mc -> GlobalSettings.language.set(GlobalSettings.Language.GERMAN));
         ctx.waitTicks(10);
@@ -160,12 +159,13 @@ public final class NoticesGameTest implements FabricClientGameTest {
         if (!toasts.equals(List.of(BUILTIN, "test-remote"))) throw new AssertionError("toasts: " + toasts);
         log("remote shown once, hidden: expired, max_version 0.0.1, launcher only; toasts " + toasts);
 
-        ctx.setScreen(() -> new VibeyScreen(new TitleScreen(), VibeyTabs.GENERAL));
+        ctx.runOnClient(mc -> Menus.openQuick(new TitleScreen()));
         ctx.waitTicks(15);
+        if (!ui.has("dismiss-test-remote")) throw new AssertionError("no row for the remote notice");
         ctx.takeScreenshot("notice_4_two_cards");
 
-        // ---- dismiss the built-in card with a click; still dismissed after reading core.json again
-        int[] b = ctx.computeOnClient(mc -> NoticeCards.DISMISS_BOUNDS.get(BUILTIN));
+        // ---- dismiss the built-in notice with a click; still dismissed after reading core.json again
+        float[] b = ui.box("dismiss-" + BUILTIN);
         if (b == null) throw new AssertionError("no dismiss button");
         click(ctx, b[0] + b[2] / 2.0, b[1] + b[3] / 2.0);
         ctx.waitTicks(10);

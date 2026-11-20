@@ -59,13 +59,15 @@
     "language.english": "English",
     "onlineFeatures": "Online-Funktionen",
     "onlineFeatures.desc": "Freunde, Chat und Cosmetics, die andere sehen. Aus: Vibey verbindet sich mit nichts.",
-    "launcherStatus": "Dem Launcher zeigen, was ich spiele",
+    "launcherStatus": "Launcher-Status",
     "launcherStatus.desc": "Für den Discord-Status des Vibe Launchers: deine Welt, der Server und der Einladungslink. Bleibt auf diesem PC.",
     "animations": "Animationen",
     "animations.desc": "Weiche Übergänge in den Vibey-Menüs.",
     "open_menu": "Vibey-Menü öffnen",
     "backendUrl": "Vibe-Serveradresse",
     "backendUrl.desc": "Nur ändern, wenn du einen eigenen Vibe-Server betreibst.",
+    "classicUi": "Klassische Menüs",
+    "classicUi.desc": "Alte Vibey-Menüs statt der neuen.",
     "resetBackend": "Standard-Serveradresse",
     "resetBackend.button": "Zurücksetzen",
     "uiScale": "Menügröße",
@@ -73,7 +75,8 @@
     "uiScale.game": "Auto",
     "uiScale.x2": "2×",
     "uiScale.x3": "3×",
-    "uiScale.x4": "4×"
+    "uiScale.x4": "4×",
+    "open_menu.desc": "Vibey-Menü öffnen"
   },
   "title": {
     "wardrobe": "Garderobe",

@@ -10,7 +10,6 @@ import dev.henny.vibeyclient.api.net.VibeyNet;
 import dev.henny.vibeyclient.module.BuiltinModules;
 import dev.henny.vibeyclient.net.NetDispatch;
 import dev.henny.vibeyclient.ui.Gfx;
-import dev.henny.vibeyclient.ui.VibeyScreen;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -35,12 +34,14 @@ public final class VibeyCore {
         dev.henny.vibeyclient.ui.notice.Announcements.init();
         GlobalSettings.openMenu.onPress(VibeyCore::openMenu);
         dev.henny.vibeyclient.ui.toast.ToastHooks.init();
+        dev.henny.vibeyclient.ui.vui.toast.VuiToasts.init();
         dev.henny.vibeyclient.ui.title.CoreMenus.register();
         BuiltinModules.registerAll(ModuleManager.get());
         ModuleManager.get().load();
         ServerRulesClient.init();
         NetDispatch.setClientHandler(VibeyNet::handle);
         dev.henny.vibeyclient.dev.DevDriver.startIfRequested();
+        if (Integer.getInteger("vibeyclient.devDriver") != null) dev.henny.vibeyclient.ui.vui.DevUiCommands.register();
         dev.henny.vibeyclient.launcher.LauncherStatus.init(Vibey.platform().gameDir());
         Vibey.LOG.info("Vibey Client core ready, {} modules", ModuleManager.get().all().size());
     }
@@ -50,8 +51,8 @@ public final class VibeyCore {
     }
 
     public static void openMenu() {
-        if (ClientCompat.screen() instanceof VibeyScreen) return;
-        ClientCompat.openScreen(new VibeyScreen(ClientCompat.screen()));
+        if (dev.henny.vibeyclient.ui.vui.Menus.isOpen()) return;
+        dev.henny.vibeyclient.ui.vui.Menus.open(ClientCompat.screen());
     }
 
     // ============================================================================================ hooks
@@ -69,6 +70,7 @@ public final class VibeyCore {
         dev.henny.vibeyclient.launcher.LauncherStatus.tick();
         dev.henny.vibeyclient.ui.notice.Announcements.tick();
         dev.henny.vibeyclient.ui.title.UiShot.tick();
+        dev.henny.vibeyclient.ui.vui.corner.Decorations.tick();
         dev.henny.vibeyclient.dev.DevTour.tick();
         dev.henny.vibeyclient.dev.ClickTest.tick();
     }

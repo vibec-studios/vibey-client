@@ -1,4 +1,7 @@
 <import name="ico" src="vibeyclient:components/ico"/>
+<contract>
+{ "fields": { "confirm": "object" }, "actions": ["accept", "cancel"] }
+</contract>
 <template>
   <modal :open="confirm.open" @close="cancel()">
     <column class="confirm">

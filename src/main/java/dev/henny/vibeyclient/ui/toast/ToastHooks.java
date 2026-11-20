@@ -49,10 +49,10 @@ public final class ToastHooks {
             *///?} else
             ScreenEvents.afterRender(screen).register((s, g, mx, my, d) -> afterScreen(s, new Gfx(g, mc.font), mx, my));
             //? if >=1.21.9 {
-            ScreenMouseEvents.allowMouseClick(screen).register((s, e) -> !ToastStack.click(e.x(), e.y(), dev.henny.vibeyclient.client.Keys.mouseFromNative(e.button())));
+            ScreenMouseEvents.allowMouseClick(screen).register((s, e) -> !click(e.x(), e.y(), dev.henny.vibeyclient.client.Keys.mouseFromNative(e.button())));
             ScreenKeyboardEvents.afterKeyPress(screen).register((s, e) -> screenKey(s, e.key()));
             //?} else {
-            /*ScreenMouseEvents.allowMouseClick(screen).register((s, x, y, b) -> !ToastStack.click(x, y, b));
+            /*ScreenMouseEvents.allowMouseClick(screen).register((s, x, y, b) -> !click(x, y, b));
             ScreenKeyboardEvents.afterKeyPress(screen).register((s, key, scan, mods) -> screenKey(s, key));
             *///?}
         });
@@ -60,7 +60,7 @@ public final class ToastHooks {
         /*NeoForge.EVENT_BUS.addListener((ScreenEvent.Render.Post e) ->
                 afterScreen(e.getScreen(), new Gfx(e.getGuiGraphics(), Minecraft.getInstance().font), e.getMouseX(), e.getMouseY()));
         NeoForge.EVENT_BUS.addListener((ScreenEvent.MouseButtonPressed.Pre e) -> {
-            if (ToastStack.click(e.getMouseX(), e.getMouseY(), dev.henny.vibeyclient.client.Keys.mouseFromNative(e.getButton()))) e.setCanceled(true);
+            if (click(e.getMouseX(), e.getMouseY(), dev.henny.vibeyclient.client.Keys.mouseFromNative(e.getButton()))) e.setCanceled(true);
         });
         NeoForge.EVENT_BUS.addListener((ScreenEvent.KeyPressed.Post e) -> screenKey(e.getScreen(), neoKey(e)));
         *///?}
@@ -76,6 +76,11 @@ public final class ToastHooks {
         return e.getKeyCode();
     }
     *///?}
+
+    private static boolean click(double x, double y, int button) {
+        if (dev.henny.vibeyclient.ui.vui.ClassicUi.enabled()) return ToastStack.click(x, y, button);
+        return dev.henny.vibeyclient.ui.vui.toast.VuiToasts.click(x, y, button);
+    }
 
     /** A key pressed on a screen (after the screen handled it); listeners return true if they used it. */
     public static void addScreenKeyListener(BiPredicate<Screen, Integer> listener) {
@@ -105,12 +110,14 @@ public final class ToastHooks {
                 dev.henny.vibeyclient.Vibey.LOG.error("Screen overlay failed", t);
             }
         }
-        ToastStack.render(g, mx, my);
+        if (dev.henny.vibeyclient.ui.vui.ClassicUi.enabled()) ToastStack.render(g, mx, my);
+        else dev.henny.vibeyclient.ui.vui.toast.VuiToasts.render(g.g, mx, my);
     }
 
     /** From the HUD hook: toasts in game when no screen is open (the HUD hook itself respects F1). */
     public static void renderHud(Gfx g) {
         if (ClientCompat.screen() != null) return;
-        ToastStack.render(g, -1, -1);
+        if (dev.henny.vibeyclient.ui.vui.ClassicUi.enabled()) ToastStack.render(g, -1, -1);
+        else dev.henny.vibeyclient.ui.vui.toast.VuiToasts.render(g.g, -1, -1);
     }
 }

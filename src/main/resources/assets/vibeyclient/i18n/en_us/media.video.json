@@ -24,7 +24,7 @@
   "setting.fps": "Max frame rate",
   "setting.distance": "Play within",
   "setting.distance.desc": "Farther away screens pause.",
-  "setting.removeAll": "Remove all my screens here",
+  "setting.removeAll": "Remove all",
   "setting.removeAll.button": "Remove",
   "status.nosource": "No source",
   "status.hidden": "Hidden",
@@ -86,5 +86,6 @@
   "tip.setup": "Download what is missing",
   "load": "Load",
   "setup": "Set up",
-  "url.hint": "Link or file path"
+  "url.hint": "Link or file path",
+  "setting.removeAll.desc": "Remove all my screens here"
 }

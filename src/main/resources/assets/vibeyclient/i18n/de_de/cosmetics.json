@@ -4,7 +4,7 @@
   "summary": "Umhänge, Flügel, Begleiter, Hüte und mehr.",
   "setting": {
     "showOwn": "Meine Cosmetics zeigen",
-    "showOthers": "Cosmetics anderer Spieler zeigen",
+    "showOthers": "Andere Cosmetics",
     "hideWithArmor": "Unter Rüstung verstecken",
     "hideWithArmor.desc": "Zum Beispiel Hüte unter einem Helm.",
     "show_cape": "Umhänge",
@@ -15,9 +15,10 @@
     "show_hat": "Hüte",
     "show_back": "Rückenitems",
     "wardrobe": "Garderobe öffnen",
-    "notifyNew": "Über neue Cosmetics informieren",
+    "notifyNew": "Neu-Hinweise",
     "notifyNew.desc": "Kurzer Hinweis, wenn neue Items in deiner Garderobe ankommen.",
-    "openWardrobe": "Garderobe öffnen"
+    "openWardrobe": "Garderobe öffnen",
+    "showOthers.desc": "Cosmetics anderer Spieler zeigen"
   },
   "locked": {
     "notUnlocked": "Nicht freigeschaltet",
@@ -40,6 +41,6 @@
   },
   "section": {
     "show": "Was du siehst",
-    "types": "Diese Arten bei allen zeigen"
+    "types": "Bei allen"
   }
 }

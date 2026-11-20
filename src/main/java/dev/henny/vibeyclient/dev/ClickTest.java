@@ -6,9 +6,7 @@ import dev.henny.vibeyclient.api.ModuleManager;
 import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.client.Keys;
 import dev.henny.vibeyclient.mixin.client.MouseHandlerAccessor;
-import dev.henny.vibeyclient.ui.VibeyScreen;
-import dev.henny.vibeyclient.ui.VibeyTabs;
-import dev.henny.vibeyclient.ui.screen.ModulesPanel;
+import dev.henny.vibeyclient.ui.vui.Menus;
 import dev.henny.vibeyclient.ui.title.OnboardingScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -160,17 +158,21 @@ public final class ClickTest {
             return 0;
         });
 
-        // the real Vibey menu: click along the header until the tab changes
+        // the real Vibey menu: the gear in the header opens the quick settings
         step(mc -> {
-            ModulesPanel.preselect(null);
-            ClientCompat.openScreen(new VibeyScreen(new TitleScreen(), VibeyTabs.MODULES));
+            Menus.open(new TitleScreen());
             return 30;
         });
         step(mc -> {
             shot(mc, "menu-before");
             return 0;
         });
-        STEPS.add(new TabScan());
+        clickAt(() -> MenuTargets.center("open-quick", -1)[0], () -> MenuTargets.center("open-quick", -1)[1], Keys.MOUSE_LEFT);
+        step(mc -> {
+            check("menu_gear_click", "quick".equals(MenuTargets.panel()), "panel=" + MenuTargets.panel());
+            shot(mc, "menu-after");
+            return 0;
+        });
 
         // the corner button on the vanilla title screen opens the Vibey menu
         step(mc -> {
@@ -179,20 +181,19 @@ public final class ClickTest {
         });
         clickAt(() -> titleButton()[0], () -> titleButton()[1], Keys.MOUSE_LEFT);
         step(mc -> {
-            check("title_button", ClientCompat.screen() instanceof VibeyScreen, "screen=" + ClientCompat.screen());
+            check("title_button", Menus.isOpen(), "screen=" + ClientCompat.screen());
             shot(mc, "title-button-after");
             return 0;
         });
 
         // a module tile opens its page
         step(mc -> {
-            ModulesPanel.preselect(null);
-            ClientCompat.openScreen(new VibeyScreen(new TitleScreen(), VibeyTabs.MODULES));
+            Menus.open(new TitleScreen());
             return 30;
         });
-        clickAt(() -> tile("emotes")[0], () -> tile("emotes")[1], Keys.MOUSE_LEFT);
+        clickAt(() -> MenuTargets.center("tile-emotes", 30)[0], () -> MenuTargets.center("tile-emotes", 30)[1], Keys.MOUSE_LEFT);
         step(mc -> {
-            check("module_tile", "emotes".equals(ModulesPanel.openPage()), "page=" + ModulesPanel.openPage());
+            check("module_tile", "emotes".equals(MenuTargets.page()), "page=" + MenuTargets.page());
             shot(mc, "module-page");
             return 0;
         });
@@ -221,69 +222,6 @@ public final class ClickTest {
         }
         if (s instanceof TitleScreen) log("no Vibey corner button on the title screen");
         return new double[] {s == null ? 0 : s.width / 2.0, s == null ? 0 : s.height / 2.0};
-    }
-
-    /** A point inside the tile of module {@code id} (bottom left, away from the switch). */
-    private static double[] tile(String id) {
-        int[] b = ModulesPanel.tileBounds(id);
-        if (b == null) return new double[] {0, 0};
-        return new double[] {b[0] + 50, b[1] + b[3] - 8};
-    }
-
-    /** Clicks across the menu header (left of the close button) until {@link VibeyScreen#tab()} changes. */
-    private static final class TabScan implements Step {
-        private int x = -1;
-        private int phase;
-        private String before;
-
-        @Override
-        public int run(Minecraft mc) throws Exception {
-            if (!(ClientCompat.screen() instanceof VibeyScreen vs)) {
-                check("menu_tab_click", false, "the menu closed during the scan: " + ClientCompat.screen());
-                return 0;
-            }
-            int w = vs.windowWidth(), h = vs.windowHeight();
-            int left = (vs.width - w) / 2, top = (vs.height - h) / 2;
-            double y = top + VibeyScreen.HEADER / 2.0;
-            if (x < 0) {
-                before = vs.tab();
-                x = left + 90;
-            }
-            if (phase == 0) {
-                press(mc, x, y, Keys.MOUSE_LEFT, true);
-                phase = 1;
-                STEPS.addFirst(this);
-                return 2;
-            }
-            press(mc, x, y, Keys.MOUSE_LEFT, false);
-            phase = 0;
-            STEPS.addFirst(mc2 -> {
-                if (!(ClientCompat.screen() instanceof VibeyScreen now)) {
-                    check("menu_tab_click", false, "the menu closed after a click at x=" + x + ": " + ClientCompat.screen());
-                    return 0;
-                }
-                if (!now.tab().equals(before)) {
-                    check("menu_tab_click", true, "tab " + before + " -> " + now.tab() + " (click at " + x + "," + (int) y + ")");
-                    STEPS.addFirst(mc3 -> {
-                        shot(mc3, "menu-after");
-                        return 0;
-                    });
-                    return 15;
-                }
-                x += 16;
-                if (x >= left + w - 34) { // the close button starts at w - 26
-                    check("menu_tab_click", false, "no header click changed the tab (still " + now.tab() + ")");
-                    STEPS.addFirst(mc3 -> {
-                        shot(mc3, "menu-after");
-                        return 0;
-                    });
-                    return 2;
-                }
-                STEPS.addFirst(this);
-                return 0;
-            });
-            return 4;
-        }
     }
 
     // ============================================================================================ input injection

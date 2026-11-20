@@ -20,6 +20,7 @@ public final class NametagsModule extends VibeyModule {
     public NametagsModule() {
         super("nametags", ModuleCategory.SOCIAL);
         instance = this;
+        MyNameSettings.declare(this);
     }
 
     @Override

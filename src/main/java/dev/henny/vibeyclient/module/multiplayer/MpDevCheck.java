@@ -6,8 +6,6 @@ import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.module.multiplayer.host.HostSession;
 import dev.henny.vibeyclient.module.multiplayer.screen.AdminScreen;
 import dev.henny.vibeyclient.module.multiplayer.screen.HostScreen;
-import dev.henny.vibeyclient.ui.VibeyScreen;
-import dev.henny.vibeyclient.ui.screen.ModulesPanel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.PauseScreen;
@@ -60,8 +58,7 @@ final class MpDevCheck {
                 case 0 -> ClientCompat.openScreen(new HostScreen(ClientCompat.screen()));
                 case 1 -> {
                     shot("mpcheck_1_host_title");
-                    ModulesPanel.preselect("multiplayer");
-                    ClientCompat.openScreen(new VibeyScreen(null));
+                    dev.henny.vibeyclient.ui.vui.Menus.openModule(null, "multiplayer");
                 }
                 case 2 -> {
                     shot("mpcheck_2_menu_multiplayer");

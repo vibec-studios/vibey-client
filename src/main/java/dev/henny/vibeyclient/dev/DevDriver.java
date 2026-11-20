@@ -262,11 +262,9 @@ public final class DevDriver {
                 return "ok";
             }
             case "page": { // page <module id>: open the Vibey menu on that module's settings page
-                dev.henny.vibeyclient.ui.screen.ModulesPanel.preselect(arg.isEmpty() ? null : arg);
                 ClientCompat.openScreen(null);
-                dev.henny.vibeyclient.client.VibeyCore.openMenu();
-                if (ClientCompat.screen() instanceof dev.henny.vibeyclient.ui.VibeyScreen vs) vs.showTab(dev.henny.vibeyclient.ui.VibeyTabs.MODULES);
-                return "ok " + dev.henny.vibeyclient.ui.screen.ModulesPanel.openPage();
+                dev.henny.vibeyclient.ui.vui.Menus.openModule(null, arg.isEmpty() ? null : arg);
+                return "ok " + arg;
             }
             case "shot":
                 shot(mc);

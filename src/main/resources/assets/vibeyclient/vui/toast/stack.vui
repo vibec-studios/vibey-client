@@ -1,3 +1,6 @@
+<contract>
+{ "fields": { "toasts": "list" }, "actions": ["dismiss(t)", "act(t)"] }
+</contract>
 <template>
   <column id="toasts">
     <toast v-for="t in toasts" :key="t.id" :class="t.kind" @click="dismiss(t)">

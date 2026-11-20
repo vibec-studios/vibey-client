@@ -1,0 +1,70 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<import name="head" src="vibeyclient:components/head"/>
+<import name="icon-button" src="vibeyclient:components/icon-button"/>
+<import name="section" src="vibeyclient:components/section"/>
+<import name="setting-row" src="vibeyclient:components/setting-row"/>
+<import name="empty" src="vibeyclient:components/empty"/>
+<contract>
+{ "fields": { "name": "string", "head": "string", "ready": "bool", "status": "string", "statusOptions": "list",
+              "privacy": "list", "devices": "list", "blocked": "list" },
+  "actions": ["back", "signIn", "signOut", "revoke(d)", "unblock(b)", "run(row)"] }
+</contract>
+<template>
+  <stack class="scrim">
+    <column class="acc">
+      <row class="acc-bar">
+        <icon-button icon="back" :tip="t('ui.menu.back')" @click="back()"/>
+        <ico name="person" class="acc-icon"/>
+        <text class="acc-title">{{ t('ui.account.title') }}</text>
+        <spacer/>
+        <button v-if="ready" id="sign-out" class="ghost acc-out" @click="signOut()">{{ t('ui.confirm.signOutYes') }}</button>
+      </row>
+      <scroll v-if="ready" class="acc-body">
+        <row class="acc-me">
+          <head :src="head" :size="16"/>
+          <text class="acc-name">{{ name }}</text>
+          <spacer/>
+          <select class="acc-status" v-model="status" :options="statusOptions"/>
+        </row>
+        <grid class="acc-sections" min-column="190" gap="4">
+          <section :title="t('ui.account.privacy')">
+            <setting-row v-for="r in privacy" :key="r.id" :row="r"/>
+          </section>
+          <section :title="t('ui.account.devices')">
+            <row v-for="d in devices" :key="d.id" class="acc-row">
+              <text class="acc-row-name" :tooltip="d.note">{{ d.name }}</text>
+              <text v-if="d.current" class="acc-row-note">{{ d.note }}</text>
+              <button class="ghost acc-row-btn" @click="revoke(d)">{{ t('ui.account.revoke') }}</button>
+            </row>
+          </section>
+          <section :title="t('ui.account.blocked')">
+            <text v-if="len(blocked) == 0" class="acc-none">{{ t('ui.account.nobody') }}</text>
+            <row v-for="b in blocked" :key="b.id" class="acc-row">
+              <head :src="b.head" :size="10"/>
+              <text class="acc-row-name">{{ b.name }}</text>
+              <button class="ghost acc-row-btn" @click="unblock(b)">{{ t('ui.account.unblock') }}</button>
+            </row>
+          </section>
+        </grid>
+      </scroll>
+      <empty v-else icon="person" :title="t('ui.status.signedOut')" :action="t('ui.friends.signIn')" @act="signIn()"/>
+    </column>
+  </stack>
+</template>
+<style>
+.scrim { background: alpha($bg, .6); padding: 8; }
+.acc { background: $surface; border: 1 $line2; }
+.acc-bar { height: 24; gap: 5; padding: 0 6 0 4; border-bottom: 1 $line; flex-shrink: 0; }
+.acc-icon { color: $brand; }
+.acc-title { color: $text; font-weight: bold; text-wrap: nowrap; }
+.acc-out { height: 16; }
+.acc-body { grow: 1; padding: 6; gap: 6; }
+.acc-me { gap: 6; height: 22; padding: 0 6; background: $panel; border: 1 $line; }
+.acc-name { color: $text; text-wrap: nowrap; text-overflow: ellipsis; min-width: 0; }
+.acc-status { width: 80; }
+.acc-row { height: 18; gap: 4; }
+.acc-row-name { grow: 1; min-width: 0; color: $text; text-wrap: nowrap; text-overflow: ellipsis; }
+.acc-row-note { color: $brand2; font-scale: 0.75; text-wrap: nowrap; }
+.acc-row-btn { height: 14; padding: 0 5; }
+.acc-none { color: $dim; }
+</style>

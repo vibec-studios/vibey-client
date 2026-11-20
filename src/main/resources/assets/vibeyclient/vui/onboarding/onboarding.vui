@@ -3,6 +3,10 @@
 <import name="step-welcome" src="vibeyclient:onboarding/step-welcome"/>
 <import name="step-online" src="vibeyclient:onboarding/step-online"/>
 <import name="step-keys" src="vibeyclient:onboarding/step-keys"/>
+<contract>
+{ "fields": { "step": "number", "features": "list", "language": "string", "languages": "list", "online": "bool", "keys": "list" },
+  "actions": ["next", "skip", "go(i)"] }
+</contract>
 <template>
   <stack class="ob-scrim">
     <column class="ob-card">

@@ -63,6 +63,22 @@ public final class Heads {
         drawFace(g, face, x, y, size);
     }
 
+    public static int[] face(String userId, String skinUrl) {
+        if (skinUrl == null) skinUrl = skinOf(userId);
+        if (skinUrl != null) {
+            int[] face = FACES.get(skinUrl);
+            if (face != null) return face;
+            if (!FAILED.contains(skinUrl)) {
+                load(skinUrl);
+                return null;
+            }
+        }
+        String key = "default:" + defaultName(userId);
+        int[] face = FACES.get(key);
+        if (face == null) load(key);
+        return face;
+    }
+
     public static void drawFace(Gfx g, int[] face, int x, int y, int size) {
         for (int py = 0; py < 8; py++) {
             int y1 = y + py * size / 8;

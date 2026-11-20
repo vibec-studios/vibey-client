@@ -42,7 +42,9 @@
     "server": "Server",
     "serverTip": "Nur für eigene Vibe-Server.",
     "info": "Infos für Bugreport",
-    "infoTip": "Kopiert Version und Verbindung."
+    "infoTip": "Kopiert Version und Verbindung.",
+    "noticeOpen": "Link öffnen",
+    "noticeHide": "Ausblenden"
   },
   "status": {
     "online": "Online",
@@ -172,7 +174,8 @@
     "resetHud": "HUD zurücksetzen?",
     "resetHudText": "Strg+Z holt es zurück.",
     "unfriend": "{0} entfernen?",
-    "unfriendYes": "Entfernen"
+    "unfriendYes": "Entfernen",
+    "signOutText": "Du bleibst abgemeldet, bis du dich wieder anmeldest."
   },
   "toast": {
     "online": "Online",
@@ -185,5 +188,26 @@
   },
   "empty": {
     "retry": "Nochmal"
+  },
+  "account": {
+    "title": "Konto",
+    "privacy": "Privatsphäre",
+    "requests": "Anfragen",
+    "messages": "Nachrichten",
+    "invites": "Einladungen",
+    "hosting": "Welten zeigen",
+    "hostingTip": "Freunde sehen deine gehosteten Welten.",
+    "devices": "Geräte",
+    "blocked": "Blockiert",
+    "unblock": "Entblocken",
+    "revoke": "Abmelden",
+    "thisDevice": "Dieses Gerät",
+    "nobody": "Niemand blockiert",
+    "level": {
+      "everyone": "Alle",
+      "friends_of_friends": "Freunde+",
+      "friends": "Freunde",
+      "nobody": "Niemand"
+    }
   }
 }
