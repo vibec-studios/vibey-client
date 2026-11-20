@@ -46,8 +46,8 @@ public final class CompanionGameTest implements FabricClientGameTest {
             return new int[] {x, mc.level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z};
         });
         int x = p[0], y = Math.max(p[1], 64), z = p[2];
-        cmd(world, "fill %d %d %d %d %d %d minecraft:air", x - 14, y, z - 14, x + 14, y + 10, z + 14);
-        cmd(world, "fill %d %d %d %d %d %d minecraft:grass_block", x - 14, y - 3, z - 14, x + 14, y - 1, z + 14);
+        cmd(world, "fill %d %d %d %d %d %d minecraft:air", x - 22, y, z - 22, x + 22, y + 12, z + 22);
+        cmd(world, "fill %d %d %d %d %d %d minecraft:grass_block", x - 22, y - 3, z - 22, x + 22, y - 1, z + 22);
         cmd(world, "fill %d %d %d %d %d %d minecraft:water", x + 5, y - 2, z - 3, x + 10, y - 1, z + 3);
         cmd(world, "fill %d %d %d %d %d %d minecraft:snow_block", x - 14, y - 1, z - 4, x - 2, y - 1, z + 4);
         cmd(world, "fill %d %d %d %d %d %d minecraft:oak_leaves", x - 3, y, z + 8, x + 1, y + 1, z + 9);
@@ -78,7 +78,7 @@ public final class CompanionGameTest implements FabricClientGameTest {
             return c.body.distance(o[0] + 0.5, o[1], o[2] - 7.5) < 4.6;
         });
         ctx.waitTicks(20);
-        tp(world, ctx, o[0] + 0.5, o[1], o[2] - 13.5, 180, 15);
+        tp(world, ctx, o[0] + 0.5, o[1], o[2] - 12.5, 180, 15);
         ctx.waitTicks(14);
         lookAt(ctx, center(ctx).add(0, 0.3, 0));
         shot(ctx, "follow_walk");
