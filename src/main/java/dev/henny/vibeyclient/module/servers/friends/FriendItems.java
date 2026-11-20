@@ -37,11 +37,12 @@ final class FriendItems {
         Player p = s.friend();
         String ping = s.shared() ? pings.label(s.address()) : "";
         FriendLabels.Label l = FriendLabels.server(s);
-        String where = l.hiddenTitle() ? Lang.tr("servers.friends.hidden") : l.title();
-        String detail = l.hiddenDetail() ? Lang.tr("servers.friends.hiddenAddress") : l.detail();
+        String lan = Lang.tr("servers.friends.lan");
+        String where = l.hiddenTitle() ? s.lan() ? lan : Lang.tr("servers.friends.hidden") : l.title();
+        String detail = l.hiddenDetail() ? s.lan() ? lan : Lang.tr("servers.friends.hiddenAddress") : l.detail();
         String card = join(Lang.tr("servers.friends.card.server", where), since(s.since(), now));
         return new FriendItem(key, "server", "", 0, p.id(), p.name(), HeadTextures.of(p.id(), p.skinUrl()), rank(p),
-                rankColor(p), "server", where, detail, ping, pings.bad(s.address()), s.shared(), s.shared(), false,
+                rankColor(p), s.lan() ? "lan" : "server", where, detail, ping, pings.bad(s.address()), s.shared(), s.shared(), false,
                 s.shared() ? s.address() : "", p.status(), card);
     }
 

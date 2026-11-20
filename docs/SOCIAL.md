@@ -67,16 +67,17 @@ Backend fields from `feat/presence-server-details`, all optional (old backends s
 
 | What | Client side |
 |---|---|
-| Presence we send | `PresenceTracker` still fills `server` (address or *Multiplayer*); unless *Hide server address* / streamer mode hides it, `presence/ServerFields` adds `serverName` (the server list entry name, `SocialCompat.serverListName`, null for direct connects), `serverAddress` (host without port) and `serverPort`. LAN, loopback, private, link-local, CGNAT, multicast, single-label, `*.local`/`.lan`/`.home.arpa`/`.internal` names and `nip.io`-style names of a private IP are never sent (`presence/LocalAddress`, pure, no DNS); invalid hosts neither (the backend would reject the whole presence). |
-| Presence we read | `Model.Activity` parses `serverName`, `serverAddress`, `serverPort`, `addressShared` (tri-state). `activity/SharedAddress` uses `addressShared` when present, the old host-name guess only without it. |
+| Presence we send | `PresenceTracker` still fills `server` (address or *Multiplayer*); unless *Hide server address* / streamer mode hides it, `presence/ServerFields` adds `serverName` (the server list entry name, `SocialCompat.serverListName`, null for direct connects), `serverAddress` (host without port) and `serverPort`. LAN, loopback, private, link-local, CGNAT, multicast, single-label, `*.local`/`.lan`/`.home.arpa`/`.internal` names and `nip.io`-style names of a private IP are never sent (`presence/LocalAddress`, pure, no DNS); invalid hosts neither (the backend would reject the whole presence). `serverKind` (`presence/ServerKind`, pure): `local` for our own world opened to LAN or hosted (relay hosting presence too, with `serverName` = world name), `lan` for a server the LAN filter (or an unparsable address) flags, then `server` = list name or `LAN-Welt` and no address/port; `remote` otherwise. With *Hide server address* only `server: "Multiplayer"` goes out. |
+| Presence we read | `Model.Activity` parses `serverName`, `serverAddress`, `serverPort`, `addressShared` (tri-state), `serverKind`. `activity/SharedAddress` never returns an address for `lan`/`local` and uses `addressShared` when present, the old host-name guess only without it. |
 | Privacy | *Share server address* (`privacy.shareServerAddress`, default off) in the account privacy rows (`vui/PrivacyRows`, classic `ui/AccountPanel`), `GET`/`PATCH /api/v1/me`. Off: friends see only the name. |
-| Hosting | `Model.HostSession` has `worldName`, `joinHost`, `joinPort` (`activity/HostedJoin` falls back to `address`). While we host, `HostWorldName` (from the presence tick) sends `PATCH /api/v1/hosting/sessions/{id} {worldName}` once per session and name; errors (old backend 404) are only logged. |
+| Hosting | `Model.HostSession` has `worldName`, `joinHost`, `joinPort` (`activity/HostedJoin` falls back to `address`). The hosting presence carries `world` from the start, the backend adopts it as `worldName` while the session has none (and sends `hosting.update`). `HostWorldName` (presence tick) PATCHes `/api/v1/hosting/sessions/{id} {worldName}` only for a rename, or when the session still has no name 20 s after the presence (`presence/WorldNamePatch`, pure); once per session and name, errors only logged. |
 | Invites | `Model.Invite.destination` (`model/Destination`), `displayName()` = `destination.name` or `target.name`. Accept joins the response `connection` (`{type:"direct", address, port}` for destination invites), else the invite's own `destination` (`InviteTarget`), else *no connection*. |
 
 ## Tests
 
 - JUnit: `RpcPayloadTest` (payloads, privacy, frames, pipe paths), `FakeIpcServerTest` (a fake Discord on a Unix
   domain socket in a temp folder: handshake, set + clear, ping/pong, error answer, Discord not running, the worker),
-  `NameRedactorTest`, `LocalAddressTest`, `ServerFieldsTest` (host/port, LAN filter, sent fields), `NewFieldsParseTest`
+  `NameRedactorTest`, `LocalAddressTest`, `ServerFieldsTest` (host/port, LAN filter, sent fields), `ServerKindTest` (kind decision, LAN/remote/local payloads),
+  `WorldNamePatchTest`, `LanActivityTest` (spec LAN example), `NewFieldsParseTest`
   (old + new payloads), `SharedAddressTest`, `HostedJoinTest`, `InviteTargetTest`.
 - Gametest: `ChatGameTest` covers streamer mode (chat, tab list, skins, F7 on/off, masked address box).

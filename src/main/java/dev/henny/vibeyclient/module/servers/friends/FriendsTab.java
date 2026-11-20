@@ -136,7 +136,7 @@ public final class FriendsTab implements FriendsController.Actions {
     @Override
     public void join(FriendItem r) {
         FriendsActivity src = source();
-        if (src == null) return;
+        if (src == null || !r.canJoin()) return;
         switch (r.kind()) {
             case "server" -> src.joinServer(r.ref());
             case "world" -> src.joinWorld(r.ref());

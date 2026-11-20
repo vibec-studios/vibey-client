@@ -8,6 +8,7 @@ import dev.henny.vibeyclient.api.service.HostingService;
 import dev.henny.vibeyclient.backend.J;
 import dev.henny.vibeyclient.module.social.model.Model.HostSession;
 import dev.henny.vibeyclient.module.social.presence.ServerFields;
+import dev.henny.vibeyclient.module.social.presence.ServerKind;
 
 import java.time.Instant;
 import java.util.Locale;
@@ -28,6 +29,7 @@ public final class PresenceTracker {
     private boolean autoAway;
     private String sentStatus;
     private String sentActivity;
+    private String sentHostWorld;
     private String worldKey;
     private long startedAt = System.currentTimeMillis();
 
@@ -64,7 +66,7 @@ public final class PresenceTracker {
             autoAway = true;
         }
         update(false);
-        hostWorldName.tick();
+        hostWorldName.tick(sentHostWorld);
     }
 
     public String effectiveStatus() {
@@ -94,6 +96,7 @@ public final class PresenceTracker {
         if (force || !act.equals(sentActivity)) d.add("activity", activity == null ? com.google.gson.JsonNull.INSTANCE : activity);
         sentStatus = status;
         sentActivity = act;
+        sentHostWorld = activity != null && "hosting".equals(J.str(activity, "type")) ? J.str(activity, "world") : null;
         backend.sendOp("presence", d);
     }
 
@@ -112,8 +115,9 @@ public final class PresenceTracker {
         HostingService hs = Services.get(HostingService.class).orElse(null);
         if (world != null && hs != null && hs.isHosting() && hs.address() != null && module.showHosting()) {
             a.addProperty("type", "hosting");
-            a.addProperty("world", clip(world, 100));
+            a.addProperty("world", ServerFields.name(world));
             a.addProperty("joinable", true);
+            ServerFields.local(a, world);
             JsonObject join = J.of("type", "relay", "address", hs.address(), "port", hs.port() <= 0 ? 25565 : hs.port());
             HostSession mine = module.service().state.myHost;
             if (mine != null && Objects.equals(mine.address(), hs.address())) join.addProperty("hostSessionId", mine.id());
@@ -121,16 +125,13 @@ public final class PresenceTracker {
             return a;
         }
         if (world != null) {
-            a.addProperty("world", clip(world, 100));
+            a.addProperty("world", ServerFields.name(world));
+            if (ServerKind.of(true, SocialCompat.worldOpened(), null) != null) ServerFields.local(a, world);
         } else if (server != null) {
             boolean hidden = module.hideServerAddress.on() || dev.henny.vibeyclient.api.privacy.Privacy.hideServer();
-            a.addProperty("server", hidden ? "Multiplayer" : clip(server, 255));
-            if (!hidden) ServerFields.add(a, server, SocialCompat.serverListName());
+            if (hidden) a.addProperty("server", "Multiplayer");
+            else ServerFields.add(a, server, SocialCompat.serverListName());
         }
         return a;
-    }
-
-    private static String clip(String s, int max) {
-        return s.length() <= max ? s : s.substring(0, max);
     }
 }

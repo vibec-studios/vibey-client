@@ -23,6 +23,8 @@ final class FakeFriends implements FriendsActivity {
         f.servers.add(new OnServer(player(id('a'), "Mia", "online"), "Example SMP", pingAddress, now - 12 * 60_000));
         f.servers.add(new OnServer(player(id('b'), "Jonas", "busy"), null, null, now - 3 * 3_600_000));
         f.servers.add(new OnServer(player(id('e'), "Noah", "online"), "Secret SMP", null, now - 5 * 60_000));
+        f.servers.add(new OnServer(player(id('g'), "Emil", "online"), null, null, now - 25 * 60_000, true));
+        f.servers.add(new OnServer(player(id('h'), "Tara", "away"), "Home Base", null, now - 7 * 60_000, true));
         f.worlds.add(new HostedWorld(player(id('c'), "Lea", "online"), "Cherry Valley", "mossy-otter-27.axolite.cc", 25570, 3,
                 now - 40 * 60_000));
         f.invites.add(new Invite("inv-1", player(id('d'), "Ben", "away"), "world", "Sky Farm", null, 0, now + 9 * 60_000));
