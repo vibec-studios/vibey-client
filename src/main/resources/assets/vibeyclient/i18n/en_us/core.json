@@ -66,6 +66,8 @@
     "open_menu": "Open the Vibey menu",
     "backendUrl": "Vibe server address",
     "backendUrl.desc": "Only change this if you run your own Vibe server.",
+    "classicUi": "Classic menus",
+    "classicUi.desc": "Old Vibey menus instead of the new ones.",
     "resetBackend": "Default server address",
     "resetBackend.button": "Reset",
     "uiScale": "Menu size",

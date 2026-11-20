@@ -18,8 +18,6 @@ import dev.henny.vibeyclient.backend.DomainMove;
 import dev.henny.vibeyclient.backend.Notices;
 import dev.henny.vibeyclient.backend.Notices.Notice;
 import dev.henny.vibeyclient.client.ClientCompat;
-import dev.henny.vibeyclient.ui.VibeyScreen;
-import dev.henny.vibeyclient.ui.VibeyTabs;
 import net.minecraft.client.gui.screens.TitleScreen;
 
 import dev.henny.vibeyclient.backend.net.Net;
@@ -131,7 +129,7 @@ public final class Announcements {
     private static void toastPending() {
         if (!GlobalSettings.onboarded() || !ModuleManager.get().isStarted() || ClientCompat.loadingOverlay()) return;
         net.minecraft.client.gui.screens.Screen screen = ClientCompat.screen();
-        boolean place = screen instanceof TitleScreen || screen instanceof VibeyScreen || (screen == null && ClientCompat.inWorld());
+        boolean place = screen instanceof TitleScreen || dev.henny.vibeyclient.ui.vui.Menus.isOpen() || (screen == null && ClientCompat.inWorld());
         if (!place) return;
         for (Notice n : active()) {
             if (toasted(n.id())) continue;
@@ -145,8 +143,8 @@ public final class Announcements {
     }
 
     private static void openMenu() {
-        if (ClientCompat.screen() instanceof VibeyScreen) return;
-        ClientCompat.openScreen(new VibeyScreen(ClientCompat.screen(), VibeyTabs.GENERAL));
+        if (dev.henny.vibeyclient.ui.vui.Menus.isOpen()) return;
+        dev.henny.vibeyclient.ui.vui.Menus.openQuick(ClientCompat.screen());
     }
 
     // ============================================================================================ fetch

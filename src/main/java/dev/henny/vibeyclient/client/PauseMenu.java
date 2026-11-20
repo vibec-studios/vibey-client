@@ -31,12 +31,18 @@ public final class PauseMenu {
     private static final int GAP = 4;
 
     public static void decorate(Screen screen, List<? extends GuiEventListener> widgets, Consumer<AbstractWidget> add) {
+        boolean classic = dev.henny.vibeyclient.ui.vui.ClassicUi.enabled();
         if (screen instanceof TitleScreen) {
-            TitleButtons.decorate(screen, widgets, add);
+            if (classic) TitleButtons.decorate(screen, widgets, add);
+            else dev.henny.vibeyclient.ui.vui.corner.Decorations.title(screen, widgets, add);
             return;
         }
         if (!(screen instanceof PauseScreen)) return;
         if (!hasButton(widgets, "menu.returnToGame")) return; // pause menu hidden (F3 + Esc)
+        if (!classic) {
+            dev.henny.vibeyclient.ui.vui.corner.Decorations.pause(screen, widgets, add);
+            return;
+        }
         List<MenuEntries.Entry> entries = MenuEntries.visible(MenuEntries.Place.PAUSE);
         if (entries.isEmpty()) return;
 

@@ -14,9 +14,10 @@
       <select v-else-if="row.kind == 'choice'" v-model="row.value" :options="row.options"/>
       <keybind v-else-if="row.kind == 'key'" v-model="row.value" :class="{ conflict: row.conflict }"
                :tooltip="row.conflict ? t('ui.settings.conflict', row.conflict) : ''"/>
-      <colorpicker v-else-if="row.kind == 'color'" v-model="row.value"/>
-      <textfield v-else-if="row.kind == 'text'" class="setting-text" v-model.trim="row.value" :placeholder="row.placeholder"/>
-      <button v-else-if="row.kind == 'action'" class="setting-action" @click="run(row)">{{ row.button }}</button>
+      <colorpicker v-else-if="row.kind == 'color'" v-model="row.value" :presets="row.presets"/>
+      <textfield v-else-if="row.kind == 'text'" class="setting-text" v-model.trim="row.value" :placeholder="row.placeholder"
+                 :max-length="row.maxLength"/>
+      <button v-else-if="row.kind == 'action'" :id="'act-' + row.id" class="setting-action" @click="run(row)">{{ row.button }}</button>
     </row>
   </row>
 </template>

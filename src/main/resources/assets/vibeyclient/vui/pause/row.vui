@@ -1,21 +1,27 @@
 <import name="ico" src="vibeyclient:components/ico"/>
 <import name="icon-button" src="vibeyclient:components/icon-button"/>
+<contract>
+{ "fields": { "x": "number", "y": "number", "width": "number", "compact": "bool", "main": "object", "entries": "list", "focus?": "string" },
+  "actions": ["activate(e)"] }
+</contract>
 <template>
   <row class="pause-row" :class="{ compact: compact }" :style="{ left: x, top: y, width: compact ? 'auto' : width }">
-    <button class="pause-main" :tooltip="compact ? main.label : ''" @click="activate(main)">
+    <button :id="'e-' + main.id" class="pause-main" :class="{ focus: focus == main.id }" :tooltip="compact ? main.label : ''"
+            @click="activate(main)">
       <ico :name="main.icon"/>
       <text v-if="!compact" class="pause-label">{{ main.label }}</text>
     </button>
-    <icon-button v-for="e in entries" :key="e.id" class="pause-btn" :icon="e.icon" :tip="e.label"
-                 :badge="e.badge" :dot="e.dot" @click="activate(e)"/>
+    <icon-button v-for="e in entries" :key="e.id" :id="'e-' + e.id" class="pause-btn" :class="{ focus: focus == e.id }"
+                 :icon="e.icon" :tip="e.label" :badge="e.badge" :dot="e.dot" @click="activate(e)"/>
   </row>
 </template>
 <style>
 .pause-row { position: absolute; gap: 4; }
 .pause-main { grow: 1; height: 20; gap: 5; background: alpha($bg, .7); border: 1 $brand; color: $text; }
 .pause-main .ico { color: $brand; }
-.pause-main:hover, .pause-main:focus { background: $surface2; border-color: $brand; }
+.pause-main:hover, .pause-main:focus, .pause-main.focus { background: $surface2; border-color: $brand; }
 .pause-row.compact .pause-main { grow: 0; width: 20; padding: 0; }
 .pause-label { text-wrap: nowrap; }
 .pause-row .pause-btn { size: 20; background: alpha($bg, .7); border-color: $line2; color: $text; }
+.pause-row .pause-btn.focus { background: $surface2; border-color: $brand; }
 </style>

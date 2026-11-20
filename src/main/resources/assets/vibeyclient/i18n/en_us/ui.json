@@ -42,7 +42,9 @@
     "server": "Server",
     "serverTip": "Only for own Vibe servers.",
     "info": "Bug report info",
-    "infoTip": "Copies version and connection."
+    "infoTip": "Copies version and connection.",
+    "noticeOpen": "Open link",
+    "noticeHide": "Hide"
   },
   "status": {
     "online": "Online",

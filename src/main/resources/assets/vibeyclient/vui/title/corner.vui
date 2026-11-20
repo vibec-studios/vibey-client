@@ -1,7 +1,11 @@
 <import name="icon-button" src="vibeyclient:components/icon-button"/>
+<contract>
+{ "fields": { "corner": "string", "entries": "list", "x?": "number", "y?": "number", "focus?": "string" }, "actions": ["activate(e)"] }
+</contract>
 <template>
-  <row class="corner" :class="corner">
-    <icon-button v-for="e in entries" :key="e.id" class="corner-btn" :class="{ main: e.id == 'vibey' }"
+  <row class="corner" :class="corner" :style="corner == 'at' ? { left: x, top: y } : {}">
+    <icon-button v-for="e in entries" :key="e.id" :id="'e-' + e.id" class="corner-btn"
+                 :class="{ main: e.id == 'vibey', focus: focus == e.id }"
                  :icon="e.icon" :tip="e.label" :badge="e.badge" :dot="e.dot" @click="activate(e)"/>
   </row>
 </template>
@@ -11,6 +15,6 @@
 .corner.top-left { anchor: top-left; left: 4; top: 4; }
 .corner.bottom-left { anchor: bottom-left; left: 4; bottom: 4; }
 .corner .corner-btn { size: 20; background: alpha($bg, .55); border-color: $line2; color: $text; }
-.corner .corner-btn:hover, .corner .corner-btn:focus { background: $surface2; border-color: $brand; }
+.corner .corner-btn:hover, .corner .corner-btn:focus, .corner .corner-btn.focus { background: $surface2; border-color: $brand; }
 .corner .corner-btn.main { border-color: $brand; color: $brand; }
 </style>
