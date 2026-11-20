@@ -7,6 +7,7 @@ import dev.henny.vibeyclient.api.Services;
 import dev.henny.vibeyclient.api.service.HostingService;
 import dev.henny.vibeyclient.backend.J;
 import dev.henny.vibeyclient.module.social.model.Model.HostSession;
+import dev.henny.vibeyclient.module.social.presence.ServerFields;
 
 import java.time.Instant;
 import java.util.Locale;
@@ -21,6 +22,7 @@ public final class PresenceTracker {
     public enum Status { ONLINE, AWAY, BUSY, INVISIBLE }
 
     private final SocialModule module;
+    private final HostWorldName hostWorldName;
     private int ticks;
     private long unfocusedSince;
     private boolean autoAway;
@@ -31,6 +33,7 @@ public final class PresenceTracker {
 
     PresenceTracker(SocialModule module) {
         this.module = module;
+        this.hostWorldName = new HostWorldName(module);
     }
 
     /** After a fresh {@code ready}: take the status the backend remembers, then send our activity. */
@@ -61,6 +64,7 @@ public final class PresenceTracker {
             autoAway = true;
         }
         update(false);
+        hostWorldName.tick();
     }
 
     public String effectiveStatus() {
@@ -119,7 +123,9 @@ public final class PresenceTracker {
         if (world != null) {
             a.addProperty("world", clip(world, 100));
         } else if (server != null) {
-            a.addProperty("server", module.hideServerAddress.on() || dev.henny.vibeyclient.api.privacy.Privacy.hideServer() ? "Multiplayer" : clip(server, 255));
+            boolean hidden = module.hideServerAddress.on() || dev.henny.vibeyclient.api.privacy.Privacy.hideServer();
+            a.addProperty("server", hidden ? "Multiplayer" : clip(server, 255));
+            if (!hidden) ServerFields.add(a, server, SocialCompat.serverListName());
         }
         return a;
     }

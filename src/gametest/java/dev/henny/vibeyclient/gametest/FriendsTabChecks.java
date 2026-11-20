@@ -39,6 +39,7 @@ final class FriendsTabChecks {
                 "all three sections: " + keys);
         ctx.waitFor(mc -> find("s:00000000-0000-0000-0000-00000000000a").ping().endsWith("ms"), 200);
         check(!item("s:00000000-0000-0000-0000-00000000000b").canJoin(), "hidden server has no Join");
+        FieldChecks.run(this::item, pingAddress);
         SHOTS.shot(ctx, "friends_tab");
         hoverCard();
         actions();
@@ -67,7 +68,7 @@ final class FriendsTabChecks {
         return session().friends().controller().rows.snapshot().stream().map(FriendItem::key).toList();
     }
 
-    private FriendItem item(String key) {
+    FriendItem item(String key) {
         return ctx.computeOnClient(mc -> find(key));
     }
 

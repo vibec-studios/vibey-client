@@ -22,7 +22,7 @@ Nothing here touches a server you are not looking at: it only pings the servers 
 
 | Drag & drop (servers) | `dragReorder` (list) | Grab a row (not the icon, not the star) and drag it: after 4 px the row follows the mouse, the other rows slide apart and a teal box marks the drop place, the list scrolls near its top/bottom edge, **Esc** cancels. Dropping moves the server in `servers.dat` (the list vanilla's move arrows change) and keeps it selected. A click without moving still selects, a double click still joins. With a search or *Favourites first* active the drop is mapped to the real list: the server lands right before the visible row under it (`core/MoveTarget`); favourites only move among favourites (`DropSlot.group`). |
 | World order | `worldSort` = custom / last played / name, `worldDrag` (worlds) | Drag a world in the singleplayer list the same way. The order is stored in `config/vibeyclient/world-order.json` (`{"version":1,"order":[<level folder ids>]}`, `core/OrderCodec`); worlds that are not in it yet (new ones) go to the top, by last played (`core/WorldOrder`). The chip right of the search field shows the sort and cycles it on click; dragging while sorted by date or name switches to *custom*. |
-| Friends tab | `friendsTab` (list) | *Servers / Friends* tabs replace the title. *Friends* shows one list with sections **Invites** (Join = accept, x = decline, time left), **Playing on servers** (server, live ping, Join and **+** only when the friend shares the address), **Hosted worlds** (players, Join through the relay address). Hover a row for a card (what, since when). Drag a server row onto the *Servers* tab (it lights up) or press **+** to add it to your list. States: not signed in -> *Sign in*; social off -> *Open friends*; nobody playing -> *Open friends*. |
+| Friends tab | `friendsTab` (list) | *Servers / Friends* tabs replace the title. *Friends* shows one list with sections **Invites** (Join = accept, x = decline, time left), **Playing on servers** (server, live ping, Join and **+** only when the friend shares the address), **Hosted worlds** (players, Join through the relay address). Rows show the server/world name with a dim detail: the shared address, *Address hidden* when the friend only shares the name, nothing for *Hidden server*. Hover a row for a card (what, since when). Drag a server row onto the *Servers* tab (it lights up) or press **+** to add it to your list. States: not signed in -> *Sign in*; social off -> *Open friends*; nobody playing -> *Open friends*. |
 
 ## Friends data (`api/service/FriendsActivity`)
 
@@ -33,9 +33,9 @@ looked up with `Services.get(FriendsActivity.class)`; the servers module never i
 |---|---|
 | `state()` | `ready`, `signedOut`, `connecting`, `error` |
 | `revision()`, `listen(Runnable)` | changes (social state revision; listeners run on the client thread from social's tick) |
-| `servers()` -> `OnServer(friend, server, address, since)` | online friends whose presence activity has a `server`. `address` is set only when the friend shares it: the activity's `join` address when `joinable`, else `server` when it looks like a host name (`SharedAddress`); *Multiplayer* (hide server address / streamer mode) never is |
-| `worlds()` -> `HostedWorld(host, world, address, port, players, since)` | the backend's joinable friend sessions (`/hosting/friends`, `hosting.update`) plus friends whose activity is `hosting` with a join address |
-| `invites()` -> `Invite(id, from, kind, target, expiresAt)` | open incoming invites |
+| `servers()` -> `OnServer(friend, server, address, since)` | online friends whose activity has `server`, `serverName` or `serverAddress`. `server` is the display name (`serverName`, else a `server` that is no host name, else the shared address; null = hidden). `address` (`host[:port]`, IPv6 in brackets) only when shared: with `addressShared` from the backend, `true` -> `serverAddress`/`serverPort`, `false` -> none; without the field (old backend/launcher) the old guess: `join` address when `joinable`, else `server` when it looks like a host name (`SharedAddress`) |
+| `worlds()` -> `HostedWorld(host, world, address, port, players, since)` | the backend's friend sessions (`/hosting/friends`, `hosting.update`): `world` = `worldName`, else the presence world; `address`/`port` = `joinHost`/`joinPort`, else parsed from `address` (`HostedJoin`); plus friends whose activity is `hosting` with a join address |
+| `invites()` -> `Invite(id, from, kind, target, host, port, expiresAt)` | open incoming invites; `target` = `destination.name`, else `target.name`; `host`/`port` from `destination` (null without one), `address()` joins them |
 | `joinServer`, `joinWorld`, `accept`, `decline`, `signIn`, `openFriends` | the existing social flows (`InviteFlow.join`, invite accept/decline, login, friends menu) |
 
 `Player(id, name, skinUrl, status, rank)`: `rank` is the identity's rank id; the row shows its label in the rank
@@ -71,7 +71,7 @@ colour from `client/ranks/Ranks`.
 | Package | Job |
 |---|---|
 | `servers` | `ServersModule` (settings, favourites storage) |
-| `servers.core` | pure Java, JUnit in `src/junit/java/.../module/servers/core`: `AddressKey`, `Favourites`, `ServerFilter`, `ServerOrder`, `PingSchedule`, `PingCache`, `MotdSegment`, `MotdLines`, `LegacyFormat`, `HoverDelay`, `DragTracker`, `DropSlot`, `MoveTarget`, `ListMove`, `GapOffsets`, `AutoScroll`, `WorldSort`, `WorldOrder`, `OrderCodec`, `Durations`, `FriendSections` |
+| `servers.core` | pure Java, JUnit in `src/junit/java/.../module/servers/core`: `AddressKey`, `Favourites`, `ServerFilter`, `ServerOrder`, `PingSchedule`, `PingCache`, `MotdSegment`, `MotdLines`, `LegacyFormat`, `HoverDelay`, `DragTracker`, `DropSlot`, `MoveTarget`, `ListMove`, `GapOffsets`, `AutoScroll`, `WorldSort`, `WorldOrder`, `OrderCodec`, `Durations`, `FriendSections`, `FriendLabels` (row title/detail) |
 | `servers.ping` | `LivePinger`, `PingThreads`, `PingResult`, `PingStore`, `FriendPings` |
 | `servers.screen` | `ServerScreenHooks`, `ServerSessions`, `ServerSession`, `BarController`, `PreviewController`, `PreviewData`, `MotdReader`, `ServerListView`, `ServerSwap`, `StarMark`, `ServerHover`, `VanillaChrome`, `TabDropZone` |
 | `servers.drag` | `ListDrag`, `DragTarget`, `DragPaint`, `ServerDrop` |
@@ -95,7 +95,7 @@ shows all; hovering opens the MOTD preview (second MOTD line, 3/20 players); the
 `pingEvery` (set to 10 s); reopening the screen restores the cached result without a new ping. The test adds and
 removes its two servers in `servers.dat`.
 
-`ServerListsGameTest` (+ `ServerDragChecks`, `WorldOrderChecks`, `FriendsTabChecks`, `FakeFriends`, `WorldFixtures`),
+`ServerListsGameTest` (+ `ServerDragChecks`, `WorldOrderChecks`, `FriendsTabChecks`, `FieldChecks`, `FakeFriends`, `WorldFixtures`),
 screenshots in `build/review/servers-friends/`:
 
 ```
@@ -105,7 +105,8 @@ screenshots in `build/review/servers-friends/`:
 It drags server 3 above server 1 (saved in `servers.dat`, stays selected), cancels a drag with Esc, checks a plain
 click still selects, drags inside a search filter (mapped to the real list); builds three worlds (copies of one test
 world with other names/dates), drags the oldest to the top (stored, survives reopening), cycles the sort chip; opens
-*Friends* with a fake `FriendsActivity` (all three sections, ping of a shared address, hidden address without Join),
+*Friends* with a fake `FriendsActivity` (all three sections, ping of a shared address, hidden address without Join,
+server name + address, name with *Address hidden*, hosted world name, invite destination),
 hover card, Join/accept/decline, drags a friend's server onto *Servers* (added), empty, signed-out and off states.
 
 Porting later: `ServerSelectionList.Entry` render signature (`renderContent` since 1.21.9), `MouseButtonEvent`/

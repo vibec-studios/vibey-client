@@ -24,6 +24,11 @@ public final class Model {
         }
     }
 
+    static Boolean flag(JsonObject o, String key) {
+        var e = o == null ? null : o.get(key);
+        return e != null && e.isJsonPrimitive() && e.getAsJsonPrimitive().isBoolean() ? e.getAsBoolean() : null;
+    }
+
     // ============================================================================================ users
 
     public record User(String id, String name, String skinUrl, boolean slim, String statusText, String badge, long createdAt, Identity identity) {
@@ -36,10 +41,11 @@ public final class Model {
         }
     }
 
-    public record Privacy(String friendRequests, String directMessages, String invites, boolean showHosting) {
+    public record Privacy(String friendRequests, String directMessages, String invites, boolean showHosting,
+                          boolean shareServerAddress) {
         public static Privacy from(JsonObject o) {
             return new Privacy(J.str(o, "friendRequests", "everyone"), J.str(o, "directMessages", "friends"),
-                    J.str(o, "invites", "friends"), J.bool(o, "showHosting", true));
+                    J.str(o, "invites", "friends"), J.bool(o, "showHosting", true), J.bool(o, "shareServerAddress", false));
         }
     }
 
@@ -67,12 +73,14 @@ public final class Model {
     }
 
     public record Activity(String type, String instanceName, String mcVersion, String loader, String server, String world,
-                           boolean joinable, Join join, long startedAt) {
+                           boolean joinable, Join join, long startedAt, String serverName, String serverAddress,
+                           int serverPort, Boolean addressShared) {
         public static Activity from(JsonObject o) {
             if (o == null) return null;
             return new Activity(J.str(o, "type", "playing"), J.str(o, "instanceName"), J.str(o, "mcVersion"),
                     J.str(o, "loader"), J.str(o, "server"), J.str(o, "world"), J.bool(o, "joinable", false),
-                    Join.from(J.obj(o, "join")), time(J.str(o, "startedAt")));
+                    Join.from(J.obj(o, "join")), time(J.str(o, "startedAt")), J.str(o, "serverName"),
+                    J.str(o, "serverAddress"), J.num(o, "serverPort", 0), flag(o, "addressShared"));
         }
     }
 
@@ -220,14 +228,18 @@ public final class Model {
 
     public record Invite(String id, String kind, User from, String toUserId, String chatId, String targetName,
                          String mcVersion, String loader, String packCode, String message, String hostSessionId,
-                         String status, String myResponse, long createdAt, long expiresAt) {
+                         String status, String myResponse, long createdAt, long expiresAt, Destination destination) {
         public static Invite from(JsonObject o) {
             if (o == null) return null;
             JsonObject t = J.obj(o, "target");
             return new Invite(J.str(o, "id", "").intern(), J.str(o, "kind", "world"), User.from(J.obj(o, "from")), J.str(o, "toUserId"),
                     J.str(o, "chatId"), J.str(t, "name", ""), J.str(t, "mcVersion"), J.str(t, "loader"), J.str(t, "packCode"),
                     J.str(o, "message"), J.str(o, "hostSessionId"), J.str(o, "status", "pending"), J.str(o, "myResponse"),
-                    time(J.str(o, "createdAt")), time(J.str(o, "expiresAt")));
+                    time(J.str(o, "createdAt")), time(J.str(o, "expiresAt")), Destination.from(J.obj(o, "destination")));
+        }
+
+        public String displayName() {
+            return destination != null && destination.name() != null && !destination.name().isBlank() ? destination.name() : targetName;
         }
 
         public boolean open() {
@@ -256,13 +268,13 @@ public final class Model {
     // ============================================================================================ hosting / devices
 
     public record HostSession(String id, User host, String kind, String address, String mcVersion, String status,
-                              int players, long startedAt) {
+                              int players, long startedAt, String worldName, String joinHost, int joinPort) {
         public static HostSession from(JsonObject o) {
             if (o == null) return null;
             var p = J.arr(o, "players");
             return new HostSession(J.str(o, "id", "").intern(), User.from(J.obj(o, "host")), J.str(o, "kind", "world"),
                     J.str(o, "address"), J.str(o, "mcVersion"), J.str(o, "status", "online"), p == null ? 0 : p.size(),
-                    time(J.str(o, "startedAt")));
+                    time(J.str(o, "startedAt")), J.str(o, "worldName"), J.str(o, "joinHost"), J.num(o, "joinPort", 0));
         }
 
         public boolean online() {

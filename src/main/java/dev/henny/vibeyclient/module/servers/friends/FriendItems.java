@@ -7,6 +7,7 @@ import dev.henny.vibeyclient.api.service.FriendsActivity.OnServer;
 import dev.henny.vibeyclient.api.service.FriendsActivity.Player;
 import dev.henny.vibeyclient.client.ranks.Ranks;
 import dev.henny.vibeyclient.module.servers.core.Durations;
+import dev.henny.vibeyclient.module.servers.core.FriendLabels;
 import dev.henny.vibeyclient.module.servers.core.FriendSections;
 import dev.henny.vibeyclient.module.servers.ping.FriendPings;
 import dev.henny.vibeyclient.ranks.RankDef;
@@ -35,30 +36,34 @@ final class FriendItems {
     private static FriendItem server(String key, OnServer s, FriendPings pings, long now) {
         Player p = s.friend();
         String ping = s.shared() ? pings.label(s.address()) : "";
-        String where = s.shared() ? s.server() : Lang.tr("servers.friends.hidden");
+        FriendLabels.Label l = FriendLabels.server(s);
+        String where = l.hiddenTitle() ? Lang.tr("servers.friends.hidden") : l.title();
+        String detail = l.hiddenDetail() ? Lang.tr("servers.friends.hiddenAddress") : l.detail();
         String card = join(Lang.tr("servers.friends.card.server", where), since(s.since(), now));
         return new FriendItem(key, "server", "", 0, p.id(), p.name(), HeadTextures.of(p.id(), p.skinUrl()), rank(p),
-                rankColor(p), "server", where, ping, pings.bad(s.address()), s.shared(), s.shared(), false,
+                rankColor(p), "server", where, detail, ping, pings.bad(s.address()), s.shared(), s.shared(), false,
                 s.shared() ? s.address() : "", p.status(), card);
     }
 
     private static FriendItem world(String key, HostedWorld w, long now) {
         Player p = w.host();
-        String name = w.world() == null || w.world().isBlank() ? Lang.tr("servers.friends.world") : w.world();
+        FriendLabels.Label l = FriendLabels.world(w);
+        String name = l.hiddenTitle() ? Lang.tr("servers.friends.world") : l.title();
         String players = w.players() > 0 ? Lang.tr("servers.friends.players", w.players()) : "";
         String card = join(Lang.tr("servers.friends.card.world", name), since(w.since(), now));
         return new FriendItem(key, "world", "", 0, p.id(), p.name(), HeadTextures.of(p.id(), p.skinUrl()), rank(p),
-                rankColor(p), "host", name, players, false, w.joinable(), false, false, "", p.status(), card);
+                rankColor(p), "host", name, l.detail(), players, false, w.joinable(), false, false, "", p.status(), card);
     }
 
     private static FriendItem invite(String key, Invite i, long now) {
         Player p = i.from();
-        String what = i.target() == null || i.target().isBlank() ? Lang.tr("servers.friends.world") : i.target();
+        FriendLabels.Label l = FriendLabels.invite(i);
+        String what = l.hiddenTitle() ? Lang.tr("servers.friends.world") : l.title();
         Durations.Span left = Durations.left(i.expiresAt(), now);
         String expires = left == null ? "" : Lang.tr("servers.friends.expires", span(left));
         String card = join(Lang.tr("servers.friends.card.invite", what), expires);
         return new FriendItem(key, "invite", "", 0, i.id(), p.name(), HeadTextures.of(p.id(), p.skinUrl()), rank(p),
-                rankColor(p), "world".equals(i.kind()) ? "host" : "server", what, expires, false, true, false, true, "",
+                rankColor(p), "world".equals(i.kind()) ? "host" : "server", what, l.detail(), expires, false, true, false, true, "",
                 p.status(), card);
     }
 

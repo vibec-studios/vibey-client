@@ -255,6 +255,8 @@
     "invites": "Einladungen",
     "hosting": "Welten zeigen",
     "hostingTip": "Freunde sehen deine gehosteten Welten.",
+    "shareAddress": "Serveradresse teilen",
+    "shareAddressTip": "Freunde sehen Adresse und Port deines Servers und können nachkommen. Aus: Sie sehen nur den Namen.",
     "devices": "Geräte",
     "blocked": "Blockiert",
     "unblock": "Entblocken",
