@@ -2,6 +2,12 @@
 
 All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.properties`.
 
+## 0.4.0-beta.3 – toast head icon fix (beta)
+
+Hotfix for **0.4.0-beta.2** (beta / dev channel only; 0.3.2 stays the normal version).
+
+- Fixed a VUI error banner (`unknown icon 'vibeyclient:head/...'`) when social/friend toasts displayed a player head texture instead of a pixel icon, and rendered toast player heads untinted via `<image>`.
+
 ## 0.4.0-beta.2 – companions, AFK cinematics and a screen editor (beta)
 
 Another **beta**: you only get it on the beta / dev channel of the Vibe Launcher or from GitHub. 0.3.2 stays the

@@ -4,7 +4,10 @@
 <template>
   <column id="toasts">
     <toast v-for="t in toasts" :key="t.id" :class="t.kind" @click="dismiss(t)">
-      <stack class="toast-icon"><icon v-if="t.icon" :name="t.icon"/></stack>
+      <stack class="toast-icon">
+        <image v-if="t.iconTexture" :src="t.iconTexture" class="toast-head" fit="fill"/>
+        <icon v-else-if="t.iconName" :name="t.iconName"/>
+      </stack>
       <column class="toast-body">
         <text class="toast-title">{{ t.title }}</text>
         <text v-if="t.text" class="toast-text">{{ t.text }}</text>
@@ -19,6 +22,7 @@ toast { min-width: 0; width: 176; height: 22; padding: 0 4 0 0; gap: 5; backgrou
         transition: opacity 150ms out, translate-y 150ms out; }
 toast:enter, toast:leave { opacity: 0; translate-y: 8; }
 .toast-icon { width: 20; align-self: stretch; align-items: center; background: $surface3; color: $brand2; }
+.toast-head { width: 12; height: 12; }
 toast.ok .toast-icon { color: $ok; }
 toast.warn .toast-icon { color: $warn; }
 toast.error .toast-icon { color: $danger; }
