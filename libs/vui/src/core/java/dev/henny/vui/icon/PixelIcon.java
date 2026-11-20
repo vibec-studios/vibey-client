@@ -4,19 +4,31 @@ import java.util.Arrays;
 import java.util.List;
 
 public final class PixelIcon {
+    private static final int ON = 0xFFFFFFFF;
+
     private final String name;
     private final int width;
     private final int height;
-    private final boolean[] cells;
+    private final int[] pixels;
+    private final boolean tinted;
     private final int[] runs;
 
     public PixelIcon(String name, int width, int height, boolean[] cells) {
-        if (cells.length != width * height) throw new IllegalArgumentException("icon " + name + ": expected " + width * height + " cells");
+        this(name, width, height, mono(cells), true);
+    }
+
+    private PixelIcon(String name, int width, int height, int[] pixels, boolean tinted) {
+        if (pixels.length != width * height) throw new IllegalArgumentException("icon " + name + ": expected " + width * height + " cells");
         this.name = name;
         this.width = width;
         this.height = height;
-        this.cells = cells.clone();
-        this.runs = runsOf(width, height, this.cells);
+        this.pixels = pixels;
+        this.tinted = tinted;
+        this.runs = IconRuns.of(width, height, pixels);
+    }
+
+    public static PixelIcon colored(String name, int width, int height, int[] argb) {
+        return new PixelIcon(name, width, height, argb.clone(), false);
     }
 
     public static PixelIcon fromRows(String name, List<String> rows) {
@@ -31,6 +43,12 @@ public final class PixelIcon {
         return new PixelIcon(name, w, h, cells);
     }
 
+    private static int[] mono(boolean[] cells) {
+        int[] out = new int[cells.length];
+        for (int i = 0; i < cells.length; i++) out[i] = cells[i] ? ON : 0;
+        return out;
+    }
+
     public String name() {
         return name;
     }
@@ -43,24 +61,36 @@ public final class PixelIcon {
         return height;
     }
 
+    public boolean tinted() {
+        return tinted;
+    }
+
     public boolean on(int x, int y) {
-        return x >= 0 && y >= 0 && x < width && y < height && cells[y * width + x];
+        return pixel(x, y) != 0;
+    }
+
+    public int pixel(int x, int y) {
+        return x >= 0 && y >= 0 && x < width && y < height ? pixels[y * width + x] : 0;
     }
 
     public int runCount() {
-        return runs.length / 3;
+        return runs.length / IconRuns.STRIDE;
     }
 
     public int runX(int i) {
-        return runs[i * 3];
+        return runs[i * IconRuns.STRIDE];
     }
 
     public int runY(int i) {
-        return runs[i * 3 + 1];
+        return runs[i * IconRuns.STRIDE + 1];
     }
 
     public int runLength(int i) {
-        return runs[i * 3 + 2];
+        return runs[i * IconRuns.STRIDE + 2];
+    }
+
+    public int runColor(int i) {
+        return runs[i * IconRuns.STRIDE + 3];
     }
 
     public String[] rows() {
@@ -73,33 +103,13 @@ public final class PixelIcon {
         return out;
     }
 
-    private static int[] runsOf(int w, int h, boolean[] cells) {
-        int[] out = new int[w * h * 3];
-        int n = 0;
-        for (int y = 0; y < h; y++) {
-            int x = 0;
-            while (x < w) {
-                if (!cells[y * w + x]) {
-                    x++;
-                    continue;
-                }
-                int start = x;
-                while (x < w && cells[y * w + x]) x++;
-                out[n++] = start;
-                out[n++] = y;
-                out[n++] = x - start;
-            }
-        }
-        return Arrays.copyOf(out, n);
-    }
-
     @Override
     public boolean equals(Object o) {
-        return o instanceof PixelIcon p && p.width == width && p.height == height && Arrays.equals(p.cells, cells);
+        return o instanceof PixelIcon p && p.width == width && p.height == height && p.tinted == tinted && Arrays.equals(p.pixels, pixels);
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(cells) * 31 + width;
+        return Arrays.hashCode(pixels) * 31 + width;
     }
 }

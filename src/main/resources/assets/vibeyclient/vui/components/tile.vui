@@ -1,9 +1,10 @@
 <import name="ico" src="vibeyclient:components/ico"/>
+<import name="module-icon" src="vibeyclient:components/module-icon"/>
 <props>{ "m": {} }</props>
 <template>
   <row class="tile" :class="{ on: m.on, unavailable: !m.available }" :tooltip="m.tip" tabindex="0">
     <box class="tile-bar" :style="{ background: m.on ? m.accent : 'transparent' }"/>
-    <stack class="tile-icon" :style="{ color: m.on ? m.accent : '$dim' }"><ico :name="m.icon"/></stack>
+    <module-icon :name="m.icon" :accent="m.accent" :on="m.on"/>
     <column class="tile-text">
       <text class="tile-name">{{ m.name }}</text>
       <text v-if="m.hit" class="tile-hit">› {{ m.hit }}</text>
@@ -14,11 +15,10 @@
   </row>
 </template>
 <style>
-.tile { height: 24; gap: 5; padding-right: 5; background: $surface; border: 1 $line; cursor: pointer;
+.tile { height: 24; gap: 4; padding-right: 5; background: $surface; border: 1 $line; cursor: pointer;
         transition: background 150ms out, border-color 150ms out; }
 .tile:hover, .tile:focus { background: $surface2; border-color: $line2; }
 .tile-bar { width: 2; align-self: stretch; }
-.tile-icon { size: 13; align-items: center; background: $panel; border: 1 $line; flex-shrink: 0; }
 .tile-text { grow: 1; gap: 1; min-width: 0; }
 .tile-name { color: $text; text-wrap: nowrap; text-overflow: ellipsis; }
 .tile.unavailable .tile-name { color: $dim; }

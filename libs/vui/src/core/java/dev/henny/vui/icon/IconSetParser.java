@@ -34,9 +34,14 @@ public final class IconSetParser {
     }
 
     private static void icon(IconSet set, String name, JsonValue value, Diagnostics diagnostics) {
+        if (value.isObject()) {
+            PixelIcon colored = ColorIconParser.parse(name, value, diagnostics);
+            if (colored != null) set.put(colored);
+            return;
+        }
         List<String> rows = rows(value);
         if (rows == null || rows.isEmpty()) {
-            diagnostics.error(value.pos(), "icon '" + name + "' needs rows", "a list of strings or one string of rows split by spaces, '#' = on, '.' = off");
+            diagnostics.error(value.pos(), "icon '" + name + "' needs rows", "a list of strings or one string of rows split by spaces, '#' = on, '.' = off; or { \"palette\": {...}, \"rows\": [...] } for colours");
             return;
         }
         int width = rows.get(0).length();
@@ -49,7 +54,7 @@ public final class IconSetParser {
         set.put(PixelIcon.fromRows(name, rows));
     }
 
-    private static List<String> rows(JsonValue value) {
+    static List<String> rows(JsonValue value) {
         List<String> out = new ArrayList<>();
         if (value.isArray()) {
             for (JsonValue v : value.asArray()) out.add(v.asString().trim());

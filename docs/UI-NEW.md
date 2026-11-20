@@ -16,7 +16,7 @@ text and is far too complicated"*. Result: one calm menu, icons + short labels, 
 2. **No paragraphs.** Anything longer than a label is a tooltip of one short sentence – or it is cut.
 3. **One primary action per view.** Exactly one purple button: module page (*Edit crosshair*), wardrobe (*Wear*),
    onboarding (*Next*), HUD editor (*Done*), dialog (*Reset all*). Everything else is ghost, icon or row.
-4. **Icons first.** Every place, tab and tool has a 9 × 9 icon; the label is its tooltip where space is short
+4. **Icons first.** Every place, tab and tool has a 9 × 9 icon, every module a coloured 16 × 16 one; the label is its tooltip where space is short
    (header, rail, title corner, pause row).
 5. **Hover for details.** Module tile → summary; setting label → what it does; friend → what they play; wardrobe
    item → name + rarity; locked row → why. Nothing explains itself in the layout.

@@ -4,33 +4,18 @@ import dev.henny.vibeyclient.api.Lang;
 import dev.henny.vibeyclient.api.ModuleManager;
 import dev.henny.vibeyclient.api.VibeyModule;
 
+import java.util.Set;
+
 public final class ModuleLook {
     private ModuleLook() {}
 
+    public static final Set<String> COLORED = Set.of("social", "cosmetics", "emotes", "multiplayer", "media", "devlink",
+            "nametags", "hud", "pvp", "clips", "waypoints", "info", "camera", "visuals", "chat", "inventory", "servers",
+            "cinematic", "screens", "companion");
+
     public static String icon(VibeyModule m) {
-        return switch (m.id()) {
-            case "social" -> "friends";
-            case "cosmetics" -> "shirt";
-            case "emotes" -> "wave";
-            case "multiplayer" -> "host";
-            case "lyrics", "media" -> "note";
-            case "devlink" -> "cube";
-            case "nametags" -> "seal";
-            case "hud" -> "hud";
-            case "pvp" -> "crosshair";
-            case "clips" -> "play";
-            case "waypoints" -> "pin";
-            case "info" -> "info";
-            case "camera" -> "camera";
-            case "visuals" -> "palette";
-            case "chat" -> "chat";
-            case "inventory" -> "bag";
-            case "servers" -> "server";
-            case "cinematic" -> "film";
-            case "screens" -> "window";
-            case "companion" -> "paw";
-            default -> "puzzle";
-        };
+        String id = m.id().equals("lyrics") ? "media" : m.id();
+        return COLORED.contains(id) ? "module_" + id : "puzzle";
     }
 
     public static String accent(VibeyModule m) {

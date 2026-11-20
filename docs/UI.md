@@ -13,7 +13,8 @@ How the client's menus are built and how a module plugs into them. Every menu is
   Details go into `setting.<key>.desc` (shown on hover). `checkI18n` keeps both languages complete.
 - **One primary action per view** (purple), everything else ghost, icon or row.
 - **Icons first:** 9 × 9 pixel icons from `vui/icons.json` (`<ico name="gear"/>`), label in the tooltip where space is
-  short.
+  short. Modules get a coloured 16 × 16 icon (`module_<id>`, shown by `components/module-icon` at 1:1, faded when
+  off); a module without one falls back to `puzzle`.
 - **427 × 240 GUI px first** (GUI scale 3 at 1280 × 720), English and German; wider screens get more columns.
 - **Keyboard:** Tab / Shift+Tab move focus, Enter / Space activate, Esc steps back (key capture → field → popover →
   page → search → close). Typing anywhere in the menu searches.
@@ -61,7 +62,7 @@ How the client's menus are built and how a module plugs into them. Every menu is
 names of the contract, and its methods delegate. `sync()` runs every 5 ticks (`SyncedScreen`) and keeps switches,
 values, lists and the open page in step with the game; `document().refresh()` re-reads plain getters.
 
-- **Grid:** one `ModuleTile` per visible module (`<id>.name`, icon from `ModuleLook.icon`, accent colour, switch =
+- **Grid:** one `ModuleTile` per visible module (`<id>.name`, coloured icon from `ModuleLook.icon`, accent colour, switch =
   `ModuleSwitch`, a `State` that writes through to `ModuleManager.setEnabled`). Tooltip = `<id>.summary`.
   `ModuleCategory.CREATOR` modules sit behind the *Creator tools n* chip. Search (`query`) matches the name, the
   summary and every setting label; a setting hit shows *› label* on the tile.
