@@ -2,7 +2,8 @@
 <import name="chip" src="vibeyclient:components/chip"/>
 <template>
   <stack class="srv-layer">
-    <row v-if="searchOn" id="search" class="srv-search" :class="{ some: shown != '' }" :style="{ left: left, top: top }">
+    <row v-if="searchOn && tab == 'servers'" id="search" class="srv-search" :class="{ some: shown != '' }"
+         :style="{ left: left, top: top, width: searchWidth }">
       <ico name="search" class="srv-ico"/>
       <textfield id="q" class="srv-field" v-model="query" max-length="48" :placeholder="tr('servers.ui.search')"/>
       <text v-if="shown != ''" id="shown" class="srv-count">{{ shown }}</text>
@@ -10,13 +11,24 @@
         <ico name="close"/>
       </button>
     </row>
-    <chip v-if="favOn" id="favs" class="srv-favs" icon="star" :label="tr('servers.ui.favourites')" :count="favCount"
+    <row v-if="tabsOn" id="tabs" class="srv-tabs" :style="{ top: top }">
+      <row id="tab-servers" class="srv-tab" :class="{ on: tab == 'servers', hot: dropHot }" @click="showServers()">
+        <ico name="server"/>
+        <text class="srv-tab-label">{{ tr('servers.tab.servers') }}</text>
+      </row>
+      <row id="tab-friends" class="srv-tab" :class="{ on: tab == 'friends' }" @click="showFriends()">
+        <ico name="friends"/>
+        <text class="srv-tab-label">{{ tr('servers.tab.friends') }}</text>
+        <text v-if="friendsCount > 0" class="srv-tab-count">{{ friendsCount }}</text>
+      </row>
+    </row>
+    <chip v-if="favOn && tab == 'servers'" id="favs" class="srv-favs" icon="star" :label="tabsOn ? '' : tr('servers.ui.favourites')" :count="favCount"
           :on="favOnly" :tip="tr('servers.ui.favouritesTip')" :style="{ right: right, top: top }" @click="toggleFavOnly()"/>
   </stack>
 </template>
 <style>
 .srv-layer { width: 100%; height: 100%; pointer-events: none; }
-.srv-search { position: absolute; width: 108; height: 14; gap: 3; padding: 0 2 0 3; background: $panel;
+.srv-search { position: absolute; height: 14; gap: 3; padding: 0 2 0 3; background: $panel;
               border: 1 $line2; color: $dim; transition: border-color 150ms out; }
 .srv-search:focus-within { border-color: $brand; color: $muted; }
 .srv-search.some { border-color: $brand; }
@@ -27,4 +39,14 @@
 .srv-clear:hover { color: $text; }
 .srv-favs { position: absolute; anchor: top-right; }
 .srv-favs.on { color: #ffd23f; }
+.srv-tabs { position: absolute; anchor: top; height: 14; gap: 0; border: 1 $line2; background: $panel; }
+.srv-tab { height: 12; gap: 3; padding: 0 6; color: $dim; cursor: pointer; align-items: center;
+           transition: background 150ms out, color 150ms out; }
+.srv-tab:hover { color: $text; }
+.srv-tab.on { background: $surface2; color: $text; }
+.srv-tab.on .srv-tab-label { color: $text; }
+.srv-tab.hot { background: $brand; color: $on-brand; }
+.srv-tab-label { text-wrap: nowrap; }
+.srv-tab-count { color: $brand2; }
+.srv-tab.hot .srv-tab-count, .srv-tab.hot .srv-tab-label { color: $on-brand; }
 </style>

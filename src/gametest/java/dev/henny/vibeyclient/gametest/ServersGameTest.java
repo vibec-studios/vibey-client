@@ -40,7 +40,7 @@ public final class ServersGameTest implements FabricClientGameTest {
         });
         page(ctx, GlobalSettings.Language.ENGLISH, "page_en");
         page(ctx, GlobalSettings.Language.GERMAN, "page_de");
-        try (FakeStatusServer srv = FakeStatusServer.start(json())) {
+        try (FakeStatusServer srv = FakeStatusServer.start(statusJson())) {
             String address = "127.0.0.1:" + srv.port();
             ServersTestKit.addServers(ctx, new String[] {DEAD, TEST}, new String[] {"127.0.0.1:1", address});
             open(ctx);
@@ -129,7 +129,7 @@ public final class ServersGameTest implements FabricClientGameTest {
         return ServerSessions.current();
     }
 
-    private static String json() {
+    static String statusJson() {
         int protocol = SharedConstants.getCurrentVersion().protocolVersion();
         return String.format(Locale.ROOT, "{\"version\":{\"name\":\"%s\",\"protocol\":%d},"
                 + "\"players\":{\"max\":20,\"online\":3,\"sample\":[{\"name\":\"Alex\",\"id\":\"00000000-0000-0000-0000-000000000001\"},"

@@ -41,6 +41,11 @@ public final class StarMark {
         return true;
     }
 
+    public static boolean over(ServerSelectionList.Entry e, double mx, double my) {
+        ServersModule m = ServersModule.get();
+        return m != null && m.favouritesActive() && inside(e, mx, my);
+    }
+
     static boolean inside(ServerSelectionList.Entry e, double mx, double my) {
         int x = x(e) - 1, y = y(e) - 1;
         return mx >= x && my >= y && mx < x + SIZE + 2 && my < y + SIZE + 2;

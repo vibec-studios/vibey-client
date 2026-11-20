@@ -148,6 +148,7 @@ public final class SocialModule extends VibeyModule {
         presence.tick();
         streamerMode.tick();
         discordPresence.tick();
+        activity.tick();
     }
 
     private void installStreamerPart() {
@@ -167,15 +168,19 @@ public final class SocialModule extends VibeyModule {
             Services.register(VibeBackend.class, backend);
             Services.register(SocialStatus.class, socialStatus);
             Services.register(FriendsDrawer.class, drawer);
+            Services.register(dev.henny.vibeyclient.api.service.FriendsActivity.class, activity);
         } else {
             Services.unregister(VibeBackend.class, backend);
             Services.unregister(SocialStatus.class, socialStatus);
             Services.unregister(FriendsDrawer.class, drawer);
+            Services.unregister(dev.henny.vibeyclient.api.service.FriendsActivity.class, activity);
             if (backend.running()) backend.stop();
         }
     }
 
     private final FriendsDrawer drawer = new dev.henny.vibeyclient.module.social.vui.SocialDrawer(this);
+    private final dev.henny.vibeyclient.module.social.activity.FriendsActivityService activity =
+            new dev.henny.vibeyclient.module.social.activity.FriendsActivityService(this);
 
     private void openFriends(Screen parent) {
         if (dev.henny.vibeyclient.ui.vui.ClassicUi.enabled()) ClientCompat.openScreen(new SocialScreen(parent, this, null));

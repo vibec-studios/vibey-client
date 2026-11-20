@@ -1,0 +1,102 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<import name="head" src="vibeyclient:components/head"/>
+<import name="empty" src="vibeyclient:components/empty"/>
+<import name="spin" src="vibeyclient:components/spin"/>
+<import name="status-dot" src="vibeyclient:components/status-dot"/>
+<template>
+  <stack class="fr-layer">
+    <column id="friends" class="fr-panel" :style="{ left: left, top: top, width: width, height: height }">
+      <template v-if="state == 'ready'">
+        <scroll v-if="len(rows) > 0" id="fr-list" class="fr-list">
+          <column v-for="r in rows" :key="r.key" class="fr-item">
+            <row v-if="r.header" class="fr-head">
+              <text class="fr-head-title">{{ r.title }}</text>
+              <text class="fr-head-count">{{ r.count }}</text>
+            </row>
+            <row v-else :id="r.key" class="fr-row" :class="r.kind" @enter="hover(r)" @leave="unhover(r)"
+                 @dragstart="grab(r, $event)" @drag="dragMove($event)" @dragend="dragEnd($event)"
+                 @doubleclick="join(r)">
+              <stack class="fr-face">
+                <head :src="r.head" :size="16"/>
+                <status-dot class="fr-dot" :status="r.status"/>
+              </stack>
+              <column class="fr-text">
+                <row class="fr-top">
+                  <text class="fr-name">{{ r.name }}</text>
+                  <text v-if="r.rank" class="fr-rank" :style="{ color: r.rankColor, borderColor: r.rankColor }">{{ r.rank }}</text>
+                </row>
+                <row class="fr-sub">
+                  <ico :name="r.icon" class="fr-sub-ico"/>
+                  <text class="fr-where">{{ r.where }}</text>
+                </row>
+              </column>
+              <text v-if="r.ping" class="fr-ping" :class="{ bad: r.bad }">{{ r.ping }}</text>
+              <button v-if="r.canAdd" :id="r.key + ':add'" class="fr-icon" :tooltip="tr('servers.friends.add')" @click.stop="add(r)">
+                <ico name="plus"/>
+              </button>
+              <button v-if="r.canDecline" :id="r.key + ':decline'" class="fr-icon" :tooltip="tr('servers.friends.decline')"
+                      @click.stop="decline(r)">
+                <ico name="close"/>
+              </button>
+              <button v-if="r.canJoin" :id="r.key + ':join'" class="primary fr-join" @click.stop="join(r)">{{ tr('servers.friends.join') }}</button>
+            </row>
+          </column>
+        </scroll>
+        <empty v-else id="fr-empty" icon="friends" :title="tr('servers.friends.none')"
+               :action="tr('servers.friends.open')" @act="openFriends()"/>
+      </template>
+      <empty v-else-if="state == 'signedOut'" id="fr-signin" icon="person" :title="tr('servers.friends.signedOut')"
+             :action="tr('servers.friends.signIn')" @act="signIn()"/>
+      <empty v-else-if="state == 'off'" id="fr-off" icon="power" :title="tr('servers.friends.off')"
+             :action="tr('servers.friends.open')" @act="openFriends()"/>
+      <empty v-else-if="state == 'error'" id="fr-error" kind="error" icon="warn" :title="tr('servers.friends.error')"
+             :action="tr('servers.friends.retry')" @act="signIn()"/>
+      <spin v-else :label="tr('servers.friends.connecting')"/>
+    </column>
+    <row v-if="cardOpen" id="fr-card" class="fr-card" :style="{ left: cardX, top: cardY }">
+      <head :src="cardHead" :size="24"/>
+      <column class="fr-card-text">
+        <text class="fr-card-name">{{ cardName }}</text>
+        <text class="fr-card-line">{{ cardText }}</text>
+      </column>
+    </row>
+    <row v-if="dragging" id="fr-ghost" class="fr-ghost" :style="{ left: dragX, top: dragY }">
+      <ico name="plus" class="fr-ghost-ico"/>
+      <text class="fr-ghost-label">{{ dragLabel }}</text>
+    </row>
+  </stack>
+</template>
+<style>
+.fr-layer { width: 100%; height: 100%; pointer-events: none; }
+.fr-panel { position: absolute; pointer-events: auto; background: #000000aa; border-top: 1 $line2; border-bottom: 1 $line2; }
+.fr-list { grow: 1; gap: 0; padding: 2 4 4 4; }
+.fr-item { gap: 0; }
+.fr-head { height: 14; gap: 4; padding: 4 2 0 2; align-items: end; }
+.fr-head-title { color: $brand2; text-transform: uppercase; font-scale: 0.75; text-wrap: nowrap; }
+.fr-head-count { color: $dim; font-scale: 0.75; }
+.fr-row { height: 26; gap: 5; padding: 0 4; align-items: center; border: 1 transparent; cursor: pointer;
+          transition: background 150ms out, border-color 150ms out; }
+.fr-row:hover { background: $surface2; border-color: $line2; }
+.fr-face { width: 16; height: 16; flex-shrink: 0; }
+.fr-dot { position: absolute; anchor: bottom-right; left: 1; top: 1; size: 5; }
+.fr-text { grow: 1; basis: 0; min-width: 0; gap: 2; }
+.fr-top { gap: 4; height: 9; min-width: 0; }
+.fr-name { color: $text; text-wrap: nowrap; text-overflow: ellipsis; min-width: 0; shrink: 1; }
+.fr-rank { font-scale: 0.75; padding: 0 2; border: 1 $line2; text-wrap: nowrap; flex-shrink: 0; }
+.fr-sub { gap: 3; height: 9; min-width: 0; color: $dim; }
+.fr-sub-ico { flex-shrink: 0; size: 8; }
+.fr-where { color: $muted; text-wrap: nowrap; text-overflow: ellipsis; min-width: 0; shrink: 1; }
+.fr-ping { color: $brand2; text-wrap: nowrap; flex-shrink: 0; }
+.fr-ping.bad { color: $danger; }
+.fr-icon { width: 16; height: 16; padding: 0; background: transparent; border: 1 transparent; color: $muted; flex-shrink: 0; }
+.fr-icon:hover { background: $surface2; border-color: $line2; color: $text; }
+.fr-join { height: 16; padding: 0 8; flex-shrink: 0; }
+.fr-card { position: absolute; width: 170; gap: 6; padding: 5 6; background: $panel; border: 1 $brand; pointer-events: none;
+           align-items: center; }
+.fr-card-text { grow: 1; min-width: 0; gap: 2; }
+.fr-card-name { color: $text; font-weight: bold; text-wrap: nowrap; text-overflow: ellipsis; }
+.fr-card-line { color: $muted; max-lines: 2; }
+.fr-ghost { position: absolute; height: 16; gap: 3; padding: 0 5; background: $panel; border: 1 $brand; color: $brand;
+            pointer-events: none; align-items: center; }
+.fr-ghost-label { color: $text; text-wrap: nowrap; }
+</style>

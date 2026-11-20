@@ -1,10 +1,11 @@
 {
   "name": "Servers",
-  "description": "Live pings, search, favourites and a MOTD preview in the server list.",
+  "description": "Live pings, search, favourites, drag & drop and a friends tab in the server list; your own world order.",
   "summary": "Pings, search, favourites",
   "section": {
     "list": "Server list",
-    "ping": "Live ping"
+    "ping": "Live ping",
+    "worlds": "World list"
   },
   "setting": {
     "search": "Search field",
@@ -18,7 +19,17 @@
     "livePing.desc": "Pings again while the list is open.",
     "pingEvery": "Ping every",
     "pingParallel": "Parallel pings",
-    "pingParallel.desc": "How many servers at once."
+    "pingParallel.desc": "How many servers at once.",
+    "dragReorder": "Drag to sort",
+    "dragReorder.desc": "Drag a row up or down.",
+    "friendsTab": "Friends tab",
+    "friendsTab.desc": "Where your friends play.",
+    "worldSort": "Sort worlds",
+    "worldSort.custom": "Custom",
+    "worldSort.last_played": "Last played",
+    "worldSort.name": "Name",
+    "worldDrag": "Drag to sort",
+    "worldDrag.desc": "Drag a world up or down."
   },
   "ui": {
     "search": "Search",
@@ -28,5 +39,52 @@
     "ping": "{0} ms",
     "offline": "Offline",
     "players": "{0}/{1}"
+  },
+  "tab": {
+    "servers": "Servers",
+    "friends": "Friends"
+  },
+  "worlds": {
+    "sort": {
+      "custom": "Custom",
+      "last_played": "Last played",
+      "name": "Name"
+    },
+    "sortTip": "Sort order"
+  },
+  "friends": {
+    "section": {
+      "invites": "Invites",
+      "servers": "Playing on servers",
+      "worlds": "Hosted worlds"
+    },
+    "world": "World",
+    "players": "{0} playing",
+    "card": {
+      "server": "On {0}",
+      "world": "Hosting {0}",
+      "invite": "Invites you to {0}"
+    },
+    "since": "for {0}",
+    "expires": "{0} left",
+    "unit": {
+      "minutes": "{0} min",
+      "hours": "{0} h",
+      "days": "{0} d"
+    },
+    "add": "Add to my servers",
+    "decline": "Decline",
+    "join": "Join",
+    "none": "No friends online",
+    "open": "Open friends",
+    "signedOut": "Not signed in",
+    "signIn": "Sign in",
+    "off": "Friends are off",
+    "error": "Can't reach Vibey",
+    "retry": "Retry",
+    "connecting": "Connecting…",
+    "already": "Already in your list",
+    "added": "Server added",
+    "hidden": "Hidden server"
   }
 }
