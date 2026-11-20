@@ -9,7 +9,7 @@
       <text v-if="m.hit" class="tile-hit">› {{ m.hit }}</text>
     </column>
     <ico v-if="m.blocked" name="lock" class="tile-flag" :tooltip="t('ui.module.blockedTip')"/>
-    <toggle v-if="m.available" v-model="m.on" @click.stop="toggled(m)"/>
+    <toggle v-if="m.available" class="tile-switch" v-model="m.on" @click.stop="toggled(m)"/>
     <ico v-else name="warn" class="tile-flag warn" :tooltip="m.reason"/>
   </row>
 </template>

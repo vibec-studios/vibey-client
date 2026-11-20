@@ -19,7 +19,9 @@ import dev.henny.vibeyclient.module.cosmetics.preview.AvatarPreview;
 import dev.henny.vibeyclient.module.cosmetics.ui.WardrobeUi;
 import dev.henny.vibeyclient.ui.Gfx;
 import dev.henny.vibeyclient.ui.Theme;
-import dev.henny.vibeyclient.ui.VibeyScreen;
+import dev.henny.vibeyclient.module.cosmetics.vui.WardrobeController;
+import dev.henny.vibeyclient.module.cosmetics.vui.WardrobeVui;
+import dev.henny.vibeyclient.ui.vui.Menus;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
@@ -39,8 +41,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public final class WardrobeUiGameTest implements FabricClientGameTest {
     private static final String NS = "vibeytest:";
-    private static final int HEADER = 28;
-    private static final int PAD = 10;
 
     private final FakeWardrobe wardrobe = new FakeWardrobe();
     private final FakePreview preview = new FakePreview();
@@ -96,107 +96,103 @@ public final class WardrobeUiGameTest implements FabricClientGameTest {
     // ============================================================================================ title screen
 
     private void titleScreen(ClientGameTestContext context) {
+        UiTest t = new UiTest(context, "ui-new");
         setScale(context, 2);
         context.setScreen(() -> null);
         context.runOnClient(mc -> WardrobeUi.openWardrobe(mc.screen));
         context.waitTicks(6);
         String[] cats = {"cape", "wings", "aura", "pet", "shield", "hat", "back", "emotes"};
         for (int i = 0; i < cats.length; i++) {
-            clickGui(context, 30, HEADER + 1 + 20 + i * rowH(context) + 5);
+            clickNth(context, t, ".rail-slot", i);
             context.waitTicks(5);
+            String now = context.computeOnClient(mc -> controller(mc).slot.peek());
+            if (!cats[i].equals(now)) throw new AssertionError("Rail click " + i + " should show " + cats[i] + ", shows " + now);
             if (i == cats.length - 1) {
-                // select an emote card for the preview
-                clickGui(context, firstCardX(context) + 20, firstCardY() + 20);
+                clickNth(context, t, ".item", 0);
                 context.waitTicks(4);
                 if (!(NS + "wave").equals(preview.view.emote)) throw new AssertionError("Clicking an emote should preview it, got " + preview.view.emote);
             }
-            context.takeScreenshot("wardrobe_s2_en_" + (i + 1) + "_" + cats[i]);
+            t.shot("wardrobe_s2_en_" + (i + 1) + "_" + cats[i]);
         }
 
-        // capes: hover try-on, then click equips
-        clickGui(context, 30, HEADER + 1 + 20 + 5);
+        clickNth(context, t, ".rail-slot", 0);
         context.waitTicks(4);
-        int cx = firstCardX(context) + 20, cy = firstCardY() + 20;
-        int secondX = cx + cardStep(context);
-        moveGui(context, secondX, cy);
+        clickNth(context, t, ".item", 1);
         context.waitTicks(4);
-        context.takeScreenshot("wardrobe_s2_en_9_hover_tryon");
+        t.shot("wardrobe_s2_en_9_pick_tryon");
         String tried = preview.view.overrides.get(Slot.CAPE);
-        if (tried == null) throw new AssertionError("Hovering a cape should try it on");
-        clickGui(context, secondX, cy);
+        if (tried == null) throw new AssertionError("Picking a cape should try it on");
+        t.click(".pv-main");
         context.waitTicks(4);
-        if (!tried.equals(wardrobe.equipped.get(Slot.CAPE))) throw new AssertionError("Click should equip " + tried + ", equipped " + wardrobe.equipped.get(Slot.CAPE));
-        clickGui(context, secondX, cy);
+        if (!tried.equals(wardrobe.equipped.get(Slot.CAPE))) throw new AssertionError("Wear should equip " + tried + ", equipped " + wardrobe.equipped.get(Slot.CAPE));
+        t.click(".pv-main");
         context.waitTicks(4);
-        if (wardrobe.equipped.get(Slot.CAPE) != null) throw new AssertionError("Second click should unequip");
+        if (wardrobe.equipped.get(Slot.CAPE) != null) throw new AssertionError("Take off should unequip");
+        float[] card = centerNth(context, ".item", 1);
+        t.hover(card[0], card[1]);
+        context.getInput().pressMouse(0);
+        context.getInput().pressMouse(0);
+        context.waitTicks(4);
+        if (!tried.equals(wardrobe.equipped.get(Slot.CAPE))) throw new AssertionError("Double click should wear " + tried);
         wardrobe.equipped.put(Slot.CAPE, NS + "vibe_cape");
 
-        // search
-        int w = guiWidth(context);
-        int sw = Math.max(80, Math.min(180, w / 4));
-        clickGui(context, w - 24 - 8 - sw + 30, HEADER / 2);
-        context.waitTicks(2);
+        t.click(".wd-search-field");
         context.getInput().typeChars("seal");
-        context.waitTicks(4);
-        context.takeScreenshot("wardrobe_s2_en_10_search_seal");
+        context.waitTicks(6);
+        int found = context.computeOnClient(mc -> controller(mc).items.size());
+        t.shot("wardrobe_s2_en_10_search_seal");
         context.getInput().typeChars("zzz");
-        context.waitTicks(4);
-        context.takeScreenshot("wardrobe_s2_en_11_search_empty");
+        context.waitTicks(6);
+        int none = context.computeOnClient(mc -> controller(mc).items.size());
+        if (none != 0) throw new AssertionError("Search sealzzz should find nothing, found " + none + " (seal: " + found + ")");
+        t.shot("wardrobe_s2_en_11_search_empty");
 
-        // wheel editor, emote wheel
         context.setScreen(() -> null);
         context.runOnClient(mc -> WardrobeUi.openWheelEditor(null));
         context.waitTicks(6);
-        context.takeScreenshot("wardrobe_s2_en_12_wheel_editor");
+        t.shot("wardrobe_s2_en_12_wheel_editor");
         wheel(context, "wardrobe_s2_en_13_wheel", 2);
 
-        // Vibey menu tab
-        context.setScreen(() -> new VibeyScreen(null, WardrobeUi.TAB_ID));
+        context.runOnClient(mc -> Menus.openModule(null, "cosmetics"));
         context.waitTicks(8);
-        context.takeScreenshot("wardrobe_s2_en_14_menu_tab");
+        t.shot("wardrobe_s2_en_14_menu_page");
+        t.click("open-wardrobe");
+        context.waitTicks(4);
+        if (!context.computeOnClient(mc -> mc.screen instanceof WardrobeVui)) throw new AssertionError("Menu wardrobe icon should open the wardrobe");
 
-        // GUI scale 3 (426 x 240), German
         setScale(context, 3);
         context.runOnClient(mc -> GlobalSettings.language.set(GlobalSettings.Language.GERMAN));
         context.setScreen(() -> null);
         context.runOnClient(mc -> WardrobeUi.openWardrobe(null, Slot.CAPE));
         context.waitTicks(6);
-        context.takeScreenshot("wardrobe_s3_de_1_cape");
+        t.shot("wardrobe_s3_de_1_cape");
         context.setScreen(() -> null);
         context.runOnClient(mc -> WardrobeUi.openWardrobeEmotes(null));
         context.waitTicks(6);
-        context.takeScreenshot("wardrobe_s3_de_2_emotes");
+        t.shot("wardrobe_s3_de_2_emotes");
         context.setScreen(() -> null);
         context.runOnClient(mc -> WardrobeUi.openWheelEditor(null));
         context.waitTicks(6);
-        context.takeScreenshot("wardrobe_s3_de_3_wheel_editor");
+        t.shot("wardrobe_s3_de_3_wheel_editor");
         wheel(context, "wardrobe_s3_de_4_wheel", 3);
-        context.setScreen(() -> new VibeyScreen(null, WardrobeUi.TAB_ID));
-        context.waitTicks(8);
-        context.takeScreenshot("wardrobe_s3_de_5_menu_tab");
 
-        // English at scale 3
         context.runOnClient(mc -> GlobalSettings.language.set(GlobalSettings.Language.ENGLISH));
         context.setScreen(() -> null);
         context.runOnClient(mc -> WardrobeUi.openWardrobe(null, Slot.PET));
         context.waitTicks(6);
-        context.takeScreenshot("wardrobe_s3_en_1_pet");
+        t.shot("wardrobe_s3_en_1_pet");
 
-        // no services, no items: empty states
         context.runOnClient(mc -> {
             Services.unregister(Wardrobe.class, wardrobe);
             Services.unregister(AvatarPreview.class, preview);
             for (Item i : items) Cosmetico.items().remove(i.id(), i.source());
         });
-        context.waitTicks(4);
-        context.takeScreenshot("wardrobe_s3_en_2_empty_no_services");
+        context.waitTicks(8);
+        t.shot("wardrobe_s3_en_2_empty_no_services");
         context.setScreen(() -> null);
         context.runOnClient(mc -> WardrobeUi.openWheel(() -> true));
         context.waitTicks(6);
-        context.takeScreenshot("wardrobe_s3_en_3_wheel_no_services");
-        context.setScreen(() -> new VibeyScreen(null, WardrobeUi.TAB_ID));
-        context.waitTicks(8);
-        context.takeScreenshot("wardrobe_s3_en_4_menu_tab_no_services");
+        t.shot("wardrobe_s3_en_3_wheel_no_services");
         context.setScreen(() -> null);
         context.runOnClient(mc -> {
             Services.register(Wardrobe.class, wardrobe);
@@ -204,20 +200,40 @@ public final class WardrobeUiGameTest implements FabricClientGameTest {
             for (Item i : items) Cosmetico.items().put(i);
         });
 
-        // big window (4K at scale 4 = 960 x 540) and small (854 x 480 at scale 2)
         context.getInput().resizeWindow(3840, 2160);
         setScale(context, 4);
         context.runOnClient(mc -> WardrobeUi.openWardrobe(null, Slot.CAPE));
         context.waitTicks(6);
-        context.takeScreenshot("wardrobe_4k_s4_cape");
+        t.shot("wardrobe_4k_s4_cape");
         context.setScreen(() -> null);
         context.getInput().resizeWindow(854, 480);
         setScale(context, 2);
         context.runOnClient(mc -> WardrobeUi.openWardrobeEmotes(null));
         context.waitTicks(6);
-        context.takeScreenshot("wardrobe_854_s2_emotes");
+        t.shot("wardrobe_854_s2_emotes");
         context.setScreen(() -> null);
         context.getInput().resizeWindow(1280, 720);
+    }
+
+    private static WardrobeController controller(net.minecraft.client.Minecraft mc) {
+        if (!(mc.screen instanceof WardrobeVui w)) throw new AssertionError("wardrobe not open: " + mc.screen);
+        return w.controller();
+    }
+
+    private static float[] centerNth(ClientGameTestContext context, String selector, int index) {
+        return context.computeOnClient(mc -> {
+            var doc = ((WardrobeVui) mc.screen).document();
+            doc.layoutIfNeeded();
+            var list = doc.query(selector);
+            if (list.size() <= index) throw new AssertionError("only " + list.size() + " " + selector);
+            var r = dev.henny.vui.layout.ScreenRects.of(list.get(index));
+            return new float[] {r.centerX(), r.centerY()};
+        });
+    }
+
+    private static void clickNth(ClientGameTestContext context, UiTest t, String selector, int index) {
+        float[] c = centerNth(context, selector, index);
+        t.click(c[0], c[1]);
     }
 
     /** Opens the wheel with a simulated held key, points up-right (slot 1), screenshots, releases → plays slot 1. */
@@ -267,9 +283,9 @@ public final class WardrobeUiGameTest implements FabricClientGameTest {
             boolean closed = context.computeOnClient(mc -> !WardrobeUi.isOpen());
             if (!closed) throw new AssertionError("Right click should close the wheel");
 
-            context.setScreen(() -> new VibeyScreen(null, WardrobeUi.TAB_ID));
+            context.runOnClient(mc -> Menus.openModule(null, "cosmetics"));
             context.waitTicks(8);
-            context.takeScreenshot("wardrobe_world_s2_menu_tab");
+            context.takeScreenshot("wardrobe_world_s2_menu_page");
             context.setScreen(() -> null);
         }
     }
@@ -305,38 +321,6 @@ public final class WardrobeUiGameTest implements FabricClientGameTest {
         moveGui(context, x, y);
         context.waitTicks(1);
         context.getInput().pressMouse(0);
-    }
-
-    /** Same formulas as the wardrobe screen. */
-    private static int listW(ClientGameTestContext context) {
-        return Math.max(84, Math.min(140, guiWidth(context) / 6));
-    }
-
-    private static int rowH(ClientGameTestContext context) {
-        int bodyH = guiHeight(context) - HEADER - 1;
-        return Math.max(14, Math.min(22, (bodyH - 20 - 18 - PAD * 2) / 8));
-    }
-
-    private static int firstCardX(ClientGameTestContext context) {
-        return listW(context) + 1 + PAD;
-    }
-
-    private static int firstCardY() {
-        return HEADER + 1 + 28 + 1;
-    }
-
-    private static int cardStep(ClientGameTestContext context) {
-        int w = guiWidth(context);
-        int prevW = Math.max(110, Math.min(300, w * 3 / 10));
-        int gridW = w - listW(context) - 1 - prevW - 1;
-        int innerW = gridW - PAD * 2 + 4 - 8;
-        int cols = Math.max(1, (innerW + 6) / (70 + 6));
-        int cardW = (innerW - 6 * (cols - 1)) / cols;
-        if (cardW > 104) {
-            cols = (innerW + 6 + 104 + 6 - 1) / (104 + 6);
-            cardW = (innerW - 6 * (cols - 1)) / cols;
-        }
-        return cardW + 6;
     }
 
     // ============================================================================================ fake data
