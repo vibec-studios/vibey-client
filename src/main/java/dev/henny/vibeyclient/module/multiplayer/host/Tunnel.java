@@ -1,5 +1,7 @@
 package dev.henny.vibeyclient.module.multiplayer.host;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.henny.vibeyclient.BuildInfo;
@@ -14,6 +16,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -38,7 +42,13 @@ public final class Tunnel {
 
         /** The relay turned someone away because of the whitelist or the ban list. */
         default void onBlocked(String name, String ip, String reason) {}
+
+        default void onUdp(UdpState state, UdpReady ready) {}
+
+        default void onKick(String name, String uuid, String message) {}
     }
+
+    public enum UdpState { OFF, WAITING, UNAVAILABLE, DENIED, CONNECTING, BLOCKED, OK }
 
     private static final byte[] MAGIC = RelayHello.MAGIC;
 
@@ -51,6 +61,7 @@ public final class Tunnel {
     private final Function<String, String> joinServer;
     private final Supplier<String> access;
     private final Listener listener;
+    private final Supplier<Map<Integer, Integer>> udpLocal;
 
     private volatile boolean closed;
     private volatile boolean wasOnline;
@@ -58,6 +69,11 @@ public final class Tunnel {
     private volatile OutputStream controlOut;
     private final Set<Socket> streams = ConcurrentHashMap.newKeySet();
     private Thread thread;
+    private volatile UdpTunnel udp;
+    private volatile UdpState udpState = UdpState.OFF;
+    private volatile UdpReady udpReady;
+    private volatile long udpSince;
+    private volatile int udpGen;
 
     /**
      * @param joinServer called with the relay's challenge; performs the Mojang "join server" call and returns null on
@@ -65,6 +81,12 @@ public final class Tunnel {
      */
     public Tunnel(String relay, int lanPort, String name, UUID uuid, String mcVersion,
                   Function<String, String> joinServer, Supplier<String> access, Listener listener) {
+        this(relay, lanPort, name, uuid, mcVersion, joinServer, access, listener, Map::of);
+    }
+
+    public Tunnel(String relay, int lanPort, String name, UUID uuid, String mcVersion,
+                  Function<String, String> joinServer, Supplier<String> access, Listener listener,
+                  Supplier<Map<Integer, Integer>> udpLocal) {
         String host = relay;
         int port = 25565;
         int colon = relay.lastIndexOf(':');
@@ -84,6 +106,7 @@ public final class Tunnel {
         this.joinServer = joinServer;
         this.access = access;
         this.listener = listener;
+        this.udpLocal = udpLocal;
     }
 
     public void start() {
@@ -94,6 +117,7 @@ public final class Tunnel {
 
     public void close() {
         closed = true;
+        closeUdp(UdpState.OFF, null);
         quietClose(control);
         for (Socket s : streams) quietClose(s);
         streams.clear();
@@ -102,6 +126,18 @@ public final class Tunnel {
 
     public int activeStreams() {
         return streams.size() / 2;
+    }
+
+    public UdpState udpState() {
+        UdpState s = udpState;
+        UdpTunnel u = udp;
+        if (s == UdpState.CONNECTING && u != null && u.acked()) return UdpState.OK;
+        if (s == UdpState.CONNECTING && System.currentTimeMillis() - udpSince > 5_000) return UdpState.BLOCKED;
+        return s;
+    }
+
+    public UdpReady udpReady() {
+        return udpReady;
     }
 
     public void rotate() {
@@ -160,6 +196,11 @@ public final class Tunnel {
             }
             send(hello.toString());
             send(access.get());
+            Map<Integer, Integer> wanted = udpLocal.get();
+            if (!wanted.isEmpty()) {
+                send(udpRequest(wanted).toString());
+                setUdp(UdpState.WAITING, null);
+            }
 
             Thread pinger = new Thread(() -> {
                 while (!closed && control == s && !s.isClosed()) {
@@ -189,6 +230,11 @@ public final class Tunnel {
                     case "ready" -> {
                         wasOnline = true;
                         listener.onState(State.ONLINE, msg.get("address").getAsString(), null);
+                        if (udpState == UdpState.WAITING) awaitUdp(hasFeature(msg, "udp"));
+                    }
+                    case "udp_ready" -> onUdpReady(UdpReady.parse(msg));
+                    case "udp_ok" -> {
+                        if (udp != null) setUdp(UdpState.OK, udpReady);
                     }
                     case "open" -> {
                         if (msg.has("name") && msg.has("ip")) {
@@ -197,6 +243,7 @@ public final class Tunnel {
                         openStream(msg.get("sid").getAsInt(), msg.get("key").getAsString());
                     }
                     case "blocked" -> listener.onBlocked(str(msg, "name"), str(msg, "ip"), str(msg, "reason"));
+                    case "kick" -> listener.onKick(str(msg, "name"), str(msg, "uuid"), str(msg, "msg"));
                     case "replaced" -> {
                         return "replaced";
                     }
@@ -217,7 +264,93 @@ public final class Tunnel {
         } finally {
             quietClose(s);
             if (control == s) control = null;
+            if (!closed) closeUdp(UdpState.OFF, null);
         }
+    }
+
+    static JsonObject udpRequest(Map<Integer, Integer> wanted) {
+        JsonArray channels = new JsonArray();
+        if (wanted.containsKey(UdpTunnel.CHANNEL_VOICE)) channels.add("voice");
+        if (wanted.containsKey(UdpTunnel.CHANNEL_BEDROCK)) channels.add("bedrock");
+        JsonObject o = new JsonObject();
+        o.addProperty("t", "udp");
+        o.add("channels", channels);
+        return o;
+    }
+
+    private static boolean hasFeature(JsonObject msg, String feature) {
+        if (!msg.has("features") || !msg.get("features").isJsonArray()) return false;
+        for (JsonElement e : msg.getAsJsonArray("features")) {
+            if (e.isJsonPrimitive() && feature.equals(e.getAsString())) return true;
+        }
+        return false;
+    }
+
+    private void awaitUdp(boolean supported) {
+        if (!supported) {
+            setUdp(UdpState.UNAVAILABLE, null);
+            return;
+        }
+        int gen = udpGen;
+        Thread t = new Thread(() -> {
+            try {
+                Thread.sleep(5_000);
+            } catch (InterruptedException e) {
+                return;
+            }
+            if (gen == udpGen && udpState == UdpState.WAITING) setUdp(UdpState.UNAVAILABLE, null);
+        }, "VibeyClient-Mp-UdpWait");
+        t.setDaemon(true);
+        t.start();
+    }
+
+    private void onUdpReady(UdpReady ready) {
+        if (closed) return;
+        if (!ready.open()) {
+            closeUdp(ready.denied().isEmpty() ? UdpState.UNAVAILABLE : UdpState.DENIED, ready);
+            return;
+        }
+        Map<Integer, Integer> local = new HashMap<>(udpLocal.get());
+        if (ready.voiceHost() == null) local.remove(UdpTunnel.CHANNEL_VOICE);
+        if (ready.bedrockHost() == null) local.remove(UdpTunnel.CHANNEL_BEDROCK);
+        if (local.isEmpty()) {
+            closeUdp(UdpState.DENIED, ready);
+            return;
+        }
+        int port = ready.tunnelPort() > 0 ? ready.tunnelPort() : 24454;
+        UdpTunnel u = udp;
+        try {
+            if (u == null) {
+                u = new UdpTunnel(relayHost, port, ready.token(), local);
+                u.start();
+                udp = u;
+            } else {
+                for (int ch : new int[]{UdpTunnel.CHANNEL_VOICE, UdpTunnel.CHANNEL_BEDROCK}) {
+                    u.setLocalPort(ch, local.getOrDefault(ch, 0));
+                }
+                u.update(ready.token(), port);
+            }
+        } catch (IOException e) {
+            MultiplayerModule.LOG.warn("UDP tunnel could not start: {}", e.toString());
+            closeUdp(UdpState.UNAVAILABLE, ready);
+            return;
+        }
+        udpSince = System.currentTimeMillis();
+        setUdp(UdpState.CONNECTING, ready);
+    }
+
+    private void closeUdp(UdpState state, UdpReady ready) {
+        UdpTunnel u = udp;
+        udp = null;
+        if (u != null) u.close();
+        if (state != udpState || ready != udpReady) setUdp(state, ready);
+    }
+
+    private void setUdp(UdpState state, UdpReady ready) {
+        udpGen++;
+        udpState = state;
+        udpReady = ready;
+        listener.onUdp(state, ready);
     }
 
     private static String str(JsonObject o, String key) {

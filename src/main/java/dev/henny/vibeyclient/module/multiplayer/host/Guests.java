@@ -69,15 +69,56 @@ public final class Guests {
             player.connection.disconnect(Component.literal(T.get(deny)));
             return;
         }
-        if (server.getPlayerList().getPlayers().size() > cfg.maxPlayers) {
+        if (server.getPlayerList().getPlayers().size() > maxPlayers(server)) {
             player.connection.disconnect(Component.literal(T.get("kick.full")));
             return;
         }
+        checkJoin(server, player);
         // Every guest starts in the chosen game mode; OPs and cheaters can change it themselves afterwards.
         MpCompat.command(server, "gamemode " + cfg.gameMode + " " + player.getName().getString());
         if (cfg.forceMods) awaitingMods.put(player.getUUID(), System.currentTimeMillis() + MOD_CHECK_MS);
         refresh(server);
         MultiplayerModule.guestToast(T.get("toast.joined", player.getName().getString()), player.getUUID().toString());
+    }
+
+    public static int maxPlayers(MinecraftServer server) {
+        Integer policy = HostPanel.policyMaxPlayers();
+        int max = policy != null ? policy : HostConfig.get().maxPlayers;
+        if (server != null && server.getPlayerList().getMaxPlayers() > 0) max = Math.min(max, server.getPlayerList().getMaxPlayers());
+        return Math.max(1, max);
+    }
+
+    private static void checkJoin(MinecraftServer server, ServerPlayer player) {
+        UUID id = player.getUUID();
+        String name = player.getName().getString();
+        HostPanel.joinCheck(id, name).thenAccept(d -> {
+            if (d.allow()) return;
+            server.execute(() -> {
+                ServerPlayer p = server.getPlayerList().getPlayer(id);
+                if (p == null || isHost(p)) return;
+                MultiplayerModule.LOG.info("{} may not join ({})", name, d.code());
+                p.connection.disconnect(Component.literal(T.get("kick.denied." + deniedKey(d.code()))));
+            });
+        });
+    }
+
+    static String deniedKey(String code) {
+        return switch (code == null ? "" : code) {
+            case "not_friend" -> "not_friend";
+            case "not_invited" -> "not_invited";
+            default -> "kicked";
+        };
+    }
+
+    public static void kickNow(UUID uuid, String name, String reason, boolean permanent) {
+        run(server -> {
+            ServerPlayer p = uuid != null ? server.getPlayerList().getPlayer(uuid) : null;
+            if (p == null && name != null && !name.isBlank()) p = server.getPlayerList().getPlayerByName(name);
+            if (p == null || isHost(p)) return;
+            String text = T.get(permanent ? "kick.banned" : "kick.kicked");
+            if (reason != null && !reason.isBlank()) text += "\n\n" + reason;
+            p.connection.disconnect(Component.literal(text));
+        });
     }
 
     public static void onLeave(MinecraftServer server, ServerPlayer player) {

@@ -79,3 +79,13 @@ jar {
     // The fonts of the lyrics module must travel with their licenses (SIL OFL 1.1 / Apache 2.0).
     if (moduleIncluded('media')) from(rootProject.file('licenses/lyrics')) { into 'licenses/vibeyclient/lyrics' }
 }
+
+repositories {
+    exclusiveContent {
+        forRepository { maven { name = 'maxhenkel'; url = 'https://maven.maxhenkel.de/repository/public' } }
+        filter { includeGroup 'de.maxhenkel.voicechat' }
+    }
+}
+dependencies {
+    compileOnly "de.maxhenkel.voicechat:voicechat-api:${project.voicechat_api_version}"
+}
