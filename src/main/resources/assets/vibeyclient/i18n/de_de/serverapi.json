@@ -1,0 +1,5 @@
+{
+  "name": "Serverinfos",
+  "description": "Zeigt Wegpunkte und Spieler-Namensfarben, die dieser Server bereitstellt.",
+  "marker": "Server · {0} · {1} m"
+}

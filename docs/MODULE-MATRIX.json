@@ -1,0 +1,1545 @@
+{
+  "schema": 1,
+  "targets": [
+    {
+      "id": "fabric-1.21.1",
+      "loader": "fabric",
+      "line": "1.21.1",
+      "minecraft": [
+        "1.21",
+        "1.21.1"
+      ]
+    },
+    {
+      "id": "fabric-1.21.3",
+      "loader": "fabric",
+      "line": "1.21.3",
+      "minecraft": [
+        "1.21.2",
+        "1.21.3"
+      ]
+    },
+    {
+      "id": "fabric-1.21.4",
+      "loader": "fabric",
+      "line": "1.21.4",
+      "minecraft": [
+        "1.21.4"
+      ]
+    },
+    {
+      "id": "fabric-1.21.5",
+      "loader": "fabric",
+      "line": "1.21.5",
+      "minecraft": [
+        "1.21.5"
+      ]
+    },
+    {
+      "id": "fabric-1.21.8",
+      "loader": "fabric",
+      "line": "1.21.8",
+      "minecraft": [
+        "1.21.6",
+        "1.21.7",
+        "1.21.8"
+      ]
+    },
+    {
+      "id": "fabric-1.21.10",
+      "loader": "fabric",
+      "line": "1.21.10",
+      "minecraft": [
+        "1.21.9",
+        "1.21.10"
+      ]
+    },
+    {
+      "id": "fabric-1.21.11",
+      "loader": "fabric",
+      "line": "1.21.11",
+      "minecraft": [
+        "1.21.11"
+      ]
+    },
+    {
+      "id": "fabric-26.1",
+      "loader": "fabric",
+      "line": "26.1",
+      "minecraft": [
+        "26.1",
+        "26.1.1",
+        "26.1.2"
+      ]
+    },
+    {
+      "id": "fabric-26.2",
+      "loader": "fabric",
+      "line": "26.2",
+      "minecraft": [
+        "26.2"
+      ]
+    },
+    {
+      "id": "fabric-26.3",
+      "loader": "fabric",
+      "line": "26.3",
+      "minecraft": [
+        "26.3"
+      ]
+    },
+    {
+      "id": "neoforge-1.21.1",
+      "loader": "neoforge",
+      "line": "1.21.1",
+      "minecraft": [
+        "1.21",
+        "1.21.1"
+      ]
+    },
+    {
+      "id": "neoforge-1.21.3",
+      "loader": "neoforge",
+      "line": "1.21.3",
+      "minecraft": [
+        "1.21.2",
+        "1.21.3"
+      ]
+    },
+    {
+      "id": "neoforge-1.21.4",
+      "loader": "neoforge",
+      "line": "1.21.4",
+      "minecraft": [
+        "1.21.4"
+      ]
+    },
+    {
+      "id": "neoforge-1.21.5",
+      "loader": "neoforge",
+      "line": "1.21.5",
+      "minecraft": [
+        "1.21.5"
+      ]
+    },
+    {
+      "id": "neoforge-1.21.8",
+      "loader": "neoforge",
+      "line": "1.21.8",
+      "minecraft": [
+        "1.21.6",
+        "1.21.7",
+        "1.21.8"
+      ]
+    },
+    {
+      "id": "neoforge-1.21.10",
+      "loader": "neoforge",
+      "line": "1.21.10",
+      "minecraft": [
+        "1.21.9",
+        "1.21.10"
+      ]
+    },
+    {
+      "id": "neoforge-1.21.11",
+      "loader": "neoforge",
+      "line": "1.21.11",
+      "minecraft": [
+        "1.21.11"
+      ]
+    },
+    {
+      "id": "neoforge-26.1",
+      "loader": "neoforge",
+      "line": "26.1",
+      "minecraft": [
+        "26.1",
+        "26.1.1",
+        "26.1.2"
+      ]
+    },
+    {
+      "id": "neoforge-26.2",
+      "loader": "neoforge",
+      "line": "26.2",
+      "minecraft": [
+        "26.2"
+      ]
+    },
+    {
+      "id": "neoforge-26.3",
+      "loader": "neoforge",
+      "line": "26.3",
+      "minecraft": [
+        "26.3"
+      ]
+    }
+  ],
+  "modules": [
+    {
+      "id": "accessibility",
+      "kind": "module",
+      "targets": [
+        "fabric-1.21.10",
+        "fabric-1.21.11",
+        "fabric-26.1",
+        "fabric-26.2",
+        "neoforge-1.21.10",
+        "neoforge-1.21.11",
+        "neoforge-26.1",
+        "neoforge-26.2"
+      ],
+      "serverRules": []
+    },
+    {
+      "id": "camera",
+      "kind": "module",
+      "targets": [
+        "fabric-1.21.11"
+      ],
+      "serverRules": [
+        "camera.freelook",
+        "freelook",
+        "camera.orbit",
+        "camera.*"
+      ]
+    },
+    {
+      "id": "chat",
+      "kind": "module",
+      "targets": [
+        "fabric-1.21.11"
+      ],
+      "serverRules": []
+    },
+    {
+      "id": "cinematic",
+      "kind": "module",
+      "targets": [
+        "fabric-1.21.11"
+      ],
+      "serverRules": [
+        "cinematic.afk"
+      ]
+    },
+    {
+      "id": "clips",
+      "kind": "module",
+      "targets": [
+        "fabric-1.21.11"
+      ],
+      "serverRules": [
+        "clips",
+        "clips.auto"
+      ]
+    },
+    {
+      "id": "companion",
+      "kind": "module",
+      "targets": [
+        "fabric-1.21.11"
+      ],
+      "serverRules": [
+        "companion.show"
+      ]
+    },
+    {
+      "id": "core",
+      "kind": "shared",
+      "targets": [
+        "fabric-1.21.1",
+        "fabric-1.21.3",
+        "fabric-1.21.4",
+        "fabric-1.21.5",
+        "fabric-1.21.8",
+        "fabric-1.21.10",
+        "fabric-1.21.11",
+        "fabric-26.1",
+        "fabric-26.2",
+        "fabric-26.3",
+        "neoforge-1.21.1",
+        "neoforge-1.21.3",
+        "neoforge-1.21.4",
+        "neoforge-1.21.5",
+        "neoforge-1.21.8",
+        "neoforge-1.21.10",
+        "neoforge-1.21.11",
+        "neoforge-26.1",
+        "neoforge-26.2",
+        "neoforge-26.3"
+      ],
+      "serverRules": [
+        "discord.server"
+      ]
+    },
+    {
+      "id": "cosmetics",
+      "kind": "module",
+      "targets": [
+        "fabric-1.21.1",
+        "fabric-1.21.3",
+        "fabric-1.21.4",
+        "fabric-1.21.5",
+        "fabric-1.21.8",
+        "fabric-1.21.10",
+        "fabric-1.21.11",
+        "fabric-26.1",
+        "fabric-26.2",
+        "fabric-26.3",
+        "neoforge-1.21.1",
+        "neoforge-1.21.3",
+        "neoforge-1.21.4",
+        "neoforge-1.21.5",
+        "neoforge-1.21.8",
+        "neoforge-1.21.10",
+        "neoforge-1.21.11",
+        "neoforge-26.1",
+        "neoforge-26.2",
+        "neoforge-26.3"
+      ],
+      "serverRules": [
+        "cosmetics.*",
+        "cosmetics.pets",
+        "cosmetics.capes",
+        "cosmetics.wings",
+        "cosmetics.auras",
+        "cosmetics.shields",
+        "cosmetics.hats",
+        "cosmetics.backs"
+      ]
+    },
+    {
+      "id": "devlink",
+      "kind": "module",
+      "targets": [
+        "fabric-1.21.1",
+        "fabric-1.21.3",
+        "fabric-1.21.4",
+        "fabric-1.21.5",
+        "fabric-1.21.8",
+        "fabric-1.21.10",
+        "fabric-1.21.11",
+        "fabric-26.1",
+        "fabric-26.2",
+        "fabric-26.3",
+        "neoforge-1.21.1",
+        "neoforge-1.21.3",
+        "neoforge-1.21.4",
+        "neoforge-1.21.5",
+        "neoforge-1.21.8",
+        "neoforge-1.21.10",
+        "neoforge-1.21.11",
+        "neoforge-26.1",
+        "neoforge-26.2",
+        "neoforge-26.3"
+      ],
+      "serverRules": []
+    },
+    {
+      "id": "emotes",
+      "kind": "module",
+      "targets": [
+        "fabric-1.21.1",
+        "fabric-1.21.3",
+        "fabric-1.21.4",
+        "fabric-1.21.5",
+        "fabric-1.21.8",
+        "fabric-1.21.10",
+        "fabric-1.21.11",
+        "fabric-26.1",
+        "fabric-26.2",
+        "fabric-26.3",
+        "neoforge-1.21.1",
+        "neoforge-1.21.3",
+        "neoforge-1.21.4",
+        "neoforge-1.21.5",
+        "neoforge-1.21.8",
+        "neoforge-1.21.10",
+        "neoforge-1.21.11",
+        "neoforge-26.1",
+        "neoforge-26.2",
+        "neoforge-26.3"
+      ],
+      "serverRules": [
+        "emotes"
+      ]
+    },
+    {
+      "id": "hud",
+      "kind": "module",
+      "targets": [
+        "fabric-1.21.11"
+      ],
+      "serverRules": [
+        "hud.*",
+        "hud.fps",
+        "hud.cps",
+        "hud.keystrokes",
+        "hud.coords",
+        "hud.armor",
+        "hud.effects",
+        "hud.clock",
+        "hud.ping",
+        "hud.server",
+        "hud.speed",
+        "hud.time",
+        "hud.items",
+        "hud.memory",
+        "hud.compass",
+        "hud.timer"
+      ]
+    },
+    {
+      "id": "info",
+      "kind": "module",
+      "targets": [
+        "fabric-1.21.11"
+      ],
+      "serverRules": [
+        "info.*",
+        "info.light",
+        "info.chunks",
+        "info.card",
+        "info.food",
+        "info.saturation",
+        "info.toolwarn",
+        "info.tnt"
+      ]
+    },
+    {
+      "id": "inventory",
+      "kind": "module",
+      "targets": [
+        "fabric-1.21.11"
+      ],
+      "serverRules": [
+        "inventory.tweaks",
+        "inventory.presets"
+      ]
+    },
+    {
+      "id": "media",
+      "kind": "module",
+      "targets": [
+        "fabric-1.21.1",
+        "fabric-1.21.3",
+        "fabric-1.21.4",
+        "fabric-1.21.5",
+        "fabric-1.21.8",
+        "fabric-1.21.10",
+        "fabric-1.21.11",
+        "fabric-26.1",
+        "fabric-26.2",
+        "fabric-26.3"
+      ],
+      "serverRules": []
+    },
+    {
+      "id": "media.video",
+      "kind": "part",
+      "targets": [
+        "fabric-1.21.11"
+      ],
+      "serverRules": []
+    },
+    {
+      "id": "multiplayer",
+      "kind": "module",
+      "targets": [
+        "fabric-1.21.1",
+        "fabric-1.21.3",
+        "fabric-1.21.4",
+        "fabric-1.21.5",
+        "fabric-1.21.8",
+        "fabric-1.21.10",
+        "fabric-1.21.11",
+        "fabric-26.1",
+        "fabric-26.2",
+        "fabric-26.3",
+        "neoforge-1.21.1",
+        "neoforge-1.21.3",
+        "neoforge-1.21.4",
+        "neoforge-1.21.5",
+        "neoforge-1.21.8",
+        "neoforge-1.21.10",
+        "neoforge-1.21.11",
+        "neoforge-26.1",
+        "neoforge-26.2",
+        "neoforge-26.3"
+      ],
+      "serverRules": []
+    },
+    {
+      "id": "nametags",
+      "kind": "module",
+      "targets": [
+        "fabric-1.21.1",
+        "fabric-1.21.3",
+        "fabric-1.21.4",
+        "fabric-1.21.5",
+        "fabric-1.21.8",
+        "fabric-1.21.10",
+        "fabric-1.21.11",
+        "fabric-26.1",
+        "fabric-26.2",
+        "fabric-26.3",
+        "neoforge-1.21.1",
+        "neoforge-1.21.3",
+        "neoforge-1.21.4",
+        "neoforge-1.21.5",
+        "neoforge-1.21.8",
+        "neoforge-1.21.10",
+        "neoforge-1.21.11",
+        "neoforge-26.1",
+        "neoforge-26.2",
+        "neoforge-26.3"
+      ],
+      "serverRules": [
+        "nametags.*",
+        "nametags.seal",
+        "nametags.ranks",
+        "nametags.styles"
+      ]
+    },
+    {
+      "id": "pvp",
+      "kind": "module",
+      "targets": [
+        "fabric-1.21.11"
+      ],
+      "serverRules": [
+        "zoom",
+        "togglesprint",
+        "togglesneak",
+        "crosshair",
+        "blockoutline",
+        "hitcolor",
+        "lowfire",
+        "lowshield",
+        "hud.togglestate",
+        "hud.*"
+      ]
+    },
+    {
+      "id": "screens",
+      "kind": "module",
+      "targets": [
+        "fabric-1.21.11"
+      ],
+      "serverRules": []
+    },
+    {
+      "id": "serverapi",
+      "kind": "module",
+      "targets": [
+        "fabric-1.21.11",
+        "fabric-26.1",
+        "fabric-26.2",
+        "fabric-26.3",
+        "neoforge-1.21.11",
+        "neoforge-26.1",
+        "neoforge-26.2",
+        "neoforge-26.3"
+      ],
+      "serverRules": []
+    },
+    {
+      "id": "servers",
+      "kind": "module",
+      "targets": [
+        "fabric-1.21.11"
+      ],
+      "serverRules": []
+    },
+    {
+      "id": "social",
+      "kind": "module",
+      "targets": [
+        "fabric-1.21.1",
+        "fabric-1.21.3",
+        "fabric-1.21.4",
+        "fabric-1.21.5",
+        "fabric-1.21.8",
+        "fabric-1.21.10",
+        "fabric-1.21.11",
+        "fabric-26.1",
+        "fabric-26.2",
+        "fabric-26.3",
+        "neoforge-1.21.1",
+        "neoforge-1.21.3",
+        "neoforge-1.21.4",
+        "neoforge-1.21.5",
+        "neoforge-1.21.8",
+        "neoforge-1.21.10",
+        "neoforge-1.21.11",
+        "neoforge-26.1",
+        "neoforge-26.2",
+        "neoforge-26.3"
+      ],
+      "serverRules": [
+        "discord.server"
+      ]
+    },
+    {
+      "id": "social.streamer",
+      "kind": "part",
+      "targets": [
+        "fabric-1.21.11"
+      ],
+      "serverRules": []
+    },
+    {
+      "id": "visuals",
+      "kind": "module",
+      "targets": [
+        "fabric-1.21.11"
+      ],
+      "serverRules": [
+        "visuals.*",
+        "visuals.fire",
+        "visuals.pumpkin",
+        "visuals.totem",
+        "visuals.particles"
+      ]
+    },
+    {
+      "id": "visuals.effects",
+      "kind": "part",
+      "targets": [
+        "fabric-1.21.11"
+      ],
+      "serverRules": []
+    },
+    {
+      "id": "visuals.items",
+      "kind": "part",
+      "targets": [
+        "fabric-1.21.11"
+      ],
+      "serverRules": [
+        "visuals.helditem"
+      ]
+    },
+    {
+      "id": "waypoints",
+      "kind": "module",
+      "targets": [
+        "fabric-1.21.11"
+      ],
+      "serverRules": [
+        "waypoints.minimap"
+      ]
+    }
+  ],
+  "serverRules": [
+    {
+      "key": "zoom",
+      "description": "Zoom",
+      "modules": [
+        "pvp"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "camera.freelook",
+      "description": "Freelook (looking around without turning)",
+      "modules": [
+        "camera"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "freelook",
+      "description": "Freelook (looking around without turning)",
+      "modules": [
+        "camera"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "camera.orbit",
+      "description": "Rotating the third-person camera around the player with the middle mouse (F5 stays)",
+      "modules": [
+        "camera"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "camera.*",
+      "description": "Both camera keys",
+      "modules": [
+        "camera"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "cinematic.afk",
+      "description": "AFK cinematics: the camera flying around while you are away (stops a running one at once)",
+      "modules": [
+        "cinematic"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "togglesprint",
+      "description": "Toggle sprint",
+      "modules": [
+        "pvp"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "togglesneak",
+      "description": "Toggle sneak",
+      "modules": [
+        "pvp"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "crosshair",
+      "description": "Custom crosshair",
+      "modules": [
+        "pvp"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "blockoutline",
+      "description": "Custom block outline",
+      "modules": [
+        "pvp"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "hitcolor",
+      "description": "Custom hit colour",
+      "modules": [
+        "pvp"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "lowfire",
+      "description": "Low fire overlay",
+      "modules": [
+        "pvp"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "lowshield",
+      "description": "Lowered shield",
+      "modules": [
+        "pvp"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "hud.togglestate",
+      "description": "The toggle sprint/sneak state shown on the HUD",
+      "modules": [
+        "pvp"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "hud.*",
+      "description": "Every HUD element below",
+      "modules": [
+        "hud",
+        "pvp"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "hud.fps",
+      "description": "FPS counter",
+      "modules": [
+        "hud"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "hud.cps",
+      "description": "Clicks per second",
+      "modules": [
+        "hud"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "hud.keystrokes",
+      "description": "Keystrokes",
+      "modules": [
+        "hud"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "hud.coords",
+      "description": "Coordinates",
+      "modules": [
+        "hud"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "hud.armor",
+      "description": "Armour status",
+      "modules": [
+        "hud"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "hud.effects",
+      "description": "Potion effects",
+      "modules": [
+        "hud"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "hud.clock",
+      "description": "Real-time clock",
+      "modules": [
+        "hud"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "hud.ping",
+      "description": "Ping",
+      "modules": [
+        "hud"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "hud.server",
+      "description": "Server address",
+      "modules": [
+        "hud"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "hud.speed",
+      "description": "Speed",
+      "modules": [
+        "hud"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "hud.time",
+      "description": "In-game time",
+      "modules": [
+        "hud"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "hud.items",
+      "description": "Item counter",
+      "modules": [
+        "hud"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "hud.memory",
+      "description": "Memory usage",
+      "modules": [
+        "hud"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "hud.compass",
+      "description": "Compass",
+      "modules": [
+        "hud"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "hud.timer",
+      "description": "Stopwatch / countdown / split timer",
+      "modules": [
+        "hud"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "emotes",
+      "description": "Emotes: no emote wheel, no own emotes, other players' emotes are not shown",
+      "modules": [
+        "emotes"
+      ],
+      "targets": [
+        "fabric-1.21.1",
+        "fabric-1.21.3",
+        "fabric-1.21.4",
+        "fabric-1.21.5",
+        "fabric-1.21.8",
+        "fabric-1.21.10",
+        "fabric-1.21.11",
+        "fabric-26.1",
+        "fabric-26.2",
+        "fabric-26.3",
+        "neoforge-1.21.1",
+        "neoforge-1.21.3",
+        "neoforge-1.21.4",
+        "neoforge-1.21.5",
+        "neoforge-1.21.8",
+        "neoforge-1.21.10",
+        "neoforge-1.21.11",
+        "neoforge-26.1",
+        "neoforge-26.2",
+        "neoforge-26.3"
+      ]
+    },
+    {
+      "key": "cosmetics.*",
+      "description": "Every cosmetic below",
+      "modules": [
+        "cosmetics"
+      ],
+      "targets": [
+        "fabric-1.21.1",
+        "fabric-1.21.3",
+        "fabric-1.21.4",
+        "fabric-1.21.5",
+        "fabric-1.21.8",
+        "fabric-1.21.10",
+        "fabric-1.21.11",
+        "fabric-26.1",
+        "fabric-26.2",
+        "fabric-26.3",
+        "neoforge-1.21.1",
+        "neoforge-1.21.3",
+        "neoforge-1.21.4",
+        "neoforge-1.21.5",
+        "neoforge-1.21.8",
+        "neoforge-1.21.10",
+        "neoforge-1.21.11",
+        "neoforge-26.1",
+        "neoforge-26.2",
+        "neoforge-26.3"
+      ]
+    },
+    {
+      "key": "cosmetics.pets",
+      "description": "Pets (own and other players')",
+      "modules": [
+        "cosmetics"
+      ],
+      "targets": [
+        "fabric-1.21.1",
+        "fabric-1.21.3",
+        "fabric-1.21.4",
+        "fabric-1.21.5",
+        "fabric-1.21.8",
+        "fabric-1.21.10",
+        "fabric-1.21.11",
+        "fabric-26.1",
+        "fabric-26.2",
+        "fabric-26.3",
+        "neoforge-1.21.1",
+        "neoforge-1.21.3",
+        "neoforge-1.21.4",
+        "neoforge-1.21.5",
+        "neoforge-1.21.8",
+        "neoforge-1.21.10",
+        "neoforge-1.21.11",
+        "neoforge-26.1",
+        "neoforge-26.2",
+        "neoforge-26.3"
+      ]
+    },
+    {
+      "key": "cosmetics.capes",
+      "description": "That cosmetic slot (own and other players')",
+      "modules": [
+        "cosmetics"
+      ],
+      "targets": [
+        "fabric-1.21.1",
+        "fabric-1.21.3",
+        "fabric-1.21.4",
+        "fabric-1.21.5",
+        "fabric-1.21.8",
+        "fabric-1.21.10",
+        "fabric-1.21.11",
+        "fabric-26.1",
+        "fabric-26.2",
+        "fabric-26.3",
+        "neoforge-1.21.1",
+        "neoforge-1.21.3",
+        "neoforge-1.21.4",
+        "neoforge-1.21.5",
+        "neoforge-1.21.8",
+        "neoforge-1.21.10",
+        "neoforge-1.21.11",
+        "neoforge-26.1",
+        "neoforge-26.2",
+        "neoforge-26.3"
+      ]
+    },
+    {
+      "key": "cosmetics.wings",
+      "description": "That cosmetic slot (own and other players')",
+      "modules": [
+        "cosmetics"
+      ],
+      "targets": [
+        "fabric-1.21.1",
+        "fabric-1.21.3",
+        "fabric-1.21.4",
+        "fabric-1.21.5",
+        "fabric-1.21.8",
+        "fabric-1.21.10",
+        "fabric-1.21.11",
+        "fabric-26.1",
+        "fabric-26.2",
+        "fabric-26.3",
+        "neoforge-1.21.1",
+        "neoforge-1.21.3",
+        "neoforge-1.21.4",
+        "neoforge-1.21.5",
+        "neoforge-1.21.8",
+        "neoforge-1.21.10",
+        "neoforge-1.21.11",
+        "neoforge-26.1",
+        "neoforge-26.2",
+        "neoforge-26.3"
+      ]
+    },
+    {
+      "key": "cosmetics.auras",
+      "description": "That cosmetic slot (own and other players')",
+      "modules": [
+        "cosmetics"
+      ],
+      "targets": [
+        "fabric-1.21.1",
+        "fabric-1.21.3",
+        "fabric-1.21.4",
+        "fabric-1.21.5",
+        "fabric-1.21.8",
+        "fabric-1.21.10",
+        "fabric-1.21.11",
+        "fabric-26.1",
+        "fabric-26.2",
+        "fabric-26.3",
+        "neoforge-1.21.1",
+        "neoforge-1.21.3",
+        "neoforge-1.21.4",
+        "neoforge-1.21.5",
+        "neoforge-1.21.8",
+        "neoforge-1.21.10",
+        "neoforge-1.21.11",
+        "neoforge-26.1",
+        "neoforge-26.2",
+        "neoforge-26.3"
+      ]
+    },
+    {
+      "key": "cosmetics.shields",
+      "description": "That cosmetic slot (own and other players')",
+      "modules": [
+        "cosmetics"
+      ],
+      "targets": [
+        "fabric-1.21.1",
+        "fabric-1.21.3",
+        "fabric-1.21.4",
+        "fabric-1.21.5",
+        "fabric-1.21.8",
+        "fabric-1.21.10",
+        "fabric-1.21.11",
+        "fabric-26.1",
+        "fabric-26.2",
+        "fabric-26.3",
+        "neoforge-1.21.1",
+        "neoforge-1.21.3",
+        "neoforge-1.21.4",
+        "neoforge-1.21.5",
+        "neoforge-1.21.8",
+        "neoforge-1.21.10",
+        "neoforge-1.21.11",
+        "neoforge-26.1",
+        "neoforge-26.2",
+        "neoforge-26.3"
+      ]
+    },
+    {
+      "key": "cosmetics.hats",
+      "description": "That cosmetic slot (own and other players')",
+      "modules": [
+        "cosmetics"
+      ],
+      "targets": [
+        "fabric-1.21.1",
+        "fabric-1.21.3",
+        "fabric-1.21.4",
+        "fabric-1.21.5",
+        "fabric-1.21.8",
+        "fabric-1.21.10",
+        "fabric-1.21.11",
+        "fabric-26.1",
+        "fabric-26.2",
+        "fabric-26.3",
+        "neoforge-1.21.1",
+        "neoforge-1.21.3",
+        "neoforge-1.21.4",
+        "neoforge-1.21.5",
+        "neoforge-1.21.8",
+        "neoforge-1.21.10",
+        "neoforge-1.21.11",
+        "neoforge-26.1",
+        "neoforge-26.2",
+        "neoforge-26.3"
+      ]
+    },
+    {
+      "key": "cosmetics.backs",
+      "description": "That cosmetic slot (own and other players')",
+      "modules": [
+        "cosmetics"
+      ],
+      "targets": [
+        "fabric-1.21.1",
+        "fabric-1.21.3",
+        "fabric-1.21.4",
+        "fabric-1.21.5",
+        "fabric-1.21.8",
+        "fabric-1.21.10",
+        "fabric-1.21.11",
+        "fabric-26.1",
+        "fabric-26.2",
+        "fabric-26.3",
+        "neoforge-1.21.1",
+        "neoforge-1.21.3",
+        "neoforge-1.21.4",
+        "neoforge-1.21.5",
+        "neoforge-1.21.8",
+        "neoforge-1.21.10",
+        "neoforge-1.21.11",
+        "neoforge-26.1",
+        "neoforge-26.2",
+        "neoforge-26.3"
+      ]
+    },
+    {
+      "key": "discord.server",
+      "description": "The server name in the Discord / launcher status (\"Playing on …\"), and in saved clips",
+      "modules": [
+        "core",
+        "social"
+      ],
+      "targets": [
+        "fabric-1.21.1",
+        "fabric-1.21.3",
+        "fabric-1.21.4",
+        "fabric-1.21.5",
+        "fabric-1.21.8",
+        "fabric-1.21.10",
+        "fabric-1.21.11",
+        "fabric-26.1",
+        "fabric-26.2",
+        "fabric-26.3",
+        "neoforge-1.21.1",
+        "neoforge-1.21.3",
+        "neoforge-1.21.4",
+        "neoforge-1.21.5",
+        "neoforge-1.21.8",
+        "neoforge-1.21.10",
+        "neoforge-1.21.11",
+        "neoforge-26.1",
+        "neoforge-26.2",
+        "neoforge-26.3"
+      ]
+    },
+    {
+      "key": "clips",
+      "description": "Clips: no recording at all. The replay buffer stops at once and what it held is thrown away; the save key shows \"Clips are off on this server\"",
+      "modules": [
+        "clips"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "clips.auto",
+      "description": "Clips: no automatic clips (kill, multi-kill, clutch, death). Saving with the key still works",
+      "modules": [
+        "clips"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "nametags.*",
+      "description": "Every key below",
+      "modules": [
+        "nametags"
+      ],
+      "targets": [
+        "fabric-1.21.1",
+        "fabric-1.21.3",
+        "fabric-1.21.4",
+        "fabric-1.21.5",
+        "fabric-1.21.8",
+        "fabric-1.21.10",
+        "fabric-1.21.11",
+        "fabric-26.1",
+        "fabric-26.2",
+        "fabric-26.3",
+        "neoforge-1.21.1",
+        "neoforge-1.21.3",
+        "neoforge-1.21.4",
+        "neoforge-1.21.5",
+        "neoforge-1.21.8",
+        "neoforge-1.21.10",
+        "neoforge-1.21.11",
+        "neoforge-26.1",
+        "neoforge-26.2",
+        "neoforge-26.3"
+      ]
+    },
+    {
+      "key": "nametags.seal",
+      "description": "The Vibey seal before player names",
+      "modules": [
+        "nametags"
+      ],
+      "targets": [
+        "fabric-1.21.1",
+        "fabric-1.21.3",
+        "fabric-1.21.4",
+        "fabric-1.21.5",
+        "fabric-1.21.8",
+        "fabric-1.21.10",
+        "fabric-1.21.11",
+        "fabric-26.1",
+        "fabric-26.2",
+        "fabric-26.3",
+        "neoforge-1.21.1",
+        "neoforge-1.21.3",
+        "neoforge-1.21.4",
+        "neoforge-1.21.5",
+        "neoforge-1.21.8",
+        "neoforge-1.21.10",
+        "neoforge-1.21.11",
+        "neoforge-26.1",
+        "neoforge-26.2",
+        "neoforge-26.3"
+      ]
+    },
+    {
+      "key": "nametags.ranks",
+      "description": "Rank and badge icons before player names (nametag, tab list, chat)",
+      "modules": [
+        "nametags"
+      ],
+      "targets": [
+        "fabric-1.21.1",
+        "fabric-1.21.3",
+        "fabric-1.21.4",
+        "fabric-1.21.5",
+        "fabric-1.21.8",
+        "fabric-1.21.10",
+        "fabric-1.21.11",
+        "fabric-26.1",
+        "fabric-26.2",
+        "fabric-26.3",
+        "neoforge-1.21.1",
+        "neoforge-1.21.3",
+        "neoforge-1.21.4",
+        "neoforge-1.21.5",
+        "neoforge-1.21.8",
+        "neoforge-1.21.10",
+        "neoforge-1.21.11",
+        "neoforge-26.1",
+        "neoforge-26.2",
+        "neoforge-26.3"
+      ]
+    },
+    {
+      "key": "nametags.styles",
+      "description": "Coloured / animated name styles (nametag, tab list, chat)",
+      "modules": [
+        "nametags"
+      ],
+      "targets": [
+        "fabric-1.21.1",
+        "fabric-1.21.3",
+        "fabric-1.21.4",
+        "fabric-1.21.5",
+        "fabric-1.21.8",
+        "fabric-1.21.10",
+        "fabric-1.21.11",
+        "fabric-26.1",
+        "fabric-26.2",
+        "fabric-26.3",
+        "neoforge-1.21.1",
+        "neoforge-1.21.3",
+        "neoforge-1.21.4",
+        "neoforge-1.21.5",
+        "neoforge-1.21.8",
+        "neoforge-1.21.10",
+        "neoforge-1.21.11",
+        "neoforge-26.1",
+        "neoforge-26.2",
+        "neoforge-26.3"
+      ]
+    },
+    {
+      "key": "waypoints.minimap",
+      "description": "The minimap (terrain and own waypoints; it never shows players or mobs). Waypoints, beacons and the world map stay",
+      "modules": [
+        "waypoints"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "info.*",
+      "description": "Every key below",
+      "modules": [
+        "info"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "info.light",
+      "description": "Light level of the looked-at block",
+      "modules": [
+        "info"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "info.chunks",
+      "description": "Chunk border key (vanilla F3+G is not touched)",
+      "modules": [
+        "info"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "info.card",
+      "description": "Block/mob info card and cards pinned into the world",
+      "modules": [
+        "info"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "info.food",
+      "description": "Food gain on the hunger bar",
+      "modules": [
+        "info"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "info.saturation",
+      "description": "Saturation on the hunger bar (off by default)",
+      "modules": [
+        "info"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "info.toolwarn",
+      "description": "Tool break warning",
+      "modules": [
+        "info"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "info.tnt",
+      "description": "TNT fuse timer",
+      "modules": [
+        "info"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "inventory.tweaks",
+      "description": "Quick moves in inventories (Shift-drag and mouse-wheel moves; off by default in the client too)",
+      "modules": [
+        "inventory"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "inventory.presets",
+      "description": "Hotbar presets (switch key, preset bar)",
+      "modules": [
+        "inventory"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "visuals.helditem",
+      "description": "Moved / resized held items and the hidden empty hand (Visuals → Held item); items show in the vanilla pose",
+      "modules": [
+        "visuals.items"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "visuals.*",
+      "description": "Every key below",
+      "modules": [
+        "visuals"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "visuals.fire",
+      "description": "Fire overlay opacity below 100 % (the overlay looks vanilla; its height is `lowfire`)",
+      "modules": [
+        "visuals"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "visuals.pumpkin",
+      "description": "See-through carved pumpkin mask",
+      "modules": [
+        "visuals"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "visuals.totem",
+      "description": "Smaller totem animation (bigger stays allowed)",
+      "modules": [
+        "visuals"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "visuals.particles",
+      "description": "Hidden, fewer or smaller particles per type and hidden own potion particles (tint, more and bigger stay)",
+      "modules": [
+        "visuals"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    },
+    {
+      "key": "companion.show",
+      "description": "Companions: the own companion and other players' companions are hidden (e.g. minigames). They come back when the player leaves",
+      "modules": [
+        "companion"
+      ],
+      "targets": [
+        "fabric-1.21.11"
+      ]
+    }
+  ]
+}

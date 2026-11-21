@@ -27,8 +27,10 @@ public final class ServerRules {
 
     private static final Set<String> SUPPORTED = Collections.synchronizedSet(new LinkedHashSet<>());
     private static final List<Listener> LISTENERS = new CopyOnWriteArrayList<>();
-    private static volatile List<String> rules = List.of();
-    private static volatile String message;
+    private record State(List<String> disable, List<String> allow, String message) {}
+
+    private static final State EMPTY = new State(List.of(), List.of(), null);
+    private static volatile State rules = EMPTY;
 
     /** Declares a feature key this client understands (call once at startup, e.g. in {@code onLoad}). */
     public static void supports(String key) {
@@ -44,9 +46,12 @@ public final class ServerRules {
 
     /** True if the current server disabled this feature key. Cheap; safe to call every frame. */
     public static boolean isDisabled(String key) {
-        List<String> r = rules;
-        if (r.isEmpty() || key == null) return false;
-        for (String rule : r) {
+        State current = rules;
+        return key != null && matches(current.disable(), key) && !matches(current.allow(), key);
+    }
+
+    private static boolean matches(List<String> patterns, String key) {
+        for (String rule : patterns) {
             if (rule.equals(key)) return true;
             if (rule.equals("*")) return true;
             if (rule.endsWith(".*") && key.startsWith(rule.substring(0, rule.length() - 1))) return true;
@@ -56,30 +61,36 @@ public final class ServerRules {
 
     /** The server's explanation ({@code message}), or null. */
     public static String message() {
-        return message;
+        return rules.message();
     }
 
     /** The raw rule list currently active (empty when none). */
     public static List<String> active() {
-        return rules;
+        return rules.disable();
     }
 
     /** Sets the rules received from the server (networking side only). Malformed entries are dropped. */
     public static void apply(List<String> disable, String serverMessage) {
-        List<String> clean = disable == null ? List.of() : disable.stream()
+        apply(disable, List.of(), serverMessage);
+    }
+
+    public static void apply(List<String> disable, List<String> allow, String serverMessage) {
+        rules = new State(cleanKeys(disable), cleanKeys(allow),
+                serverMessage == null || serverMessage.isBlank() ? null : serverMessage.strip());
+        fire();
+    }
+
+    private static List<String> cleanKeys(List<String> keys) {
+        return keys == null ? List.of() : keys.stream()
                 .filter(s -> s != null && !s.isBlank() && s.length() <= 64)
                 .filter(s -> s.indexOf('*') < 0 || s.equals("*") || (s.endsWith(".*") && s.indexOf('*') == s.length() - 1))
                 .distinct().limit(256).toList();
-        rules = clean;
-        message = serverMessage == null || serverMessage.isBlank() ? null : serverMessage.strip();
-        fire();
     }
 
     /** Clears the rules (left the server). */
     public static void clear() {
-        if (rules.isEmpty() && message == null) return;
-        rules = List.of();
-        message = null;
+        if (rules.equals(EMPTY)) return;
+        rules = EMPTY;
         fire();
     }
 

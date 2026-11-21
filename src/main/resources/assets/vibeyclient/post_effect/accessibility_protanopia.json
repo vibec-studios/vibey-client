@@ -1,0 +1,87 @@
+{
+  "targets": {
+    "swap": {}
+  },
+  "passes": [
+    {
+      "vertex_shader": "minecraft:core/screenquad",
+      "fragment_shader": "vibeyclient:post/accessibility_color",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "target": "minecraft:main"
+        }
+      ],
+      "output": "swap",
+      "uniforms": {
+        "ColorVisionConfig": [
+          {
+            "name": "Red",
+            "type": "vec4",
+            "value": [
+              0.152286,
+              1.052583,
+              -0.204868,
+              0
+            ]
+          },
+          {
+            "name": "Green",
+            "type": "vec4",
+            "value": [
+              0.114503,
+              0.786281,
+              0.099216,
+              0
+            ]
+          },
+          {
+            "name": "Blue",
+            "type": "vec4",
+            "value": [
+              -0.003882,
+              -0.048116,
+              1.051998,
+              0
+            ]
+          },
+          {
+            "name": "Redistribution",
+            "type": "vec4",
+            "value": [
+              0,
+              0.55,
+              0.85,
+              0
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "vertex_shader": "minecraft:core/screenquad",
+      "fragment_shader": "minecraft:post/blit",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "target": "swap"
+        }
+      ],
+      "uniforms": {
+        "BlitConfig": [
+          {
+            "name": "ColorModulate",
+            "type": "vec4",
+            "value": [
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      },
+      "output": "minecraft:main"
+    }
+  ]
+}

@@ -32,6 +32,18 @@ class ServerRulesTest {
     }
 
     @Test
+    void allowOverridesRestrictionsUntilReplaced() {
+        ServerRules.apply(List.of("*"), List.of("hud.*", "zoom"), null);
+        assertFalse(ServerRules.isDisabled("hud.coords"));
+        assertFalse(ServerRules.isDisabled("zoom"));
+        assertTrue(ServerRules.isDisabled("hud"));
+        assertTrue(ServerRules.isDisabled("clips"));
+
+        ServerRules.apply(List.of("*"), null);
+        assertTrue(ServerRules.isDisabled("zoom"));
+    }
+
+    @Test
     void starDisablesEverything() {
         ServerRules.apply(List.of("*"), null);
         assertTrue(ServerRules.isDisabled("emotes"));

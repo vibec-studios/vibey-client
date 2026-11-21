@@ -9,11 +9,14 @@ Start with the [main README](../README.md) for what Vibey Client is, installatio
 | [BLOCKBENCH.md](BLOCKBENCH.md) | Make cosmetics and emotes in Blockbench: install the plugin, model on the reference player, animate, particles and sounds, export, live link into the game. |
 | [FORMAT.md](FORMAT.md) | The `.vibey` file format explained for creators: slots, attach points, coordinates, animations, events, limits, validation, examples. |
 | [CONTENT.md](CONTENT.md) | The free starter set (every cosmetic and emote with previews) and the Node toolkit that builds it. |
+| [ACCESSIBILITY.md](ACCESSIBILITY.md) | Farbsehfilter, kontrastreiche HUD-Anzeigen und Geräuschuntertitel. |
+| [MODULE-MATRIX.md](MODULE-MATRIX.md) | Modul-Verfügbarkeit nach Minecraft-Version und Loader sowie unterstützte Server-Regeln. |
 
 ## For developers
 
 | Doc | What's in it |
 |---|---|
+| [SERVER-RULES.md](SERVER-RULES.md) | VibeyRules, Paper-API und Plugin-Channels für Server-Regeln, Wegpunkte und Nametags. |
 | [SPEC.md](SPEC.md) | The shared contract for every part of the project: targets, coexistence with the standalone mods, module API requirements, design tokens, the normative `.vibey` format (§5), sync (§6), backend API (§7), live link protocol (§8). |
 | [MODULES.md](MODULES.md) | Writing a module: lifecycle, settings, keybinds, network channel, events, services, backend access, toasts, i18n, mixins, version-specific code. |
 | [UI.md](UI.md) | Design rules, screens (title, onboarding, Vibey menu, pause row), extension points (tabs, menu entries, title preview), widgets, UI tests. |

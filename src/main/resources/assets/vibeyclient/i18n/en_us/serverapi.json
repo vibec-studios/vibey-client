@@ -1,0 +1,5 @@
+{
+  "name": "Server info",
+  "description": "Show waypoints and player name colours shared by this server.",
+  "marker": "Server · {0} · {1} m"
+}

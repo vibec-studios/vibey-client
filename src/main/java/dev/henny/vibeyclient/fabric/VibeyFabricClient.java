@@ -48,6 +48,7 @@ public final class VibeyFabricClient implements ClientModInitializer, ClientPlat
         ClientPlayNetworking.registerGlobalReceiver(LoadoutPayload.TYPE, (p, ctx) -> NetDispatch.toClient(p));
         ClientPlayNetworking.registerGlobalReceiver(EmotePayload.TYPE, (p, ctx) -> NetDispatch.toClient(p));
         ClientPlayNetworking.registerGlobalReceiver(MessagePayload.TYPE, (p, ctx) -> NetDispatch.toClient(p));
+        ClientPlayNetworking.registerGlobalReceiver(RulesPayloads.Presentation.TYPE, (p, ctx) -> NetDispatch.toClient(p));
         if (RulesPayloads.active()) ClientPlayNetworking.registerGlobalReceiver(RulesPayloads.Rules.TYPE, (p, ctx) -> NetDispatch.toClient(p));
 
         ClientTickEvents.END_CLIENT_TICK.register(mc -> VibeyCore.onTick());
