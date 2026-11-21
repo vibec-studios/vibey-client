@@ -129,7 +129,7 @@ your modpack/mods and joins your world. The host window also tells you when mods
 those too). With the Vibe Launcher the client writes `.vibe/session.json` for the launcher's Discord status (world,
 server, invite link); switch it off under *General → Online* ("Show what I'm playing to the launcher").
 
-### HUD module (Fabric 1.21.11 for now)
+### HUD module (all versions, Fabric and NeoForge)
 
 FPS, CPS, keystrokes, coordinates, armour, potion effects, clock, ping, server, speed, in-game time, item counters,
 memory and a compass – placed with the **HUD editor** (**H** or *HUD* in the pause menu): drag with snapping and
@@ -174,7 +174,7 @@ and the now playing bar with the **HUD editor**. Fabric only, just like the stan
 | *unbound* | Open the wardrobe | Cosmetics |
 | *unbound* | Open the host screen | Multiplayer |
 | *unbound* | Play / pause song, next / previous song, hide / show lyrics, lyrics 0.1 s earlier / later | Media (Fabric) |
-| **H** | HUD editor (move, resize and style HUD widgets) | HUD (Fabric 1.21.11) |
+| **H** | HUD editor (move, resize and style HUD widgets) | HUD |
 
 Change them under *Options → Controls → Vibey Client* or in the module settings in the Vibey menu. The keys only
 work while their module is switched on.

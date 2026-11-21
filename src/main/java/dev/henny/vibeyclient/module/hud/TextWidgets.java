@@ -119,7 +119,10 @@ final class TextWidgets {
             if (pl == null || mc().level == null) return I18n.get("biome.minecraft.cherry_grove");
             try {
                 return mc().level.getBiome(BlockPos.containing(pl.getX(), pl.getY(), pl.getZ())).unwrapKey()
+                        //? if >=1.21.11 {
                         .map(k -> I18n.get("biome." + k.identifier().getNamespace() + "." + k.identifier().getPath()))
+                        //?} else
+                        /*.map(k -> I18n.get("biome." + k.location().getNamespace() + "." + k.location().getPath()))*/
                         .orElse("?");
             } catch (RuntimeException e) {
                 return "?";
@@ -248,6 +251,9 @@ final class TextWidgets {
         @Override
         protected void lines(HudPaint p) {
             long t;
+            //? if >=26.1 {
+            /*if (mc().level != null) t = mc().level.getOverworldClockTime();
+            *///?} else
             if (mc().level != null) t = mc().level.getLevelData().getDayTime();
             else if (p.preview) t = 6000 + 24000L * 11;
             else return;

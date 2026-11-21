@@ -16,12 +16,12 @@ ext.clientModules = [
         nametags     : 'all',
         media        : 'fabric',
         'media.video': ['fabric-1.21.11'],
-        hud          : ['fabric-1.21.11'],
-        pvp          : ['fabric-1.21.11'],
+        hud          : 'all',
+        pvp          : 'all',
         clips        : ['fabric-1.21.11'],
         waypoints    : ['fabric-1.21.11'],
-        info         : ['fabric-1.21.11'],
-        camera       : ['fabric-1.21.11'],
+        info         : 'all',
+        camera       : 'all',
         visuals      : ['fabric-1.21.11'],
         'visuals.items': ['fabric-1.21.11'],
         'visuals.effects': ['fabric-1.21.11'],
@@ -49,6 +49,12 @@ ext.clientModuleResources = [
         'visuals.items': ['assets/vibeyclient/vui/items/**'],
         'visuals.effects': ['assets/vibeyclient/vui/effects/**'],
         cinematic: ['assets/vibeyclient/textures/cinematic/**'],
+]
+
+// Resources only some targets ship (same target syntax), e.g. a shader that only those versions can parse.
+ext.limitedResources = [
+        'assets/vibeyclient/post_effect/motion_blur.json': ['fabric-1.21.11', 'neoforge-1.21.11'],
+        'assets/vibeyclient/shaders/post/motion_blur.fsh': ['fabric-1.21.11', 'neoforge-1.21.11'],
 ]
 
 // Shared packages (dev.henny.vibeyclient.<path>) that several modules use instead of each other, with their targets

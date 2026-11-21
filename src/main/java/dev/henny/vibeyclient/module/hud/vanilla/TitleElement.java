@@ -4,10 +4,9 @@ import dev.henny.vibeyclient.module.hud.mixin.GuiTitleAccessor;
 import dev.henny.vibeyclient.ui.Gfx;
 import dev.henny.vibeyclient.ui.hud.Anchor;
 import dev.henny.vibeyclient.ui.hud.HudElement;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
+import dev.henny.vibeyclient.client.hud.HudAccess;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 
 import java.util.function.BooleanSupplier;
@@ -29,16 +28,16 @@ final class TitleElement {
 
     static int width() {
         Font f = Minecraft.getInstance().font;
-        GuiTitleAccessor gui = (GuiTitleAccessor) Minecraft.getInstance().gui;
+        GuiTitleAccessor gui = (GuiTitleAccessor) HudAccess.hud();
         Component t = gui.vibey$title(), s = gui.vibey$subtitle();
         int tw = t == null ? f.width(SAMPLE) : f.width(t);
         int sw = s == null ? (t == null ? f.width(SAMPLE_SUB) : 0) : f.width(s);
         return Math.max(tw * 4, sw * 2) + 8;
     }
 
-    static void draw(GuiGraphics g, DeltaTracker tick, net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement vanilla, HudElement e) {
+    static void draw(Gfx g, Runnable vanilla, HudElement e) {
         float w = width();
-        Placed.draw(g, e, -(g.guiWidth() / 2f - w / 2f), -(g.guiHeight() / 2f - TOP), () -> vanilla.render(g, tick));
+        Placed.draw(g, e, -(g.screenWidth() / 2f - w / 2f), -(g.screenHeight() / 2f - TOP), vanilla);
     }
 
     private static void preview(Gfx g, int w, int h, boolean preview) {

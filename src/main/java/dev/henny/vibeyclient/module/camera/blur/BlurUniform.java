@@ -1,5 +1,6 @@
 package dev.henny.vibeyclient.module.camera.blur;
 
+//? if >=1.21.11 && <26.1 {
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.henny.vibeyclient.Vibey;
@@ -58,3 +59,12 @@ final class BlurUniform {
         }
     }
 }
+//?} else {
+/*final class BlurUniform {
+    private BlurUniform() {}
+
+    static boolean failed() {
+        return false;
+    }
+}
+*///?}

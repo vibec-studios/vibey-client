@@ -3,6 +3,8 @@ package dev.henny.vibeyclient.module.pvp.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import dev.henny.vibeyclient.client.ClientCompat;
+import dev.henny.vibeyclient.client.GameCompat;
 import dev.henny.vibeyclient.module.pvp.Zoom;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
@@ -40,7 +42,7 @@ abstract class MouseHandlerMixin {
     @Inject(method = "onScroll", require = 0, at = @At("HEAD"), cancellable = true)
     private void vibey$zoomScroll(long window, double dx, double dy, CallbackInfo ci) {
         Minecraft mc = minecraft;
-        if (window != mc.getWindow().handle() || mc.screen != null || mc.getOverlay() != null || mc.player == null) return;
+        if (window != GameCompat.windowHandle() || ClientCompat.screen() != null || ClientCompat.loadingOverlay() || mc.player == null) return;
         if (Zoom.scroll(dy)) ci.cancel();
     }
 }

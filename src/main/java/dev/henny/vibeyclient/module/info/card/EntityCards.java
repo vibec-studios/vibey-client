@@ -6,7 +6,10 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+//? if >=1.21.11 {
 import net.minecraft.world.entity.boss.enderdragon.EnderDragonPart;
+//?} else
+/*import net.minecraft.world.entity.boss.EnderDragonPart;*/
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -32,7 +35,11 @@ public final class EntityCards {
     private static ItemStack icon(Entity e) {
         ItemStack pick = e.getPickResult();
         if (pick != null && !pick.isEmpty()) return pick;
+        //? if >=26.1 {
+        /*return SpawnEggItem.byId(e.getType()).map(h -> new ItemStack(h.value())).orElse(ItemStack.EMPTY);
+        *///?} else {
         SpawnEggItem egg = SpawnEggItem.byId(e.getType());
         return egg != null ? new ItemStack(egg) : ItemStack.EMPTY;
+        //?}
     }
 }

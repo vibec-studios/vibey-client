@@ -1,12 +1,10 @@
 package dev.henny.vibeyclient.module.hud.vanilla;
 
 import dev.henny.vibeyclient.module.hud.mixin.BossOverlayAccessor;
+import dev.henny.vibeyclient.client.hud.HudAccess;
 import dev.henny.vibeyclient.ui.Gfx;
 import dev.henny.vibeyclient.ui.hud.Anchor;
 import dev.henny.vibeyclient.ui.hud.HudElement;
-import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 
 import java.util.function.BooleanSupplier;
 
@@ -25,14 +23,14 @@ final class BossBarElement {
 
     static int count() {
         try {
-            return ((BossOverlayAccessor) Minecraft.getInstance().gui.getBossOverlay()).vibey$events().size();
+            return ((BossOverlayAccessor) HudAccess.bossOverlay()).vibey$events().size();
         } catch (RuntimeException e) {
             return 1;
         }
     }
 
-    static void draw(GuiGraphics g, DeltaTracker tick, net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement vanilla, HudElement e) {
-        Placed.draw(g, e, -(g.guiWidth() / 2f - W / 2f), -3, () -> vanilla.render(g, tick));
+    static void draw(Gfx g, Runnable vanilla, HudElement e) {
+        Placed.draw(g, e, -(g.screenWidth() / 2f - W / 2f), -3, vanilla);
     }
 
     private static void preview(Gfx g, int w, int h, boolean preview) {

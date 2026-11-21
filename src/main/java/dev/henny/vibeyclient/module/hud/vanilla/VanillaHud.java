@@ -1,9 +1,9 @@
 package dev.henny.vibeyclient.module.hud.vanilla;
 
+import dev.henny.vibeyclient.client.hud.VanillaLayers;
+import dev.henny.vibeyclient.client.hud.VanillaLayers.Layer;
 import dev.henny.vibeyclient.ui.hud.HudElement;
 import dev.henny.vibeyclient.ui.hud.HudLayout;
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 
 import java.util.function.BooleanSupplier;
 
@@ -13,20 +13,18 @@ public final class VanillaHud {
     public static void register(BooleanSupplier enabled) {
         HudElement boss = HudLayout.register(BossBarElement.build(enabled));
         HudElement title = HudLayout.register(TitleElement.build(enabled));
-        HudElementRegistry.replaceElement(VanillaHudElements.BOSS_BAR, vanilla -> (g, tick) -> {
-            if (Placed.active(boss)) BossBarElement.draw(g, tick, vanilla, boss);
-            else vanilla.render(g, tick);
+        VanillaLayers.replace(Layer.BOSS_BAR, (g, vanilla) -> {
+            if (!Placed.active(boss)) return false;
+            BossBarElement.draw(g, vanilla, boss);
+            return true;
         });
-        HudElementRegistry.replaceElement(VanillaHudElements.TITLE_AND_SUBTITLE, vanilla -> (g, tick) -> {
-            if (Placed.active(title)) TitleElement.draw(g, tick, vanilla, title);
-            else vanilla.render(g, tick);
+        VanillaLayers.replace(Layer.TITLE, (g, vanilla) -> {
+            if (!Placed.active(title)) return false;
+            TitleElement.draw(g, vanilla, title);
+            return true;
         });
-        HudElementRegistry.replaceElement(VanillaHudElements.SCOREBOARD, vanilla -> (g, tick) -> {
-            if (!replaced("hud.scoreboard")) vanilla.render(g, tick);
-        });
-        HudElementRegistry.replaceElement(VanillaHudElements.PLAYER_LIST, vanilla -> (g, tick) -> {
-            if (!replaced("hud.tablist")) vanilla.render(g, tick);
-        });
+        VanillaLayers.replace(Layer.SCOREBOARD, (g, vanilla) -> replaced("hud.scoreboard"));
+        VanillaLayers.replace(Layer.PLAYER_LIST, (g, vanilla) -> replaced("hud.tablist"));
     }
 
     public static boolean replaced(String id) {

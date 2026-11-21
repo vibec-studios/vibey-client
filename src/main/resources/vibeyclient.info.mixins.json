@@ -6,7 +6,8 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [],
   "client": [
-    "AbstractContainerScreenAccessor"
+    "AbstractContainerScreenAccessor",
+    "DebugRendererAccessor"
   ],
   "server": [],
   "injectors": {

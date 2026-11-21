@@ -23,9 +23,9 @@ src/main/resources/
 Existing stubs: `social`, `cosmetics`, `emotes`, `multiplayer` (conflicts with mod id `vibey`), `media` (Fabric
 only: the package is excluded from the NeoForge build and not registered there; its parts are *media features*, the
 `lyrics` part conflicts with `vibeylyrics` – see [MEDIA.md](MEDIA.md)), `devlink`, `nametags` (seal, rank icons and name styles before player names; data in `client/VibeyPlayers`, `client/ranks`, see [NAMETAGS.md](NAMETAGS.md)), `pvp` (zoom, crosshair,
-toggle sprint, outlines; Fabric 1.21.11 only for now, see [PVP.md](PVP.md)), `waypoints` (beacons, share codes, minimap, world map, death point, nether
+toggle sprint, outlines; every target, the render tweaks only on 1.21.11, see [PVP.md](PVP.md)), `waypoints` (beacons, share codes, minimap, world map, death point, nether
 coordinates; Fabric 1.21.11 only, see [WAYPOINTS.md](WAYPOINTS.md)), `info` (light level, chunk borders,
-block/mob card with world pinning, food gain, tool warning, TNT timer; Fabric 1.21.11 only, see [INFO.md](INFO.md)), `camera` (freelook, orbit view, motion blur; Fabric 1.21.11 only, see [CAMERA.md](CAMERA.md)),
+block/mob card with world pinning, food gain, tool warning, TNT timer; every target, see [INFO.md](INFO.md)), `camera` (freelook, orbit view, motion blur; every target, motion blur only on 1.21.11, see [CAMERA.md](CAMERA.md)), `hud` (HUD widgets, templates, editor key; every target, see [HUD.md](HUD.md)),
 `visuals` (held item models with an in-game editor, swing, glint, item sizes, item physics, particle amount, part
 `visuals.effects`: effects and per-type particle editor; Fabric 1.21.11 only, see [VISUALS.md](VISUALS.md)). The screenshot gallery is
 part of `clips` ([CLIPS.md](CLIPS.md) §14). `chat` (timestamps, search, copy, mentions, filters, DM
@@ -45,7 +45,8 @@ packs, built on the `companio` lib; Fabric 1.21.11 only, see [COMPANION.md](COMP
 target that does not build it, `gradle/modules-filter.gradle` leaves out the package, `i18n/*/<id>[.*].json`,
 `vibeyclient.<id>[.*].mixins.json`, the matching lines in `fabric.mod.json` / `neoforge.mods.toml` and the extra
 resources listed in `clientModuleResources`. Modules present only in some jars are registered by reflection in
-`BuiltinModules`. To port a module, widen its entry.
+`BuiltinModules`. To port a module, widen its entry; [PORTING.md](PORTING.md) lists the shared helpers and what changed
+between versions. `limitedResources` keeps single files (e.g. a shader) out of targets that cannot use them.
 
 Modules must not use each other: `checkModuleBoundaries` (part of `:fabric-1.21.11:check` and `buildAll`) fails when
 a file in `module/<a>/` names `dev.henny.vibeyclient.module.<b>.…`. Shared code goes to `api`, `client`, `ui` or a

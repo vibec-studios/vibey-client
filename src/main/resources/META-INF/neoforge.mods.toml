@@ -33,6 +33,18 @@ config = "vibeyclient.accessibility.mixins.json"
 [[mixins]]
 config = "vibeyclient.serverapi.mixins.json"
 
+[[mixins]]
+config = "vibeyclient.hud.mixins.json"
+
+[[mixins]]
+config = "vibeyclient.info.mixins.json"
+
+[[mixins]]
+config = "vibeyclient.pvp.mixins.json"
+
+[[mixins]]
+config = "vibeyclient.camera.mixins.json"
+
 [[dependencies.${mod_id}]]
 modId = "neoforge"
 type = "required"

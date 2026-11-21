@@ -2,6 +2,14 @@
 
 All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.properties`.
 
+## Unreleased – modules on every version
+
+- HUD editor and widgets, Info (light level, chunk borders, block/mob card, food gain, tool warning, TNT timer), PvP
+  (zoom, toggle sprint/sneak, crosshair editor) and Camera (freelook, orbit view) now run on every supported version,
+  Fabric and NeoForge, 1.21.1 to 26.3 – before only on Fabric 1.21.11.
+- Block outline, hit colour, low fire, lower shield and motion blur stay on 1.21.11 for now; on other versions their
+  switches are hidden instead of doing nothing.
+
 ## 0.4.0-beta.3 – toast head icon fix (beta)
 
 Hotfix for **0.4.0-beta.2** (beta / dev channel only; 0.3.2 stays the normal version).

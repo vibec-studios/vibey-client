@@ -460,6 +460,37 @@ public final class DevTour {
         waitTicks(25);
         shot("40_host_screen");
 
+        step("ported_modules");
+        run(mc -> {
+            requireWorld(mc);
+            ClientCompat.openScreen(null);
+            hideHud(mc, false);
+            look(mc, 0f, 30f);
+            StringBuilder missing = new StringBuilder();
+            for (String id : PORTED) {
+                if (ModuleManager.get().get(id) == null) missing.append(id).append(' ');
+                else ModuleManager.get().setEnabled(id, true);
+            }
+            if (missing.length() > 0) throw new IllegalStateException("modules missing: " + missing.toString().trim());
+        });
+        waitTicks(40);
+        shot("42_hud_world");
+        run(mc -> {
+            List<String> bad = new ArrayList<>();
+            for (String f : dev.henny.vibeyclient.MixinHealth.failures()) {
+                for (String p : PORTED_MIXINS) if (f.startsWith(p)) bad.add(f);
+            }
+            log("hooks without target: " + bad);
+            if (!bad.isEmpty()) throw new IllegalStateException("hooks without target: " + bad);
+        });
+
+        step("hud_editor");
+        run(mc -> dev.henny.vibeyclient.ui.hud.HudLayout.openEditor(null));
+        waitTicks(30);
+        shot("43_hud_editor");
+        run(mc -> ClientCompat.openScreen(null));
+        waitTicks(5);
+
         step("pause_menu");
         run(mc -> {
             requireWorld(mc);
@@ -474,6 +505,11 @@ public final class DevTour {
         });
         waitTicks(5);
     }
+
+    private static final String[] PORTED = {"hud", "info", "pvp", "camera"};
+    private static final String[] PORTED_MIXINS = {"dev.henny.vibeyclient.module.hud.", "dev.henny.vibeyclient.module.info.",
+            "dev.henny.vibeyclient.module.pvp.", "dev.henny.vibeyclient.module.camera.",
+            "dev.henny.vibeyclient.mixin.client.GuiLayersMixin", "dev.henny.vibeyclient.mixin.client.BossOverlayLayerMixin"};
 
     private static void emote(String id, int ticks, String name) {
         run(mc -> {

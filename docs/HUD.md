@@ -2,7 +2,7 @@
 
 Everything a module draws on the HUD that players may want to move, resize or style is a **HUD element**
 (`dev.henny.vibeyclient.ui.hud`). The core keeps one layout for all of them (`config/vibeyclient/hud-layout.json`)
-and offers the HUD editor to arrange it. The **HUD** module (`module/hud`, Fabric 1.21.11 for now) ships the built-in
+and offers the HUD editor to arrange it. The **HUD** module (`module/hud`, every target: Fabric and NeoForge, 1.21.1 to 26.3) ships the built-in
 widgets (FPS, CPS, keystrokes, …), the templates and the editor key / menu entries.
 
 > See also: [MODULES.md](MODULES.md) (module API) · [UI.md](UI.md) (design rules) · [MEDIA.md](MEDIA.md) (media

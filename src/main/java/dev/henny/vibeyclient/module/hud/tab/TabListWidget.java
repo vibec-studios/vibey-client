@@ -4,8 +4,6 @@ import dev.henny.vibeyclient.ui.hud.HudPaint;
 import dev.henny.vibeyclient.ui.hud.HudWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.PlayerFaceRenderer;
 
 public final class TabListWidget extends HudWidget {
     static final int ROW = 10;
@@ -53,7 +51,7 @@ public final class TabListWidget extends HudWidget {
     @Override
     protected void paint(HudPaint p) {
         p.background();
-        GuiGraphics g = p.g.g;
+        dev.henny.vibeyclient.ui.Gfx g = p.g;
         Font f = p.g.font;
         for (int i = 0; i < rows.names.size(); i++) {
             int col = i / perCol, row = i % perCol;
@@ -61,10 +59,10 @@ public final class TabListWidget extends HudWidget {
             if (row % 2 == 1) g.fill(x - 1, y - 1, x + colW + 1, y + ROW - 1, 0x14FFFFFF);
             int tx = x;
             if (heads) {
-                PlayerFaceRenderer.draw(g, rows.skins.get(i), x, y, 8);
+                g.face(rows.skins.get(i), x, y, 8);
                 tx += 10;
             }
-            g.drawString(f, rows.names.get(i), tx, y, p.style.text, p.style.shadow);
+            g.text(rows.names.get(i), tx, y, p.style.text, p.style.shadow);
             int ping = rows.pings.get(i);
             int bx = x + colW - PingBars.WIDTH;
             PingBars.draw(g, bx, y, ping);

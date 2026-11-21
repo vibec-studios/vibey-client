@@ -1,12 +1,14 @@
 package dev.henny.vibeyclient.module.pvp;
 
+import dev.henny.vibeyclient.ui.Gfx;
+//? if >=1.21.11 && <26.1 {
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.state.BlockOutlineRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
+//?}
 
 /** What the pvp mixins ask, in one place (each answer already includes "module on" and the server rules). */
 public final class PvpHooks {
@@ -21,9 +23,9 @@ public final class PvpHooks {
     public static volatile long crosshairCalls;
 
     /** Draws the custom crosshair instead of vanilla's sprite; false = draw vanilla. */
-    public static boolean crosshair(GuiGraphics g) {
+    public static boolean crosshair(Object graphics) {
         crosshairCalls++;
-        return Crosshair.drawHud(g);
+        return Crosshair.drawHud(Gfx.of(graphics));
     }
 
     // ---------------------------------------------------------------------------------------- block outline
@@ -49,7 +51,8 @@ public final class PvpHooks {
         return m == null ? 2.5f : m.outlineWidth.get();
     }
 
-    /** Translucent faces of every box of the outline shape, a hair bigger than the block (no z-fighting). */
+    //? if >=1.21.11 && <26.1 {
+    // Translucent faces of every box of the outline shape, a hair bigger than the block (no z-fighting).
     public static void fillOutline(PoseStack poseStack, VertexConsumer vc, BlockOutlineRenderState state, Vec3 cam) {
         PvpModule m = PvpModule.get();
         if (m == null) return;
@@ -63,7 +66,7 @@ public final class PvpHooks {
                 (float) (x2 + ox) + e, (float) (y2 + oy) + e, (float) (z2 + oz) + e, color));
     }
 
-    /** Six outward-facing quads (counter-clockwise seen from outside, the debug box type culls back faces). */
+    // Six outward-facing quads (counter-clockwise seen from outside, the debug box type culls back faces).
     private static void box(VertexConsumer vc, Matrix4f m, float x1, float y1, float z1, float x2, float y2, float z2, int c) {
         // bottom (y1), seen from below
         quad(vc, m, c, x1, y1, z1, x2, y1, z1, x2, y1, z2, x1, y1, z2);
@@ -86,6 +89,7 @@ public final class PvpHooks {
         vc.addVertex(m, cx, cy, cz).setColor(c);
         vc.addVertex(m, dx, dy, dz).setColor(c);
     }
+    //?}
 
     // ---------------------------------------------------------------------------------------- first person
 

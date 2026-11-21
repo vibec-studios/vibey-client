@@ -3,6 +3,7 @@ package dev.henny.vibeyclient.module.info.food;
 import dev.henny.vibeyclient.module.info.core.FoodTable;
 import dev.henny.vibeyclient.module.info.core.FoodValue;
 import dev.henny.vibeyclient.module.info.mixin.AbstractContainerScreenAccessor;
+import dev.henny.vibeyclient.client.ClientCompat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -14,11 +15,11 @@ public final class FoodItem {
     private FoodItem() {}
 
     public static ItemStack pick(Minecraft mc) {
-        if (mc.screen instanceof AbstractContainerScreenAccessor screen) {
+        if (ClientCompat.screen() instanceof AbstractContainerScreenAccessor screen) {
             Slot slot = screen.vibey$hoveredSlot();
             return slot != null && slot.hasItem() ? slot.getItem() : ItemStack.EMPTY;
         }
-        if (mc.screen != null) return ItemStack.EMPTY;
+        if (ClientCompat.screen() != null) return ItemStack.EMPTY;
         ItemStack main = mc.player.getMainHandItem();
         return value(main) != null ? main : mc.player.getOffhandItem();
     }

@@ -24,8 +24,8 @@ import dev.henny.vibeyclient.ui.hud.HudLayout;
  * spyglass-like view, toggles only press the vanilla keys for you, the rest is cosmetic. Every feature has a
  * {@link ServerRules} key and switches itself off while the server disables it.
  *
- * <p>Fabric 1.21.11 only for now: gradle/common.gradle leaves the package (and its mixin config) out of every other
- * target and {@code BuiltinModules} registers it by reflection.
+ * <p>Zoom, toggles and crosshair run on every target; outline, hit colour, low fire and low shield only where
+ * {@link PvpExtras#RENDER_TWEAKS} is set (their settings are hidden elsewhere).
  */
 public final class PvpModule extends VibeyModule {
     /** Server-rule keys (vibe-launcher docs/PLAY-LINKS.md §5). */
@@ -87,7 +87,7 @@ public final class PvpModule extends VibeyModule {
             .visibleWhen(this::customCrosshair);
 
     // ---------------------------------------------------------------------------------------- block outline
-    public final BoolSetting outline = bool("outline", false).section("outline").serverRule(RULE_OUTLINE);
+    public final BoolSetting outline = bool("outline", false).section("outline").serverRule(RULE_OUTLINE).visibleWhen(PvpModule::renderTweaks);
     public final ColorSetting outlineColor = color("outlineColor", 0xFF8B6CFF).presets(OUTLINE_COLORS).section("outline")
             .serverRule(RULE_OUTLINE).visibleWhen(this::outlineOn);
     public final FloatSetting outlineWidth = floatRange("outlineWidth", 3.5f, 1f, 6f, 0.5f).decimals(1).section("outline")
@@ -100,19 +100,19 @@ public final class PvpModule extends VibeyModule {
             .serverRule(RULE_OUTLINE).visibleWhen(() -> outlineOn() && outlineFill.on());
 
     // ---------------------------------------------------------------------------------------- hit colour
-    public final BoolSetting hitColor = bool("hitColor", false).section("hit").serverRule(RULE_HIT);
+    public final BoolSetting hitColor = bool("hitColor", false).section("hit").serverRule(RULE_HIT).visibleWhen(PvpModule::renderTweaks);
     public final ColorSetting hitTint = color("hitTint", 0xFFFF0000).presets(HIT_COLORS).section("hit")
-            .serverRule(RULE_HIT).visibleWhen(hitColor::on);
+            .serverRule(RULE_HIT).visibleWhen(this::hitOn);
     public final IntSetting hitStrength = intRange("hitStrength", 30, 10, 80, 5).unit("%").section("hit")
-            .serverRule(RULE_HIT).visibleWhen(hitColor::on);
+            .serverRule(RULE_HIT).visibleWhen(this::hitOn);
 
     // ---------------------------------------------------------------------------------------- first person
-    public final BoolSetting lowFire = bool("lowFire", false).section("view").serverRule(RULE_FIRE);
+    public final BoolSetting lowFire = bool("lowFire", false).section("view").serverRule(RULE_FIRE).visibleWhen(PvpModule::renderTweaks);
     public final IntSetting fireHeight = intRange("fireHeight", 70, 10, 100, 5).unit("%").section("view")
-            .serverRule(RULE_FIRE).visibleWhen(lowFire::on);
-    public final BoolSetting lowShield = bool("lowShield", false).section("view").serverRule(RULE_SHIELD);
+            .serverRule(RULE_FIRE).visibleWhen(this::lowFireOn);
+    public final BoolSetting lowShield = bool("lowShield", false).section("view").serverRule(RULE_SHIELD).visibleWhen(PvpModule::renderTweaks);
     public final IntSetting shieldHeight = intRange("shieldHeight", 50, 10, 100, 5).unit("%").section("view")
-            .serverRule(RULE_SHIELD).visibleWhen(lowShield::on);
+            .serverRule(RULE_SHIELD).visibleWhen(this::lowShieldOn);
 
     // ---------------------------------------------------------------------------------------- advanced
     public final IntSetting zoomTime = intRange("zoomTime", 140, 40, 400, 10).unit(" ms").advanced();
@@ -257,7 +257,23 @@ public final class PvpModule extends VibeyModule {
     }
 
     private boolean outlineOn() {
-        return outline.on();
+        return renderTweaks() && outline.on();
+    }
+
+    private boolean hitOn() {
+        return renderTweaks() && hitColor.on();
+    }
+
+    private boolean lowFireOn() {
+        return renderTweaks() && lowFire.on();
+    }
+
+    private boolean lowShieldOn() {
+        return renderTweaks() && lowShield.on();
+    }
+
+    private static boolean renderTweaks() {
+        return PvpExtras.RENDER_TWEAKS;
     }
 
     private boolean customCrosshair() {
@@ -292,19 +308,19 @@ public final class PvpModule extends VibeyModule {
     }
 
     public boolean outlineActive() {
-        return active(outline, RULE_OUTLINE);
+        return renderTweaks() && active(outline, RULE_OUTLINE);
     }
 
     public boolean hitColorActive() {
-        return active(hitColor, RULE_HIT);
+        return renderTweaks() && active(hitColor, RULE_HIT);
     }
 
     public boolean lowFireActive() {
-        return active(lowFire, RULE_FIRE);
+        return renderTweaks() && active(lowFire, RULE_FIRE);
     }
 
     public boolean lowShieldActive() {
-        return active(lowShield, RULE_SHIELD);
+        return renderTweaks() && active(lowShield, RULE_SHIELD);
     }
 
     /** The current crosshair settings as a style (cheap, used every frame). */

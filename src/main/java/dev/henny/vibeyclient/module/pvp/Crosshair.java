@@ -1,11 +1,9 @@
 package dev.henny.vibeyclient.module.pvp;
 
+import dev.henny.vibeyclient.Compat;
 import dev.henny.vibeyclient.ui.Gfx;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -27,7 +25,7 @@ public final class Crosshair {
         public boolean outline = true, dot, invert;
     }
 
-    public static final Identifier VANILLA_SPRITE = Identifier.withDefaultNamespace("hud/crosshair");
+    public static final Object VANILLA_SPRITE = Compat.id("minecraft", "hud/crosshair");
     private static final Style HUD_STYLE = new Style();
     private static final int[] RECTS = new int[4 * 512];
     private static int count;
@@ -38,13 +36,13 @@ public final class Crosshair {
      * The in-game crosshair (called instead of vanilla's sprite). False = draw the vanilla sprite (custom crosshair
      * off, or disabled by the server).
      */
-    static boolean drawHud(GuiGraphics gg) {
+    static boolean drawHud(Gfx g) {
         PvpModule m = PvpModule.get();
         if (m == null || !m.crosshairActive()) return false;
         Style s = m.crosshairStyle(HUD_STYLE);
-        int cx = centre(gg.guiWidth()), cy = centre(gg.guiHeight());
+        int cx = centre(g.screenWidth()), cy = centre(g.screenHeight());
         int extra = m.chDynamic.on() ? Math.round(dynamicSpread(m)) : 0;
-        draw(new Gfx(gg, Minecraft.getInstance().font), s, cx, cy, extra);
+        draw(g, s, cx, cy, extra);
         return true;
     }
 
@@ -75,7 +73,7 @@ public final class Crosshair {
     /** Draws {@code s} centred on GUI pixel ({@code cx}, {@code cy}); {@code extraGap} widens it (dynamic). */
     public static void draw(Gfx g, Style s, int cx, int cy, int extraGap) {
         if (s.shape == Shape.VANILLA) {
-            g.g.blitSprite(RenderPipelines.CROSSHAIR, VANILLA_SPRITE, cx - 7, cy - 7, 15, 15);
+            vanillaSprite(g, cx - 7, cy - 7);
             return;
         }
         int t = Math.max(1, s.thickness);
@@ -92,9 +90,38 @@ public final class Crosshair {
         for (int i = 0; i < count; i++) {
             int x = RECTS[i * 4], y = RECTS[i * 4 + 1], w = RECTS[i * 4 + 2], h = RECTS[i * 4 + 3];
             if (w <= 0 || h <= 0) continue;
-            if (invert) g.g.fill(RenderPipelines.GUI_INVERT, x, y, x + w, y + h, 0xFFFFFFFF);
+            if (invert) invertRect(g, x, y, w, h);
             else g.rect(x, y, w, h, color);
         }
+    }
+
+    private static void vanillaSprite(Gfx g, int x, int y) {
+        //? if >=1.21.11 {
+        var id = (net.minecraft.resources.Identifier) VANILLA_SPRITE;
+        //?} else
+        /*var id = (net.minecraft.resources.ResourceLocation) VANILLA_SPRITE;*/
+        //? if >=1.21.6 {
+        g.g.blitSprite(net.minecraft.client.renderer.RenderPipelines.CROSSHAIR, id, x, y, 15, 15);
+        //?} else if >=1.21.2 {
+        /*g.g.blitSprite(net.minecraft.client.renderer.RenderType::crosshair, id, x, y, 15, 15);
+        *///?} else {
+        /*com.mojang.blaze3d.systems.RenderSystem.enableBlend();
+        com.mojang.blaze3d.systems.RenderSystem.blendFuncSeparate(com.mojang.blaze3d.platform.GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR,
+                com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR, com.mojang.blaze3d.platform.GlStateManager.SourceFactor.ONE,
+                com.mojang.blaze3d.platform.GlStateManager.DestFactor.ZERO);
+        g.g.blitSprite(id, x, y, 15, 15);
+        com.mojang.blaze3d.systems.RenderSystem.defaultBlendFunc();
+        com.mojang.blaze3d.systems.RenderSystem.disableBlend();
+        *///?}
+    }
+
+    private static void invertRect(Gfx g, int x, int y, int w, int h) {
+        //? if >=1.21.9 {
+        g.g.fill(net.minecraft.client.renderer.RenderPipelines.GUI_INVERT, x, y, x + w, y + h, 0xFFFFFFFF);
+        //?} else if >=1.21.6 {
+        /*g.g.fill(net.minecraft.client.renderer.RenderPipelines.GUI_TEXT_HIGHLIGHT, x, y, x + w, y + h, 0xFF000000);
+        *///?} else
+        /*g.g.fill(net.minecraft.client.renderer.RenderType.guiTextHighlight(), x, y, x + w, y + h, 0xFF000000);*/
     }
 
     /** Fills {@link #RECTS} with the shape's rectangles, each grown by {@code grow} px on every side. */

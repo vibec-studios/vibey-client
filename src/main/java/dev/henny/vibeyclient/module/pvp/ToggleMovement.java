@@ -62,6 +62,15 @@ public final class ToggleMovement {
         return p != null && !p.getAbilities().flying && !p.isPassenger();
     }
 
+    public static boolean held(net.minecraft.client.KeyMapping key) {
+        if (!sprint && !sneak) return false;
+        Options o = Minecraft.getInstance().options;
+        if (o == null) return false;
+        if (key == o.keySprint) return sprintHeld();
+        if (key == o.keyShift) return sneakHeld();
+        return false;
+    }
+
     static boolean sneakToggled() {
         return sneak;
     }
