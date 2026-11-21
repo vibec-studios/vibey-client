@@ -1,0 +1,115 @@
+plugins {
+    id 'java'
+    id 'com.gradleup.shadow' version '9.2.2'
+}
+
+group = 'dev.henny'
+version = findProperty('agent_version')
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    shade
+    implementation.extendsFrom shade
+    lwjgl33 { transitive = false }
+    lwjgl34 { transitive = false }
+    lwjgl2 { transitive = false }
+}
+
+dependencies {
+    shade 'org.ow2.asm:asm:9.8'
+    testImplementation platform('org.junit:junit-bom:5.11.4')
+    testImplementation 'org.ow2.asm:asm-util:9.8'
+    testImplementation 'org.ow2.asm:asm-tree:9.8'
+    testImplementation 'org.ow2.asm:asm-analysis:9.8'
+    lwjgl33 'org.lwjgl:lwjgl:3.3.3'
+    lwjgl33 'org.lwjgl:lwjgl-glfw:3.3.3'
+    lwjgl33 'org.lwjgl:lwjgl-openal:3.3.3'
+    lwjgl33 'org.lwjgl:lwjgl-vulkan:3.3.3'
+    lwjgl34 'org.lwjgl:lwjgl:3.4.3'
+    lwjgl34 'org.lwjgl:lwjgl-sdl:3.4.3'
+    lwjgl34 'org.lwjgl:lwjgl-vulkan:3.4.3'
+    lwjgl2 'org.lwjgl.lwjgl:lwjgl:2.9.3'
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+sourceSets {
+    stubs
+}
+
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+}
+
+tasks.named('compileJava', JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.release = 8
+    options.compilerArgs += ['-Xlint:-options']
+}
+
+tasks.named('compileTestJava', JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.release = 21
+}
+
+processResources {
+    inputs.property 'version', version
+    filesMatching('dev/henny/vibeafk/version.txt') { expand(version: version) }
+}
+
+jar {
+    archiveClassifier = 'thin'
+}
+
+shadowJar {
+    archiveBaseName = 'vibe-afk-agent'
+    archiveClassifier = ''
+    configurations = [project.configurations.shade]
+    relocate 'org.objectweb.asm', 'dev.henny.vibeafk.shaded.asm'
+    exclude 'module-info.class', 'META-INF/versions/**', 'META-INF/maven/**'
+    manifest {
+        attributes(
+                'Premain-Class': 'dev.henny.vibeafk.Agent',
+                'Agent-Class': 'dev.henny.vibeafk.Agent',
+                'Can-Redefine-Classes': 'true',
+                'Can-Retransform-Classes': 'true',
+                'Implementation-Title': 'Vibe AFK Agent',
+                'Implementation-Version': version
+        )
+    }
+}
+
+tasks.register('sha256') {
+    dependsOn shadowJar
+    def jarFile = shadowJar.archiveFile
+    outputs.file(jarFile.map { it.asFile.path + '.sha256' })
+    doLast {
+        def f = jarFile.get().asFile
+        def md = java.security.MessageDigest.getInstance('SHA-256')
+        f.withInputStream { s -> byte[] b = new byte[65536]; int n; while ((n = s.read(b)) > 0) md.update(b, 0, n) }
+        def hex = md.digest().collect { String.format('%02x', it) }.join()
+        new File(f.path + '.sha256').text = "${hex}  ${f.name}\n"
+        println "${f.name} ${hex} ${f.length()} bytes"
+    }
+}
+
+assemble.dependsOn 'sha256'
+
+tasks.named('compileStubsJava', JavaCompile) {
+    options.release = 8
+}
+
+test {
+    useJUnitPlatform()
+    dependsOn shadowJar, 'compileStubsJava'
+    systemProperty 'vibeafk.stubs', sourceSets.stubs.output.classesDirs.asPath
+    systemProperty 'vibeafk.agentJar', shadowJar.archiveFile.get().asFile.path
+    def sets = ['lwjgl33', 'lwjgl34', 'lwjgl2'].collectEntries { [it, configurations.getByName(it)] }
+    sets.values().each { inputs.files it }
+    doFirst {
+        sets.each { name, conf -> systemProperty "vibeafk.${name}", conf.files.collect { it.path }.join(File.pathSeparator) }
+    }
+}

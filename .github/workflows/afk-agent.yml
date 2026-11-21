@@ -1,0 +1,78 @@
+name: AFK agent release
+
+# Standalone release of the Vibe AFK agent (tools/afk-agent, docs/AFK-AGENT.md). Pushing the tag
+# afk-agent-v<version> creates the GitHub release "Vibe AFK Agent <version>" with exactly two assets:
+#   vibe-afk-agent-<version>.jar          the -javaagent jar (Java 8 bytecode, ASM shaded)
+#   vibe-afk-agent-<version>.jar.sha256   "<sha256>  vibe-afk-agent-<version>.jar"
+# The release is never marked "Latest" (that stays the client release) and is not a pre-release or draft.
+# The Vibe Launcher pins version + SHA-256 in its code and downloads the jar on first use; the backend's client
+# import skips this release (no vibey-manifest.json).
+#
+# Release a new agent version: bump agent_version in tools/afk-agent/gradle.properties, merge to main, then
+#   git tag afk-agent-v<version> && git push origin afk-agent-v<version>
+# Re-running (or workflow_dispatch with the tag) is safe: assets are replaced (--clobber).
+
+on:
+  push:
+    tags: ["afk-agent-v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to (re-)release (e.g. afk-agent-v0.1.0)"
+        required: true
+
+concurrency:
+  group: afk-agent-release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  TAG: ${{ inputs.tag || github.ref_name }}
+
+jobs:
+  release:
+    name: Test and publish the agent
+    if: ${{ startsWith(inputs.tag || github.ref_name, 'afk-agent-v') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Check tag matches agent_version
+        run: |
+          VERSION="$(grep '^agent_version=' tools/afk-agent/gradle.properties | cut -d= -f2 | tr -d '\r')"
+          if [ "afk-agent-v$VERSION" != "$TAG" ]; then
+            echo "Tag $TAG does not match agent_version=$VERSION" >&2
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Test and build
+        run: ./gradlew -p tools/afk-agent --no-daemon test shadowJar sha256
+
+      - name: Create or update the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd tools/afk-agent/build/libs
+          JAR="vibe-afk-agent-$VERSION.jar"
+          test -f "$JAR" && test -f "$JAR.sha256"
+          cat "$JAR.sha256"
+          sha256sum -c "$JAR.sha256"
+          title="Vibe AFK Agent $VERSION"
+          notes="Java agent for the Vibe Launcher AFK mode (hide window, 2 FPS, mute, chat/events). SHA-256: $(cut -d' ' -f1 "$JAR.sha256")"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$JAR" "$JAR.sha256" --clobber
+            gh release edit "$TAG" --title "$title" --notes "$notes" --latest=false --prerelease=false --draft=false
+          else
+            gh release create "$TAG" "$JAR" "$JAR.sha256" --verify-tag --title "$title" --notes "$notes" --latest=false
+          fi
