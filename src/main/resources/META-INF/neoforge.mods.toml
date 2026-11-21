@@ -27,6 +27,12 @@ config = "vibeyclient.devlink.mixins.json"
 [[mixins]]
 config = "vibeyclient.nametags.mixins.json"
 
+[[mixins]]
+config = "vibeyclient.accessibility.mixins.json"
+
+[[mixins]]
+config = "vibeyclient.serverapi.mixins.json"
+
 [[dependencies.${mod_id}]]
 modId = "neoforge"
 type = "required"

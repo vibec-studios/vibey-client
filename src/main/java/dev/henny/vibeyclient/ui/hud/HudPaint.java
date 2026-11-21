@@ -4,6 +4,12 @@ import dev.henny.vibeyclient.ui.Gfx;
 import dev.henny.vibeyclient.ui.Theme;
 
 public final class HudPaint {
+    private static java.util.function.BooleanSupplier highContrast = () -> false;
+
+    public static void highContrastWhen(java.util.function.BooleanSupplier condition) {
+        highContrast = condition;
+    }
+
     public Gfx g;
     public int w;
     public int h;
@@ -57,6 +63,10 @@ public final class HudPaint {
     }
 
     public void background(int x, int y, int bw, int bh) {
+        if (highContrast.getAsBoolean()) {
+            g.rect(x, y, bw, bh, 0xFF000000);
+            return;
+        }
         HudStyle.Resolved s = style;
         if (s.background) fillShape(x, y, bw, bh, s.bg);
         if (s.border) outlineShape(x, y, bw, bh, Theme.alpha(s.accent, 0.7f));
@@ -103,12 +113,21 @@ public final class HudPaint {
 
     public void plain(String s, int x, int y, int argb) {
         if (s == null || s.isEmpty()) return;
+        if (highContrast.getAsBoolean()) {
+            g.rect(x - 1, y - 1, g.width(s) + 2, g.lineHeight() + 1, 0xFF000000);
+            g.text(s, x, y, 0xFFFFFFFF);
+            return;
+        }
         if (style.shadow) g.textShadow(s, x, y, argb);
         else g.text(s, x, y, argb);
     }
 
     private void rainbow(String s, int x, int y, int alpha) {
         if (s == null || s.isEmpty()) return;
+        if (highContrast.getAsBoolean()) {
+            plain(s, x, y, 0xFFFFFFFF);
+            return;
+        }
         float base = (now % 4000L) / 4000f;
         int cx = x;
         for (int i = 0; i < s.length(); i++) {

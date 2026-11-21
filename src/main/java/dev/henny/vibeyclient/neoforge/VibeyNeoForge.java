@@ -67,6 +67,8 @@ public final class VibeyNeoForge {
         register(r, LoadoutPayload.TYPE, LoadoutPayload.CODEC);
         register(r, EmotePayload.TYPE, EmotePayload.CODEC);
         register(r, MessagePayload.TYPE, MessagePayload.CODEC);
+        r.playToClient(RulesPayloads.Presentation.TYPE, RulesPayloads.Presentation.CODEC,
+                (payload, context) -> context.enqueueWork(() -> NetDispatch.toClient(payload)));
         // the open server-rules channels (RulesPayloads): rules S->C, hello C->S
         try {
             r.playToClient(RulesPayloads.Rules.TYPE, RulesPayloads.Rules.CODEC, (payload, context) -> context.enqueueWork(() -> NetDispatch.toClient(payload)));

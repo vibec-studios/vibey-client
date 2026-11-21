@@ -53,6 +53,18 @@ public final class RulesPayloads {
         }
     }
 
+    public record Presentation(byte[] json) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<Presentation> TYPE =
+                new CustomPacketPayload.Type<>(Compat.id("vibey", "presentation"));
+        public static final StreamCodec<FriendlyByteBuf, Presentation> CODEC = StreamCodec.of(
+                (buf, p) -> buf.writeBytes(p.json), buf -> new Presentation(readAll(buf)));
+
+        @Override
+        public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
+
     /** Reads the whole rest of the payload; always consumes it (leftover bytes would kick the player). */
     static byte[] readAll(FriendlyByteBuf buf) {
         int n = buf.readableBytes();

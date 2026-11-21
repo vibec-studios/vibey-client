@@ -42,6 +42,11 @@ public final class VibeyFabric implements ModInitializer, Platform {
         register(EmotePayload.TYPE, EmotePayload.CODEC);
         register(MessagePayload.TYPE, MessagePayload.CODEC);
         registerRules();
+        //? if >=26.1 {
+        /*PayloadTypeRegistry.clientboundPlay().register(RulesPayloads.Presentation.TYPE, RulesPayloads.Presentation.CODEC);
+        *///?} else {
+        PayloadTypeRegistry.playS2C().register(RulesPayloads.Presentation.TYPE, RulesPayloads.Presentation.CODEC);
+        //?}
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> ServerRulesHost.onJoin(handler.getPlayer()));
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             ServerRelay.onLeave(handler.getPlayer());

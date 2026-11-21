@@ -41,7 +41,11 @@ public final class RulesProtocol {
     private static final Pattern CLIENT = Pattern.compile("[A-Za-z0-9_.+-]{1,64}");
 
     /** Parsed {@code vibey:rules}: the disabled keys (validated, lower case, no duplicates) and the message or null. */
-    public record Rules(List<String> disable, String message) {
+    public record Rules(List<String> disable, List<String> allow, String message) {
+        public Rules(List<String> disable, String message) {
+            this(disable, List.of(), message);
+        }
+
         public static final Rules NONE = new Rules(List.of(), null);
 
         public boolean isEmpty() {
@@ -64,19 +68,21 @@ public final class RulesProtocol {
     public static Rules parseRules(byte[] data) throws BadPacket {
         JsonObject o = object(data);
         checkSchema(o);
-        List<String> disable = new ArrayList<>();
-        JsonElement d = o.get("disable");
+        return new Rules(readKeys(o, "disable"), readKeys(o, "allow"), message(o.get("message")));
+    }
+
+    private static List<String> readKeys(JsonObject o, String field) throws BadPacket {
+        JsonElement d = o.get(field);
+        Set<String> seen = new LinkedHashSet<>();
         if (d != null && !d.isJsonNull()) {
-            if (!d.isJsonArray()) throw new BadPacket("\"disable\" must be an array");
-            Set<String> seen = new LinkedHashSet<>();
+            if (!d.isJsonArray()) throw new BadPacket(field + " must be an array");
             for (JsonElement e : d.getAsJsonArray()) {
                 if (seen.size() >= MAX_RULES) break;
                 String k = key(e);
                 if (k != null) seen.add(k);
             }
-            disable.addAll(seen);
         }
-        return new Rules(List.copyOf(disable), message(o.get("message")));
+        return List.copyOf(seen);
     }
 
     /** One rule entry, normalised; null if it is not a valid key (skipped, the rest of the list still counts). */
@@ -123,6 +129,11 @@ public final class RulesProtocol {
         JsonArray a = new JsonArray();
         for (String k : rules.disable()) a.add(k);
         o.add("disable", a);
+        if (!rules.allow().isEmpty()) {
+            JsonArray allow = new JsonArray();
+            rules.allow().forEach(allow::add);
+            o.add("allow", allow);
+        }
         if (rules.message() != null) o.addProperty("message", rules.message());
         return o.toString().getBytes(StandardCharsets.UTF_8);
     }

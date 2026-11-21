@@ -1,5 +1,6 @@
 package dev.henny.vibeyrules;
 
+import dev.henny.vibeyclient.net.ServerPresentation;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -13,6 +14,8 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRegisterChannelEvent;
+import org.bukkit.event.player.PlayerUnregisterChannelEvent;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
@@ -32,11 +35,16 @@ import java.util.concurrent.ConcurrentHashMap;
  * for {@code vibey:rules}; join (one tick later, for clients that registered during configuration), the client's
  * hello and world changes send again only if the rules for that player changed. No metrics, no external libraries.
  */
-public final class VibeyRulesPlugin extends JavaPlugin implements Listener, PluginMessageListener {
+public final class VibeyRulesPlugin extends JavaPlugin implements Listener, PluginMessageListener, VibeyServerApi {
+
+    private static final byte[] EMPTY_PRESENTATION = ServerPresentation.EMPTY.encode();
 
     private static final class Peer {
         byte[] sent;
         Rules.Hello hello;
+        Rules.Applied override;
+        byte[] presentation;
+        byte[] sentPresentation;
     }
 
     private final Map<UUID, Peer> peers = new ConcurrentHashMap<>();
@@ -47,6 +55,8 @@ public final class VibeyRulesPlugin extends JavaPlugin implements Listener, Plug
         saveDefaultConfig();
         load();
         getServer().getMessenger().registerOutgoingPluginChannel(this, Rules.RULES_CHANNEL);
+        getServer().getMessenger().registerOutgoingPluginChannel(this, ServerPresentation.CHANNEL);
+        getServer().getServicesManager().register(VibeyServerApi.class, this, this, ServicePriority.Normal);
         getServer().getMessenger().registerIncomingPluginChannel(this, Rules.HELLO_CHANNEL, this);
         getServer().getPluginManager().registerEvents(this, this);
         PluginCommand cmd = getCommand("vibeyrules");
@@ -54,11 +64,15 @@ public final class VibeyRulesPlugin extends JavaPlugin implements Listener, Plug
             cmd.setExecutor(this);
             cmd.setTabCompleter(this);
         }
-        for (Player p : Bukkit.getOnlinePlayers()) send(p); // /reload or a late plugin load
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            send(player);
+            sendPresentation(player);
+        }
     }
 
     @Override
     public void onDisable() {
+        getServer().getServicesManager().unregisterAll(this);
         getServer().getMessenger().unregisterOutgoingPluginChannel(this);
         getServer().getMessenger().unregisterIncomingPluginChannel(this);
         peers.clear();
@@ -75,8 +89,8 @@ public final class VibeyRulesPlugin extends JavaPlugin implements Listener, Plug
                 if (w != null) worlds.put(name, w.getValues(false));
             }
         }
-        config = Rules.config(c.getBoolean("enabled", true), c.getList("disable", List.of()), c.getString("message", ""),
-                worlds, c.getBoolean("log-hello", true));
+        config = Rules.config(c.getBoolean("enabled", true), c.getList("disable", List.of()), c.getList("allow", List.of()),
+                c.getString("message", ""), worlds, c.getBoolean("log-hello", true));
         for (String p : config.problems()) getLogger().warning("config.yml: " + p);
         getLogger().info("Rules " + (config.enabled() ? "on: disable " + config.disable() : "off")
                 + (config.worlds().isEmpty() ? "" : ", " + config.worlds().size() + " world override(s)"));
@@ -87,13 +101,26 @@ public final class VibeyRulesPlugin extends JavaPlugin implements Listener, Plug
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
-        peers.put(p.getUniqueId(), new Peer());
-        Bukkit.getScheduler().runTask(this, () -> send(p));
+        Bukkit.getScheduler().runTask(this, () -> {
+            send(p);
+            sendPresentation(p);
+        });
     }
 
     @EventHandler
     public void onRegister(PlayerRegisterChannelEvent e) {
         if (Rules.RULES_CHANNEL.equals(e.getChannel())) onMain(() -> send(e.getPlayer()));
+        if (ServerPresentation.CHANNEL.equals(e.getChannel())) onMain(() -> sendPresentation(e.getPlayer()));
+    }
+
+    @EventHandler
+    public void onUnregister(PlayerUnregisterChannelEvent e) {
+        onMain(() -> {
+            Peer peer = peers.get(e.getPlayer().getUniqueId());
+            if (peer == null) return;
+            if (Rules.RULES_CHANNEL.equals(e.getChannel())) peer.sent = null;
+            if (ServerPresentation.CHANNEL.equals(e.getChannel())) peer.sentPresentation = null;
+        });
     }
 
     @EventHandler
@@ -123,7 +150,7 @@ public final class VibeyRulesPlugin extends JavaPlugin implements Listener, Plug
             peer.hello = hello;
             Rules.Config c = config;
             if (first && c.logHello()) {
-                List<String> missing = Rules.unsupported(c.rulesFor(player.getWorld().getName()).disable(), hello.supports());
+                List<String> missing = Rules.unsupported(rulesFor(player, peer).disable(), hello.supports());
                 getLogger().info(player.getName() + " announced vibey:hello: " + hello.client() + " " + hello.version()
                         + ", supports " + hello.supports() + (missing.isEmpty() ? "" : " (does not know: " + missing + ")"));
             }
@@ -142,13 +169,70 @@ public final class VibeyRulesPlugin extends JavaPlugin implements Listener, Plug
     private void send(Player player) {
         if (!player.isOnline()) return;
         Peer peer = peers.computeIfAbsent(player.getUniqueId(), k -> new Peer());
-        Rules.Applied rules = player.hasPermission("vibeyrules.bypass") ? Rules.Applied.NONE : config.rulesFor(player.getWorld().getName());
-        if (rules.isEmpty() && peer.sent == null) return; // nothing to say, nothing to clear
+        Rules.Applied rules = rulesFor(player, peer);
         byte[] json = Rules.encode(rules);
+        if (json.length > ServerPresentation.MAX_BYTES) {
+            getLogger().warning("Rules for " + player.getName() + " exceed 16 KiB; keeping the last valid rules");
+            return;
+        }
         if (peer.sent != null && Arrays.equals(peer.sent, json)) return;
         if (!player.getListeningPluginChannels().contains(Rules.RULES_CHANNEL)) return;
         player.sendPluginMessage(this, Rules.RULES_CHANNEL, json);
         peer.sent = json;
+    }
+
+    private Rules.Applied rulesFor(Player player, Peer peer) {
+        if (player.hasPermission("vibeyrules.bypass") || !config.enabled()) return Rules.Applied.NONE;
+        return peer.override != null ? peer.override : config.rulesFor(player.getWorld().getName());
+    }
+
+    @Override
+    public void setPresentation(Player viewer, ServerPresentation presentation) {
+        Peer peer = onlinePeer(viewer);
+        peer.presentation = presentation.encode();
+        sendPresentation(viewer);
+    }
+
+    @Override
+    public void setRules(Player viewer, List<String> disable, List<String> allow, String message) {
+        Peer peer = onlinePeer(viewer);
+        Rules.Applied rules = new Rules.Applied(apiKeys(disable), apiKeys(allow), Rules.cleanMessage(message));
+        if (Rules.encode(rules).length > ServerPresentation.MAX_BYTES) {
+            throw new IllegalArgumentException("Rules exceed 16 KiB");
+        }
+        peer.override = rules;
+        send(viewer);
+    }
+
+    @Override
+    public void resetRules(Player viewer) {
+        onlinePeer(viewer).override = null;
+        send(viewer);
+    }
+
+    private Peer onlinePeer(Player viewer) {
+        if (!Bukkit.isPrimaryThread()) throw new IllegalStateException("Use VibeyServerApi on the server thread");
+        if (!isEnabled() || !viewer.isOnline()) throw new IllegalArgumentException("Viewer must be online");
+        return peers.computeIfAbsent(viewer.getUniqueId(), k -> new Peer());
+    }
+
+    private static List<String> apiKeys(List<String> keys) {
+        List<String> normalized = keys.stream().map(key -> {
+            String value = Rules.key(key);
+            if (value == null) throw new IllegalArgumentException("Invalid rule key");
+            return value;
+        }).distinct().toList();
+        if (normalized.size() > Rules.MAX_RULES) throw new IllegalArgumentException("Too many rule keys");
+        return normalized;
+    }
+
+    private void sendPresentation(Player player) {
+        if (!player.isOnline() || !player.getListeningPluginChannels().contains(ServerPresentation.CHANNEL)) return;
+        Peer peer = peers.computeIfAbsent(player.getUniqueId(), key -> new Peer());
+        byte[] json = peer.presentation != null ? peer.presentation : EMPTY_PRESENTATION;
+        if (Arrays.equals(peer.sentPresentation, json)) return;
+        player.sendPluginMessage(this, ServerPresentation.CHANNEL, json);
+        peer.sentPresentation = json;
     }
 
     // ============================================================================================ command
@@ -166,9 +250,9 @@ public final class VibeyRulesPlugin extends JavaPlugin implements Listener, Plug
             case "status" -> {
                 Rules.Config c = config;
                 sender.sendMessage("VibeyRules " + getDescription().getVersion() + ": " + (c.enabled() ? "on" : "off")
-                        + ", disable " + c.disable() + (c.message() == null ? "" : ", message \"" + c.message() + "\""));
+                        + ", disable " + c.disable() + ", allow " + c.allow() + (c.message() == null ? "" : ", message \"" + c.message() + "\""));
                 c.worlds().forEach((w, o) -> sender.sendMessage("  world " + w + ": disable " + (o.disable() == null ? c.disable() : o.disable())
-                        + (o.message() == null ? "" : ", message \"" + o.message() + "\"")));
+                        + ", allow " + (o.allow() == null ? c.allow() : o.allow()) + (o.message() == null ? "" : ", message \"" + o.message() + "\"")));
                 int announced = 0, sent = 0;
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     Peer peer = peers.get(p.getUniqueId());

@@ -1,0 +1,19 @@
+{
+  "name": "Accessibility",
+  "description": "Adjust world colours, HUD contrast and sound subtitles.",
+  "setting": {
+    "filter": "Colour vision filter",
+    "filter.desc": "Adjusts world colours to help distinguish similar shades.",
+    "filter.off": "Off",
+    "filter.protanopia": "Protanopia (red)",
+    "filter.deuteranopia": "Deuteranopia (green)",
+    "filter.tritanopia": "Tritanopia (blue)",
+    "hud": "High-contrast HUD",
+    "hud.desc": "White text on a black background for Vibey HUD widgets.",
+    "subtitles": "Sound subtitle style",
+    "subtitles.desc": "Turn on Show Subtitles in Minecraft's accessibility settings to see sound subtitles.",
+    "subtitles.vanilla": "Minecraft default",
+    "subtitles.white": "White on black",
+    "subtitles.yellow": "Yellow on black"
+  }
+}

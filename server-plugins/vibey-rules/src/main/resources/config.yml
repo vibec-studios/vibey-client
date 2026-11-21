@@ -12,15 +12,17 @@ enabled: true
 #     - hud.coords
 #     - waypoints.minimap
 disable: []
+allow: []
 
 # Shown to the player once per join (one toast). Leave empty for a generic text.
 message: ""
 
 # Optional per-world overrides (world folder names). An entry replaces the global "disable" list in that world
-# and, if it sets one, the message.
+# and can set its own "allow" list and message.
 #   worlds:
 #     world_nether:
 #       disable: [zoom, hud.*]
+#       allow: [hud.fps]
 #       message: "No zoom and no HUD in the nether."
 worlds: {}
 

@@ -28,6 +28,8 @@ public final class BuiltinModules {
         registerIfPresent(mm, "dev.henny.vibeyclient.module.servers.ServersModule");
         registerIfPresent(mm, "dev.henny.vibeyclient.module.screens.ScreensModule");
         mm.register(new DevLinkModule());
+        registerIfPresent(mm, "dev.henny.vibeyclient.module.accessibility.AccessibilityModule");
+        registerIfPresent(mm, "dev.henny.vibeyclient.module.serverapi.ServerApiModule");
         // HUD widgets + templates: Fabric 1.21.11 only for now (gradle/modules.gradle leaves the package out elsewhere)
         registerIfPresent(mm, "dev.henny.vibeyclient.module.hud.HudModule");
         registerIfPresent(mm, "dev.henny.vibeyclient.module.waypoints.WaypointsModule");

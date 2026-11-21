@@ -33,7 +33,11 @@ public final class Rules {
     public static final Pattern KEY = Pattern.compile("\\*|[a-z0-9_-]+(\\.[a-z0-9_-]+)*(\\.\\*)?");
 
     /** What one player gets: disabled keys and the message (null = none). */
-    public record Applied(List<String> disable, String message) {
+    public record Applied(List<String> disable, List<String> allow, String message) {
+        public Applied(List<String> disable, String message) {
+            this(disable, List.of(), message);
+        }
+
         public static final Applied NONE = new Applied(List.of(), null);
 
         public boolean isEmpty() {
@@ -42,17 +46,18 @@ public final class Rules {
     }
 
     /** One world override: {@code disable} null = the global list, {@code message} null = the global message. */
-    public record World(List<String> disable, String message) {}
+    public record World(List<String> disable, List<String> allow, String message) {}
 
     /** The parsed config.yml. */
-    public record Config(boolean enabled, List<String> disable, String message, Map<String, World> worlds, boolean logHello,
+    public record Config(boolean enabled, List<String> disable, List<String> allow, String message, Map<String, World> worlds, boolean logHello,
                          List<String> problems) {
 
         public Applied rulesFor(String world) {
             if (!enabled) return Applied.NONE;
             World w = world == null ? null : worlds.get(world.toLowerCase(Locale.ROOT));
-            if (w == null) return new Applied(disable, message);
-            return new Applied(w.disable() != null ? w.disable() : disable, w.message() != null ? w.message() : message);
+            if (w == null) return new Applied(disable, allow, message);
+            return new Applied(w.disable() != null ? w.disable() : disable,
+                    w.allow() != null ? w.allow() : allow, w.message() != null ? w.message() : message);
         }
     }
 
@@ -66,20 +71,34 @@ public final class Rules {
      * skipped and reported in {@link Config#problems()}.
      */
     public static Config config(boolean enabled, Collection<?> disable, String message, Map<String, Map<String, Object>> worlds, boolean logHello) {
+        return config(enabled, disable, List.of(), message, worlds, logHello);
+    }
+
+    public static Config config(boolean enabled, Collection<?> disable, Collection<?> allow, String message,
+                                Map<String, Map<String, Object>> worlds, boolean logHello) {
         List<String> problems = new ArrayList<>();
         List<String> global = keys(disable, "disable", problems);
+        List<String> exceptions = keys(allow, "allow", problems);
         Map<String, World> w = new LinkedHashMap<>();
         if (worlds != null) {
             for (Map.Entry<String, Map<String, Object>> e : worlds.entrySet()) {
                 Map<String, Object> v = e.getValue();
-                Object d = v == null ? null : v.get("disable");
-                Object m = v == null ? null : v.get("message");
-                List<String> list = d instanceof Collection<?> c ? keys(c, "worlds." + e.getKey() + ".disable", problems) : null;
-                if (d != null && !(d instanceof Collection<?>)) problems.add("worlds." + e.getKey() + ".disable must be a list");
-                w.put(e.getKey().toLowerCase(Locale.ROOT), new World(list, m == null ? null : cleanMessage(String.valueOf(m))));
+                if (v == null) continue;
+                Object m = v.get("message");
+                String field = "worlds." + e.getKey() + ".";
+                w.put(e.getKey().toLowerCase(Locale.ROOT), new World(
+                        worldKeys(v.get("disable"), field + "disable", problems),
+                        worldKeys(v.get("allow"), field + "allow", problems),
+                        m == null ? null : cleanMessage(String.valueOf(m))));
             }
         }
-        return new Config(enabled, global, cleanMessage(message), Map.copyOf(w), logHello, List.copyOf(problems));
+        return new Config(enabled, global, exceptions, cleanMessage(message), Map.copyOf(w), logHello, List.copyOf(problems));
+    }
+
+    private static List<String> worldKeys(Object raw, String field, List<String> problems) {
+        if (raw instanceof Collection<?> values) return keys(values, field, problems);
+        if (raw != null) problems.add(field + " must be a list");
+        return null;
     }
 
     private static List<String> keys(Collection<?> raw, String field, List<String> problems) {
@@ -127,6 +146,11 @@ public final class Rules {
         JsonArray a = new JsonArray();
         for (String k : rules.disable()) a.add(k);
         o.add("disable", a);
+        if (!rules.allow().isEmpty()) {
+            JsonArray allow = new JsonArray();
+            rules.allow().forEach(allow::add);
+            o.add("allow", allow);
+        }
         if (rules.message() != null) o.addProperty("message", rules.message());
         return o.toString().getBytes(StandardCharsets.UTF_8);
     }

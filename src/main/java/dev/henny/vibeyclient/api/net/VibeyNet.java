@@ -160,6 +160,10 @@ public final class VibeyNet {
 
     /** Core: a payload from the server (client thread). */
     public static void handle(CustomPacketPayload payload) {
+        if (payload instanceof dev.henny.vibeyclient.net.RulesPayloads.Presentation p) {
+            dev.henny.vibeyclient.client.ServerRulesClient.handle(p);
+            return;
+        }
         if (payload instanceof dev.henny.vibeyclient.net.RulesPayloads.Rules p) {
             dev.henny.vibeyclient.client.ServerRulesClient.handle(p);
         } else if (payload instanceof HelloPayload p) {

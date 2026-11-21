@@ -7,6 +7,7 @@ import dev.henny.vibeyclient.api.ServerRules;
 import dev.henny.vibeyclient.api.service.Notify;
 import dev.henny.vibeyclient.net.RulesPayloads;
 import dev.henny.vibeyclient.net.RulesProtocol;
+import dev.henny.vibeyclient.net.ServerPresentation;
 
 /**
  * Client side of the open server-rules channels (PLAY-LINKS.md §5, {@code docs/SERVER-RULES.md}): feeds
@@ -39,6 +40,7 @@ public final class ServerRulesClient {
         helloSent = false;
         toastShown = false;
         ServerRules.clear();
+        ServerPresentationClient.replace(ServerPresentation.EMPTY);
     }
 
     public static void onLeave() {
@@ -46,6 +48,7 @@ public final class ServerRulesClient {
         helloSent = false;
         toastShown = false;
         ServerRules.clear();
+        ServerPresentationClient.replace(ServerPresentation.EMPTY);
     }
 
     public static void tick() {
@@ -69,6 +72,15 @@ public final class ServerRulesClient {
                 BuildInfo.MINECRAFT, Vibey.platform().loader().toLowerCase(java.util.Locale.ROOT));
     }
 
+    public static void handle(RulesPayloads.Presentation payload) {
+        if (!inWorld) return;
+        try {
+            ServerPresentationClient.replace(ServerPresentation.decode(payload.json()));
+        } catch (IllegalArgumentException e) {
+            Vibey.LOG.debug("Ignoring bad vibey:presentation from the server", e);
+        }
+    }
+
     /** A {@code vibey:rules} packet arrived (client thread). */
     public static void handle(RulesPayloads.Rules payload) {
         if (!inWorld) return;
@@ -79,11 +91,13 @@ public final class ServerRulesClient {
             Vibey.LOG.warn("Ignoring bad vibey:rules from the server: {}", e.getMessage());
             return;
         }
-        ServerRules.apply(rules.disable(), rules.message());
+        ServerRules.apply(rules.disable(), rules.allow(), rules.message());
         Vibey.LOG.info("Server rules: disable {}{}", rules.disable(), rules.message() == null ? "" : " (\"" + rules.message() + "\")");
-        if (toastShown || rules.isEmpty()) return;
+        if (toastShown) return;
+        long disabled = ServerRules.supportedKeys().stream().filter(ServerRules::isDisabled).count();
+        if (disabled == 0 && rules.message() == null) return;
         toastShown = true;
-        String body = rules.message() != null ? rules.message() : Lang.tr("serverrules.toast.generic", rules.disable().size());
+        String body = rules.message() != null ? rules.message() : Lang.tr("serverrules.toast.generic", disabled);
         Notify.show(new Notify.Toast(Lang.tr("serverrules.toast.title"), body, Notify.Kind.INFO, null, null));
     }
 }

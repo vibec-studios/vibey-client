@@ -1,0 +1,19 @@
+{
+  "name": "Sehhilfen",
+  "description": "Spielfarben, HUD-Kontrast und Geräuschuntertitel anpassen.",
+  "setting": {
+    "filter": "Farbsehfilter",
+    "filter.desc": "Passt die Farben der Spielwelt an, damit sich ähnliche Farbtöne leichter unterscheiden lassen.",
+    "filter.off": "Aus",
+    "filter.protanopia": "Protanopie (Rot)",
+    "filter.deuteranopia": "Deuteranopie (Grün)",
+    "filter.tritanopia": "Tritanopie (Blau)",
+    "hud": "Kontrastreiches HUD",
+    "hud.desc": "Weiße Schrift auf schwarzem Hintergrund für Vibey-HUD-Anzeigen.",
+    "subtitles": "Stil der Geräuschuntertitel",
+    "subtitles.desc": "Aktiviere in Minecraft unter Barrierefreiheit die Untertitel, um Geräusche als Text zu sehen.",
+    "subtitles.vanilla": "Minecraft-Standard",
+    "subtitles.white": "Weiß auf Schwarz",
+    "subtitles.yellow": "Gelb auf Schwarz"
+  }
+}

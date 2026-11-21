@@ -24,6 +24,11 @@ repositories {
     }
 }
 
+sourceSets.main.java {
+    srcDir '../../src/main/java'
+    include 'dev/henny/vibeyrules/**', 'dev/henny/vibeyclient/net/ServerPresentation.java'
+}
+
 dependencies {
     // Only the Bukkit API surface that exists since 1.20 is used (plugin.yml api-version 1.20), Gson comes with the server.
     compileOnly 'io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT'

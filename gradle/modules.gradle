@@ -7,6 +7,12 @@ ext.clientModules = [
         emotes       : 'all',
         multiplayer  : 'all',
         devlink      : 'all',
+        accessibility: [
+                'fabric-1.21.10', 'fabric-1.21.11', 'fabric-26.1', 'fabric-26.2',
+                'neoforge-1.21.10', 'neoforge-1.21.11', 'neoforge-26.1', 'neoforge-26.2'],
+        serverapi    : [
+                'fabric-1.21.11', 'fabric-26.1', 'fabric-26.2', 'fabric-26.3',
+                'neoforge-1.21.11', 'neoforge-26.1', 'neoforge-26.2', 'neoforge-26.3'],
         nametags     : 'all',
         media        : 'fabric',
         'media.video': ['fabric-1.21.11'],
@@ -30,6 +36,7 @@ ext.clientModules = [
 
 // Resources a module owns besides its i18n files (i18n/*/<id>[.*].json) and mixin configs (vibeyclient.<id>[.*].mixins.json).
 ext.clientModuleResources = [
+        accessibility: ['assets/vibeyclient/post_effect/accessibility_*', 'assets/vibeyclient/shaders/post/accessibility_*'],
         media: ['assets/vibeyclient/font/lyrics/**', 'assets/vibeyclient/textures/lyrics/**', 'assets/vibeyclient/lyrics/**'],
         clips: ['assets/vibeyclient/shaders/core/clips_*', 'assets/vibeyclient/vui/clips/**'],
         camera: ['assets/vibeyclient/post_effect/motion_blur.json', 'assets/vibeyclient/shaders/post/motion_blur.fsh'],
