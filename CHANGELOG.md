@@ -2,7 +2,34 @@
 
 All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.properties`.
 
-## Unreleased – modules on every version
+## 0.4.0-beta.4 – modules on every version, hosting, voice and accessibility (beta)
+
+Another **beta** (beta / dev channel only; 0.3.2 stays the normal version).
+
+**Fix:** the Fabric jars of 0.4.0-beta.3 could refuse to start on every version except 1.21.11 (a trailing comma or
+`null` in `fabric.mod.json` left by the module filter). Fixed.
+
+**Vibe beta access:** Vibey screens only open for players with an approved Vibe beta access.
+
+**Hosting**
+- Host menu: who may join (everyone / friends / invite only), members, kick and ban through the Vibe backend; kicks
+  can be lifted; the max player count is shared with the backend.
+- Joining players are checked against the rules of the host; rejected players get a clear message (DE/EN).
+- Voice chat in hosted worlds: Simple Voice Chat is tunnelled through the Vibey relay (UDP), no port forwarding.
+
+**Server API and accessibility**
+- Servers can send waypoints, team and nametag colours and allow or block single modules (`vibey:presentation`,
+  Paper plugin API `VibeyServerApi`). Players can switch it off (module *Server info*).
+- New module *Vision aids*: colour-blindness filters (protanopia, deuteranopia, tritanopia), high-contrast HUD and a
+  subtitle style. Fabric and NeoForge 1.21.9 to 26.2.
+- `docs/MODULE-MATRIX.md`: which module runs on which version and which server rule can block it.
+
+**Clips and skins**
+- *Long rewind*: keep the last 1–10 minutes on disk instead of in memory; clips carry keyframes and a trim hint for
+  the clip editor of the launcher.
+- New *Skins* window (Fabric 1.21.11): switch to any skin of your launcher library without restarting.
+
+**Modules on every version**
 
 - HUD editor and widgets, Info (light level, chunk borders, block/mob card, food gain, tool warning, TNT timer), PvP
   (zoom, toggle sprint/sneak, crosshair editor) and Camera (freelook, orbit view) now run on every supported version,
