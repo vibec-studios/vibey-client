@@ -61,7 +61,7 @@
     "onlineFeatures.desc": "Freunde, Chat und Cosmetics, die andere sehen. Aus: Vibey verbindet sich mit nichts.",
     "launcherStatus": "Launcher-Status",
     "launcherStatus.desc": "Für den Discord-Status des Vibe Launchers: deine Welt, der Server und der Einladungslink. Bleibt auf diesem PC.",
-    "serverBrand": "Vibey gegenüber Servern zeigen",
+    "serverBrand": "Vibey-Kennung",
     "serverBrand.desc": "Server sehen, dass du Vibey Client nutzt (Client-Kennung „vibey,fabric“ bzw. „vibey,neoforge“). Aus: nur die Kennung des Mod-Loaders. Gilt ab dem nächsten Beitritt.",
     "animations": "Animationen",
     "animations.desc": "Weiche Übergänge in den Vibey-Menüs.",

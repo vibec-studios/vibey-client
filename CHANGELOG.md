@@ -18,7 +18,7 @@ Another **beta** (beta / dev channel only; 0.3.2 stays the normal version).
   Fabric and NeoForge 1.21.1 to 26.3 (26.x sets icons through SDL, the same hook works there).
   On macOS, versions that still use Mojang's `.icns` file keep the Minecraft icon in the Dock.
 - Client brand for servers: `vibey,fabric` / `vibey,neoforge` in the `minecraft:brand` message, so servers can
-  recognise the client (`docs/SERVER-RULES.md`). New switch *General → Privacy → Show Vibey to servers* (on by
+  recognise the client (`docs/SERVER-RULES.md`). New switch *General → Privacy → Vibey brand* (on by
   default); off sends only the loader's brand.
 - Title screen: small Vibey logo and `Vibey Client <version>` bottom left, above the vanilla version line (above
   the NeoForge lines on NeoForge).
