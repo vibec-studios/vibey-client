@@ -32,6 +32,7 @@ ext.clientModules = [
         cinematic    : ['fabric-1.21.11'],
         screens      : ['fabric-1.21.11'],
         companion    : ['fabric-1.21.11'],
+        skins        : ['fabric-1.21.11'],
 ]
 
 // Resources a module owns besides its i18n files (i18n/*/<id>[.*].json) and mixin configs (vibeyclient.<id>[.*].mixins.json).

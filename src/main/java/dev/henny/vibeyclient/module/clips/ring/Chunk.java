@@ -2,19 +2,16 @@ package dev.henny.vibeyclient.module.clips.ring;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
- * One GOP of MPEG-TS (starts with a keyframe), held in pooled 64 KiB blocks. Written by the chunker thread while
+ * One GOP of MPEG-TS (starts with a keyframe), held in pooled 64 KiB blocks or a buffer file. Written by the chunker thread while
  * open; once {@link #close closed} it never changes. {@link #snapshot()} gives a consistent view of an open chunk up to
  * the start of its newest frame (so a save never ends in a half-written frame).
  */
 public final class Chunk {
     final int session;
     final byte[] headers; // PAT + PMT of the session, put in front of every part file
-    private final BlockPool pool;
-    private final List<byte[]> blocks = new ArrayList<>();
+    private final ChunkBody body;
     private long size;
     final long firstPts;
     private long lastPesStart;
@@ -23,12 +20,12 @@ public final class Chunk {
     private volatile long durationPts = -1;
     private volatile boolean released;
 
-    Chunk(int session, byte[] headers, long firstPts, BlockPool pool) {
+    Chunk(int session, byte[] headers, long firstPts, ChunkBody body) {
         this.session = session;
         this.headers = headers;
         this.firstPts = firstPts;
         this.lastPesPts = firstPts;
-        this.pool = pool;
+        this.body = body;
     }
 
     public int session() {
@@ -37,16 +34,8 @@ public final class Chunk {
 
     synchronized void append(byte[] src, int off, int len) {
         if (released) return; // the ring was cleared while the encoder still delivered
-        while (len > 0) {
-            int inBlock = (int) (size % BlockPool.BLOCK);
-            if (inBlock == 0) blocks.add(pool.take());
-            byte[] b = blocks.get(blocks.size() - 1);
-            int n = Math.min(len, BlockPool.BLOCK - inBlock);
-            System.arraycopy(src, off, b, inBlock, n);
-            off += n;
-            len -= n;
-            size += n;
-        }
+        body.append(src, off, len);
+        size = body.size();
     }
 
     /** A video PES (one frame) starts at the current end with {@code pts}. */
@@ -58,6 +47,8 @@ public final class Chunk {
 
     synchronized void close(long endPts) {
         durationPts = Math.max(0, Ts.ptsDiff(endPts, firstPts));
+        body.seal();
+        size = body.size();
     }
 
     public boolean closed() {
@@ -89,20 +80,12 @@ public final class Chunk {
     synchronized void release() {
         if (released) return;
         released = true;
-        for (byte[] b : blocks) pool.give(b);
-        blocks.clear();
+        body.release();
     }
 
     synchronized boolean writeTo(OutputStream out, long end) throws IOException {
         if (released) return false;
-        long left = end;
-        for (byte[] b : blocks) {
-            if (left <= 0) break;
-            int n = (int) Math.min(left, BlockPool.BLOCK);
-            out.write(b, 0, n);
-            left -= n;
-        }
-        return true;
+        return body.writeTo(out, Math.min(end, body.size()));
     }
 
     /** A fixed byte range of a chunk. */

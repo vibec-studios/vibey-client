@@ -12,6 +12,7 @@ import dev.henny.vibeyclient.module.clips.ring.Chunk;
 import dev.henny.vibeyclient.module.clips.ring.ClipRing;
 import dev.henny.vibeyclient.module.clips.store.ClipMeta;
 import dev.henny.vibeyclient.module.clips.store.ClipStore;
+import dev.henny.vibeyclient.module.clips.store.ClipTimeline;
 import dev.henny.vibeyclient.module.clips.ui.ClipsGalleryScreen;
 import dev.henny.vibeyclient.media.ffmpeg.Ffmpeg;
 import dev.henny.vibeyclient.ui.toast.ToastStack;
@@ -56,6 +57,11 @@ public final class ClipSaver {
      * frames first (hotkey; auto clips already waited for their post-roll).
      */
     static void save(ClipsModule m, ClipRing ring, String reason, long lengthMs, AutoInfo auto, Encoder encoder, long settleMs) {
+        save(m, ring, reason, lengthMs, auto, encoder, settleMs, -1);
+    }
+
+    static void save(ClipsModule m, ClipRing ring, String reason, long lengthMs, AutoInfo auto, Encoder encoder, long settleMs,
+                     long trimHintMs) {
         if (saving) {
             Notify.show(new Notify.Toast(Lang.tr("clips.toast.busy"), null, Notify.Kind.INFO, null, null));
             return;
@@ -70,7 +76,7 @@ public final class ClipSaver {
         ClipsFiles.io(() -> {
             try {
                 if (settleMs > 0) Thread.sleep(settleMs);
-                ClipStore.Clip c = write(m, ffmpeg, ring, reason, lengthMs, auto, encoder, ctx, requestedAt, w, h, fps);
+                ClipStore.Clip c = write(m, ffmpeg, ring, reason, lengthMs, auto, encoder, ctx, requestedAt, w, h, fps, trimHintMs);
                 ClipsFiles.cleanup(m);
                 Tasks.onMain(() -> saved(m, c));
             } catch (Exception e) {
@@ -99,7 +105,7 @@ public final class ClipSaver {
     }
 
     private static ClipStore.Clip write(ClipsModule m, String ffmpeg, ClipRing ring, String reason, long lengthMs, AutoInfo auto,
-                                        Encoder encoder, Context ctx, long requestedAt, int w, int h, int fps) throws Exception {
+                                        Encoder encoder, Context ctx, long requestedAt, int w, int h, int fps, long trimHintMs) throws Exception {
         List<Chunk.View> views = ring.last(lengthMs);
         long endWall = System.currentTimeMillis();
         if (views.isEmpty()) throw new IOException(Lang.tr("clips.error.empty"));
@@ -116,17 +122,25 @@ public final class ClipSaver {
             OutputStream out = null;
             int session = Integer.MIN_VALUE;
             long durationMs = 0;
+            ClipTimeline.Builder timeline = new ClipTimeline.Builder();
             try {
                 for (Chunk.View v : views) {
                     if (v.session() != session || out == null) {
-                        if (out != null) out.close();
+                        if (out != null) {
+                            out.close();
+                            timeline.cut(durationMs);
+                        }
                         Path p = tmp.resolve("part" + parts.size() + ".ts");
                         parts.add(p);
                         out = new BufferedOutputStream(Files.newOutputStream(p), 1 << 16);
                         out.write(v.headers());
                         session = v.session();
                     }
-                    if (v.writeTo(out)) durationMs += v.durationMs();
+                    long at = durationMs;
+                    if (v.writeTo(out)) {
+                        timeline.keyframe(at);
+                        durationMs += v.durationMs();
+                    }
                 }
             } finally {
                 if (out != null) out.close();
@@ -144,7 +158,7 @@ public final class ClipSaver {
                 cmd.addAll(List.of("-f", "concat", "-safe", "0", "-i", list.toString()));
             }
             cmd.addAll(List.of("-map", "0", "-c", "copy", "-movflags", "+faststart", "-f", "mp4", videoPart.toString()));
-            run(cmd, 60);
+            run(cmd, (int) Math.max(60, 60 + durationMs / 5000));
             if (!Files.isRegularFile(videoPart) || Files.size(videoPart) == 0) throw new IOException("FFmpeg wrote no video");
             ClipStore.move(videoPart, video);
 
@@ -168,7 +182,9 @@ public final class ClipSaver {
             ClipMeta.Info info = new ClipMeta.Info(id, Instant.ofEpochMilli(endWall), durationMs, Files.size(video), w, h, fps, false,
                     reason, kills, highlight, events, ctx.player(), ctx.uuid(), ctx.mode(), ctx.server(), ctx.world(),
                     BuildInfo.MINECRAFT, "fabric", BuildInfo.VERSION, encoder == null ? null : encoder.codec, thumb);
-            store.writeJson(id, ClipMeta.json(info));
+            com.google.gson.JsonObject json = ClipMeta.json(info);
+            ClipTimeline.write(json, timeline.build(durationMs, trimHintMs));
+            store.writeJson(id, json);
             Vibey.LOG.info("Clips: saved {} ({} ms, {} KB, {} part(s), {} ms after the request)", id, durationMs,
                     Files.size(video) / 1024, parts.size(), System.currentTimeMillis() - requestedAt);
             return store.get(id);

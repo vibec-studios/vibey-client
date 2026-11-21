@@ -9,6 +9,7 @@ import dev.henny.vibeyclient.module.clips.capture.FrameGrabber;
 import dev.henny.vibeyclient.module.clips.encode.EncodeSession;
 import dev.henny.vibeyclient.module.clips.encode.Encoder;
 import dev.henny.vibeyclient.module.clips.encode.EncoderProbe;
+import dev.henny.vibeyclient.module.clips.ring.ChunkStorage;
 import dev.henny.vibeyclient.module.clips.ring.ClipRing;
 import dev.henny.vibeyclient.media.ffmpeg.Ffmpeg;
 import dev.henny.vibeyclient.media.ffmpeg.FfmpegPurpose;
@@ -37,6 +38,8 @@ public final class Recorder {
     /** Game tests: the test window usually has no focus; record anyway. */
     public static volatile boolean ignoreFocusForTest = Boolean.getBoolean("vibeyclient.clips.ignoreFocus");
     private static final long RAM_HEADROOM_MS = 2_000;
+    private static final long DISK_RESERVE = 1024L * 1048576L;
+    private static final long DISK_MIN = 64L * 1048576L;
 
     private final ClipsModule m;
     private volatile ClipRing ring;
@@ -60,6 +63,9 @@ public final class Recorder {
     private long behindWindowStart;
     private long behindCaptured, behindSkipped;
     private long lastStartAttempt;
+    private boolean dropRing;
+    private volatile long freeBytes = -1;
+    private long freeCheckedAt;
 
     Recorder(ClipsModule m) {
         this.m = m;
@@ -106,8 +112,9 @@ public final class Recorder {
         if (!m.buffer.on()) return null;
         State s = state;
         ClipRing r = ring;
-        String held = r == null ? "" : Lang.tr("clips.status.held",
-                String.format(Locale.ROOT, r.bytes() < 10_485_760 ? "%.1f" : "%.0f", r.bytes() / 1048576.0), r.durationMs() / 1000);
+        String mb = r == null ? "" : String.format(Locale.ROOT, r.bytes() < 10_485_760 ? "%.1f" : "%.0f", r.bytes() / 1048576.0);
+        String held = r == null ? "" : r.onDisk() ? Lang.tr("clips.status.heldDisk", mb, ClipSaver.duration(r.durationMs()))
+                : Lang.tr("clips.status.held", mb, r.durationMs() / 1000);
         Encoder e = encoder;
         String enc = e == null ? "" : " · " + Lang.tr(e.hardware ? "clips.status.hardware" : "clips.status.software", e.label);
         return switch (s) {
@@ -127,6 +134,13 @@ public final class Recorder {
     /** "30 s → 26 s at this quality" when the RAM cap is smaller than length × bitrate. */
     String capNotice() {
         if (!m.buffer.on()) return null;
+        if (m.longRewind.on()) {
+            long needDisk = (long) m.bitrateKbps() * 125L * (m.rewindMinutes.get() * 60L + 2);
+            long capDisk = diskCapBytes();
+            if (needDisk <= capDisk) return null;
+            long realS = Math.max(2, capDisk / ((long) m.bitrateKbps() * 125L) - 2);
+            return Lang.tr("clips.notice.capDisk", m.rewindMinutes.get(), ClipSaver.duration(realS * 1000));
+        }
         long need = (long) m.bitrateKbps() * 125L * (m.length.get() + 2);
         long cap = m.ramCap.get() * 1048576L;
         if (need <= cap) return null;
@@ -135,11 +149,37 @@ public final class Recorder {
     }
 
     long keepMs() {
+        if (m.longRewind.on()) return m.rewindMinutes.get() * 60_000L + RAM_HEADROOM_MS;
         return m.length.get() * 1000L + RAM_HEADROOM_MS;
     }
 
     long capBytes() {
+        if (m.longRewind.on()) return diskCapBytes();
         return m.ramCap.get() * 1048576L;
+    }
+
+    long diskCapBytes() {
+        long want = m.diskCap.get() * 1048576L;
+        long now = System.currentTimeMillis();
+        if (now - freeCheckedAt > 10_000) {
+            freeCheckedAt = now;
+            ClipsFiles.io(() -> freeBytes = ClipsFiles.usableSpace());
+        }
+        long free = freeBytes;
+        if (free < 0) return want;
+        ClipRing r = ring;
+        long held = r != null && r.onDisk() ? r.bytes() : 0;
+        return Math.max(DISK_MIN, Math.min(want, free + held - DISK_RESERVE));
+    }
+
+    private ClipRing newRing() {
+        ChunkStorage storage = m.longRewind.on() ? ChunkStorage.disk(ClipsFiles.bufferDir()) : ChunkStorage.ram();
+        return new ClipRing(keepMs(), capBytes(), storage);
+    }
+
+    void storageChanged() {
+        dropRing = true;
+        restart = true;
     }
 
     // ============================================================================================ events
@@ -200,7 +240,8 @@ public final class Recorder {
         }
         if (restart) {
             restart = false;
-            stop(false);
+            stop(dropRing);
+            dropRing = false;
             encoder = null; // resolution or encoder choice may have changed: probe again
             broken.clear();
         }
@@ -265,6 +306,15 @@ public final class Recorder {
         }
         ClipRing r = ring;
         if (r != null) r.limits(keepMs(), capBytes());
+        if (r != null && r.storage().error() != null) diskFailed(r.storage().error());
+    }
+
+    private void diskFailed(java.io.IOException e) {
+        Vibey.LOG.warn("Clips: rewind buffer on disk failed, back to RAM", e);
+        failure = e.getMessage();
+        Notify.show(new Notify.Toast(Lang.tr("clips.toast.diskFailed"), Lang.tr("clips.toast.diskFailed.body"), Notify.Kind.WARN, null, null));
+        m.longRewind.set(false);
+        stop(true);
     }
 
     private Pause pauseReason(Minecraft mc) {
@@ -348,7 +398,7 @@ public final class Recorder {
         Encoder e = encoder;
         if (e == null) return;
         starting = true;
-        if (ring == null) ring = new ClipRing(keepMs(), capBytes());
+        if (ring == null) ring = newRing();
         ClipRing r = ring;
         int id = ++sessionIds;
         int w = m.resolution.get().width, h = m.resolution.get().height, f = m.rate.get().fps, kbps = m.bitrateKbps();
@@ -384,7 +434,8 @@ public final class Recorder {
         if (dropBuffer) {
             ClipRing r = ring;
             ring = null;
-            if (r != null) r.clear();
+            if (r != null && r.onDisk()) ClipsFiles.io(r::clear);
+            else if (r != null) r.clear();
         }
         pause = Pause.NONE;
         pausedSince = 0;
@@ -475,6 +526,10 @@ public final class Recorder {
         }
         if (!hasFootage()) {
             Notify.show(new Notify.Toast(Lang.tr("clips.toast.nothing"), Lang.tr("clips.toast.nothing.body"), Notify.Kind.INFO, null, null));
+            return;
+        }
+        if (m.longRewind.on()) {
+            ClipSaver.save(m, ring, "hotkey", keepMs(), null, encoder, 350, m.length.get() * 1000L);
             return;
         }
         ClipSaver.save(m, ring, "hotkey", m.length.get() * 1000L, null, encoder, 350);

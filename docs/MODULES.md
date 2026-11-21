@@ -36,7 +36,7 @@ streamer state any module can read. `inventory` (durability %, shulker preview, 
 multiplayer screen, own world order; Fabric 1.21.11 only, see [SERVERS.md](SERVERS.md)), `cinematic` (AFK camera flights and an
 editable AFK screen; Fabric 1.21.11 only, see [CINEMATIC.md](CINEMATIC.md)), `screens` (screen editor: move/scale/hide the widgets of any menu, container panels, own
 screen size, dim/blur, hide title; Fabric 1.21.11 only, see [SCREENS.md](SCREENS.md)), `companion` (a living companion from companion
-packs, built on the `companio` lib; Fabric 1.21.11 only, see [COMPANION.md](COMPANION.md)).
+packs, built on the `companio` lib; Fabric 1.21.11 only, see [COMPANION.md](COMPANION.md)), `skins` (change your skin in game from the launcher's skin library; Fabric 1.21.11 only, see [SKINS.md](SKINS.md)).
 
 ## Targets and boundaries
 
