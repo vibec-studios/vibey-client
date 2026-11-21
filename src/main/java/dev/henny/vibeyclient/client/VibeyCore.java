@@ -35,6 +35,7 @@ public final class VibeyCore {
         dev.henny.vibeyclient.ui.notice.Announcements.init();
         GlobalSettings.openMenu.onPress(VibeyCore::openMenu);
         dev.henny.vibeyclient.ui.toast.ToastHooks.init();
+        dev.henny.vibeyclient.client.branding.TitleBadge.install();
         dev.henny.vibeyclient.ui.vui.toast.VuiToasts.init();
         dev.henny.vibeyclient.ui.title.CoreMenus.register();
         BuiltinModules.registerAll(ModuleManager.get());

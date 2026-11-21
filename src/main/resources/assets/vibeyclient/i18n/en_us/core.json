@@ -61,6 +61,8 @@
     "onlineFeatures.desc": "Friends, chat and cosmetics that others can see. Off: Vibey connects to nothing.",
     "launcherStatus": "Launcher status",
     "launcherStatus.desc": "For the Discord status of the Vibe Launcher: your world, server and invite link. Stays on this PC.",
+    "serverBrand": "Show Vibey to servers",
+    "serverBrand.desc": "Servers see that you use Vibey Client (client brand \"vibey,fabric\" or \"vibey,neoforge\"). Off: only the mod loader's brand. Applies from the next join.",
     "animations": "Animations",
     "animations.desc": "Smooth transitions in the Vibey menus.",
     "open_menu": "Open menu",
@@ -191,7 +193,8 @@
   },
   "section": {
     "look": "Language & look",
-    "online": "Online"
+    "online": "Online",
+    "privacy": "Privacy"
   },
   "hud": {
     "share": {

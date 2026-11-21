@@ -57,6 +57,8 @@ public final class GlobalSettings {
      */
     public static final BoolSetting launcherStatus = GROUP.add(new BoolSetting("launcherStatus", true)).section("online");
 
+    public static final BoolSetting serverBrand = GROUP.add(new BoolSetting("serverBrand", true)).section("privacy");
+
     public static final KeybindSetting openMenu = GROUP.add(new KeybindSetting("core", "open_menu", Keys.RIGHT_SHIFT));
 
     /** Default = BuildInfo.DEFAULT_BACKEND: our backend, official builds only (forks: own default_backend, https://github.com/vibec-studios/.github/blob/main/SERVICES.md). */

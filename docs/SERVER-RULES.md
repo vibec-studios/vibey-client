@@ -172,6 +172,33 @@ server once and edit `config/vibeyclient-server.json`:
 - A broken file is reported in the log and means "no rules" until it is fixed and reloaded.
 - Singleplayer, LAN and Vibey-hosted worlds never send rules.
 
+## Recognising Vibey Client (client brand)
+
+Vibey Client reports itself in the vanilla `minecraft:brand` plugin message that every client sends while joining
+(configuration phase). The brand is `vibey`, a comma and the brand of the mod loader – the same list format Fabric
+Loader uses when something else already set a brand:
+
+| Loader | Brand sent | With "Show Vibey to servers" off |
+|---|---|---|
+| Fabric | `vibey,fabric` | `fabric` |
+| NeoForge | `vibey,neoforge` | `neoforge` |
+
+- Match with "starts with `vibey`" (`brand.startsWith("vibey")`, ClientBrand pattern `vibey*`), like the build
+  hash in `lunarclient:<hash>`. Checks for `contains("fabric")` / `contains("neoforge")` keep working.
+- Only lowercase letters and a comma, at most a few dozen characters – nothing for anti-cheats to trip over.
+- Players can switch it off (Vibey menu → General → Privacy → *Show Vibey to servers*); the client then sends the
+  loader's own brand and is indistinguishable from any other Fabric/NeoForge client. The change applies from the next join.
+- Like every brand, it is self-reported and easy to fake: use it for statistics, welcome messages or to send the
+  `vibey:*` packets below, never as proof. The reliable signal that Vibey Client is listening is the registration of
+  `vibey:rules` / the `vibey:hello` message described in the protocol section.
+- Paper/Spigot: `player.getClientBrandName()`; Velocity: `player.getClientBrand()`; Fabric/NeoForge servers: the
+  `BrandPayload` in the configuration phase.
+
+> **Deutsch, kurz:** Vibey Client meldet sich über den Vanilla-Kanal `minecraft:brand` als `vibey,fabric` bzw.
+> `vibey,neoforge` (Format wie bei Fabric Loader: Liste mit Komma). Erkennen mit „beginnt mit `vibey`“. Spieler
+> können das unter Allgemein → Datenschutz → „Vibey gegenüber Servern zeigen“ abschalten; dann wird nur `fabric` /
+> `neoforge` gesendet. Der Brand ist selbst gemeldet und kein Beweis – kein Anti-Cheat-Merkmal.
+
 ## Protocol (for other server software)
 
 Each plugin-message body is the UTF-8 bytes of **one JSON object** – no length prefix, no
