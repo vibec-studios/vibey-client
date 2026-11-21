@@ -13,7 +13,10 @@ public final class BlockCards {
     private BlockCards() {}
 
     public static CardData read(Level level, BlockPos pos, BlockState state, Player player, InfoModule m) {
+        //? if >=1.21.4 {
         ItemStack icon = state.getCloneItemStack(level, pos, false);
+        //?} else
+        /*ItemStack icon = state.getBlock().getCloneItemStack(level, pos, state);*/
         if (icon.isEmpty()) icon = new ItemStack(state.getBlock().asItem());
         String title = state.getBlock().getName().getString();
         String mod = m.cardMod.on() ? ModNames.of(BuiltInRegistries.BLOCK.getKey(state.getBlock()).getNamespace()) : null;

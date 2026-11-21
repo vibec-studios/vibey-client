@@ -3,17 +3,16 @@ package dev.henny.vibeyclient.module.info.food;
 import dev.henny.vibeyclient.module.info.InfoModule;
 import dev.henny.vibeyclient.module.info.core.Colors;
 import dev.henny.vibeyclient.module.info.core.FoodGain;
+import dev.henny.vibeyclient.Compat;
 import dev.henny.vibeyclient.ui.Gfx;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 
 public final class HungerBarOverlay {
-    private static final Identifier FULL = Identifier.withDefaultNamespace("hud/food_full");
-    private static final Identifier HALF = Identifier.withDefaultNamespace("hud/food_half");
-    private static final Identifier FULL_HUNGER = Identifier.withDefaultNamespace("hud/food_full_hunger");
-    private static final Identifier HALF_HUNGER = Identifier.withDefaultNamespace("hud/food_half_hunger");
+    private static final Object FULL = Compat.id("minecraft", "hud/food_full");
+    private static final Object HALF = Compat.id("minecraft", "hud/food_half");
+    private static final Object FULL_HUNGER = Compat.id("minecraft", "hud/food_full_hunger");
+    private static final Object HALF_HUNGER = Compat.id("minecraft", "hud/food_half_hunger");
     private static final int SATURATION = 0xFFFFC94D;
     private static final long PULSE_MS = 1200;
 
@@ -47,8 +46,8 @@ public final class HungerBarOverlay {
             int full = i * 2 + 2;
             if (gain.food() <= i * 2 || before >= full) continue;
             boolean whole = gain.food() >= full;
-            Identifier sprite = risky ? (whole ? FULL_HUNGER : HALF_HUNGER) : (whole ? FULL : HALF);
-            g.g.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, right - i * 8 - 9, y, 9, 9, color);
+            Object sprite = risky ? (whole ? FULL_HUNGER : HALF_HUNGER) : (whole ? FULL : HALF);
+            g.sprite(sprite, right - i * 8 - 9, y, 9, 9, color);
         }
     }
 

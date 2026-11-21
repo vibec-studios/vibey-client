@@ -7,7 +7,7 @@ public final class ItemDraw {
     private ItemDraw() {}
 
     public static void full(Gfx g, ItemStack stack, int x, int y) {
-        if (stack != null && !stack.isEmpty()) g.g.renderItem(stack, x, y);
+        if (stack != null && !stack.isEmpty()) g.item(stack, x, y);
     }
 
 }

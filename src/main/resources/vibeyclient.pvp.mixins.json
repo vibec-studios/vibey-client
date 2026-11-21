@@ -10,6 +10,7 @@
     "GuiMixin",
     "ItemInHandRendererMixin",
     "KeyboardInputMixin",
+    "KeyMappingToggleMixin",
     "LevelRendererMixin",
     "MouseHandlerMixin",
     "OverlayTextureAccessor",

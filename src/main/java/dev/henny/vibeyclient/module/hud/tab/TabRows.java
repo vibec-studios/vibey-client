@@ -1,11 +1,16 @@
 package dev.henny.vibeyclient.module.hud.tab;
 
+import dev.henny.vibeyclient.client.GameCompat;
+import dev.henny.vibeyclient.client.hud.HudAccess;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.resources.DefaultPlayerSkin;
-import net.minecraft.network.chat.Component;
+//? if >=1.21.9 {
 import net.minecraft.world.entity.player.PlayerSkin;
+//?} else
+/*import net.minecraft.client.resources.PlayerSkin;*/
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.GameType;
 
 import java.util.ArrayList;
@@ -15,12 +20,19 @@ import java.util.UUID;
 
 final class TabRows {
     static final int MAX = 80;
-    private static final Comparator<PlayerInfo> VANILLA = Comparator.comparingInt((PlayerInfo p) -> -p.getTabListOrder())
+    private static final Comparator<PlayerInfo> VANILLA = Comparator.comparingInt(TabRows::order)
             .thenComparingInt(p -> p.getGameMode() == GameType.SPECTATOR ? 1 : 0)
             .thenComparing(p -> p.getTeam() == null ? "" : p.getTeam().getName())
-            .thenComparing(p -> p.getProfile().name(), String::compareToIgnoreCase);
-    private static final Comparator<PlayerInfo> NAME = Comparator.comparing(p -> p.getProfile().name(), String::compareToIgnoreCase);
+            .thenComparing(p -> GameCompat.profileName(p.getProfile()), String::compareToIgnoreCase);
+    private static final Comparator<PlayerInfo> NAME = Comparator.comparing(p -> GameCompat.profileName(p.getProfile()), String::compareToIgnoreCase);
     private static final Comparator<PlayerInfo> PING = Comparator.comparingInt(PlayerInfo::getLatency).thenComparing(NAME);
+
+    private static int order(PlayerInfo p) {
+        //? if >=1.21.2 {
+        return -p.getTabListOrder();
+        //?} else
+        /*return 0;*/
+    }
 
     final List<Component> names = new ArrayList<>();
     final List<PlayerSkin> skins = new ArrayList<>();
@@ -39,7 +51,7 @@ final class TabRows {
             list.sort("name".equals(sort) ? NAME : "ping".equals(sort) ? PING : VANILLA);
             for (int i = 0; i < Math.min(MAX, list.size()); i++) {
                 PlayerInfo p = list.get(i);
-                names.add(mc.gui.getTabList().getNameForDisplay(p));
+                names.add(HudAccess.tabList().getNameForDisplay(p));
                 skins.add(p.getSkin());
                 pings.add(p.getLatency());
                 labels.add(p.getLatency() + "ms");

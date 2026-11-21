@@ -4,11 +4,8 @@ import dev.henny.vibeyclient.ui.Theme;
 import dev.henny.vibeyclient.ui.hud.HudPaint;
 import dev.henny.vibeyclient.ui.hud.HudWidget;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -20,7 +17,8 @@ import java.util.List;
 final class EffectsWidget extends HudWidget {
     private static final int MAX = 12, ROW = 20;
 
-    private final Identifier[] icons = new Identifier[MAX];
+    @SuppressWarnings("unchecked")
+    private final Holder<MobEffect>[] icons = new Holder[MAX];
     private final String[] names = new String[MAX];
     private final String[] times = new String[MAX];
     private final boolean[] ending = new boolean[MAX];
@@ -43,8 +41,13 @@ final class EffectsWidget extends HudWidget {
         sorted.clear();
         if (pl != null) sorted.addAll(pl.getActiveEffects());
         if (sorted.isEmpty() && p.preview) {
+            //? if >=1.21.5 {
             sorted.add(new MobEffectInstance(MobEffects.SPEED, 20 * 95, 1));
             sorted.add(new MobEffectInstance(MobEffects.STRENGTH, 20 * 8, 0));
+            //?} else {
+            /*sorted.add(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 95, 1));
+            sorted.add(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 20 * 8, 0));
+            *///?}
             sorted.add(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 20 * 180, 0));
         }
         sorted.sort((a, b) -> Integer.compare(a.isInfiniteDuration() ? Integer.MAX_VALUE : a.getDuration(),
@@ -53,7 +56,7 @@ final class EffectsWidget extends HudWidget {
         for (MobEffectInstance e : sorted) {
             if (count >= MAX) break;
             Holder<MobEffect> h = e.getEffect();
-            icons[count] = Gui.getMobEffectSprite(h);
+            icons[count] = h;
             int d = e.getDuration();
             times[count] = e.isInfiniteDuration() ? "∞" : (d / 20 / 60) + ":" + String.format(java.util.Locale.ROOT, "%02d", (d / 20) % 60);
             ending[count] = !e.isInfiniteDuration() && d < 200;
@@ -84,11 +87,7 @@ final class EffectsWidget extends HudWidget {
             int y = 2 + i * ROW;
             int ix = right ? p.w - 4 - 18 : 4;
             float blink = ending[i] ? 0.45f + 0.55f * (float) Math.abs(Math.sin(p.now / 220.0)) : 1f;
-            if (blink < 1f) {
-                p.g.g.blitSprite(RenderPipelines.GUI_TEXTURED, icons[i], ix, y, 18, 18, Theme.alpha(0xFFFFFFFF, blink));
-            } else {
-                p.g.g.blitSprite(RenderPipelines.GUI_TEXTURED, icons[i], ix, y, 18, 18);
-            }
+            p.g.effectIcon(icons[i], ix, y, 18, blink < 1f ? Theme.alpha(0xFFFFFFFF, blink) : 0xFFFFFFFF);
             int tx = right ? ix - 4 - textW[i] : ix + 22;
             if (detailed) {
                 int nw = p.g.width(names[i]);

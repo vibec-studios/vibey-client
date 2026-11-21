@@ -23,7 +23,7 @@ public final class CameraModule extends VibeyModule {
             .serverRule(CameraRules.FREELOOK).visibleWhen(this::freelookOn);
     public final BoolSetting orbit = bool("orbit", true).section("look").serverRule(CameraRules.ORBIT);
 
-    public final BoolSetting motionBlur = bool("motionBlur", false).section("blur");
+    public final BoolSetting motionBlur = bool("motionBlur", false).section("blur").visibleWhen(() -> MotionBlur.SUPPORTED);
     public final IntSetting blurStrength = intRange("blurStrength", 4, BlurMath.MIN_STRENGTH, BlurMath.MAX_STRENGTH)
             .section("blur").visibleWhen(this::blurOn);
 
@@ -51,7 +51,7 @@ public final class CameraModule extends VibeyModule {
 
     @Override
     public List<String> notices() {
-        return MotionBlur.unavailable() && motionBlur.on() ? List.of(Lang.tr("camera.notice.blur")) : List.of();
+        return MotionBlur.SUPPORTED && MotionBlur.unavailable() && motionBlur.on() ? List.of(Lang.tr("camera.notice.blur")) : List.of();
     }
 
     @Override
@@ -75,7 +75,7 @@ public final class CameraModule extends VibeyModule {
     }
 
     private boolean blurOn() {
-        return motionBlur.on();
+        return MotionBlur.SUPPORTED && motionBlur.on();
     }
 
     public boolean freelookActive() {
@@ -87,6 +87,6 @@ public final class CameraModule extends VibeyModule {
     }
 
     public boolean blurActive() {
-        return isEnabled() && motionBlur.on();
+        return MotionBlur.SUPPORTED && isEnabled() && motionBlur.on();
     }
 }

@@ -1,5 +1,6 @@
 package dev.henny.vibeyclient.module.camera.blur;
 
+//? if >=1.21.11 && <26.1 {
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
 import dev.henny.vibeyclient.module.camera.CameraModule;
@@ -11,6 +12,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 
 public final class MotionBlur {
+    public static final boolean SUPPORTED = true;
     public static final Identifier ID = Identifier.fromNamespaceAndPath("vibeyclient", "motion_blur");
 
     private static boolean unavailable;
@@ -72,3 +74,26 @@ public final class MotionBlur {
         return reset ? 0f : BlurMath.historyWeight(m.blurStrength.get(), dt);
     }
 }
+//?} else {
+/*public final class MotionBlur {
+    public static final boolean SUPPORTED = false;
+
+    private MotionBlur() {}
+
+    public static boolean unavailable() {
+        return true;
+    }
+
+    public static float lastWeight() {
+        return 0f;
+    }
+
+    public static long frames() {
+        return 0;
+    }
+
+    public static boolean strengthFixed() {
+        return false;
+    }
+}
+*///?}

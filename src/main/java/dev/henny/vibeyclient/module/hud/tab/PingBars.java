@@ -1,6 +1,6 @@
 package dev.henny.vibeyclient.module.hud.tab;
 
-import net.minecraft.client.gui.GuiGraphics;
+import dev.henny.vibeyclient.ui.Gfx;
 
 final class PingBars {
     private PingBars() {}
@@ -25,7 +25,7 @@ final class PingBars {
         };
     }
 
-    static void draw(GuiGraphics g, int x, int y, int ping) {
+    static void draw(Gfx g, int x, int y, int ping) {
         int level = level(ping);
         int on = color(level);
         for (int i = 0; i < 5; i++) {

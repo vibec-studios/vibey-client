@@ -32,7 +32,7 @@ public final class Orbit {
     public static boolean release(Minecraft mc) {
         if (!GESTURE.down()) return false;
         if (GESTURE.release(System.currentTimeMillis()) && pickBlockOnMiddle(mc)) {
-            KeyMapping.click(InputConstants.Type.MOUSE.getOrCreate(MIDDLE));
+            KeyMapping.click(InputConstants.Type.MOUSE.getOrCreate(dev.henny.vibeyclient.client.Keys.mouseToNative(MIDDLE)));
         }
         return true;
     }

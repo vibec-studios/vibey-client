@@ -62,6 +62,6 @@ public final class ScoreboardWidget extends HudWidget {
     }
 
     private static void draw(HudPaint p, Component c, int x, int y) {
-        p.g.g.drawString(p.g.font, c, x, y, p.style.text, p.style.shadow);
+        p.g.text(c, x, y, p.style.text, p.style.shadow);
     }
 }

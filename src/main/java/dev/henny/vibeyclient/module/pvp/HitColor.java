@@ -1,9 +1,11 @@
 package dev.henny.vibeyclient.module.pvp;
 
+import net.minecraft.client.Minecraft;
+//? if >=1.21.11 && <26.1 {
 import com.mojang.blaze3d.platform.NativeImage;
 import dev.henny.vibeyclient.module.pvp.mixin.OverlayTextureAccessor;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+//?}
 
 /**
  * The tint of hurt entities. Vanilla keeps it in the upper half of the 16 × 16 "entity color overlay" texture
@@ -32,6 +34,7 @@ public final class HitColor {
             want = (alpha << 24) | (m.hitTint.argb() & 0xFFFFFF);
         }
         if (want == painted) return;
+        //? if >=1.21.11 && <26.1 {
         DynamicTexture tex = ((OverlayTextureAccessor) mc.gameRenderer.overlayTexture()).vibey$texture();
         NativeImage img = tex.getPixels();
         if (img == null) return;
@@ -40,6 +43,7 @@ public final class HitColor {
         }
         tex.upload();
         painted = want;
+        //?}
     }
 
     /** The colour currently in the texture (tests). */

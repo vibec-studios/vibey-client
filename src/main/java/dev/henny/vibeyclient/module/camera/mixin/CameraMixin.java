@@ -11,19 +11,24 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 @Mixin(Camera.class)
 abstract class CameraMixin {
-    @WrapOperation(method = "setup", require = 0, at = @At(value = "INVOKE",
+    //? if >=26.1 {
+    /*private static final String ALIGN = "alignWithEntity";
+    *///?} else
+    private static final String ALIGN = "setup";
+
+    @WrapOperation(method = CameraMixin.ALIGN, require = 0, at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/entity/Entity;getViewYRot(F)F"))
     private float vibey$yaw(Entity entity, float partialTick, Operation<Float> original) {
         return CameraState.yaw(entity, original.call(entity, partialTick));
     }
 
-    @WrapOperation(method = "setup", require = 0, at = @At(value = "INVOKE",
+    @WrapOperation(method = CameraMixin.ALIGN, require = 0, at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/entity/Entity;getViewXRot(F)F"))
     private float vibey$pitch(Entity entity, float partialTick, Operation<Float> original) {
         return CameraState.pitch(entity, original.call(entity, partialTick));
     }
 
-    @ModifyArg(method = "setup", require = 0, at = @At(value = "INVOKE",
+    @ModifyArg(method = CameraMixin.ALIGN, require = 0, at = @At(value = "INVOKE",
             target = "Lnet/minecraft/client/Camera;getMaxZoom(F)F"))
     private float vibey$distance(float distance) {
         return CameraState.distance(((CameraAccessor) this).vibey$entity(), distance);

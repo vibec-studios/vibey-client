@@ -2,8 +2,7 @@
 
 Small "what am I looking at" helpers: light level and chunk borders, a block/mob card you can pin into the world,
 food gain on the hunger bar, a tool break warning and a TNT fuse timer (features #6, #7, #8, #10, #11 of
-[FEATURES.md](FEATURES.md)). **Fabric 1.21.11 only for now** (`gradle/modules.gradle`: `info: ['fabric-1.21.11']`,
-`BuiltinModules` registers it by reflection). Code: `src/main/java/dev/henny/vibeyclient/module/info`.
+[FEATURES.md](FEATURES.md)). Runs on **every target** (Fabric and NeoForge, 1.21.1 to 26.3; see [PORTING.md](PORTING.md)). Code: `src/main/java/dev/henny/vibeyclient/module/info`.
 
 > See also: [MODULES.md](MODULES.md) · [HUD.md](HUD.md) (card + warning are HUD widgets) ·
 > [libs/r3](../libs/r3/README.md) (world labels, pinned cards) · [SERVER-RULES.md](SERVER-RULES.md) · [PVP.md](PVP.md)
@@ -89,6 +88,6 @@ stays after looking away, goes with the TNT; ore card with iron/stone pickaxe/ha
 card, middle-drag moves it, wheel grows it, tap removes it, mob pin; tool warning low/critical; steak gain on 8 food
 (16), saturation line, bread hovered in the inventory (+5); `info.*` server rule hides everything and the page badge.
 
-Porting later: `DebugScreenEntries` exists since 1.21.9 (older: `debugRenderer.switchRenderChunkborder()`),
-`Gui` sprite blits and `renderItem` differ on 26.x (`GuiGraphicsExtractor`), `Identifier` was `ResourceLocation`
-before 1.21.11.
+Per-version differences (handled with Stonecutter, see [PORTING.md](PORTING.md)): `DebugScreenEntries` since 1.21.9
+(older: `debugRenderer.switchRenderChunkborder()` and `DebugRendererAccessor`), sprite blits and items through `Gfx`,
+`EnderDragonPart` moved in 1.21.11, `SpawnEggItem.byId` returns an `Optional` from 26.1.

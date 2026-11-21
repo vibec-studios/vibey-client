@@ -4,7 +4,6 @@ import dev.henny.vibeyclient.ui.hud.HudPaint;
 import dev.henny.vibeyclient.ui.hud.HudWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -31,9 +30,12 @@ final class ItemCounterWidget extends HudWidget {
 
     static Item item(String id) {
         try {
-            Identifier rl = Identifier.tryParse(id);
+            //? if >=1.21.11 {
+            var rl = net.minecraft.resources.Identifier.tryParse(id);
+            //?} else
+            /*var rl = net.minecraft.resources.ResourceLocation.tryParse(id);*/
             if (rl == null) return Items.ARROW;
-            Item it = BuiltInRegistries.ITEM.getValue(rl);
+            Item it = BuiltInRegistries.ITEM.getOptional(rl).orElse(null);
             return it == null || it == Items.AIR ? Items.ARROW : it;
         } catch (RuntimeException e) {
             return Items.ARROW;
@@ -89,7 +91,7 @@ final class ItemCounterWidget extends HudWidget {
         int cw = width - 8;
         int x = right ? p.w - 4 - cw : p.align() == 0 ? (p.w - cw) / 2 : 4;
         int y = (p.h - 16) / 2;
-        p.g.g.renderItem(icon, x, y);
+        p.g.item(icon, x, y);
         int tx = x + 19;
         if (detailed) {
             p.accentText(name, tx, y + 4);

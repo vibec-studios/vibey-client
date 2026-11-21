@@ -1,8 +1,8 @@
 # PvP & View module (`pvp`)
 
-Small PvP basics and view tweaks, **Fabric 1.21.11 only for now** (`gradle/modules.gradle` leaves
-`module/pvp/**`, `vibeyclient.pvp.mixins.json`, `i18n/*/pvp.json` and its `fabric.mod.json` line out of every other
-target; `BuiltinModules` registers the module by reflection when the class is there). Code:
+Small PvP basics and view tweaks on **every target** (Fabric and NeoForge, 1.21.1 to 26.3). Zoom, toggle
+sprint/sneak and the crosshair editor run everywhere; block outline, hit colour, low fire and lower shield only on
+1.21.11 for now (`PvpExtras.RENDER_TWEAKS`, their settings are hidden elsewhere; see [PORTING.md](PORTING.md)). Code:
 `src/main/java/dev/henny/vibeyclient/module/pvp`.
 
 > See also: [MODULES.md](MODULES.md) · [UI.md](UI.md) · server rules: `api/ServerRules` (vibe-launcher

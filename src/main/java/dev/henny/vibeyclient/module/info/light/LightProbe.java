@@ -22,6 +22,9 @@ public final class LightProbe {
         DimensionType dim = level.dimensionType();
         int sky = level.getBrightness(LightLayer.SKY, at);
         color = SpawnLight.classify(blockLight, sky, dim.monsterSpawnBlockLightLimit(),
+                //? if >=26.1 {
+                /*dim.monsterSpawnLightTest().maxInclusive()).color();
+                *///?} else
                 dim.monsterSpawnLightTest().getMaxValue()).color();
     }
 

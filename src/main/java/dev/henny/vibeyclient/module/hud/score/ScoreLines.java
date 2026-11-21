@@ -59,6 +59,9 @@ final class ScoreLines {
         Scoreboard sb = mc.level.getScoreboard();
         PlayerTeam team = sb.getPlayersTeam(mc.player.getScoreboardName());
         if (team != null) {
+            //? if >=26.2 {
+            /*DisplaySlot slot = team.getColor().map(net.minecraft.world.scores.TeamColor::displaySlot).orElse(null);
+            *///?} else
             DisplaySlot slot = DisplaySlot.teamColorToSlot(team.getColor());
             Objective o = slot == null ? null : sb.getDisplayObjective(slot);
             if (o != null) return o;

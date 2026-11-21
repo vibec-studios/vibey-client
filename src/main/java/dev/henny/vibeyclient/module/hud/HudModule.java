@@ -7,6 +7,7 @@ import dev.henny.vibeyclient.api.setting.Settings.BoolSetting;
 import dev.henny.vibeyclient.api.setting.Settings.KeybindSetting;
 import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.client.Keys;
+import dev.henny.vibeyclient.client.hud.VanillaLayers;
 import dev.henny.vibeyclient.module.hud.timer.Timers;
 import dev.henny.vibeyclient.ui.Gfx;
 import dev.henny.vibeyclient.ui.MenuEntries;
@@ -75,11 +76,7 @@ public final class HudModule extends VibeyModule {
         MenuEntries.register(MenuEntries.Place.PAUSE, new MenuEntries.Entry("hud", "hud.menu", HudIcons.LIBRARY, 25,
                 MenuEntries.whenEnabled(ID), HudLayout::openEditor));
         HudLayout.hideWidgetsWhen(() -> hideF3.get() && debugOpen());
-        net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry.replaceElement(
-                net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements.STATUS_EFFECTS,
-                vanilla -> (g, tick) -> {
-                    if (!effectsReplaceVanilla()) vanilla.render(g, tick);
-                });
+        VanillaLayers.replace(VanillaLayers.Layer.EFFECTS, (g, vanilla) -> effectsReplaceVanilla());
     }
 
     private boolean effectsReplaceVanilla() {

@@ -190,6 +190,67 @@ public final class Gfx {
         w.render(g, mouseX, mouseY, delta);
     }
 
+    public void item(net.minecraft.world.item.ItemStack stack, int x, int y) {
+        //? if >=26.1 {
+        /*g.item(stack, x, y);
+        *///?} else
+        g.renderItem(stack, x, y);
+    }
+
+    public void text(Component c, int x, int y, int color, boolean shadow) {
+        if ((color >>> 24) < 6) return;
+        //? if >=26.1 {
+        /*g.text(font, c, x, y, color, shadow);
+        *///?} else
+        g.drawString(font, c, x, y, color, shadow);
+    }
+
+    //? if >=1.21.9 {
+    public void face(net.minecraft.world.entity.player.PlayerSkin skin, int x, int y, int size) {
+    //?} else
+    /*public void face(net.minecraft.client.resources.PlayerSkin skin, int x, int y, int size) {*/
+        //? if >=26.1 {
+        /*net.minecraft.client.gui.components.PlayerFaceExtractor.extractRenderState(g, skin, x, y, size);
+        *///?} else
+        net.minecraft.client.gui.components.PlayerFaceRenderer.draw(g, skin, x, y, size);
+    }
+
+    public void sprite(Object spriteId, int x, int y, int w, int h, int argb) {
+        //? if >=1.21.11 {
+        var id = (net.minecraft.resources.Identifier) spriteId;
+        //?} else
+        /*var id = (net.minecraft.resources.ResourceLocation) spriteId;*/
+        //? if >=1.21.6 {
+        g.blitSprite(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, id, x, y, w, h, argb);
+        //?} else if >=1.21.2 {
+        /*g.blitSprite(net.minecraft.client.renderer.RenderType::guiTextured, id, x, y, w, h, argb);
+        *///?} else {
+        /*com.mojang.blaze3d.systems.RenderSystem.enableBlend();
+        g.setColor(((argb >> 16) & 0xFF) / 255f, ((argb >> 8) & 0xFF) / 255f, (argb & 0xFF) / 255f, (argb >>> 24) / 255f);
+        g.blitSprite(id, x, y, w, h);
+        g.setColor(1f, 1f, 1f, 1f);
+        com.mojang.blaze3d.systems.RenderSystem.disableBlend();
+        *///?}
+    }
+
+    public void effectIcon(net.minecraft.core.Holder<net.minecraft.world.effect.MobEffect> effect, int x, int y, int size, int argb) {
+        //? if >=26.2 {
+        /*g.blitSprite(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, net.minecraft.client.gui.Hud.getMobEffectSprite(effect), x, y, size, size, argb);
+        *///?} else if >=1.21.6 {
+        g.blitSprite(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, net.minecraft.client.gui.Gui.getMobEffectSprite(effect), x, y, size, size, argb);
+        //?} else if >=1.21.2 {
+        /*var sprite = net.minecraft.client.Minecraft.getInstance().getMobEffectTextures().get(effect);
+        g.blitSprite(net.minecraft.client.renderer.RenderType::guiTextured, sprite, x, y, size, size, argb);
+        *///?} else {
+        /*var sprite = net.minecraft.client.Minecraft.getInstance().getMobEffectTextures().get(effect);
+        com.mojang.blaze3d.systems.RenderSystem.enableBlend();
+        g.setColor(((argb >> 16) & 0xFF) / 255f, ((argb >> 8) & 0xFF) / 255f, (argb & 0xFF) / 255f, (argb >>> 24) / 255f);
+        g.blit(x, y, 0, size, size, sprite);
+        g.setColor(1f, 1f, 1f, 1f);
+        com.mojang.blaze3d.systems.RenderSystem.disableBlend();
+        *///?}
+    }
+
     /**
      * Starts a new layer: everything drawn after it is on top of everything before (1.21.6+ draws text after shapes
      * within a layer, so overlays, popups and tooltips need this).

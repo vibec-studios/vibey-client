@@ -96,14 +96,14 @@ final class ArmorWidget extends HudWidget {
             if (horizontal) {
                 x = (p.w - width) / 2 + 3 + i * 22;
                 y = 2;
-                p.g.g.renderItem(stacks[i], x, y);
+                p.g.item(stacks[i], x, y);
                 if (bar && frac[i] >= 0) durability(p, x + 1, y + 17, 14, frac[i]);
                 if (text) p.text(texts[i], x + 8 - textW[i] / 2, y + 17 + (bar ? 3 : 0) + 1);
             } else {
                 y = (p.h - height) / 2 + 1 + i * 18;
                 boolean right = a > 0;
                 int ix = right ? p.w - 3 - 16 : 3;
-                p.g.g.renderItem(stacks[i], ix, y);
+                p.g.item(stacks[i], ix, y);
                 if (bar && frac[i] >= 0) durability(p, ix + 1, y + 15, 14, frac[i]);
                 if (text) {
                     int tx = right ? ix - 3 - textW[i] : ix + 19;

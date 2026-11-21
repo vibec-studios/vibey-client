@@ -1,8 +1,9 @@
 # Camera module (`camera`)
 
 Freelook, a rotatable third-person ("skin") view and motion blur (features #23, #24, #25 of
-[FEATURES.md](FEATURES.md)). **Fabric 1.21.11 only for now** (`gradle/modules.gradle`: `camera: ['fabric-1.21.11']`,
-`BuiltinModules` registers it by reflection). Code: `src/main/java/dev/henny/vibeyclient/module/camera`.
+[FEATURES.md](FEATURES.md)). Freelook and the orbit view run on **every target**; motion blur only on 1.21.11 for now (`MotionBlur.SUPPORTED`, the
+setting is hidden elsewhere and its shader files are only in those jars: `limitedResources` in `gradle/modules.gradle`;
+see [PORTING.md](PORTING.md)). Code: `src/main/java/dev/henny/vibeyclient/module/camera`.
 
 > See also: [MODULES.md](MODULES.md) · [PVP.md](PVP.md) (zoom) · [SERVER-RULES.md](SERVER-RULES.md) ·
 > [libs/r3](../libs/r3/README.md) (world objects keep the middle mouse)

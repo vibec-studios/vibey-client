@@ -6,6 +6,8 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [],
   "client": [
+    "client.BossOverlayLayerMixin",
+    "client.GuiLayersMixin",
     "client.MouseHandlerAccessor",
     "client.RenderTypeInvoker",
     "client.ScreenSwapMixin",
