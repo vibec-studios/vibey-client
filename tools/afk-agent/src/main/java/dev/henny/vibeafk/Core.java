@@ -54,6 +54,11 @@ public final class Core implements BiFunction<String, Object, Object> {
             if (Hooks.GAIN.equals(event)) {
                 return arg instanceof Float ? Float.valueOf(sound.filter(owner, (Float) arg)) : null;
             }
+            if (Hooks.AL_READY.equals(event)) {
+                sound.onReady(owner);
+                main.soundReady();
+                return null;
+            }
             if (Hooks.GLFW_SHOW.equals(event) || Hooks.SDL_SHOW.equals(event)) {
                 return window.skipShow() ? Boolean.TRUE : Boolean.FALSE;
             }

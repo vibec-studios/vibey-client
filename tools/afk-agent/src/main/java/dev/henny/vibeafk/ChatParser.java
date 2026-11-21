@@ -37,6 +37,11 @@ public final class ChatParser {
         public boolean mentions(String name) {
             if (name == null || name.isEmpty()) return false;
             if (sender != null && sender.equalsIgnoreCase(name)) return false;
+            String start = text.startsWith("* ") ? text.substring(2) : text;
+            if (start.regionMatches(true, 0, name, 0, name.length())
+                    && (start.length() == name.length() || !Character.isLetterOrDigit(start.charAt(name.length())) && start.charAt(name.length()) != '_')) {
+                return false;
+            }
             String body = text;
             if (sender != null) {
                 int at = text.indexOf(sender);

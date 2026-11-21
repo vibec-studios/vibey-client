@@ -92,6 +92,16 @@ class RealLwjglTest {
     }
 
     @Test
+    void openalCapabilities333() throws Exception {
+        verify("lwjgl33", Target.AL, 2);
+    }
+
+    @Test
+    void lwjgl2AlCreate() throws Exception {
+        verify("lwjgl2", Target.AL, 2);
+    }
+
+    @Test
     void vulkan333() throws Exception {
         verify("lwjgl33", Target.VK_SWAPCHAIN, 1);
     }

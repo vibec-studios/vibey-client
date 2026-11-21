@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 public final class Target {
-    public enum Kind { NOTIFY, NOTIFY_ARG0, SKIP_IF_TRUE, CREATE_GLFW, CREATE_SDL, GAIN }
+    public enum Kind { NOTIFY, NOTIFY_ARG0, SKIP_IF_TRUE, CREATE_GLFW, CREATE_SDL, GAIN, AFTER }
 
     public final String owner;
     public final String name;
@@ -35,6 +35,7 @@ public final class Target {
     public static final String SDL_EVENTS = "org/lwjgl/sdl/SDLEvents";
     public static final String VK_SWAPCHAIN = "org/lwjgl/vulkan/KHRSwapchain";
     public static final String AL10 = "org/lwjgl/openal/AL10";
+    public static final String AL = "org/lwjgl/openal/AL";
     public static final String LWJGL2_DISPLAY = "org/lwjgl/opengl/Display";
 
     private static final Map<String, List<Target>> BY_OWNER;
@@ -52,6 +53,8 @@ public final class Target {
         all.add(new Target(SDL_EVENTS, "SDL_PollEvent", "(", ")Z", Kind.NOTIFY, Hooks.POLL));
         all.add(new Target(VK_SWAPCHAIN, "vkQueuePresentKHR", "(", ")I", Kind.NOTIFY, Hooks.SWAP));
         all.add(new Target(AL10, "alListenerf", "(IF)", "V", Kind.GAIN, Hooks.GAIN));
+        all.add(new Target(AL, "createCapabilities", "(Lorg/lwjgl/openal/ALCCapabilities;", ")Lorg/lwjgl/openal/ALCapabilities;", Kind.AFTER, Hooks.AL_READY));
+        all.add(new Target(AL, "create", "(Ljava/lang/String;IIZ", ")V", Kind.AFTER, Hooks.AL_READY));
         all.add(new Target(LWJGL2_DISPLAY, "update", "(Z)", "V", Kind.NOTIFY, Hooks.SWAP_LEGACY));
         Map<String, List<Target>> m = new HashMap<String, List<Target>>();
         for (Target t : all) {

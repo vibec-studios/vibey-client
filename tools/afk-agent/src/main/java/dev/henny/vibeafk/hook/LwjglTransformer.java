@@ -26,6 +26,8 @@ public final class LwjglTransformer implements ClassFileTransformer {
 
     public LwjglTransformer(Listener listener) {
         this.listener = listener;
+        Target.owners();
+        Target.forOwner(Target.GLFW);
     }
 
     public Set<String> transformedOwners() {
@@ -34,7 +36,8 @@ public final class LwjglTransformer implements ClassFileTransformer {
 
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> redefined, ProtectionDomain pd, byte[] bytes) {
-        if (className == null || redefined != null || !Target.owners().contains(className)) return null;
+        if (className == null || redefined != null || className.startsWith("dev/henny/vibeafk/")) return null;
+        if (!Target.owners().contains(className)) return null;
         try {
             List<String> done = new ArrayList<String>();
             byte[] out = transform(className, bytes, done);

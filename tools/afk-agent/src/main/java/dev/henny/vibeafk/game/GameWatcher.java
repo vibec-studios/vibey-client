@@ -133,6 +133,10 @@ public final class GameWatcher {
         }
     }
 
+    static Double r1(float v) {
+        return Math.round(v * 10.0) / 10.0;
+    }
+
     private void health(Sample s, AfkConfig cfg, long now) {
         if (s.health == null) return;
         float h = s.health;
@@ -148,7 +152,7 @@ public final class GameWatcher {
         if (cfg.lowHealth > 0) {
             if (!healthLow && h <= cfg.lowHealth) {
                 healthLow = true;
-                sink.event("health_low", Json.obj("health", (double) h, "max_health", s.maxHealth == null ? null : (double) s.maxHealth));
+                sink.event("health_low", Json.obj("health", r1(h), "max_health", s.maxHealth == null ? null : r1(s.maxHealth)));
             } else if (healthLow && h > cfg.lowHealth + 2) {
                 healthLow = false;
             }
@@ -166,7 +170,7 @@ public final class GameWatcher {
         if (!key.equals(lastHealthKey) && (lastHealthKey == null || now - lastHealthAt >= HEALTH_EVERY_MS)) {
             lastHealthKey = key;
             lastHealthAt = now;
-            sink.event("health", Json.obj("health", (double) h, "max_health", s.maxHealth == null ? null : (double) s.maxHealth,
+            sink.event("health", Json.obj("health", r1(h), "max_health", s.maxHealth == null ? null : r1(s.maxHealth),
                     "food", s.food));
         }
     }

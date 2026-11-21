@@ -11,6 +11,7 @@ Start with the [main README](../README.md) for what Vibey Client is, installatio
 | [CONTENT.md](CONTENT.md) | The free starter set (every cosmetic and emote with previews) and the Node toolkit that builds it. |
 | [ACCESSIBILITY.md](ACCESSIBILITY.md) | Farbsehfilter, kontrastreiche HUD-Anzeigen und Geräuschuntertitel. |
 | [MODULE-MATRIX.md](MODULE-MATRIX.md) | Modul-Verfügbarkeit nach Minecraft-Version und Loader sowie unterstützte Server-Regeln. |
+| [AFK.md](AFK.md) | AFK-Modus des Vibe Launchers: jede Instanz im Hintergrund (Fenster weg, 2 FPS, Ton aus), Messwerte, Serverregeln. |
 
 ## For developers
 
@@ -32,6 +33,7 @@ Start with the [main README](../README.md) for what Vibey Client is, installatio
 | [WAYPOINTS.md](WAYPOINTS.md) | Waypoints module (Fabric 1.21.11): beacons with direct manipulation, share codes, fair minimap, world map, death point, nether coordinates, map tile cache. |
 | [CHAT.md](CHAT.md) | Chat module (Fabric 1.21.11): timestamps, history, search, copy a line, mention highlight, mention + DM toasts, spam collapse, filters, the chat window as a HUD element. |
 | [SOCIAL.md](SOCIAL.md) | Social additions: Discord Rich Presence (own IPC client, privacy, app id) and streamer mode (names, skins, server address; `api/privacy`). |
+| [AFK-AGENT.md](AFK-AGENT.md) | The AFK Java agent (`tools/afk-agent`): LWJGL/SDL/Vulkan/OpenAL hooks, name mapping (Mojang/obf/intermediary), what works on which version and loader, tests, release. Contract: [AFK-FILES.md](AFK-FILES.md), headless research: [AFK-HEADLESS-RESEARCH.md](AFK-HEADLESS-RESEARCH.md). |
 | [CLIPS.md](CLIPS.md) | **Proposal** for the Clips module (replay buffer, auto clips, gallery): capture/encoder research with measurements, and the clip folder + JSON contract for the Vibe Launcher. |
 | [../blockbench/README.md](../blockbench/README.md) | Developing the Blockbench plugin: tests, mock game server, code layout. |
 

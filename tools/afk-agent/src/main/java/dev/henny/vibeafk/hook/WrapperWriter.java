@@ -74,6 +74,9 @@ final class WrapperWriter implements Opcodes {
                 gain();
                 callOriginalAndReturn();
                 break;
+            case AFTER:
+                callOriginalThenNotify();
+                break;
             default:
                 throw new IllegalStateException(target.kind.name());
         }
@@ -209,6 +212,20 @@ final class WrapperWriter implements Opcodes {
         mv.visitInsn(POP);
         mv.visitVarInsn(LLOAD, slot);
         mv.visitInsn(LRETURN);
+    }
+
+    private void callOriginalThenNotify() {
+        loadArgs();
+        mv.visitMethodInsn(INVOKESTATIC, owner, original, desc, false);
+        int slot = nextSlot;
+        if (ret.getSort() != Type.VOID) {
+            mv.visitVarInsn(ret.getOpcode(ISTORE), slot);
+            locals.add(frameType(ret));
+        }
+        hookCall(target.event, null, 0);
+        mv.visitInsn(POP);
+        if (ret.getSort() != Type.VOID) mv.visitVarInsn(ret.getOpcode(ILOAD), slot);
+        mv.visitInsn(ret.getOpcode(IRETURN));
     }
 
     private int slotOf(int argIndex) {

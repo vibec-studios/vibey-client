@@ -24,6 +24,9 @@ final class Controller implements Runnable {
     private long lastBridgeAttempt;
     private Map<String, Object> lastCaps;
     private volatile boolean stopped;
+    private long statFrames;
+    private long statAt;
+    private Double fps;
 
     Controller(Session s, Core core) {
         this.s = s;
@@ -213,6 +216,13 @@ final class Controller implements Runnable {
                 "env", env,
                 "capabilities", lastCaps != null ? lastCaps : caps());
         if (s.game != null) o.put("game", s.game);
+        long frames = core.throttle.frames();
+        if (statAt > 0 && now - statAt >= 1000) fps = Math.round((frames - statFrames) * 10000.0 / (now - statAt)) / 10.0;
+        statFrames = frames;
+        statAt = now;
+        o.put("stats", Json.obj("frames", frames, "fps", fps, "muted", core.sound.muted(),
+                "game_volume", core.sound.available() ? Double.valueOf(core.sound.gameGain()) : null,
+                "window_hidden", core.window.hidden()));
         o.put("updated_at", now);
         try {
             Fs.writeAtomic(new File(s.dir, Session.STATE), Json.write(o) + "\n");

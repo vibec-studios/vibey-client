@@ -41,6 +41,11 @@ final class MainThread {
         return d.background && d.hideWindow;
     }
 
+    void soundReady() {
+        AfkConfig a = applied;
+        if (a != null && a.background && a.mute && core.sound.muted()) core.sound.tick(s.lwjglLoader, Long.MAX_VALUE);
+    }
+
     void hookError(String event, Throwable t) {
         String msg = event + ": " + t;
         if (msg.equals(lastHookError)) return;
@@ -58,6 +63,7 @@ final class MainThread {
             if (now - lastSlow < 1000) return;
             lastSlow = now;
             reconcileWindow();
+            core.sound.tick(s.lwjglLoader, now);
             game(now);
             drain(now);
         } catch (Throwable t) {
@@ -74,7 +80,7 @@ final class MainThread {
         if (wantHidden && !core.window.hidden()) core.window.hide();
         if (!wantHidden && core.window.hidden()) core.window.show();
         core.throttle.set(bg, d.backgroundFps);
-        core.sound.setMuted(bg && d.mute);
+        core.sound.setMuted(bg && d.mute, s.lwjglLoader);
         modeEvent();
     }
 
@@ -144,8 +150,8 @@ final class MainThread {
                 "screen", k.name().toLowerCase(java.util.Locale.ROOT),
                 "server", world ? server : watcher.server(),
                 "player", s.playerName,
-                "health", h == null ? null : Double.valueOf(h),
-                "max_health", mh == null ? null : Double.valueOf(mh),
+                "health", h == null ? null : Double.valueOf(Math.round(h * 10.0) / 10.0),
+                "max_health", mh == null ? null : Double.valueOf(Math.round(mh * 10.0) / 10.0),
                 "food", food,
                 "dead", watcher.dead());
     }

@@ -44,13 +44,14 @@ public final class OutboxItem {
         else throw new Invalid(id, "bad type");
         Object t = o.get("text");
         if (!(t instanceof String)) throw new Invalid(id, "no text");
-        String text = ((String) t).trim();
+        String raw = (String) t;
+        for (int k = 0; k < raw.length(); k++) {
+            char c = raw.charAt(k);
+            if ((c < 0x20 && c != ' ') || c == 0x7f || c == '§') throw new Invalid(id, "bad character");
+        }
+        String text = raw.trim();
         if (command && text.startsWith("/")) text = text.substring(1).trim();
         if (text.isEmpty() || text.length() > 256) throw new Invalid(id, "bad length");
-        for (int k = 0; k < text.length(); k++) {
-            char c = text.charAt(k);
-            if (c < 0x20 || c == 0x7f || c == '§') throw new Invalid(id, "bad character");
-        }
         return new OutboxItem(id, command, text, now);
     }
 }

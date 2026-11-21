@@ -16,6 +16,7 @@ public final class Hooks {
     public static final String SDL_WINDOW = "sdl_window";
     public static final String SDL_SHOW = "sdl_show";
     public static final String GAIN = "gain";
+    public static final String AL_READY = "al_ready";
 
     public static final String PREFIX = "vibeafk$";
 

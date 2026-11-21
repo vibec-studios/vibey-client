@@ -65,6 +65,7 @@ class FilesContractTest {
         assertThrows(OutboxItem.Invalid.class, () -> OutboxItem.parse("{\"id\":\"b5\",\"type\":\"chat\",\"text\":\"" + "x".repeat(257) + "\"}", 0));
         assertNull(assertThrows(OutboxItem.Invalid.class, () -> OutboxItem.parse("{\"id\":\"bad id\",\"type\":\"chat\",\"text\":\"x\"}", 0)).id);
         assertThrows(OutboxItem.Invalid.class, () -> OutboxItem.parse("nope", 0));
+        assertThrows(OutboxItem.Invalid.class, () -> OutboxItem.parse("{\"id\":\"b6\",\"type\":\"chat\",\"text\":\"zeile\u0007\"}", 0));
     }
 
     @Test
@@ -166,6 +167,10 @@ class FilesContractTest {
         assertTrue(l.mentions("Alex"));
         assertFalse(l.mentions("Ale"));
         assertFalse(ChatParser.classify("<Alex> ich bin Alex").mentions("Alex"));
+        assertFalse(ChatParser.classify("* Alex winkt").mentions("Alex"));
+        assertFalse(ChatParser.classify("Alex was slain by Slime").mentions("Alex"));
+        assertTrue(ChatParser.classify("Steve was slain by Alex").mentions("Alex"));
+        assertFalse(ChatParser.classify("Alexander joined").mentions("Alex"));
         ChatParser.Line w = ChatParser.classify("Steve whispers to you: psst");
         assertTrue(w.whisper);
         assertEquals("Steve", w.sender);
