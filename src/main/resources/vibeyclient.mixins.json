@@ -7,12 +7,15 @@
   "mixins": [],
   "client": [
     "client.BossOverlayLayerMixin",
+    "client.ClientBrandMixin",
     "client.GuiLayersMixin",
     "client.MouseHandlerAccessor",
     "client.RenderTypeInvoker",
     "client.ScreenSwapMixin",
     "client.ToastInstanceAccessor",
-    "client.ToastManagerAccessor"
+    "client.ToastManagerAccessor",
+    "client.WindowIconMixin",
+    "client.WindowTitleMixin"
   ],
   "server": [],
   "injectors": {

@@ -2,6 +2,21 @@
 
 All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.properties`.
 
+## Unreleased
+
+**Branding**
+- Window title on every version: `Vibey Client <version> · Minecraft <version>`, with vanilla's place suffix
+  (`– Singleplayer`, `– Multiplayer (3rd-party Server)`, …). Stays after joining or leaving worlds and servers; it
+  never shows a server name, so it is safe for streaming.
+- Window and taskbar icon: the Vibey seal (16, 32, 48, 128 and 256 px) instead of the Minecraft grass block, on
+  Fabric and NeoForge 1.21.1 to 26.3 (26.x sets icons through SDL, the same hook works there).
+  On macOS, versions that still use Mojang's `.icns` file keep the Minecraft icon in the Dock.
+- Client brand for servers: `vibey,fabric` / `vibey,neoforge` in the `minecraft:brand` message, so servers can
+  recognise the client (`docs/SERVER-RULES.md`). New switch *General → Privacy → Show Vibey to servers* (on by
+  default); off sends only the loader's brand.
+- Title screen: small Vibey logo and `Vibey Client <version>` bottom left, above the vanilla version line (above
+  the NeoForge lines on NeoForge).
+
 ## 0.4.0-beta.4 – modules on every version, hosting, voice and accessibility (beta)
 
 Another **beta** (beta / dev channel only; 0.3.2 stays the normal version).

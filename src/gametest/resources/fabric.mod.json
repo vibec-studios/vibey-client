@@ -44,7 +44,8 @@
       "dev.henny.vibeyclient.gametest.ScreensGameTest",
       "dev.henny.vibeyclient.gametest.CompanionGameTest",
       "dev.henny.vibeyclient.gametest.CompanionPacksGameTest",
-      "dev.henny.vibeyclient.gametest.RewindSkinsGameTest"
+      "dev.henny.vibeyclient.gametest.RewindSkinsGameTest",
+      "dev.henny.vibeyclient.gametest.BrandingGameTest"
     ]
   },
   "mixins": ["vibeyclient-gametest.mixins.json"],
