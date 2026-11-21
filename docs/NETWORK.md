@@ -37,6 +37,7 @@ Every HTTP request Vibey Client makes, how it is cached, and how to measure it. 
 | new/changed catalog items | `GET /api/v1/cosmetics/assets/<sha256>` | disk `cache/assets/<hash>.vibey`, immutable | ≤ 4 parallel, each hash once |
 | wardrobe | `GET …/thumbnail.png` | disk `cache/thumbs/` | ≤ 4 parallel, each URL once |
 | friends list, toasts | skin textures (`textures.minecraft.net`) | in memory, each URL once | decoded on `Tasks` |
+| first tick, "Erneut prüfen" | `GET /api/v1/access` (logs in first if needed, no gateway) | approvals in `vibeyclient/access.json` for 7 days | ACCESS.md; nothing else runs while access is not approved |
 | login | `POST /auth/challenge`, Mojang `joinServer`, `POST /auth/verify` | tokens in `auth.json` | auth thread |
 | token about to expire | `POST /auth/refresh` | | strictly serialised |
 | login done | `GET /ws` (WebSocket) → hello → identify → `ready` | | own HTTP/1.1 upgrade connection; heartbeat ping every 30 s |

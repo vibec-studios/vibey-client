@@ -93,7 +93,9 @@ Order at startup (client thread):
    Do not use `Minecraft.getInstance()` state here (NeoForge constructs mods before the game is ready).
 3. Keybinds are handed to the loader (only those of modules that can run).
 4. First client tick: modules that are on (persisted in `config/vibeyclient/modules.json`, default
-   `defaultEnabled()`) get `onEnable()`.
+   `defaultEnabled()`) get `onEnable()`. Only once the beta access gate is open (ACCESS.md); until then no module
+   runs, and `onLoad()` must not start network traffic or features. A denial later disables all modules again
+   (`ModuleManager.suspend()`, the saved on/off choice stays).
 
 Rules: `onEnable`/`onDisable` must be reversible without a restart. Disabling a module disables everything that
 depends on it; enabling a module enables its dependencies. A module whose conflicting standalone mod is installed

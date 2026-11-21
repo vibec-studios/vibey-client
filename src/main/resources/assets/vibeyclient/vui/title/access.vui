@@ -1,0 +1,26 @@
+<import name="ico" src="vibeyclient:components/ico"/>
+<contract>
+{ "fields": { "text": "string", "tip": "string", "busy": "bool", "retry": "bool", "button": "object", "retryLabel": "string", "focus?": "string" },
+  "actions": ["activate(e)"] }
+</contract>
+<template>
+  <row class="access" :tooltip="tip">
+    <ico name="seal" class="access-seal"/>
+    <text class="access-text">{{ text }}</text>
+    <button v-if="retry" :id="'e-' + button.id" class="access-btn" :class="{ focus: focus == button.id, busy: busy }"
+            @click="activate(button)">
+      <ico name="redo"/>
+      <text class="access-label">{{ retryLabel }}</text>
+    </button>
+  </row>
+</template>
+<style>
+.access { position: absolute; anchor: top-right; right: 4; top: 4; gap: 5; height: 20; padding: 0 2 0 6;
+          background: alpha($bg, .55); border: 1 $line2; color: $muted; }
+.access-seal { color: $brand; }
+.access-text { text-wrap: nowrap; text-overflow: ellipsis; }
+.access-btn { height: 16; gap: 3; padding: 0 5; background: transparent; border: 1 $line2; color: $text; }
+.access-btn:hover, .access-btn:focus, .access-btn.focus { background: $surface2; border-color: $brand; }
+.access-btn.busy { color: $dim; }
+.access-label { text-wrap: nowrap; }
+</style>

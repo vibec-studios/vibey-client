@@ -48,6 +48,7 @@ public final class ModuleManager {
     private final Map<String, Boolean> wanted = new LinkedHashMap<>();
     private boolean loaded;
     private boolean started;
+    private java.util.function.BooleanSupplier allowed = () -> true;
 
     private ModuleManager() {}
 
@@ -136,7 +137,7 @@ public final class ModuleManager {
 
     /** First client tick: enables what should run. */
     public void start() {
-        if (started) return;
+        if (started || !allowed.getAsBoolean()) return;
         started = true;
         for (VibeyModule m : modules.values()) {
             if (m.status.loadable() && wanted.getOrDefault(m.id(), m.defaultEnabled())) enable(m, false);
@@ -147,12 +148,25 @@ public final class ModuleManager {
         return started;
     }
 
+    public void gate(java.util.function.BooleanSupplier allowed) {
+        this.allowed = allowed;
+    }
+
+    public void suspend() {
+        if (!started) return;
+        started = false;
+        List<VibeyModule> list = new ArrayList<>(modules.values());
+        Collections.reverse(list);
+        for (VibeyModule m : list) disable(m, false);
+    }
+
     // ============================================================================================ toggling
 
     /** Switches a module on/off at runtime (dependencies follow). Returns false if it cannot change. */
     public boolean setEnabled(String id, boolean on) {
         VibeyModule m = modules.get(id);
         if (m == null || !m.status.loadable() || (!m.canToggle() && !on)) return false;
+        if (on && !allowed.getAsBoolean()) return false;
         boolean ok = on ? enable(m, true) : disable(m, true);
         saveState();
         return ok;

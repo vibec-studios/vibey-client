@@ -11,7 +11,7 @@ import dev.henny.vibeyclient.api.setting.Settings.BoolSetting;
 import dev.henny.vibeyclient.api.setting.Settings.EnumSetting;
 import dev.henny.vibeyclient.api.setting.Settings.IntSetting;
 import dev.henny.vibeyclient.api.setting.Settings.KeybindSetting;
-import dev.henny.vibeyclient.backend.AuthStore;
+import dev.henny.vibeyclient.backend.SharedBackend;
 import dev.henny.vibeyclient.backend.BackendClient;
 import dev.henny.vibeyclient.client.ClientCompat;
 import dev.henny.vibeyclient.client.Keys;
@@ -97,7 +97,7 @@ public final class SocialModule extends VibeyModule {
 
     @Override
     public void onLoad() {
-        backend = new BackendClient(AuthStore.defaultStore());
+        backend = SharedBackend.get();
         service = new SocialService(this, backend);
         presence = new PresenceTracker(this);
         invites = new InviteFlow(this);

@@ -39,6 +39,7 @@ final class Decor {
         String focused = "";
         for (ProxyButton p : proxies) if (p.isFocused()) focused = p.id;
         controller.focus.set(focused);
+        controller.update();
         view.move(mouseX, mouseY);
         view.draw(graphics, screen.width, screen.height, false);
         place();
@@ -55,6 +56,7 @@ final class Decor {
     private void place() {
         for (ProxyButton p : proxies) {
             Element e = doc.find("e-" + p.id);
+            p.visible = e != null;
             if (e == null) continue;
             LayoutBox b = e.box();
             p.place(b.x, b.y, b.width, b.height);

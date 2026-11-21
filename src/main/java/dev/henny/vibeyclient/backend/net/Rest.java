@@ -34,6 +34,8 @@ public final class Rest {
 
         /** An authenticated call answered {@code banned}. */
         void banned(ApiException e);
+
+        default void accessDenied(ApiException e) {}
     }
 
     /** One call. {@code raw}/{@code rawType}: a non-JSON body (multipart). */
@@ -120,6 +122,7 @@ public final class Rest {
             return Net.later(backoff(attempt), () -> attempt(c, attempt + 1, refreshed));
         }
         if ("banned".equals(e.code) && c.auth()) auth.banned(e);
+        if (status == 403 && c.auth() && e.code != null && e.code.startsWith("ACCESS_")) auth.accessDenied(e);
         return CompletableFuture.failedFuture(e);
     }
 

@@ -7,6 +7,7 @@ import dev.henny.vibeyclient.api.ModuleManager;
 import dev.henny.vibeyclient.api.event.Events;
 import dev.henny.vibeyclient.api.event.VibeyEvents;
 import dev.henny.vibeyclient.api.net.VibeyNet;
+import dev.henny.vibeyclient.client.access.Access;
 import dev.henny.vibeyclient.module.BuiltinModules;
 import dev.henny.vibeyclient.net.NetDispatch;
 import dev.henny.vibeyclient.ui.Gfx;
@@ -37,13 +38,17 @@ public final class VibeyCore {
         dev.henny.vibeyclient.ui.vui.toast.VuiToasts.init();
         dev.henny.vibeyclient.ui.title.CoreMenus.register();
         BuiltinModules.registerAll(ModuleManager.get());
+        ModuleManager.get().gate(Access::open);
         ModuleManager.get().load();
         ServerRulesClient.init();
-        NetDispatch.setClientHandler(VibeyNet::handle);
+        NetDispatch.setClientHandler(payload -> {
+            if (Access.open()) VibeyNet.handle(payload);
+        });
         dev.henny.vibeyclient.dev.DevDriver.startIfRequested();
         if (Integer.getInteger("vibeyclient.devDriver") != null) {
             dev.henny.vibeyclient.ui.vui.DevUiCommands.register();
             dev.henny.vibeyclient.ui.vui.theme.DevThemeCommands.register();
+            dev.henny.vibeyclient.dev.DevAccessCommands.register();
         }
         dev.henny.vibeyclient.launcher.LauncherStatus.init(Vibey.platform().gameDir());
         Vibey.LOG.info("Vibey Client core ready, {} modules", ModuleManager.get().all().size());
@@ -54,7 +59,7 @@ public final class VibeyCore {
     }
 
     public static void openMenu() {
-        if (dev.henny.vibeyclient.ui.vui.Menus.isOpen()) return;
+        if (!Access.open() || dev.henny.vibeyclient.ui.vui.Menus.isOpen()) return;
         dev.henny.vibeyclient.ui.vui.Menus.open(ClientCompat.screen());
     }
 
@@ -63,15 +68,21 @@ public final class VibeyCore {
     /** End of every client tick. */
     public static void onTick() {
         dev.henny.vibeyclient.dev.DevTourB.tick();
+        Access.tick();
+        boolean open = Access.open();
         ModuleManager mm = ModuleManager.get();
-        if (!mm.isStarted()) mm.start();
+        if (!mm.isStarted() && open) mm.start();
         Lang.tick();
-        Keybinds.tick();
-        ServerRulesClient.tick();
-        dev.henny.vibeyclient.client.ranks.RanksSync.tick();
+        if (open) {
+            Keybinds.tick();
+            ServerRulesClient.tick();
+            dev.henny.vibeyclient.client.ranks.RanksSync.tick();
+        }
         mm.tick();
-        dev.henny.vibeyclient.launcher.LauncherStatus.tick();
-        dev.henny.vibeyclient.ui.notice.Announcements.tick();
+        if (open) {
+            dev.henny.vibeyclient.launcher.LauncherStatus.tick();
+            dev.henny.vibeyclient.ui.notice.Announcements.tick();
+        }
         dev.henny.vibeyclient.ui.title.UiShot.tick();
         dev.henny.vibeyclient.ui.vui.corner.Decorations.tick();
         dev.henny.vibeyclient.dev.DevTour.tick();
@@ -79,7 +90,7 @@ public final class VibeyCore {
     }
 
     public static void onHud(Gfx g) {
-        if (ClientCompat.hudHidden()) return;
+        if (ClientCompat.hudHidden() || !Access.open()) return;
         ModuleManager.get().renderHud(g);
         dev.henny.vibeyclient.ui.hud.HudLayout.renderWidgets(g);
         dev.henny.vibeyclient.ui.toast.ToastHooks.renderHud(g);
@@ -87,6 +98,7 @@ public final class VibeyCore {
 
     public static void onWorldJoin() {
         inWorld = true;
+        if (!Access.open()) return;
         ServerRulesClient.onJoin();
         VibeyNet.onJoin();
         ModuleManager.get().forEachEnabled(m -> m.onWorldJoin());

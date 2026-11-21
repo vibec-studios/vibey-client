@@ -90,6 +90,21 @@
     "accent": "Accent",
     "accent.desc": "Colour of buttons and highlights."
   },
+  "access": {
+    "line": "Vibey Client: {0}",
+    "checking": "Checking access …",
+    "busy": "Checking …",
+    "retry": "Check again",
+    "waitlist": "You are on the waitlist",
+    "waitlistAt": "You are on the waitlist (position {0})",
+    "none": "Join the beta waitlist in the Vibe Launcher",
+    "rejected": "Your beta access was declined",
+    "noLogin": "Cannot check access, sign-in with a Microsoft account needed",
+    "unreachable": "Vibe unreachable, cannot check access",
+    "onlineOff": "Online features are off, cannot check access",
+    "tip": "During the beta the Vibey Client is only active with approved Vibe access. Minecraft keeps running normally.",
+    "reason": "Reason: {0}"
+  },
   "title": {
     "wardrobe": "Wardrobe",
     "friends": "Friends",

@@ -30,7 +30,7 @@ neoForge {
             systemProperty 'vibeyclient.mpcheck', System.getProperty('vibeyclient.mpcheck', 'false')
             systemProperty 'vibeyclient.mpcheck.relay', System.getProperty('vibeyclient.mpcheck.relay', '')
             // Social against a local backend (see SocialGameTest): -Dvibeyclient.devAuth=true -Dvibeyclient.api=...
-            ['vibeyclient.devAuth', 'vibeyclient.api'].each { k ->
+            ['vibeyclient.devAuth', 'vibeyclient.api', 'vibeyclient.accessGate'].each { k ->
                 def v = System.getProperty(k)
                 if (v != null) systemProperty k, v
             }

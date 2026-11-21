@@ -23,6 +23,7 @@ Start with the [main README](../README.md) for what Vibey Client is, installatio
 | [HUD.md](HUD.md) | HUD widgets and the HUD editor: the widget API for modules, styles, placement model, templates, share codes, server rules. |
 | [AVATAR.md](AVATAR.md) | The cosmetics and emotes engine: packages, services, render path per Minecraft version, coordinates, tests. |
 | [VIDEO.md](VIDEO.md) | Video screens (Fabric 1.21.11): placing, players (FFmpeg / MCEF Modern), setup prompts, sharing, wiring into the Media module. Research and licences: [VIDEO-RESEARCH.md](VIDEO-RESEARCH.md). |
+| [ACCESS.md](ACCESS.md) | The beta access gate: `GET /api/v1/access`, 7-day cache of approvals, `403 ACCESS_*` / close `4403`, the title screen hint and the dev switch. |
 | [NETWORK.md](NETWORK.md) | Every HTTP request the client makes (startup and during play), the shared HTTP client, caching/ETags, bootstrap, timeouts and retries, and how to measure it (`tools/net-bench`). |
 | [NAMETAGS.md](NAMETAGS.md) | Names and ranks: seal, rank icons (glyph table, `rank-icons.json`), animated name styles (colour function + test vectors), chat hook, server-rule keys, local backend test. |
 | [PORTING.md](PORTING.md) | Which modules run on which of the 20 targets, shared helpers for porting (vanilla HUD layers, screen input, `Gfx`), what changed between 1.21.1 and 26.3. |

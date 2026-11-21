@@ -31,6 +31,10 @@ public final class PauseMenu {
     private static final int GAP = 4;
 
     public static void decorate(Screen screen, List<? extends GuiEventListener> widgets, Consumer<AbstractWidget> add) {
+        if (!dev.henny.vibeyclient.client.access.Access.open()) {
+            if (screen instanceof TitleScreen) dev.henny.vibeyclient.ui.vui.corner.Decorations.access(screen, add);
+            return;
+        }
         boolean classic = dev.henny.vibeyclient.ui.vui.ClassicUi.enabled();
         if (screen instanceof TitleScreen) {
             if (classic) TitleButtons.decorate(screen, widgets, add);
