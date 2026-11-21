@@ -20,6 +20,9 @@
     ],
     "client": [
       "dev.henny.vibeyclient.fabric.VibeyFabricClient"
+    ],
+    "voicechat": [
+      "dev.henny.vibeyclient.module.multiplayer.voice.VoicePlugin"
     ]
   },
   "mixins": [

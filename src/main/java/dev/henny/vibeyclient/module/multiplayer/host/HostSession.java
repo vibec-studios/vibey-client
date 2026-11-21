@@ -109,6 +109,8 @@ public final class HostSession {
         User user = mc.getUser();
         String mcVersion = MpLoader.minecraftVersion();
         status = Status.CONNECTING;
+        int port = lanPort;
+        java.util.Map<Integer, Integer> udp = Voice.channels(port);
         Tunnel t = new Tunnel(cfg.relay, lanPort, user.getName(), user.getProfileId(), mcVersion,
                 MpCompat::joinServer, Access::relayMessage, new Tunnel.Listener() {
                     @Override
@@ -125,7 +127,22 @@ public final class HostSession {
                     public void onBlocked(String name, String ip, String reason) {
                         Access.onRelayBlocked(name, ip, reason);
                     }
-                });
+
+                    @Override
+                    public void onKick(String name, String uuid, String message) {
+                        java.util.UUID id = null;
+                        try {
+                            if (!uuid.isEmpty()) id = java.util.UUID.fromString(HostPanel.dashed(uuid));
+                        } catch (IllegalArgumentException ignored) {
+                        }
+                        Guests.kickNow(id, name, message, false);
+                    }
+
+                    @Override
+                    public void onUdp(Tunnel.UdpState state, UdpReady ready) {
+                        Voice.onUdp(state, ready);
+                    }
+                }, () -> udp);
         tunnel = t;
         t.start();
         MultiplayerModule.LOG.info("Hosting world on LAN port {} through {}", lanPort, cfg.relay);
@@ -136,6 +153,8 @@ public final class HostSession {
         Tunnel t = tunnel;
         tunnel = null;
         if (t != null) t.close();
+        Voice.reset();
+        HostPanel.clear();
         IntegratedServer server = hosted;
         hosted = null;
         boolean wasHosting = status != Status.OFF && status != Status.ERROR;
@@ -156,6 +175,11 @@ public final class HostSession {
     static void pushAccess() {
         Tunnel t = tunnel;
         if (t != null) t.pushAccess();
+    }
+
+    public static Tunnel.UdpState udpState() {
+        Tunnel t = tunnel;
+        return t == null ? Tunnel.UdpState.OFF : t.udpState();
     }
 
     public static void rotate() {
@@ -233,6 +257,8 @@ public final class HostSession {
         Tunnel t = tunnel;
         tunnel = null;
         if (t != null) t.close();
+        Voice.reset();
+        HostPanel.clear();
         hosted = null;
         address = "";
         status = Status.ERROR;

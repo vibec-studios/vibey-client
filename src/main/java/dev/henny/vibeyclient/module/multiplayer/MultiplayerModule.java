@@ -134,7 +134,10 @@ public final class MultiplayerModule extends VibeyModule {
     @Override
     public void tick() {
         if (MpDevCheck.enabled()) MpDevCheck.tick();
-        if (++ticks % 10 == 0) PlayLinks.tick();
+        if (++ticks % 10 == 0) {
+            PlayLinks.tick();
+            dev.henny.vibeyclient.module.multiplayer.host.HostPanel.tick();
+        }
     }
 
     @Override
@@ -251,7 +254,7 @@ public final class MultiplayerModule extends VibeyModule {
 
         @Override
         public int maxPlayers() {
-            return HostSession.isHosting() ? HostConfig.get().maxPlayers : -1;
+            return HostSession.isHosting() ? dev.henny.vibeyclient.module.multiplayer.host.Guests.maxPlayers(Minecraft.getInstance().getSingleplayerServer()) : -1;
         }
     }
 }

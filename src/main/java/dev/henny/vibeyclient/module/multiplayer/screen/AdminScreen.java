@@ -6,7 +6,11 @@ import dev.henny.vibeyclient.ui.Gfx;
 import dev.henny.vibeyclient.module.multiplayer.host.Access;
 import dev.henny.vibeyclient.module.multiplayer.host.Guests;
 import dev.henny.vibeyclient.module.multiplayer.host.HostConfig;
+import dev.henny.vibeyclient.module.multiplayer.host.HostPanel;
 import dev.henny.vibeyclient.module.multiplayer.host.HostSession;
+import dev.henny.vibeyclient.module.multiplayer.host.PanelModel;
+import dev.henny.vibeyclient.module.multiplayer.host.Tunnel;
+import dev.henny.vibeyclient.module.multiplayer.host.Voice;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import dev.henny.vibeyclient.module.multiplayer.T;
@@ -25,6 +29,7 @@ public final class AdminScreen extends MpCardScreen {
     private enum Tab { PLAYERS, ACCESS, WORLD, ADVANCED }
 
     private static final GameType[] MODES = {GameType.SURVIVAL, GameType.CREATIVE, GameType.ADVENTURE, GameType.SPECTATOR};
+    private static final String[] PRIVACY = {"public", "friends", "invite"};
     private static Tab lastTab = Tab.PLAYERS;
 
     private Tab tab = lastTab;
@@ -140,6 +145,8 @@ public final class AdminScreen extends MpCardScreen {
             y = note(g, x, y, w, T.get("players.offline"), DIM);
         } else {
             List<Guests.View> guests = Guests.snapshot().stream().filter(p -> !p.host()).toList();
+            PanelModel.State panel = HostPanel.state();
+            y = panelStatus(g, x, y, w, panel);
             if (guests.isEmpty()) y = note(g, x, y, w, T.get("players.empty"), DIM);
             for (Guests.View p : guests) {
                 int h = 24;
@@ -150,10 +157,17 @@ public final class AdminScreen extends MpCardScreen {
                 String name = p.name();
 
                 int right = x + w - 4;
-                right = buttonRight(g, right, y + 4, 16, T.get("players.ban"), Style.DANGER,
-                        () -> Guests.ban(id, name)) - 3;
+                right = buttonRight(g, right, y + 4, 16, T.get("players.ban"), Style.DANGER, () -> {
+                    if (panel != null) HostPanel.kick(id, name, true);
+                    Guests.ban(id, name);
+                }) - 3;
                 right = buttonRight(g, right, y + 4, 16, T.get("players.kick"), Style.SECONDARY,
-                        () -> Guests.kick(id)) - 3;
+                        () -> HostPanel.kick(id, name, false)) - 3;
+                if (panel != null) {
+                    boolean member = panel.member(id.toString(), name);
+                    right = buttonRight(g, right, y + 4, 16, T.get("players.member"), member ? Style.PRIMARY : Style.SECONDARY,
+                            () -> HostPanel.setRole(id.toString(), name, member ? "guest" : "member")) - 3;
+                }
                 boolean op = p.op();
                 right = buttonRight(g, right, y + 4, 16, T.get("players.op"), op ? Style.PRIMARY : Style.SECONDARY,
                         () -> Guests.setOp(id, !op)) - 6;
@@ -186,8 +200,76 @@ public final class AdminScreen extends MpCardScreen {
 
     // ============================================================================================ access
 
+    private int panelStatus(Gfx g, int x, int y, int w, PanelModel.State panel) {
+        String text;
+        int color;
+        if (panel != null) {
+            text = T.get("panel.privacy." + panel.policy().privacy());
+            color = MUTED;
+        } else if (!HostPanel.error().isEmpty()) {
+            text = HostPanel.error();
+            color = AMBER;
+        } else {
+            text = T.get("panel.offline");
+            color = DIM;
+        }
+        g.text(g.clip(text, w), x, y + 2, color);
+        return y + 14;
+    }
+
+    private int drawPrivacy(Gfx g, int x, int y, int w) {
+        PanelModel.State panel = HostPanel.state();
+        y = section(g, T.get("panel.privacy"), x, y);
+        if (panel == null) {
+            y = note(g, x, y, w, T.get(HostSession.isHosting() ? "panel.offline" : "players.offline"), DIM);
+            return y + 12;
+        }
+        String[] labels = new String[PRIVACY.length];
+        int selected = 0;
+        for (int i = 0; i < PRIVACY.length; i++) {
+            labels[i] = T.get("panel.privacy.short." + PRIVACY[i]);
+            if (PRIVACY[i].equals(panel.policy().privacy())) selected = i;
+        }
+        y = segmented(g, x, y, w, labels, selected, i -> HostPanel.setPrivacy(PRIVACY[i]));
+        g.text(g.clip(T.get("panel.privacy." + PRIVACY[selected]), w), x, y + 4, DIM);
+        y += 18;
+
+        int rowH = row(g, x, y, w, "panel.defaultMember");
+        boolean defMember = "member".equals(panel.policy().defaultRole());
+        toggle(g, "defrole", x + w, y + rowH / 2, defMember, () -> HostPanel.setDefaultRole(defMember ? "guest" : "member"));
+        y += rowH + 4;
+
+        if (!panel.members().isEmpty()) {
+            y = section(g, T.get("panel.members"), x, y);
+            for (PanelModel.Member m : panel.members()) {
+                g.rect(x, y, w, 20, SURFACE);
+                avatar(g, null, m.name(), x + 4, y + 3);
+                g.text(g.clip(m.name(), w - 120), x + 23, y + 6, TEXT);
+                g.textRight(T.get("panel.role." + m.role()), x + w - 24, y + 6, "member".equals(m.role()) ? ACCENT : DIM);
+                removeButton(g, x + w - 18, y + 2, () -> HostPanel.removeMember(m.uuid(), m.name()));
+                y += 22;
+            }
+            y += 8;
+        }
+        if (!panel.kicks().isEmpty()) {
+            y = section(g, T.get("panel.kicks"), x, y);
+            for (PanelModel.Kick k : panel.kicks()) {
+                g.rect(x, y, w, 20, SURFACE);
+                avatar(g, null, k.name(), x + 4, y + 3);
+                int left = buttonRight(g, x + w - 2, y + 2, 16, T.get("panel.unkick"), Style.SECONDARY,
+                        () -> HostPanel.unkick(k.uuid(), k.name()));
+                String label = k.name() + "  ·  " + T.get(k.permanent() ? "panel.kick.permanent" : "panel.kick.session");
+                g.text(g.clip(label, left - x - 28), x + 23, y + 6, MUTED);
+                y += 22;
+            }
+            y += 8;
+        }
+        return y + 4;
+    }
+
     private int drawAccess(Gfx g, int x, int y, int w) {
         HostConfig cfg = HostConfig.get();
+        y = drawPrivacy(g, x, y, w);
 
         // Whitelist
         int rowH = row(g, x, y, w, "access.whitelist");
@@ -304,9 +386,11 @@ public final class AdminScreen extends MpCardScreen {
         y += rowH;
 
         rowH = row(g, x, y, w, "adv.max");
-        stepper(g, x + w, y + rowH / 2, cfg.maxPlayers, 2, 8, v -> {
+        int slots = HostSession.isHosting() ? Guests.maxPlayers(net.minecraft.client.Minecraft.getInstance().getSingleplayerServer()) : cfg.maxPlayers;
+        stepper(g, x + w, y + rowH / 2, Math.max(2, Math.min(8, slots)), 2, 8, v -> {
             cfg.maxPlayers = v;
             HostConfig.save();
+            if (HostPanel.connected()) HostPanel.setMaxPlayers(v);
         });
         y += rowH;
 
@@ -369,6 +453,18 @@ public final class AdminScreen extends MpCardScreen {
             }
         });
         y += rowH;
+
+        rowH = row(g, x, y, w, "voice");
+        Tunnel.UdpState udp = HostSession.udpState();
+        String key = !Voice.installed() ? "voice.missing" : !HostSession.isHosting() ? "voice.idle"
+                : "voice." + udp.name().toLowerCase(java.util.Locale.ROOT);
+        int color = udp == Tunnel.UdpState.OK ? ACCENT : udp == Tunnel.UdpState.BLOCKED || udp == Tunnel.UdpState.DENIED ? AMBER : MUTED;
+        g.textRight(g.clip(T.get(key), w / 2), x + w, y + rowH / 2 - 4, color);
+        y += rowH;
+        if (HostSession.isHosting() && Voice.portMismatch()) {
+            g.text(g.clip(T.get("voice.port_mismatch", Voice.localPort()), w), x, y, AMBER);
+            y += 13;
+        }
 
         rowH = row(g, x, y, w, "adv.relay");
         int bw = Math.min(160, w / 2);
