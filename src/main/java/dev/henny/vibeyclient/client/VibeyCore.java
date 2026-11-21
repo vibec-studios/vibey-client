@@ -48,6 +48,7 @@ public final class VibeyCore {
         if (Integer.getInteger("vibeyclient.devDriver") != null) {
             dev.henny.vibeyclient.ui.vui.DevUiCommands.register();
             dev.henny.vibeyclient.ui.vui.theme.DevThemeCommands.register();
+            dev.henny.vibeyclient.dev.DevAccessCommands.register();
         }
         dev.henny.vibeyclient.launcher.LauncherStatus.init(Vibey.platform().gameDir());
         Vibey.LOG.info("Vibey Client core ready, {} modules", ModuleManager.get().all().size());

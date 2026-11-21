@@ -34,7 +34,8 @@ Negative answers are never stored: the next start checks again.
 - Any authenticated REST call answering `403` with `ACCESS_PENDING|ACCESS_REJECTED|ACCESS_NONE`
   (`Rest.Auth#accessDenied`) and a gateway close `4403` (`Gateway`, no reconnect) call `BackendClient`'s
   access listeners. The gate forgets the cache entry and closes: `ModuleManager.suspend()` disables every module
-  (without touching the saved on/off choice), open Vibey menus close, the social module stops the backend
+  (without touching the saved on/off choice), every open Vibey screen closes (menus, onboarding, wardrobe, emote
+  wheel, waypoints: any screen class under `dev.henny.vibeyclient.`), the social module stops the backend
   connection.
 - After a denial of an open gate one `GET /api/v1/access` fetches the details (waitlist position). It may only
   keep the gate closed; reopening needs "Erneut prüfen". A denial while already closed asks nothing more (no loop
@@ -73,7 +74,10 @@ the cosmetics module is enabled (`applyConfig()` in `onLoad`).
 
 In a dev workspace (`isDevelopment()`) the gate is off, so `runClient`, game tests and smoke runs behave as before.
 `-Dvibeyclient.accessGate=on` turns it on (use `-Dvibeyclient.devAuth=true` against a local backend). Release
-builds always gate.
+builds always gate. The Gradle runs forward the property to the game JVM.
+
+With `-Dvibeyclient.devDriver=<port>` the dev driver answers `access` (phase, status, position, started modules) and
+`access recheck` (same as "Erneut prüfen").
 
 The cache is a convenience, not a security boundary: the backend answers `403 ACCESS_*` to every gated route
 anyway, which closes the gate again.
