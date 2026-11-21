@@ -463,6 +463,7 @@ public final class DevTour {
         step("ported_modules");
         run(mc -> {
             requireWorld(mc);
+            ClientCompat.openScreen(null);
             hideHud(mc, false);
             look(mc, 0f, 30f);
             StringBuilder missing = new StringBuilder();

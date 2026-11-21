@@ -25,7 +25,14 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 *///?} else
 @Mixin(net.minecraft.client.gui.Gui.class)
 abstract class GuiMixin {
-    //? if >=26.1 {
+    //? if >=26.3 {
+    /*@WrapOperation(method = "extractCrosshair", require = 0, at = @At(value = "INVOKE", ordinal = 0,
+            target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;blitSprite(Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIII)V"))
+    private void vibey$crosshair(net.minecraft.client.gui.GuiGraphicsExtractor g, RenderPipeline pipeline,
+                                 net.minecraft.resources.Identifier sprite, int x, int y, int w, int h, Operation<Void> original) {
+        if (!PvpHooks.crosshair(g)) original.call(g, pipeline, sprite, x, y, w, h);
+    }
+    *///?} else if >=26.1 {
     /*@WrapOperation(method = "extractCrosshair", require = 0, at = @At(value = "INVOKE", ordinal = 0,
             target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIII)V"))
     private void vibey$crosshair(net.minecraft.client.gui.GuiGraphicsExtractor g, RenderPipeline pipeline,

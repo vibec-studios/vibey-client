@@ -46,7 +46,18 @@ written and tested.
 - 26.1: `Camera.alignWithEntity` replaces `Camera.setup`; `Level.getOverworldClockTime()` replaces `getDayTime()`;
   `IntProvider.maxInclusive()`; `SpawnEggItem.byId` returns an `Optional<Holder<Item>>`.
 - 26.2: HUD code lives in `net.minecraft.client.gui.Hud`; team colours are `Optional<TeamColor>`.
-- 26.3: native mouse buttons are SDL numbers (`Keys.mouseFromNative` / `mouseToNative`).
+- 26.3: native mouse buttons are SDL numbers (`Keys.mouseFromNative` / `mouseToNative`); `RenderPipeline` moved to
+  `com.mojang.renderpearl.api.pipeline` (mixin descriptors too); `Minecraft.getOverlay()` is gone
+  (`ClientCompat.loadingOverlay()`).
+- 26.3 binds item components later: never create an `ItemStack` in a constructor or field initialiser of something
+  built while modules load (`ItemCounterWidget` creates its icon on the first update).
+
+## Fabric metadata
+
+`gradle/modules-filter.gradle` drops the mixin lines of modules a target leaves out from `fabric.mod.json`; a
+`doLast` step then removes a dangling comma (or a `null` line) before `]`. Without it every Fabric jar except 1.21.11
+had invalid metadata, because `chat` and `social.streamer` are the last entries (seen in 0.4.0-beta.3: the 1.21.1 jar
+lists `null` as its last mixin config).
 
 ## How to port the next module
 
@@ -55,6 +66,8 @@ written and tested.
    `./gradlew --max-workers=2 --continue :fabric-1.21.1:compileJava :fabric-1.21.5:compileJava :fabric-1.21.8:compileJava
    :fabric-26.1:compileJava :fabric-26.3:compileJava :neoforge-1.21.1:compileJava :neoforge-26.3:compileJava`.
    These seven cover every API break listed above; then all 20.
+   Runtime check on a target: `./gradlew :<target>:runClient -Dvibeyclient.tour=<dir> -Dvibeyclient.api=http://127.0.0.1:9`;
+   the `ported_modules` step fails when a ported module is missing or one of its mixin hooks found no target.
 3. Replace Fabric API calls with the helpers above (or add a helper there when two modules need the same thing).
 4. Mixins: gate the body, not the class (`//? if …` inside the class; keep `@Mixin` on a class that exists on every
    version), because the mixin config lists the class on every target. Put block comments outside gated code:

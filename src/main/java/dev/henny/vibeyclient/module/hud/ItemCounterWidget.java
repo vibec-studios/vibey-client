@@ -15,9 +15,9 @@ final class ItemCounterWidget extends HudWidget {
             "minecraft:ender_pearl", "minecraft:firework_rocket", "minecraft:experience_bottle", "minecraft:cobweb",
             "minecraft:wind_charge", "minecraft:torch", "minecraft:cooked_beef"};
 
-    private String itemId = "";
+    private String itemId;
     private Item item = Items.ARROW;
-    private ItemStack icon = new ItemStack(Items.ARROW);
+    private ItemStack icon = ItemStack.EMPTY;
     private String countText = "0";
     private String name = "";
     private int count;

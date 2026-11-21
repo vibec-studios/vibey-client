@@ -28,6 +28,14 @@ processResources {
     }
     if (mixinPattern) {
         filesMatching('fabric.mod.json') { filter { String line -> line =~ mixinPattern ? null : line } }
+        doLast {
+            def json = new File(destinationDir, 'fabric.mod.json')
+            if (json.exists()) {
+                def text = json.getText('UTF-8')
+                def fixed = text.replaceAll(/(?m)^\s*null\s*,?\s*\r?\n/, '').replaceAll(/,(\s*)\]/, '$1]')
+                if (fixed != text) json.setText(fixed, 'UTF-8')
+            }
+        }
         filesMatching('META-INF/neoforge.mods.toml') {
             String held = null
             filter { String line ->
