@@ -2,7 +2,13 @@
 
 All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.properties`.
 
-## Unreleased
+## 0.4.0-beta.5 – Vibey branding and AFK helper (beta)
+
+Another **beta** (beta / dev channel only; 0.3.2 stays the normal version).
+
+**AFK helper (Vibe Launcher)**
+- New standalone Java agent `vibe-afk-agent` (released separately as `afk-agent-v0.1.0`): the Vibe Launcher can run any instance in the background – hidden window, ~2 FPS, muted – and bring it back. Works with vanilla, Fabric and NeoForge, not only with Vibey Client.
+
 
 **Branding**
 - Window title on every version: `Vibey Client <version> · Minecraft <version>`, with vanilla's place suffix
