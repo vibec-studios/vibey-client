@@ -116,6 +116,11 @@ public final class BackendClient implements VibeBackend {
         public void banned(ApiException e) {
             authLost(e.code, e.getMessage(), false);
         }
+
+        @Override
+        public void accessDenied(ApiException e) {
+            BackendClient.this.accessDenied(e.code);
+        }
     });
     private final Gateway gateway;
     private final ReentrantLock refreshLock = new ReentrantLock();
@@ -186,6 +191,19 @@ public final class BackendClient implements VibeBackend {
         int gen = generation.incrementAndGet();
         this.running = true;
         this.autoLogin = autoLogin;
+        selectAccount();
+        LOG.info("Backend {} for {} ({})", baseUrl, accountName, tokens != null ? "stored login" : "no login yet");
+        if (tokens != null && tokens.valid()) {
+            setState(State.CONNECTING, null, null);
+            gateway.connect(gen);
+        } else if (autoLogin && !store.loggedOut(accountKey) && (devAuth() || MojangJoin.hasOnlineSession())) {
+            loginAsync(gen);
+        } else {
+            setState(State.LOGGED_OUT, null, null);
+        }
+    }
+
+    private void selectAccount() {
         this.baseUrl = configuredBaseUrl();
         UUID profile = MojangJoin.profileId();
         this.accountName = MojangJoin.name();
@@ -200,16 +218,47 @@ public final class BackendClient implements VibeBackend {
             Tokens stored = store.get(key);
             if (tokens == null) tokens = stored;
         }
-        LOG.info("Backend {} for {} ({})", baseUrl, accountName, tokens != null ? "stored login" : "no login yet");
-        if (tokens != null && tokens.valid()) {
-            setState(State.CONNECTING, null, null);
-            gateway.connect(gen);
-        } else if (autoLogin && !store.loggedOut(accountKey) && (devAuth() || MojangJoin.hasOnlineSession())) {
-            loginAsync(gen);
-        } else {
-            setState(State.LOGGED_OUT, null, null);
+    }
+
+    public synchronized String prepareAccount() {
+        if (!running) selectAccount();
+        return accountKey;
+    }
+
+    public CompletableFuture<JsonElement> fetchAccess(boolean userAction) {
+        prepareAccount();
+        return CompletableFuture.runAsync(() -> ensureLogin(userAction), authExec)
+                .thenCompose(v -> rest.call(Rest.Call.of("GET", "/api/v1/access", null, true)));
+    }
+
+    private void ensureLogin(boolean userAction) {
+        if (tokens != null) return;
+        String key = accountKey;
+        if (userAction && key != null) store.setLoggedOut(key, false);
+        boolean possible = devAuth() || MojangJoin.hasOnlineSession();
+        if (!possible || key == null || (!userAction && store.loggedOut(key))) {
+            throw new ApiException(0, "no_login", "No login possible");
+        }
+        loginBlocking();
+    }
+
+    public AutoCloseable onAccessDenied(Consumer<String> listener) {
+        accessListeners.add(listener);
+        return () -> accessListeners.remove(listener);
+    }
+
+    void accessDenied(String code) {
+        LOG.warn("Vibe access denied: {}", code);
+        for (Consumer<String> l : accessListeners) {
+            try {
+                l.accept(code);
+            } catch (RuntimeException e) {
+                LOG.error("Access listener failed", e);
+            }
         }
     }
+
+    private final List<Consumer<String>> accessListeners = new CopyOnWriteArrayList<>();
 
     /** Disconnects (online features or module off). Keeps the stored login. */
     public synchronized void stop() {

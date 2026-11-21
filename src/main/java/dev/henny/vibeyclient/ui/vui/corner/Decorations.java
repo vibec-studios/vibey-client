@@ -24,6 +24,10 @@ public final class Decorations {
         install(new Decor(screen, TitleCorner.DOC, c, add));
     }
 
+    public static void access(Screen screen, Consumer<AbstractWidget> add) {
+        install(new Decor(screen, AccessHint.DOC, new AccessHint(), add));
+    }
+
     public static void pause(Screen screen, List<? extends GuiEventListener> widgets, Consumer<AbstractWidget> add) {
         PauseRow r = new PauseRow(screen, widgets);
         if (r.main == null) return;

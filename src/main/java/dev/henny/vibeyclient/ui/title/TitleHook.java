@@ -15,6 +15,7 @@ public final class TitleHook {
 
     public static Screen replace(Screen screen) {
         if (!(screen instanceof TitleScreen title) || !enabled() || !CoreMenus.needsOnboarding()) return screen;
+        if (!dev.henny.vibeyclient.client.access.Access.open()) return screen;
         try {
             if (dev.henny.vibeyclient.ui.vui.ClassicUi.enabled()) return new OnboardingScreen(title);
             return dev.henny.vibeyclient.ui.vui.onboarding.Onboarding.create(title);

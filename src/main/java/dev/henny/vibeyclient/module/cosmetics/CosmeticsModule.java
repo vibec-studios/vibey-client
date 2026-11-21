@@ -101,6 +101,7 @@ public final class CosmeticsModule extends VibeyModule implements Wardrobe {
         dev.henny.vibeyclient.api.ServerRules.listen(CosmeticsModule::applyServerRules);
         applyServerRules();
         dev.henny.vibeyclient.module.cosmetics.ui.WardrobeUi.register();
+        applyConfig();
     }
 
     @Override

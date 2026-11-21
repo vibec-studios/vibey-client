@@ -275,6 +275,7 @@ final class Gateway {
     }
 
     private String revokedReason;
+    static final int ACCESS_DENIED = 4403;
 
     private void closed(int id, int code, String reason) {
         if (id != connectionId) return;
@@ -286,7 +287,7 @@ final class Gateway {
         if (heartbeat != null) heartbeat.cancel(false);
         heartbeat = null;
         if (wasReady) disconnectedAt = System.currentTimeMillis();
-        boolean fatal = code == 4010 || !wanted;
+        boolean fatal = code == 4010 || code == ACCESS_DENIED || !wanted;
         BackendClient.LOG.info("Gateway closed {} {}{}", code, reason, fatal ? " (no reconnect)" : "");
         client.onGatewayDown(gen, code, reason, !fatal);
         if (code == 4010) {
@@ -295,6 +296,11 @@ final class Gateway {
             String why = revokedReason != null ? revokedReason : reason;
             revokedReason = null;
             client.authLost(gen, "session_revoked", why, true);
+            return;
+        }
+        if (code == ACCESS_DENIED) {
+            wanted = false;
+            client.accessDenied(reason == null || reason.isBlank() ? "ACCESS_NONE" : reason);
             return;
         }
         if (fatal) return;

@@ -12,6 +12,8 @@ public abstract class CornerController {
 
     public abstract List<CornerEntry> all();
 
+    public void update() {}
+
     public void activate(CornerEntry e) {
         e.entry().action().accept(ClientCompat.screen());
     }
