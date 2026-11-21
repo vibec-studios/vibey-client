@@ -69,7 +69,7 @@
     "inInventories": "In Inventaren",
     "inInventories.desc": "Aus: Die Aufnahme pausiert, solange ein Inventar, eine Kiste oder ein anderer Behälter offen ist. Der Chat wird immer aufgenommen.",
     "ramCap": "Pufferspeicher",
-    "diskCap": "Platz auf der Festplatte",
+    "diskCap": "Speicherplatz",
     "diskCap.desc": "So viel darf der lange Rückblick höchstens belegen. Es bleibt immer mindestens 1 GB frei.",
     "folderLimit": "Ordnerlimit (GB)",
     "folderLimit.desc": "Wird der Ordner größer, gehen die ältesten Clips zuerst. Behaltene Clips werden nie gelöscht.",
