@@ -434,7 +434,8 @@ the shader out of every other target; `BuiltinModules` registers it by reflectio
 | UI | `ui/ClipsGalleryScreen`, `ui/ClipViewScreen`, `ui/Thumbs`, `ClipsHud`, `ClipsStats` | Gallery (filter, storage bar), player with the shared `media/player/FfmpegPlayer` (keep, rename, delete, open folder, copy path, kill marks on the seek bar). The REC dot is a plain HUD element (HUD templates hide unknown *widgets* on first start). `ClipsStats`: `-Dvibeyclient.clips.stats=true`. FFmpeg consent: the shared `media/ffmpeg/FfmpegSetupScreen` with `FfmpegPurpose.RECORDING` (texts in `i18n/*/media.ffmpeg.json`). |
 
 Not built yet (prepared): sound (phase 3: the encoder command has no audio input yet, `audio_codec` stays absent),
-other Minecraft versions and NeoForge (phase 4), disk ring and trimming (phase 5).
+other Minecraft versions and NeoForge (phase 4), trimming (phase 5; the launcher's clip editor, metadata in §15).
+The disk ring is built: §15.
 
 
 ## 14. Screenshot gallery (feature #22)
@@ -487,3 +488,37 @@ thumbnail → selected, look at › + click, middle-drag to the east wall, wheel
 
 Known: toasts (top right, `ui/toast/ToastStack`) cover the gallery header buttons for ~4 s after copy/delete; the
 gametest waits for them. A later fix belongs to the toast stack (avoid open screens' headers), not to the gallery.
+
+
+## 15. Long rewind (feature #14): disk ring and editor metadata
+
+Setting **Long rewind** (card *Replay buffer*, off): the ring lives on disk instead of RAM and holds **1–10 minutes**
+(*Rewind length*, default 5). *Disk space* (card *Saving resources*, 256–8192 MB, default 1024) caps it; at least
+1 GB of the drive always stays free (free space is checked every 10 s on the clips I/O thread). If the cap is
+smaller than *length × bitrate*, the page says how long the rewind really is. A write error (disk full) switches
+back to the RAM ring with a toast.
+
+| Part | Where | Notes |
+|---|---|---|
+| Storage | `ring/ChunkStorage`, `RamStorage`/`RamBody` (pooled blocks, as before), `DiskStorage`/`DiskBody` | `Chunk` keeps its PTS bookkeeping and hands the bytes to a body. A disk body appends into one 64 KiB buffer and writes it when full (~12 writes/s at 6 Mbit/s), closes its file when the chunk closes, reads with positional `FileChannel` reads when a save needs it, and deletes its file when the ring drops it. RAM use is one 64 KiB buffer, CPU a memcpy per packet. JUnit: `DiskRingTest` (same bytes as the RAM ring, files follow drops, clear, 5 min). |
+| Files | `<gameDir>/vibeyclient/clips/.buffer/<session>/s<n>-<m>.ts` | One folder per ring (a new ring never shares files with an old one being deleted). Deleted when the buffer stops, on world leave, when switching RAM/disk, and every start (`ClipsFiles.wipeBuffers`). The launcher ignores `.buffer/` (§10.1). |
+| Saving | `Recorder.saveHotkey`, `ClipSaver` | With long rewind the key saves **the whole rewind** (`rewind: true`) plus a suggested cut of the last *Length* seconds (`trim_hint`). Auto clips stay *Length* long. The FFmpeg remux timeout grows with the clip (60 s + 1 s per 5 s of video). |
+| Metadata | `store/ClipTimeline` (JUnit `ClipTimelineTest`) | Written for **every** new clip, see below. |
+
+**Disk use:** ≈ 45 MB per minute at 720p30 Medium (6 Mbit/s): 10 min ≈ 450 MB, 1080p60 High ≈ 1.5 GB. Writing is
+sequential, ~0.75 MB/s at 6 Mbit/s.
+
+### 15.1 Metadata for the launcher's clip editor (`<id>.json`, still schema 1)
+
+| Field | Writer | Rule |
+|---|---|---|
+| `keyframes_ms` | game, every new clip | Keyframe (GOP start) times from the clip start, ascending, first is `0`, at most 2000. A `-c copy` cut must **start** on one of them (±1 frame). Older clips have none (probe with `ffprobe -skip_frame nokey`). |
+| `cuts_ms` | game | Jump cuts where recording paused (menu, unfocused, low FPS). Missing when there are none. |
+| `rewind` | game | `true` on a long-rewind save, missing otherwise. |
+| `trim_hint` | game | `{"in_ms","out_ms"}`: suggested range, `in_ms` rounded down to a keyframe, `out_ms` = end. Rewind saves only. |
+| `trim` | **launcher** | The user's non-destructive cut, same shape. `0 ≤ in_ms < out_ms ≤ duration_ms`, invalid values are ignored. The launcher may now edit `kept`, `title`, `tags` **and `trim`** (§10.3 rules). |
+
+An exported cut is a **new clip** written like any other (MP4, JPG, JSON last) with `reason: "edit"` and
+`source_id` = the original's id; events and keyframes are shifted to the new start. This version shows `edit` as
+"Clip". Full contract for the launcher: vibe-launcher contract `14-34-client-launcher.md` part A.
+

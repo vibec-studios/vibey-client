@@ -1,0 +1,58 @@
+{
+  "name": "Skins",
+  "description": "Wechsle deinen Skin im Spiel, ohne neu zu starten. Die Skins kommen aus der Skin-Bibliothek des Vibe Launchers.",
+  "summary": "Skin-Bibliothek im Spiel",
+  "setting": {
+    "openLibrary": "Skin-Bibliothek",
+    "openLibrary.action": "Öffnen…",
+    "libraryKey": "Skin-Bibliothek öffnen"
+  },
+  "notice": {
+    "noLauncher": "Nur verfügbar, wenn du das Spiel über den Vibe Launcher startest.",
+    "noList": "Der Launcher hat noch keine Skin-Liste geschickt. Aktualisiere den Vibe Launcher und starte das Spiel neu."
+  },
+  "screen": {
+    "title": "Skins",
+    "count": "{0} Skins",
+    "subtitle": "Klick auf einen Skin, um ihn sofort zu tragen.",
+    "accountOnly": "Konto: {0}",
+    "account": "Konto: {0} · Klick auf einen Skin, um ihn sofort zu tragen.",
+    "loading": "Lädt",
+    "off": "Das Skins-Modul ist aus.",
+    "noLauncher": "Den Skin im Spiel wechseln geht nur, wenn du das Spiel über den Vibe Launcher startest.",
+    "noList": "Der Launcher hat noch keine Skin-Liste geschickt. Aktualisiere den Vibe Launcher und starte das Spiel neu.",
+    "wrongAccount": "Die Skin-Liste gehört zu einem anderen Konto als dem, mit dem du spielst. Starte das Spiel im Launcher mit dem richtigen Konto neu.",
+    "empty": "Deine Skin-Bibliothek ist leer. Füge im Launcher unter „Skins“ einen Skin hinzu – er taucht hier von selbst auf.",
+    "cannot.offline_account": "Mit einem Offline-Konto kannst du keinen Skin wechseln. Melde dich im Launcher mit deinem Microsoft-Konto an.",
+    "cannot.no_account": "Im Launcher ist kein Konto angemeldet.",
+    "cannot.signed_out": "Deine Anmeldung im Launcher ist abgelaufen. Melde dich dort neu an, dann geht es wieder.",
+    "cannot.other": "Der Launcher kann deinen Skin gerade nicht wechseln.",
+    "active": "Trägst du gerade",
+    "classic": "Klassisch",
+    "slim": "Schmal",
+    "sent": "Frage den Launcher",
+    "working": "Wird gewechselt",
+    "done": "Gewechselt. Andere sehen ihn, wenn du dem Server neu beitrittst.",
+    "hint": "Der Wechsel geht über dein Minecraft-Konto und gilt überall.",
+    "reload": "Neu laden"
+  },
+  "toast": {
+    "done": "Skin gewechselt",
+    "done.body": "Andere Spieler sehen ihn, wenn du dem Server neu beitrittst.",
+    "failed": "Skin nicht gewechselt"
+  },
+  "error": {
+    "no_answer": "Der Launcher antwortet nicht. Läuft er noch?",
+    "timeout": "Das hat zu lange gedauert. Versuch es gleich noch einmal.",
+    "offline_account": "Mit einem Offline-Konto geht das nicht.",
+    "no_account": "Im Launcher ist kein Konto angemeldet.",
+    "signed_out": "Deine Anmeldung im Launcher ist abgelaufen. Melde dich dort neu an.",
+    "not_found": "Diesen Skin gibt es in der Bibliothek nicht mehr.",
+    "rate_limited": "Minecraft erlaubt gerade keinen weiteren Wechsel. Warte eine Minute.",
+    "network": "Keine Verbindung zu Minecraft. Prüfe dein Internet.",
+    "mojang": "Minecraft hat den Skin abgelehnt.",
+    "busy": "Der Launcher ist noch mit einem anderen Wechsel beschäftigt.",
+    "io": "Die Anfrage an den Launcher konnte nicht gespeichert werden.",
+    "other": "Etwas ist schiefgegangen."
+  }
+}

@@ -22,7 +22,11 @@
     "saveKey": "Clip speichern",
     "galleryKey": "Clips-Galerie",
     "length": "Länge",
-    "length.desc": "So viel wird gespeichert, wenn du die Taste drückst.",
+    "length.desc": "So viel wird gespeichert, wenn du die Taste drückst. Mit langem Rückblick ist das die Länge der Auto-Clips und der Vorschlag zum Zuschneiden.",
+    "longRewind": "Langer Rückblick",
+    "longRewind.desc": "Hält bis zu 10 Minuten statt 2 – auf der Festplatte statt im Arbeitsspeicher. Die Taste speichert dann den ganzen Rückblick; zuschneiden kannst du ihn später im Launcher.",
+    "rewindMinutes": "Rückblick-Länge",
+    "rewindMinutes.desc": "So viele Minuten hält der Puffer. Etwa 45 MB pro Minute bei mittlerer Qualität (720p).",
     "resolution": "Auflösung",
     "resolution.p480": "480p",
     "resolution.p720": "720p",
@@ -65,6 +69,8 @@
     "inInventories": "In Inventaren",
     "inInventories.desc": "Aus: Die Aufnahme pausiert, solange ein Inventar, eine Kiste oder ein anderer Behälter offen ist. Der Chat wird immer aufgenommen.",
     "ramCap": "Pufferspeicher",
+    "diskCap": "Platz auf der Festplatte",
+    "diskCap.desc": "So viel darf der lange Rückblick höchstens belegen. Es bleibt immer mindestens 1 GB frei.",
     "folderLimit": "Ordnerlimit (GB)",
     "folderLimit.desc": "Wird der Ordner größer, gehen die ältesten Clips zuerst. Behaltene Clips werden nie gelöscht.",
     "autoDelete": "Auto-Löschen",
@@ -85,6 +91,7 @@
   },
   "status": {
     "held": " · {0} MB RAM · {1} s",
+    "heldDisk": " · {0} MB auf der Festplatte · {1}",
     "hardware": "Hardware: {0}",
     "software": "Software: {0}",
     "blocked": "Clips sind auf diesem Server aus.",
@@ -108,6 +115,7 @@
   },
   "notice": {
     "cap": "Speichergrenze: Aus {0} s werden bei dieser Qualität etwa {1} s. „Speicher für den Puffer“ erhöhen oder die Qualität senken.",
+    "capDisk": "Platzgrenze: Aus {0} min werden bei dieser Qualität etwa {1}. „Platz auf der Festplatte“ erhöhen, Speicher frei machen oder die Qualität senken.",
     "keptOverLimit": "Deine behaltenen Clips allein liegen über der Ordnergrenze. Es wird nichts mehr automatisch gelöscht."
   },
   "hint": {
@@ -122,6 +130,8 @@
     "bufferOff.body": "Schalte ihn in den Clips-Einstellungen ein.",
     "nothing": "Noch nichts aufgenommen",
     "nothing.body": "Der Puffer nimmt beim Spielen auf (nicht in Menüs).",
+    "diskFailed": "Langer Rückblick aus",
+    "diskFailed.body": "Auf die Festplatte konnte nicht geschrieben werden (voll?). Der Puffer läuft im Arbeitsspeicher weiter.",
     "busy": "Der letzte Clip wird noch gespeichert…",
     "failed": "Clip konnte nicht gespeichert werden",
     "saved": "Clip gespeichert",

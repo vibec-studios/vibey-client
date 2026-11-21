@@ -83,6 +83,9 @@ public final class ClipsModule extends VibeyModule {
     public final BoolSetting buffer = bool("buffer", false).section("buffer").serverRule(RULE_CLIPS);
     public final KeybindSetting saveKey = keybind("saveKey", Keys.F8).serverRule(RULE_CLIPS);
     public final IntSetting length = intRange("length", 30, 10, 120, 5).unit(" s").section("buffer").visibleWhen(buffer::on);
+    public final BoolSetting longRewind = bool("longRewind", false).section("buffer").serverRule(RULE_CLIPS).visibleWhen(buffer::on);
+    public final IntSetting rewindMinutes = intRange("rewindMinutes", 5, 1, 10).unit(" min").section("buffer")
+            .visibleWhen(() -> buffer.on() && longRewind.on());
     public final KeybindSetting galleryKey = keybind("galleryKey", Keys.UNBOUND);
     public final KeybindSetting shotsKey = keybind("shotsKey", Keys.UNBOUND).onPress(Shots::openScreen);
 
@@ -109,7 +112,10 @@ public final class ClipsModule extends VibeyModule {
     public final IntSetting fpsThreshold = intRange("fpsThreshold", 40, 20, 120, 5).section("resources")
             .visibleWhen(() -> lowFpsPause.on() && !fpsAuto.on());
     public final BoolSetting inInventories = bool("inInventories", false).section("resources");
-    public final IntSetting ramCap = intRange("ramCap", 96, 32, 256, 16).unit(" MB").section("resources");
+    public final IntSetting ramCap = intRange("ramCap", 96, 32, 256, 16).unit(" MB").section("resources")
+            .visibleWhen(() -> !longRewind.on());
+    public final IntSetting diskCap = intRange("diskCap", 1024, 256, 8192, 256).unit(" MB").section("resources")
+            .visibleWhen(longRewind::on);
 
     // ---------------------------------------------------------------------------------------- storage
     public final FloatSetting folderLimit = floatRange("folderLimit", 2f, 0.5f, 50f, 0.5f).decimals(1).section("storage");
@@ -182,6 +188,9 @@ public final class ClipsModule extends VibeyModule {
         encoder.onChange(v -> recorder.settingsChanged(true));
         length.onChange(v -> recorder.settingsChanged(false));
         ramCap.onChange(v -> recorder.settingsChanged(false));
+        rewindMinutes.onChange(v -> recorder.settingsChanged(false));
+        diskCap.onChange(v -> recorder.settingsChanged(false));
+        longRewind.onChange(v -> recorder.storageChanged());
         net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents.GAME.register(ClipsHooks::gameMessage);
         ClipsHud.register(this);
         ClipsFiles.startup(this);

@@ -1,0 +1,58 @@
+{
+  "name": "Skins",
+  "description": "Change your skin in game without restarting. The skins come from the Vibe Launcher's skin library.",
+  "summary": "Skin library in game",
+  "setting": {
+    "openLibrary": "Skin library",
+    "openLibrary.action": "Open…",
+    "libraryKey": "Open skin library"
+  },
+  "notice": {
+    "noLauncher": "Only available when you start the game from the Vibe Launcher.",
+    "noList": "The launcher hasn't sent a skin list yet. Update the Vibe Launcher and restart the game."
+  },
+  "screen": {
+    "title": "Skins",
+    "count": "{0} skins",
+    "subtitle": "Click a skin to wear it right away.",
+    "accountOnly": "Account: {0}",
+    "account": "Account: {0} · Click a skin to wear it right away.",
+    "loading": "Loading",
+    "off": "The Skins module is off.",
+    "noLauncher": "Changing your skin in game only works when you start the game from the Vibe Launcher.",
+    "noList": "The launcher hasn't sent a skin list yet. Update the Vibe Launcher and restart the game.",
+    "wrongAccount": "The skin list belongs to a different account than the one you're playing with. Restart the game from the launcher with the right account.",
+    "empty": "Your skin library is empty. Add a skin in the launcher under \"Skins\" – it shows up here by itself.",
+    "cannot.offline_account": "You can't change the skin of an offline account. Sign in with your Microsoft account in the launcher.",
+    "cannot.no_account": "No account is signed in to the launcher.",
+    "cannot.signed_out": "Your launcher sign-in has expired. Sign in there again and it works again.",
+    "cannot.other": "The launcher can't change your skin right now.",
+    "active": "Wearing now",
+    "classic": "Classic",
+    "slim": "Slim",
+    "sent": "Asking the launcher",
+    "working": "Changing",
+    "done": "Changed. Others see it when you rejoin the server.",
+    "hint": "The change goes through your Minecraft account and applies everywhere.",
+    "reload": "Reload"
+  },
+  "toast": {
+    "done": "Skin changed",
+    "done.body": "Other players see it when you rejoin the server.",
+    "failed": "Skin not changed"
+  },
+  "error": {
+    "no_answer": "The launcher doesn't answer. Is it still running?",
+    "timeout": "That took too long. Try again in a moment.",
+    "offline_account": "That doesn't work with an offline account.",
+    "no_account": "No account is signed in to the launcher.",
+    "signed_out": "Your launcher sign-in has expired. Sign in there again.",
+    "not_found": "This skin isn't in the library any more.",
+    "rate_limited": "Minecraft doesn't allow another change right now. Wait a minute.",
+    "network": "No connection to Minecraft. Check your internet.",
+    "mojang": "Minecraft rejected the skin.",
+    "busy": "The launcher is still busy with another change.",
+    "io": "The request to the launcher couldn't be saved.",
+    "other": "Something went wrong."
+  }
+}

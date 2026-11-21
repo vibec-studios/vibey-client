@@ -32,6 +32,37 @@ public final class ClipsFiles {
         return FabricLoader.getInstance().getGameDir().resolve("vibeyclient").resolve("clips");
     }
 
+    public static Path bufferRoot() {
+        return dir().resolve(".buffer");
+    }
+
+    public static Path bufferDir() {
+        return bufferRoot().resolve(Long.toString(System.currentTimeMillis(), 36) + "-" + Integer.toString((int) (Math.random() * 46656), 36));
+    }
+
+    public static long usableSpace() {
+        try {
+            Path d = dir();
+            Files.createDirectories(d);
+            return Files.getFileStore(d).getUsableSpace();
+        } catch (java.io.IOException | RuntimeException e) {
+            return -1;
+        }
+    }
+
+    static void wipeBuffers() {
+        Path root = bufferRoot();
+        if (!Files.isDirectory(root)) return;
+        try (var s = Files.list(root)) {
+            for (Path p : s.toList()) dev.henny.vibeyclient.module.clips.ring.DiskStorage.wipe(p);
+        } catch (java.io.IOException ignored) {
+        }
+        try {
+            Files.deleteIfExists(root);
+        } catch (java.io.IOException ignored) {
+        }
+    }
+
     public static Path encoderCache() {
         return FabricLoader.getInstance().getConfigDir().resolve("vibeyclient").resolve("clips-encoder.json");
     }
@@ -78,6 +109,7 @@ public final class ClipsFiles {
     /** At module start: remove what an interrupted save left behind, then apply the folder limit. */
     static void startup(ClipsModule m) {
         io(() -> {
+            wipeBuffers();
             int orphans = store().removeOrphans(System.currentTimeMillis());
             if (orphans > 0) Vibey.LOG.info("Clips: removed {} unfinished clip files", orphans);
             cleanup(m);

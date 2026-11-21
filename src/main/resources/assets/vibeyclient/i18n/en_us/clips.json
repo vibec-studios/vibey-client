@@ -22,7 +22,11 @@
     "saveKey": "Save clip",
     "galleryKey": "Clips gallery",
     "length": "Length",
-    "length.desc": "How much is saved when you press the key.",
+    "length.desc": "How much is saved when you press the key. With long rewind this is the length of automatic clips and the suggested cut.",
+    "longRewind": "Long rewind",
+    "longRewind.desc": "Keeps up to 10 minutes instead of 2 – on the disk instead of in memory. The key then saves the whole rewind; you can trim it later in the launcher.",
+    "rewindMinutes": "Rewind length",
+    "rewindMinutes.desc": "How many minutes the buffer keeps. About 45 MB per minute at medium quality (720p).",
     "resolution": "Resolution",
     "resolution.p480": "480p",
     "resolution.p720": "720p",
@@ -65,6 +69,8 @@
     "inInventories": "In inventories",
     "inInventories.desc": "Off: recording pauses while an inventory, chest or other container is open. Chat is always recorded.",
     "ramCap": "Buffer memory",
+    "diskCap": "Disk space",
+    "diskCap.desc": "The most the long rewind may use. At least 1 GB always stays free.",
     "folderLimit": "Folder limit (GB)",
     "folderLimit.desc": "When the folder grows above this, the oldest clips go first. Kept clips are never deleted.",
     "autoDelete": "Auto delete",
@@ -85,6 +91,7 @@
   },
   "status": {
     "held": " · {0} MB RAM · {1} s",
+    "heldDisk": " · {0} MB on disk · {1}",
     "hardware": "Hardware: {0}",
     "software": "Software: {0}",
     "blocked": "Clips are off on this server.",
@@ -108,6 +115,7 @@
   },
   "notice": {
     "cap": "Memory limit: {0} s become about {1} s at this quality. Raise \"Memory for the buffer\" or lower the quality.",
+    "capDisk": "Space limit: {0} min become about {1} at this quality. Raise \"Disk space\", free up space or lower the quality.",
     "keptOverLimit": "Your kept clips alone are above the folder limit. Nothing more is deleted automatically."
   },
   "hint": {
@@ -122,6 +130,8 @@
     "bufferOff.body": "Switch it on in the Clips settings.",
     "nothing": "Nothing recorded yet",
     "nothing.body": "The buffer records while you play (not in menus).",
+    "diskFailed": "Long rewind off",
+    "diskFailed.body": "Couldn't write to the disk (full?). The buffer keeps running in memory.",
     "busy": "Still saving the last clip…",
     "failed": "Couldn't save the clip",
     "saved": "Clip saved",
