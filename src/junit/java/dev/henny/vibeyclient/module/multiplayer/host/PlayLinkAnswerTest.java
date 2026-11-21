@@ -48,4 +48,23 @@ class PlayLinkAnswerTest {
         assertNotNull(noExpiry);
         assertEquals(0, noExpiry.expiresAt());
     }
+
+    /** Contract 02: refused with {@code vibe_pack} (older backend 400, pack gone 404) = once more without it. */
+    @Test
+    void retryWithoutVibePack() {
+        com.google.gson.JsonObject with = new com.google.gson.JsonObject();
+        with.add("vibe_pack", new com.google.gson.JsonObject());
+        com.google.gson.JsonObject without = new com.google.gson.JsonObject();
+        var bad = new dev.henny.vibeyclient.api.service.VibeBackend.ApiException(400, "bad_request", "x");
+        var gone = new dev.henny.vibeyclient.api.service.VibeBackend.ApiException(404, "not_found", "Pack nicht gefunden");
+        var noRoute = new dev.henny.vibeyclient.api.service.VibeBackend.ApiException(404, "http_404", "x");
+        var server = new dev.henny.vibeyclient.api.service.VibeBackend.ApiException(500, "internal", "x");
+        var offline = new dev.henny.vibeyclient.api.service.VibeBackend.ApiException(0, "network", "x");
+        assertTrue(PlayLinks.retryWithoutVibePack(with, bad));
+        assertTrue(PlayLinks.retryWithoutVibePack(with, gone));
+        assertFalse(PlayLinks.retryWithoutVibePack(with, noRoute), "no play links at all: retrying will not help");
+        assertFalse(PlayLinks.retryWithoutVibePack(with, server));
+        assertFalse(PlayLinks.retryWithoutVibePack(with, offline));
+        assertFalse(PlayLinks.retryWithoutVibePack(without, bad), "second try has no vibe_pack: no loop");
+    }
 }

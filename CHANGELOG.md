@@ -9,6 +9,9 @@ All notable changes to Vibey Client. Versions follow `mod_version` in `gradle.pr
   Fabric and NeoForge, 1.21.1 to 26.3 – before only on Fabric 1.21.11.
 - Block outline, hit colour, low fire, lower shield and motion blur stay on 1.21.11 for now; on other versions their
   switches are hidden instead of doing nothing.
+- Play links for a hosted world now carry the instance's Vibe pack (`vibe_pack` from the launcher's `instance.json`),
+  also when the client renews the link: friends who join get the right modpack automatically. An older backend (400) or
+  a removed pack (404) gets the link once more without it.
 
 ## 0.4.0-beta.3 – toast head icon fix (beta)
 

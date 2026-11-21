@@ -43,6 +43,12 @@ public final class InstanceInfo {
     /** The modpack, or null in {@link #pack()} when the instance has none. */
     public record Pack(String source, String projectId, String versionId, String title) {}
 
+    /**
+     * A shared Vibe pack ({@code vibe_pack}: share code, installed version; contract 02), or null in {@link #vibePack()}.
+     * {@code versionId} is null for an instance the player shared themselves (the backend then takes the newest version).
+     */
+    public record VibePack(String code, String versionId) {}
+
     private final boolean present;
     private final int schema;
     private final String name;
@@ -50,12 +56,13 @@ public final class InstanceInfo {
     private final String loaderKind;
     private final String loaderVersion;
     private final Pack pack;
+    private final VibePack vibePack;
     private final List<Mod> mods;
     private final String clientPack;
     private final Set<String> knownFiles;
 
     private InstanceInfo(boolean present, int schema, String name, String mcVersion, String loaderKind, String loaderVersion,
-                         Pack pack, List<Mod> mods, String clientPack, Set<String> knownFiles) {
+                         Pack pack, VibePack vibePack, List<Mod> mods, String clientPack, Set<String> knownFiles) {
         this.present = present;
         this.schema = schema;
         this.name = name;
@@ -63,6 +70,7 @@ public final class InstanceInfo {
         this.loaderKind = loaderKind;
         this.loaderVersion = loaderVersion;
         this.pack = pack;
+        this.vibePack = vibePack;
         this.mods = mods;
         this.clientPack = clientPack;
         this.knownFiles = knownFiles;
@@ -70,7 +78,7 @@ public final class InstanceInfo {
 
     /** No {@code instance.json} (another launcher, dev run) or not readable. */
     public static InstanceInfo absent() {
-        return new InstanceInfo(false, 0, null, null, null, null, null, List.of(), null, Set.of());
+        return new InstanceInfo(false, 0, null, null, null, null, null, null, List.of(), null, Set.of());
     }
 
     // ============================================================================================ reading
@@ -122,6 +130,15 @@ public final class InstanceInfo {
             }
         }
 
+        VibePack vibePack = null;
+        JsonElement ve = o.get("vibe_pack");
+        if (ve != null && ve.isJsonObject()) {
+            JsonObject v = ve.getAsJsonObject();
+            String code = str(v.get("code"));
+            // as the backend accepts it: 4-16 letters/digits, version id 1-64 characters (else sent without one)
+            if (code != null && code.matches("[A-Za-z0-9]{4,16}")) vibePack = new VibePack(code, id(str(v.get("version_id"))));
+        }
+
         List<Mod> mods = new ArrayList<>();
         Set<String> known = new HashSet<>();
         JsonElement me = o.get("mods");
@@ -153,7 +170,7 @@ public final class InstanceInfo {
         }
         String clientPack = lower(str(o.get("client_pack")));
         if (clientPack != null && !clientPack.matches("[a-z0-9_-]{1,32}")) clientPack = null;
-        return new InstanceInfo(true, schema, name, mc, loaderKind, loaderVersion, pack,
+        return new InstanceInfo(true, schema, name, mc, loaderKind, loaderVersion, pack, vibePack,
                 Collections.unmodifiableList(mods), clientPack, Collections.unmodifiableSet(known));
     }
 
@@ -187,6 +204,11 @@ public final class InstanceInfo {
 
     public Pack pack() {
         return pack;
+    }
+
+    /** The shared Vibe pack the instance comes from (or was shared as), or null. */
+    public VibePack vibePack() {
+        return vibePack;
     }
 
     public List<Mod> mods() {
@@ -245,11 +267,22 @@ public final class InstanceInfo {
     /**
      * The instance part of {@code POST /api/v1/play-links} (§3): {@code pack}, {@code mods}, {@code client_pack} as
      * the backend accepts them (only modrinth/curseforge with ids, at most {@link #MAX_MODS} entries). Empty when absent.
+     * With a {@link #vibePack()} it is sent as {@code vibe_pack} unchanged and {@code pack} is left out (both = 400).
      */
     public JsonObject playLinkFields() {
+        return playLinkFields(true);
+    }
+
+    /** As {@link #playLinkFields()}; {@code withVibePack = false} for a backend that does not know {@code vibe_pack}. */
+    public JsonObject playLinkFields(boolean withVibePack) {
         JsonObject o = new JsonObject();
         if (!present) return o;
-        if (pack != null) {
+        if (withVibePack && vibePack != null) {
+            JsonObject v = new JsonObject();
+            v.addProperty("code", vibePack.code());
+            if (vibePack.versionId() != null) v.addProperty("version_id", vibePack.versionId());
+            o.add("vibe_pack", v);
+        } else if (pack != null) {
             JsonObject p = new JsonObject();
             p.addProperty("source", pack.source());
             p.addProperty("project_id", pack.projectId());

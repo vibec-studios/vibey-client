@@ -167,4 +167,46 @@ class InstanceInfoTest {
         assertEquals(2, i.manualMods(mods), "4 jars, 2 listed mods (the resource pack does not count)");
         assertEquals(0, i.manualMods(dir.resolve("missing")));
     }
+
+    /** Contract 02: the launcher's {@code vibe_pack} goes to the play link unchanged, without {@code pack}. */
+    @Test
+    void vibePackReplacesPack() {
+        InstanceInfo i = InstanceInfo.parse("""
+                {"schema": 1, "mc_version": "1.21.1", "loader": {"kind": "fabric"},
+                 "pack": {"source": "modrinth", "project_id": "abc", "version_id": "def"},
+                 "vibe_pack": {"code": "AB12CD34", "version_id": "01JABCDEF", "extra": 1},
+                 "mods": [{"source": "modrinth", "project_id": "m1"}]}""");
+        assertEquals(new InstanceInfo.VibePack("AB12CD34", "01JABCDEF"), i.vibePack());
+        JsonObject f = i.playLinkFields();
+        assertFalse(f.has("pack"), "pack and vibe_pack together give 400");
+        JsonObject v = f.getAsJsonObject("vibe_pack");
+        assertEquals("AB12CD34", v.get("code").getAsString());
+        assertEquals("01JABCDEF", v.get("version_id").getAsString());
+        assertEquals(2, v.size(), "only code and version_id");
+        assertEquals(1, f.getAsJsonArray("mods").size());
+
+        // fallback for an older backend: as before, with the Modrinth pack
+        JsonObject old = i.playLinkFields(false);
+        assertFalse(old.has("vibe_pack"));
+        assertEquals("abc", old.getAsJsonObject("pack").get("project_id").getAsString());
+    }
+
+    @Test
+    void vibePackWithoutVersionAndBroken() {
+        InstanceInfo own = InstanceInfo.parse("{\"vibe_pack\": {\"code\": \"MYPACK1\"}}");
+        assertEquals(new InstanceInfo.VibePack("MYPACK1", null), own.vibePack());
+        JsonObject f = own.playLinkFields();
+        assertFalse(f.getAsJsonObject("vibe_pack").has("version_id"), "backend takes the newest version");
+        assertFalse(f.has("pack"));
+        assertTrue(own.playLinkFields(false).get("pack").isJsonNull());
+
+        assertNull(InstanceInfo.parse("{\"vibe_pack\": {\"code\": \"x\"}}").vibePack(), "too short");
+        assertNull(InstanceInfo.parse("{\"vibe_pack\": {\"code\": \"AB-12/CD\"}}").vibePack());
+        assertNull(InstanceInfo.parse("{\"vibe_pack\": \"AB12CD34\"}").vibePack());
+        assertNull(InstanceInfo.parse("{\"vibe_pack\": null}").vibePack());
+        assertNull(InstanceInfo.parse(CONTRACT_EXAMPLE).vibePack());
+        assertFalse(InstanceInfo.parse(CONTRACT_EXAMPLE).playLinkFields().has("vibe_pack"));
+        assertEquals(new InstanceInfo.VibePack("AB12CD34", null),
+                InstanceInfo.parse("{\"vibe_pack\": {\"code\": \"AB12CD34\", \"version_id\": \"bad id\"}}").vibePack());
+    }
 }

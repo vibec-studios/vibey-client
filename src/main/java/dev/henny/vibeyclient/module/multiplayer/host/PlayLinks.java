@@ -21,6 +21,7 @@ import net.minecraft.client.server.IntegratedServer;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
@@ -246,9 +247,27 @@ public final class PlayLinks {
         Tasks.supply(() -> {
             InstanceInfo info = LauncherStatus.instance();
             manualMods = info.manualMods(LauncherStatus.instanceDir() == null ? null : LauncherStatus.instanceDir().resolve("mods"));
-            return body(addr, info, worldName, maxPlayers);
-        }).thenCompose(body -> backend.request("POST", PATH, body)).whenComplete((res, err) ->
+            return info;
+        }).thenCompose(info -> {
+            JsonObject body = body(addr, info, worldName, maxPlayers, true);
+            return backend.request("POST", PATH, body).exceptionallyCompose(err -> {
+                ApiException e = unwrap(err);
+                if (!retryWithoutVibePack(body, e)) return CompletableFuture.failedFuture(err);
+                // older backend (400) or the pack is gone/hidden (404): a link without the pack is better than none
+                MultiplayerModule.LOG.info("Play link with vibe_pack refused ({} {}), again without it", e.status, e.code);
+                return backend.request("POST", PATH, body(addr, info, worldName, maxPlayers, false));
+            });
+        }).whenComplete((res, err) ->
                 Minecraft.getInstance().execute(() -> created(gen, addr, backend, res, err)));
+    }
+
+    /**
+     * Whether a refused {@code POST} is sent once more without {@code vibe_pack} (contract 02): an older backend answers
+     * {@code 400} to the unknown field, a removed/hidden pack or version gives {@code 404 not_found}.
+     */
+    static boolean retryWithoutVibePack(JsonObject body, ApiException e) {
+        if (body == null || !body.has("vibe_pack") || e == null) return false;
+        return e.status == 400 || (e.status == 404 && "not_found".equals(e.code));
     }
 
     private static void created(int gen, String addr, VibeBackend backend, JsonElement res, Throwable err) {
@@ -360,6 +379,11 @@ public final class PlayLinks {
 
     /** The {@code POST /api/v1/play-links} body (§3). */
     static JsonObject body(String relayHost, InstanceInfo info, String worldName, int maxPlayers) {
+        return body(relayHost, info, worldName, maxPlayers, true);
+    }
+
+    /** As above; {@code withVibePack = false} leaves out the instance's {@code vibe_pack} (and sends {@code pack} instead). */
+    static JsonObject body(String relayHost, InstanceInfo info, String worldName, int maxPlayers, boolean withVibePack) {
         JsonObject o = new JsonObject();
         o.addProperty("relay_host", relayHost);
         o.addProperty("mc_version", MpLoader.minecraftVersion());
@@ -373,7 +397,7 @@ public final class PlayLinks {
             if (v != null) loader.addProperty("version", v);
         }
         o.add("loader", loader);
-        JsonObject fields = info.playLinkFields();
+        JsonObject fields = info.playLinkFields(withVibePack);
         for (var e : fields.entrySet()) o.add(e.getKey(), e.getValue());
         if (worldName != null && !worldName.isBlank()) {
             String w = worldName.strip();
